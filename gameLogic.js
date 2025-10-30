@@ -453,6 +453,29 @@ export class GameLogic {
         return promise;
     }
 
+    canPlayerClaimExposure(player, discardTile) {
+        const hand = this.table.players[player].hand;
+        const hiddenTiles = hand.getHiddenTileArray();
+        let matches = 0;
+
+        for (const tile of hiddenTiles) {
+            if (tile.suit === SUIT.JOKER) {
+                matches++;
+            } else if (tile.suit === discardTile.suit && tile.number === discardTile.number) {
+                matches++;
+            }
+        }
+
+        return matches >= 2;
+    }
+
+    canPlayerMahjongWithDiscard(player, discardTile) {
+        const copyHand = this.table.players[player].hand.dupHand();
+        copyHand.insertHidden(discardTile);
+        const validInfo = this.card.validateHand14(copyHand);
+        return validInfo.valid;
+    }
+
     // Return promise with claim info
     //      discard/expose/mahjong
     //      tileArray (if discard or exposure)
@@ -481,6 +504,15 @@ export class GameLogic {
                 }); 
         } else {
             // player 0  (PLAYER.BOTTOM)
+            const canMahjong = this.canPlayerMahjongWithDiscard(player, discardTile);
+            const canExpose = this.canPlayerClaimExposure(player, discardTile);
+
+            if (!canMahjong && !canExpose) {
+                return {
+                    playerOption: PLAYER_OPTION.DISCARD_TILE,
+                    tileArray: [discardTile]
+                };
+            }
 
             this.state = STATE.LOOP_QUERY_CLAIM_DISCARD;
             this.updateUI(); 
