@@ -1,243 +1,118 @@
-# UI Improvements Implementation Plan
+# Lightweight UI Refresh Plan (Phaser 3)
 
-## Overview
-This plan outlines 5 specific UI improvements to enhance the American Mahjong game while maintaining compatibility with existing game logic.
+## Current Context
+- The game now runs inside a Phaser 3 scene (`main.js`, `GameScene.js`) with the canvas mounted in `#gamediv`.
+- DOM controls live alongside the canvas inside `index.html`, relying on inline styles and absolute positioning (`#uicenterdiv`, `#uidiv`).
+- Player messaging uses plain `<textarea>` elements (`#info`, `#messages`) styled directly in the HTML.
 
-## 1. Year Selection Dropdown
-**Objective**: Global game setting to select card rules for any game mode (2017-2020)
+## Removed Items From Previous Plan
+- Year selection workflow across card data files – still valuable, but it is logic-heavy and outside the lightweight UI focus.
+- Audio system and tile-highlighting features – both require new modules and deeper integration with game state.
+- NMJL color-coded hints panel – the existing Phaser 3 overlay can deliver similar clarity with simpler styling changes.
 
-### Current State
-- Card system hardcoded to 2020
-- Multiple year card data exists but unused
-- Year selection buried in training section only
-- Training hands don't update when year changes
+## Improvement Tracks
 
-### Implementation Steps
-1. **Modify Card class** (`card/card.js`):
-   - Add `setYear(year)` method
-   - Dynamic import of year-specific card data
-   - Update constructor to accept year parameter
+### 1. Consolidate Layout & Move Styling Into CSS
+**Objective**: Let CSS handle the layout so the Phaser canvas and side panels stay aligned without inline styles.
 
-2. **Update Game Logic** (`gameLogic.js`):
-   - Move year selection to global game settings
-   - Year selection affects both training AND regular games
-   - Update `getTrainingInfo()` to include year
-   - Dynamic training hand population based on selected year
-   - Initialize card with selected year for all game modes
+**Current Pain Points**
+- Inline `style` attributes make the layout brittle and hard to maintain.
+- `#parentdiv` mixes sizing concerns with content, and responsiveness is limited.
 
-3. **UI Modifications** (`index.html`):
-   - **Prominent year dropdown** (not in training section)
-   - Position as main game setting before game start
-   - Populate with available years (2017-2020)
-   - Update layout styling
-   - Dynamic training hand options when year changes
+**Implementation Steps**
+1. Create `styles.css` containing the shared layout (`body`, `#app-shell`, `#gamediv`, `#uidiv`, `#uicenterdiv`) using CSS Grid/Flexbox.
+2. Update `index.html` to drop inline `style` attributes, add semantic class names, and link the new stylesheet in `<head>`.
+3. Give `#uidiv` a fixed width with fluid fallback, and let `#gamediv` flex-grow while honoring the Phaser size from `constants.js`.
+4. In `GameScene.js`, keep the existing resize listener but update it to set a CSS custom property (e.g. `--canvas-bottom`) used by the stylesheet to position the command bar.
 
-### Code Changes Required
-- `card/card.js`: Add year selection logic
-- `gameLogic.js`: Global year selection and dynamic training hands
-- `index.html`: Prominent year dropdown UI element
+**Expected Impact**: Cleaner markup, easier tweaks, and consistent spacing on wide and narrow screens.
 
----
+**Effort**: ~2-3 hours.
 
-## 2. Modern Font and Button Styling
-**Objective**: Update visual design with modern aesthetics
+### 2. Theme & Typography Refresh
+**Objective**: Modernize colors and typography while keeping the payload minimal.
 
-### Current State
-- Basic CSS styling in HTML
-- Standard HTML buttons
-- Limited color scheme
+**Current Pain Points**
+- Default font stack and stark green background give a legacy feel.
+- Buttons and panels lack visual hierarchy or breathing room.
 
-### Implementation Steps
-1. **External CSS File**:
-   - Create `styles.css` with modern design system
-   - Define color palette and typography
-   - Responsive button styles
+**Implementation Steps**
+1. Define a lightweight theme in `styles.css` using CSS custom properties for surface, accent, and border colors plus spacing tokens.
+2. Switch `body` and UI text to a system font stack (`"Segoe UI", "Roboto", "Helvetica Neue", sans-serif`) for a fresh look without external downloads.
+3. Apply subtle gradients or darker tints to the table background and a neutral card color to the sidebar for contrast.
+4. Add shared padding, border-radius, shadow, and hover/focus rules for `.button` elements and forms.
 
-2. **Font Updates**:
-   - Import Google Fonts (e.g., Inter, Roboto)
-   - Update body and UI text styling
-   - Improve readability and hierarchy
+**Expected Impact**: Noticeable visual upgrade using only CSS; no new JavaScript paths.
 
-3. **Button Modernization**:
-   - Modern button design with hover effects
-   - Consistent sizing and spacing
-   - Loading and disabled states
+**Effort**: ~1.5-2 hours.
 
-4. **Layout Improvements**:
-   - Better spacing and alignment
-   - Subtle shadows and borders
-   - Improved color contrast
+### 3. Command Bar & Button Ribbon
+**Objective**: Turn `#uicenterdiv` into a bottom-aligned command bar that mirrors board-game controls.
 
-### Code Changes Required
-- Create `styles.css`
-- Update `index.html` to link external CSS
-- Replace inline styles with CSS classes
+**Current Pain Points**
+- The info textarea and action buttons float in the middle of the canvas and overlap content when the window resizes.
+- Button spacing and states feel uneven.
 
----
+**Implementation Steps**
+1. Wrap the existing `#info` textarea and `#buttondiv` in a new container element (`<div class="command-bar">`) while keeping the existing IDs for logic compatibility.
+2. Use CSS Grid inside the command bar to align the status display and action buttons with consistent gaps.
+3. Style `#info` as a pill-shaped status badge (background tint, uppercase label, optional icon using CSS `::before`).
+4. Introduce lightweight CSS transitions for hover/focus and a disabled state overlay that keeps the buttons legible.
 
-## 3. Separate Hints Panel with NMJL Color Coding
-**Objective**: Move hints to dedicated panel with NMJL-themed colors
+**Expected Impact**: Controls feel anchored and intentional, improving usability without touching game logic.
 
-### Current State
-- Hints mixed with game log messages
-- Text-only formatting
-- No color coding system
+**Effort**: ~1.5 hours.
 
-### Implementation Steps
-1. **Hints Panel Creation**:
-   - Create dedicated hints display panel
-   - Always visible on screen
-   - Separate from game log
+### 4. Message Log & Training Panel Clarity
+**Objective**: Improve readability of `#messages` and the training forms using only markup tweaks and CSS.
 
-2. **NMJL Color Integration**:
-   - **Red**: Critical information (mahjong possibilities)
-   - **Green**: Positive actions (good discards)
-   - **Blue**: Strategic information (hand analysis)
-   - **Black**: General game information
+**Current Pain Points**
+- The log textarea runs edge-to-edge with no hierarchy.
+- Training form elements are stacked without spacing or labels.
 
-3. **Enhanced Hint Display**:
-   - Better formatting and spacing
-   - Color-coded message types
-   - Real-time updates during gameplay
+**Implementation Steps**
+1. Wrap `#messagesdiv` and `#trainingdiv` in card-like containers with headers (`<h2>` or visually-hidden labels) to clarify purpose.
+2. Style `#messages` with a monospace-friendly font-size, controlled line-height, and inset shadow; ensure `overflow-y: auto` with consistent padding.
+3. Convert the training form to a two-column grid on desktop with `grid-template-columns: 1fr auto` and responsive stacking below ~900px.
+4. Add subtle color-coding via modifier classes (`.message--info`, `.message--warning`) so future logic can opt-in by toggling class names from `utils.js`.
 
-4. **UI Layout Updates**:
-   - Add hints panel to HTML structure
-   - Position alongside game log
-   - Responsive design considerations
+**Expected Impact**: Clearer information hierarchy, better legibility, and a layout that adapts gracefully.
 
-### Code Changes Required
-- `index.html`: Add hints panel structure
-- `gameLogic.js`: Update hint display logic
-- `styles.css`: NMJL color scheme and panel styling
+**Effort**: ~2 hours.
 
----
+### 5. Accessibility & Responsive Polish
+**Objective**: Bake in small quality-of-life tweaks that keep the UI lightweight but friendlier.
 
-## 4. Sound Effects Integration
-**Objective**: Add audio feedback for game actions
+**Current Pain Points**
+- Limited keyboard focus styling and no mobile-aware adjustments.
+- Animations are absent, but future additions should respect reduced-motion users.
 
-### Current State
-- No audio system
-- Visual-only feedback
+**Implementation Steps**
+1. Add `:focus-visible` outlines and larger hit areas for buttons and form elements in `styles.css`.
+2. Introduce responsive breakpoints: stack the sidebar below the canvas for widths < 960px and adjust textarea heights accordingly.
+3. Use CSS `prefers-reduced-motion` to disable hover transitions when users opt out.
+4. Ensure textareas announce updates by setting `aria-live="polite"` in `index.html` for `#info` and `#messages`.
 
-### Implementation Steps
-1. **Audio System**:
-   - Create `audio.js` module
-   - Web Audio API integration
-   - Sound loading and caching
+**Expected Impact**: Better accessibility compliance and mobile usability with negligible code weight.
 
-2. **Sound Effects**:
-   - Tile draw sound
-   - Tile discard sound
-   - Tile claim/expose sound
-   - Mahjong win sound
-   - Button click sounds
+**Effort**: ~1 hour.
 
-3. **Audio Controls**:
-   - Master volume control
-   - Enable/disable sounds
-   - Audio context management
+## Optional Nice-to-Haves (If Time Allows)
+- Dark table theme toggle driven by a single `data-theme` attribute on `<body>` and CSS variables.
+- Subtle dealer indicator badge rendered with pure CSS positioned near the appropriate player area.
+- SVG-based favicon refresh to match the updated palette.
 
-4. **Integration Points**:
-   - Game logic sound triggers
-   - UI interaction sounds
-   - Error/warning sounds
+## Sequencing & Effort
+1. **Phase 1 (4-5 hrs)**: Tracks 1 & 2 – create stylesheet, relink HTML, refresh theme.
+2. **Phase 2 (2-3 hrs)**: Track 3 – rework command bar layout and button styling.
+3. **Phase 3 (3 hrs)**: Track 4 – message log and training form polish.
+4. **Phase 4 (1 hr)**: Track 5 plus optional extras as capacity permits.
 
-### Code Changes Required
-- Create `audio.js` module
-- Update `gameLogic.js` to trigger sounds
-- `index.html`: Add audio controls
-- `styles.css`: Audio control styling
+_Total Estimated Time_: 10-12 hours of focused UI work.
 
----
-
-## 5. Tile Highlighting System
-**Objective**: Visual highlighting of recommended discard tiles from hints
-
-### Current State
-- Hints panel shows recommended discards in text
-- No visual connection to actual tiles
-- Manual tile identification required
-
-### Implementation Steps
-1. **Tile Recognition System**:
-   - Parse hint text to identify specific tiles
-   - Match text descriptions to actual tile objects
-   - Create tile-to-hint mapping
-
-2. **Visual Highlighting**:
-   - Subtle glow effect on recommended tiles
-   - Border color matching hint priority
-   - Non-intrusive but clear visual feedback
-
-3. **Integration with Hints Panel**:
-   - Real-time tile highlighting as hints update
-   - Clear visual correlation between hint text and tiles
-   - Highlight state management
-
-4. **Animation Effects**:
-   - Gentle pulsing for highly recommended tiles
-   - Smooth highlight transitions
-   - Clear indication of which tiles are being discussed
-
-### Code Changes Required
-- `gameLogic.js`: Extract hint tile information
-- `gameObjects_hand.js`: Add tile highlighting functionality
-- `styles.css`: Tile highlight animations and effects
-- `index.html`: Support for hint-tile correlation
-
----
-
-## Technical Approach
-
-### Phasing Strategy
-1. **Phase 1**: Year selection and modern styling
-2. **Phase 2**: Hints panel and tile highlighting system
-3. **Phase 3**: Sound effects and testing
-
-### Compatibility Requirements
-- Maintain existing game logic
-- Preserve AI decision-making
-- Keep all current functionality
-- No breaking changes to game mechanics
-
-### Testing Strategy
-- Functional testing for each feature
-- UI/UX testing for improvements
-- Audio system testing
-- Cross-browser compatibility
-- Performance impact assessment
-
----
-
-## File Structure After Changes
-```
-c:/Repos/mahjong/
-├── styles.css (new)
-├── audio.js (new)
-├── game.js
-├── gameLogic.js
-├── gameObjects_hand.js
-├── gameAI.js
-├── index.html (updated)
-└── card/
-    └── card.js (updated)
-```
-
-## Estimated Effort
-- **Year Selection**: 2-3 hours
-- **Modern Styling**: 3-4 hours
-- **Hints Panel with NMJL Colors**: 3-4 hours
-- **Tile Highlighting System**: 4-5 hours
-- **Sound Effects**: 4-5 hours
-- **Testing & Polish**: 2-3 hours
-
-**Total Estimated Time**: 18-24 hours
-
-## Success Metrics
-1. ✅ Year selection works for all available card years
-2. ✅ Improved visual appeal with modern design
-3. ✅ Dedicated hints panel with NMJL color coding
-4. ✅ Visual highlighting connects hints to actual tiles
-5. ✅ Working sound effects for key actions
-6. ✅ No regression in game functionality
-7. ✅ Responsive design across screen sizes
+## Success Criteria
+- Layout holds up from 1280px desktop down to tablet widths without overlapping the Phaser canvas.
+- Buttons remain readable and accessible in enabled/disabled states; keyboard navigation is obvious.
+- Message log and training controls are visually distinct and scannable at a glance.
+- No meaningful increase in JavaScript bundle size; CSS remains under ~8 KB gzipped.
+- Plan stays within the lightweight ethos—no new build tooling or heavy dependencies.
