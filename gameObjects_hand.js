@@ -42,6 +42,7 @@ export class TileSet {
     }
 
     resetSelection() {
+        console.log("TileSet.resetSelection() called");
         if (this.selectCount === 0) {
             return;
         }
@@ -467,6 +468,8 @@ export class Hand {
     }
 
     resetSelection() {
+        console.log("Hand.resetSelection() called");
+        console.trace();
         this.hiddenTileSet.resetSelection();
 
         for (const tileset of this.exposedTileSetArray) {
@@ -502,6 +505,8 @@ export class Hand {
             tile.sprite.setInteractive();
 
             tile.sprite.on('pointerup', (pointer) => {
+                console.log("Tile clicked. Current state:", this.gameLogic.state);
+                console.log("Current selectCount:", tileSet.selectCount);
                 if (tile.drag) {
                     return;
                 }
@@ -539,6 +544,7 @@ export class Hand {
                         tileSet.selectCount--;
                         tile.selected = !tile.selected;
                     } else if (tileSet.selectCount < maxSelect) {
+                        console.log("Attempting to select tile. selectCount < maxSelect.");
                         let bSelectOk = true;
 
                         if (this.gameLogic.state === STATE.LOOP_EXPOSE_TILES) {
@@ -556,12 +562,14 @@ export class Hand {
                                 this.gameLogic.displayErrorText(" Joker cannot be passed during Charleston ");
                             }
                         }
+                        console.log("bSelectOk:", bSelectOk);
 
                         if (bSelectOk) {
                             tile.origX = tile.x;
                             tile.origY = tile.y;
                             tile.y -= 25;
                             tileSet.selectCount++;
+                            console.log("selectCount incremented to:", tileSet.selectCount);
                             tile.selected = !tile.selected;
                         }
                     }
@@ -578,7 +586,6 @@ export class Hand {
             this.scene.input.setDraggable(tile.sprite);
             tile.sprite.on('dragstart', (pointer, dragX, dragY) => {
                 tile.drag = true;
-                this.resetSelection();
                 tile.origX = tile.x;
                 tile.origY = tile.y;
             });

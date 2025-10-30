@@ -1,9 +1,10 @@
 import GameScene from './GameScene.js';
+import {WINDOW_WIDTH, WINDOW_HEIGHT} from "./constants.js";
 
 const config = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 600,
+    width: WINDOW_WIDTH,
+    height: WINDOW_HEIGHT,
     backgroundColor: '#008000',
     parent: 'gamediv',
     scene: [GameScene],

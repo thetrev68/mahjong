@@ -22,8 +22,9 @@ class GameScene extends Phaser.Scene {
         this.scale.on('resize', this.resize, this);
 
         // Create game objects
-        this.gTable = new Table(this);
-        this.gGameLogic = new GameLogic(this, this.gTable);
+        this.gGameLogic = new GameLogic(this);
+        this.gTable = new Table(this, this.gGameLogic);
+        this.gGameLogic.table = this.gTable;
 
         // Create sprites etc
         this.gGameLogic.wallText = this.add.text(190, 160, "", {
@@ -45,6 +46,7 @@ class GameScene extends Phaser.Scene {
 
         // Set up the UI buttons
         this.gGameLogic.init();
+        this.resize(this.sys.game.canvas.width, this.sys.game.canvas.height);
     }
 
     update() {

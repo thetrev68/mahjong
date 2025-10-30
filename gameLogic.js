@@ -10,10 +10,10 @@ import {Hand, TileSet} from "./gameObjects_hand.js";
 // PRIVATE GLOBALS
 
 export class GameLogic {
-    constructor(scene, table) {
+    constructor(scene) {
         this.scene = scene;
         this.state = STATE.INIT;
-        this.table = table;
+        this.table = null; // Will be set later
         this.card = new Card();
         this.gameAI = new GameAI(this.card, this.table);
         this.currPlayer = 0;

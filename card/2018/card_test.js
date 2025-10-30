@@ -1,4 +1,4 @@
-import {debugPrint, debugTrace} from "../../game.js";
+import {debugPrint, debugTrace} from "../../utils.js";
 import {Tile} from "../../gameObjects.js";
 import {Hand} from "../../gameObjects_hand.js";
 import {Card} from "../../card/card.js";

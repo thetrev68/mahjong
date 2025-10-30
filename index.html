@@ -7,7 +7,7 @@
     <title>American Mahjong</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@v3.90.0/dist/phaser.min.js"></script>
     <style type="text/css">
-        body {
+        html, body {
             margin: 0;
             width: 100%;
             height: 100%;
@@ -15,7 +15,7 @@
     </style>
 </head>
 
-<div id="parentdiv">
+<div id="parentdiv" style="height: 100%;">
     <div id="gamediv">
     </div>
     <div id="uicenterdiv">
@@ -101,6 +101,10 @@
         width: 500px;
         height: 80px;
         position: absolute;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     #info {
         width: 300px;
