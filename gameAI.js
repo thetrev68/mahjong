@@ -1,4 +1,4 @@
-import {gGameLogic, debugPrint, debugTrace, gdebug} from "./game.js";
+import {debugPrint, debugTrace, gdebug} from "./utils.js";
 import {STATE, PLAYER_OPTION, PLAYER, SUIT, VNUMBER, DRAGON, WIND} from "./constants.js";
 import {Tile} from "./gameObjects.js";
 

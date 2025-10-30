@@ -1,4 +1,4 @@
-import {printMessage} from "./game.js";
+import {printMessage} from "./utils.js";
 import {
     PLAYER, PLAYER_OPTION, SUIT,
     WINDOW_WIDTH, WINDOW_HEIGHT,
@@ -61,8 +61,9 @@ const gPlayerInfo = [
 
 
 export class Table {
-    constructor(scene) {
+    constructor(scene, gameLogic) {
         this.scene = scene;
+        this.gameLogic = gameLogic;
         this.wall = new Wall(scene);
         this.discards = new Discards();
 
@@ -74,7 +75,7 @@ export class Table {
         // Create players
         this.players = [];
         for (let i = 0; i < 4; i++) {
-            this.players[i] = new Player(scene, gPlayerInfo[i]);
+            this.players[i] = new Player(scene, gameLogic, gPlayerInfo[i]);
         }
 
         this.player02CourtesyVote = 0;

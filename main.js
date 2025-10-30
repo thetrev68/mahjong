@@ -5,6 +5,7 @@ const config = {
     width: 800,
     height: 600,
     backgroundColor: '#008000',
+    parent: 'gamediv',
     scene: [GameScene],
     scale: {
         mode: Phaser.Scale.FIT,

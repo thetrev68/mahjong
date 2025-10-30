@@ -1,4 +1,4 @@
-import {printMessage, printInfo, debugPrint, debugTrace} from "./game.js";
+import {printMessage, printInfo, debugPrint, debugTrace} from "./utils.js";
 import {STATE, PLAYER_OPTION, PLAYER, SUIT, DRAGON, WIND, VNUMBER} from "./constants.js";
 import {GameAI} from "./gameAI.js";
 import {Card} from "./card/card.js";
@@ -32,43 +32,6 @@ export class GameLogic {
         this.discardTile = null;
         this.gameResult = { mahjong: false,
                             winner: 0};
-    }
-
-    create() {
-        // Create Phaser.IO UI elements
-        this.wallText = this.scene.add.text(190, 160, "", {
-            font: "14px Arial",
-            fill: "#ffffff",
-            align: "left"
-        });
-        this.wallText.visible = false;
-
-        this.errorText = this.scene.add.text(400, 400, "", {
-            font: "14px Arial",
-            fill: "#ff8080",
-            backgroundColor: 'rgba(0,0,0,1)',
-            align: "left"
-        });
-        this.wallText.visible = false;
-    }
-
-    init() {
-
-        // INIT
-        this.state = STATE.INIT;
-        this.updateUI();
-
-        // Start button
-        const startButton = window.document.getElementById("start");
-        if (this.startButtonFunction) {
-            startButton.removeEventListener("click", this.startButtonFunction);
-        }
-        this.startButtonFunction = function () {
-            this.start();
-        }.bind(this);
-
-        // Wait for start button to be pressed. Main game logic loop executed within start button callback.
-        startButton.addEventListener("click", this.startButtonFunction);        
     }
 
     start() {
