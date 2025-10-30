@@ -43,8 +43,8 @@ class GameScene extends Phaser.Scene {
 
         this.gTable.create();
 
-        // Start the game
-        this.gGameLogic.start();
+        // Set up the UI buttons
+        this.gGameLogic.init();
     }
 
     update() {

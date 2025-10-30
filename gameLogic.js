@@ -34,6 +34,24 @@ export class GameLogic {
                             winner: 0};
     }
 
+    init() {
+        // INIT
+        this.state = STATE.INIT;
+        this.updateUI();
+
+        // Start button
+        const startButton = window.document.getElementById("start");
+        if (this.startButtonFunction) {
+            startButton.removeEventListener("click", this.startButtonFunction);
+        }
+        this.startButtonFunction = function () {
+            this.start();
+        }.bind(this);
+
+        // Wait for start button to be pressed. Main game logic loop executed within start button callback.
+        startButton.addEventListener("click", this.startButtonFunction);
+    }
+
     start() {
         // START
         this.state = STATE.START;
