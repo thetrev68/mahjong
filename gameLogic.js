@@ -1,4 +1,4 @@
-import {game, printMessage, printInfo, debugPrint, debugTrace} from "./game.js";
+import {printMessage, printInfo, debugPrint, debugTrace} from "./game.js";
 import {STATE, PLAYER_OPTION, PLAYER, SUIT, DRAGON, WIND, VNUMBER} from "./constants.js";
 import {GameAI} from "./gameAI.js";
 import {Card} from "./card/card.js";
@@ -10,7 +10,8 @@ import {Hand, TileSet} from "./gameObjects_hand.js";
 // PRIVATE GLOBALS
 
 export class GameLogic {
-    constructor(table) {
+    constructor(scene, table) {
+        this.scene = scene;
         this.state = STATE.INIT;
         this.table = table;
         this.card = new Card();
@@ -35,20 +36,20 @@ export class GameLogic {
 
     create() {
         // Create Phaser.IO UI elements
-        this.wallText = game.add.text(190, 160, "", {
+        this.wallText = this.scene.add.text(190, 160, "", {
             font: "14px Arial",
             fill: "#ffffff",
             align: "left"
         });
         this.wallText.visible = false;
 
-        this.errorText = game.add.text(400, 400, "", {
+        this.errorText = this.scene.add.text(400, 400, "", {
             font: "14px Arial",
             fill: "#ff8080",
             backgroundColor: 'rgba(0,0,0,1)',
             align: "left"
         });
-        this.wallText.visible = false;    
+        this.wallText.visible = false;
     }
 
     init() {
