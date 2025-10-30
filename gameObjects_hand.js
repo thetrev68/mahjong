@@ -505,8 +505,6 @@ export class Hand {
             tile.sprite.setInteractive();
 
             tile.sprite.on('pointerup', (pointer) => {
-                console.log("Tile clicked. Current state:", this.gameLogic.state);
-                console.log("Current selectCount:", tileSet.selectCount);
                 if (tile.drag) {
                     return;
                 }
@@ -536,15 +534,16 @@ export class Hand {
                         minSelect = 0;
                         break;
                 }
+                console.log(`Tile clicked. State: ${this.gameLogic.state}, selectCount: ${tileSet.selectCount}, min: ${minSelect}, max: ${maxSelect}`);
 
                 if (maxSelect) {
                     if (tile.selected) {
-                        tile.x = tile.origX;
-                        tile.y = tile.origY;
+                        // Deselect
+                        tile.selected = false;
+                        tile.animate(tile.origX, tile.origY, tile.angle);
                         tileSet.selectCount--;
-                        tile.selected = !tile.selected;
                     } else if (tileSet.selectCount < maxSelect) {
-                        console.log("Attempting to select tile. selectCount < maxSelect.");
+                         // Select
                         let bSelectOk = true;
 
                         if (this.gameLogic.state === STATE.LOOP_EXPOSE_TILES) {
@@ -562,22 +561,20 @@ export class Hand {
                                 this.gameLogic.displayErrorText(" Joker cannot be passed during Charleston ");
                             }
                         }
-                        console.log("bSelectOk:", bSelectOk);
 
                         if (bSelectOk) {
+                            tile.selected = true;
                             tile.origX = tile.x;
                             tile.origY = tile.y;
-                            tile.y -= 25;
+                            tile.animate(tile.x, tile.y - 25, tile.angle);
                             tileSet.selectCount++;
-                            console.log("selectCount incremented to:", tileSet.selectCount);
-                            tile.selected = !tile.selected;
                         }
                     }
 
-                    if (tileSet.selectCount > maxSelect || tileSet.selectCount < minSelect) {
-                        window.document.getElementById("button1").disabled = true;
-                    } else {
+                    if (tileSet.selectCount >= minSelect && tileSet.selectCount <= maxSelect) {
                         window.document.getElementById("button1").disabled = false;
+                    } else {
+                        window.document.getElementById("button1").disabled = true;
                     }
                 }
             });
@@ -586,8 +583,10 @@ export class Hand {
             this.scene.input.setDraggable(tile.sprite);
             tile.sprite.on('dragstart', (pointer, dragX, dragY) => {
                 tile.drag = true;
-                tile.origX = tile.x;
-                tile.origY = tile.y;
+    if (!tile.selected) {
+     tile.origX = tile.x;
+     tile.origY = tile.y;
+    }
             });
             tile.sprite.on('drag', (pointer, dragX, dragY) => {
                 tile.sprite.x = dragX;
@@ -599,8 +598,6 @@ export class Hand {
             });
             tile.sprite.on('dragend', (pointer, dragX, dragY, dropped) => {
                 tile.drag = false;
-                tile.x = tile.origX;
-                tile.y = tile.origY;
             });
         }
 

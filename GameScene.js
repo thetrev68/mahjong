@@ -25,6 +25,7 @@ class GameScene extends Phaser.Scene {
         this.gGameLogic = new GameLogic(this);
         this.gTable = new Table(this, this.gGameLogic);
         this.gGameLogic.table = this.gTable;
+        this.gGameLogic.gameAI.table = this.gTable;
 
         // Create sprites etc
         this.gGameLogic.wallText = this.add.text(190, 160, "", {
