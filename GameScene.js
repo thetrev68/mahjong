@@ -55,18 +55,22 @@ class GameScene extends Phaser.Scene {
     }
 
     resize(gameSize, baseSize, displaySize, resolution) {
-        const { width, height } = gameSize;
         const uicenterdiv = document.getElementById('uicenterdiv');
         const canvas = this.sys.canvas;
 
-        // Center the uicenterdiv based on the canvas's position and size
-        const canvasBounds = canvas.getBoundingClientRect();
-        const left = canvasBounds.left + (canvasBounds.width / 2) - (uicenterdiv.offsetWidth / 2);
-        const top = canvasBounds.top + (canvasBounds.height * 0.75) - (uicenterdiv.offsetHeight / 2); // 0.75 to position it lower
+        if (!uicenterdiv || !canvas) {
+            return;
+        }
 
-        uicenterdiv.style.position = 'absolute';
-        uicenterdiv.style.left = `${left}px`;
-        uicenterdiv.style.top = `${top}px`;
+        const canvasBounds = canvas.getBoundingClientRect();
+        const commandBarHeight = uicenterdiv.offsetHeight || 0;
+        const left = canvasBounds.left + (canvasBounds.width / 2);
+        const bottomPadding = 32; // keep the bar slightly above the canvas edge
+        const top = canvasBounds.top + canvasBounds.height - commandBarHeight - bottomPadding;
+
+        const rootStyle = document.documentElement.style;
+        rootStyle.setProperty('--command-bar-left', `${left}px`);
+        rootStyle.setProperty('--command-bar-top', `${Math.max(top, 24)}px`);
     }
 }
 

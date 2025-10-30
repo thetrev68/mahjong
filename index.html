@@ -1,169 +1,74 @@
-<!doctype html> 
-<html lang="en"> 
-<head> 
+<!doctype html>
+<html lang="en">
+<head>
     <meta charset="UTF-8" />
     <meta name="description" content="American Mahjong game">
-    <meta name="keywords" content="Mahjong, free, game, javascript">    
+    <meta name="keywords" content="Mahjong, free, game, javascript">
     <title>American Mahjong</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/phaser@v3.90.0/dist/phaser.min.js"></script>
-    <style type="text/css">
-        html, body {
-            background-color: #006400;
-            margin: 0;
-            width: 100%;
-            height: 100%;
-        }
-    </style>
 </head>
+<body>
+    <div id="parentdiv">
+        <div id="gamediv"></div>
 
-<div id="parentdiv" style="height: 100%;">
-    <div id="gamediv">
-    </div>
-    <div id="uicenterdiv">
-        <textarea id="info" readonly style="visibility: hidden"></textarea>
-        <div id="buttondiv" style="visibility: hidden">
-            <button id="button1" class="button">button1</button>
-            <button id="button2" class="button">button2</button>
-            <button id="button3" class="button">button3</button>
-            <button id="button4" class="button">button4</button>
+        <div id="uicenterdiv">
+            <label class="sr-only" for="info">Action status</label>
+            <textarea id="info" readonly aria-live="polite"></textarea>
+            <div id="buttondiv">
+                <button id="button1" class="button">button1</button>
+                <button id="button2" class="button">button2</button>
+                <button id="button3" class="button">button3</button>
+                <button id="button4" class="button">button4</button>
+            </div>
         </div>
-    </div>
-    <div id="uidiv">
-        <div id="messagesdiv">
-            <textarea id="messages" readonly></textarea>
-        </div>
-        <div id="trainingdiv">
-            <form id="trainform1">
-                <fieldset id="trainfieldset1">    
-                    <div>
-                        <div>
+
+        <aside id="uidiv">
+            <section id="messagesdiv" class="sidebar__section">
+                <label class="sidebar__heading" for="messages">Game Log</label>
+                <textarea id="messages" class="sidebar__textarea" readonly aria-live="polite"></textarea>
+            </section>
+
+            <section id="trainingdiv" class="sidebar__section">
+                <h2 class="sidebar__heading">Training Options</h2>
+                <form id="trainform1" class="training-form">
+                    <fieldset id="trainfieldset1">
+                        <div class="training-form__row">
                             <input id="trainCheckbox" type="checkbox">
-                            <label for="trainCheckbox">Training Mode</label>  
+                            <label for="trainCheckbox">Training Mode</label>
                         </div>
-                    </div>  
-                </fieldset>             
-            </form>    
-            <form id="trainform2">
-            <fieldset id="trainfieldset2">
-                <div class = "trainclass">Select a Starting Hand</div>        
-                <div class = "trainclass">
-                        <select  id="handSelect"></select>   
-                </div>
-                <div class = "trainclass">
-                        <select id="numTileSelect"></select> Number of Tiles             
-                </div>
-                <div class = "trainclass">
-                        <input id="skipCharlestonCheckbox" type="checkbox">
-                        <label for="skipCharlestonCheckbox">Skip Charleston?</label>  
-                </div>   
-            </fieldset>             
-            </form>    
-        </div>
-        <div id="controldiv" style="visibility: hidden">
+                    </fieldset>
+                </form>
+                <form id="trainform2" class="training-form">
+                    <fieldset id="trainfieldset2">
+                        <div class="training-form__row">
+                            <label for="handSelect">Select a Starting Hand</label>
+                        </div>
+                        <div class="training-form__row">
+                            <select id="handSelect"></select>
+                        </div>
+                        <div class="training-form__row">
+                            <label class="training-form__note" for="numTileSelect">Number of Tiles</label>
+                            <select id="numTileSelect"></select>
+                        </div>
+                        <div class="training-form__row">
+                            <input id="skipCharlestonCheckbox" type="checkbox">
+                            <label for="skipCharlestonCheckbox">Skip Charleston?</label>
+                        </div>
+                    </fieldset>
+                </form>
+            </section>
+
+            <div id="controldiv">
                 <button id="start" class="button">Start Game</button>
                 <button id="sort1" class="button">Sort by suit</button>
                 <button id="sort2" class="button">Sort by rank</button>
                 <button id="hint" class="button">Hint</button>
-        </div>        
+            </div>
+        </aside>
     </div>
-</div>
 
-
-
-<style type="text/css">
-    #parentdiv {
-        display: flex;
-    }
-    #gamediv {
-        width: 80%;
-        height: 100%;
-    }
-    #uidiv {
-        flex-grow: 1;
-        width: 20%;
-        height: 100%;            
-    }
-    #messagesdiv {
-        padding: 5px;
-    }  
-    #trainingdiv {
-        padding: 5px;
-    }      
-    .button {
-        background-color: #FFFFFF;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-    .button:disabled {
-        opacity: 0.65; 
-        cursor: not-allowed;
-    }
-    #uicenterdiv {
-        width: 500px;
-        height: 80px;
-        position: absolute;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-    #info {
-        width: 300px;
-        height: 30px;
-        resize: none;      
-    }
-    #buttondiv {
-        width: 500px;
-        height: 50px;
-    }    
-    #messages {
-        width: 100%;
-        height: 348px;
-        resize: none;
-    }
-    #controldiv {
-        width: 100%;        
-        height: 20px;
-    }     
-    #trainform1 {
-        width: 100%;        
-        height: 20px;
-    }          
-    #trainform2 {
-        width: 100%;        
-        height: 150px;
-    }        
-    #trainfieldset1 {
-        width: 100%;        
-        border: none;
-    }
-    #trainfieldset2 {
-        width: 100%;        
-        border: none;
-    }    
-    .trainclass {
-        padding: 3px;
-    }        
-    #handSelect {
-        width: 100%;        
-    }          
-    #trainfieldset1:disabled {
-        opacity: 0.35; 
-        cursor: not-allowed;
-    } 
-    #trainfieldset2:disabled {
-        opacity: 0.35; 
-        cursor: not-allowed;
-    }  
-    #trainCheckbox:disabled {
-        opacity: 0.35; 
-        cursor: not-allowed;
-    }
-               
-</style>    
-
-<body>
-<script src="main.js" type="module"></script>
-<script nomodule>alert("Browser does not support ES6 modules. Please enable ES6 module support or alternatively use Google Chrome.");</script>
+    <script src="main.js" type="module"></script>
+    <script nomodule>alert("Browser does not support ES6 modules. Please enable ES6 module support or alternatively use Google Chrome.");</script>
 </body>
 </html>
