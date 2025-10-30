@@ -57,24 +57,32 @@ class GameScene extends Phaser.Scene {
         // from game.js update() - it was empty
     }
 
-    getClampedCommandBarPosition(left, top, bar, canvasBounds) {
+    getDragBounds() {
+        const parent = document.getElementById('parentdiv');
+        if (parent) {
+            return parent.getBoundingClientRect();
+        }
+        return this.sys.canvas.getBoundingClientRect();
+    }
+
+    getClampedCommandBarPosition(left, top, bar, boundsRect) {
         const padding = 16;
         const rect = bar.getBoundingClientRect();
         const halfWidth = (rect.width || bar.offsetWidth || 0) / 2;
         const barHeight = rect.height || bar.offsetHeight || 0;
 
-        let minLeft = canvasBounds.left + halfWidth + padding;
-        let maxLeft = canvasBounds.right - halfWidth - padding;
+        let minLeft = boundsRect.left + halfWidth + padding;
+        let maxLeft = boundsRect.right - halfWidth - padding;
         if (minLeft > maxLeft) {
-            const center = canvasBounds.left + (canvasBounds.width / 2);
+            const center = boundsRect.left + (boundsRect.width / 2);
             minLeft = center;
             maxLeft = center;
         }
 
-        let minTop = canvasBounds.top + padding;
-        let maxTop = canvasBounds.bottom - barHeight - padding;
+        let minTop = boundsRect.top + padding;
+        let maxTop = boundsRect.bottom - barHeight - padding;
         if (minTop > maxTop) {
-            const mid = canvasBounds.top + (canvasBounds.height / 2);
+            const mid = boundsRect.top + (boundsRect.height / 2);
             minTop = mid;
             maxTop = mid;
         }
@@ -83,6 +91,24 @@ class GameScene extends Phaser.Scene {
         const clampedTop = Math.min(Math.max(top, minTop), maxTop);
 
         return {left: clampedLeft, top: clampedTop};
+    }
+
+    getDefaultCommandBarPosition(bar, canvasBounds, boundsRect) {
+        const dock = document.getElementById('commandDock');
+        if (dock) {
+            const dockRect = dock.getBoundingClientRect();
+            if (dockRect.width && dockRect.height) {
+                const targetLeft = dockRect.left + (dockRect.width / 2);
+                const targetTop = dockRect.top + Math.max((dockRect.height - (bar.offsetHeight || 0)) / 2, 0);
+                return this.getClampedCommandBarPosition(targetLeft, targetTop, bar, boundsRect);
+            }
+        }
+
+        const barWidth = bar.offsetWidth || 0;
+        const barHeight = bar.offsetHeight || 0;
+        const fallbackLeft = canvasBounds.right - (barWidth / 2) - 24;
+        const fallbackTop = canvasBounds.bottom - barHeight - 120;
+        return this.getClampedCommandBarPosition(fallbackLeft, fallbackTop, bar, boundsRect);
     }
 
     enableCommandBarDrag() {
@@ -101,11 +127,11 @@ class GameScene extends Phaser.Scene {
             if (!isDragging) {
                 return;
             }
-            const canvasBounds = this.sys.canvas.getBoundingClientRect();
+            const boundsRect = this.getDragBounds();
             const rect = bar.getBoundingClientRect();
             const tentativeLeft = event.clientX - pointerOffsetX + (rect.width || bar.offsetWidth || 0) / 2;
             const tentativeTop = event.clientY - pointerOffsetY;
-            const {left, top} = this.getClampedCommandBarPosition(tentativeLeft, tentativeTop, bar, canvasBounds);
+            const {left, top} = this.getClampedCommandBarPosition(tentativeLeft, tentativeTop, bar, boundsRect);
 
             rootStyle.setProperty('--command-bar-left', `${left}px`);
             rootStyle.setProperty('--command-bar-top', `${top}px`);
@@ -174,6 +200,7 @@ class GameScene extends Phaser.Scene {
         }
 
         const canvasBounds = canvas.getBoundingClientRect();
+        const boundsRect = this.getDragBounds();
         const rootStyle = document.documentElement.style;
 
         if (this.commandBarManualPosition && this.commandBarPosition) {
@@ -181,7 +208,7 @@ class GameScene extends Phaser.Scene {
                 this.commandBarPosition.left,
                 this.commandBarPosition.top,
                 uicenterdiv,
-                canvasBounds
+                boundsRect
             );
             this.commandBarPosition = {left, top};
             rootStyle.setProperty('--command-bar-left', `${left}px`);
@@ -189,11 +216,7 @@ class GameScene extends Phaser.Scene {
             return;
         }
 
-        const commandBarHeight = uicenterdiv.offsetHeight || 0;
-        const defaultLeft = canvasBounds.left + (canvasBounds.width / 2);
-        const bottomMargin = Math.max(120, commandBarHeight * 0.75);
-        const defaultTop = canvasBounds.top + canvasBounds.height - commandBarHeight - bottomMargin;
-        const {left, top} = this.getClampedCommandBarPosition(defaultLeft, defaultTop, uicenterdiv, canvasBounds);
+        const {left, top} = this.getDefaultCommandBarPosition(uicenterdiv, canvasBounds, boundsRect);
 
         this.commandBarPosition = {left, top};
         rootStyle.setProperty('--command-bar-left', `${left}px`);

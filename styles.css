@@ -114,6 +114,7 @@ a:focus-visible {
     border-left: 1px solid rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(6px);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), var(--shadow-panel);
+    position: relative;
 }
 
 .sidebar__section {
@@ -189,6 +190,15 @@ a:focus-visible {
     gap: var(--spacing-sm);
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     visibility: hidden;
+}
+
+#commandDock {
+    height: 160px;
+    margin-top: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    border: 0;
+    background: transparent;
+    pointer-events: none;
 }
 
 .button {
@@ -377,6 +387,10 @@ select {
 
     .sidebar__textarea {
         height: 14rem;
+    }
+
+    #commandDock {
+        display: none;
     }
 }
 
