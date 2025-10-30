@@ -126,6 +126,13 @@ a:focus-visible {
     backdrop-filter: blur(4px);
 }
 
+.sidebar__section--log,
+.sidebar__section--training {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
 .sidebar__heading {
     margin: 0 0 var(--spacing-sm);
     font-size: var(--font-size-xs);
@@ -151,38 +158,76 @@ a:focus-visible {
 }
 
 .training-form {
-    display: grid;
-    gap: var(--spacing-sm);
+    display: block;
 }
 
 .training-form fieldset {
     margin: 0;
     padding: 0;
     border: none;
-    display: grid;
-    gap: var(--spacing-sm);
 }
 
-.training-form__row {
+.training-form__toggle {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: var(--spacing-sm);
-    padding: var(--spacing-xs) 0;
+    padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-xs) 0;
 }
 
-.training-form__row select,
-.training-form__row input[type="checkbox"] {
-    flex-shrink: 0;
+.training-form__grid {
+    display: grid;
+    gap: var(--spacing-sm);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.training-form__row select {
+.training-form__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.training-form__item--full {
+    grid-column: 1 / -1;
+}
+
+.training-form__item--checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-sm);
+    grid-column: 1 / -1;
+    padding-top: var(--spacing-xs);
+}
+
+.training-form__label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.training-form__select {
     width: 100%;
 }
 
-.training-form__note {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
+.training-form__select--compact {
+    max-width: 160px;
+}
+
+.message-log__textarea {
+    min-height: 19rem;
+    letter-spacing: 0.03em;
+}
+
+.message-log__textarea.message-log__textarea--info {
+    color: #b9f5ce;
+}
+
+.message-log__textarea.message-log__textarea--warning {
+    color: #ffe3a3;
+}
+
+.message-log__textarea.message-log__textarea--danger {
+    color: #ffb7b7;
 }
 
 #controldiv {
@@ -351,6 +396,10 @@ select {
     #uicenterdiv {
         width: min(340px, calc(100% - 2rem));
     }
+
+    .training-form__grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 960px) {
@@ -379,6 +428,10 @@ select {
 
     .sidebar__textarea {
         height: 14rem;
+    }
+
+    .training-form__grid {
+        grid-template-columns: 1fr;
     }
 
 }

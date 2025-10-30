@@ -24,16 +24,16 @@
         </div>
 
         <aside id="uidiv">
-            <section id="messagesdiv" class="sidebar__section">
+            <section id="messagesdiv" class="sidebar__section sidebar__section--log">
                 <label class="sidebar__heading" for="messages">Game Log</label>
-                <textarea id="messages" class="sidebar__textarea" readonly aria-live="polite"></textarea>
+                <textarea id="messages" class="sidebar__textarea message-log__textarea" readonly aria-live="polite"></textarea>
             </section>
 
-            <section id="trainingdiv" class="sidebar__section">
+            <section id="trainingdiv" class="sidebar__section sidebar__section--training">
                 <h2 class="sidebar__heading">Training Options</h2>
                 <form id="trainform1" class="training-form">
                     <fieldset id="trainfieldset1">
-                        <div class="training-form__row">
+                        <div class="training-form__toggle">
                             <input id="trainCheckbox" type="checkbox">
                             <label for="trainCheckbox">Training Mode</label>
                         </div>
@@ -41,19 +41,19 @@
                 </form>
                 <form id="trainform2" class="training-form">
                     <fieldset id="trainfieldset2">
-                        <div class="training-form__row">
-                            <label for="handSelect">Select a Starting Hand</label>
-                        </div>
-                        <div class="training-form__row">
-                            <select id="handSelect"></select>
-                        </div>
-                        <div class="training-form__row">
-                            <label class="training-form__note" for="numTileSelect">Number of Tiles</label>
-                            <select id="numTileSelect"></select>
-                        </div>
-                        <div class="training-form__row">
-                            <input id="skipCharlestonCheckbox" type="checkbox">
-                            <label for="skipCharlestonCheckbox">Skip Charleston?</label>
+                        <div class="training-form__grid">
+                            <div class="training-form__item training-form__item--full">
+                                <label class="training-form__label" for="handSelect">Select a Starting Hand</label>
+                                <select id="handSelect" class="training-form__select"></select>
+                            </div>
+                            <div class="training-form__item">
+                                <label class="training-form__label" for="numTileSelect">Number of Tiles</label>
+                                <select id="numTileSelect" class="training-form__select training-form__select--compact"></select>
+                            </div>
+                            <div class="training-form__item training-form__item--checkbox">
+                                <input id="skipCharlestonCheckbox" type="checkbox">
+                                <label for="skipCharlestonCheckbox">Skip Charleston?</label>
+                            </div>
                         </div>
                     </fieldset>
                 </form>
