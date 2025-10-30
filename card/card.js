@@ -44,7 +44,7 @@ export class Card {
     }
 
     generateHand(handDescription, numTiles) {
-        const vsuitArray = [SUIT.CHAR, SUIT.BAM, SUIT.DOT];
+        const vsuitArray = [SUIT.CRACK, SUIT.BAM, SUIT.DOT];
         const hand = new Hand(false);
         let foundHand = null;
 
@@ -159,7 +159,7 @@ export class Card {
             allHidden
         };
 
-        // Determine all suits  (dragons will be translated to char, bam, dot)
+        // Determine all suits  (dragons will be translated to CRACK, bam, dot)
         for (const tile of test) {
             let suit = tile.suit;
             if (suit === SUIT.DRAGON) {
@@ -233,7 +233,7 @@ export class Card {
             return false;
         }
 
-        // Number of suits (char,dot,bam,flower,dragon, wind, joker) must be >= number of vsuits
+        // Number of suits (CRACK,dot,bam,flower,dragon, wind, joker) must be >= number of vsuits
         if (info.suits.length < validHand.vsuitCount) {
             return false;
         }
@@ -242,26 +242,26 @@ export class Card {
         const permVsuit0 = [[-1, -1, -1]];
 
         const permVsuit1 = [
-            [SUIT.CHAR, -1, -1],
+            [SUIT.CRACK, -1, -1],
             [SUIT.BAM, -1, -1],
             [SUIT.DOT, -1, -1]
         ];
 
         const permVsuit2 = [
-            [SUIT.CHAR, SUIT.BAM, -1],
-            [SUIT.CHAR, SUIT.DOT, -1],
-            [SUIT.BAM, SUIT.CHAR, -1],
+            [SUIT.CRACK, SUIT.BAM, -1],
+            [SUIT.CRACK, SUIT.DOT, -1],
+            [SUIT.BAM, SUIT.CRACK, -1],
             [SUIT.BAM, SUIT.DOT, -1],
-            [SUIT.DOT, SUIT.CHAR, -1],
+            [SUIT.DOT, SUIT.CRACK, -1],
             [SUIT.DOT, SUIT.BAM, -1]
         ];
 
         const permVsuit3 = [
-            [SUIT.CHAR, SUIT.BAM, SUIT.DOT],
-            [SUIT.CHAR, SUIT.DOT, SUIT.BAM],
-            [SUIT.BAM, SUIT.CHAR, SUIT.DOT],
+            [SUIT.CRACK, SUIT.BAM, SUIT.DOT],
+            [SUIT.CRACK, SUIT.DOT, SUIT.BAM],
+            [SUIT.BAM, SUIT.CRACK, SUIT.DOT],
             [SUIT.BAM, SUIT.DOT, SUIT.CHAR],
-            [SUIT.DOT, SUIT.CHAR, SUIT.BAM],
+            [SUIT.DOT, SUIT.CRACK, SUIT.BAM],
             [SUIT.DOT, SUIT.BAM, SUIT.CHAR]
         ];
 
@@ -455,26 +455,26 @@ export class Card {
         const permVsuit0 = [[-1, -1, -1]];
 
         const permVsuit1 = [
-            [SUIT.CHAR, -1, -1],
+            [SUIT.CRACK, -1, -1],
             [SUIT.BAM, -1, -1],
             [SUIT.DOT, -1, -1]
         ];
 
         const permVsuit2 = [
-            [SUIT.CHAR, SUIT.BAM, -1],
-            [SUIT.CHAR, SUIT.DOT, -1],
-            [SUIT.BAM, SUIT.CHAR, -1],
+            [SUIT.CRACK, SUIT.BAM, -1],
+            [SUIT.CRACK, SUIT.DOT, -1],
+            [SUIT.BAM, SUIT.CRACK, -1],
             [SUIT.BAM, SUIT.DOT, -1],
-            [SUIT.DOT, SUIT.CHAR, -1],
+            [SUIT.DOT, SUIT.CRACK, -1],
             [SUIT.DOT, SUIT.BAM, -1]
         ];
 
         const permVsuit3 = [
-            [SUIT.CHAR, SUIT.BAM, SUIT.DOT],
-            [SUIT.CHAR, SUIT.DOT, SUIT.BAM],
-            [SUIT.BAM, SUIT.CHAR, SUIT.DOT],
-            [SUIT.BAM, SUIT.DOT], SUIT.CHAR,
-            [SUIT.DOT, SUIT.CHAR, SUIT.BAM],
+            [SUIT.CRACK, SUIT.BAM, SUIT.DOT],
+            [SUIT.CRACK, SUIT.DOT, SUIT.BAM],
+            [SUIT.BAM, SUIT.CRACK, SUIT.DOT],
+            [SUIT.BAM, SUIT.DOT], SUIT.CRACK,
+            [SUIT.DOT, SUIT.CRACK, SUIT.BAM],
             [SUIT.DOT, SUIT.BAM, SUIT.CHAR]
         ];
 

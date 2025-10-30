@@ -53,7 +53,7 @@ export const PLAYER = {
 
 // Suit types
 export const SUIT = {
-    CHAR: 0,
+    CRACK: 0,
     BAM: 1,
     DOT: 2,
     WIND: 3,
@@ -73,7 +73,7 @@ export const SUIT = {
 
 export const VNUMBER = {
     // 0 - not used
-    // 1-9 reserved for normal numbers (char, bam, dot)
+    // 1-9 reserved for normal numbers (CRACK, bam, dot)
     CONSECUTIVE1: 10,
     CONSECUTIVE2: 11,
     CONSECUTIVE3: 12,

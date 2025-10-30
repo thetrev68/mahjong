@@ -439,7 +439,7 @@ export const handsSinglesPairs = {
                 },
 
                 {
-                    suit: SUIT.CHAR,
+                    suit: SUIT.CRACK,
                     number: 2,
                     count: 1
                 },
@@ -449,12 +449,12 @@ export const handsSinglesPairs = {
                     count: 1
                 },
                 {
-                    suit: SUIT.CHAR,
+                    suit: SUIT.CRACK,
                     number: 1,
                     count: 1
                 },
                 {
-                    suit: SUIT.CHAR,
+                    suit: SUIT.CRACK,
                     number: 8,
                     count: 1
                 },

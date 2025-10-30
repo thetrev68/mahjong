@@ -21,9 +21,9 @@ export class CardTest2017 {
 
             // 222 0000 111 7777 (2 suits)
             const hand = new Hand(false);
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
@@ -48,9 +48,9 @@ export class CardTest2017 {
 
             // 222 0000 111 7777 (2 suits)
             const hand = new Hand(false);
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
@@ -81,10 +81,10 @@ export class CardTest2017 {
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-            hand.insertHidden(new Tile(SUIT.CHAR, 1));
-            hand.insertHidden(new Tile(SUIT.CHAR, 7));
+            hand.insertHidden(new Tile(SUIT.CRACK, 1));
+            hand.insertHidden(new Tile(SUIT.CRACK, 7));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
@@ -281,10 +281,10 @@ export class CardTest2017 {
             hand.insertHidden(new Tile(SUIT.DOT, 4));
             hand.insertHidden(new Tile(SUIT.DOT, 4));
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 9));
-            hand.insertHidden(new Tile(SUIT.CHAR, 9));
-            hand.insertHidden(new Tile(SUIT.CHAR, 9));
-            hand.insertHidden(new Tile(SUIT.CHAR, 9));
+            hand.insertHidden(new Tile(SUIT.CRACK, 9));
+            hand.insertHidden(new Tile(SUIT.CRACK, 9));
+            hand.insertHidden(new Tile(SUIT.CRACK, 9));
+            hand.insertHidden(new Tile(SUIT.CRACK, 9));
 
             hand.insertHidden(new Tile(SUIT.BAM, 1));
 
@@ -337,12 +337,12 @@ export class CardTest2017 {
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-            hand.insertHidden(new Tile(SUIT.CHAR, 7));
-            hand.insertHidden(new Tile(SUIT.CHAR, 7));
-            hand.insertHidden(new Tile(SUIT.CHAR, 7));
-            hand.insertHidden(new Tile(SUIT.CHAR, 7));
+            hand.insertHidden(new Tile(SUIT.CRACK, 7));
+            hand.insertHidden(new Tile(SUIT.CRACK, 7));
+            hand.insertHidden(new Tile(SUIT.CRACK, 7));
+            hand.insertHidden(new Tile(SUIT.CRACK, 7));
 
-            const singleTile = new Tile(SUIT.CHAR, 7);
+            const singleTile = new Tile(SUIT.CRACK, 7);
 
             debugPrint("NNNNN DDDD 11111 (quints, any wind, any dragon, any number/suit)\n");
 
@@ -358,21 +358,21 @@ export class CardTest2017 {
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 4));
-            hand.insertHidden(new Tile(SUIT.CHAR, 4));
+            hand.insertHidden(new Tile(SUIT.CRACK, 4));
+            hand.insertHidden(new Tile(SUIT.CRACK, 4));
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 5));
-            hand.insertHidden(new Tile(SUIT.CHAR, 5));
-            hand.insertHidden(new Tile(SUIT.CHAR, 5));
-            hand.insertHidden(new Tile(SUIT.CHAR, 5));
+            hand.insertHidden(new Tile(SUIT.CRACK, 5));
+            hand.insertHidden(new Tile(SUIT.CRACK, 5));
+            hand.insertHidden(new Tile(SUIT.CRACK, 5));
+            hand.insertHidden(new Tile(SUIT.CRACK, 5));
 
-            const singleTile = new Tile(SUIT.CHAR, 5);
+            const singleTile = new Tile(SUIT.CRACK, 5);
 
             debugPrint("FF 11111 22 33333 (1 suit, 3 consecutive numbers)\n");
 
@@ -388,10 +388,10 @@ export class CardTest2017 {
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
 
             hand.insertHidden(new Tile(SUIT.DOT, 4));
             hand.insertHidden(new Tile(SUIT.DOT, 4));
@@ -416,10 +416,10 @@ export class CardTest2017 {
             // 11 22 111 222 3333 (3 suit, 3 consecutive numbers)
             const hand = new Hand(false);
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 4));
-            hand.insertHidden(new Tile(SUIT.CHAR, 4));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 4));
+            hand.insertHidden(new Tile(SUIT.CRACK, 4));
 
             hand.insertHidden(new Tile(SUIT.DOT, 3));
             hand.insertHidden(new Tile(SUIT.DOT, 3));
@@ -446,14 +446,14 @@ export class CardTest2017 {
             // 111 22 333 DDD DDD (3 consecutive numbers, 3 suits)
             const hand = new Hand(false);
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 4));
-            hand.insertHidden(new Tile(SUIT.CHAR, 4));
-            hand.insertHidden(new Tile(SUIT.CHAR, 5));
-            hand.insertHidden(new Tile(SUIT.CHAR, 5));
-            hand.insertHidden(new Tile(SUIT.CHAR, 5));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 4));
+            hand.insertHidden(new Tile(SUIT.CRACK, 4));
+            hand.insertHidden(new Tile(SUIT.CRACK, 5));
+            hand.insertHidden(new Tile(SUIT.CRACK, 5));
+            hand.insertHidden(new Tile(SUIT.CRACK, 5));
 
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
@@ -543,10 +543,10 @@ export class CardTest2017 {
             hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
             hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
             hand.insertHidden(new Tile(SUIT.DOT, 3));
             hand.insertHidden(new Tile(SUIT.DOT, 3));
             hand.insertHidden(new Tile(SUIT.BAM, 3));
@@ -573,8 +573,8 @@ export class CardTest2017 {
             hand.insertHidden(new Tile(SUIT.WIND, WIND.EAST));
             hand.insertHidden(new Tile(SUIT.WIND, WIND.EAST));
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
             hand.insertHidden(new Tile(SUIT.DOT, 3));
             hand.insertHidden(new Tile(SUIT.DOT, 3));
             hand.insertHidden(new Tile(SUIT.BAM, 3));
@@ -593,20 +593,20 @@ export class CardTest2017 {
             const hand = new Hand(false);
 
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 4));
-            hand.insertHidden(new Tile(SUIT.CHAR, 4));
-            hand.insertHidden(new Tile(SUIT.CHAR, 5));
-            hand.insertHidden(new Tile(SUIT.CHAR, 5));
-            hand.insertHidden(new Tile(SUIT.CHAR, 6));
-            hand.insertHidden(new Tile(SUIT.CHAR, 6));
-            hand.insertHidden(new Tile(SUIT.CHAR, 7));
-            hand.insertHidden(new Tile(SUIT.CHAR, 7));
-            hand.insertHidden(new Tile(SUIT.CHAR, 8));
-            hand.insertHidden(new Tile(SUIT.CHAR, 8));
-            hand.insertHidden(new Tile(SUIT.CHAR, 9));
-            const singleTile = new Tile(SUIT.CHAR, 9);
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 4));
+            hand.insertHidden(new Tile(SUIT.CRACK, 4));
+            hand.insertHidden(new Tile(SUIT.CRACK, 5));
+            hand.insertHidden(new Tile(SUIT.CRACK, 5));
+            hand.insertHidden(new Tile(SUIT.CRACK, 6));
+            hand.insertHidden(new Tile(SUIT.CRACK, 6));
+            hand.insertHidden(new Tile(SUIT.CRACK, 7));
+            hand.insertHidden(new Tile(SUIT.CRACK, 7));
+            hand.insertHidden(new Tile(SUIT.CRACK, 8));
+            hand.insertHidden(new Tile(SUIT.CRACK, 8));
+            hand.insertHidden(new Tile(SUIT.CRACK, 9));
+            const singleTile = new Tile(SUIT.CRACK, 9);
 
             debugPrint("11 22 33 44 55 66 77 (any 7 consecutive numbers in 1 suit) \n");
 
@@ -621,16 +621,16 @@ export class CardTest2017 {
             const hand = new Hand(false);
 
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 1));
-            hand.insertHidden(new Tile(SUIT.CHAR, 1));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 3));
-            hand.insertHidden(new Tile(SUIT.CHAR, 5));
-            hand.insertHidden(new Tile(SUIT.CHAR, 5));
-            hand.insertHidden(new Tile(SUIT.CHAR, 7));
-            hand.insertHidden(new Tile(SUIT.CHAR, 7));
-            hand.insertHidden(new Tile(SUIT.CHAR, 9));
-            hand.insertHidden(new Tile(SUIT.CHAR, 9));
+            hand.insertHidden(new Tile(SUIT.CRACK, 1));
+            hand.insertHidden(new Tile(SUIT.CRACK, 1));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 3));
+            hand.insertHidden(new Tile(SUIT.CRACK, 5));
+            hand.insertHidden(new Tile(SUIT.CRACK, 5));
+            hand.insertHidden(new Tile(SUIT.CRACK, 7));
+            hand.insertHidden(new Tile(SUIT.CRACK, 7));
+            hand.insertHidden(new Tile(SUIT.CRACK, 9));
+            hand.insertHidden(new Tile(SUIT.CRACK, 9));
 
             hand.insertHidden(new Tile(SUIT.DOT, 3));
             hand.insertHidden(new Tile(SUIT.DOT, 3));
@@ -652,10 +652,10 @@ export class CardTest2017 {
 
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-            hand.insertHidden(new Tile(SUIT.CHAR, 1));
-            hand.insertHidden(new Tile(SUIT.CHAR, 7));
+            hand.insertHidden(new Tile(SUIT.CRACK, 1));
+            hand.insertHidden(new Tile(SUIT.CRACK, 7));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
 

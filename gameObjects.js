@@ -8,8 +8,8 @@ import {SUIT, SPRITE_HEIGHT, SPRITE_WIDTH} from "./constants.js";
 
 const gTileGroups = [
     {
-        suit: SUIT.CHAR,
-        textArray: ["Char"],
+        suit: SUIT.CRACK,
+        textArray: ["Crack"],
         prefix: ["C"],
         maxNum: 9,
         count: 4

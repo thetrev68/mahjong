@@ -24,9 +24,9 @@ export class CardTest2020 {
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
 
             hand.insertHidden(new Tile(SUIT.DOT, 2));
@@ -57,10 +57,10 @@ export class CardTest2020 {
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 4));
-            hand.insertHidden(new Tile(SUIT.CHAR, 4));
-            hand.insertHidden(new Tile(SUIT.CHAR, 4));
-            hand.insertHidden(new Tile(SUIT.CHAR, 4));
+            hand.insertHidden(new Tile(SUIT.CRACK, 4));
+            hand.insertHidden(new Tile(SUIT.CRACK, 4));
+            hand.insertHidden(new Tile(SUIT.CRACK, 4));
+            hand.insertHidden(new Tile(SUIT.CRACK, 4));
 
             hand.insertHidden(new Tile(SUIT.DOT, 6));
             hand.insertHidden(new Tile(SUIT.DOT, 6));
@@ -95,8 +95,8 @@ export class CardTest2020 {
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
 
             hand.insertHidden(new Tile(SUIT.DOT, 2));
             hand.insertHidden(new Tile(SUIT.DOT, 2));

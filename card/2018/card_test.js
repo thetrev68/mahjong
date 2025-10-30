@@ -24,10 +24,10 @@ export class CardTest2018 {
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-            hand.insertHidden(new Tile(SUIT.CHAR, 1));
-            hand.insertHidden(new Tile(SUIT.CHAR, 8));
+            hand.insertHidden(new Tile(SUIT.CRACK, 1));
+            hand.insertHidden(new Tile(SUIT.CRACK, 8));
 
             hand.insertHidden(new Tile(SUIT.BAM, 2));
             hand.insertHidden(new Tile(SUIT.BAM, 2));
@@ -52,8 +52,8 @@ export class CardTest2018 {
             // 22 000 NEWS 111 88 (1 suit, concealed)
             const hand = new Hand(false);
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
 
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
@@ -64,12 +64,12 @@ export class CardTest2018 {
             hand.insertHidden(new Tile(SUIT.WIND, WIND.WEST));
             hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 1));
-            hand.insertHidden(new Tile(SUIT.CHAR, 1));
-            hand.insertHidden(new Tile(SUIT.CHAR, 1));
+            hand.insertHidden(new Tile(SUIT.CRACK, 1));
+            hand.insertHidden(new Tile(SUIT.CRACK, 1));
+            hand.insertHidden(new Tile(SUIT.CRACK, 1));
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 8));
-            hand.insertHidden(new Tile(SUIT.CHAR, 8));
+            hand.insertHidden(new Tile(SUIT.CRACK, 8));
+            hand.insertHidden(new Tile(SUIT.CRACK, 8));
 
             debugPrint("22 000 NEWS 111 88 (1 suit, concealed)\n");
 
@@ -119,14 +119,14 @@ export class CardTest2018 {
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
 
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
-            hand.insertHidden(new Tile(SUIT.CHAR, 2));
-            hand.insertHidden(new Tile(SUIT.CHAR, 4));
-            hand.insertHidden(new Tile(SUIT.CHAR, 4));
-            hand.insertHidden(new Tile(SUIT.CHAR, 6));
-            hand.insertHidden(new Tile(SUIT.CHAR, 6));
-            hand.insertHidden(new Tile(SUIT.CHAR, 8));
-            hand.insertHidden(new Tile(SUIT.CHAR, 8));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 2));
+            hand.insertHidden(new Tile(SUIT.CRACK, 4));
+            hand.insertHidden(new Tile(SUIT.CRACK, 4));
+            hand.insertHidden(new Tile(SUIT.CRACK, 6));
+            hand.insertHidden(new Tile(SUIT.CRACK, 6));
+            hand.insertHidden(new Tile(SUIT.CRACK, 8));
+            hand.insertHidden(new Tile(SUIT.CRACK, 8));
 
             hand.insertHidden(new Tile(SUIT.BAM, 4));
             hand.insertHidden(new Tile(SUIT.BAM, 4));
