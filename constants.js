@@ -94,9 +94,9 @@ export const WIND = {
 }
 
 // Dragons
-// Note - dragon ordering matches SUIT ordering.  e.g. red = char = 0
+// Note - dragon ordering matches SUIT ordering.  e.g. red = crack = 0
 export const DRAGON = {
-    // Char
+    // Crack
     RED: 0,
     // Bamboo
     GREEN: 1,

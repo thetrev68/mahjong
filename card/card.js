@@ -177,7 +177,7 @@ export class Card {
         info.minNumLow = 9999;
         info.minNumHigh = 9999;
         for (const tile of test) {
-            if (tile.suit === SUIT.CHAR || tile.suit === SUIT.BAM || tile.suit === SUIT.DOT) {
+            if (tile.suit === SUIT.CRACK || tile.suit === SUIT.BAM || tile.suit === SUIT.DOT) {
                 if (tile.number < info.minNumHigh) {
                     info.minNumHigh = tile.number;
                 }
@@ -260,9 +260,9 @@ export class Card {
             [SUIT.CRACK, SUIT.BAM, SUIT.DOT],
             [SUIT.CRACK, SUIT.DOT, SUIT.BAM],
             [SUIT.BAM, SUIT.CRACK, SUIT.DOT],
-            [SUIT.BAM, SUIT.DOT, SUIT.CHAR],
+            [SUIT.BAM, SUIT.DOT, SUIT.CRACK],
             [SUIT.DOT, SUIT.CRACK, SUIT.BAM],
-            [SUIT.DOT, SUIT.BAM, SUIT.CHAR]
+            [SUIT.DOT, SUIT.BAM, SUIT.CRACK]
         ];
 
         let permArray = null;
@@ -475,7 +475,7 @@ export class Card {
             [SUIT.BAM, SUIT.CRACK, SUIT.DOT],
             [SUIT.BAM, SUIT.DOT], SUIT.CRACK,
             [SUIT.DOT, SUIT.CRACK, SUIT.BAM],
-            [SUIT.DOT, SUIT.BAM, SUIT.CHAR]
+            [SUIT.DOT, SUIT.BAM, SUIT.CRACK]
         ];
 
         let permArray = null;

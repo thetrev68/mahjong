@@ -86,10 +86,10 @@ export class TileSet {
             let valb = b.number;
 
             if (a.suit > SUIT.DOT) {
-                // Sort order of winds dragons is > char/bam/dot
+                // Sort order of winds dragons is > crack/bam/dot
                 vala += 10 + (a.suit * 10);
             } else {
-                // Add suit to number to make sure char/bam/dot are grouped together
+                // Add suit to number to make sure crack/bam/dot are grouped together
                 vala += a.suit;
             }
             if (b.suit > SUIT.DOT) {

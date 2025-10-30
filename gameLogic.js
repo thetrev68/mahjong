@@ -799,14 +799,7 @@ export class GameLogic {
 
         switch (this.state) {
             case STATE.INIT:
-  
-            printMessage("\nGreen Dragon Mahjong\nE-mail: contact@greendragonmahjong.com\n\n");
 
-            printMessage("Browser requirements:\n");
-            printMessage("Latest version of\n");
-            printMessage("- Google Chrome \n");
-            printMessage("- Firefox\n");
-            printMessage("- Microsoft Edge\n\n");
             printMessage("American Mahjong v1.00\n");
             printMessage("Using " + this.card.year + " Mahjong card\n\n");            
             printMessage("Press Start Game button\n");
