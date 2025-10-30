@@ -788,7 +788,7 @@ export class GameLogic {
             sort1.style.display = "none";
             sort2.style.display = "none";
             hint.style.display = "none";
-            window.document.getElementById("controldiv").style.visibility = "";     
+            window.document.getElementById("controldiv").style.visibility = "visible";     
 
             // Populate hand select
             for (const group of this.card.validHandGroups) {
@@ -831,8 +831,8 @@ export class GameLogic {
             button2.style.display = "none";
             button3.style.display = "none";
             button4.style.display = "none";            
-            window.document.getElementById("buttondiv").style.visibility = "";
-            window.document.getElementById("info").style.visibility = "";
+            window.document.getElementById("buttondiv").style.visibility = "visible";
+            window.document.getElementById("info").style.visibility = "visible";
             this.disableTrainingForm();
             this.wallText.visible = true;
             break;   
