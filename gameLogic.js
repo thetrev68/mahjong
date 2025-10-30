@@ -1,4 +1,4 @@
-import {game, printMessage, printInfo, debugPrint, debugTrace} from "./game.js";
+import {printMessage, printInfo, debugPrint, debugTrace} from "./utils.js";
 import {STATE, PLAYER_OPTION, PLAYER, SUIT, DRAGON, WIND, VNUMBER} from "./constants.js";
 import {GameAI} from "./gameAI.js";
 import {Card} from "./card/card.js";
@@ -10,7 +10,8 @@ import {Hand, TileSet} from "./gameObjects_hand.js";
 // PRIVATE GLOBALS
 
 export class GameLogic {
-    constructor(table) {
+    constructor(scene, table) {
+        this.scene = scene;
         this.state = STATE.INIT;
         this.table = table;
         this.card = new Card();
@@ -33,26 +34,7 @@ export class GameLogic {
                             winner: 0};
     }
 
-    create() {
-        // Create Phaser.IO UI elements
-        this.wallText = game.add.text(190, 160, "", {
-            font: "14px Arial",
-            fill: "#ffffff",
-            align: "left"
-        });
-        this.wallText.visible = false;
-
-        this.errorText = game.add.text(400, 400, "", {
-            font: "14px Arial",
-            fill: "#ff8080",
-            backgroundColor: 'rgba(0,0,0,1)',
-            align: "left"
-        });
-        this.wallText.visible = false;    
-    }
-
     init() {
-
         // INIT
         this.state = STATE.INIT;
         this.updateUI();
@@ -67,7 +49,7 @@ export class GameLogic {
         }.bind(this);
 
         // Wait for start button to be pressed. Main game logic loop executed within start button callback.
-        startButton.addEventListener("click", this.startButtonFunction);        
+        startButton.addEventListener("click", this.startButtonFunction);
     }
 
     start() {

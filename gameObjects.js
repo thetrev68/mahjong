@@ -1,4 +1,3 @@
-import {game} from "./game.js";
 import {SUIT, SPRITE_HEIGHT, SPRITE_WIDTH} from "./constants.js";
 
 // PRIVATE CONSTANTS
@@ -77,7 +76,8 @@ const gTileGroups = [
 ];
 
 export class Tile {
-    constructor(suit, number, spriteName) {
+    constructor(scene, suit, number, spriteName) {
+        this.scene = scene;
         this.suit = suit;
         this.number = number;
         this.sprite = null;
@@ -89,13 +89,13 @@ export class Tile {
     }
 
     create() {
-        this.sprite = game.add.sprite(0, 0, "tiles", this.spriteName);
+        this.sprite = this.scene.add.sprite(0, 0, "tiles", this.spriteName);
         this.sprite.visible = false;
-        this.sprite.anchor.setTo(0.5, 0.5);
+        this.sprite.setOrigin(0.5, 0.5);
 
-        this.spriteBack = game.add.sprite(0, 0, "back");
+        this.spriteBack = this.scene.add.sprite(0, 0, "back");
         this.spriteBack.visible = false;
-        this.spriteBack.anchor.setTo(0.5, 0.5);
+        this.spriteBack.setOrigin(0.5, 0.5);
     }
 
     get x() {
@@ -127,56 +127,51 @@ export class Tile {
     }
 
     set scale(scale) {
-        this.sprite.scale.set(scale, scale);
-        this.spriteBack.scale.set(scale, scale);
+        this.sprite.setScale(scale);
+        this.spriteBack.setScale(scale);
     }
 
     animate(x, y, angle) {
         const speed = 750;
         const distance = Math.hypot(x - this.sprite.x, y - this.sprite.y);
         const time = (distance * 1000 / speed);
-        
-        if (this.tween !== null) {
-            // Cancel previous tween
-            game.tweens.remove(this.tween);
+
+        if (this.tween) {
+            this.tween.stop();
         }
 
-        this.sprite.bringToTop();
-        this.spriteBack.bringToTop();
+        this.sprite.depth = 1;
+        this.spriteBack.depth = 1;
 
-        this.tween = game.add.tween(this.sprite);
-        
-        if (this.sprite.angle === undefined) {
-            this.angle = 0;
+        let tweenConfig = {
+            targets: this.sprite,
+            x: x,
+            y: y,
+            duration: time,
+            ease: 'Linear',
+            onUpdate: () => {
+                this.spriteBack.x = this.sprite.x;
+                this.spriteBack.y = this.sprite.y;
+                this.spriteBack.angle = this.sprite.angle;
+            },
+            onComplete: () => {
+                this.sprite.x = x;
+                this.sprite.y = y;
+                this.sprite.angle = angle;
+                this.spriteBack.x = x;
+                this.spriteBack.y = y;
+                this.spriteBack.angle = angle;
+                this.sprite.depth = 0;
+                this.spriteBack.depth = 0;
+                this.tween = null;
+            }
+        };
+
+        if (Phaser.Math.Angle.Wrap(this.sprite.angle) !== Phaser.Math.Angle.Wrap(angle)) {
+            tweenConfig.angle = angle;
         }
 
-        if (Phaser.Math.wrapAngle(this.sprite.angle) === Phaser.Math.wrapAngle(angle)) {
-            this.angle = angle;
-            this.tween.to(
-                {
-                    x: x,
-                    y: y
-                }, time, Phaser.Easing.Linear.None);       
-        } else {
-            this.tween.to(
-                {
-                    x: x,
-                    y: y,
-                    angle: angle
-                }, time, Phaser.Easing.Linear.None);       
-        }
-
-        this.tween.onUpdateCallback(this.tweenUpdateCallback, this);
-        this.tween.onComplete.add( () => {
-            this.sprite.x = x;
-            this.sprite.y = y;
-            this.sprite.angle = angle;
-            this.spriteBack.x = x;
-            this.spriteBack.y = y;
-            this.spriteBack.angle = angle;
-        }, this);
-
-        this.tween.start();
+        this.tween = this.scene.tweens.add(tweenConfig);
     }
 
     // Called at game update time
@@ -229,7 +224,8 @@ export class Tile {
 
 
 export class Wall {
-    constructor() {
+    constructor(scene) {
+        this.scene = scene;
         this.tileArray = [];
     }
 
@@ -255,7 +251,7 @@ export class Wall {
 
                     // Create duplicate tiles
                     for (let j = 0; j < group.count; j++) {
-                        const tile = new Tile(group.suit, number, spriteName);
+                        const tile = new Tile(this.scene, group.suit, number, spriteName);
                         tile.create();
                         this.insert(tile);
                     }

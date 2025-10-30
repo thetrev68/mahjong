@@ -8,7 +8,7 @@ import {Hand} from "./gameObjects_hand.js"
 
 
 export class Player {
-    constructor(playerInfo) {
+    constructor(scene, gameLogic, playerInfo) {
         // Player ID
         // 0 - player, bottom of screen
         // 1 - computer, right
@@ -18,7 +18,7 @@ export class Player {
         // This is in "turn" order
         this.playerInfo = playerInfo;
         const inputEnabled = (playerInfo.id === PLAYER.BOTTOM)
-        this.hand = new Hand(inputEnabled);
+        this.hand = new Hand(scene, gameLogic, inputEnabled);
     }
 
     create() {

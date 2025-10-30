@@ -1,4 +1,4 @@
-import {game, printMessage} from "./game.js";
+import {printMessage} from "./utils.js";
 import {
     PLAYER, PLAYER_OPTION, SUIT,
     WINDOW_WIDTH, WINDOW_HEIGHT,
@@ -61,8 +61,10 @@ const gPlayerInfo = [
 
 
 export class Table {
-    constructor() {
-        this.wall = new Wall();
+    constructor(scene, gameLogic) {
+        this.scene = scene;
+        this.gameLogic = gameLogic;
+        this.wall = new Wall(scene);
         this.discards = new Discards();
 
         this.boxes = [];
@@ -73,7 +75,7 @@ export class Table {
         // Create players
         this.players = [];
         for (let i = 0; i < 4; i++) {
-            this.players[i] = new Player(gPlayerInfo[i]);
+            this.players[i] = new Player(scene, gameLogic, gPlayerInfo[i]);
         }
 
         this.player02CourtesyVote = 0;
@@ -83,10 +85,9 @@ export class Table {
     create() {
 
         for (let i = 0; i < 4; i++) {
-            const graphics = game.add.graphics(0, 0);
-            graphics.beginFill(0x8FBF00);
-            graphics.drawRect(gPlayerInfo[i].rectX, gPlayerInfo[i].rectY, gPlayerInfo[i].rectWidth, gPlayerInfo[i].rectHeight);
-            graphics.endFill();
+            const graphics = this.scene.add.graphics(0, 0);
+            graphics.fillStyle(0x8FBF00);
+            graphics.fillRect(gPlayerInfo[i].rectX, gPlayerInfo[i].rectY, gPlayerInfo[i].rectWidth, gPlayerInfo[i].rectHeight);
             graphics.visible = false;
             this.boxes[i] = graphics;
         }
