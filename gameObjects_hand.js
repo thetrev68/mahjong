@@ -1,4 +1,3 @@
-import {gGameLogic} from "./game.js";
 import {
     STATE, PLAYER, SUIT, SPRITE_WIDTH,
     SPRITE_SCALE, WINDOW_WIDTH, WINDOW_HEIGHT
@@ -10,7 +9,8 @@ import {
 // PRIVATE GLOBALS
 
 export class TileSet {
-    constructor(inputEnabled) {
+    constructor(scene, inputEnabled) {
+        this.scene = scene;
         this.tileArray = [];
         this.inputEnabled = inputEnabled;
         this.selectCount = 0;
@@ -293,8 +293,9 @@ export class TileSet {
 }
 
 export class Hand {
-    constructor(inputEnabled) {
-        this.hiddenTileSet = new TileSet(inputEnabled);
+    constructor(scene, inputEnabled) {
+        this.scene = scene;
+        this.hiddenTileSet = new TileSet(scene, inputEnabled);
         this.exposedTileSetArray = [];
         // When adding new variables, make sure to update dupHand()
     }
@@ -504,16 +505,16 @@ export class Hand {
         const tileSet = this.hiddenTileSet;
 
         if (tileSet.inputEnabled) {
-            tile.sprite.inputEnabled = true;
-            tile.sprite.events.onInputUp.add(
-                (sprite) => {
-                    if (tile.drag) {
-                        return;
-                    }
-                    let maxSelect = 3;
-                    let minSelect = 3;
+            tile.sprite.setInteractive();
 
-                    switch (gGameLogic.state) {
+            tile.sprite.on('pointerup', (pointer) => {
+                if (tile.drag) {
+                    return;
+                }
+                let maxSelect = 3;
+                let minSelect = 3;
+
+                switch (window.gGameLogic.state) {
                     case STATE.LOOP_CHOOSE_DISCARD:
                         maxSelect = 1;
                         minSelect = 1;
@@ -524,90 +525,82 @@ export class Hand {
                         minSelect = 3;
                         break;
                     case STATE.COURTESY:
-                        maxSelect = gGameLogic.table.player02CourtesyVote;
-                        minSelect = gGameLogic.table.player02CourtesyVote;
+                        maxSelect = window.gGameLogic.table.player02CourtesyVote;
+                        minSelect = window.gGameLogic.table.player02CourtesyVote;
                         break;
-
                     case STATE.LOOP_EXPOSE_TILES:
                         maxSelect = 4;
                         minSelect = 2;
                         break;
-
                     default:
                         maxSelect = 0;
                         minSelect = 0;
                         break;
+                }
+
+                if (maxSelect) {
+                    if (tile.selected) {
+                        tile.x = tile.origX;
+                        tile.y = tile.origY;
+                        tileSet.selectCount--;
+                        tile.selected = !tile.selected;
+                    } else if (tileSet.selectCount < maxSelect) {
+                        let bSelectOk = true;
+
+                        if (window.gGameLogic.state === STATE.LOOP_EXPOSE_TILES) {
+                            if (tile.suit !== SUIT.JOKER &&
+                                (tile.suit !== window.gGameLogic.discardTile.suit || tile.number !== window.gGameLogic.discardTile.number)) {
+                                bSelectOk = false;
+                                window.gGameLogic.displayErrorText(" Select same tile or joker to form pong/kong/quint ");
+                            }
+                        }
+
+                        if (window.gGameLogic.state === STATE.CHARLESTON1 || window.gGameLogic.state === STATE.CHARLESTON2 ||
+                            window.gGameLogic.state === STATE.COURTESY) {
+                            if (tile.suit === SUIT.JOKER) {
+                                bSelectOk = false;
+                                window.gGameLogic.displayErrorText(" Joker cannot be passed during Charleston ");
+                            }
+                        }
+
+                        if (bSelectOk) {
+                            tile.origX = tile.x;
+                            tile.origY = tile.y;
+                            tile.y -= 25;
+                            tileSet.selectCount++;
+                            tile.selected = !tile.selected;
+                        }
                     }
 
-                    if (maxSelect) {
-                        if (tile.selected) {
-                            tile.x = tile.origX;
-                            tile.y = tile.origY;
-                            tileSet.selectCount--;
-                            tile.selected = !tile.selected;
-                        } else if (tileSet.selectCount < maxSelect) {
-                            let bSelectOk = true;
-
-                            if (gGameLogic.state === STATE.LOOP_EXPOSE_TILES) {
-                                // Selected tile must be a match for discardTile (or a joker) to form a pong/kong/quint
-                                if (tile.suit !== SUIT.JOKER &&
-                                    (tile.suit !== gGameLogic.discardTile.suit || tile.number !== gGameLogic.discardTile.number)) {
-                                    bSelectOk = false;
-                                    gGameLogic.displayErrorText(" Select same tile or joker to form pong/kong/quint ");
-                                }
-                            }
-
-                            if (gGameLogic.state === STATE.CHARLESTON1 || gGameLogic.state === STATE.CHARLESTON2 ||
-                                gGameLogic.state === STATE.COURTESY) {
-                                if (tile.suit === SUIT.JOKER) {
-                                    bSelectOk = false;
-                                    gGameLogic.displayErrorText(" Joker cannot be passed during Charleston ");
-                                }
-                            }
-
-                            if (bSelectOk) {
-                                tile.origX = tile.x;
-                                tile.origY = tile.y;
-                                tile.y -= 25;
-                                tileSet.selectCount++;
-                                tile.selected = !tile.selected;
-                            }
-                        }
-
-                        if (tileSet.selectCount > maxSelect || tileSet.selectCount < minSelect) {
-                            window.document.getElementById("button1").disabled = true;
-                        } else {
-                            window.document.getElementById("button1").disabled = false;
-                        }
+                    if (tileSet.selectCount > maxSelect || tileSet.selectCount < minSelect) {
+                        window.document.getElementById("button1").disabled = true;
+                    } else {
+                        window.document.getElementById("button1").disabled = false;
                     }
                 }
-            );
+            });
 
             // Enable drag and drop
-            tile.sprite.input.enableDrag();
-            tile.sprite.input.dragDistanceThreshold  = 3;
-            tile.sprite.input.bringToTop = true;
-            tile.sprite.events.onDragStart.add((sprite, pointer, x, y) => {
+            this.scene.input.setDraggable(tile.sprite);
+            tile.sprite.on('dragstart', (pointer, dragX, dragY) => {
                 tile.drag = true;
                 this.resetSelection();
                 tile.origX = tile.x;
                 tile.origY = tile.y;
-            });      
-            tile.sprite.events.onDragUpdate.add((sprite, pointer, x, y, point, fromStart) => {
-                // Check for tile overlap with all hidden tiles
+            });
+            tile.sprite.on('drag', (pointer, dragX, dragY) => {
+                tile.sprite.x = dragX;
+                tile.sprite.y = dragY;
                 const overlappedTile = tileSet.checkOverlap(tile);
                 if (overlappedTile) {
                     tileSet.swapTiles(tile, overlappedTile);
-                } 
-            });                  
-            tile.sprite.events.onDragStop.add((sprite, pointer) => {
+                }
+            });
+            tile.sprite.on('dragend', (pointer, dragX, dragY, dropped) => {
                 tile.drag = false;
-
-                // Reset original tile position
                 tile.x = tile.origX;
                 tile.y = tile.origY;
             });
-
         }
 
         tileSet.insert(tile);
@@ -632,7 +625,7 @@ export class Hand {
         let uniqueTile = null;
 
         // Create new "exposed" TileSet
-        const tileSet = new TileSet(true);
+        const tileSet = new TileSet(this.scene, true);
 
         for (const tile of tileArray) {
             tileSet.insert(tile);
@@ -648,13 +641,12 @@ export class Hand {
         // To support swapping for exposed jokers, add tile button press handler for jokers only
         for (const tile of tileArray) {
             if (tile.suit === SUIT.JOKER) {
-                tile.sprite.inputEnabled = true;
-                tile.sprite.events.onInputUp.add(
-                    (sprite) => {
-                        let maxSelect = 1;
-                        let minSelect = 1;
+                tile.sprite.setInteractive();
+                tile.sprite.on('pointerup', (pointer) => {
+                    let maxSelect = 1;
+                    let minSelect = 1;
 
-                        switch (gGameLogic.state) {
+                    switch (window.gGameLogic.state) {
                         case STATE.LOOP_CHOOSE_DISCARD:
                             maxSelect = 1;
                             minSelect = 1;
@@ -663,84 +655,70 @@ export class Hand {
                             maxSelect = 0;
                             minSelect = 0;
                             break;
-                        }
+                    }
 
-                        if (maxSelect) {
-                            if (tile.selected) {
-                                tile.x = tile.origX;
-                                tile.y = tile.origY;
-                                tileSet.selectCount--;
-                                tile.selected = !tile.selected;
-                            } else if (tileSet.selectCount < maxSelect) {
-                                let bSelectOk = true;
+                    if (maxSelect) {
+                        if (tile.selected) {
+                            tile.x = tile.origX;
+                            tile.y = tile.origY;
+                            tileSet.selectCount--;
+                            tile.selected = !tile.selected;
+                        } else if (tileSet.selectCount < maxSelect) {
+                            let bSelectOk = true;
 
-                                // Allow selection of joker (in any player's exposed tiles), if
-                                // 1.  User has one hidden tile selected
-                                // 2.  User's selected tile matches the non-jokers in an exposed pong/kong/quint containing this joker
-                                //     Note that the exposed pong/kong/quint can be from player 0 - 3
-                                if (gGameLogic.table.players[PLAYER.BOTTOM].hand.getSelectionHiddenCount() !== 1) {
-                                    bSelectOk = false;
-                                    gGameLogic.displayErrorText(" To swap for an exposed joker, please select a hidden tile first ");
-                                } else if (this.getSelectionExposedCount() > 0) {
-                                    bSelectOk = false;
-                                    gGameLogic.displayErrorText(" Only one joker can be selected ");
-                                } else {
-                                    // One hidden tile selected - get tile
-                                    const hiddenTileArray = gGameLogic.table.players[PLAYER.BOTTOM].hand.getSelectionHidden();
-                                    const hiddenTile = hiddenTileArray[0];
+                            if (window.gGameLogic.table.players[PLAYER.BOTTOM].hand.getSelectionHiddenCount() !== 1) {
+                                bSelectOk = false;
+                                window.gGameLogic.displayErrorText(" To swap for an exposed joker, please select a hidden tile first ");
+                            } else if (this.getSelectionExposedCount() > 0) {
+                                bSelectOk = false;
+                                window.gGameLogic.displayErrorText(" Only one joker can be selected ");
+                            } else {
+                                const hiddenTileArray = window.gGameLogic.table.players[PLAYER.BOTTOM].hand.getSelectionHidden();
+                                const hiddenTile = hiddenTileArray[0];
 
-                                    if (uniqueTile) {
-                                        if (hiddenTile.suit !== uniqueTile.suit || hiddenTile.number !== uniqueTile.number) {
-                                            bSelectOk = false;
-                                            gGameLogic.displayErrorText(" To swap for an exposed joker, tile must match exposed pong/kong/quint ");
-                                        }
-                                    } else {
+                                if (uniqueTile) {
+                                    if (hiddenTile.suit !== uniqueTile.suit || hiddenTile.number !== uniqueTile.number) {
                                         bSelectOk = false;
+                                        window.gGameLogic.displayErrorText(" To swap for an exposed joker, tile must match exposed pong/kong/quint ");
                                     }
+                                } else {
+                                    bSelectOk = false;
                                 }
+                            }
 
-                                if (bSelectOk) {
-                                    tile.origX = tile.x;
-                                    tile.origY = tile.y;
+                            if (bSelectOk) {
+                                tile.origX = tile.x;
+                                tile.origY = tile.y;
 
-                                    switch (tile.angle) {
+                                switch (tile.angle) {
                                     case 270:
                                     case -90:
-                                        // Player 1  (right)
                                         tile.x -= 25;
                                         break;
                                     case 180:
                                     case -180:
-                                        // Player 2 (top)
                                         tile.y += 25;
                                         break;
                                     case 90:
                                     case -270:
-                                        // Player 3  (left)
                                         tile.x += 25;
                                         break;
-                                    case 0:
-                                    case 360:
-                                    case -360:
                                     default:
-                                        // Player 0 (bottom)
                                         tile.y -= 25;
                                         break;
-                                    }
-                                    tileSet.selectCount++;
-                                    tile.selected = !tile.selected;
                                 }
-                            }
-
-                            // Joker exchange button
-                            if (tileSet.selectCount > maxSelect || tileSet.selectCount < minSelect) {
-                                window.document.getElementById("button2").disabled = true;
-                            } else {
-                                window.document.getElementById("button2").disabled = false;
+                                tileSet.selectCount++;
+                                tile.selected = !tile.selected;
                             }
                         }
+
+                        if (tileSet.selectCount > maxSelect || tileSet.selectCount < minSelect) {
+                            window.document.getElementById("button2").disabled = true;
+                        } else {
+                            window.document.getElementById("button2").disabled = false;
+                        }
                     }
-                );
+                });
             }
         }
     }
