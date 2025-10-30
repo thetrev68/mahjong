@@ -73,7 +73,7 @@ export const SUIT = {
 
 export const VNUMBER = {
     // 0 - not used
-    // 1-9 reserved for normal numbers (CRACK, bam, dot)
+    // 1-9 reserved for normal numbers (crack, bam, dot)
     CONSECUTIVE1: 10,
     CONSECUTIVE2: 11,
     CONSECUTIVE3: 12,
