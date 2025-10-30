@@ -180,7 +180,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: var(--spacing-sm) var(--spacing-md);
-    width: min(640px, calc(100% - 3rem));
+    width: min(420px, calc(100% - 3rem));
     background: rgba(0, 0, 0, 0.35);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-soft);
@@ -261,7 +261,7 @@ input[type="checkbox"] {
     }
 
     #uicenterdiv {
-        width: min(540px, calc(100% - 2rem));
+        width: min(400px, calc(100% - 2rem));
     }
 }
 
@@ -280,7 +280,7 @@ input[type="checkbox"] {
     #uicenterdiv {
         position: static;
         transform: none;
-        width: min(640px, 100%);
+        width: min(420px, 100%);
         margin: var(--spacing-lg) auto;
     }
 
