@@ -65,8 +65,8 @@ class GameScene extends Phaser.Scene {
         const canvasBounds = canvas.getBoundingClientRect();
         const commandBarHeight = uicenterdiv.offsetHeight || 0;
         const left = canvasBounds.left + (canvasBounds.width / 2);
-        const dynamicPadding = Math.max(commandBarHeight + 48, canvasBounds.height * 0.28);
-        const top = canvasBounds.top + canvasBounds.height - commandBarHeight - dynamicPadding;
+        const bottomMargin = Math.max(96, commandBarHeight * 0.5);
+        const top = canvasBounds.top + canvasBounds.height - commandBarHeight - bottomMargin;
 
         const rootStyle = document.documentElement.style;
         rootStyle.setProperty('--command-bar-left', `${left}px`);
