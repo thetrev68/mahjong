@@ -127,8 +127,8 @@ export class Tile {
     }
 
     set scale(scale) {
-        this.sprite.scale.set(scale, scale);
-        this.spriteBack.scale.set(scale, scale);
+        this.sprite.setScale(scale);
+        this.spriteBack.setScale(scale);
     }
 
     animate(x, y, angle) {

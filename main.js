@@ -4,6 +4,7 @@ const config = {
     type: Phaser.AUTO,
     width: 800,
     height: 600,
+    backgroundColor: '#008000',
     scene: [GameScene],
     scale: {
         mode: Phaser.Scale.FIT,

@@ -33,9 +33,6 @@ class GameScene extends Phaser.Scene {
         // This is a temporary solution that mimics the old architecture.
         window.gGameLogic = gGameLogic;
 
-        // Background
-        this.cameras.main.setBackgroundColor("rgb(0, 128, 0)");
-
         // Init game logic
         gGameLogic.init();
 
