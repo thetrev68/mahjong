@@ -1,4 +1,4 @@
-import {debugPrint, debugTrace, gdebug} from "../game.js";
+import {debugPrint, debugTrace, gdebug} from "../utils.js";
 import {Tile} from "../gameObjects.js";
 import {Hand} from "../gameObjects_hand.js";
 import {SUIT, DRAGON, WIND, VNUMBER} from "../constants.js";

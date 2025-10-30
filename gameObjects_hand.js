@@ -9,8 +9,9 @@ import {
 // PRIVATE GLOBALS
 
 export class TileSet {
-    constructor(scene, inputEnabled) {
+    constructor(scene, gameLogic, inputEnabled) {
         this.scene = scene;
+        this.gameLogic = gameLogic;
         this.tileArray = [];
         this.inputEnabled = inputEnabled;
         this.selectCount = 0;
@@ -230,16 +231,8 @@ export class TileSet {
 
         if (this.inputEnabled) {
             tile.selected = false;
-            tile.sprite.events.onInputUp.removeAll();
-            tile.sprite.inputEnabled = false;
-
-            tile.drag = false;
-            if (tile.sprite.input) {
-                tile.sprite.input.disableDrag();
-            }
-            tile.sprite.events.onDragStart.removeAll();
-            tile.sprite.events.onDragUpdate.removeAll();
-            tile.sprite.events.onDragStop.removeAll();            
+            tile.sprite.removeAllListeners();
+            tile.sprite.disableInteractive();
         }
         const index = this.tileArray.indexOf(tile);
         if (index !== -1) {
@@ -259,7 +252,7 @@ export class TileSet {
             if (tile === tempTile) {
                 continue;
             }
-            let intersectRect = Phaser.Rectangle.intersection(tileBounds, tempTile.sprite.getBounds());
+            let intersectRect = Phaser.Geom.Rectangle.Intersection(tileBounds, tempTile.sprite.getBounds());
             let area = intersectRect.width * intersectRect.height;
 
             if (area && (area > maxarea) && ((area / tileArea) > 0.7)) {
@@ -293,9 +286,10 @@ export class TileSet {
 }
 
 export class Hand {
-    constructor(scene, inputEnabled) {
+    constructor(scene, gameLogic, inputEnabled) {
         this.scene = scene;
-        this.hiddenTileSet = new TileSet(scene, inputEnabled);
+        this.gameLogic = gameLogic;
+        this.hiddenTileSet = new TileSet(scene, gameLogic, inputEnabled);
         this.exposedTileSetArray = [];
         // When adding new variables, make sure to update dupHand()
     }
@@ -303,14 +297,14 @@ export class Hand {
     // Duplicate hand
     // - hiddenTileSet and exposedTileSetArray can then be freely manipulated
     dupHand() {
-        const newHand = new Hand(false);
+        const newHand = new Hand(this.scene, this.gameLogic, false);
 
         for (const tile of this.hiddenTileSet.tileArray) {
             newHand.hiddenTileSet.tileArray.push(tile);
         }
 
         for (const tileset of this.exposedTileSetArray) {
-            const newTileSet = new TileSet(false);
+            const newTileSet = new TileSet(this.scene, this.gameLogic, false);
             for (const tile of tileset.tileArray) {
                 newTileSet.insert(tile);
             }
@@ -514,7 +508,7 @@ export class Hand {
                 let maxSelect = 3;
                 let minSelect = 3;
 
-                switch (window.gGameLogic.state) {
+                switch (this.gameLogic.state) {
                     case STATE.LOOP_CHOOSE_DISCARD:
                         maxSelect = 1;
                         minSelect = 1;
@@ -525,8 +519,8 @@ export class Hand {
                         minSelect = 3;
                         break;
                     case STATE.COURTESY:
-                        maxSelect = window.gGameLogic.table.player02CourtesyVote;
-                        minSelect = window.gGameLogic.table.player02CourtesyVote;
+                        maxSelect = this.gameLogic.table.player02CourtesyVote;
+                        minSelect = this.gameLogic.table.player02CourtesyVote;
                         break;
                     case STATE.LOOP_EXPOSE_TILES:
                         maxSelect = 4;
@@ -547,19 +541,19 @@ export class Hand {
                     } else if (tileSet.selectCount < maxSelect) {
                         let bSelectOk = true;
 
-                        if (window.gGameLogic.state === STATE.LOOP_EXPOSE_TILES) {
+                        if (this.gameLogic.state === STATE.LOOP_EXPOSE_TILES) {
                             if (tile.suit !== SUIT.JOKER &&
-                                (tile.suit !== window.gGameLogic.discardTile.suit || tile.number !== window.gGameLogic.discardTile.number)) {
+                                (tile.suit !== this.gameLogic.discardTile.suit || tile.number !== this.gameLogic.discardTile.number)) {
                                 bSelectOk = false;
-                                window.gGameLogic.displayErrorText(" Select same tile or joker to form pong/kong/quint ");
+                                this.gameLogic.displayErrorText(" Select same tile or joker to form pong/kong/quint ");
                             }
                         }
 
-                        if (window.gGameLogic.state === STATE.CHARLESTON1 || window.gGameLogic.state === STATE.CHARLESTON2 ||
-                            window.gGameLogic.state === STATE.COURTESY) {
+                        if (this.gameLogic.state === STATE.CHARLESTON1 || this.gameLogic.state === STATE.CHARLESTON2 ||
+                            this.gameLogic.state === STATE.COURTESY) {
                             if (tile.suit === SUIT.JOKER) {
                                 bSelectOk = false;
-                                window.gGameLogic.displayErrorText(" Joker cannot be passed during Charleston ");
+                                this.gameLogic.displayErrorText(" Joker cannot be passed during Charleston ");
                             }
                         }
 
@@ -625,7 +619,7 @@ export class Hand {
         let uniqueTile = null;
 
         // Create new "exposed" TileSet
-        const tileSet = new TileSet(this.scene, true);
+        const tileSet = new TileSet(this.scene, this.gameLogic, true);
 
         for (const tile of tileArray) {
             tileSet.insert(tile);
@@ -646,7 +640,7 @@ export class Hand {
                     let maxSelect = 1;
                     let minSelect = 1;
 
-                    switch (window.gGameLogic.state) {
+                    switch (this.gameLogic.state) {
                         case STATE.LOOP_CHOOSE_DISCARD:
                             maxSelect = 1;
                             minSelect = 1;
@@ -666,20 +660,20 @@ export class Hand {
                         } else if (tileSet.selectCount < maxSelect) {
                             let bSelectOk = true;
 
-                            if (window.gGameLogic.table.players[PLAYER.BOTTOM].hand.getSelectionHiddenCount() !== 1) {
+                            if (this.gameLogic.table.players[PLAYER.BOTTOM].hand.getSelectionHiddenCount() !== 1) {
                                 bSelectOk = false;
-                                window.gGameLogic.displayErrorText(" To swap for an exposed joker, please select a hidden tile first ");
+                                this.gameLogic.displayErrorText(" To swap for an exposed joker, please select a hidden tile first ");
                             } else if (this.getSelectionExposedCount() > 0) {
                                 bSelectOk = false;
-                                window.gGameLogic.displayErrorText(" Only one joker can be selected ");
+                                this.gameLogic.displayErrorText(" Only one joker can be selected ");
                             } else {
-                                const hiddenTileArray = window.gGameLogic.table.players[PLAYER.BOTTOM].hand.getSelectionHidden();
+                                const hiddenTileArray = this.gameLogic.table.players[PLAYER.BOTTOM].hand.getSelectionHidden();
                                 const hiddenTile = hiddenTileArray[0];
 
                                 if (uniqueTile) {
                                     if (hiddenTile.suit !== uniqueTile.suit || hiddenTile.number !== uniqueTile.number) {
                                         bSelectOk = false;
-                                        window.gGameLogic.displayErrorText(" To swap for an exposed joker, tile must match exposed pong/kong/quint ");
+                                        this.gameLogic.displayErrorText(" To swap for an exposed joker, tile must match exposed pong/kong/quint ");
                                     }
                                 } else {
                                     bSelectOk = false;
