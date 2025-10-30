@@ -149,12 +149,11 @@ a:focus-visible {
     border-radius: var(--radius-sm);
     background: var(--color-surface-subtle);
     color: var(--color-text-primary);
-    padding: var(--spacing-sm);
+    padding: calc(var(--spacing-xs) * 0.75) var(--spacing-sm);
     line-height: var(--line-height-tight);
-    font-size: var(--font-size-sm);
+    font-size: 0.86rem;
     font-family: var(--font-mono);
     box-shadow: var(--shadow-inset);
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .training-form {
@@ -216,6 +215,8 @@ a:focus-visible {
 .message-log__textarea {
     min-height: 19rem;
     letter-spacing: 0.03em;
+    font-size: 0.82rem;
+    line-height: 1.4;
 }
 
 .message-log__textarea.message-log__textarea--info {
@@ -288,6 +289,7 @@ a:focus-visible {
     cursor: grab;
     border: 1px solid rgba(255, 255, 255, 0.16);
     z-index: 10;
+    font-size: 0.94rem;
 }
 
 #uicenterdiv.command-bar--dragging {
@@ -394,7 +396,8 @@ select {
     }
 
     #uicenterdiv {
-        width: min(340px, calc(100% - 2rem));
+        width: min(320px, calc(100% - 2rem));
+        font-size: 0.9rem;
     }
 
     .training-form__grid {
@@ -417,8 +420,9 @@ select {
     #uicenterdiv {
         position: static;
         transform: none;
-        width: min(360px, 100%);
+        width: min(300px, 100%);
         margin: var(--spacing-lg) auto;
+        font-size: 0.88rem;
     }
 
     :root {
@@ -434,6 +438,17 @@ select {
         grid-template-columns: 1fr;
     }
 
+}
+
+@media (max-width: 720px) {
+    #uicenterdiv {
+        width: 100%;
+        font-size: 0.85rem;
+    }
+
+    #buttondiv {
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
