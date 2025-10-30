@@ -233,7 +233,7 @@ export class Card {
             return false;
         }
 
-        // Number of suits (CRACK,dot,bam,flower,dragon, wind, joker) must be >= number of vsuits
+        // Number of suits (crack,dot,bam,flower,dragon,wind,joker) must be >= number of vsuits
         if (info.suits.length < validHand.vsuitCount) {
             return false;
         }
