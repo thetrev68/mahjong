@@ -333,6 +333,12 @@ textarea:focus-visible {
     outline-offset: 2px;
 }
 
+select:focus-visible,
+input[type="checkbox"]:focus-visible {
+    outline: 2px solid rgba(255, 209, 102, 0.36);
+    outline-offset: 2px;
+}
+
 label,
 input,
 select {
@@ -414,7 +420,7 @@ select {
         border-left: none;
         border-top: 1px solid rgba(255, 255, 255, 0.08);
         flex-direction: column;
-        gap: var(--spacing-lg);
+        gap: calc(var(--spacing-sm) * 1.1);
     }
 
     #uicenterdiv {
@@ -449,11 +455,27 @@ select {
     #buttondiv {
         grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     }
+
+    .message-log__textarea {
+        min-height: 16rem;
+    }
+}
+
+@media (max-width: 540px) {
+    #uicenterdiv {
+        font-size: 0.83rem;
+    }
+
+    .sidebar__section--log,
+    .sidebar__section--training {
+        gap: var(--spacing-xs);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .button,
-    #uicenterdiv {
+    #uicenterdiv,
+    .sidebar__section {
         transition: none;
     }
 

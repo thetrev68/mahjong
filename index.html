@@ -12,7 +12,8 @@
     <div id="parentdiv">
         <div id="gamediv"></div>
 
-        <div id="uicenterdiv">
+        <div id="uicenterdiv" role="region" aria-label="Action commands" aria-describedby="commandBarHint">
+            <p class="sr-only" id="commandBarHint">To reposition the action bar, drag or touch and move it within the play area.</p>
             <label class="sr-only" for="info">Action status</label>
             <textarea id="info" readonly aria-live="polite" rows="2"></textarea>
             <div id="buttondiv">
@@ -26,7 +27,7 @@
         <aside id="uidiv">
             <section id="messagesdiv" class="sidebar__section sidebar__section--log">
                 <label class="sidebar__heading" for="messages">Game Log</label>
-                <textarea id="messages" class="sidebar__textarea message-log__textarea" readonly aria-live="polite"></textarea>
+                <textarea id="messages" class="sidebar__textarea message-log__textarea" readonly aria-live="polite" role="log" aria-label="Game log output"></textarea>
             </section>
 
             <section id="trainingdiv" class="sidebar__section sidebar__section--training">
