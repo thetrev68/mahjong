@@ -94,20 +94,10 @@ class GameScene extends Phaser.Scene {
     }
 
     getDefaultCommandBarPosition(bar, canvasBounds, boundsRect) {
-        const dock = document.getElementById('commandDock');
-        if (dock) {
-            const dockRect = dock.getBoundingClientRect();
-            if (dockRect.width && dockRect.height) {
-                const targetLeft = dockRect.left + (dockRect.width / 2);
-                const targetTop = dockRect.top + Math.max((dockRect.height - (bar.offsetHeight || 0)) / 2, 0);
-                return this.getClampedCommandBarPosition(targetLeft, targetTop, bar, boundsRect);
-            }
-        }
-
         const barWidth = bar.offsetWidth || 0;
         const barHeight = bar.offsetHeight || 0;
-        const fallbackLeft = canvasBounds.right - (barWidth / 2) - 24;
-        const fallbackTop = canvasBounds.bottom - barHeight - 120;
+        const fallbackLeft = canvasBounds.right - (barWidth / 2) - 36;
+        const fallbackTop = canvasBounds.bottom - barHeight - 110;
         return this.getClampedCommandBarPosition(fallbackLeft, fallbackTop, bar, boundsRect);
     }
 

@@ -192,15 +192,6 @@ a:focus-visible {
     visibility: hidden;
 }
 
-#commandDock {
-    height: 160px;
-    margin-top: var(--spacing-lg);
-    border-radius: var(--radius-md);
-    border: 0;
-    background: transparent;
-    pointer-events: none;
-}
-
 .button {
     appearance: none;
     font-family: inherit;
@@ -251,6 +242,7 @@ a:focus-visible {
     backdrop-filter: blur(8px);
     cursor: grab;
     border: 1px solid rgba(255, 255, 255, 0.16);
+    z-index: 10;
 }
 
 #uicenterdiv.command-bar--dragging {
@@ -389,9 +381,6 @@ select {
         height: 14rem;
     }
 
-    #commandDock {
-        display: none;
-    }
 }
 
 @media (prefers-reduced-motion: reduce) {
