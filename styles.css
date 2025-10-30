@@ -1,24 +1,40 @@
 :root {
-    --color-table-base: #0a6133;
-    --color-table-dark: #03321d;
-    --color-surface: rgba(10, 27, 20, 0.86);
-    --color-panel: rgba(7, 40, 24, 0.92);
-    --color-text-primary: #f4f7f5;
-    --color-text-secondary: rgba(244, 247, 245, 0.72);
+    --color-table-base: #0c6d3a;
+    --color-table-dark: #044328;
+    --color-table-highlight: #178c4e;
+    --color-panel: rgba(5, 28, 18, 0.9);
+    --color-panel-soft: rgba(15, 54, 35, 0.65);
+    --color-surface-elevated: rgba(4, 24, 14, 0.88);
+    --color-surface-subtle: rgba(11, 37, 24, 0.55);
+    --color-text-primary: #f5fbf7;
+    --color-text-secondary: rgba(237, 244, 239, 0.72);
+    --color-text-muted: rgba(213, 231, 220, 0.56);
+    --color-outline: rgba(255, 255, 255, 0.22);
+    --color-outline-strong: rgba(255, 255, 255, 0.45);
     --color-accent: #ffd166;
-    --color-accent-dark: #e8ad32;
-    --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.32);
-    --shadow-panel: 0 10px 24px rgba(0, 0, 0, 0.4);
-    --radius-lg: 16px;
-    --radius-md: 12px;
-    --radius-sm: 8px;
+    --color-accent-dark: #e9a932;
+    --color-accent-contrast: #1f1400;
+    --shadow-soft: 0 20px 45px rgba(0, 0, 0, 0.32);
+    --shadow-panel: 0 14px 32px rgba(0, 0, 0, 0.38);
+    --shadow-inset: inset 0 12px 18px rgba(0, 0, 0, 0.34);
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
     --spacing-xs: 0.35rem;
-    --spacing-sm: 0.6rem;
+    --spacing-sm: 0.65rem;
     --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
+    --spacing-lg: 1.6rem;
+    --spacing-xl: 2.25rem;
     --font-stack: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "Consolas", "SFMono-Regular", "Menlo", monospace;
+    --font-size-base: 16px;
+    --font-size-sm: 0.9rem;
+    --font-size-xs: 0.78rem;
+    --line-height-base: 1.6;
+    --line-height-tight: 1.3;
     --command-bar-left: 50%;
     --command-bar-top: calc(100vh - 7.5rem);
+    --gradient-table: radial-gradient(circle at 35% 18%, var(--color-table-highlight) 0%, var(--color-table-base) 45%, var(--color-table-dark) 98%);
 }
 
 *,
@@ -32,14 +48,47 @@ body {
     height: 100%;
     margin: 0;
     font-family: var(--font-stack);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
     color: var(--color-text-primary);
-    background: radial-gradient(circle at 35% 20%, #0c7c45 0%, var(--color-table-base) 45%, var(--color-table-dark) 95%);
+    background: var(--gradient-table);
 }
 
 body {
     display: flex;
     flex-direction: column;
     min-height: 100%;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(130deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0) 40%);
+    pointer-events: none;
+}
+
+h1, h2, h3 {
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+p {
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--spacing-sm);
+}
+
+a {
+    color: var(--color-accent);
+    text-decoration: none;
+}
+
+a:hover,
+a:focus-visible {
+    text-decoration: underline;
 }
 
 #parentdiv {
@@ -60,23 +109,25 @@ body {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
-    background: var(--color-panel);
-    padding: calc(var(--spacing-lg) + 0.25rem) var(--spacing-lg);
+    background: linear-gradient(180deg, rgba(6, 36, 21, 0.92) 0%, rgba(4, 22, 13, 0.94) 55%, rgba(3, 18, 12, 0.97) 100%);
+    padding: calc(var(--spacing-lg) + 0.35rem) var(--spacing-lg);
     border-left: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(5px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(6px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), var(--shadow-panel);
 }
 
 .sidebar__section {
-    background: rgba(0, 0, 0, 0.24);
+    background: var(--color-surface-elevated);
     border-radius: var(--radius-md);
     padding: var(--spacing-md);
-    box-shadow: var(--shadow-panel);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(4px);
 }
 
 .sidebar__heading {
     margin: 0 0 var(--spacing-sm);
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--color-text-secondary);
@@ -88,13 +139,14 @@ body {
     resize: none;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-sm);
-    background: rgba(6, 30, 20, 0.8);
+    background: var(--color-surface-subtle);
     color: var(--color-text-primary);
     padding: var(--spacing-sm);
-    line-height: 1.35;
-    font-size: 0.92rem;
-    font-family: "Consolas", "SFMono-Regular", "Menlo", monospace;
-    box-shadow: inset 0 8px 14px rgba(0, 0, 0, 0.25);
+    line-height: var(--line-height-tight);
+    font-size: var(--font-size-sm);
+    font-family: var(--font-mono);
+    box-shadow: var(--shadow-inset);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .training-form {
@@ -115,6 +167,7 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-sm);
+    padding: var(--spacing-xs) 0;
 }
 
 .training-form__row select,
@@ -127,8 +180,8 @@ body {
 }
 
 .training-form__note {
-    font-size: 0.8rem;
-    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
 }
 
 #controldiv {
@@ -143,23 +196,24 @@ body {
     font-family: inherit;
     font-size: 0.95rem;
     font-weight: 600;
-    color: #081d14;
+    color: var(--color-accent-contrast);
     background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
     border: none;
     border-radius: var(--radius-sm);
     padding: 0.7rem 1.1rem;
     cursor: pointer;
-    transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
-    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.25);
+    transition: transform 120ms ease, box-shadow 120ms ease, filter 160ms ease;
+    box-shadow: 0 14px 26px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .button:hover {
     transform: translateY(-1px);
-    box-shadow: 0 14px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 18px 30px rgba(0, 0, 0, 0.35);
+    filter: brightness(1.02);
 }
 
 .button:focus-visible {
-    outline: 3px solid rgba(255, 209, 102, 0.6);
+    outline: 3px solid rgba(255, 215, 125, 0.7);
     outline-offset: 2px;
 }
 
@@ -181,11 +235,12 @@ body {
     justify-content: center;
     padding: var(--spacing-sm) var(--spacing-md);
     width: min(360px, calc(100% - 3rem));
-    background: rgba(0, 0, 0, 0.35);
+    background: linear-gradient(175deg, rgba(5, 37, 22, 0.76) 0%, rgba(4, 24, 14, 0.96) 65%);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-soft);
     backdrop-filter: blur(8px);
     cursor: grab;
+    border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 #uicenterdiv.command-bar--dragging {
@@ -197,16 +252,17 @@ body {
     min-height: 3.25rem;
     padding: 0.55rem 0.75rem;
     border-radius: var(--radius-sm);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(6, 30, 20, 0.75);
+    border: 1px solid var(--color-outline);
+    background: rgba(6, 30, 20, 0.78);
     color: var(--color-text-primary);
     resize: none;
     font-size: 0.95rem;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.045em;
     text-transform: uppercase;
     visibility: hidden;
     line-height: 1.25;
     overflow-y: auto;
+    box-shadow: var(--shadow-inset);
 }
 
 #buttondiv {
@@ -220,17 +276,18 @@ body {
 textarea {
     border: none;
     outline: none;
+    background-clip: padding-box;
 }
 
 textarea:focus-visible {
-    outline: 3px solid rgba(255, 209, 102, 0.5);
+    outline: 2px solid rgba(255, 209, 102, 0.36);
     outline-offset: 2px;
 }
 
 label,
 input,
 select {
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
     color: inherit;
 }
 
@@ -241,6 +298,28 @@ input[type="checkbox"] {
     border: 1px solid rgba(255, 255, 255, 0.35);
     background: rgba(0, 0, 0, 0.2);
     accent-color: var(--color-accent);
+}
+
+select {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--color-outline);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.65rem;
+    color: var(--color-text-primary);
+    box-shadow: inset 0 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+#controldiv .button,
+#buttondiv .button {
+    letter-spacing: 0.05em;
+}
+
+#controldiv .button {
+    background: linear-gradient(140deg, rgba(255, 212, 112, 0.92), rgba(242, 167, 48, 0.95));
+}
+
+#controldiv .button:hover {
+    filter: brightness(1.05);
 }
 
 #trainfieldset1:disabled,
