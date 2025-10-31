@@ -5,7 +5,7 @@ const config = {
     type: Phaser.AUTO,
     width: WINDOW_WIDTH,
     height: WINDOW_HEIGHT,
-    backgroundColor: '#006400',
+    transparent: true,
     parent: 'gamediv',
     scene: [GameScene],
     scale: {

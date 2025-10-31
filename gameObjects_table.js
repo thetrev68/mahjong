@@ -86,8 +86,9 @@ export class Table {
 
         for (let i = 0; i < 4; i++) {
             const graphics = this.scene.add.graphics(0, 0);
-            graphics.fillStyle(0x8FBF00);
-            graphics.fillRect(gPlayerInfo[i].rectX, gPlayerInfo[i].rectY, gPlayerInfo[i].rectWidth, gPlayerInfo[i].rectHeight);
+            // Remove light green fill to match background
+            // graphics.fillStyle(0x8FBF00);
+            // graphics.fillRect(gPlayerInfo[i].rectX, gPlayerInfo[i].rectY, gPlayerInfo[i].rectWidth, gPlayerInfo[i].rectHeight);
             this.boxes[i] = graphics;
         }
 

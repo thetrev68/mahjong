@@ -34,7 +34,7 @@
     --line-height-tight: 1.3;
     --command-bar-left: 50%;
     --command-bar-top: calc(100vh - 7.5rem);
-    --gradient-table: radial-gradient(circle at 35% 18%, var(--color-table-highlight) 0%, var(--color-table-base) 45%, var(--color-table-dark) 98%);
+    --gradient-table: radial-gradient(circle at 35% 18%, var(--color-table-highlight) 0%, var(--color-table-base) 45%, var(--color-table-dark) 98%), radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.15) 0%, transparent 60%), radial-gradient(circle at 20% 60%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.08) 0%, transparent 45%);
 }
 
 *,
@@ -103,6 +103,7 @@ a:focus-visible {
 #gamediv {
     position: relative;
     min-height: 0;
+    background: var(--gradient-table);
 }
 
 #uidiv {
