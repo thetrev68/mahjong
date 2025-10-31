@@ -97,12 +97,20 @@ export class Tile {
         this.spriteBack.visible = false;
         this.spriteBack.setOrigin(0.5, 0.5);
 
-        // Create rounded corner mask (smaller to prevent overlap)
+        // Create rounded corner mask with proper scaling
         const maskGraphics = this.scene.add.graphics();
         maskGraphics.fillStyle(0xffffff);
-        const maskSizeW = SPRITE_WIDTH - TILE_GAP;
-        const maskSizeH = SPRITE_HEIGHT - TILE_GAP;
-        maskGraphics.fillRoundedRect(-maskSizeW/2, -maskSizeH/2, maskSizeW, maskSizeH, 6);
+        let maskSizeW = SPRITE_WIDTH;
+        let maskSizeH = SPRITE_HEIGHT;
+        let cornerRadius = 6;
+
+        // Reduce mask size for scaled tiles to prevent white overlap
+        if (this.sprite.scaleX < 1.0 || this.sprite.scaleY < 1.0) {
+            maskSizeW = SPRITE_WIDTH - TILE_GAP;
+            maskSizeH = SPRITE_HEIGHT - TILE_GAP;
+        }
+
+        maskGraphics.fillRoundedRect(-maskSizeW/2, -maskSizeH/2, maskSizeW, maskSizeH, cornerRadius);
         const mask = maskGraphics.createGeometryMask();
         this.sprite.setMask(mask);
         this.spriteBack.setMask(mask);
@@ -140,11 +148,21 @@ export class Tile {
     set angle(angle) {
         this.sprite.angle = angle;
         this.spriteBack.angle = angle;
+        
+        // Rotate mask geometry to match tile rotation
+        if (this.mask && this.mask.geometryMask) {
+            this.mask.geometryMask.angle = angle;
+        }
     }
 
     set scale(scale) {
         this.sprite.setScale(scale);
         this.spriteBack.setScale(scale);
+
+        // Update mask for scaled tiles - scale the mask geometry too
+        if (this.mask && this.mask.geometryMask) {
+            this.mask.geometryMask.setScale(scale);
+        }
     }
 
     animate(x, y, angle) {
@@ -156,8 +174,10 @@ export class Tile {
             this.tween.stop();
         }
 
-        this.sprite.depth = 1;
-        this.spriteBack.depth = 1;
+        // Save current depth to restore after animation
+        const savedDepth = this.sprite.depth;
+        this.sprite.depth = Math.max(1, savedDepth);
+        this.spriteBack.depth = Math.max(1, savedDepth);
 
         let tweenConfig = {
             targets: this.sprite,
@@ -169,9 +189,10 @@ export class Tile {
                 this.spriteBack.x = this.sprite.x;
                 this.spriteBack.y = this.sprite.y;
                 this.spriteBack.angle = this.sprite.angle;
-                if (this.mask) {
+                if (this.mask && this.mask.geometryMask) {
                     this.mask.geometryMask.x = this.sprite.x;
                     this.mask.geometryMask.y = this.sprite.y;
+                    this.mask.geometryMask.angle = this.sprite.angle;
                 }
             },
             onComplete: () => {
@@ -181,12 +202,13 @@ export class Tile {
                 this.spriteBack.x = x;
                 this.spriteBack.y = y;
                 this.spriteBack.angle = angle;
-                if (this.mask) {
+                if (this.mask && this.mask.geometryMask) {
                     this.mask.geometryMask.x = x;
                     this.mask.geometryMask.y = y;
+                    this.mask.geometryMask.angle = angle;
                 }
-                this.sprite.depth = 0;
-                this.spriteBack.depth = 0;
+                this.sprite.depth = savedDepth;
+                this.spriteBack.depth = savedDepth;
                 this.tween = null;
             }
         };
@@ -357,6 +379,26 @@ export class Wall {
         }
         return { offsetX: 200, offsetY };
     }
+
+    showWallBack() {
+        const WALL_SCALE = 0.6;
+
+        // Calculate positions for all wall tiles (face down)
+        let offsetX = 200;
+        let offsetY = 200;
+        for (const tile of this.tileArray) {
+            tile.animate(offsetX, offsetY, 0);
+            tile.scale = WALL_SCALE; // This will update the mask
+            tile.showTile(true, false); // Show face down
+
+            offsetX += SPRITE_WIDTH * WALL_SCALE + TILE_GAP;
+
+            if (offsetX > 800) {
+                offsetX = 200;
+                offsetY += SPRITE_HEIGHT * WALL_SCALE + TILE_GAP;
+            }
+        }
+    }
 }
 
 export class Discards {
@@ -375,6 +417,8 @@ export class Discards {
             //tile.x = offsetX;
             //tile.y = offsetY;
             //tile.angle = 0;
+            tile.sprite.setDepth(0);
+            tile.spriteBack.setDepth(0);
             tile.animate(offsetX, offsetY, 0);
             tile.scale = DISCARD_SCALE;
             tile.showTile(true, true);

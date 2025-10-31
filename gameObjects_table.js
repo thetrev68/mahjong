@@ -179,7 +179,7 @@ export class Table {
             this.players[i].showHand();
         }
 
-        this.wall.showWall();
+        this.wall.showWallBack();
     }
 
     // Insert pass tile arrays into players hands.

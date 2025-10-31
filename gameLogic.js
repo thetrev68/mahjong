@@ -298,13 +298,28 @@ export class GameLogic {
 
             // CLAIM DISCARD? (for exposure/mahjong).            
 
-            // Show tile
+            // Show tile - position it above the discard pile to avoid overlap
             //discardTile.x = 350;
             //discardTile.y = 475;
             //discardTile.angle = 0;
-            discardTile.animate(350, 475, 0);
+            
+            // Add highlight background first using a rectangle sprite
+            // Match the golden color of the Yes/No buttons (#ffd166 / 0xffd166)
+            const highlightRect = this.scene.add.rectangle(350, 420, 70, 90, 0xffd166, 0.7);
+            highlightRect.setStrokeStyle(3, 0xffd166, 0.9);
+            highlightRect.setDepth(49); // Below the tile
+            discardTile.highlightGraphics = highlightRect;
+            
+            // Animate and show tile
             discardTile.scale = 1.0;
             discardTile.showTile(true, true);
+            
+            // Store desired depth before animation
+            discardTile.sprite.depth = 50;
+            discardTile.spriteBack.depth = 50;
+            
+            // Now animate - this will preserve the depth we just set
+            discardTile.animate(350, 420, 0);
 
             // Ask all players if the discard is wanted  (currPlayer == i automatically returns discard)
             const claimArray = [];
@@ -315,6 +330,13 @@ export class GameLogic {
             // Process claim array for each player
             // Returns {playerOption, winningPlayer}
             const claimResult = this.table.processClaimArray(this.currPlayer, claimArray, discardTile);
+
+            // Clear highlight effect after claim is processed
+            if (discardTile.highlightGraphics) {
+                discardTile.highlightGraphics.destroy();
+                discardTile.highlightGraphics = null;
+            }
+            discardTile.sprite.depth = 0;
 
             if (claimResult.playerOption === PLAYER_OPTION.MAHJONG) {
                 this.gameResult.mahjong = true;

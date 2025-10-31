@@ -31,10 +31,13 @@ class GameScene extends Phaser.Scene {
 
         // Create sprites etc
         this.gGameLogic.wallText = this.add.text(190, 160, "", {
-            font: "14px Arial",
+            fontSize: '16px',
+            fontFamily: 'Arial',
             fill: "#ffffff",
-            align: "left"
+            align: "left",
+            resolution: 2
         });
+        this.gGameLogic.wallText.setOrigin(0, 0);
         this.gGameLogic.wallText.visible = false;
 
         this.gGameLogic.errorText = this.add.text(400, 400, "", {
