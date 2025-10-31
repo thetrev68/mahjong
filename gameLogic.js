@@ -274,6 +274,10 @@ export class GameLogic {
             const discardInfo = await this.chooseDiscard();
             this.table.players[this.currPlayer].showHand();
 
+            if (this.currPlayer !== PLAYER.BOTTOM) {
+                await this.sleep(500);
+            }
+
             if (discardInfo.playerOption === PLAYER_OPTION.MAHJONG) {
                 this.gameResult.mahjong = true;
                 this.gameResult.winner = this.currPlayer;
