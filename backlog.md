@@ -56,6 +56,7 @@ This document provides a high-level analysis of potential new features for the A
 *   **Effort:** Medium
 *   **Time:** 10-15 hours (includes sound asset sourcing/creation)
 *   **Benefit:** Medium. Enhances the game's atmosphere and provides auditory feedback.
+*   **Source:** www.zapsplat.com - Multimedia button click 16 (tile click), Multimedia button click 21 (discard), Golf club set down or drop on grass 3 (error/invalid move), Applause approx 8 people (win celebration), Game music - soft warm synth arpeggios calming soothing game (? maybe. ambient music)
 
 ### 7. Colorize Hints Panel
 
