@@ -90,7 +90,7 @@ This document provides a high-level analysis of potential new features for the A
 *   **Time:** 6-10 hours
 *   **Benefit:** Medium. Provides a clear visual cue for important game events.
 
-### 11. Fix Stripe Alignment
+### 11. Fix Stripe Alignment [DONE]
 
 *   **Description:** Correct the alignment of the "stripe thing" on the game canvas so that it aligns with all player hands.
 *   **Difficulty:** Low
@@ -98,7 +98,7 @@ This document provides a high-level analysis of potential new features for the A
 *   **Time:** 2-4 hours
 *   **Benefit:** Medium. A minor graphical fix that improves the game's overall visual polish.
 
-### 12. 3D Tile Effect
+### 12. 3D Tile Effect [DONE] - with compromise. Added rounded corners and spacing but kept 2D design.
 
 *   **Description:** Add a 3D effect to the tiles with rounded corners and gradients to give them a more modern look.
 *   **Difficulty:** High
