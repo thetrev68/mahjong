@@ -63,13 +63,55 @@
 
             <div id="controldiv">
                 <button id="start" class="button">Start Game</button>
+                <button id="settings" class="button">Settings</button>
                 <button id="sort1" class="button">Sort by suit</button>
                 <button id="sort2" class="button">Sort by rank</button>
                 <button id="hint" class="button">Hint</button>
             </div>
         </aside>
+
+        <!-- Settings Overlay -->
+        <div id="settings-overlay" class="settings-overlay" style="display: none;">
+            <div class="settings-container">
+                <header class="settings-header">
+                    <button id="settings-back" class="settings-back-button">
+                        <span class="sr-only">Back to Game</span>
+                        ← Back
+                    </button>
+                    <h1 class="settings-title">Settings</h1>
+                </header>
+
+                <main class="settings-content">
+                    <section class="settings-section">
+                        <h2 class="settings-section-title">Game Settings</h2>
+                        <p class="settings-placeholder">AI difficulty scaling and game preferences will be added here.</p>
+                    </section>
+
+                    <section class="settings-section">
+                        <h2 class="settings-section-title">Training Mode</h2>
+                        <p class="settings-placeholder">Training options will be moved here from the sidebar.</p>
+                    </section>
+
+                    <section class="settings-section">
+                        <h2 class="settings-section-title">Year Selection</h2>
+                        <p class="settings-placeholder">Card data year selection workflow will be implemented here.</p>
+                    </section>
+
+                    <section class="settings-section">
+                        <h2 class="settings-section-title">Audio Controls</h2>
+                        <p class="settings-placeholder">Sound effects and music controls will be added here.</p>
+                    </section>
+
+                    <section class="settings-section">
+                        <h2 class="settings-section-title">House Rules</h2>
+                        <p class="settings-placeholder">Custom house rules (like using blanks) will be configured here.</p>
+                    </section>
+                </main>
+            </div>
+        </div>
     </div>
 
+    <script src="settings.js" type="module"></script>
     <script src="main.js" type="module"></script>
     <script nomodule>alert("Browser does not support ES6 modules. Please enable ES6 module support or alternatively use Google Chrome.");</script>
 </body>

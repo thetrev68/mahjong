@@ -824,7 +824,7 @@ export class GameLogic {
             });
     }
         
-    updateUI () {        
+    updateUI () {
         const button1 = window.document.getElementById("button1");
         const button2 = window.document.getElementById("button2");
         const button3 = window.document.getElementById("button3");
@@ -833,6 +833,7 @@ export class GameLogic {
         const sort1 = window.document.getElementById("sort1");
         const sort2 = window.document.getElementById("sort2");
         const hint = window.document.getElementById("hint");
+        const settingsButton = window.document.getElementById("settings");
         const handSelect = window.document.getElementById("handSelect");
         const numTileSelect = window.document.getElementById("numTileSelect");
         const skipCharlestonCheckbox = window.document.getElementById("skipCharlestonCheckbox");
@@ -841,12 +842,13 @@ export class GameLogic {
             case STATE.INIT:
 
             printMessage("American Mahjong v1.00\n");
-            printMessage("Using " + this.card.year + " Mahjong card\n\n");            
+            printMessage("Using " + this.card.year + " Mahjong card\n\n");
             printMessage("Press Start Game button\n");
             sort1.style.display = "none";
             sort2.style.display = "none";
             hint.style.display = "none";
-            window.document.getElementById("controldiv").style.visibility = "visible";     
+            settingsButton.style.display = "";
+            window.document.getElementById("controldiv").style.visibility = "visible";
 
             // Populate hand select
             for (const group of this.card.validHandGroups) {
@@ -884,16 +886,17 @@ export class GameLogic {
             sort1.style.display = "";
             sort2.style.display = "";
             hint.style.display = "";
+            settingsButton.style.display = "";
             this.disableSortButtons();
             button1.style.display = "none";
             button2.style.display = "none";
             button3.style.display = "none";
-            button4.style.display = "none";            
+            button4.style.display = "none";
             window.document.getElementById("buttondiv").style.visibility = "visible";
             window.document.getElementById("info").style.visibility = "visible";
             this.disableTrainingForm();
             this.wallText.visible = true;
-            break;   
+            break;
 
             case STATE.DEAL:
             printMessage("Shuffling wall\n");
@@ -1066,7 +1069,8 @@ export class GameLogic {
             sort1.style.display = "none";
             sort2.style.display = "none";
             hint.style.display = "none";
-            this.enableTrainingForm();        
+            settingsButton.style.display = "none";
+            this.enableTrainingForm();
 
             startButton.disabled = false;
 
