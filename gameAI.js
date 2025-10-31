@@ -68,10 +68,15 @@ export class GameAI {
             for (let j = 0; j < rankCardHands.length; j++) {
                 let scale = 1.0;
                 if (rankCardHands[j].rank > 50) {
-                    // Weight high ranking hands more heavily
-                    scale = rankCardHands[j].rank;
+                    // Weight high ranking hands more heavily, but cap to prevent over-weighting
+                    scale = Math.min(rankCardHands[j].rank, 100);
                 }
-                rank += (copyHandRankArray[j].rank - rankCardHands[j].rank) * scale;
+                // Add penalty for discarding tiles that significantly hurt high-value hands
+                const delta = copyHandRankArray[j].rank - rankCardHands[j].rank;
+                if (delta < -10) {
+                    scale *= 2.0; // Double penalty for large negative impacts
+                }
+                rank += delta * scale;
             }
 
             const tileRank = {
@@ -148,8 +153,13 @@ export class GameAI {
             // Compute rank for this tile
             // - compare delta in testRankArray and rankCardHands
             // - don't discard tiles that would cause large negative deltas
+            // Add weighting for joker exchanges to be more aggressive
             for (let j = 0; j < rankCardHands.length; j++) {
-                rank += (copyHandRankArray[j].rank - rankCardHands[j].rank);
+                let scale = 1.0;
+                if (rankCardHands[j].rank > 50) {
+                    scale = Math.min(rankCardHands[j].rank, 100);
+                }
+                rank += (copyHandRankArray[j].rank - rankCardHands[j].rank) * scale;
             }
 
             debugPrint("exchangeTilesForJokers.  Joker found for exchange. rank = " + rank + "\n");
@@ -283,7 +293,8 @@ export class GameAI {
         const rankInfo = rankCardHands[0];
 
         // Allow exposure if we have already exposed, or hand rank is greater than a certain level
-        if (!copyHand.isAllHidden() || (!rankInfo.hand.concealed && rankInfo.rank > 55)) {
+        // Lower threshold to encourage more exposures and prevent wall games
+        if (!copyHand.isAllHidden() || (!rankInfo.hand.concealed && rankInfo.rank > 45)) {
 
             // Find component with the discarded tile
             let compInfo = null;
@@ -351,13 +362,15 @@ export class GameAI {
         debugPrint("courtesyVote: Player " + player + ", rank = " + rank);
         this.card.printHandRankArray(rankCardHands, 1);
 
-        if (rank < 50) {
+        // Adjust courtesy voting to be more aggressive in early game
+        // Encourage tile exchange to improve hands and prevent stagnation
+        if (rank < 45) {
             return 3;
         }
-        if (rank < 60) {
+        if (rank < 55) {
             return 2;
         }
-        if (rank < 70) {
+        if (rank < 65) {
             return 1;
         }
 

@@ -328,41 +328,49 @@ component_score = 100 × (component_size / 14) × (tiles_matched / component_siz
 tile_impact = (hand_rank_without_tile - hand_rank_with_tile) × weighting_factor
 ```
 
-### 3. High-Value Weighting
+### 3. High-Value Weighting (Updated)
 ```javascript
 if (hand_rank > 50) {
-    weighting = hand_rank;
+    weighting = min(hand_rank, 100);  // Capped to prevent over-weighting
 } else {
     weighting = 1.0;
 }
+
+// Additional penalty for large negative impacts
+if (delta < -10) {
+    weighting *= 2.0;  // Double penalty for significant hand degradation
+}
 ```
 
-### 4. Courtesy Voting
+### 4. Courtesy Voting (Updated)
 ```javascript
-tiles_to_request = max(0, 3 - Math.floor(hand_rank / 10))
+// More aggressive courtesy voting to encourage tile exchange
+tiles_to_request = max(0, 3 - Math.floor((hand_rank - 5) / 10))  // Shifted thresholds down by 5 points
 ```
 
-### 5. Exposure Threshold
+### 5. Exposure Threshold (Updated)
 ```javascript
-can_expose = (!has_exposures) OR (hand_rank > 55 AND hand_can_be_exposed)
+can_expose = (!has_exposures) OR (hand_rank > 45 AND hand_can_be_exposed)  // Lowered threshold for more aggressive exposures
 ```
 
-## 🎯 Strategic Principles
+## 🎯 Strategic Principles (Updated)
 
 ### Offensive Strategy
 - **Component Completion** - Prioritize completing high-scoring hand patterns
-- **Joker Optimization** - Use jokers to maximize hand potential
+- **Joker Optimization** - Use jokers to maximize hand potential with consistent weighting
 - **Pattern Flexibility** - Maintain multiple winning possibilities
+- **Aggressive Early Development** - Lower thresholds for exposures and courtesy exchanges
 
-### Defensive Strategy  
-- **High-Impact Weighting** - Avoid discarding tiles that significantly improve opponent hands
+### Defensive Strategy
+- **High-Impact Weighting** - Avoid discarding tiles that significantly improve opponent hands (capped at 100x, 2x penalty for large deltas)
 - **Dangerous Tile Avoidance** - Consider opponent hand patterns when discarding
 - **Information Hiding** - Minimize strategic information leakage
 
 ### Adaptive Behavior
-- **Game Phase Adjustment** - Early game focuses on hand development, late game on defense
+- **Game Phase Adjustment** - Early game focuses on hand development with more aggressive exposures, late game on defense
 - **Opponent Modeling** - Consider likely opponent hand patterns
 - **Wall Analysis** - Adjust strategy based on remaining tile probabilities
+- **Courtesy Optimization** - More aggressive tile exchange to prevent stagnation
 
 ## 🔬 Algorithm Complexity Analysis
 
@@ -412,3 +420,9 @@ The AI integrates seamlessly with:
 ---
 
 **Key Insight:** The genius of this AI system is that all decisions flow from the same core ranking algorithms, ensuring consistent strategy whether it's bot players making moves or generating hints for human players. The algorithms prioritize long-term hand development while being defensively aware of tile values that help opponents.
+
+**Recent Updates (2025):** To address wall game issues, the AI has been tuned to be more aggressive in early-game development:
+- Lowered exposure threshold from 55 to 45 for more proactive hand building
+- Enhanced defensive weighting with caps and penalties to prevent over-conservatism
+- More aggressive courtesy voting to encourage tile exchange
+- Consistent weighting applied across all decision-making functions
