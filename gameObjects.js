@@ -1,4 +1,4 @@
-import {SUIT, SPRITE_HEIGHT, SPRITE_WIDTH} from "./constants.js";
+import {SUIT, SPRITE_HEIGHT, SPRITE_WIDTH, TILE_GAP} from "./constants.js";
 
 // PRIVATE CONSTANTS
 
@@ -328,9 +328,9 @@ export class Wall {
     }
 
     showWall() {
-        const DISCARD_SCALE = 0.6;
+        const WALL_SCALE = 0.6;
 
-        // Calculate positions for all discarded tiles
+        // Calculate positions for all wall tiles
         let offsetX = 200;
         let offsetY = 200;
         for (const tile of this.tileArray) {
@@ -338,23 +338,23 @@ export class Wall {
             //tile.y = offsetY;
             //tile.angle = 0;
             tile.animate(offsetX, offsetY, 0);
-            tile.scale = DISCARD_SCALE;
+            tile.scale = WALL_SCALE;
             tile.showTile(true, false);
 
-            offsetX += SPRITE_WIDTH * DISCARD_SCALE;
+            offsetX += SPRITE_WIDTH * WALL_SCALE + TILE_GAP;
 
             if (offsetX > 800) {
                 offsetX = 200;
-                offsetY += SPRITE_HEIGHT * DISCARD_SCALE;
+                offsetY += SPRITE_HEIGHT * WALL_SCALE + TILE_GAP;
             }
         }
 
         // Return position where discarded tiles should start
         if (offsetX !== 200) {
-            offsetY += SPRITE_HEIGHT * DISCARD_SCALE;
+            offsetY += SPRITE_HEIGHT * WALL_SCALE + TILE_GAP;
         }
         return { offsetX:200, offsetY};
-    }    
+    }
 }
 
 export class Discards {
@@ -377,11 +377,11 @@ export class Discards {
             tile.scale = DISCARD_SCALE;
             tile.showTile(true, true);
 
-            offsetX += SPRITE_WIDTH * DISCARD_SCALE;
+            offsetX += SPRITE_WIDTH * DISCARD_SCALE + TILE_GAP;
 
             if (offsetX > 800) {
                 offsetX = 200;
-                offsetY += SPRITE_HEIGHT * DISCARD_SCALE;
+                offsetY += SPRITE_HEIGHT * DISCARD_SCALE + TILE_GAP;
             }
         }
     }
