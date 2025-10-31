@@ -31,6 +31,10 @@
                 <textarea id="messages" class="sidebar__textarea message-log__textarea" readonly aria-live="polite" role="log" aria-label="Game log output"></textarea>
             </section>
 
+            <section id="hintdiv" class="sidebar__section sidebar__section--hint">
+                <button id="hint-toggle" class="sidebar__heading" aria-expanded="true" aria-controls="hint-content">Hint</button>
+                <div id="hint-content" class="sidebar__textarea" role="region"></div>
+            </section>
 
             <div id="controldiv">
                 <button id="start" class="button">Start Game</button>

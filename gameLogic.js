@@ -1,4 +1,4 @@
-import {printMessage, printInfo, debugPrint, debugTrace} from "./utils.js";
+import {printMessage, printInfo, printHint, debugPrint, debugTrace} from "./utils.js";
 import {STATE, PLAYER_OPTION, PLAYER, SUIT, DRAGON, WIND, VNUMBER} from "./constants.js";
 import {GameAI} from "./gameAI.js";
 import {Card} from "./card/card.js";
@@ -875,6 +875,20 @@ export class GameLogic {
 
             // Training form event listener is now handled in settings.js
             this.updateTrainingForm();
+
+            // Add hint panel toggle event listener
+            const hintToggle = window.document.getElementById("hint-toggle");
+            const hintContent = window.document.getElementById("hint-content");
+            const hintDiv = window.document.getElementById("hintdiv");
+
+            hintToggle.addEventListener("click", () => {
+                const isExpanded = hintToggle.getAttribute("aria-expanded") === "true";
+                hintToggle.setAttribute("aria-expanded", !isExpanded);
+                hintContent.classList.toggle("hidden");
+            });
+
+            // Hide hint panel on home page - only show during gameplay
+            hintDiv.style.display = "none";
             break;
 
             case STATE.START:
@@ -893,6 +907,7 @@ export class GameLogic {
             window.document.getElementById("info").style.visibility = "visible";
             this.disableTrainingForm();
             this.wallText.visible = true;
+            window.document.getElementById("hintdiv").style.display = "";
             break;
 
             case STATE.DEAL:
@@ -1124,25 +1139,20 @@ export class GameLogic {
             const rankCardHands = this.card.rankHandArray14(hand);
             this.card.sortHandRankArray(rankCardHands);
 
-            printMessage("==================================\n");
-            printMessage("Top 3 hands for player 0\n");
-            
+            let hintText = "<strong>Top 3 hands for player 0</strong><br>";
             for (let i = 0; i < 3; i++) {
                 const rankInfo = rankCardHands[i];
-                printMessage((i + 1) + ". " + rankInfo.hand.description + "\n");
-                //printMessage("   Group " + rankInfo.group.groupDescription + "\n");
-                //printMessage("   Rank  = " + Math.round(rankInfo.rank) + "/100\n");
-                
-            }            
-            printMessage("\nTop 3 tiles to discard\n");
+                hintText += (i + 1) + ". " + rankInfo.hand.description + "<br>";
+            }
+            hintText += "<br><strong>Top 3 tiles to discard</strong><br>";
 
             const tileRankArray = this.gameAI.rankTiles14(hand);
             for (let i = 0; i < 3; i++) {
                 const rankInfo = tileRankArray[i];
-                printMessage((i + 1) + ". " + rankInfo.tile.getText() + "\n");
+                hintText += (i + 1) + ". " + rankInfo.tile.getText() + "<br>";
             }
-            printMessage("==================================\n");
-            
+
+            printHint(hintText);
 
         }.bind(this); 
 

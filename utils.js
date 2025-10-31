@@ -25,3 +25,9 @@ export function debugTrace(str) {
         console.log(str);
     }
 }
+
+// Print to hint window
+export function printHint(html) {
+    const hintContent = window.document.getElementById("hint-content");
+    hintContent.innerHTML = html;
+}

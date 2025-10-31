@@ -231,6 +231,40 @@ a:focus-visible {
     color: #ffb7b7;
 }
 
+/* Hint panel styles */
+.sidebar__section--hint {
+    /* (Optional) Add any specific styles for the hint section container */
+}
+
+#hint-content {
+    padding: 10px;
+    border-top: 1px solid #ccc;
+}
+
+#hint-toggle {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font-size: inherit;
+    font-weight: bold;
+    padding: 10px;
+    cursor: pointer;
+}
+
+#hint-toggle::after {
+    content: '\\25B2'; /* Up arrow */
+    float: right;
+}
+
+#hint-toggle[aria-expanded="false"]::after {
+    content: '\\25BC'; /* Down arrow */
+}
+
+.hidden {
+    display: none;
+}
+
 #controldiv {
     display: grid;
     gap: var(--spacing-sm);
