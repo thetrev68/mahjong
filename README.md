@@ -252,6 +252,18 @@ For questions or issues:
 
 ---
 
+## Credits
+
+### Audio
+
+- みんなの創作支援サイトＴスタ (discard_tile.mp3).
+
+### Sprites, AI Logic, and Game Core
+
+- https://github.com/pauls-gh/mahjong
+
+---
+
 **American Mahjong v1.00** - Built with Phaser.IO and modern JavaScript
 
 *Enjoy playing authentic American Mahjong against intelligent AI opponents!*

@@ -873,10 +873,7 @@ export class GameLogic {
             numTileSelect.selectedIndex = 8;
             skipCharlestonCheckbox.checked = true;
 
-            const traincheckbox = window.document.getElementById("trainCheckbox");
-            traincheckbox.addEventListener("change", () => {
-                this.updateTrainingForm();
-            });   
+            // Training form event listener is now handled in settings.js
             this.updateTrainingForm();
             break;
 

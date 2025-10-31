@@ -31,35 +31,6 @@
                 <textarea id="messages" class="sidebar__textarea message-log__textarea" readonly aria-live="polite" role="log" aria-label="Game log output"></textarea>
             </section>
 
-            <section id="trainingdiv" class="sidebar__section sidebar__section--training">
-                <h2 class="sidebar__heading">Training Options</h2>
-                <form id="trainform1" class="training-form">
-                    <fieldset id="trainfieldset1">
-                        <div class="training-form__toggle">
-                            <input id="trainCheckbox" type="checkbox">
-                            <label for="trainCheckbox">Training Mode</label>
-                        </div>
-                    </fieldset>
-                </form>
-                <form id="trainform2" class="training-form">
-                    <fieldset id="trainfieldset2">
-                        <div class="training-form__grid">
-                            <div class="training-form__item training-form__item--full">
-                                <label class="training-form__label" for="handSelect">Select a Starting Hand</label>
-                                <select id="handSelect" class="training-form__select"></select>
-                            </div>
-                            <div class="training-form__item">
-                                <label class="training-form__label" for="numTileSelect">Number of Tiles</label>
-                                <select id="numTileSelect" class="training-form__select training-form__select--compact"></select>
-                            </div>
-                            <div class="training-form__item training-form__item--checkbox">
-                                <input id="skipCharlestonCheckbox" type="checkbox">
-                                <label for="skipCharlestonCheckbox">Skip Charleston?</label>
-                            </div>
-                        </div>
-                    </fieldset>
-                </form>
-            </section>
 
             <div id="controldiv">
                 <button id="start" class="button">Start Game</button>
@@ -89,7 +60,32 @@
 
                     <section class="settings-section">
                         <h2 class="settings-section-title">Training Mode</h2>
-                        <p class="settings-placeholder">Training options will be moved here from the sidebar.</p>
+                        <form id="trainform1" class="training-form">
+                            <fieldset id="trainfieldset1">
+                                <div class="training-form__toggle">
+                                    <input id="trainCheckbox" type="checkbox">
+                                    <label for="trainCheckbox">Enable Training Mode</label>
+                                </div>
+                            </fieldset>
+                        </form>
+                        <form id="trainform2" class="training-form">
+                            <fieldset id="trainfieldset2">
+                                <div class="training-form__grid">
+                                    <div class="training-form__item training-form__item--full">
+                                        <label class="training-form__label" for="handSelect">Select a Starting Hand</label>
+                                        <select id="handSelect" class="training-form__select"></select>
+                                    </div>
+                                    <div class="training-form__item">
+                                        <label class="training-form__label" for="numTileSelect">Number of Tiles</label>
+                                        <select id="numTileSelect" class="training-form__select training-form__select--compact"></select>
+                                    </div>
+                                    <div class="training-form__item training-form__item--checkbox">
+                                        <input id="skipCharlestonCheckbox" type="checkbox">
+                                        <label for="skipCharlestonCheckbox">Skip Charleston Phase</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
                     </section>
 
                     <section class="settings-section">

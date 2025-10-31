@@ -127,8 +127,7 @@ a:focus-visible {
     backdrop-filter: blur(4px);
 }
 
-.sidebar__section--log,
-.sidebar__section--training {
+.sidebar__section--log {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
@@ -467,8 +466,7 @@ select {
         font-size: 0.83rem;
     }
 
-    .sidebar__section--log,
-    .sidebar__section--training {
+    .sidebar__section--log {
         gap: var(--spacing-xs);
     }
 }
@@ -566,6 +564,19 @@ select {
     color: var(--color-text-muted);
     margin: 0;
     font-style: italic;
+}
+
+/* Training form styles in settings context */
+.settings-section .training-form {
+    margin-top: var(--spacing-md);
+}
+
+.settings-section .training-form__toggle {
+    margin-bottom: var(--spacing-sm);
+}
+
+.settings-section .training-form__grid {
+    margin-top: var(--spacing-sm);
 }
 
 /* Responsive adjustments for settings */
