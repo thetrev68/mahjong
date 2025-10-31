@@ -97,10 +97,12 @@ export class Tile {
         this.spriteBack.visible = false;
         this.spriteBack.setOrigin(0.5, 0.5);
 
-        // Create rounded corner mask
+        // Create rounded corner mask (smaller to prevent overlap)
         const maskGraphics = this.scene.add.graphics();
         maskGraphics.fillStyle(0xffffff);
-        maskGraphics.fillRoundedRect(-SPRITE_WIDTH/2, -SPRITE_HEIGHT/2, SPRITE_WIDTH, SPRITE_HEIGHT, 6);
+        const maskSizeW = SPRITE_WIDTH - TILE_GAP;
+        const maskSizeH = SPRITE_HEIGHT - TILE_GAP;
+        maskGraphics.fillRoundedRect(-maskSizeW/2, -maskSizeH/2, maskSizeW, maskSizeH, 6);
         const mask = maskGraphics.createGeometryMask();
         this.sprite.setMask(mask);
         this.spriteBack.setMask(mask);
@@ -353,7 +355,7 @@ export class Wall {
         if (offsetX !== 200) {
             offsetY += SPRITE_HEIGHT * WALL_SCALE + TILE_GAP;
         }
-        return { offsetX:200, offsetY};
+        return { offsetX: 200, offsetY };
     }
 }
 
