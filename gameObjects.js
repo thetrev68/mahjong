@@ -96,6 +96,15 @@ export class Tile {
         this.spriteBack = this.scene.add.sprite(0, 0, "back");
         this.spriteBack.visible = false;
         this.spriteBack.setOrigin(0.5, 0.5);
+
+        // Create rounded corner mask
+        const maskGraphics = this.scene.add.graphics();
+        maskGraphics.fillStyle(0xffffff);
+        maskGraphics.fillRoundedRect(-SPRITE_WIDTH/2, -SPRITE_HEIGHT/2, SPRITE_WIDTH, SPRITE_HEIGHT, 6);
+        const mask = maskGraphics.createGeometryMask();
+        this.sprite.setMask(mask);
+        this.spriteBack.setMask(mask);
+        this.mask = mask;
     }
 
     get x() {
@@ -110,20 +119,25 @@ export class Tile {
         return this.sprite.angle;
     }
 
-    set x(x) {        
+    set x(x) {
         this.sprite.x = x;
         this.spriteBack.x = x;
+        if (this.mask) {
+            this.mask.geometryMask.x = x;
+        }
     }
 
     set y(y) {
         this.sprite.y = y;
         this.spriteBack.y = y;
+        if (this.mask) {
+            this.mask.geometryMask.y = y;
+        }
     }
 
     set angle(angle) {
         this.sprite.angle = angle;
         this.spriteBack.angle = angle;
-
     }
 
     set scale(scale) {
@@ -153,6 +167,10 @@ export class Tile {
                 this.spriteBack.x = this.sprite.x;
                 this.spriteBack.y = this.sprite.y;
                 this.spriteBack.angle = this.sprite.angle;
+                if (this.mask) {
+                    this.mask.geometryMask.x = this.sprite.x;
+                    this.mask.geometryMask.y = this.sprite.y;
+                }
             },
             onComplete: () => {
                 this.sprite.x = x;
@@ -161,6 +179,10 @@ export class Tile {
                 this.spriteBack.x = x;
                 this.spriteBack.y = y;
                 this.spriteBack.angle = angle;
+                if (this.mask) {
+                    this.mask.geometryMask.x = x;
+                    this.mask.geometryMask.y = y;
+                }
                 this.sprite.depth = 0;
                 this.spriteBack.depth = 0;
                 this.tween = null;

@@ -1,6 +1,6 @@
 import {
     STATE, PLAYER, SUIT, SPRITE_WIDTH,
-    SPRITE_SCALE, WINDOW_WIDTH, WINDOW_HEIGHT
+    SPRITE_SCALE, WINDOW_WIDTH, WINDOW_HEIGHT, TILE_GAP
 } from "./constants.js";
 
 // PRIVATE CONSTANTS
@@ -172,9 +172,11 @@ export class TileSet {
     }
 
     getWidth(playerInfo) {
-        // Width of tileset
-        return this.tileArray.length * this.getTileWidth(playerInfo);
-
+        // Width of tileset including gaps between tiles
+        const tileWidth = this.getTileWidth(playerInfo);
+        const numTiles = this.tileArray.length;
+        if (numTiles === 0) return 0;
+        return numTiles * tileWidth + (numTiles - 1) * TILE_GAP;
     }
 
     // Returns updated x, y
@@ -184,7 +186,8 @@ export class TileSet {
         let y = posY;
         const tileWidth = this.getTileWidth(playerInfo);
 
-        for (const tile of this.tileArray) {
+        for (let i = 0; i < this.tileArray.length; i++) {
+            const tile = this.tileArray[i];
             //tile.x = x;
             //tile.y = y;
             //tile.angle = playerInfo.angle;
@@ -203,17 +206,17 @@ export class TileSet {
 
             switch (playerInfo.id) {
             case PLAYER.BOTTOM:
-                x += tileWidth;
+                x += tileWidth + TILE_GAP;
                 break;
             case PLAYER.TOP:
-                x -= tileWidth;
+                x -= tileWidth + TILE_GAP;
                 break;
             case PLAYER.LEFT:
-                y += tileWidth;
+                y += tileWidth + TILE_GAP;
                 break;
             case PLAYER.RIGHT:
             default:
-                y -= tileWidth;
+                y -= tileWidth + TILE_GAP;
                 break;
             }
         }
