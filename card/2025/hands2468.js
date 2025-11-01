@@ -191,12 +191,12 @@ export const hands2468 = {
                 },
                 {
                     suit: SUIT.VSUIT2,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 3
                 },
                 {
                     suit: SUIT.VSUIT3,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 3
                 }
             ]
@@ -283,7 +283,7 @@ export const hands2468 = {
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 4
                 },
                 {
@@ -293,7 +293,7 @@ export const hands2468 = {
                 },
                 {
                     suit: SUIT.VSUIT3,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 4
                 }
             ]
@@ -327,12 +327,12 @@ export const hands2468 = {
                 },
                 {
                     suit: SUIT.VSUIT2,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 3
                 },
                 {
                     suit: SUIT.VSUIT3,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 3
                 }
             ]

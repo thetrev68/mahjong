@@ -18,7 +18,7 @@ export const hands369 = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 3
-                },                
+                },
                 {
                     suit: SUIT.VSUIT1,
                     number: 3,

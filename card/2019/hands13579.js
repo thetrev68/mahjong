@@ -74,7 +74,7 @@ export const hands13579 = {
                     count: 2
                 }
             ]
-        },        
+        },
         {
             description: "111 3333 333 5555 (2 suits)",
             vsuitCount: 2,
@@ -207,7 +207,7 @@ export const hands13579 = {
                     suit: SUIT.VSUIT1,
                     number: 3,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.VSUIT2,
                     number: 3,
@@ -217,7 +217,7 @@ export const hands13579 = {
                     suit: SUIT.VSUIT2,
                     number: 5,
                     count: 3
-                },                
+                },
                 {
                     suit: SUIT.VSUIT3_DRAGON,
                     number: 0,
@@ -241,7 +241,7 @@ export const hands13579 = {
                     suit: SUIT.VSUIT1,
                     number: 7,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.VSUIT2,
                     number: 7,
@@ -251,7 +251,7 @@ export const hands13579 = {
                     suit: SUIT.VSUIT2,
                     number: 9,
                     count: 3
-                },                
+                },
                 {
                     suit: SUIT.VSUIT3_DRAGON,
                     number: 0,
@@ -290,7 +290,7 @@ export const hands13579 = {
                     suit: SUIT.VSUIT3,
                     number: 1,
                     count: 4
-                },                                
+                }
             ]
         },
         {
@@ -324,9 +324,9 @@ export const hands13579 = {
                     suit: SUIT.VSUIT3,
                     number: 3,
                     count: 4
-                },                                
+                }
             ]
-        },        
+        },
         {
             description: "11 33 55 5555 5555 (3 suits)",
             vsuitCount: 3,
@@ -358,9 +358,9 @@ export const hands13579 = {
                     suit: SUIT.VSUIT3,
                     number: 5,
                     count: 4
-                },                                
+                }
             ]
-        },        
+        },
 
         {
             description: "55 77 99 5555 5555 (3 suits)",
@@ -393,7 +393,7 @@ export const hands13579 = {
                     suit: SUIT.VSUIT3,
                     number: 5,
                     count: 4
-                },                                
+                }
             ]
         },
         {
@@ -427,7 +427,7 @@ export const hands13579 = {
                     suit: SUIT.VSUIT3,
                     number: 7,
                     count: 4
-                },                                
+                }
             ]
         },
         {
@@ -461,9 +461,9 @@ export const hands13579 = {
                     suit: SUIT.VSUIT3,
                     number: 9,
                     count: 4
-                },                                
+                }
             ]
-        },    
+        },
         {
             description: "111 3 555 555 7 999 (2 suits, concealed)",
             vsuitCount: 2,
@@ -495,14 +495,14 @@ export const hands13579 = {
                     suit: SUIT.VSUIT2,
                     number: 7,
                     count: 1
-                },                                
+                },
                 {
                     suit: SUIT.VSUIT2,
                     number: 9,
                     count: 3
                 }
             ]
-        }                    
+        }
     ]
 };
 

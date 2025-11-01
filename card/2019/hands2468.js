@@ -200,6 +200,6 @@ export const hands2468 = {
                     count: 3
                 }
             ]
-        }        
+        }
     ]
 }

@@ -35,7 +35,7 @@ export const handsQuints = {
                     count: 5
                 }
             ]
-        },        
+        },
         {
             description: "FFFF NNNNN 11111 (any wind, any no.)",
             vsuitCount: 1,
@@ -47,7 +47,7 @@ export const handsQuints = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 4
-                },                
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.NORTH,
@@ -71,7 +71,7 @@ export const handsQuints = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 4
-                },                
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.SOUTH,
@@ -95,7 +95,7 @@ export const handsQuints = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 4
-                },                
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.WEST,
@@ -119,7 +119,7 @@ export const handsQuints = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 4
-                },                
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.EAST,
@@ -131,7 +131,7 @@ export const handsQuints = {
                     count: 5
                 }
             ]
-        },                        
+        },
         {
             description: "11111 22 33333 DD (1 suit, 3 consecutive numbers, dragons match)",
             vsuitCount: 1,
@@ -160,7 +160,7 @@ export const handsQuints = {
                     count: 2
                 }
             ]
-        }, 
+        },
         {
             description: "11111 DDDD 11111 (3 suit, any like nos.)",
             vsuitCount: 3,
@@ -177,14 +177,14 @@ export const handsQuints = {
                     suit: SUIT.VSUIT2_DRAGON,
                     number: 0,
                     count: 4
-                },                
+                },
                 {
                     suit: SUIT.VSUIT3,
                     number: VNUMBER.CONSECUTIVE1,
                     count: 5
                 }
             ]
-        },         
+        }
     ]
 }
 

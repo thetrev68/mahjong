@@ -152,7 +152,7 @@ export const handsSinglesPairs = {
                     suit: SUIT.VSUIT3,
                     number: 5,
                     count: 2
-                },
+                }
             ]
         },
         {
@@ -201,7 +201,7 @@ export const handsSinglesPairs = {
                     suit: SUIT.VSUIT3,
                     number: 9,
                     count: 2
-                },
+                }
             ]
         },
         {
@@ -303,7 +303,7 @@ export const handsSinglesPairs = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.VSUIT1,
                     number: VNUMBER.CONSECUTIVE1,
@@ -333,7 +333,7 @@ export const handsSinglesPairs = {
                     suit: SUIT.VSUIT2_DRAGON,
                     number: 0,
                     count: 2
-                }             
+                }
             ]
         },
         {
@@ -362,7 +362,7 @@ export const handsSinglesPairs = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
-                },                 
+                },
                 {
                     suit: SUIT.VSUIT1,
                     number: 2,
@@ -372,7 +372,7 @@ export const handsSinglesPairs = {
                     suit: SUIT.VSUIT1,
                     number: 1,
                     count: 1
-                },                {
+                }, {
                     suit: SUIT.VSUIT1,
                     number: 9,
                     count: 1
@@ -386,7 +386,7 @@ export const handsSinglesPairs = {
                     suit: SUIT.VSUIT2,
                     number: 1,
                     count: 1
-                },                {
+                }, {
                     suit: SUIT.VSUIT2,
                     number: 9,
                     count: 1
@@ -400,11 +400,11 @@ export const handsSinglesPairs = {
                     suit: SUIT.VSUIT3,
                     number: 1,
                     count: 1
-                },                {
+                }, {
                     suit: SUIT.VSUIT3,
                     number: 9,
                     count: 1
-                },                                
+                }
             ]
         }
     ]

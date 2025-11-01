@@ -9,7 +9,7 @@ import {SUIT, DRAGON, WIND, VNUMBER} from "../../constants.js";
 
 //  2019 card
 
-export class CardTest2019 {
+export class CardTest {
     constructor(card) {
         this.card = card;
     }
@@ -87,14 +87,13 @@ export class CardTest2019 {
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
             hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-            
 
 
             hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
             hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
             hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
             hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-            
+
             hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
             hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
             hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
@@ -102,15 +101,15 @@ export class CardTest2019 {
 
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
             hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-            
+
             debugPrint("FFFF NNNN DD SSSS (red dragon only)\n");
 
             const validationInfo = this.card.validateHand14(hand);
             this.card.printValidationInfo(validationInfo);
 
-        }     
-        
-        
+        }
+
+
         {
 
             // FF 22 44 66 88 22 22 (3 suits, any like even pairs, concealed)
@@ -139,7 +138,7 @@ export class CardTest2019 {
             const validationInfo = this.card.validateHand14(hand);
             this.card.printValidationInfo(validationInfo);
 
-        } 
+        }
     }
 
 }

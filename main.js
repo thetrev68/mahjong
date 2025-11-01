@@ -1,4 +1,4 @@
-import GameScene from './GameScene.js';
+import GameScene from "./GameScene.js";
 import {WINDOW_WIDTH, WINDOW_HEIGHT} from "./constants.js";
 
 const config = {
@@ -6,7 +6,7 @@ const config = {
     width: WINDOW_WIDTH,
     height: WINDOW_HEIGHT,
     transparent: true,
-    parent: 'gamediv',
+    parent: "gamediv",
     scene: [GameScene],
     scale: {
         mode: Phaser.Scale.FIT,

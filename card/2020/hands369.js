@@ -67,7 +67,7 @@ export const hands369 = {
                     suit: SUIT.VSUIT3,
                     number: 3,
                     count: 4
-                }                
+                }
             ]
         },
         {
@@ -101,7 +101,7 @@ export const hands369 = {
                     suit: SUIT.VSUIT3,
                     number: 6,
                     count: 4
-                }                
+                }
             ]
         },
         {
@@ -135,9 +135,9 @@ export const hands369 = {
                     suit: SUIT.VSUIT3,
                     number: 9,
                     count: 4
-                }                
+                }
             ]
-        },        
+        },
         {
             description: "333 6666 999 DDDD (1 suit)",
             vsuitCount: 1,
@@ -198,7 +198,7 @@ export const hands369 = {
                     suit: SUIT.VSUIT3,
                     number: 9,
                     count: 4
-                }                
+                }
             ]
         },
         {
@@ -270,7 +270,7 @@ export const hands369 = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
-                },                 
+                },
                 {
                     suit: SUIT.VSUIT1,
                     number: 3,
@@ -300,7 +300,7 @@ export const hands369 = {
                     suit: SUIT.VSUIT2,
                     number: 9,
                     count: 3
-                },                
+                }
             ]
         }
     ]

@@ -100,7 +100,7 @@ export const hands369 = {
                 }
             ]
         },
-              
+
         {
             description: "FF 3333 6666 9999 (any 1 suit)",
             vsuitCount: 1,
@@ -180,7 +180,7 @@ export const hands369 = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 4
-                },                
+                },
                 {
                     suit: SUIT.VSUIT2,
                     number: 6,
@@ -204,7 +204,7 @@ export const hands369 = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
-                },                 
+                },
                 {
                     suit: SUIT.VSUIT1,
                     number: 3,

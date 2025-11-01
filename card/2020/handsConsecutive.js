@@ -183,14 +183,14 @@ export const handsConsecutive = {
                     suit: SUIT.VSUIT1,
                     number: VNUMBER.CONSECUTIVE3,
                     count: 3
-                },                
+                },
                 {
                     suit: SUIT.VSUIT1_DRAGON,
                     number: 0,
                     count: 4
                 }
             ]
-        },  
+        },
         {
             description: "11 22 33 4444 5555 (3 suits, 5 consecutive numbers)",
             vsuitCount: 3,
@@ -280,7 +280,7 @@ export const handsConsecutive = {
                     suit: SUIT.VSUIT1,
                     number: VNUMBER.CONSECUTIVE3,
                     count: 3
-                },                
+                },
                 {
                     suit: SUIT.VSUIT2_DRAGON,
                     number: 0,
@@ -290,9 +290,9 @@ export const handsConsecutive = {
                     suit: SUIT.VSUIT3_DRAGON,
                     number: 0,
                     count: 3
-                }                
+                }
             ]
-        },  
+        },
         {
             description: "111 222 111 222 33 (3 suits, 3 consecutive numbers, concealed)",
             vsuitCount: 3,
@@ -326,7 +326,7 @@ export const handsConsecutive = {
                     count: 2
                 }
             ]
-        },
-     
+        }
+
     ]
 };

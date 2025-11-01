@@ -18,7 +18,7 @@ class GameScene extends Phaser.Scene {
         // The resizeCallback is also a separate step.
     }
 
-    create() {
+    async create() {
         // from game.js create()
 
         this.scale.on('resize', this.resize, this);
@@ -27,6 +27,7 @@ class GameScene extends Phaser.Scene {
         this.gGameLogic = new GameLogic(this);
         this.gTable = new Table(this, this.gGameLogic);
         this.gGameLogic.table = this.gTable;
+        await this.gGameLogic.init();
         this.gGameLogic.gameAI.table = this.gTable;
 
         // Create sprites etc
@@ -51,7 +52,6 @@ class GameScene extends Phaser.Scene {
         this.gTable.create();
 
         // Set up the UI buttons
-        this.gGameLogic.init();
         this.enableCommandBarDrag();
         this.resize(this.sys.game.canvas.width, this.sys.game.canvas.height);
     }

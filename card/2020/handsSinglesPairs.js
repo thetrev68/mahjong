@@ -62,7 +62,7 @@ export const handsSinglesPairs = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.VSUIT1,
                     number: VNUMBER.CONSECUTIVE1,
@@ -106,7 +106,7 @@ export const handsSinglesPairs = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.VSUIT1,
                     number: VNUMBER.CONSECUTIVE1,
@@ -136,7 +136,7 @@ export const handsSinglesPairs = {
                     suit: SUIT.VSUIT3,
                     number: VNUMBER.CONSECUTIVE2,
                     count: 2
-                },
+                }
             ]
         },
         {
@@ -175,7 +175,7 @@ export const handsSinglesPairs = {
                     suit: SUIT.VSUIT1_DRAGON,
                     number: 0,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.VSUIT2,
                     number: 2,
@@ -200,7 +200,7 @@ export const handsSinglesPairs = {
                     suit: SUIT.VSUIT2_DRAGON,
                     number: 0,
                     count: 2
-                }                
+                }
             ]
         },
         {
@@ -244,12 +244,12 @@ export const handsSinglesPairs = {
                     suit: SUIT.VSUIT3,
                     number: 6,
                     count: 2
-                },               
+                },
                 {
                     suit: SUIT.VSUIT3,
                     number: 9,
                     count: 2
-                },                
+                }
             ]
         },
         {
@@ -308,7 +308,7 @@ export const handsSinglesPairs = {
                     suit: SUIT.VSUIT2,
                     number: 9,
                     count: 2
-                },            
+                }
             ]
         },
         {
@@ -337,32 +337,32 @@ export const handsSinglesPairs = {
                     suit: SUIT.DRAGON,
                     number: DRAGON.WHITE,
                     count: 1
-                },       
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.NORTH,
                     count: 1
-                },    
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.EAST,
                     count: 1
-                },                
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.WEST,
                     count: 1
-                },                
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.SOUTH,
                     count: 1
-                },                      
+                },
                 {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
-                },                 
+                },
                 {
                     suit: SUIT.VSUIT1,
                     number: 2,
@@ -372,7 +372,7 @@ export const handsSinglesPairs = {
                     suit: SUIT.VSUIT2,
                     number: 2,
                     count: 2
-                },
+                }
             ]
         }
     ]

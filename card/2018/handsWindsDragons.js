@@ -120,7 +120,7 @@ export const handsWindsDragons = {
                     suit: SUIT.WIND,
                     number: WIND.SOUTH,
                     count: 1
-                },                                                                
+                },
                 {
                     suit: SUIT.FLOWER,
                     number: 0,

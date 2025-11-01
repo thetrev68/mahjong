@@ -72,10 +72,10 @@ export const hands2468 = {
                     suit: SUIT.VSUIT3_DRAGON,
                     number: 0,
                     count: 4
-                },
-                                
+                }
+
             ]
-        },        
+        },
         {
             description: "2222 4444 6666 88 (1 suit)",
             vsuitCount: 1,
@@ -133,7 +133,7 @@ export const hands2468 = {
                     count: 4
                 }
             ]
-        },        
+        },
         {
             description: "FFFF 4444 6666 24 (3 suits)",
             vsuitCount: 3,
@@ -201,7 +201,7 @@ export const hands2468 = {
                     count: 1
                 }
             ]
-        },     
+        },
         {
             description: "22 444 44 666 8888 (3 suits)",
             vsuitCount: 3,
@@ -233,7 +233,7 @@ export const hands2468 = {
                     suit: SUIT.VSUIT3,
                     number: 8,
                     count: 4
-                }     
+                }
             ]
         },
         {
@@ -281,7 +281,7 @@ export const hands2468 = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.VSUIT1,
                     number: 2,
@@ -303,6 +303,6 @@ export const hands2468 = {
                     count: 3
                 }
             ]
-        }        
+        }
     ]
 }

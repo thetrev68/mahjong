@@ -35,7 +35,7 @@ export const handsWindsDragons = {
                     count: 4
                 }
             ]
-        },        
+        },
         {
             description: "FF DDDD NEWS DDDD (Kongs - any 2 dragons)",
             vsuitCount: 2,
@@ -67,19 +67,19 @@ export const handsWindsDragons = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
-                },   
+                },
                 {
                     suit: SUIT.VSUIT1_DRAGON,
                     number: 0,
                     count: 4
-                },   
+                },
                 {
                     suit: SUIT.VSUIT2_DRAGON,
                     number: 0,
                     count: 4
-                },                                             
+                }
             ]
-        },        
+        },
         {
             description: "NNNN 11 11 11 SSSS (Any like odd nos. in 3 suits)",
             vsuitCount: 3,
@@ -101,12 +101,12 @@ export const handsWindsDragons = {
                     suit: SUIT.VSUIT2,
                     number: VNUMBER.CONSECUTIVE1,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.VSUIT3,
                     number: VNUMBER.CONSECUTIVE1,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.SOUTH,
@@ -135,12 +135,12 @@ export const handsWindsDragons = {
                     suit: SUIT.VSUIT2,
                     number: VNUMBER.CONSECUTIVE1,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.VSUIT3,
                     number: VNUMBER.CONSECUTIVE1,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.WEST,
@@ -169,7 +169,7 @@ export const handsWindsDragons = {
                     suit: SUIT.VSUIT1_DRAGON,
                     number: 0,
                     count: 4
-                },                
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.WEST,
@@ -181,7 +181,7 @@ export const handsWindsDragons = {
                     count: 2
                 }
             ]
-        },        
+        },
         {
             description: "FF NNNN 2020 SSSS (2s any 1 suit)",
             vsuitCount: 1,
@@ -193,12 +193,12 @@ export const handsWindsDragons = {
                     suit: SUIT.DRAGON,
                     number: DRAGON.WHITE,
                     count: 2
-                },         
+                },
                 {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
-                },                       
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.NORTH,
@@ -213,9 +213,9 @@ export const handsWindsDragons = {
                     suit: SUIT.VSUIT1,
                     number: 2,
                     count: 2
-                } 
+                }
             ]
-        },         
+        },
         {
             description: "FF EEEE 2020 WWWW (2s any 1 suit)",
             vsuitCount: 1,
@@ -227,12 +227,12 @@ export const handsWindsDragons = {
                     suit: SUIT.DRAGON,
                     number: DRAGON.WHITE,
                     count: 2
-                },     
+                },
                 {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
-                },                       
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.EAST,
@@ -247,9 +247,9 @@ export const handsWindsDragons = {
                     suit: SUIT.VSUIT1,
                     number: 2,
                     count: 2
-                } 
+                }
             ]
-        },                               
+        },
         {
             description: "FF NNN EEE WWW SSS",
             vsuitCount: 0,

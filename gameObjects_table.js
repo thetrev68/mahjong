@@ -87,8 +87,8 @@ export class Table {
         for (let i = 0; i < 4; i++) {
             const graphics = this.scene.add.graphics(0, 0);
             // Remove light green fill to match background
-            // graphics.fillStyle(0x8FBF00);
-            // graphics.fillRect(gPlayerInfo[i].rectX, gPlayerInfo[i].rectY, gPlayerInfo[i].rectWidth, gPlayerInfo[i].rectHeight);
+            // Graphics.fillStyle(0x8FBF00);
+            // Graphics.fillRect(gPlayerInfo[i].rectX, gPlayerInfo[i].rectY, gPlayerInfo[i].rectWidth, gPlayerInfo[i].rectHeight);
             this.boxes[i] = graphics;
         }
 
@@ -271,7 +271,7 @@ export class Table {
         if (numDiscard === 4) {
             // If no-one wants the discard, add to discard pile
             this.discards.insertDiscard(discardTile);
-            let {offsetX, offsetY} = this.wall.showWall();
+            const {offsetX, offsetY} = this.wall.showWall();
             this.discards.showDiscards(offsetX, offsetY);
 
             return {

@@ -84,22 +84,22 @@ export const handsConsecutive = {
             components: [
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 3
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE2,
+                    number: VNUMBER.CONSECUTIVE2,
                     count: 4
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE3,
+                    number: VNUMBER.CONSECUTIVE3,
                     count: 3
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE4,
+                    number: VNUMBER.CONSECUTIVE4,
                     count: 4
                 }
             ]
@@ -113,22 +113,22 @@ export const handsConsecutive = {
             components: [
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 3
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE2,
+                    number: VNUMBER.CONSECUTIVE2,
                     count: 4
                 },
                 {
                     suit: SUIT.VSUIT2,
-                    number: VNUMBER_CONSECUTIVE3,
+                    number: VNUMBER.CONSECUTIVE3,
                     count: 3
                 },
                 {
                     suit: SUIT.VSUIT2,
-                    number: VNUMBER_CONSECUTIVE4,
+                    number: VNUMBER.CONSECUTIVE4,
                     count: 4
                 }
             ]
@@ -147,17 +147,17 @@ export const handsConsecutive = {
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 4
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE2,
+                    number: VNUMBER.CONSECUTIVE2,
                     count: 2
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE3,
+                    number: VNUMBER.CONSECUTIVE3,
                     count: 4
                 }
             ]
@@ -176,17 +176,17 @@ export const handsConsecutive = {
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 4
                 },
                 {
                     suit: SUIT.VSUIT2,
-                    number: VNUMBER_CONSECUTIVE2,
+                    number: VNUMBER.CONSECUTIVE2,
                     count: 2
                 },
                 {
                     suit: SUIT.VSUIT3,
-                    number: VNUMBER_CONSECUTIVE3,
+                    number: VNUMBER.CONSECUTIVE3,
                     count: 4
                 }
             ]
@@ -205,27 +205,27 @@ export const handsConsecutive = {
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 1
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE2,
+                    number: VNUMBER.CONSECUTIVE2,
                     count: 1
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE3,
+                    number: VNUMBER.CONSECUTIVE3,
                     count: 1
                 },
                 {
                     suit: SUIT.VSUIT2,
-                    number: VNUMBER_CONSECUTIVE4,
+                    number: VNUMBER.CONSECUTIVE4,
                     count: 4
                 },
                 {
                     suit: SUIT.VSUIT3,
-                    number: VNUMBER_CONSECUTIVE5,
+                    number: VNUMBER.CONSECUTIVE5,
                     count: 4
                 }
             ]
@@ -244,17 +244,17 @@ export const handsConsecutive = {
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 2
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE2,
+                    number: VNUMBER.CONSECUTIVE2,
                     count: 3
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE3,
+                    number: VNUMBER.CONSECUTIVE3,
                     count: 4
                 },
                 {
@@ -273,17 +273,17 @@ export const handsConsecutive = {
             components: [
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 3
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE2,
+                    number: VNUMBER.CONSECUTIVE2,
                     count: 3
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE3,
+                    number: VNUMBER.CONSECUTIVE3,
                     count: 4
                 },
                 {
@@ -307,37 +307,37 @@ export const handsConsecutive = {
             components: [
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 2
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE2,
+                    number: VNUMBER.CONSECUTIVE2,
                     count: 1
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE3,
+                    number: VNUMBER.CONSECUTIVE3,
                     count: 1
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE4,
+                    number: VNUMBER.CONSECUTIVE4,
                     count: 1
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE5,
+                    number: VNUMBER.CONSECUTIVE5,
                     count: 1
                 },
                 {
                     suit: SUIT.VSUIT2,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 4
                 },
                 {
                     suit: SUIT.VSUIT3,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 4
                 }
             ]
@@ -356,32 +356,32 @@ export const handsConsecutive = {
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 1
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE2,
+                    number: VNUMBER.CONSECUTIVE2,
                     count: 2
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: VNUMBER_CONSECUTIVE3,
+                    number: VNUMBER.CONSECUTIVE3,
                     count: 3
                 },
                 {
                     suit: SUIT.VSUIT2,
-                    number: VNUMBER_CONSECUTIVE1,
+                    number: VNUMBER.CONSECUTIVE1,
                     count: 1
                 },
                 {
                     suit: SUIT.VSUIT2,
-                    number: VNUMBER_CONSECUTIVE2,
+                    number: VNUMBER.CONSECUTIVE2,
                     count: 2
                 },
                 {
                     suit: SUIT.VSUIT2,
-                    number: VNUMBER_CONSECUTIVE3,
+                    number: VNUMBER.CONSECUTIVE3,
                     count: 3
                 }
             ]

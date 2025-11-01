@@ -47,7 +47,7 @@ export const handsLikeNumbers = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.VSUIT1,
                     number: VNUMBER.CONSECUTIVE1,
@@ -81,7 +81,7 @@ export const handsLikeNumbers = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 5
-                },                
+                },
                 {
                     suit: SUIT.VSUIT1,
                     number: VNUMBER.CONSECUTIVE1,
@@ -98,6 +98,6 @@ export const handsLikeNumbers = {
                     count: 4
                 }
             ]
-        }        
+        }
     ]
 }

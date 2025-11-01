@@ -14,8 +14,8 @@ export class GameLogic {
         this.scene = scene;
         this.state = STATE.INIT;
         this.table = null; // Will be set later
-        this.card = new Card();
-        this.gameAI = new GameAI(this.card, this.table);
+        this.card = null;
+        this.gameAI = null;
         this.currPlayer = 0;
         this.button1Function = null;
         this.button2Function = null;
@@ -32,12 +32,30 @@ export class GameLogic {
         this.discardTile = null;
         this.gameResult = { mahjong: false,
                             winner: 0};
+        this.updateUI();
     }
 
-    init() {
-        // INIT
-        this.state = STATE.INIT;
-        this.updateUI();
+    async init() {
+        const year = window.settingsManager.getCardYear();
+        this.card = new Card(year);
+        await this.card.init();
+        this.gameAI = new GameAI(this.card, this.table);
+
+        printMessage("Using " + this.card.year + " Mahjong card\n\n");
+
+        // Populate hand select
+        const handSelect = window.document.getElementById("handSelect");
+        for (const group of this.card.validHandGroups) {
+            const optionGroup = window.document.createElement("optgroup");
+            optionGroup.label = group.groupDescription;
+            handSelect.add(optionGroup);                    
+        
+            for (const validHand of group.hands) {
+                const option = window.document.createElement("option");
+                option.text = validHand.description;
+                handSelect.add(option);                    
+            }
+        }
 
         // Start button
         const startButton = window.document.getElementById("start");
@@ -842,26 +860,12 @@ export class GameLogic {
             case STATE.INIT:
 
             printMessage("American Mahjong v1.00\n");
-            printMessage("Using " + this.card.year + " Mahjong card\n\n");
             printMessage("Press Start Game button\n");
             sort1.style.display = "none";
             sort2.style.display = "none";
             hint.style.display = "none";
             settingsButton.style.display = "";
             window.document.getElementById("controldiv").style.visibility = "visible";
-
-            // Populate hand select
-            for (const group of this.card.validHandGroups) {
-                const optionGroup = window.document.createElement("optgroup");
-                optionGroup.label = group.groupDescription;
-                handSelect.add(optionGroup);                    
-            
-                for (const validHand of group.hands) {
-                    const option = window.document.createElement("option");
-                    option.text = validHand.description;
-                    handSelect.add(option);                    
-                }
-            }
 
             // Populate number of tiles select
             for (let i = 1; i <= 14; i++) {

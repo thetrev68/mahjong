@@ -9,7 +9,7 @@ import {SUIT, DRAGON, WIND, VNUMBER} from "../../constants.js";
 
 //  2020 card
 
-export class CardTest2020 {
+export class CardTest {
     constructor(card) {
         this.card = card;
     }
@@ -101,14 +101,14 @@ export class CardTest2020 {
             hand.insertHidden(new Tile(SUIT.DOT, 2));
             hand.insertHidden(new Tile(SUIT.DOT, 2));
 
-            
+
             debugPrint("FF 2020 NEWS 2020 (any 2 suits, 2s match in each 2020, concealed)\n");
 
             const validationInfo = this.card.validateHand14(hand);
             this.card.printValidationInfo(validationInfo);
 
-        }     
-      
+        }
+
     }
 
 }

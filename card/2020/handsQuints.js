@@ -18,7 +18,7 @@ export const handsQuints = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 5
-                },                
+                },
                 {
                     suit: SUIT.DRAGON,
                     number: DRAGON.RED,
@@ -30,7 +30,7 @@ export const handsQuints = {
                     count: 5
                 }
             ]
-        },    
+        },
         {
             description: "FFFFF DDDD 11111 (any no. in any suit, green dragon)",
             vsuitCount: 1,
@@ -42,7 +42,7 @@ export const handsQuints = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 5
-                },                
+                },
                 {
                     suit: SUIT.DRAGON,
                     number: DRAGON.GREEN,
@@ -54,7 +54,7 @@ export const handsQuints = {
                     count: 5
                 }
             ]
-        },   
+        },
         {
             description: "FFFFF DDDD 11111 (any no. in any suit, white dragon)",
             vsuitCount: 1,
@@ -66,7 +66,7 @@ export const handsQuints = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 5
-                },                
+                },
                 {
                     suit: SUIT.DRAGON,
                     number: DRAGON.WHITE,
@@ -78,7 +78,7 @@ export const handsQuints = {
                     count: 5
                 }
             ]
-        },                       
+        },
         {
             description: "11 22 33333 33333 (3 suits, 3 consecutive numbers)",
             vsuitCount: 3,
@@ -107,7 +107,7 @@ export const handsQuints = {
                     count: 5
                 }
             ]
-        },        
+        },
         {
             description: "11111 3333 55555  (1 suit)",
             vsuitCount: 1,
@@ -131,7 +131,7 @@ export const handsQuints = {
                     count: 5
                 }
             ]
-        }, 
+        },
         {
             description: "55555 7777 99999  (1 suit)",
             vsuitCount: 1,
@@ -155,7 +155,7 @@ export const handsQuints = {
                     count: 5
                 }
             ]
-        }, 
+        },
         {
             description: "11111 22 33 44444 (1 suits, 4 consecutive numbers)",
             vsuitCount: 1,
@@ -184,7 +184,7 @@ export const handsQuints = {
                     count: 5
                 }
             ]
-        },        
+        }
     ]
 }
 

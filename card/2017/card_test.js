@@ -9,7 +9,7 @@ import {SUIT, DRAGON, WIND, VNUMBER} from "../../constants.js";
 
 // Test 2017 card
 
-export class CardTest2017 {
+export class CardTest {
     constructor(card) {
         this.card = card;
     }

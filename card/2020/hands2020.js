@@ -67,7 +67,7 @@ export const hands2020 = {
                     suit: SUIT.DRAGON,
                     number: DRAGON.GREEN,
                     count: 4
-                },                
+                },
                 {
                     suit: SUIT.VSUIT1,
                     number: 2,
@@ -91,7 +91,7 @@ export const hands2020 = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 5
-                },                
+                },
                 {
                     suit: SUIT.VSUIT1,
                     number: 2,
@@ -106,7 +106,7 @@ export const hands2020 = {
                     suit: SUIT.VSUIT3,
                     number: 2,
                     count: 2
-                },
+                }
 
             ]
         },

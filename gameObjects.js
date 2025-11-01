@@ -102,7 +102,7 @@ export class Tile {
         maskGraphics.fillStyle(0xffffff);
         let maskSizeW = SPRITE_WIDTH;
         let maskSizeH = SPRITE_HEIGHT;
-        let cornerRadius = 6;
+        const cornerRadius = 6;
 
         // Reduce mask size for scaled tiles to prevent white overlap
         if (this.sprite.scaleX < 1.0 || this.sprite.scaleY < 1.0) {
@@ -110,7 +110,7 @@ export class Tile {
             maskSizeH = SPRITE_HEIGHT - TILE_GAP;
         }
 
-        maskGraphics.fillRoundedRect(-maskSizeW/2, -maskSizeH/2, maskSizeW, maskSizeH, cornerRadius);
+        maskGraphics.fillRoundedRect(-maskSizeW / 2, -maskSizeH / 2, maskSizeW, maskSizeH, cornerRadius);
         const mask = maskGraphics.createGeometryMask();
         this.sprite.setMask(mask);
         this.spriteBack.setMask(mask);
@@ -148,7 +148,7 @@ export class Tile {
     set angle(angle) {
         this.sprite.angle = angle;
         this.spriteBack.angle = angle;
-        
+
         // Rotate mask geometry to match tile rotation
         if (this.mask && this.mask.geometryMask) {
             this.mask.geometryMask.angle = angle;
@@ -179,12 +179,12 @@ export class Tile {
         this.sprite.depth = Math.max(1, savedDepth);
         this.spriteBack.depth = Math.max(1, savedDepth);
 
-        let tweenConfig = {
+        const tweenConfig = {
             targets: this.sprite,
-            x: x,
-            y: y,
+            x,
+            y,
             duration: time,
-            ease: 'Linear',
+            ease: "Linear",
             onUpdate: () => {
                 this.spriteBack.x = this.sprite.x;
                 this.spriteBack.y = this.sprite.y;
@@ -358,9 +358,9 @@ export class Wall {
         let offsetX = 200;
         let offsetY = 200;
         for (const tile of this.tileArray) {
-            //tile.x = offsetX;
-            //tile.y = offsetY;
-            //tile.angle = 0;
+            // Tile.x = offsetX;
+            // Tile.y = offsetY;
+            // Tile.angle = 0;
             tile.animate(offsetX, offsetY, 0);
             tile.scale = WALL_SCALE;
             tile.showTile(true, false);
@@ -377,7 +377,9 @@ export class Wall {
         if (offsetX !== 200) {
             offsetY += SPRITE_HEIGHT * WALL_SCALE + TILE_GAP;
         }
-        return { offsetX: 200, offsetY };
+
+        return {offsetX: 200,
+            offsetY};
     }
 
     showWallBack() {
@@ -414,9 +416,9 @@ export class Discards {
         // Calculate positions for all discarded tiles
         for (const tile of this.tileArray) {
             const DISCARD_SCALE = 0.6;
-            //tile.x = offsetX;
-            //tile.y = offsetY;
-            //tile.angle = 0;
+            // Tile.x = offsetX;
+            // Tile.y = offsetY;
+            // Tile.angle = 0;
             tile.sprite.setDepth(0);
             tile.spriteBack.setDepth(0);
             tile.animate(offsetX, offsetY, 0);

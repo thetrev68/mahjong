@@ -2,31 +2,29 @@ import {debugPrint, debugTrace, gdebug} from "../utils.js";
 import {Tile} from "../gameObjects.js";
 import {Hand} from "../gameObjects_hand.js";
 import {SUIT, DRAGON, WIND, VNUMBER} from "../constants.js";
-//import {CardTest2017} from "../card/2017/card_test.js";
-//import {CardTest2018} from "../card/2018/card_test.js";
-//import {CardTest2019} from "../card/2019/card_test.js";
-import {CardTest2020} from "../card/2020/card_test.js";
-//import {validHandGroups2017} from "../card/2017/card2017.js"
-//import {validHandGroups2018} from "../card/2018/card2018.js"
-//import {validHandGroups2019} from "../card/2019/card2019.js"
-import {validHandGroups2020} from "../card/2020/card2020.js"
-
 
 // PRIVATE CONSTANTS
 
 // PRIVATE GLOBALS
 
 
-// Currently support 2017, 2018, 2019, 2020 card
+// Currently support 2017, 2018, 2019, 2020, 2025 card
 
 export class Card {
-    constructor() {
-        this.year = "2020";
-        this.validHandGroups = validHandGroups2020;
+    constructor(year) {
+        this.year = year;
+        this.validHandGroups = null;
+    }
+
+    async init() {
+        const year = this.year;
+        const { validHandGroups } = await import(`./${year}/card${year}.js`);
+        this.validHandGroups = validHandGroups;
 
         // Debug only
         if (0) {
-            const cardTest = new CardTest2020(this);
+            const { CardTest } = await import(`./${year}/card_test.js`);
+            const cardTest = new CardTest(this);
             cardTest.test();
         }
 

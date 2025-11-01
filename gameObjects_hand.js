@@ -120,7 +120,7 @@ export class TileSet {
     }
 
     moveJokerToFront() {
-        let jokers = [];
+        const jokers = [];
 
         for (const tile of this.tileArray) {
             if (tile.suit == SUIT.JOKER) {
@@ -137,7 +137,7 @@ export class TileSet {
     }
 
     moveFlowerToFront() {
-        let flowers = [];
+        const flowers = [];
 
         for (const tile of this.tileArray) {
             if (tile.suit == SUIT.FLOWER) {
@@ -175,7 +175,10 @@ export class TileSet {
         // Width of tileset including gaps between tiles
         const tileWidth = this.getTileWidth(playerInfo);
         const numTiles = this.tileArray.length;
-        if (numTiles === 0) return 0;
+        if (numTiles === 0) {
+            return 0;
+        }
+
         return numTiles * tileWidth + (numTiles - 1) * TILE_GAP;
     }
 
@@ -188,9 +191,9 @@ export class TileSet {
 
         for (let i = 0; i < this.tileArray.length; i++) {
             const tile = this.tileArray[i];
-            //tile.x = x;
-            //tile.y = y;
-            //tile.angle = playerInfo.angle;
+            // Tile.x = x;
+            // Tile.y = y;
+            // Tile.angle = playerInfo.angle;
             tile.animate(x, y, playerInfo.angle);
             if (playerInfo.id === PLAYER.BOTTOM) {
                 tile.scale = 1.0;
@@ -249,15 +252,15 @@ export class TileSet {
     checkOverlap(tile) {
         let overlappedTile = null;
         let maxarea = 0;
-        let tileBounds = tile.sprite.getBounds();
-        let tileArea = (tileBounds.width * tileBounds.height);
+        const tileBounds = tile.sprite.getBounds();
+        const tileArea = (tileBounds.width * tileBounds.height);
 
         for (const tempTile of this.tileArray) {
             if (tile === tempTile) {
                 continue;
             }
-            let intersectRect = Phaser.Geom.Rectangle.Intersection(tileBounds, tempTile.sprite.getBounds());
-            let area = intersectRect.width * intersectRect.height;
+            const intersectRect = Phaser.Geom.Rectangle.Intersection(tileBounds, tempTile.sprite.getBounds());
+            const area = intersectRect.width * intersectRect.height;
 
             if (area && (area > maxarea) && ((area / tileArea) > 0.7)) {
                 maxarea = area;
@@ -270,19 +273,19 @@ export class TileSet {
 
     swapTiles(tile, overlappedTile) {
         // Swap tile sprite positions
-        let tempx = tile.origX;
-        let tempy = tile.origY;
+        const tempx = tile.origX;
+        const tempy = tile.origY;
 
         tile.origX = overlappedTile.x;
-        tile.origy =  overlappedTile.y;
+        tile.origy = overlappedTile.y;
         overlappedTile.x = tempx;
-        overlappedTile.y = tempy;        
+        overlappedTile.y = tempy;
 
         // Swap tile positions in the tile array
         const tileIndex = this.tileArray.indexOf(tile);
         const overlappedTileIndex = this.tileArray.indexOf(overlappedTile);
 
-        let temp = this.tileArray[tileIndex];
+        const temp = this.tileArray[tileIndex];
         this.tileArray[tileIndex] = this.tileArray[overlappedTileIndex];
         this.tileArray[overlappedTileIndex] = temp;
     }
@@ -507,7 +510,7 @@ export class Hand {
         if (tileSet.inputEnabled) {
             tile.sprite.setInteractive();
 
-            tile.sprite.on('pointerup', (pointer) => {
+            tile.sprite.on("pointerup", (pointer) => {
                 if (tile.drag) {
                     return;
                 }
@@ -515,27 +518,27 @@ export class Hand {
                 let minSelect = 3;
 
                 switch (this.gameLogic.state) {
-                    case STATE.LOOP_CHOOSE_DISCARD:
-                        maxSelect = 1;
-                        minSelect = 1;
-                        break;
-                    case STATE.CHARLESTON1:
-                    case STATE.CHARLESTON2:
-                        maxSelect = 3;
-                        minSelect = 3;
-                        break;
-                    case STATE.COURTESY:
-                        maxSelect = this.gameLogic.table.player02CourtesyVote;
-                        minSelect = this.gameLogic.table.player02CourtesyVote;
-                        break;
-                    case STATE.LOOP_EXPOSE_TILES:
-                        maxSelect = 4;
-                        minSelect = 2;
-                        break;
-                    default:
-                        maxSelect = 0;
-                        minSelect = 0;
-                        break;
+                case STATE.LOOP_CHOOSE_DISCARD:
+                    maxSelect = 1;
+                    minSelect = 1;
+                    break;
+                case STATE.CHARLESTON1:
+                case STATE.CHARLESTON2:
+                    maxSelect = 3;
+                    minSelect = 3;
+                    break;
+                case STATE.COURTESY:
+                    maxSelect = this.gameLogic.table.player02CourtesyVote;
+                    minSelect = this.gameLogic.table.player02CourtesyVote;
+                    break;
+                case STATE.LOOP_EXPOSE_TILES:
+                    maxSelect = 4;
+                    minSelect = 2;
+                    break;
+                default:
+                    maxSelect = 0;
+                    minSelect = 0;
+                    break;
                 }
                 console.log(`Tile clicked. State: ${this.gameLogic.state}, selectCount: ${tileSet.selectCount}, min: ${minSelect}, max: ${maxSelect}`);
 
@@ -546,7 +549,7 @@ export class Hand {
                         tile.animate(tile.origX, tile.origY, tile.angle);
                         tileSet.selectCount--;
                     } else if (tileSet.selectCount < maxSelect) {
-                         // Select
+                        // Select
                         let bSelectOk = true;
 
                         if (this.gameLogic.state === STATE.LOOP_EXPOSE_TILES) {
@@ -584,14 +587,14 @@ export class Hand {
 
             // Enable drag and drop
             this.scene.input.setDraggable(tile.sprite);
-            tile.sprite.on('dragstart', (pointer, dragX, dragY) => {
+            tile.sprite.on("dragstart", (pointer, dragX, dragY) => {
                 tile.drag = true;
-    if (!tile.selected) {
-     tile.origX = tile.x;
-     tile.origY = tile.y;
-    }
+                if (!tile.selected) {
+                    tile.origX = tile.x;
+                    tile.origY = tile.y;
+                }
             });
-            tile.sprite.on('drag', (pointer, dragX, dragY) => {
+            tile.sprite.on("drag", (pointer, dragX, dragY) => {
                 tile.sprite.x = dragX;
                 tile.sprite.y = dragY;
                 const overlappedTile = tileSet.checkOverlap(tile);
@@ -599,7 +602,7 @@ export class Hand {
                     tileSet.swapTiles(tile, overlappedTile);
                 }
             });
-            tile.sprite.on('dragend', (pointer, dragX, dragY, dropped) => {
+            tile.sprite.on("dragend", (pointer, dragX, dragY, dropped) => {
                 tile.drag = false;
             });
         }
@@ -643,19 +646,19 @@ export class Hand {
         for (const tile of tileArray) {
             if (tile.suit === SUIT.JOKER) {
                 tile.sprite.setInteractive();
-                tile.sprite.on('pointerup', (pointer) => {
+                tile.sprite.on("pointerup", (pointer) => {
                     let maxSelect = 1;
                     let minSelect = 1;
 
                     switch (this.gameLogic.state) {
-                        case STATE.LOOP_CHOOSE_DISCARD:
-                            maxSelect = 1;
-                            minSelect = 1;
-                            break;
-                        default:
-                            maxSelect = 0;
-                            minSelect = 0;
-                            break;
+                    case STATE.LOOP_CHOOSE_DISCARD:
+                        maxSelect = 1;
+                        minSelect = 1;
+                        break;
+                    default:
+                        maxSelect = 0;
+                        minSelect = 0;
+                        break;
                     }
 
                     if (maxSelect) {
@@ -692,21 +695,21 @@ export class Hand {
                                 tile.origY = tile.y;
 
                                 switch (tile.angle) {
-                                    case 270:
-                                    case -90:
-                                        tile.x -= 25;
-                                        break;
-                                    case 180:
-                                    case -180:
-                                        tile.y += 25;
-                                        break;
-                                    case 90:
-                                    case -270:
-                                        tile.x += 25;
-                                        break;
-                                    default:
-                                        tile.y -= 25;
-                                        break;
+                                case 270:
+                                case -90:
+                                    tile.x -= 25;
+                                    break;
+                                case 180:
+                                case -180:
+                                    tile.y += 25;
+                                    break;
+                                case 90:
+                                case -270:
+                                    tile.x += 25;
+                                    break;
+                                default:
+                                    tile.y -= 25;
+                                    break;
                                 }
                                 tileSet.selectCount++;
                                 tile.selected = !tile.selected;

@@ -47,6 +47,7 @@ class SettingsManager {
         const handSelect = document.getElementById("handSelect");
         const numTileSelect = document.getElementById("numTileSelect");
         const skipCharlestonCheckbox = document.getElementById("skipCharlestonCheckbox");
+        const yearSelect = document.getElementById("yearSelect");
 
         if (handSelect) {
             handSelect.addEventListener("change", () => this.saveTrainingSettings());
@@ -56,6 +57,9 @@ class SettingsManager {
         }
         if (skipCharlestonCheckbox) {
             skipCharlestonCheckbox.addEventListener("change", () => this.saveTrainingSettings());
+        }
+        if (yearSelect) {
+            yearSelect.addEventListener("change", () => this.saveYearSettings());
         }
     }
 
@@ -69,6 +73,10 @@ class SettingsManager {
         this.overlay.style.display = "none";
         // Return focus to settings button
         this.settingsButton.focus();
+    }
+
+    getCardYear() {
+        return this.getSetting("cardYear", "2025");
     }
 
     // Settings persistence using localStorage
@@ -111,6 +119,9 @@ class SettingsManager {
 
         // Apply training mode settings
         this.applyTrainingSettings(settings);
+
+        // Apply year selection settings
+        this.applyYearSettings(settings);
     }
 
     applyTrainingSettings(settings) {
@@ -137,6 +148,14 @@ class SettingsManager {
 
         // Update form visibility based on loaded settings
         this.updateTrainingFormVisibility();
+    }
+
+    applyYearSettings(settings) {
+        const yearSelect = document.getElementById("yearSelect");
+
+        if (yearSelect && settings.cardYear) {
+            yearSelect.value = settings.cardYear;
+        }
     }
 
     updateTrainingFormVisibility() {
@@ -173,6 +192,13 @@ class SettingsManager {
         Object.keys(trainingSettings).forEach((key) => {
             this.saveSetting(key, trainingSettings[key]);
         });
+    }
+
+    saveYearSettings() {
+        const yearSelect = document.getElementById("yearSelect");
+        if (yearSelect) {
+            this.saveSetting("cardYear", yearSelect.value);
+        }
     }
 
     // Framework for future settings sections

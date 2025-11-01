@@ -35,7 +35,7 @@ export const handsWindsDragons = {
                     count: 2
                 }
             ]
-        },        
+        },
         {
             description: "NNNN E W SSSS 2019",
             vsuitCount: 1,
@@ -47,7 +47,7 @@ export const handsWindsDragons = {
                     suit: SUIT.DRAGON,
                     number: DRAGON.WHITE,
                     count: 4
-                },                
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.NORTH,
@@ -82,9 +82,9 @@ export const handsWindsDragons = {
                     suit: SUIT.VSUIT1,
                     number: 9,
                     count: 1
-                }                
+                }
             ]
-        },        
+        },
         {
             description: "NNNN DD DD DD SSSS",
             vsuitCount: 3,
@@ -106,12 +106,12 @@ export const handsWindsDragons = {
                     suit: SUIT.VSUIT2_DRAGON,
                     number: 0,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.VSUIT3_DRAGON,
                     number: 0,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.SOUTH,
@@ -140,12 +140,12 @@ export const handsWindsDragons = {
                     suit: SUIT.VSUIT2_DRAGON,
                     number: 0,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.VSUIT3_DRAGON,
                     number: 0,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.WEST,
@@ -164,7 +164,7 @@ export const handsWindsDragons = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.NORTH,
@@ -184,7 +184,7 @@ export const handsWindsDragons = {
                     suit: SUIT.VSUIT2,
                     number: VNUMBER.CONSECUTIVE1,
                     count: 4
-                },
+                }
 
             ]
         },
@@ -199,7 +199,7 @@ export const handsWindsDragons = {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
-                },                
+                },
                 {
                     suit: SUIT.WIND,
                     number: WIND.EAST,
@@ -219,7 +219,7 @@ export const handsWindsDragons = {
                     suit: SUIT.VSUIT2,
                     number: VNUMBER.CONSECUTIVE1,
                     count: 4
-                },
+                }
 
             ]
         },

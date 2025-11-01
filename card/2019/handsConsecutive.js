@@ -292,7 +292,7 @@ export const handsConsecutive = {
                     count: 3
                 }
             ]
-        },
-     
+        }
+
     ]
 };
