@@ -90,6 +90,7 @@ export class Tile {
 
     create() {
         this.sprite = this.scene.add.sprite(0, 0, "tiles", this.spriteName);
+        console.log("Tile.create() called for tile:", this.suit, this.number, "sprite:", this.sprite);
         this.sprite.visible = false;
         this.sprite.setOrigin(0.5, 0.5);
 
@@ -155,6 +156,10 @@ export class Tile {
         }
     }
 
+    get scale() {
+        return this.sprite.scale;
+    }
+
     set scale(scale) {
         this.sprite.setScale(scale);
         this.spriteBack.setScale(scale);
@@ -213,6 +218,7 @@ export class Tile {
             }
         };
 
+        // eslint-disable-next-line new-cap
         if (Phaser.Math.Angle.Wrap(this.sprite.angle) !== Phaser.Math.Angle.Wrap(angle)) {
             tweenConfig.angle = angle;
         }
@@ -241,7 +247,8 @@ export class Tile {
         }
 
         // Debug - all tiles face up
-        if (0) {
+        // eslint-disable-next-line no-constant-condition
+        if (false) {
             this.sprite.visible = visible;
             this.spriteBack.visible = false;
         }
@@ -309,6 +316,7 @@ export class Wall {
     }
 
     destroy() {
+        // Intentionally empty
     }
 
     getCount() {
@@ -362,20 +370,17 @@ export class Wall {
             // Tile.y = offsetY;
             // Tile.angle = 0;
             tile.animate(offsetX, offsetY, 0);
-            tile.scale = WALL_SCALE;
-            tile.showTile(true, false);
-
-            offsetX += SPRITE_WIDTH * WALL_SCALE + TILE_GAP;
+            offsetX += (SPRITE_WIDTH * WALL_SCALE) + TILE_GAP;
 
             if (offsetX > 800) {
                 offsetX = 200;
-                offsetY += SPRITE_HEIGHT * WALL_SCALE + TILE_GAP;
+                offsetY += (SPRITE_HEIGHT * WALL_SCALE) + TILE_GAP;
             }
         }
 
         // Return position where discarded tiles should start
         if (offsetX !== 200) {
-            offsetY += SPRITE_HEIGHT * WALL_SCALE + TILE_GAP;
+            offsetY += (SPRITE_HEIGHT * WALL_SCALE) + TILE_GAP;
         }
 
         return {offsetX: 200,
@@ -390,14 +395,16 @@ export class Wall {
         let offsetY = 200;
         for (const tile of this.tileArray) {
             tile.animate(offsetX, offsetY, 0);
-            tile.scale = WALL_SCALE; // This will update the mask
-            tile.showTile(true, false); // Show face down
+            // This will update the mask
+            tile.scale = WALL_SCALE;
+            // Show face down
+            tile.showTile(true, false);
 
-            offsetX += SPRITE_WIDTH * WALL_SCALE + TILE_GAP;
+            offsetX += (SPRITE_WIDTH * WALL_SCALE) + TILE_GAP;
 
             if (offsetX > 800) {
                 offsetX = 200;
-                offsetY += SPRITE_HEIGHT * WALL_SCALE + TILE_GAP;
+                offsetY += (SPRITE_HEIGHT * WALL_SCALE) + TILE_GAP;
             }
         }
     }
@@ -414,22 +421,24 @@ export class Discards {
 
     showDiscards(offsetX, offsetY) {
         // Calculate positions for all discarded tiles
+        let currentOffsetX = offsetX;
+        let currentOffsetY = offsetY;
         for (const tile of this.tileArray) {
             const DISCARD_SCALE = 0.6;
-            // Tile.x = offsetX;
-            // Tile.y = offsetY;
+            // Tile.x = currentOffsetX;
+            // Tile.y = currentOffsetY;
             // Tile.angle = 0;
             tile.sprite.setDepth(0);
             tile.spriteBack.setDepth(0);
-            tile.animate(offsetX, offsetY, 0);
+            tile.animate(currentOffsetX, currentOffsetY, 0);
             tile.scale = DISCARD_SCALE;
             tile.showTile(true, true);
 
-            offsetX += SPRITE_WIDTH * DISCARD_SCALE + TILE_GAP;
+            currentOffsetX += (SPRITE_WIDTH * DISCARD_SCALE) + TILE_GAP;
 
-            if (offsetX > 800) {
-                offsetX = 200;
-                offsetY += SPRITE_HEIGHT * DISCARD_SCALE + TILE_GAP;
+            if (currentOffsetX > 800) {
+                currentOffsetX = 200;
+                currentOffsetY += (SPRITE_HEIGHT * DISCARD_SCALE) + TILE_GAP;
             }
         }
     }

@@ -1,5 +1,5 @@
-import {debugPrint, debugTrace, gdebug} from "./utils.js";
-import {STATE, PLAYER_OPTION, PLAYER, SUIT, VNUMBER, DRAGON, WIND} from "./constants.js";
+import {debugPrint, gdebug} from "./utils.js";
+import {PLAYER_OPTION, SUIT, VNUMBER} from "./constants.js";
 import {Tile} from "./gameObjects.js";
 
 // PRIVATE CONSTANTS
@@ -74,7 +74,8 @@ export class GameAI {
                 // Add penalty for discarding tiles that significantly hurt high-value hands
                 const delta = copyHandRankArray[j].rank - rankCardHands[j].rank;
                 if (delta < -10) {
-                    scale *= 2.0; // Double penalty for large negative impacts
+                    // Double penalty for large negative impacts
+                    scale *= 2.0;
                 }
                 rank += delta * scale;
             }
@@ -246,7 +247,7 @@ export class GameAI {
     // Input: - compInfo.tileArray with discardTile as one of the tiles
     //          Guaranteed to be hidden.
     // Output: true - exposure ok (pong/kong/quint)
-    validateComponentForExposure(player, compInfo, discardTile) {
+    validateComponentForExposure(player, compInfo) {
 
         // Reject single/pairs components
         if (compInfo.component.count < 3) {
@@ -331,7 +332,7 @@ export class GameAI {
 
         // Player 1-3 will only have 13 tiles in their hands during the Charleston
         // Add a bogus tile to make 14.
-        const tileRankArray = this.rankTiles13(this.table.players[player].hand)
+        const tileRankArray = this.rankTiles13(this.table.players[player].hand);
 
         // Pass tiles
         for (let i = 0; i < 3; i++) {

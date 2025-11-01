@@ -247,14 +247,12 @@ export class Table {
     //      - winningPlayer (valid only for exposure, mahjong)
     processClaimArray(currPlayer, claimArray, discardTile) {
         let numDiscard = 0;
-        let numExposure = 0;
         let numMahjong = 0;
 
         // Count types of claims
         for (let i = 0; i < 4; i++) {
             switch (claimArray[i].playerOption) {
             case PLAYER_OPTION.EXPOSE_TILES:
-                numExposure++;
                 break;
             case PLAYER_OPTION.DISCARD_TILE:
                 numDiscard++;

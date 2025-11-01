@@ -54,6 +54,14 @@ class GameScene extends Phaser.Scene {
         // Set up the UI buttons
         this.enableCommandBarDrag();
         this.resize(this.sys.game.canvas.width, this.sys.game.canvas.height);
+
+        // Start Game button event listener
+        const startButton = document.getElementById("start");
+        if (startButton) {
+            startButton.addEventListener("click", () => {
+                this.gGameLogic.start();
+            });
+        }
     }
 
     update() {
@@ -125,7 +133,7 @@ class GameScene extends Phaser.Scene {
             }
             const boundsRect = this.getDragBounds();
             const rect = bar.getBoundingClientRect();
-            const tentativeLeft = event.clientX - pointerOffsetX + (rect.width || bar.offsetWidth || 0) / 2;
+            const tentativeLeft = event.clientX - pointerOffsetX + ((rect.width || bar.offsetWidth || 0) / 2);
             const tentativeTop = event.clientY - pointerOffsetY;
             const {left, top} = this.getClampedCommandBarPosition(tentativeLeft, tentativeTop, bar, boundsRect);
 
@@ -144,8 +152,8 @@ class GameScene extends Phaser.Scene {
             bar.classList.remove("command-bar--dragging");
             try {
                 bar.releasePointerCapture(event.pointerId);
-            } catch (err) {
-                // Ignore if pointer capture was not set
+            } catch {
+                // Ignore if release fails
             }
             window.removeEventListener("pointermove", onPointerMove);
             window.removeEventListener("pointerup", onPointerUp);
@@ -168,7 +176,7 @@ class GameScene extends Phaser.Scene {
 
             try {
                 bar.setPointerCapture(event.pointerId);
-            } catch (err) {
+            } catch {
                 // Ignore if capture fails (older browsers)
             }
 
@@ -188,7 +196,8 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    resize(gameSize, baseSize, displaySize, resolution) {
+    // eslint-disable-next-line no-unused-vars
+    resize(_gameSize, _baseSize, _displaySize, _resolution) {
         const uicenterdiv = document.getElementById("uicenterdiv");
         const canvas = this.sys.canvas;
 

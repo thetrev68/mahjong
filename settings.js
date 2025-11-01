@@ -93,18 +93,22 @@ class SettingsManager {
     getSetting(key, defaultValue = null) {
         const settings = this.getAllSettings();
 
-        return settings[key] !== undefined
-            ? settings[key]
-            : defaultValue;
+        if (Object.prototype.hasOwnProperty.call(settings, key)) {
+            return settings[key];
+        }
+
+        return defaultValue;
     }
 
     getAllSettings() {
         try {
             const stored = localStorage.getItem("mahjong-settings");
 
-            return stored
-                ? JSON.parse(stored)
-                : {};
+            if (stored) {
+                return JSON.parse(stored);
+            }
+
+            return {};
         } catch (error) {
             console.warn("Failed to load settings:", error);
 
@@ -130,7 +134,7 @@ class SettingsManager {
         const numTileSelect = document.getElementById("numTileSelect");
         const skipCharlestonCheckbox = document.getElementById("skipCharlestonCheckbox");
 
-        if (trainCheckbox && settings.trainingMode !== undefined) {
+        if (trainCheckbox && Object.prototype.hasOwnProperty.call(settings, "trainingMode")) {
             trainCheckbox.checked = settings.trainingMode;
         }
 
@@ -142,7 +146,7 @@ class SettingsManager {
             numTileSelect.value = settings.trainingTileCount.toString();
         }
 
-        if (skipCharlestonCheckbox && settings.skipCharleston !== undefined) {
+        if (skipCharlestonCheckbox && Object.prototype.hasOwnProperty.call(settings, "skipCharleston")) {
             skipCharlestonCheckbox.checked = settings.skipCharleston;
         }
 
@@ -173,20 +177,31 @@ class SettingsManager {
         const numTileSelect = document.getElementById("numTileSelect");
         const skipCharlestonCheckbox = document.getElementById("skipCharlestonCheckbox");
 
-        const trainingSettings = {
-            trainingMode: trainCheckbox
-                ? trainCheckbox.checked
-                : false,
-            trainingHand: handSelect
-                ? handSelect.value
-                : "",
-            trainingTileCount: numTileSelect
-                ? parseInt(numTileSelect.value, 10)
-                : 9,
-            skipCharleston: skipCharlestonCheckbox
-                ? skipCharlestonCheckbox.checked
-                : true
-        };
+        const trainingSettings = {};
+
+        if (trainCheckbox) {
+            trainingSettings.trainingMode = trainCheckbox.checked;
+        } else {
+            trainingSettings.trainingMode = false;
+        }
+
+        if (handSelect) {
+            trainingSettings.trainingHand = handSelect.value;
+        } else {
+            trainingSettings.trainingHand = "";
+        }
+
+        if (numTileSelect) {
+            trainingSettings.trainingTileCount = parseInt(numTileSelect.value, 10);
+        } else {
+            trainingSettings.trainingTileCount = 9;
+        }
+
+        if (skipCharlestonCheckbox) {
+            trainingSettings.skipCharleston = skipCharlestonCheckbox.checked;
+        } else {
+            trainingSettings.skipCharleston = true;
+        }
 
         // Save each setting individually
         Object.keys(trainingSettings).forEach((key) => {

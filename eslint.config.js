@@ -12,6 +12,8 @@ export default [
                 window: "readonly",
                 document: "readonly",
                 navigator: "readonly",
+                setTimeout: "readonly",
+                localStorage: "readonly",
                 // Custom globals
                 Phaser: "readonly"
             }

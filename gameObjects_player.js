@@ -21,7 +21,9 @@ export class Player {
         this.hand = new Hand(scene, gameLogic, inputEnabled);
     }
 
+
     create() {
+        // Intentionally empty
     }
 
     showHand(forceFaceup) {

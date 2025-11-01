@@ -1,7 +1,7 @@
 import {debugPrint, debugTrace, gdebug} from "../utils.js";
 import {Tile} from "../gameObjects.js";
 import {Hand} from "../gameObjects_hand.js";
-import {SUIT, DRAGON, WIND, VNUMBER} from "../constants.js";
+import {SUIT, VNUMBER} from "../constants.js";
 
 // PRIVATE CONSTANTS
 
@@ -22,14 +22,16 @@ export class Card {
         this.validHandGroups = validHandGroups;
 
         // Debug only
-        if (0) {
-            const {CardTest} = await import(`./${year}/card_test.js`);
+        // eslint-disable-next-line no-constant-condition
+        if (false) {
+            // eslint-disable-next-line no-undef
             const cardTest = new CardTest(this);
             cardTest.test();
         }
 
         // Debug only
-        if (0) {
+        // eslint-disable-next-line no-constant-condition
+        if (false) {
             for (const group of this.validHandGroups) {
                 for (const validHand of group.hands) {
                     const hand = this.generateHand(validHand.description);
@@ -42,12 +44,13 @@ export class Card {
     }
 
     generateHand(handDescription, numTiles) {
+        let currentNumTiles = numTiles;
         const vsuitArray = [SUIT.CRACK, SUIT.BAM, SUIT.DOT];
         const hand = new Hand(false);
         let foundHand = null;
 
-        if (!numTiles) {
-            numTiles = 14;
+        if (!currentNumTiles) {
+            currentNumTiles = 14;
         }
 
         // Find matching hand description
@@ -72,7 +75,7 @@ export class Card {
         }
 
         let compIndex = 0;
-        for (let i = 0; i < numTiles; i++) {
+        for (let i = 0; i < currentNumTiles; i++) {
             const comp = foundHand.components[compIndex];
             let suit = comp.suit;
             let number = comp.number;

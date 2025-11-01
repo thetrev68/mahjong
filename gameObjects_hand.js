@@ -123,7 +123,7 @@ export class TileSet {
         const jokers = [];
 
         for (const tile of this.tileArray) {
-            if (tile.suit == SUIT.JOKER) {
+            if (tile.suit === SUIT.JOKER) {
                 jokers.unshift(tile);
             }
         }
@@ -140,7 +140,7 @@ export class TileSet {
         const flowers = [];
 
         for (const tile of this.tileArray) {
-            if (tile.suit == SUIT.FLOWER) {
+            if (tile.suit === SUIT.FLOWER) {
                 flowers.unshift(tile);
             }
         }
@@ -179,7 +179,7 @@ export class TileSet {
             return 0;
         }
 
-        return numTiles * tileWidth + (numTiles - 1) * TILE_GAP;
+        return (numTiles * tileWidth) + ((numTiles - 1) * TILE_GAP);
     }
 
     // Returns updated x, y
@@ -259,6 +259,7 @@ export class TileSet {
             if (tile === tempTile) {
                 continue;
             }
+            // eslint-disable-next-line new-cap
             const intersectRect = Phaser.Geom.Rectangle.Intersection(tileBounds, tempTile.sprite.getBounds());
             const area = intersectRect.width * intersectRect.height;
 
@@ -508,9 +509,8 @@ export class Hand {
         const tileSet = this.hiddenTileSet;
 
         if (tileSet.inputEnabled) {
-            tile.sprite.setInteractive();
 
-            tile.sprite.on("pointerup", (pointer) => {
+            tile.sprite.on("pointerup", () => {
                 if (tile.drag) {
                     return;
                 }
@@ -586,8 +586,11 @@ export class Hand {
             });
 
             // Enable drag and drop
+            console.log("insertHidden() called for tile:", tile.suit, tile.number, "sprite:", tile.sprite);
+            tile.sprite.setInteractive();
             this.scene.input.setDraggable(tile.sprite);
-            tile.sprite.on("dragstart", (pointer, dragX, dragY) => {
+            // eslint-disable-next-line no-unused-vars
+            tile.sprite.on("dragstart", (_pointer, _dragX, _dragY) => {
                 tile.drag = true;
                 if (!tile.selected) {
                     tile.origX = tile.x;
@@ -602,7 +605,8 @@ export class Hand {
                     tileSet.swapTiles(tile, overlappedTile);
                 }
             });
-            tile.sprite.on("dragend", (pointer, dragX, dragY, dropped) => {
+            // eslint-disable-next-line no-unused-vars
+            tile.sprite.on("dragend", (_pointer, _dragX, _dragY, _dropped) => {
                 tile.drag = false;
             });
         }
@@ -646,7 +650,7 @@ export class Hand {
         for (const tile of tileArray) {
             if (tile.suit === SUIT.JOKER) {
                 tile.sprite.setInteractive();
-                tile.sprite.on("pointerup", (pointer) => {
+                tile.sprite.on("pointerup", () => {
                     let maxSelect = 1;
                     let minSelect = 1;
 

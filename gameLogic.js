@@ -1,9 +1,9 @@
-import {printMessage, printInfo, printHint, debugPrint, debugTrace} from "./utils.js";
-import {STATE, PLAYER_OPTION, PLAYER, SUIT, DRAGON, WIND, VNUMBER} from "./constants.js";
+import {printMessage, printInfo, debugPrint, printHint} from "./utils.js";
+import {STATE, PLAYER_OPTION, PLAYER, SUIT, VNUMBER} from "./constants.js";
 import {GameAI} from "./gameAI.js";
 import {Card} from "./card/card.js";
 import {Tile} from "./gameObjects.js";
-import {Hand, TileSet} from "./gameObjects_hand.js";
+import {} from "./gameObjects_hand.js";
 
 // PRIVATE CONSTANTS
 
@@ -13,7 +13,8 @@ export class GameLogic {
     constructor(scene) {
         this.scene = scene;
         this.state = STATE.INIT;
-        this.table = null; // Will be set later
+        // Will be set later
+        this.table = null;
         this.card = null;
         this.gameAI = null;
         this.currPlayer = 0;
@@ -57,17 +58,7 @@ export class GameLogic {
             }
         }
 
-        // Start button
-        const startButton = window.document.getElementById("start");
-        if (this.startButtonFunction) {
-            startButton.removeEventListener("click", this.startButtonFunction);
-        }
-        this.startButtonFunction = function () {
-            this.start();
-        }.bind(this);
 
-        // Wait for start button to be pressed. Main game logic loop executed within start button callback.
-        startButton.addEventListener("click", this.startButtonFunction);
     }
 
     start() {
@@ -105,55 +96,54 @@ export class GameLogic {
             // Hand.insertHidden(new Tile(SUIT.JOKER, 0));
         }
 
-        if (0) {
-            // Player 0  (14 tiles)
-            // InitPlayerHandArray[0] = this.card.generateHand("111 222 3333 4444 (2 suits, 4 consecutive numbers)", 14);
+        // If (false) {
+        //     // InitPlayerHandArray[0] = this.card.generateHand("111 222 3333 4444 (2 suits, 4 consecutive numbers)", 14);
 
-            initPlayerHandArray[0] = new Hand(false);
+        //     InitPlayerHandArray[0] = new Hand(false);
 
-            initPlayerHandArray[0].insertHidden(new Tile(SUIT.DOT, 4));
-            initPlayerHandArray[0].insertHidden(new Tile(SUIT.DOT, 4));
-            initPlayerHandArray[0].insertHidden(new Tile(SUIT.DOT, 4));
+        //     InitPlayerHandArray[0].insertHidden(new Tile(SUIT.DOT, 4));
+        //     InitPlayerHandArray[0].insertHidden(new Tile(SUIT.DOT, 4));
+        //     InitPlayerHandArray[0].insertHidden(new Tile(SUIT.DOT, 4));
 
-            initPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 5));
-            initPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 5));
-            initPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 5));
-            initPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 5));
+        //     InitPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 5));
+        //     InitPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 5));
+        //     InitPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 5));
+        //     InitPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 5));
 
-            initPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 6));
-            initPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 6));
-            initPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 6));
-            initPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 6));
+        //     InitPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 6));
+        //     InitPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 6));
+        //     InitPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 6));
+        //     InitPlayerHandArray[0].insertHidden(new Tile(SUIT.BAM, 6));
 
-            // Create new "exposed" TileSet
-            initPlayerHandArray[0].exposedTileSetArray = [];
-            const tileSet = new TileSet(false);
-            tileSet.insert(new Tile(SUIT.JOKER, 0));
-            tileSet.insert(new Tile(SUIT.JOKER, 0));
-            tileSet.insert(new Tile(SUIT.JOKER, 0));
-            initPlayerHandArray[0].exposedTileSetArray.push(tileSet);
+        //     // Create new "exposed" TileSet
+        //     InitPlayerHandArray[0].exposedTileSetArray = [];
+        //     Const tileSet = new TileSet(false);
+        //     TileSet.insert(new Tile(SUIT.JOKER, 0));
+        //     TileSet.insert(new Tile(SUIT.JOKER, 0));
+        //     TileSet.insert(new Tile(SUIT.JOKER, 0));
+        //     InitPlayerHandArray[0].exposedTileSetArray.push(tileSet);
 
-        }
+        // }
 
-        if (0) {
-            // Test exposed jokers
+        // If (false) {
+        //     // Test exposed jokers
 
-            // Player 0
-            initPlayerHandArray[0] = new Hand(false);
-            initPlayerHandArray[0].insertHidden(new Tile(SUIT.DOT, 4));
+        //     // Player 0
+        //     InitPlayerHandArray[0] = new Hand(false);
+        //     InitPlayerHandArray[0].insertHidden(new Tile(SUIT.DOT, 4));
 
-            // Player 1-3
-            for (let i = 1; i < 4; i++) {
-                initPlayerHandArray[i] = new Hand(false);
+        //     // Player 1-3
+        //     For (let i = 1; i < 4; i++) {
+        //         InitPlayerHandArray[i] = new Hand(false);
 
-                initPlayerHandArray[i].exposedTileSetArray = [];
-                const tileSet = new TileSet(false);
-                tileSet.insert(new Tile(SUIT.DOT, 4));
-                tileSet.insert(new Tile(SUIT.JOKER, 0));
-                tileSet.insert(new Tile(SUIT.JOKER, 0));
-                initPlayerHandArray[i].exposedTileSetArray.push(tileSet);
-            }
-        }
+        //         InitPlayerHandArray[i].exposedTileSetArray = [];
+        //         Const tileSet = new TileSet(false);
+        //         TileSet.insert(new Tile(SUIT.DOT, 4));
+        //         TileSet.insert(new Tile(SUIT.JOKER, 0));
+        //         TileSet.insert(new Tile(SUIT.JOKER, 0));
+        //         InitPlayerHandArray[i].exposedTileSetArray.push(tileSet);
+        //     }
+        // }
 
         this.table.deal(initPlayerHandArray);
 
@@ -263,11 +253,12 @@ export class GameLogic {
     //      Choose discard
     //      Query if other players want it (no prompt needed for dealers discard)
     async loop() {
-        let skipPick = true; // Dealer doesn't get a first wall pick
+        // Dealer doesn't get a first wall pick
+        let skipPick = true;
 
         this.currPlayer = 0;
 
-        while (1) {
+        while (true) {
             // Update table
             this.table.switchPlayer(this.currPlayer);
 
@@ -289,10 +280,12 @@ export class GameLogic {
             this.updateUI();
 
             // CHOOSE TILE TO DISCARD (or mahjong!)
+            // eslint-disable-next-line no-await-in-loop
             const discardInfo = await this.chooseDiscard();
             this.table.players[this.currPlayer].showHand();
 
             if (this.currPlayer !== PLAYER.BOTTOM) {
+                // eslint-disable-next-line no-await-in-loop
                 await this.sleep(500);
             }
 
@@ -329,7 +322,8 @@ export class GameLogic {
             // Match the golden color of the Yes/No buttons (#ffd166 / 0xffd166)
             const highlightRect = this.scene.add.rectangle(350, 420, 70, 90, 0xffd166, 0.7);
             highlightRect.setStrokeStyle(3, 0xffd166, 0.9);
-            highlightRect.setDepth(49); // Below the tile
+            // Below the tile
+            highlightRect.setDepth(49);
             discardTile.highlightGraphics = highlightRect;
 
             // Animate and show tile
@@ -346,6 +340,7 @@ export class GameLogic {
             // Ask all players if the discard is wanted  (currPlayer == i automatically returns discard)
             const claimArray = [];
             for (let i = 0; i < 4; i++) {
+                // eslint-disable-next-line no-await-in-loop
                 claimArray[i] = await this.claimDiscard(i, discardTile);
             }
 
@@ -441,7 +436,7 @@ export class GameLogic {
                     const button1 = window.document.getElementById("button1");
 
                     button1.removeEventListener("click", this.button1Function);
-                    this.button1Function = function () {
+                    this.button1Function = function button1Function() {
                         const discardedTile = this.table.players[this.currPlayer].hand.removeDiscard();
                         const text = discardedTile.getText();
                         printMessage("Player " + this.currPlayer + " discards " + text + " \n");
@@ -457,7 +452,7 @@ export class GameLogic {
                     // Exchange jokers button
                     const button2 = window.document.getElementById("button2");
                     button2.removeEventListener("click", this.button2Function);
-                    this.button2Function = function () {
+                    this.button2Function = function button2Function() {
                         this.table.exchangeUserSelectedTileForExposedJoker();
                         window.document.getElementById("button2").disabled = true;
 
@@ -469,7 +464,7 @@ export class GameLogic {
                     // Mahjong button
                     const button3 = window.document.getElementById("button3");
                     button3.removeEventListener("click", this.button3Function);
-                    this.button3Function = function () {
+                    this.button3Function = function button3Function() {
                         // Unselect any tiles
                         this.table.players[this.currPlayer].hand.resetSelection();
 
@@ -596,9 +591,6 @@ export class GameLogic {
                         resolve({playerOption: PLAYER_OPTION.EXPOSE_TILES,
                             tileArray: exposeInfo.tileArray});
                     });
-                break;
-            case PLAYER_OPTION.DISCARD_TILE:
-                break;
             case PLAYER_OPTION.MAHJONG:
                 // Create promise to return mahjong! (async operation)
                 return new Promise(
@@ -608,28 +600,24 @@ export class GameLogic {
                         resolve({playerOption: PLAYER_OPTION.MAHJONG,
                             tileArray: []});
                     });
-                break;
             default:
                 printMessage("ERROR - unknown discardOption\n");
-                break;
+
+                return new Promise(
+                    (resolve) => {
+                        resolve({playerOption: PLAYER_OPTION.DISCARD_TILE,
+                            tileArray: [discardTile]});
+                    });
             }
         }
 
-        // Create promise to return the discarded tile (async operation)
         return new Promise(
             (resolve) => {
-                const tileArray = [];
-                tileArray.push(discardTile);
                 resolve({playerOption: PLAYER_OPTION.DISCARD_TILE,
-                    tileArray});
+                    tileArray: [discardTile]});
             });
-
     }
 
-    // Query user whether yes/no
-    // Promise will return
-    //      True - yes
-    //      False - no
     yesNoQuery() {
 
         // Create promise to wait for player input (async operation)
@@ -642,7 +630,7 @@ export class GameLogic {
                 // No button
                 const button1 = window.document.getElementById("button1");
                 button1.removeEventListener("click", this.button1Function);
-                this.button1Function = function () {
+                this.button1Function = function button1Function() {
                     resolve(false);
                 };
 
@@ -651,7 +639,7 @@ export class GameLogic {
                 // Yes button
                 const button2 = window.document.getElementById("button2");
                 button2.removeEventListener("click", this.button2Function);
-                this.button2Function = function () {
+                this.button2Function = function button2Function() {
                     resolve(true);
                 };
 
@@ -674,7 +662,7 @@ export class GameLogic {
 
                 button1.removeEventListener("click", this.button1Function);
 
-                this.button1Function = function () {
+                this.button1Function = function button1Function() {
                     const charlestonPassArray = [];
 
                     // Player 0 (human) pressed "Pass" button
@@ -706,13 +694,6 @@ export class GameLogic {
             });
     }
 
-    // Wait for user to expose tiles after claiming a discarded tile
-    // 1. Expose tiles
-    // 2. Return tile
-    // 3. Mahjong!
-    // Return
-    //      PlayerOption - expose, discard, mahjong
-    //      TileArray    - valid only for expose
     exposeTiles() {
 
         // Create promise to wait for player input (async operation)
@@ -723,15 +704,8 @@ export class GameLogic {
                 const button1 = window.document.getElementById("button1");
 
                 button1.removeEventListener("click", this.button1Function);
-                this.button1Function = function () {
-                    // Get selected tiles
-                    const tileArray = this.table.players[PLAYER.BOTTOM].hand.getSelectionHidden();
-                    // Unselect any tiles
-                    this.table.players[PLAYER.BOTTOM].hand.resetSelection();
-                    resolve({
-                        playerOption: PLAYER_OPTION.EXPOSE_TILES,
-                        tileArray
-                    });
+                this.button1Function = function button1Function() {
+                    this.playerExposeTiles();
                 }.bind(this);
 
                 button1.addEventListener("click", this.button1Function);
@@ -740,13 +714,11 @@ export class GameLogic {
                 const button2 = window.document.getElementById("button2");
 
                 button2.removeEventListener("click", this.button2Function);
-                this.button2Function = function () {
+                this.button2Function = function button2Function() {
                     // Unselect any tiles
                     this.table.players[PLAYER.BOTTOM].hand.resetSelection();
-                    resolve({
-                        playerOption: PLAYER_OPTION.DISCARD_TILE,
-                        tileArray: []
-                    });
+                    resolve({playerOption: PLAYER_OPTION.DISCARD_TILE,
+                        tileArray: []});
                 }.bind(this);
 
                 button2.addEventListener("click", this.button2Function);
@@ -755,7 +727,7 @@ export class GameLogic {
                 const button3 = window.document.getElementById("button3");
 
                 button3.removeEventListener("click", this.button3Function);
-                this.button3Function = function () {
+                this.button3Function = function button3Function() {
                     // Unselect any tiles
                     this.table.players[PLAYER.BOTTOM].hand.resetSelection();
                     resolve({
@@ -769,8 +741,6 @@ export class GameLogic {
             });
     }
 
-    // Query user how many to pass in courtesy (0-3 tiles)
-    // Promise will return value of 0-3
     courtesyQuery() {
 
         // Create promise to wait for player input (async operation)
@@ -782,7 +752,7 @@ export class GameLogic {
                 const button1 = window.document.getElementById("button1");
 
                 button1.removeEventListener("click", this.button1Function);
-                this.button1Function = function () {
+                this.button1Function = function button1Function() {
                     resolve(0);
                 };
 
@@ -792,7 +762,7 @@ export class GameLogic {
                 const button2 = window.document.getElementById("button2");
 
                 button2.removeEventListener("click", this.button2Function);
-                this.button2Function = function () {
+                this.button2Function = function button2Function() {
                     resolve(1);
                 };
 
@@ -802,7 +772,7 @@ export class GameLogic {
                 const button3 = window.document.getElementById("button3");
 
                 button3.removeEventListener("click", this.button3Function);
-                this.button3Function = function () {
+                this.button3Function = function button3Function() {
                     resolve(2);
                 };
 
@@ -813,7 +783,7 @@ export class GameLogic {
                 const button4 = window.document.getElementById("button4");
 
                 button4.removeEventListener("click", this.button4Function);
-                this.button4Function = function () {
+                this.button4Function = function button4Function() {
                     resolve(3);
                 };
 
@@ -822,7 +792,7 @@ export class GameLogic {
             });
     }
 
-    courtesyPass(courtesyCount) {
+    courtesyPass() {
 
         // Perform courtesy pass when tiles selected and "pass button" is pressed
         // Create promise to wait for player input (async operation)
@@ -835,7 +805,7 @@ export class GameLogic {
                 const button1 = window.document.getElementById("button1");
 
                 button1.removeEventListener("click", this.button1Function);
-                this.button1Function = function () {
+                this.button1Function = function button1Function() {
                     resolve();
                 };
 
@@ -853,8 +823,6 @@ export class GameLogic {
         const sort1 = window.document.getElementById("sort1");
         const sort2 = window.document.getElementById("sort2");
         const hint = window.document.getElementById("hint");
-        const settingsButton = window.document.getElementById("settings");
-        const handSelect = window.document.getElementById("handSelect");
         const numTileSelect = window.document.getElementById("numTileSelect");
         const skipCharlestonCheckbox = window.document.getElementById("skipCharlestonCheckbox");
 
@@ -866,7 +834,7 @@ export class GameLogic {
             sort1.style.display = "none";
             sort2.style.display = "none";
             hint.style.display = "none";
-            settingsButton.style.display = "";
+            // Settings button style display
             window.document.getElementById("controldiv").style.visibility = "visible";
 
             // Populate number of tiles select
@@ -883,18 +851,20 @@ export class GameLogic {
             this.updateTrainingForm();
 
             // Add hint panel toggle event listener
-            const hintToggle = window.document.getElementById("hint-toggle");
-            const hintContent = window.document.getElementById("hint-content");
-            const hintDiv = window.document.getElementById("hintdiv");
+            {
+                const hintToggle = window.document.getElementById("hint-toggle");
+                const hintContent = window.document.getElementById("hint-content");
+                const hintDiv = window.document.getElementById("hintdiv");
 
-            hintToggle.addEventListener("click", () => {
-                const isExpanded = hintToggle.getAttribute("aria-expanded") === "true";
-                hintToggle.setAttribute("aria-expanded", !isExpanded);
-                hintContent.classList.toggle("hidden");
-            });
+                hintToggle.addEventListener("click", () => {
+                    const isExpanded = hintToggle.getAttribute("aria-expanded") === "true";
+                    hintToggle.setAttribute("aria-expanded", !isExpanded);
+                    hintContent.classList.toggle("hidden");
+                });
 
-            // Hide hint panel on home page - only show during gameplay
-            hintDiv.style.display = "none";
+                // Hide hint panel on home page - only show during gameplay
+                hintDiv.style.display = "none";
+            }
             break;
 
         case STATE.START:
@@ -903,7 +873,7 @@ export class GameLogic {
             sort1.style.display = "";
             sort2.style.display = "";
             hint.style.display = "";
-            settingsButton.style.display = "";
+            // SettingsButton.style.display = "";
             this.disableSortButtons();
             button1.style.display = "none";
             button2.style.display = "none";
@@ -1087,7 +1057,7 @@ export class GameLogic {
             sort1.style.display = "none";
             sort2.style.display = "none";
             hint.style.display = "none";
-            settingsButton.style.display = "none";
+            // SettingsButton.style.display = "none";
             this.enableTrainingForm();
 
             startButton.disabled = false;
@@ -1106,9 +1076,9 @@ export class GameLogic {
         const sort2 = window.document.getElementById("sort2");
         const hint = window.document.getElementById("hint");
 
-        sort1.disable = false;
-        sort2.disable = false;
-        hint.disable = false;
+        sort1.disabled = false;
+        sort2.disabled = false;
+        hint.disabled = false;
 
         if (this.sort1Function) {
             sort1.removeEventListener("click", this.sort1Function);
@@ -1125,18 +1095,17 @@ export class GameLogic {
             this.hintFunction = null;
         }
 
-        this.sort1Function = function () {
+        this.sort1Function = function sort1Function() {
             this.table.players[PLAYER.BOTTOM].hand.sortSuitHidden();
             this.table.players[PLAYER.BOTTOM].showHand();
         }.bind(this);
 
-        this.sort2Function = function () {
+        this.sort2Function = function sort2Function() {
             this.table.players[PLAYER.BOTTOM].hand.sortRankHidden();
             this.table.players[PLAYER.BOTTOM].showHand();
         }.bind(this);
 
-        this.hintFunction = function () {
-            // Make a copy of player 0 hand.  Pad to 14 tiles if necessary.
+        this.hintFunction = function hintFunction() {
             const hand = this.table.players[PLAYER.BOTTOM].hand.dupHand();
             if (hand.getLength() === 13) {
                 const invalidTile = new Tile(SUIT.INVALID, VNUMBER.INVALID);
@@ -1145,21 +1114,21 @@ export class GameLogic {
             const rankCardHands = this.card.rankHandArray14(hand);
             this.card.sortHandRankArray(rankCardHands);
 
-            let hintText = "<strong>Top 3 hands for player 0</strong><br>";
-            for (let i = 0; i < 3; i++) {
-                const rankInfo = rankCardHands[i];
-                hintText += (i + 1) + ". " + rankInfo.hand.description + "<br>";
+            let html = "<h3>Top Possible Hands:</h3>";
+            for (let i = 0; i < Math.min(3, rankCardHands.length); i++) {
+                const rankHand = rankCardHands[i];
+                html += `<p><strong>${rankHand.group.groupDescription}</strong> - ${rankHand.hand.description} (Rank: ${rankHand.rank.toFixed(2)})</p>`;
             }
-            hintText += "<br><strong>Top 3 tiles to discard</strong><br>";
 
+            // Add tile ranking for discard suggestions
             const tileRankArray = this.gameAI.rankTiles14(hand);
-            for (let i = 0; i < 3; i++) {
+            html += "<h3>Discard Suggestions (Best to Discard First):</h3>";
+            for (let i = 0; i < Math.min(3, tileRankArray.length); i++) {
                 const rankInfo = tileRankArray[i];
-                hintText += (i + 1) + ". " + rankInfo.tile.getText() + "<br>";
+                html += `<p>${rankInfo.tile.getText()} (Less Impact: ${rankInfo.rank.toFixed(2)})</p>`;
             }
 
-            printHint(hintText);
-
+            printHint(html);
         }.bind(this);
 
         sort1.addEventListener("click", this.sort1Function);
@@ -1172,9 +1141,9 @@ export class GameLogic {
         const sort2 = window.document.getElementById("sort2");
         const hint = window.document.getElementById("hint");
 
-        sort1.disable = true;
-        sort2.disable = true;
-        hint.disable = true;
+        sort1.disabled = true;
+        sort2.disabled = true;
+        hint.disabled = true;
 
         if (this.sort1Function) {
             sort1.removeEventListener("click", this.sort1Function);
@@ -1209,22 +1178,20 @@ export class GameLogic {
 
         trainInfo.trainCheckbox = traincheckbox.checked;
         trainInfo.handDescription = handSelect.value;
-        trainInfo.numTiles = parseInt(numTileSelect.value);
+        trainInfo.numTiles = parseInt(numTileSelect.value, 10);
         trainInfo.skipCharlestonCheckbox = skipCharlestonCheckbox.checked;
 
         return trainInfo;
     }
 
     updateTrainingForm() {
-        const trainfieldset2 = window.document.getElementById("trainfieldset2");
         const trainInfo = this.getTrainingInfo();
-
+        const trainfieldset2 = window.document.getElementById("trainfieldset2");
         trainfieldset2.disabled = !trainInfo.trainCheckbox;
     }
 
     enableTrainingForm() {
         const trainfieldset1 = window.document.getElementById("trainfieldset1");
-        const trainfieldset2 = window.document.getElementById("trainfieldset2");
 
         trainfieldset1.disabled = false;
         this.updateTrainingForm();
@@ -1261,6 +1228,7 @@ export class GameLogic {
         while (this.errorTextSemaphore) {
             const str = this.errorTextArray.shift();
             this.errorText.setText(str);
+            // eslint-disable-next-line no-await-in-loop
             await this.sleep(4000);
             this.errorTextSemaphore--;
         }
