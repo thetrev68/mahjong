@@ -247,18 +247,17 @@ a:focus-visible {
     background: none;
     border: none;
     font-size: inherit;
-    font-weight: bold;
     padding: 10px;
     cursor: pointer;
 }
 
 #hint-toggle::after {
-    content: '\\25B2'; /* Up arrow */
+    content: '-';
     float: right;
 }
 
 #hint-toggle[aria-expanded="false"]::after {
-    content: '\\25BC'; /* Down arrow */
+    content: '+';
 }
 
 .hidden {
