@@ -4,13 +4,13 @@ import {Table} from "./gameObjects_table.js";
 
 class GameScene extends Phaser.Scene {
     constructor() {
-        super({ key: 'GameScene' });
+        super({key: "GameScene"});
         this.commandBarManualPosition = false;
         this.commandBarPosition = null;
     }
 
     preload() {
-        // from game.js preload()
+        // From game.js preload()
         this.load.atlas("tiles", "assets/tiles.png", "assets/tiles.json");
         this.load.image("back", "assets/back.png");
 
@@ -19,9 +19,9 @@ class GameScene extends Phaser.Scene {
     }
 
     async create() {
-        // from game.js create()
+        // From game.js create()
 
-        this.scale.on('resize', this.resize, this);
+        this.scale.on("resize", this.resize, this);
 
         // Create game objects
         this.gGameLogic = new GameLogic(this);
@@ -32,8 +32,8 @@ class GameScene extends Phaser.Scene {
 
         // Create sprites etc
         this.gGameLogic.wallText = this.add.text(190, 160, "", {
-            fontSize: '16px',
-            fontFamily: 'Arial',
+            fontSize: "16px",
+            fontFamily: "Arial",
             fill: "#ffffff",
             align: "left",
             resolution: 2
@@ -44,7 +44,7 @@ class GameScene extends Phaser.Scene {
         this.gGameLogic.errorText = this.add.text(400, 400, "", {
             font: "14px Arial",
             fill: "#ff8080",
-            backgroundColor: 'rgba(0,0,0,1)',
+            backgroundColor: "rgba(0,0,0,1)",
             align: "left"
         });
         this.gGameLogic.errorText.visible = false;
@@ -57,14 +57,15 @@ class GameScene extends Phaser.Scene {
     }
 
     update() {
-        // from game.js update() - it was empty
+        // From game.js update() - it was empty
     }
 
     getDragBounds() {
-        const parent = document.getElementById('parentdiv');
+        const parent = document.getElementById("parentdiv");
         if (parent) {
             return parent.getBoundingClientRect();
         }
+
         return this.sys.canvas.getBoundingClientRect();
     }
 
@@ -93,7 +94,8 @@ class GameScene extends Phaser.Scene {
         const clampedLeft = Math.min(Math.max(left, minLeft), maxLeft);
         const clampedTop = Math.min(Math.max(top, minTop), maxTop);
 
-        return {left: clampedLeft, top: clampedTop};
+        return {left: clampedLeft,
+            top: clampedTop};
     }
 
     getDefaultCommandBarPosition(bar, canvasBounds, boundsRect) {
@@ -101,11 +103,12 @@ class GameScene extends Phaser.Scene {
         const barHeight = bar.offsetHeight || 0;
         const fallbackLeft = canvasBounds.right - (barWidth / 2) - 36;
         const fallbackTop = canvasBounds.bottom - barHeight - 110;
+
         return this.getClampedCommandBarPosition(fallbackLeft, fallbackTop, bar, boundsRect);
     }
 
     enableCommandBarDrag() {
-        const bar = document.getElementById('uicenterdiv');
+        const bar = document.getElementById("uicenterdiv");
         const canvas = this.sys.canvas;
         if (!bar || !canvas) {
             return;
@@ -126,9 +129,10 @@ class GameScene extends Phaser.Scene {
             const tentativeTop = event.clientY - pointerOffsetY;
             const {left, top} = this.getClampedCommandBarPosition(tentativeLeft, tentativeTop, bar, boundsRect);
 
-            rootStyle.setProperty('--command-bar-left', `${left}px`);
-            rootStyle.setProperty('--command-bar-top', `${top}px`);
-            this.commandBarPosition = {left, top};
+            rootStyle.setProperty("--command-bar-left", `${left}px`);
+            rootStyle.setProperty("--command-bar-top", `${top}px`);
+            this.commandBarPosition = {left,
+                top};
             this.commandBarManualPosition = true;
         };
 
@@ -137,22 +141,22 @@ class GameScene extends Phaser.Scene {
                 return;
             }
             isDragging = false;
-            bar.classList.remove('command-bar--dragging');
+            bar.classList.remove("command-bar--dragging");
             try {
                 bar.releasePointerCapture(event.pointerId);
             } catch (err) {
-                // ignore if pointer capture was not set
+                // Ignore if pointer capture was not set
             }
-            window.removeEventListener('pointermove', onPointerMove);
-            window.removeEventListener('pointerup', onPointerUp);
-            window.removeEventListener('pointercancel', onPointerUp);
+            window.removeEventListener("pointermove", onPointerMove);
+            window.removeEventListener("pointerup", onPointerUp);
+            window.removeEventListener("pointercancel", onPointerUp);
         };
 
         const onPointerDown = (event) => {
             if (event.button !== 0) {
                 return;
             }
-            if (event.target.closest('#buttondiv')) {
+            if (event.target.closest("#buttondiv")) {
                 return;
             }
 
@@ -160,7 +164,7 @@ class GameScene extends Phaser.Scene {
             pointerOffsetX = event.clientX - rect.left;
             pointerOffsetY = event.clientY - rect.top;
             isDragging = true;
-            bar.classList.add('command-bar--dragging');
+            bar.classList.add("command-bar--dragging");
 
             try {
                 bar.setPointerCapture(event.pointerId);
@@ -168,24 +172,24 @@ class GameScene extends Phaser.Scene {
                 // Ignore if capture fails (older browsers)
             }
 
-            window.addEventListener('pointermove', onPointerMove);
-            window.addEventListener('pointerup', onPointerUp);
-            window.addEventListener('pointercancel', onPointerUp);
+            window.addEventListener("pointermove", onPointerMove);
+            window.addEventListener("pointerup", onPointerUp);
+            window.addEventListener("pointercancel", onPointerUp);
             event.preventDefault();
         };
 
-        bar.addEventListener('pointerdown', onPointerDown);
+        bar.addEventListener("pointerdown", onPointerDown);
 
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-            bar.removeEventListener('pointerdown', onPointerDown);
-            window.removeEventListener('pointermove', onPointerMove);
-            window.removeEventListener('pointerup', onPointerUp);
-            window.removeEventListener('pointercancel', onPointerUp);
+            bar.removeEventListener("pointerdown", onPointerDown);
+            window.removeEventListener("pointermove", onPointerMove);
+            window.removeEventListener("pointerup", onPointerUp);
+            window.removeEventListener("pointercancel", onPointerUp);
         });
     }
 
     resize(gameSize, baseSize, displaySize, resolution) {
-        const uicenterdiv = document.getElementById('uicenterdiv');
+        const uicenterdiv = document.getElementById("uicenterdiv");
         const canvas = this.sys.canvas;
 
         if (!uicenterdiv || !canvas) {
@@ -203,17 +207,20 @@ class GameScene extends Phaser.Scene {
                 uicenterdiv,
                 boundsRect
             );
-            this.commandBarPosition = {left, top};
-            rootStyle.setProperty('--command-bar-left', `${left}px`);
-            rootStyle.setProperty('--command-bar-top', `${top}px`);
+            this.commandBarPosition = {left,
+                top};
+            rootStyle.setProperty("--command-bar-left", `${left}px`);
+            rootStyle.setProperty("--command-bar-top", `${top}px`);
+
             return;
         }
 
         const {left, top} = this.getDefaultCommandBarPosition(uicenterdiv, canvasBounds, boundsRect);
 
-        this.commandBarPosition = {left, top};
-        rootStyle.setProperty('--command-bar-left', `${left}px`);
-        rootStyle.setProperty('--command-bar-top', `${top}px`);
+        this.commandBarPosition = {left,
+            top};
+        rootStyle.setProperty("--command-bar-left", `${left}px`);
+        rootStyle.setProperty("--command-bar-top", `${top}px`);
     }
 }
 

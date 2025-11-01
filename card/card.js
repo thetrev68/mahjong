@@ -18,12 +18,12 @@ export class Card {
 
     async init() {
         const year = this.year;
-        const { validHandGroups } = await import(`./${year}/card${year}.js`);
+        const {validHandGroups} = await import(`./${year}/card${year}.js`);
         this.validHandGroups = validHandGroups;
 
         // Debug only
         if (0) {
-            const { CardTest } = await import(`./${year}/card_test.js`);
+            const {CardTest} = await import(`./${year}/card_test.js`);
             const cardTest = new CardTest(this);
             cardTest.test();
         }

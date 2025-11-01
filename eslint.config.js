@@ -1,10 +1,10 @@
-const js = require("@eslint/js");
+import js from "@eslint/js";
 
-module.exports = [
+export default [
     js.configs.recommended,
     {
         languageOptions: {
-            ecmaVersion: 2015,
+            ecmaVersion: 2022,
             sourceType: "module",
             globals: {
                 // Browser globals

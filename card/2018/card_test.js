@@ -1,8 +1,8 @@
-import {debugPrint, debugTrace} from "../../utils.js";
+import {debugPrint} from "../../utils.js";
 import {Tile} from "../../gameObjects.js";
 import {Hand} from "../../gameObjects_hand.js";
-import {Card} from "../../card/card.js";
-import {SUIT, DRAGON, WIND, VNUMBER} from "../../constants.js";
+
+import {SUIT, DRAGON, WIND} from "../../constants.js";
 
 // PRIVATE GLOBALS
 
