@@ -231,14 +231,10 @@ a:focus-visible {
     color: #ffb7b7;
 }
 
-/* Hint panel styles */
-.sidebar__section--hint {
-    /* (Optional) Add any specific styles for the hint section container */
-}
-
 #hint-content {
     padding: 10px;
     border-top: 1px solid #ccc;
+    min-height: 150px; /* Increased by 30px (approximately 2 additional text lines) to prevent overflow */
 }
 
 #hint-toggle {
