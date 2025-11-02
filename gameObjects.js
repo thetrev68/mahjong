@@ -1,3 +1,4 @@
+import * as Phaser from "phaser";
 import {SUIT, SPRITE_HEIGHT, SPRITE_WIDTH, TILE_GAP} from "./constants.js";
 
 // PRIVATE CONSTANTS

@@ -1,4 +1,5 @@
 // GameScene.js
+import * as Phaser from "phaser";
 import {GameLogic} from "./gameLogic.js";
 import {Table} from "./gameObjects_table.js";
 

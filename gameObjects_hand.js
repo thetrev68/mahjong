@@ -1,3 +1,4 @@
+import * as Phaser from "phaser";
 import {
     STATE, PLAYER, SUIT, SPRITE_WIDTH,
     SPRITE_SCALE, WINDOW_WIDTH, WINDOW_HEIGHT, TILE_GAP

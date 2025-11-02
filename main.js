@@ -1,3 +1,4 @@
+import * as Phaser from "phaser";
 import GameScene from "./GameScene.js";
 import {WINDOW_WIDTH, WINDOW_HEIGHT} from "./constants.js";
 

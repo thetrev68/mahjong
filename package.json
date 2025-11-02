@@ -1,6 +1,15 @@
 {
-  "dependencies": {
-    "@eslint/js": "^9.39.0"
+  "type": "module",
+  "scripts": {
+    "start": "http-server -c-1",
+    "lint": "eslint ."
   },
-  "type": "module"
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "eslint": "^9.3.0",
+    "http-server": "^14.1.1"
+  }
 }

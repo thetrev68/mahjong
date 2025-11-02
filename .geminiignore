@@ -1,0 +1,2 @@
+# Ignore node_modules for performance
+node_modules/
