@@ -9,7 +9,8 @@ import {
 
 // PRIVATE GLOBALS
 
-export class TileSet {
+
+class TileSet {
     constructor(scene, gameLogic, inputEnabled) {
         this.scene = scene;
         this.gameLogic = gameLogic;

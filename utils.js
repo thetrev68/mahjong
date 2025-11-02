@@ -12,7 +12,10 @@ export function printInfo(str) {
 }
 
 export const gdebug = 1;
-export const gtrace = 0;
+/** @knipignore */
+export function getGtrace() {
+    return 0;
+}
 
 export function debugPrint(str) {
     if (gdebug) {
@@ -21,7 +24,7 @@ export function debugPrint(str) {
 }
 
 export function debugTrace(str) {
-    if (gtrace) {
+    if (getGtrace()) {
         console.log(str);
     }
 }

@@ -1,0 +1,21 @@
+{
+  "entry": [
+    "index.html",
+    "main.js",
+    "settings.js",
+    "card/**/card*.js"
+  ],
+  "project": [
+    "**/*.js",
+    "**/*.{png,svg,json,mp3}",
+    "**/*.html",
+    "**/*.css",
+    "**/*.csv",
+    "**/*.md"
+  ],
+  "ignore": [
+    "dist/**",
+    "**/*.py"
+  ],
+  "tags": ["-knipignore"]
+}
