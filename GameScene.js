@@ -3,6 +3,10 @@ import * as Phaser from "phaser";
 import {GameLogic} from "./gameLogic.js";
 import {Table} from "./gameObjects_table.js";
 
+import tilesPng from './assets/tiles.png';
+import tilesJson from './assets/tiles.json';
+import backPng from './assets/back.png';
+
 class GameScene extends Phaser.Scene {
     constructor() {
         super({key: "GameScene"});
@@ -12,8 +16,8 @@ class GameScene extends Phaser.Scene {
 
     preload() {
         // From game.js preload()
-        this.load.atlas("tiles", "assets/tiles.png", "assets/tiles.json");
-        this.load.image("back", "assets/back.png");
+        this.load.atlas("tiles", tilesPng, tilesJson);
+        this.load.image("back", backPng);
 
         // The scale manager stuff will be handled in main.js config, so I'm omitting it here as per the plan.
         // The resizeCallback is also a separate step.
