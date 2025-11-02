@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="American Mahjong game">
+    <meta name="keywords" content="Mahjong, free, game, javascript">
+    <title>American Mahjong</title>
+    <link rel="icon" type="image/svg+xml" href="/mahjong/assets/favicon-B3WZd-3b.svg?v=4">
+
+  <script type="module" crossorigin src="/mahjong/assets/index-D9arzyGA.js"></script>
+  <link rel="stylesheet" crossorigin href="/mahjong/assets/index-DJa7YjJS.css">
+</head>
+<body>
+    <div id="parentdiv">
+        <div id="gamediv"></div>
+
+        <div id="uicenterdiv" role="region" aria-label="Action commands" aria-describedby="commandBarHint">
+            <p class="sr-only" id="commandBarHint">To reposition the action bar, drag or touch and move it within the play area.</p>
+            <label class="sr-only" for="info">Action status</label>
+            <textarea id="info" readonly aria-live="polite" rows="2"></textarea>
+            <div id="buttondiv">
+                <button id="button1" class="button">button1</button>
+                <button id="button2" class="button">button2</button>
+                <button id="button3" class="button">button3</button>
+                <button id="button4" class="button">button4</button>
+            </div>
+        </div>
+
+        <aside id="uidiv">
+            <section id="messagesdiv" class="sidebar__section sidebar__section--log">
+                <label class="sidebar__heading" for="messages">Game Log</label>
+                <textarea id="messages" class="sidebar__textarea message-log__textarea" readonly aria-live="polite" role="log" aria-label="Game log output"></textarea>
+            </section>
+
+            <section id="hintdiv" class="sidebar__section sidebar__section--hint">
+                <button id="hint-toggle" class="sidebar__heading" aria-expanded="true" aria-controls="hint-content">Hint</button>
+                <div id="hint-content" class="sidebar__textarea" role="region"></div>
+            </section>
+
+            <div id="controldiv">
+                <button id="start" class="button">Start Game</button>
+                <button id="settings" class="button">Settings</button>
+                <button id="sort1" class="button">Sort by suit</button>
+                <button id="sort2" class="button">Sort by rank</button>
+            </div>
+        </aside>
+
+        <!-- Settings Overlay -->
+        <div id="settings-overlay" class="settings-overlay" style="display: none;">
+            <div class="settings-container">
+                <header class="settings-header">
+                    <button id="settings-back" class="settings-back-button">
+                        <span class="sr-only">Back to Game</span>
+                        ← Back
+                    </button>
+                    <h1 class="settings-title">Settings</h1>
+                </header>
+
+                <main class="settings-content">
+                    <section class="settings-section">
+                        <h2 class="settings-section-title">Game Settings</h2>
+                        <p class="settings-placeholder">AI difficulty scaling and game preferences will be added here.</p>
+                    </section>
+
+                    <section class="settings-section">
+                        <h2 class="settings-section-title">Training Mode</h2>
+                        <form id="trainform1" class="training-form">
+                            <fieldset id="trainfieldset1">
+                                <div class="training-form__toggle">
+                                    <input id="trainCheckbox" type="checkbox">
+                                    <label for="trainCheckbox">Enable Training Mode</label>
+                                </div>
+                            </fieldset>
+                        </form>
+                        <form id="trainform2" class="training-form">
+                            <fieldset id="trainfieldset2">
+                                <div class="training-form__grid">
+                                    <div class="training-form__item training-form__item--full">
+                                        <label class="training-form__label" for="handSelect">Select a Starting Hand</label>
+                                        <select id="handSelect" class="training-form__select"></select>
+                                    </div>
+                                    <div class="training-form__item">
+                                        <label class="training-form__label" for="numTileSelect">Number of Tiles</label>
+                                        <select id="numTileSelect" class="training-form__select training-form__select--compact"></select>
+                                    </div>
+                                    <div class="training-form__item training-form__item--checkbox">
+                                        <input id="skipCharlestonCheckbox" type="checkbox">
+                                        <label for="skipCharlestonCheckbox">Skip Charleston Phase</label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </section>
+
+                    <section class="settings-section">
+                        <h2 class="settings-section-title">Year Selection</h2>
+                        <p class="settings-placeholder">Card data year selection workflow will be implemented here.</p>
+                    </section>
+
+                    <section class="settings-section">
+                        <h2 class="settings-section-title">Audio Controls</h2>
+                        <p class="settings-placeholder">Sound effects and music controls will be added here.</p>
+                    </section>
+
+                    <section class="settings-section">
+                        <h2 class="settings-section-title">House Rules</h2>
+                        <p class="settings-placeholder">Custom house rules (like using blanks) will be configured here.</p>
+                    </section>
+                </main>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+</html>
