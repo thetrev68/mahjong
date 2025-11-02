@@ -442,7 +442,13 @@ export class GameLogic {
             // CHOOSE TILE TO DISCARD (or mahjong!)
             // eslint-disable-next-line no-await-in-loop
             const discardInfo = await this.chooseDiscard();
-            this.table.players[this.currPlayer].showHand();
+            // Only call showHand() if tiles haven't been dragged this turn
+            // Dragged tiles are already positioned correctly by drag operations
+            if (!this.table.players[this.currPlayer].hand.tilesWereDraggedThisTurn) {
+                this.table.players[this.currPlayer].showHand();
+            }
+            // Reset drag flag for next turn
+            this.table.players[this.currPlayer].hand.tilesWereDraggedThisTurn = false;
 
             if (this.currPlayer !== PLAYER.BOTTOM) {
                 // eslint-disable-next-line no-await-in-loop

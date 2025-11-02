@@ -299,6 +299,8 @@ export class Hand {
         this.gameLogic = gameLogic;
         this.hiddenTileSet = new TileSet(scene, gameLogic, inputEnabled);
         this.exposedTileSetArray = [];
+        // Track if tiles were dragged this turn to avoid showHand() interference
+        this.tilesWereDraggedThisTurn = false;
         // When adding new variables, make sure to update dupHand()
     }
 
@@ -592,14 +594,17 @@ export class Hand {
             // eslint-disable-next-line no-unused-vars
             tile.sprite.on("dragstart", (_pointer, _dragX, _dragY) => {
                 tile.drag = true;
+                // Mark that tiles were dragged this turn
+                this.tilesWereDraggedThisTurn = true;
                 if (!tile.selected) {
                     tile.origX = tile.x;
                     tile.origY = tile.y;
                 }
             });
             tile.sprite.on("drag", (pointer, dragX, dragY) => {
-                tile.sprite.x = dragX;
-                tile.sprite.y = dragY;
+                // Use tile setters to properly update sprite and mask positions
+                tile.x = dragX;
+                tile.y = dragY;
                 const overlappedTile = tileSet.checkOverlap(tile);
                 if (overlappedTile) {
                     tileSet.swapTiles(tile, overlappedTile);
@@ -608,6 +613,11 @@ export class Hand {
             // eslint-disable-next-line no-unused-vars
             tile.sprite.on("dragend", (_pointer, _dragX, _dragY, _dropped) => {
                 tile.drag = false;
+                // Snap tile back to proper position - animate to original position
+                // The tile's original position has been preserved in tile.origX/tile.origY
+                tile.animate(tile.origX, tile.origY, tile.angle);
+                // Update glow position after animation completes
+                setTimeout(() => tile.updateGlowPosition(), 100);
             });
         }
 
