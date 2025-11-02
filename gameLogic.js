@@ -24,15 +24,25 @@ class HintAnimationManager {
         // Track which tiles we've already highlighted to handle duplicates
         const highlightedTiles = new Set();
 
-        top3Tiles.forEach((rankInfo) => {
+        // Filter out invalid tiles and ensure we process up to 3 valid tiles
+        const validTopTiles = top3Tiles.filter(rankInfo => rankInfo.tile.suit !== SUIT.INVALID);
+        
+        validTopTiles.forEach((rankInfo, index) => {
+            console.log(`Processing tile ${index + 1}: ${rankInfo.tile.getText()} with rank ${rankInfo.rank.toFixed(2)}`); // Debug log
+            
             const targetTile = this.findNextUnhighlightedTileInHand(hand, rankInfo.tile, highlightedTiles);
             if (targetTile) {
+                console.log(`Applying red glow to tile: ${targetTile.getText()}`); // Debug log
                 targetTile.addGlowEffect(this.gameLogic.scene, 0xff0000, 0.6);
                 this.glowedTiles.push(targetTile);
                 // Mark this specific tile instance as highlighted
                 highlightedTiles.add(targetTile);
+            } else {
+                console.log(`Could not find tile for: ${rankInfo.tile.getText()}`); // Debug log
             }
         });
+        
+        console.log(`Applied glow to ${this.glowedTiles.length} tiles out of ${validTopTiles.length} valid tiles requested`); // Debug log
 
         // Store current hint data for state management
         this.currentHintData = {tileRankArray: [...tileRankArray]};
@@ -257,6 +267,11 @@ export class GameLogic {
 
         this.wallText.setText("Wall tile count = " + this.table.wall.getCount());
 
+        // Start automatic hints for player 0 after initial dealing
+        if (this.table.players[PLAYER.BOTTOM].hand.getLength() > 0) {
+            this.hintAnimationManager.updateHintsForNewTiles();
+        }
+
         // Debugging - skip charleston
         if (trainInfo.trainCheckbox && trainInfo.skipCharlestonCheckbox) {
             this.loop();
@@ -271,8 +286,22 @@ export class GameLogic {
         this.updateUI();
 
         await this.charlestonPass(PLAYER.RIGHT);
+        // Update hints after Charleston pass 1 is complete (player 0 has received tiles)
+        if (this.table.players[PLAYER.BOTTOM].hand.getLength() > 0) {
+            this.hintAnimationManager.updateHintsForNewTiles();
+        }
+
         await this.charlestonPass(PLAYER.TOP);
+        // Update hints after Charleston pass 2 is complete
+        if (this.table.players[PLAYER.BOTTOM].hand.getLength() > 0) {
+            this.hintAnimationManager.updateHintsForNewTiles();
+        }
+
         await this.charlestonPass(PLAYER.LEFT);
+        // Update hints after Charleston pass 3 is complete
+        if (this.table.players[PLAYER.BOTTOM].hand.getLength() > 0) {
+            this.hintAnimationManager.updateHintsForNewTiles();
+        }
 
         // Continue Charleston?
         this.state = STATE.CHARLESTON_QUERY;
@@ -288,8 +317,22 @@ export class GameLogic {
             this.updateUI();
 
             await this.charlestonPass(PLAYER.LEFT);
+            // Update hints after Charleston pass 4 is complete
+            if (this.table.players[PLAYER.BOTTOM].hand.getLength() > 0) {
+                this.hintAnimationManager.updateHintsForNewTiles();
+            }
+
             await this.charlestonPass(PLAYER.TOP);
+            // Update hints after Charleston pass 5 is complete
+            if (this.table.players[PLAYER.BOTTOM].hand.getLength() > 0) {
+                this.hintAnimationManager.updateHintsForNewTiles();
+            }
+
             await this.charlestonPass(PLAYER.RIGHT);
+            // Update hints after Charleston pass 6 is complete
+            if (this.table.players[PLAYER.BOTTOM].hand.getLength() > 0) {
+                this.hintAnimationManager.updateHintsForNewTiles();
+            }
         }
 
         this.state = STATE.COURTESY_QUERY;
@@ -317,11 +360,6 @@ export class GameLogic {
 
         // Perform courtesy voting
         this.table.courtesyVote(courtesyVoteArray);
-
-        // Update hints after courtesy pass (for player 0)
-        if (this.table.players[PLAYER.BOTTOM].hand.getLength() > 0) {
-            this.hintAnimationManager.updateHintsForNewTiles();
-        }
 
         if (this.table.player02CourtesyVote) {
             // Wait for user to select courtesy pass tiles
@@ -353,15 +391,15 @@ export class GameLogic {
         // Perform courtesy pass exchange
         this.table.courtesyPass(courtesyPassArray);
 
+        // Update hints after courtesy pass is complete (for player 0)
+        if (this.table.players[PLAYER.BOTTOM].hand.getLength() > 0) {
+            this.hintAnimationManager.updateHintsForNewTiles();
+        }
+
         printMessage("Courtesy complete\n");
 
         // Start main game loop
         this.loop();
-
-        // Start automatic hints for player 0
-        if (this.table.players[PLAYER.BOTTOM].hand.getLength() > 0) {
-            this.hintAnimationManager.updateHintsForNewTiles();
-        }
     }
 
     // Main loop
@@ -389,6 +427,12 @@ export class GameLogic {
                     // No more tiles - wall game.
                     break;
                 }
+                
+                // Update hints immediately after Player 0 draws a tile
+                // This ensures analysis runs on the complete 14-tile hand
+                if (this.currPlayer === PLAYER.BOTTOM) {
+                    this.hintAnimationManager.updateHintsForNewTiles();
+                }
             }
             skipPick = false;
 
@@ -403,11 +447,6 @@ export class GameLogic {
             if (this.currPlayer !== PLAYER.BOTTOM) {
                 // eslint-disable-next-line no-await-in-loop
                 await this.sleep(500);
-            }
-
-            // Update hints after drawing from wall (for player 0)
-            if (this.currPlayer === PLAYER.BOTTOM) {
-                this.hintAnimationManager.updateHintsForNewTiles();
             }
 
             if (discardInfo.playerOption === PLAYER_OPTION.MAHJONG) {
@@ -434,23 +473,19 @@ export class GameLogic {
 
             // CLAIM DISCARD? (for exposure/mahjong).
 
-            // Add highlight background first using a rectangle sprite
-            // Match the golden color of the Yes/No buttons (#ffd166 / 0xffd166)
-            const highlightRect = this.scene.add.rectangle(350, 420, 70, 90, 0xffd166, 0.7);
-            highlightRect.setStrokeStyle(3, 0xffd166, 0.9);
-            // Below the tile
-            highlightRect.setDepth(49);
-            discardTile.highlightGraphics = highlightRect;
-
             // Animate and show tile
             discardTile.scale = 1.0;
             discardTile.showTile(true, true);
+
+            // Add a dynamic dark blue glow that will follow the animation
+            discardTile.addGlowEffect(this.scene, 0x1e3a8a, 0.9); // 0x1e3a8a is dark blue for better contrast
 
             // Store desired depth before animation
             discardTile.sprite.depth = 50;
             discardTile.spriteBack.depth = 50;
 
-            // Now animate - this will preserve the depth we just set
+            // Now animate. The glow will follow automatically because the
+            // animate() method is being updated to handle it.
             discardTile.animate(350, 420, 0);
 
             // Ask all players if the discard is wanted  (currPlayer == i automatically returns discard)
@@ -465,10 +500,7 @@ export class GameLogic {
             const claimResult = this.table.processClaimArray(this.currPlayer, claimArray, discardTile);
 
             // Clear highlight effect after claim is processed
-            if (discardTile.highlightGraphics) {
-                discardTile.highlightGraphics.destroy();
-                discardTile.highlightGraphics = null;
-            }
+            discardTile.removeGlowEffect();
             discardTile.sprite.depth = 0;
 
             if (claimResult.playerOption === PLAYER_OPTION.MAHJONG) {

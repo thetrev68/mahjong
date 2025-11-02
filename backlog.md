@@ -52,7 +52,7 @@ This document provides a high-level analysis of potential new features for the A
 
 ### 6. Animation for New Tiles
 
-*   **Description:** Add a "glow" animation to newly drawn tiles and the AI's top discard recommendation.
+*   **Description:** Add a "glow" animation to newly drawn tiles 
 *   **Difficulty:** Medium
 *   **Effort:** Medium
 *   **Time:** 6-10 hours
