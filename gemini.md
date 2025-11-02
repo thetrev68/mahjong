@@ -10,7 +10,8 @@ The project is a web-based, 4-player American Mahjong game. It features a single
 ## 2. Core Technologies
 
 *   **JavaScript (ES6 Modules):** The entire codebase is written in modern JavaScript, utilizing ES6 modules for a clean, organized, and maintainable structure. All scripts are loaded with `type="module"`.
-*   **Phaser 3:** The game is built on the Phaser 3 game engine (`v3.90.0`), which handles rendering, game loop management, and user input. Phaser is included via a CDN in `index.html`.
+*   **Vite:** The project uses Vite for a fast development server and efficient build process.
+*   **Phaser 3:** The game is built on the Phaser 3 game engine (`v3.90.0`), which handles rendering, game loop management, and user input. Phaser is installed locally as a dependency.
 *   **HTML5 & CSS:** The user interface, including the game board, buttons, and informational displays, is structured with HTML5 and styled with CSS.
 
 ## 3. Project Structure
@@ -26,7 +27,7 @@ The project is organized into several key files and directories:
 *   **`card/`:** This directory contains the hand validation system. It is structured with subdirectories for different years (e.g., `2017`, `2025`), each containing the specific rules and hand patterns for that year's Mahjong card.
 *   **`assets/`:** Contains all game assets, including images for the tiles (`tiles.png`, `tiles.json`) and audio files.
 *   **`constants.js`:** A centralized file for defining game-wide constants, such as window dimensions and game parameters.
-*   **`package.json`:** Defines project metadata and development dependencies. The only dependency is `@eslint/js` for code linting.
+*   **`package.json`:** Defines project metadata, scripts, and dependencies. Key dependencies include Phaser for the game engine and Vite for the development server and build process.
 
 ## 4. Key Features
 
@@ -38,7 +39,7 @@ The project is organized into several key files and directories:
 
 ## 5. Running the Project
 
-To run the game, a local web server is required due to the use of ES6 modules. The `README.md` provides instructions for setting up a simple server using Python, Node.js, or PHP.
+To run the game, you need to have Node.js and npm installed. The project uses Vite for a development server. See the README.md for detailed instructions.
 
 ## 6. Development Guidelines
 

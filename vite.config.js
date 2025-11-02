@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from "vite";
 
 export default defineConfig({
-  base: '/mahjong/',
+  base: "/mahjong/",
   build: {
     chunkSizeWarningLimit: 1500, // phaser is large
   },

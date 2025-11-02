@@ -3,9 +3,9 @@ import * as Phaser from "phaser";
 import {GameLogic} from "./gameLogic.js";
 import {Table} from "./gameObjects_table.js";
 
-import tilesPng from './assets/tiles.png';
-import tilesJson from './assets/tiles.json';
-import backPng from './assets/back.png';
+import tilesPng from "./assets/tiles.png";
+import tilesJson from "./assets/tiles.json";
+import backPng from "./assets/back.png";
 
 class GameScene extends Phaser.Scene {
     constructor() {

@@ -23,29 +23,23 @@ This American Mahjong game features:
 ### Prerequisites
 
 - A modern web browser (Chrome, Firefox, or Edge recommended)
-- Local web server (for ES6 module support)
+- [Node.js](https://nodejs.org/) and npm
 
 ### Running the Game
 
-1. **Using a simple web server:**
-
+1. **Install dependencies:**
    ```bash
-   # Using Python 3
-   python -m http.server 8000
-   
-   # Using Node.js (with http-server package)
-   npx http-server
-   
-   # Using PHP
-   php -S localhost:8000
+   npm install
    ```
 
-2. **Open your browser and navigate to:**
-   ```
-   http://localhost:8000
+2. **Start the development server:**
+   ```bash
+   npm run dev
    ```
 
-3. **Click "Start Game" to begin playing!**
+3. **Open your browser and navigate to the URL provided by Vite (usually `http://localhost:5173`).**
+
+4. **Click "Start Game" to begin playing!**
 
 ### Browser Requirements
 
@@ -94,7 +88,7 @@ Enable training mode to:
 ### Core Components
 
 ```
-game.js                 # Main entry point and Phaser initialization
+main.js                 # Main entry point and Phaser initialization
 gameLogic.js           # Game state management and flow control
 gameAI.js              # AI decision making and strategy
 gameObjects/           # Game object classes
@@ -135,7 +129,7 @@ card/                  # Mahjong hand validation system
 
 ```
 ├── index.html                 # Main game interface
-├── game.js                   # Phaser game initialization
+├── main.js                   # Phaser game initialization
 ├── constants.js              # Game constants
 ├── assets/                   # Game assets
 │   ├── tiles.png            # Tile sprite sheet
@@ -146,7 +140,8 @@ card/                  # Mahjong hand validation system
 │   ├── 2017/                # 2017 mahjong card rules
 │   ├── 2018/                # 2018 mahjong card rules
 │   ├── 2019/                # 2019 mahjong card rules
-│   └── 2020/                # 2020 mahjong card rules
+│   ├── 2020/                # 2020 mahjong card rules
+│   └── 2025/                # 2025 mahjong card rules
 └── game*.js                  # Core game logic files
 ```
 
