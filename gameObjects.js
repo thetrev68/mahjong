@@ -86,6 +86,11 @@ export class Tile {
         this.origY = 0;
         this.selected = false;
         this.tween = null;
+        // Glow effect properties
+        this.glowEffect = null;
+        // Default red glow
+        this.glowColor = 0xff0000;
+        this.glowIntensity = 0.6;
     }
 
     create() {
@@ -168,6 +173,9 @@ export class Tile {
         if (this.mask && this.mask.geometryMask) {
             this.mask.geometryMask.setScale(scale);
         }
+
+        // UPDATE GLOW FOR SCALE CHANGES
+        this.updateGlowPosition();
     }
 
     animate(x, y, angle) {
@@ -199,6 +207,8 @@ export class Tile {
                     this.mask.geometryMask.y = this.sprite.y;
                     this.mask.geometryMask.angle = this.sprite.angle;
                 }
+                // UPDATE GLOW POSITION DURING ANIMATION
+                this.updateGlowPosition();
             },
             onComplete: () => {
                 this.sprite.x = x;
@@ -215,10 +225,12 @@ export class Tile {
                 this.sprite.depth = savedDepth;
                 this.spriteBack.depth = savedDepth;
                 this.tween = null;
+                // FINAL GLOW POSITION UPDATE
+                this.updateGlowPosition();
             }
         };
 
-        // eslint-disable-next-line new-cap
+         
         if (Phaser.Math.Angle.Wrap(this.sprite.angle) !== Phaser.Math.Angle.Wrap(angle)) {
             tweenConfig.angle = angle;
         }
@@ -246,6 +258,9 @@ export class Tile {
             }
         }
 
+        // UPDATE GLOW VISIBILITY
+        this.updateGlowPosition();
+
         // Debug - all tiles face up
         // eslint-disable-next-line no-constant-condition
         if (false) {
@@ -272,6 +287,64 @@ export class Tile {
         }
 
         return text;
+    }
+
+    // Dynamic glow effect methods
+    addGlowEffect(scene, color = 0xff0000, intensity = 0.6) {
+        this.removeGlowEffect();
+
+        this.glowColor = color;
+        this.glowIntensity = intensity;
+
+        // Create glow effect that will be positioned dynamically
+        this.glowEffect = scene.add.graphics();
+        this.updateGlowPosition();
+
+        // Set depth below tile but above background
+        this.glowEffect.setDepth(this.sprite.depth - 1);
+    }
+
+    // Update glow position and appearance dynamically
+    updateGlowPosition() {
+        if (!this.glowEffect) {
+            return;
+        }
+
+        this.glowEffect.clear();
+
+        if (!this.sprite.visible) {
+            this.glowEffect.setVisible(false);
+
+            return;
+        }
+
+        this.glowEffect.setVisible(true);
+        this.glowEffect.fillStyle(this.glowColor, this.glowIntensity);
+
+        const bounds = this.sprite.getBounds();
+        const glowSize = 8;
+
+        // Account for tile scale in glow size
+        const scaleFactor = this.sprite.scaleX;
+        const scaledGlowSize = glowSize * scaleFactor;
+
+        this.glowEffect.fillRoundedRect(
+            bounds.x - (scaledGlowSize / 2),
+            bounds.y - (scaledGlowSize / 2),
+            bounds.width + scaledGlowSize,
+            bounds.height + scaledGlowSize,
+            10 * scaleFactor
+        );
+
+        // Update depth to match tile
+        this.glowEffect.setDepth(this.sprite.depth - 1);
+    }
+
+    removeGlowEffect() {
+        if (this.glowEffect) {
+            this.glowEffect.destroy();
+            this.glowEffect = null;
+        }
     }
 }
 
@@ -352,7 +425,7 @@ export class Wall {
         // Fisher-Yates shuffle
         const array = this.tileArray;
         for (let i = array.length - 1; i > 0; i -= 1) {
-            const j = Math.floor(Math.random() * (i + 1))
+            const j = Math.floor(Math.random() * (i + 1));
             const temp = array[i];
             array[i] = array[j];
             array[j] = temp;

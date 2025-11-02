@@ -83,7 +83,7 @@ export class GameAI {
             const tileRank = {
                 tile,
                 rank
-            }
+            };
 
             tileRankArray.push(tileRank);
         }
@@ -314,7 +314,7 @@ export class GameAI {
                 return {
                     playerOption: PLAYER_OPTION.EXPOSE_TILES,
                     tileArray: compInfo.tileArray
-                }
+                };
             }
 
         }

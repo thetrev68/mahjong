@@ -4,8 +4,8 @@ import {
     WINDOW_WIDTH, WINDOW_HEIGHT,
     SPRITE_HEIGHT, SPRITE_SCALE
 } from "./constants.js";
-import {Wall, Discards} from "./gameObjects.js"
-import {Player} from "./gameObjects_player.js"
+import {Wall, Discards} from "./gameObjects.js";
+import {Player} from "./gameObjects_player.js";
 
 // PRIVATE CONSTANTS
 

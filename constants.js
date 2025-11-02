@@ -36,13 +36,13 @@ export const STATE = {
     LOOP_EXPOSE_TILES_COMPLETE: 16,
     // END - end game (mahjong, wall game, quit, cleanup)
     END: 17
-}
+};
 
 export const PLAYER_OPTION = {
     EXPOSE_TILES: 0,
     DISCARD_TILE: 1,
     MAHJONG: 2
-}
+};
 
 // Player
 export const PLAYER = {
@@ -50,7 +50,7 @@ export const PLAYER = {
     RIGHT: 1,
     TOP: 2,
     LEFT: 3
-}
+};
 
 // Suit types
 export const SUIT = {
@@ -70,7 +70,7 @@ export const SUIT = {
     VSUIT3_DRAGON: 12,
     // INVALID - for padding hand to 14 tiles
     INVALID: 99
-}
+};
 
 export const VNUMBER = {
     // 0 - not used
@@ -84,7 +84,7 @@ export const VNUMBER = {
     CONSECUTIVE7: 16,
     // INVALID - for padding hand to 14 tiles
     INVALID: 99
-}
+};
 
 // Winds
 export const WIND = {
@@ -92,7 +92,7 @@ export const WIND = {
     SOUTH: 1,
     WEST: 2,
     EAST: 3
-}
+};
 
 // Dragons
 // Note - dragon ordering matches SUIT ordering.  e.g. red = crack = 0
@@ -103,5 +103,5 @@ export const DRAGON = {
     GREEN: 1,
     // Dot
     WHITE: 2
-}
+};
 

@@ -1,5 +1,5 @@
 import {PLAYER} from "./constants.js";
-import {Hand} from "./gameObjects_hand.js"
+import {Hand} from "./gameObjects_hand.js";
 
 // PRIVATE CONSTANTS
 
@@ -17,7 +17,7 @@ export class Player {
         //
         // This is in "turn" order
         this.playerInfo = playerInfo;
-        const inputEnabled = (playerInfo.id === PLAYER.BOTTOM)
+        const inputEnabled = (playerInfo.id === PLAYER.BOTTOM);
         this.hand = new Hand(scene, gameLogic, inputEnabled);
     }
 

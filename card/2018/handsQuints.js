@@ -457,5 +457,5 @@ export const handsQuints = {
             ]
         }
     ]
-}
+};
 

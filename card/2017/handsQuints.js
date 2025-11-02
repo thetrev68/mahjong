@@ -408,5 +408,5 @@ export const handsQuints = {
             ]
         }
     ]
-}
+};
 

@@ -259,7 +259,7 @@ export class TileSet {
             if (tile === tempTile) {
                 continue;
             }
-            // eslint-disable-next-line new-cap
+             
             const intersectRect = Phaser.Geom.Rectangle.Intersection(tileBounds, tempTile.sprite.getBounds());
             const area = intersectRect.width * intersectRect.height;
 
