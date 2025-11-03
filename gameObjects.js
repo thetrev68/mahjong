@@ -6,7 +6,7 @@ import {SUIT, SPRITE_HEIGHT, SPRITE_WIDTH, TILE_GAP} from "./constants.js";
 
 // PRIVATE GLOBALS
 
-const gTileGroups = [
+export const gTileGroups = [
     {
         suit: SUIT.CRACK,
         textArray: ["Crack"],
@@ -361,7 +361,10 @@ export class Wall {
         this.tileArray = [];
     }
 
-    create() {
+    create(skipTileCreation = false) {
+        if (skipTileCreation) {
+            return;
+        }
         // Create all 152 tiles
         for (const group of gTileGroups) {
             for (const prefix of group.prefix) {
@@ -396,6 +399,24 @@ export class Wall {
 
     destroy() {
         // Intentionally empty
+    }
+
+    receiveOrganizedTilesFromHomePage(homePageTiles) {
+        return new Promise((resolve, reject) => {
+            if (homePageTiles.length !== 152) {
+                console.error("Wall.receiveOrganizedTilesFromHomePage: Invalid tile count. Expected 152, got " + homePageTiles.length);
+                return reject("Invalid tile count");
+            }
+
+            // Clear existing tiles if any
+            if (this.tileArray.length > 0) {
+                this.tileArray = [];
+            }
+
+            this.tileArray = homePageTiles;
+            console.log("Wall received 152 tiles from HomePageTileManager.");
+            resolve();
+        });
     }
 
     getCount() {

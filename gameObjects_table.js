@@ -82,7 +82,7 @@ export class Table {
         this.player13CourtesyVote = 0;
     }
 
-    create() {
+    create(skipTileCreation = false) {
 
         for (let i = 0; i < 4; i++) {
             const graphics = this.scene.add.graphics(0, 0);
@@ -92,7 +92,7 @@ export class Table {
             this.boxes[i] = graphics;
         }
 
-        this.wall.create();
+        this.wall.create(skipTileCreation);
     }
 
     reset() {
