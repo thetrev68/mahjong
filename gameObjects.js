@@ -96,7 +96,7 @@ export class Tile {
 
     create() {
         this.sprite = this.scene.add.sprite(0, 0, "tiles", this.spriteName);
-        console.log("Tile.create() called for tile:", this.suit, this.number, "sprite:", this.sprite);
+        // console.log("Tile.create() called for tile:", this.suit, this.number, "sprite:", this.sprite);
         this.sprite.visible = false;
         this.sprite.setOrigin(0.5, 0.5);
 
@@ -180,6 +180,11 @@ export class Tile {
     }
 
     animate(x, y, angle) {
+        console.log("Tile.animate called for:", this.getText(), "this.sprite:", this.sprite);
+        if (!this.sprite || !this.sprite.scene) {
+            console.error("Tile.animate: this.sprite is undefined, null, or destroyed for tile:", this.getText());
+            return; // Prevent further errors
+        }
         const speed = 750;
         const distance = Math.hypot(x - this.sprite.x, y - this.sprite.y);
         const time = (distance * 1000 / speed);
