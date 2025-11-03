@@ -1,3 +1,5 @@
+import {debugPrint} from "./utils.js";
+
 // Settings.js - Settings management for American Mahjong
 class SettingsManager {
     constructor() {
@@ -119,7 +121,7 @@ class SettingsManager {
     loadSettings() {
         // Load and apply saved settings
         const settings = this.getAllSettings();
-        console.log("Loaded settings:", settings);
+        debugPrint("Loaded settings:", settings);
 
         // Apply training mode settings
         this.applyTrainingSettings(settings);
@@ -220,7 +222,7 @@ class SettingsManager {
     registerSettingSection(sectionId, config) {
         // Placeholder for registering dynamic settings sections
         // Config: { title, controls: [], onChange: callback }
-        console.log(`Registered settings section: ${sectionId}`, config);
+        debugPrint(`Registered settings section: ${sectionId}`, config);
     }
 }
 

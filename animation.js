@@ -1,4 +1,5 @@
 import * as Phaser from "phaser";
+import {debugPrint} from "./utils.js";
 
 export function animateToPileAndStartGame(scene, tileArray, calculateStackPosition, animateSingleTile, onAnimationComplete) {
     this.isAnimating = true;
@@ -21,7 +22,7 @@ export function animateToPileAndStartGame(scene, tileArray, calculateStackPositi
     }
 
     Promise.all(promises).then(() => {
-        console.log("All tiles have reached their destination.");
+        debugPrint("All tiles have reached their destination.");
         this.isAnimating = false;
         this.animationState = "complete";
         if (onAnimationComplete) {

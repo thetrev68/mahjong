@@ -28,21 +28,21 @@ class HintAnimationManager {
         const validTopTiles = top3Tiles.filter(rankInfo => rankInfo.tile.suit !== SUIT.INVALID);
         
         validTopTiles.forEach((rankInfo, index) => {
-            console.log(`Processing tile ${index + 1}: ${rankInfo.tile.getText()} with rank ${rankInfo.rank.toFixed(2)}`); // Debug log
+            debugPrint(`Processing tile ${index + 1}: ${rankInfo.tile.getText()} with rank ${rankInfo.rank.toFixed(2)}`); // Debug log
             
             const targetTile = this.findNextUnhighlightedTileInHand(hand, rankInfo.tile, highlightedTiles);
             if (targetTile) {
-                console.log(`Applying red glow to tile: ${targetTile.getText()}`); // Debug log
+                debugPrint(`Applying red glow to tile: ${targetTile.getText()}`); // Debug log
                 targetTile.addGlowEffect(this.gameLogic.scene, 0xff0000, 0.6);
                 this.glowedTiles.push(targetTile);
                 // Mark this specific tile instance as highlighted
                 highlightedTiles.add(targetTile);
             } else {
-                console.log(`Could not find tile for: ${rankInfo.tile.getText()}`); // Debug log
+                debugPrint(`Could not find tile for: ${rankInfo.tile.getText()}`); // Debug log
             }
         });
         
-        console.log(`Applied glow to ${this.glowedTiles.length} tiles out of ${validTopTiles.length} valid tiles requested`); // Debug log
+        debugPrint(`Applied glow to ${this.glowedTiles.length} tiles out of ${validTopTiles.length} valid tiles requested`); // Debug log
 
         // Store current hint data for state management
         this.currentHintData = {tileRankArray: [...tileRankArray]};

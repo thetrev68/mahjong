@@ -1,6 +1,7 @@
 import * as Phaser from "phaser";
 import { Tile, gTileGroups } from "./gameObjects.js";
 import { SUIT, SPRITE_WIDTH, SPRITE_HEIGHT, TILE_GAP } from "./constants.js";
+import {debugPrint} from "./utils.js";
 
 export class HomePageTileManager {
     constructor(scene, wall) {
@@ -131,7 +132,7 @@ export class HomePageTileManager {
         }
 
         Promise.all(promises).then(() => {
-            console.log("All tiles have reached the center pile.");
+            debugPrint("All tiles have reached the center pile.");
             this.animationState = "piled";
             this.animatePileToWall();
         });
@@ -150,7 +151,7 @@ export class HomePageTileManager {
         }
 
         Promise.all(promises).then(() => {
-            console.log("All tiles have been dealt to the wall.");
+            debugPrint("All tiles have been dealt to the wall.");
             this.isAnimating = false;
             this.animationState = "complete";
             if (this.onAnimationComplete) {
@@ -204,6 +205,6 @@ export class HomePageTileManager {
         // We no longer destroy the tiles, as they have been handed off to the Wall.
         // We just clear the array to release the HomePageTileManager's reference to them.
         this.tileArray = [];
-        console.log("HomePageTileManager cleaned up.");
+        debugPrint("HomePageTileManager cleaned up.");
     }
 }

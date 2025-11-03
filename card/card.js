@@ -36,7 +36,7 @@ export class Card {
                 for (const validHand of group.hands) {
                     const hand = this.generateHand(validHand.description);
                     if (!this.validateHand14(hand)) {
-                        console.log("ERROR - generateHand produced invalid hand\n");
+                        debugPrint("ERROR - generateHand produced invalid hand\n");
                     }
                 }
             }

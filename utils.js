@@ -11,23 +11,29 @@ export function printInfo(str) {
     textArea.value = str;
 }
 
-export const gdebug = 1;
+export const gdebug = 1; // Set to 0 to disable debug messages
+
 /** @knipignore */
 export function getGtrace() {
-    return 0;
+    return gdebug;
 }
 
-export function debugPrint(str) {
-    if (gdebug) {
+// Conditional debug functions
+let debugPrint = function() {};
+let debugTrace = function() {};
+
+if (gdebug) {
+    debugPrint = function(str) {
         console.log(str);
-    }
+    };
+    debugTrace = function(str) {
+        if (getGtrace()) { // This will now check gdebug
+            console.log(str);
+        }
+    };
 }
 
-export function debugTrace(str) {
-    if (getGtrace()) {
-        console.log(str);
-    }
-}
+export { debugPrint, debugTrace };
 
 // Print to hint window
 export function printHint(html) {

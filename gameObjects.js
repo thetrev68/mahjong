@@ -1,5 +1,6 @@
 import * as Phaser from "phaser";
 import {SUIT, SPRITE_HEIGHT, SPRITE_WIDTH, TILE_GAP} from "./constants.js";
+import {debugPrint} from "./utils.js";
 
 // PRIVATE CONSTANTS
 
@@ -180,7 +181,7 @@ export class Tile {
     }
 
     animate(x, y, angle) {
-        console.log("Tile.animate called for:", this.getText(), "this.sprite:", this.sprite);
+        debugPrint("Tile.animate called for:", this.getText(), "this.sprite:", this.sprite);
         if (!this.sprite || !this.sprite.scene) {
             console.error("Tile.animate: this.sprite is undefined, null, or destroyed for tile:", this.getText());
             return; // Prevent further errors
@@ -394,7 +395,7 @@ export class Wall {
             }
         }
 
-        console.log("Wall.create: Number of tiles = " + this.tileArray.length);
+        debugPrint("Wall.create: Number of tiles = " + this.tileArray.length);
     }
 
     destroy() {
@@ -414,7 +415,7 @@ export class Wall {
             }
 
             this.tileArray = homePageTiles;
-            console.log("Wall received 152 tiles from HomePageTileManager.");
+            debugPrint("Wall received 152 tiles from HomePageTileManager.");
             resolve();
         });
     }
