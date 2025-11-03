@@ -248,7 +248,10 @@ class TileSet {
     remove(tile) {
 
         if (this.inputEnabled) {
-            tile.selected = false;
+            if (tile.selected) {
+                this.selectCount--;
+                tile.selected = false;
+            }
             tile.sprite.removeAllListeners();
             tile.sprite.disableInteractive();
         }
@@ -755,7 +758,7 @@ export class Hand {
                                 if (tile.suit !== SUIT.JOKER &&
                                     (tile.suit !== this.gameLogic.discardTile.suit || tile.number !== this.gameLogic.discardTile.number)) {
                                     bSelectOk = false;
-                                    this.gameLogic.displayErrorText(" Select same tile or joker to form pong/kong/quint ");
+                                    this.gameLogic.displayErrorText(" Select same tile or joker to form pung/kong/quint ");
                                 }
                             }
 
@@ -1041,7 +1044,7 @@ tile.sprite.on("dragend", (_pointer, dragX, _dragY, _dropped) => {
         return count;
     }
 
-    // Input - pong/kong/quint
+    // Input - pung/kong/quint
     insertExposed(tileArray) {
         let uniqueTile = null;
 
@@ -1103,7 +1106,7 @@ tile.sprite.on("dragend", (_pointer, dragX, _dragY, _dropped) => {
                                 if (uniqueTile) {
                                     if (hiddenTile.suit !== uniqueTile.suit || hiddenTile.number !== uniqueTile.number) {
                                         bSelectOk = false;
-                                        this.gameLogic.displayErrorText(" To swap for an exposed joker, tile must match exposed pong/kong/quint ");
+                                        this.gameLogic.displayErrorText(" To swap for an exposed joker, tile must match exposed pung/kong/quint ");
                                     }
                                 } else {
                                     bSelectOk = false;

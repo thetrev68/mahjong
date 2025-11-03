@@ -57,7 +57,7 @@ This American Mahjong game features:
 4. **Game Loop**: 
    - Pick tile from wall
    - Discard or claim opponent's discards
-   - Form sets (Pong/Kong/Quint) through exposures
+   - Form sets (Pung/Kong/Quint) through exposures
    - Declare Mahjong when you have a winning hand
 
 ### Player Controls
@@ -152,7 +152,7 @@ card/                  # Mahjong hand validation system
 - **152 Tiles**: Complete American Mahjong tile set
 - **Charleston**: Mandatory 3-tile passes (can repeat twice)
 - **Courtesy Pass**: Optional tile exchange with opposite player
-- **Exposures**: Form Pong (3), Kong (4), Quint (5) sets
+- **Exposures**: Form Pung (3), Kong (4), Quint (5) sets
 - **Jokers**: Special tiles that can substitute for any tile
 - **Seats**: Fixed positions (Bottom/Right/Top/Left)
 - **Wall**: 144 tiles in wall, 8 in dead wall

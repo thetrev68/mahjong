@@ -185,7 +185,7 @@ return false;
 
 ### 4. Exposure Decision Making (`gameAI.claimDiscard()`)
 
-**Purpose:** Decides whether to claim a discarded tile for exposure (pong/kong/quint).
+**Purpose:** Decides whether to claim a discarded tile for exposure (pung/kong/quint).
 
 **Location:** `gameAI.js` lines 262-315
 
@@ -312,7 +312,7 @@ for (let i = 0; i < 3; i++) {
 2. **Mahjong Check** - `card.validateHand14(copyHand)`
 3. **Hand Ranking** - `card.rankHandArray14(copyHand)`
 4. **Exposure Decision** - Based on hand concealment and strength (>55)
-5. **Component Validation** - Ensures valid pong/kong/quint
+5. **Component Validation** - Ensures valid pung/kong/quint
 
 **Code Location:** `gameAI.js` lines 262-315
 

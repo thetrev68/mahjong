@@ -608,7 +608,7 @@ export class Card {
         const componentInfoArray = [];
         for (const comp of validHand.components) {
             // Component Info - return actual tiles representing the component.
-            // AI needs this for pong/kong/quint decisions
+            // AI needs this for pung/kong/quint decisions
             const componentInfo = {
                 component: comp,
                 tileArray: []
@@ -682,7 +682,7 @@ export class Card {
         }
 
         // 3. Handle Hidden Jokers
-        //    Add jokers to pong/kongs/quints (if needed)
+        //    Add jokers to pung/kongs/quints (if needed)
 
         for (const joker of remHiddenJokers) {
             let comp2 = null;

@@ -279,7 +279,7 @@ export class Table {
         }
 
 
-        // Mahjong takes priority over exposure (pong/kong/quints)
+        // Mahjong takes priority over exposure (pung/kong/quints)
         let searchOption = PLAYER_OPTION.EXPOSE_TILES;
 
         if (numMahjong) {
@@ -308,15 +308,28 @@ export class Table {
         } else {
             // Expose winner's (discard+exposure) tiles
 
-            // Adjust hand - remove tile from hidden and insert to exposed
-            // Note - one of these is the discarded tile and is not in the player's hand (i.e. removeHidden will fail on it)
-            for (const tile of claimArray[winningPlayer].tileArray) {
-                if (tile !== discardTile) {
-                    this.players[winningPlayer].hand.removeHidden(tile);
+            const tilesToExpose = claimArray[winningPlayer].tileArray;
+            const hand = this.players[winningPlayer].hand;
+
+            // Find tiles to remove from hidden hand by value
+            const tilesToRemove = [];
+            const hiddenTilesCopy = [...hand.getHiddenTileArray()]; // Copy to avoid issues while removing
+
+            for (const exposedTile of tilesToExpose) {
+                if (exposedTile !== discardTile) {
+                    const index = hiddenTilesCopy.findIndex(hiddenTile => hiddenTile.suit === exposedTile.suit && hiddenTile.number === exposedTile.number);
+                    if (index !== -1) {
+                        tilesToRemove.push(hiddenTilesCopy[index]);
+                        hiddenTilesCopy.splice(index, 1); // Remove from copy to handle duplicates in hand
+                    }
                 }
             }
 
-            this.players[winningPlayer].hand.insertExposed(claimArray[winningPlayer].tileArray);
+            for (const tile of tilesToRemove) {
+                hand.removeHidden(tile);
+            }
+
+            hand.insertExposed(tilesToExpose);
         }
 
         this.players[winningPlayer].showHand();
@@ -373,7 +386,7 @@ export class Table {
         for (let i = 0; i < 4; i++) {
             for (const tileset of this.players[i].hand.exposedTileSetArray) {
 
-                // Find unique tile in pong/kong/quint (i.e. non-joker)
+                // Find unique tile in pung/kong/quint (i.e. non-joker)
                 let uniqueTile = null;
                 for (const tile of tileset.tileArray) {
                     if (tile.suit !== SUIT.JOKER) {
@@ -382,7 +395,7 @@ export class Table {
                     }
                 }
 
-                // For each joker in pong/kong/quint, return the unique tile
+                // For each joker in pung/kong/quint, return the unique tile
                 if (uniqueTile) {
                     for (const tile of tileset.tileArray) {
                         if (tile.suit === SUIT.JOKER) {
@@ -399,16 +412,16 @@ export class Table {
     // Swap given tile with an exposed joker
     // Input
     // - hand
-    // - tile (contained in hand, known to match an exposed pong/kong/quint with joker)
+    // - tile (contained in hand, known to match an exposed pung/kong/quint with joker)
     // Output
     // - replace tile with joker in hand
-    // - exposed pong/kong/quint replace joker with tile
+    // - exposed pung/kong/quint replace joker with tile
     exchangeJoker(currPlayer, hand, swapTile) {
         outerLoop:
         for (let i = 0; i < 4; i++) {
             for (const tileset of this.players[i].hand.exposedTileSetArray) {
 
-                // Find unique tile in pong/kong/quint (i.e. non-joker)
+                // Find unique tile in pung/kong/quint (i.e. non-joker)
                 let uniqueTile = null;
                 for (const tile of tileset.tileArray) {
                     if (tile.suit !== SUIT.JOKER) {
@@ -417,7 +430,7 @@ export class Table {
                     }
                 }
 
-                // If pong/kong/quint matches swapTile, exchange joker (if any)
+                // If pung/kong/quint matches swapTile, exchange joker (if any)
                 if (uniqueTile && (uniqueTile.suit === swapTile.suit) &&
                     (uniqueTile.number === swapTile.number)) {
 

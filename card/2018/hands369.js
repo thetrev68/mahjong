@@ -231,7 +231,7 @@ export const hands369 = {
             ]
         },
         {
-            description: "3333 666 9999 DDD (any 2 suit, pong and dragon match)",
+            description: "3333 666 9999 DDD (any 2 suit, pung and dragon match)",
             vsuitCount: 2,
             concealed: false,
             odd: false,

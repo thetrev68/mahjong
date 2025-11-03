@@ -246,7 +246,7 @@ export class GameAI {
     //
     // Input: - compInfo.tileArray with discardTile as one of the tiles
     //          Guaranteed to be hidden.
-    // Output: true - exposure ok (pong/kong/quint)
+    // Output: true - exposure ok (pung/kong/quint)
     validateComponentForExposure(player, compInfo) {
 
         // Reject single/pairs components
@@ -265,7 +265,7 @@ export class GameAI {
     // Someone discarded a tile, decide whether to claim it.  Hand has 13 tiles.
     // - Dup hand.  Form 14 card hand with discardTile
     // - Check for Mahjong
-    // - Check for pong/kong/quint exposure with discardTile.
+    // - Check for pung/kong/quint exposure with discardTile.
     // - Otherwise, return discard
     //
     // Return
@@ -288,7 +288,7 @@ export class GameAI {
             };
         }
 
-        // Check for pong/kong/quint
+        // Check for pung/kong/quint
         const rankCardHands = this.card.rankHandArray14(copyHand);
         this.card.sortHandRankArray(rankCardHands);
         const rankInfo = rankCardHands[0];

@@ -227,7 +227,7 @@ export const handsConsecutive = {
             ]
         },
         {
-            description: "1111 222 3333 DDD (2 suits, 3 consecutive numbers, pong & dragon match)",
+            description: "1111 222 3333 DDD (2 suits, 3 consecutive numbers, pung & dragon match)",
             vsuitCount: 2,
             concealed: false,
             odd: false,

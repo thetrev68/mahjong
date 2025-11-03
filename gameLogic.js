@@ -487,8 +487,8 @@ export class GameLogic {
             discardTile.addGlowEffect(this.scene, 0x1e3a8a, 0.9); // 0x1e3a8a is dark blue for better contrast
 
             // Store desired depth before animation
-            discardTile.sprite.depth = 50;
-            discardTile.spriteBack.depth = 50;
+            discardTile.sprite.depth = 200;
+            discardTile.spriteBack.depth = 200;
 
             // Now animate. The glow will follow automatically because the
             // animate() method is being updated to handle it.
@@ -849,7 +849,13 @@ export class GameLogic {
 
                 button1.removeEventListener("click", this.button1Function);
                 this.button1Function = function button1Function() {
-                    this.playerExposeTiles();
+                    const exposedTiles = this.playerExposeTiles();
+                    if (exposedTiles) {
+                        resolve({
+                            playerOption: PLAYER_OPTION.EXPOSE_TILES,
+                            tileArray: exposedTiles
+                        });
+                    }
                 }.bind(this);
 
                 button1.addEventListener("click", this.button1Function);
@@ -885,7 +891,25 @@ export class GameLogic {
     }
 
     playerExposeTiles() {
-        printMessage("playerExposeTiles - not implemented");
+        const playerHand = this.table.players[PLAYER.BOTTOM].hand;
+        const selectedTiles = playerHand.getSelectionHidden();
+
+        // Validate: 2 to 4 tiles must be selected from hand.
+        if (selectedTiles.length < 2 || selectedTiles.length > 4) {
+            this.displayErrorText("Invalid number of tiles selected for exposure. Select 2, 3, or 4 tiles.");
+            return null;
+        }
+
+        // Validate: all non-joker tiles must match the discarded tile.
+        for (const tile of selectedTiles) {
+            if (tile.suit !== SUIT.JOKER && (tile.suit !== this.discardTile.suit || tile.number !== this.discardTile.number)) {
+                this.displayErrorText("Selected tiles must match the discarded tile or be jokers.");
+                return null;
+            }
+        }
+
+        // Validation passed. Return the selected tiles.
+        return selectedTiles;
     }
 
     courtesyQuery() {
@@ -1139,7 +1163,7 @@ export class GameLogic {
             break;
 
         case STATE.LOOP_EXPOSE_TILES:
-            printInfo("Form a pong/kong/quintet with claimed tile");
+            printInfo("Form a pung/kong/quintet with claimed tile");
             button1.innerText = "Expose tiles";
             button1.disabled = true;
             button1.style.display = "";
