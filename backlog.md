@@ -42,13 +42,6 @@ This document provides a high-level analysis of potential new features for the A
 *   **Time:** 3-5 hours
 *   **Benefit:** Medium. Adds a nice touch of personalization to the game.
 
-### 5. Maintain Alignment During Drag & Drop
-
-*   **Description:** Ensure that hand tiles remain aligned during click-and-drag operations.
-*   **Difficulty:** Medium
-*   **Effort:** Medium
-*   **Time:** 5-8 hours
-*   **Benefit:** Medium. A quality-of-life improvement that makes the UI feel more polished.
 
 ### 6. Animation for New Tiles
 

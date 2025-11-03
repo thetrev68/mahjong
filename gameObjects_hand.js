@@ -51,11 +51,17 @@ class TileSet {
 
         window.document.getElementById("button1").disabled = true;
 
+        // SIMPLE: Reset all tiles to grid level (600)
         for (const tile of this.tileArray) {
             if (tile.selected) {
                 tile.selected = false;
                 tile.x = tile.origX;
-                tile.y = tile.origY;
+                tile.y = 600; // Always park at grid level
+                tile.origY = 600; // Always park at grid level
+                
+                // Update sprite position immediately
+                tile.sprite.y = 600;
+                
                 this.selectCount--;
             }
         }
@@ -196,6 +202,7 @@ class TileSet {
             // Tile.x = x;
             // Tile.y = y;
             // Tile.angle = playerInfo.angle;
+            console.log(`showTileSet: Animating tile ${tile.getText()} to x=${x}, y=${y}, angle=${playerInfo.angle}`);
             tile.animate(x, y, playerInfo.angle);
             if (playerInfo.id === PLAYER.BOTTOM) {
                 tile.scale = 1.0;
@@ -274,24 +281,6 @@ class TileSet {
         return overlappedTile;
     }
 
-    swapTiles(tile, overlappedTile) {
-        // Swap tile sprite positions
-        const tempx = tile.origX;
-        const tempy = tile.origY;
-
-        tile.origX = overlappedTile.x;
-        tile.origy = overlappedTile.y;
-        overlappedTile.x = tempx;
-        overlappedTile.y = tempy;
-
-        // Swap tile positions in the tile array
-        const tileIndex = this.tileArray.indexOf(tile);
-        const overlappedTileIndex = this.tileArray.indexOf(overlappedTile);
-
-        const temp = this.tileArray[tileIndex];
-        this.tileArray[tileIndex] = this.tileArray[overlappedTileIndex];
-        this.tileArray[overlappedTileIndex] = temp;
-    }
 
 }
 
@@ -303,6 +292,9 @@ export class Hand {
         this.exposedTileSetArray = [];
         // Track if tiles were dragged this turn to avoid showHand() interference
         this.tilesWereDraggedThisTurn = false;
+        // Properties for visual insertion feedback
+        this.insertionFeedbackGhost = null;
+        this.insertionFeedbackLine = null;
         // When adding new variables, make sure to update dupHand()
     }
 
@@ -322,6 +314,9 @@ export class Hand {
             }
             newHand.exposedTileSetArray.push(newTileSet);
         }
+
+        // Note: We don't copy insertion feedback properties since they're ephemeral
+        // and only exist during active drag operations
 
         return newHand;
     }
@@ -388,6 +383,12 @@ export class Hand {
             tileset.reset(wall);
         }
         this.exposedTileSetArray = [];
+        
+        // Clean up any visual insertion feedback that might be active
+        this.clearInsertionFeedback();
+        
+        // Reset drag tracking flag
+        this.tilesWereDraggedThisTurn = false;
     }
 
     getSeperatorDistance(playerInfo) {
@@ -424,12 +425,15 @@ export class Hand {
     }
 
     showHand(playerInfo, forceFaceup) {
+        console.log("Hand.showHand called. playerInfo:", playerInfo, "forceFaceup:", forceFaceup);
         // Calculate starting position for all tiles in hand
         let x = playerInfo.x;
         let y = playerInfo.y;
 
         const handWidth = this.getHandWidth(playerInfo);
         const tileWidth = this.hiddenTileSet.getTileWidth(playerInfo);
+
+        console.log(`Hand.showHand: Initial x=${x}, y=${y}, handWidth=${handWidth}, tileWidth=${tileWidth}`);
 
         switch (playerInfo.id) {
         case PLAYER.BOTTOM:
@@ -475,6 +479,188 @@ export class Hand {
             }
 
             ({x, y} = tileset.showTileSet(playerInfo, x, y, true));
+        }
+    }
+
+    // Helper to calculate the grid position for a tile at a given index
+    calculateTilePosition(playerInfo, index) {
+        const handWidth = this.getHandWidth(playerInfo);
+        const tileWidth = this.hiddenTileSet.getTileWidth(playerInfo);
+        const tileGap = TILE_GAP;
+
+        let startX = 0;
+        let startY = 0;
+
+        switch (playerInfo.id) {
+            case PLAYER.BOTTOM:
+                startX = (WINDOW_WIDTH / 2) - (handWidth / 2) + (tileWidth / 2);
+                return {
+                    x: startX + (index * (tileWidth + tileGap)),
+                    y: playerInfo.y
+                };
+            case PLAYER.TOP:
+                startX = (WINDOW_WIDTH / 2) + (handWidth / 2) - (tileWidth / 2);
+                return {
+                    x: startX - (index * (tileWidth + tileGap)),
+                    y: playerInfo.y
+                };
+            case PLAYER.LEFT:
+                startY = (WINDOW_HEIGHT / 2) - (handWidth / 2) + (tileWidth / 2);
+                return {
+                    x: playerInfo.x,
+                    y: startY + (index * (tileWidth + tileGap))
+                };
+            case PLAYER.RIGHT:
+            default:
+                startY = (WINDOW_HEIGHT / 2) + (handWidth / 2) - (tileWidth / 2);
+                return {
+                    x: playerInfo.x,
+                    y: startY - (index * (tileWidth + tileGap))
+                };
+        }
+    }
+
+    // Helper method to determine insertion index based on drag position
+    getInsertionIndex(dragX, tileArray, draggedTile) {
+        let filteredIndex = 0;
+        
+        console.log(`getInsertionIndex: dragX=${dragX}, checking ${tileArray.length} tiles`);
+        
+        for (let i = 0; i < tileArray.length; i++) {
+            const currentTile = tileArray[i];
+            if (currentTile === draggedTile) {
+                console.log(`Skipping dragged tile: ${currentTile.getText()}`);
+                continue;
+            }
+            
+            // Use the actual current visual position of the tile
+            const tileVisualX = currentTile.x;
+            
+            console.log(`getInsertionIndex: comparing dragX ${dragX} with tile ${currentTile.getText()} at x=${tileVisualX}`);
+            
+            if (dragX < tileVisualX) {
+                console.log(`getInsertionIndex: returning index ${filteredIndex}`);
+                return filteredIndex;
+            }
+            filteredIndex++;
+        }
+        
+        console.log(`getInsertionIndex: returning end index ${filteredIndex}`);
+        return filteredIndex;
+    }
+
+    // Helper method to show visual insertion feedback
+    showInsertionFeedback(insertionIndex, tileArray, draggedTile, dragX) {
+        console.log(`Showing insertion feedback at index ${insertionIndex} for dragX ${dragX}`);
+        
+        // Clear any existing feedback first
+        this.clearInsertionFeedback();
+        
+        // Only show feedback if we have a valid insertion index
+        if (insertionIndex >= 0 && insertionIndex < tileArray.length) {
+            const currentPlayerInfo = this.gameLogic.table.players[PLAYER.BOTTOM].playerInfo;
+            const tileWidth = this.hiddenTileSet.getTileWidth(currentPlayerInfo);
+            const tileGap = TILE_GAP;
+            
+            // Calculate position between tiles (not on tile centers)
+            const insertionPosition = this.calculateInsertionPosition(currentPlayerInfo, insertionIndex, tileWidth, tileGap);
+            
+            console.log("Insertion position calculated:", insertionPosition.x, insertionPosition.y);
+            
+            // Create a visual indicator (ghost tile or gap marker)
+            const ghostTile = this.scene.add.rectangle(
+                insertionPosition.x,
+                insertionPosition.y,
+                SPRITE_WIDTH * 0.6, // Smaller ghost for gap indication
+                SPRITE_WIDTH * 1.4,
+                0x00ff00,
+                0.2
+            );
+            ghostTile.setStrokeStyle(1, 0x00aa00);
+            ghostTile.setDepth(200);
+            
+            // Store the ghost tile for cleanup
+            this.insertionFeedbackGhost = ghostTile;
+            
+            // Create a vertical line to mark the insertion point (between tiles)
+            const lineLength = SPRITE_WIDTH * 1.6;
+            const insertionLine = this.scene.add.line(
+                0, 0,
+                insertionPosition.x, insertionPosition.y - lineLength/2,
+                insertionPosition.x, insertionPosition.y + lineLength/2,
+                0x00ff00,
+                0.8
+            );
+            insertionLine.setDepth(201);
+            
+            // Store the line for cleanup
+            this.insertionFeedbackLine = insertionLine;
+            
+            console.log("Visual insertion feedback created at", insertionPosition.x, insertionPosition.y);
+        } else {
+            console.log("Invalid insertion index, no feedback shown");
+        }
+    }
+
+    // Helper method to calculate insertion position between tiles
+    calculateInsertionPosition(playerInfo, insertionIndex, tileWidth, tileGap) {
+        const insertionPosition = { x: 0, y: playerInfo.y };
+        
+        if (insertionIndex === 0) {
+            // Inserting at beginning - position before first tile
+            const firstTilePos = this.calculateTilePosition(playerInfo, 0);
+            insertionPosition.x = firstTilePos.x - (tileWidth + tileGap) / 2;
+        } else if (insertionIndex === this.hiddenTileSet.tileArray.length) {
+            // Inserting at end - position after last tile
+            const lastTilePos = this.calculateTilePosition(playerInfo, this.hiddenTileSet.tileArray.length - 1);
+            insertionPosition.x = lastTilePos.x + (tileWidth + tileGap) / 2;
+        } else {
+            // Inserting between tiles - position between two tiles
+            const leftTilePos = this.calculateTilePosition(playerInfo, insertionIndex - 1);
+            const rightTilePos = this.calculateTilePosition(playerInfo, insertionIndex);
+            insertionPosition.x = (leftTilePos.x + rightTilePos.x) / 2;
+        }
+        
+        return insertionPosition;
+    }
+
+    // Helper method to clear visual insertion feedback
+    clearInsertionFeedback() {
+        // Remove ghost tile if it exists
+        if (this.insertionFeedbackGhost) {
+            this.insertionFeedbackGhost.destroy();
+            this.insertionFeedbackGhost = null;
+        }
+        
+        // Remove insertion line if it exists
+        if (this.insertionFeedbackLine) {
+            this.insertionFeedbackLine.destroy();
+            this.insertionFeedbackLine = null;
+        }
+    }
+
+    // Simplified method to reposition all tiles after drag operation
+    repositionTilesAfterDrag(playerInfo) {
+        console.log("Repositioning all tiles after drag operation");
+        
+        // Reposition each tile based on its current array index - SIMPLE Y positioning
+        for (let i = 0; i < this.hiddenTileSet.tileArray.length; i++) {
+            const tile = this.hiddenTileSet.tileArray[i];
+            const targetPos = this.calculateTilePosition(playerInfo, i);
+            
+            // Update both current position and orig position - HARDCODE Y
+            tile.x = targetPos.x;
+            tile.y = 600; // Always park at grid level
+            tile.origX = targetPos.x;
+            tile.origY = 600; // Always park at grid level
+            
+            // Update sprite position immediately to avoid visual jump
+            tile.sprite.y = 600;
+            
+            // Animate to the new position
+            tile.animate(targetPos.x, targetPos.y, playerInfo.angle);
+            
+            console.log(`Positioned tile ${tile.getText()} at index ${i}: x=${targetPos.x}, y=600`);
         }
     }
 
@@ -548,12 +734,14 @@ export class Hand {
 
                 if (maxSelect) {
                     if (tile.selected) {
-                        // Deselect
+                        // SIMPLE DESELECT: Click toggles selection state
                         tile.selected = false;
-                        tile.animate(tile.origX, tile.origY, tile.angle);
+                        const playerObject = this.gameLogic.table.players[PLAYER.BOTTOM];
+                        tile.animate(tile.origX, 600, playerObject.angle); // Always park at 600
                         tileSet.selectCount--;
                     } else if (tileSet.selectCount < maxSelect) {
-                        // Select
+                        // SIMPLE SELECT: Click toggles selection state
+                        const playerObject = this.gameLogic.table.players[PLAYER.BOTTOM];
                         let bSelectOk = true;
 
                         if (this.gameLogic.state === STATE.LOOP_EXPOSE_TILES) {
@@ -574,9 +762,7 @@ export class Hand {
 
                         if (bSelectOk) {
                             tile.selected = true;
-                            tile.origX = tile.x;
-                            tile.origY = tile.y;
-                            tile.animate(tile.x, tile.y - 25, tile.angle);
+                            tile.animate(tile.origX, 575, playerObject.angle); // Always elevate to 575
                             tileSet.selectCount++;
                         }
                     }
@@ -595,31 +781,238 @@ export class Hand {
             this.scene.input.setDraggable(tile.sprite);
             // eslint-disable-next-line no-unused-vars
             tile.sprite.on("dragstart", (_pointer, _dragX, _dragY) => {
+                console.log("=== DRAGSTART ===");
+                
                 tile.drag = true;
-                // Mark that tiles were dragged this turn
                 this.tilesWereDraggedThisTurn = true;
-                if (!tile.selected) {
-                    tile.origX = tile.x;
-                    tile.origY = tile.y;
+
+                // Clear any existing visual insertion feedback first
+                this.clearInsertionFeedback();
+
+                // Store current index for drag operation
+                const currentTileIndex = tileSet.tileArray.indexOf(tile);
+                if (currentTileIndex === -1) {
+                    console.error("ERROR: Tile not found in tileArray during dragstart!");
+                    return;
                 }
+                tile.originalIndex = currentTileIndex; // Store original index
+
+                // Bring the dragged tile to the top visually
+                tile.sprite.setDepth(100);
+                if (tile.spriteBack) {
+                    tile.spriteBack.setDepth(100);
+                }
+
+                console.log("Drag started for tile:", tile.getText(), "at index:", tile.originalIndex);
+                console.log("=== DRAGSTART END ===");
             });
             tile.sprite.on("drag", (pointer, dragX, dragY) => {
-                // Use tile setters to properly update sprite and mask positions
+                if (!pointer) {
+                    console.warn("Drag event received null pointer");
+                    return;
+                }
+                // Update dragged tile's position
                 tile.x = dragX;
                 tile.y = dragY;
-                const overlappedTile = tileSet.checkOverlap(tile);
-                if (overlappedTile) {
-                    tileSet.swapTiles(tile, overlappedTile);
-                }
+
+                // Show visual insertion feedback during drag
+                const insertionIndex = this.getInsertionIndex(dragX, tileSet.tileArray, tile);
+                this.showInsertionFeedback(insertionIndex, tileSet.tileArray, tile, dragX);
             });
             // eslint-disable-next-line no-unused-vars
-            tile.sprite.on("dragend", (_pointer, _dragX, _dragY, _dropped) => {
+tile.sprite.on("dragend", (_pointer, dragX, _dragY, _dropped) => {
+                console.log("=== DRAGEND START ===");
+                console.log("Dragged Tile:", tile.getText());
+                console.log("Original Index:", tile.originalIndex);
+                
+                // COMPREHENSIVE COORDINATE DEBUGGING
+                console.log("=== MOUSE COORDINATE DEBUGGING ===");
+                console.log("Phaser pointer worldX:", _pointer.worldX);
+                console.log("Phaser pointer worldY:", _pointer.worldY);
+                console.log("Phaser pointer x:", _pointer.x);
+                console.log("Phaser pointer y:", _pointer.y);
+                console.log("Phaser dragX parameter:", dragX);
+                console.log("Phaser dragY parameter:", _dragY);
+                console.log("Sprite world position x:", tile.sprite.worldX);
+                console.log("Sprite world position y:", tile.sprite.worldY);
+                console.log("Sprite screen position x:", tile.sprite.x);
+                console.log("Sprite screen position y:", tile.sprite.y);
+                console.log("Scene camera scrollX:", tile.sprite.scene.cameras.main.scrollX);
+                console.log("Scene camera scrollY:", tile.sprite.scene.cameras.main.scrollY);
+                console.log("Scene camera zoom:", tile.sprite.scene.cameras.main.zoom);
+                console.log("Scene game scale:", tile.sprite.scene.scale);
+                console.log("Scene game canvas width:", tile.sprite.scene.scale.gameSize.width);
+                console.log("Scene game canvas height:", tile.sprite.scene.scale.gameSize.height);
+                console.log("=== END COORDINATE DEBUGGING ===");
+                
                 tile.drag = false;
-                // Snap tile back to proper position - animate to original position
-                // The tile's original position has been preserved in tile.origX/tile.origY
-                tile.animate(tile.origX, tile.origY, tile.angle);
-                // Update glow position after animation completes
-                setTimeout(() => tile.updateGlowPosition(), 100);
+
+                // Clear visual insertion feedback
+                this.clearInsertionFeedback();
+
+                // CLAMP DRAG POSITION TO HAND BOUNDARIES
+                // Calculate hand boundaries based on current tile positions
+                const handTiles = tileSet.tileArray.filter(t => t !== tile);
+                let minX = Math.min(...handTiles.map(t => t.x)) - 30; // 30 pixels margin
+                let maxX = Math.max(...handTiles.map(t => t.x)) + 30; // 30 pixels margin
+                
+                // Ensure we have valid boundaries
+                if (!isFinite(minX) || !isFinite(maxX)) {
+                    minX = 100;
+                    maxX = 900;
+                }
+                
+                // IMPORTANT: Phaser's dragX parameter is often incorrect!
+                // Use the actual sprite position instead, which matches the visual position
+                const actualDragX = tile.sprite.x;
+                console.log("Using actual sprite position instead of dragX parameter");
+                console.log(`dragX parameter: ${dragX} (unreliable)`);
+                console.log(`sprite.x position: ${actualDragX} (reliable)`);
+                
+                // Clamp the drag position to the hand area
+                const clampedDragX = Math.max(minX, Math.min(maxX, actualDragX));
+                console.log(`DragX clamped from ${actualDragX} to ${clampedDragX} (bounds: ${minX} to ${maxX})`);
+                
+                // Handle undefined dragX/dragY by falling back to current position
+                const finalDragX = dragX !== undefined ? clampedDragX : tile.x;
+
+                let finalTargetIndex = tileSet.tileArray.length; // Default to end of hand
+
+                // Determine the final insertion index based on final drag position
+                // Use the actual current visual positions of tiles
+                const currentArrayLength = tileSet.tileArray.length;
+                let filteredIndex = 0;
+                finalTargetIndex = currentArrayLength; // Default to end
+                
+                console.log(`Calculating insertion for dragX ${finalDragX}`);
+                console.log(`Current tile array length: ${currentArrayLength}`);
+                
+                for (let i = 0; i < currentArrayLength; i++) {
+                    const currentTile = tileSet.tileArray[i];
+                    
+                    if (currentTile === tile) {
+                        console.log(`Skipping dragged tile at index ${i}`);
+                        continue; // Skip the dragged tile itself
+                    }
+                    
+                    // Use the actual current visual position of the tile
+                    const tileVisualX = currentTile.x;
+                    
+                    console.log(`Comparing dragX ${finalDragX} with tile ${currentTile.getText()} at index ${i}: x=${tileVisualX}`);
+                    
+                    if (finalDragX < tileVisualX) {
+                        finalTargetIndex = filteredIndex;
+                        console.log(`Setting finalTargetIndex to ${finalTargetIndex} (before tile ${currentTile.getText()})`);
+                        break;
+                    }
+                    filteredIndex++;
+                }
+                
+                console.log(`Final target index determined: ${finalTargetIndex}`);
+
+                // Adjust target index if the tile is being moved from right to left
+                // and the original index was before the target index
+                if (tile.originalIndex < finalTargetIndex) {
+                    finalTargetIndex--;
+                }
+
+                // Ensure target index is within valid bounds
+                finalTargetIndex = Math.max(0, Math.min(finalTargetIndex, tileSet.tileArray.length - 1));
+
+                console.log("Final Target Index:", finalTargetIndex);
+                console.log("tileSet.tileArray BEFORE:", tileSet.tileArray.map(t => t.getText()));
+
+                // CRITICAL DEBUG: Log the exact insertion decision
+                console.log("=== CRITICAL INSERTION DEBUG ===");
+                console.log(`Dragged tile: ${tile.getText()}`);
+                console.log(`Dragged from index: ${tile.originalIndex}`);
+                console.log(`Trying to insert at index: ${finalTargetIndex}`);
+                console.log(`Drag X position: ${finalDragX}`);
+                
+                // Show where each tile currently is
+                tileSet.tileArray.forEach((t, idx) => {
+                    console.log(`Tile ${idx}: ${t.getText()} at x=${t.x}`);
+                });
+                console.log("=== END CRITICAL DEBUG ===");
+
+                // Perform array manipulation safely
+                try {
+                    // Remove the dragged tile from its original position
+                    const removedTile = tileSet.tileArray.splice(tile.originalIndex, 1)[0];
+                    
+                    if (!removedTile || removedTile !== tile) {
+                        console.error("ERROR: Failed to remove correct tile from array!");
+                        console.log("Expected:", tile.getText(), "Got:", removedTile ? removedTile.getText() : "null");
+                        // Restore tile to original position and return
+                        tile.x = tile.origX;
+                        tile.y = tile.origY;
+                        return;
+                    }
+
+                    console.log("Successfully removed tile from index", tile.originalIndex);
+
+                    // Insert the dragged tile at the new position
+                    tileSet.tileArray.splice(finalTargetIndex, 0, tile);
+                    
+                    console.log("Successfully inserted tile at index", finalTargetIndex);
+                    console.log("tileSet.tileArray AFTER:", tileSet.tileArray.map(t => t.getText()));
+                    
+                    // CRITICAL: Verify the tile ended up where we expected
+                    const newIndex = tileSet.tileArray.indexOf(tile);
+                    console.log(`*** VERIFICATION: Dragged tile is now at index ${newIndex} ***`);
+                    
+                } catch (error) {
+                    console.error("ERROR during array manipulation:", error);
+                    // Restore tile to original position on error
+                    tile.x = tile.origX;
+                    tile.y = tile.origY;
+                    return;
+                }
+
+                // CRITICAL: Position the tile at the target location after successful array manipulation
+                const currentPlayerInfo = this.gameLogic.table.players[PLAYER.BOTTOM].playerInfo;
+                const finalPos = this.calculateTilePosition(currentPlayerInfo, finalTargetIndex);
+                
+                // Update origX/origY BEFORE positioning to prevent other animations from overriding
+                tile.origX = finalPos.x;
+                tile.origY = finalPos.y;
+                tile.x = finalPos.x;
+                tile.y = finalPos.y;
+                console.log(`Positioned dragged tile at final position: x=${finalPos.x}, y=${finalPos.y} (index ${finalTargetIndex})`);
+
+                // Reset tile depth to normal level
+                tile.sprite.setDepth(0);
+                if (tile.spriteBack) {
+                    tile.spriteBack.setDepth(0);
+                }
+
+                // Clear any remaining selection state - always park at grid level
+                if (tile.selected) {
+                    tile.selected = false;
+                    tileSet.selectCount--; // CRITICAL: Also decrement selectCount
+                }
+                
+                // SIMPLE: Always park dragged tiles at grid level (600)
+                // Remove complex Y positioning calculations - just use hardcoded values
+                tile.x = finalPos.x;
+                tile.y = 600; // Always park at grid level
+                tile.origX = finalPos.x;
+                tile.origY = 600; // Always park at grid level
+                
+                // Update sprite position immediately to avoid visual jump
+                tile.sprite.y = 600;
+                
+                // Now animate to final position
+                tile.animate(tile.x, tile.y, currentPlayerInfo.angle);
+                
+                // Reposition all tiles - they will all be at 600 anyway
+                this.repositionTilesAfterDrag(currentPlayerInfo);
+
+                console.log(`Final Y position correction: tile.y=${tile.y}, tile.origY=${tile.origY}, currentPlayerInfo.y=${currentPlayerInfo.y}`);
+                
+                console.log("=== DRAGEND COMPLETE - drag operation finished ===");
+                
+                console.log("=== DRAGEND END ===");
             });
         }
 
@@ -679,8 +1072,11 @@ export class Hand {
 
                     if (maxSelect) {
                         if (tile.selected) {
+                            // SIMPLE: Reset to original position
                             tile.x = tile.origX;
-                            tile.y = tile.origY;
+                            tile.y = 600; // Always park at grid level
+                            tile.origY = 600; // Always park at grid level
+                            tile.sprite.y = 600;
                             tileSet.selectCount--;
                             tile.selected = !tile.selected;
                         } else if (tileSet.selectCount < maxSelect) {
@@ -708,25 +1104,12 @@ export class Hand {
 
                             if (bSelectOk) {
                                 tile.origX = tile.x;
-                                tile.origY = tile.y;
+                                tile.origY = 600; // Always park at grid level
 
-                                switch (tile.angle) {
-                                case 270:
-                                case -90:
-                                    tile.x -= 25;
-                                    break;
-                                case 180:
-                                case -180:
-                                    tile.y += 25;
-                                    break;
-                                case 90:
-                                case -270:
-                                    tile.x += 25;
-                                    break;
-                                default:
-                                    tile.y -= 25;
-                                    break;
-                                }
+                                // Simple elevated positioning for exposed jokers
+                                tile.y = 575; // Always elevate to 575
+                                tile.sprite.y = 575;
+                                
                                 tileSet.selectCount++;
                                 tile.selected = !tile.selected;
                             }

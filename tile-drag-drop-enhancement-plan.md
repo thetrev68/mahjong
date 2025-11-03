@@ -128,22 +128,54 @@ If issues arise: `git checkout HEAD -- gameObjects_hand.js gameLogic.js`
 
 ---
 
-## Experiment 4: [To Be Determined]
+## Experiment 4: Advanced Tile Insertion and Shifting with Visual Feedback
 
-### Hypothesis
-[TBD - Based on Experiment 3 results]
+### Problem Statement
+The current drag-and-drop implementation incorrectly assumes tile swapping, leading to "snapping" issues when a tile is dropped. The desired behavior is tile insertion and shifting, where a dragged tile is placed at a new position, and other tiles adjust accordingly. Previous attempts have failed due to a lack of deep integration with the existing Phaser.js rendering and layout mechanisms, specifically how `showHand()` and `tile.animate()` interact with `origX`/`origY`.
 
-### Implementation
-[TBD]
+### Desired Behavior
+When a tile is dragged and dropped into a new position within the hand:
+1.  **Visual Insertion Point:** During the drag operation, a clear visual indicator (e.g., a temporary gap or a ghost tile) should show the user where the dragged tile will be inserted. This indicator should dynamically update as the tile is dragged across the hand.
+2.  **Smooth Re-layout on Drop:** Upon `dragend`, the dragged tile should be logically inserted into the `hiddenTileSet.tileArray` at the indicated position. All tiles in the hand (including the newly positioned dragged tile and the shifted tiles) should then animate smoothly to their new, correct grid positions as determined by the hand's layout logic.
 
-### Testing
-[TBD]
+### Deeper Analysis of Existing Code and Constraints
 
-### Results
-[TBD]
+*   **`Hand.showHand()` is the Layout Authority:** This function is responsible for calculating the `x`, `y` coordinates for all tiles based on their order in `this.hiddenTileSet.tileArray`. It then calls `tile.animate(x, y, angle)` for each tile.
+*   **`tile.animate()` and `origX`/`origY`:** The `dragend` handler explicitly states that `tile.animate(tile.origX, tile.origY, tile.angle)` snaps the tile back to its "original position." This implies that `origX`/`origY` are meant to store the *last calculated grid position* for a tile. When `showHand()` calls `tile.animate()`, it effectively updates these `origX`/`origY` values.
+*   **`dragstart` saves current visual position:** The `dragstart` handler saves `tile.x` and `tile.y` into `tile.origX` and `tile.origY`. This is problematic if the tile was already visually out of its "snapped" grid position.
+*   **`drag` event is for visual feedback only:** The `tileArray` should *not* be modified during the `drag` event. Any changes to the underlying data structure should occur only on `dragend`.
 
-### Lessons Learned
-[TBD]
+### Investigation and Implementation Plan
+
+1.  **Remove `TileSet.swapTiles` function:** This function is based on an incorrect assumption of swapping and should be removed entirely from `gameObjects_hand.js`.
+2.  **Refine `dragstart` handler:**
+    *   Instead of saving `tile.x` and `tile.y` directly, ensure `tile.origX` and `tile.origY` always reflect the *last known grid position* before the drag begins. This might require calling `this.showHand()` once at the very beginning of the drag operation (or ensuring `origX`/`origY` are always up-to-date from the last `showHand()` call).
+    *   Store the `originalIndex` of the dragged tile in the `hiddenTileSet.tileArray` at `dragstart`.
+3.  **Modify `tile.sprite.on("drag", ...)` handler:**
+    *   Remove the call to `tileSet.checkOverlap(tile)` and `tileSet.swapTiles(tile, overlappedTile)`.
+    *   Implement logic to visually indicate the insertion point:
+        *   Iterate through `this.hiddenTileSet.tileArray` (excluding the dragged tile).
+        *   Based on the `dragX` of the dragged tile, determine the potential `targetIndex` where it would be inserted.
+        *   Visually shift tiles to the right of the `targetIndex` slightly to create a temporary gap, or render a "ghost" representation of the dragged tile at the `targetIndex`. This visual feedback should *not* modify the `tileArray`.
+4.  **Modify `tile.sprite.on("dragend", ...)` handler:** This is the critical section for implementing the new logic.
+    *   **Determine Final Insertion Index:** Based on the final `dragX` of the dropped tile, calculate the `finalTargetIndex` where it should be inserted. This should be consistent with the visual feedback provided during the `drag` event.
+    *   **Update `tileArray`:**
+        *   Remove the dragged `tile` from its `originalIndex` in `this.hiddenTileSet.tileArray`.
+        *   Insert the dragged `tile` into the `finalTargetIndex` in `this.hiddenTileSet.tileArray`.
+    *   **Re-layout and Animate All Tiles:** Call `this.showHand(playerInfo, false)` (or `this.showHand()` with appropriate parameters) to trigger a full re-layout of the hand. This will:
+        *   Recalculate the `x`, `y` positions for all tiles based on their new order in the `tileArray`.
+        *   Cause `tile.animate()` to be called for each tile, smoothly moving them to their new `origX`/`origY` positions.
+    *   **Clear Visual Indicator:** Remove any temporary visual insertion indicators.
+
+### Expected Behavior
+
+-   When a tile is dragged, it moves freely, and a visual gap or ghost tile indicates its potential drop location.
+-   When the tile is dropped, the visual indicator disappears.
+-   The hand's internal `tileArray` is updated to reflect the new order.
+-   All tiles in the hand animate smoothly and simultaneously to their final, correct grid positions, creating a seamless re-ordering effect.
+
+### Files to be Modified
+-   `gameObjects_hand.js` (specifically the `TileSet` class and the `Hand.insertHidden` method's drag handlers)
 
 ### File Restoration
-[TBD]
+If issues arise: `git checkout HEAD -- gameObjects_hand.js`

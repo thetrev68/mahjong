@@ -230,6 +230,10 @@ This document provides a summary of the classes, functions, and constants define
         *   `getSeperatorDistance(playerInfo)`
         *   `getHandWidth(playerInfo)`
         *   `showHand(playerInfo, forceFaceup)`
+        *   `calculateTilePosition(playerInfo, index)`
+        *   `getInsertionIndex(dragX, tileArray, draggedTile)`
+        *   `showInsertionFeedback(insertionIndex, tileArray, draggedTile)`
+        *   `clearInsertionFeedback(tileArray)`
         *   `resetSelection()`
         *   `getSelectionHidden()`
         *   `getSelectionHiddenCount()`
