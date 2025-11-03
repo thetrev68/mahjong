@@ -2,6 +2,7 @@
 import * as Phaser from "phaser";
 import {GameLogic} from "./gameLogic.js";
 import {Table} from "./gameObjects_table.js";
+import {HomePageTileManager} from "./homePageTileManager.js";
 
 import tilesPng from "./assets/tiles.png";
 import tilesJson from "./assets/tiles.json";
@@ -12,6 +13,7 @@ class GameScene extends Phaser.Scene {
         super({key: "GameScene"});
         this.commandBarManualPosition = false;
         this.commandBarPosition = null;
+        this.homePageTileManager = null;
     }
 
     preload() {
@@ -55,7 +57,9 @@ class GameScene extends Phaser.Scene {
         });
         this.gGameLogic.errorText.visible = false;
 
-        this.gTable.create();
+        this.gTable.create(true); // Don't create wall tiles yet
+        this.homePageTileManager = new HomePageTileManager(this, this.gTable.wall);
+        this.homePageTileManager.createScatteredTiles();
 
         // Set up the UI buttons
         this.enableCommandBarDrag();
@@ -65,7 +69,16 @@ class GameScene extends Phaser.Scene {
         const startButton = document.getElementById("start");
         if (startButton) {
             startButton.addEventListener("click", () => {
-                this.gGameLogic.start();
+                // Hide the button after it's clicked
+                startButton.style.display = "none";
+
+                this.homePageTileManager.onAnimationComplete = () => {
+                    this.homePageTileManager.transitionToWallSystem();
+                    this.homePageTileManager.cleanup();
+                    this.homePageTileManager = null; // Release reference
+                    this.gGameLogic.start();
+                };
+                this.homePageTileManager.animateToPileAndStartGame();
             });
         }
     }
