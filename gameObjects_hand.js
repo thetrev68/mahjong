@@ -51,17 +51,13 @@ class TileSet {
 
         window.document.getElementById("button1").disabled = true;
 
+        const playerObject = this.gameLogic.table.players[PLAYER.BOTTOM];
+
         // SIMPLE: Reset all tiles to grid level (600)
         for (const tile of this.tileArray) {
             if (tile.selected) {
                 tile.selected = false;
-                tile.x = tile.origX;
-                tile.y = 600; // Always park at grid level
-                tile.origY = 600; // Always park at grid level
-                
-                // Update sprite position immediately
-                tile.sprite.y = 600;
-                
+                tile.animate(tile.origX, 600, playerObject.playerInfo.angle);
                 this.selectCount--;
             }
         }
@@ -199,6 +195,12 @@ class TileSet {
 
         for (let i = 0; i < this.tileArray.length; i++) {
             const tile = this.tileArray[i];
+
+            if (this.inputEnabled) {
+                tile.origX = x;
+                tile.origY = y;
+            }
+
             // Tile.x = x;
             // Tile.y = y;
             // Tile.angle = playerInfo.angle;
@@ -737,33 +739,39 @@ export class Hand {
                         // SIMPLE DESELECT: Click toggles selection state
                         tile.selected = false;
                         const playerObject = this.gameLogic.table.players[PLAYER.BOTTOM];
-                        tile.animate(tile.origX, 600, playerObject.angle); // Always park at 600
+                        tile.animate(tile.origX, 600, playerObject.playerInfo.angle); // Always park at 600
                         tileSet.selectCount--;
-                    } else if (tileSet.selectCount < maxSelect) {
-                        // SIMPLE SELECT: Click toggles selection state
-                        const playerObject = this.gameLogic.table.players[PLAYER.BOTTOM];
-                        let bSelectOk = true;
-
-                        if (this.gameLogic.state === STATE.LOOP_EXPOSE_TILES) {
-                            if (tile.suit !== SUIT.JOKER &&
-                                (tile.suit !== this.gameLogic.discardTile.suit || tile.number !== this.gameLogic.discardTile.number)) {
-                                bSelectOk = false;
-                                this.gameLogic.displayErrorText(" Select same tile or joker to form pong/kong/quint ");
-                            }
+                    } else {
+                        if (maxSelect === 1) {
+                            tileSet.resetSelection();
                         }
 
-                        if (this.gameLogic.state === STATE.CHARLESTON1 || this.gameLogic.state === STATE.CHARLESTON2 ||
-                            this.gameLogic.state === STATE.COURTESY) {
-                            if (tile.suit === SUIT.JOKER) {
-                                bSelectOk = false;
-                                this.gameLogic.displayErrorText(" Joker cannot be passed during Charleston ");
-                            }
-                        }
+                        if (tileSet.selectCount < maxSelect) {
+                            // SIMPLE SELECT: Click toggles selection state
+                            const playerObject = this.gameLogic.table.players[PLAYER.BOTTOM];
+                            let bSelectOk = true;
 
-                        if (bSelectOk) {
-                            tile.selected = true;
-                            tile.animate(tile.origX, 575, playerObject.angle); // Always elevate to 575
-                            tileSet.selectCount++;
+                            if (this.gameLogic.state === STATE.LOOP_EXPOSE_TILES) {
+                                if (tile.suit !== SUIT.JOKER &&
+                                    (tile.suit !== this.gameLogic.discardTile.suit || tile.number !== this.gameLogic.discardTile.number)) {
+                                    bSelectOk = false;
+                                    this.gameLogic.displayErrorText(" Select same tile or joker to form pong/kong/quint ");
+                                }
+                            }
+
+                            if (this.gameLogic.state === STATE.CHARLESTON1 || this.gameLogic.state === STATE.CHARLESTON2 ||
+                                this.gameLogic.state === STATE.COURTESY) {
+                                if (tile.suit === SUIT.JOKER) {
+                                    bSelectOk = false;
+                                    this.gameLogic.displayErrorText(" Joker cannot be passed during Charleston ");
+                                }
+                            }
+
+                            if (bSelectOk) {
+                                tile.selected = true;
+                                tile.animate(tile.origX, 575, playerObject.playerInfo.angle); // Always elevate to 575
+                                tileSet.selectCount++;
+                            }
                         }
                     }
 

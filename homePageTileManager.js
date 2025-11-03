@@ -45,7 +45,7 @@ export class HomePageTileManager {
         // Now, position them randomly
         for (let i = 0; i < this.tileArray.length; i++) {
             const tile = this.tileArray[i];
-            const { x, y, scale, angle } = this.generateRandomPosition(i);
+            const { x, y, scale, angle } = this.generateRandomPosition();
             tile.x = x;
             tile.y = y;
             tile.scale = scale;
@@ -55,7 +55,7 @@ export class HomePageTileManager {
         }
     }
 
-    generateRandomPosition(tileIndex) {
+    generateRandomPosition() {
         // The goal is a "dumped pile" look, clustered in the center.
         // We can use a Gaussian distribution to achieve this.
         const centerX = this.scene.sys.game.config.width / 2;
@@ -71,7 +71,8 @@ export class HomePageTileManager {
 
         const x = centerX + (num * spreadX);
 
-        u = 0, v = 0;
+        u = 0;
+        v = 0;
         while(u === 0) u = Math.random();
         while(v === 0) v = Math.random();
         num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
@@ -111,6 +112,8 @@ export class HomePageTileManager {
         };
     }
 
+
+
     animateToPileAndStartGame() {
         this.isAnimating = true;
         this.animationState = "gathering";
@@ -121,18 +124,33 @@ export class HomePageTileManager {
 
         for (let i = 0; i < this.tileArray.length; i++) {
             const tile = this.tileArray[i];
-            const targetPos = this.calculateStackPosition(i);
-
-            // Calculate distance from center to create a spiral-in effect
-            const distance = Phaser.Math.Distance.Between(tile.x, tile.y, centerX, centerY);
-            const delay = distance * 2; // Adjust multiplier for desired effect
-
-            const promise = this.animateSingleTile(tile, targetPos.x, targetPos.y, 0, 1500, delay);
+            
+            // Animate to the center of the screen to form a pile
+            const promise = this.animateSingleTile(tile, centerX, centerY, 0, 1500, 0);
             promises.push(promise);
         }
 
         Promise.all(promises).then(() => {
-            console.log("All tiles have reached their destination.");
+            console.log("All tiles have reached the center pile.");
+            this.animationState = "piled";
+            this.animatePileToWall();
+        });
+    }
+
+    animatePileToWall() {
+        this.animationState = "dealing";
+        const promises = [];
+
+        for (let i = 0; i < this.tileArray.length; i++) {
+            const tile = this.tileArray[i];
+            const targetPos = this.calculateStackPosition(i);
+
+            const promise = this.animateSingleTile(tile, targetPos.x, targetPos.y, 0, 2250, i * 5);
+            promises.push(promise);
+        }
+
+        Promise.all(promises).then(() => {
+            console.log("All tiles have been dealt to the wall.");
             this.isAnimating = false;
             this.animationState = "complete";
             if (this.onAnimationComplete) {
@@ -141,10 +159,18 @@ export class HomePageTileManager {
         });
     }
 
+
     animateSingleTile(tile, x, y, angle, duration, delay) {
         return new Promise((resolve) => {
+            const anim = {
+                x: tile.x,
+                y: tile.y,
+                angle: tile.angle,
+                scale: tile.scale
+            };
+
             this.scene.tweens.add({
-                targets: tile.sprite,
+                targets: anim,
                 x: x,
                 y: y,
                 scaleX: 0.6,
@@ -152,15 +178,18 @@ export class HomePageTileManager {
                 angle: angle,
                 duration: duration,
                 delay: delay,
-                ease: 'Cubic.easeOut',
+                ease: "Cubic.easeOut",
                 onUpdate: () => {
-                    tile.spriteBack.x = tile.sprite.x;
-                    tile.spriteBack.y = tile.sprite.y;
-                    tile.spriteBack.angle = tile.sprite.angle;
-                    tile.spriteBack.scaleX = tile.sprite.scaleX;
-                    tile.spriteBack.scaleY = tile.sprite.scaleY;
+                    tile.x = anim.x;
+                    tile.y = anim.y;
+                    tile.angle = anim.angle;
+                    tile.scale = anim.scale;
                 },
                 onComplete: () => {
+                    tile.x = x;
+                    tile.y = y;
+                    tile.angle = angle;
+                    tile.scale = 0.6;
                     resolve();
                 }
             });

@@ -28,6 +28,8 @@ class GameScene extends Phaser.Scene {
     async create() {
         // From game.js create()
 
+        this.input.dragDistanceThreshold = 20;
+
         this.scale.on("resize", this.resize, this);
 
         // Create game objects
