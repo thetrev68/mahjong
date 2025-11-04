@@ -1163,7 +1163,7 @@ export class GameLogic {
             break;
 
         case STATE.LOOP_EXPOSE_TILES:
-            printInfo("Form a pung/kong/quintet with claimed tile");
+            printInfo("Form a pung/kong/quint with claimed tile");
             button1.innerText = "Expose tiles";
             button1.disabled = true;
             button1.style.display = "";

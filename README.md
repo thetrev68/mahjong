@@ -99,7 +99,7 @@ gameObjects/           # Game object classes
 constants.js           # Game constants and enumerations
 card/                  # Mahjong hand validation system
 ├── card.js           # Main validation logic
-├── 2017/, 2018/, 2019/, 2020/ # Different card years
+├── 2017/, 2018/, 2019/, 2020/, 2025/ # Different card years
 ```
 
 ### Key Features
@@ -182,6 +182,36 @@ The game supports multiple hand categories:
 - **Class-based Architecture**: Clean object-oriented design
 - **Separation of Concerns**: Logic, AI, and presentation layers
 - **Constants**: Centralized game configuration
+
+### Debugging
+
+To control the verbosity of the console logs, you can use the `gdebug` flag in `utils.js`.
+
+-   **`gdebug = 0`**: Disables debug messages.
+-   **`gdebug = 1`**: Enables debug messages.
+
+The relevant code is in `c:\Repos\mahjong\utils.js`:
+
+```javascript
+export const gdebug = 0; // Set to 0 to disable debug messages
+
+// ...
+
+let debugPrint = function() {};
+
+// ...
+
+if (gdebug) {
+    debugPrint = function(str) {
+        console.log(str);
+    };
+    // ...
+}
+
+export { debugPrint, debugTrace };
+```
+
+You can also use your browser's developer tools to filter console messages.
 
 ### Key Classes
 

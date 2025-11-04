@@ -47,3 +47,33 @@ To run the game, you need to have Node.js and npm installed. The project uses Vi
 *   **Class-Based Architecture:** Follow the object-oriented design, creating classes for distinct game components.
 *   **Separation of Concerns:** Keep game logic (`gameLogic.js`), AI (`gameAI.js`), and presentation (`GameScene.js`) separate.
 *   **Use of Constants:** Use the `constants.js` file for any new game-wide constants.
+
+## 7. Debugging
+
+To control the verbosity of the console logs, you can use the `gdebug` flag in `utils.js`.
+
+-   **`gdebug = 0`**: Disables debug messages.
+-   **`gdebug = 1`**: Enables debug messages.
+
+The relevant code is in `c:\Repos\mahjong\utils.js`:
+
+```javascript
+export const gdebug = 0; // Set to 0 to disable debug messages
+
+// ...
+
+let debugPrint = function() {};
+
+// ...
+
+if (gdebug) {
+    debugPrint = function(str) {
+        console.log(str);
+    };
+    // ...
+}
+
+export { debugPrint, debugTrace };
+```
+
+You can also use your browser's developer tools to filter console messages.
