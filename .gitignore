@@ -73,3 +73,6 @@ web_modules/
 
 # parcel-bundler cache files
 .cache
+
+# documentation and other archives
+.archive/

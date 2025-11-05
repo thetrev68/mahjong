@@ -51,14 +51,6 @@ This document provides a high-level analysis of potential new features for the A
 *   **Time:** 6-10 hours
 *   **Benefit:** Medium. Provides a clear visual cue for important game events.
 
-### 7. Pre-Game Screen with Random Tiles
-
-*   **Description:** Change the pre-game screen to a blank canvas with a random pile of tiles.
-*   **Difficulty:** Medium
-*   **Effort:** Medium
-*   **Time:** 8-12 hours
-*   **Benefit:** Medium. A nice aesthetic touch that makes the game feel more immersive from the start.
-
 ### 8. Wall Tiles Graphics
 
 *   **Description:** Change the wall tiles from a central mass to actual walls and add a "curtsey" graphic as play continues.
