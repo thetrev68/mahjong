@@ -1,8 +1,14 @@
-import {debugPrint, gdebug} from "./utils.js";
+import {debugPrint} from "./utils.js";
 import {PLAYER_OPTION, SUIT, VNUMBER} from "./constants.js";
 import {Tile} from "./gameObjects.js";
 
 // PRIVATE CONSTANTS
+const TILE_RECOMMENDATION = {
+    KEEP: "KEEP",
+    PASS: "PASS",
+    DISCARD: "DISCARD"
+};
+
 
 // PRIVATE GLOBALS
 
@@ -13,112 +19,59 @@ export class GameAI {
     }
 
 
-    rankTiles13(hand) {
-        // Add a bogus tile to make hand 14 tiles
-        const copyHand = hand.dupHand();
-        const invalidTile = new Tile(SUIT.INVALID, VNUMBER.INVALID);
-        copyHand.insertHidden(invalidTile);
-
-        // Rank tiles
-        const tileRankArray = this.rankTiles14(copyHand);
-
-        // Remove invalid tile
-        for (let i = 0; i < tileRankArray.length; i++) {
-            const rankInfo = tileRankArray[i];
-            if (rankInfo.tile === invalidTile) {
-                tileRankArray.splice(i, 1);
-                break;
+    isNeededInPatterns(tile, patterns) {
+        for (const ranked of patterns) {
+            // Check if tile appears in this pattern's tile sequence
+            for (const compInfo of ranked.componentInfoArray) {
+                for (const compTile of compInfo.tileArray) {
+                    if (tile.suit === compTile.suit && tile.number === compTile.number) {
+                        return true;
+                    }
+                }
             }
         }
-
-        return tileRankArray;
+        return false;
     }
 
-
-    // Rank (hidden) tiles
-    // Input
-    //  - hand (must be 14 tiles)
-    //  - rankCardHands - array (unsorted) of ranked hands
-    // Output
-    //  - sorted array of {hidden tile, rank}  (<=13 elements). least relevant => most relevant
-    rankTiles14(hand) {
+    getTileRecommendations(hand) {
+        const recommendations = [];
         const rankCardHands = this.card.rankHandArray14(hand);
-        const tileRankArray = [];
+        const sortedRankCardHands = [...rankCardHands].sort((a, b) => b.rank - a.rank);
 
-        // Rank only the hidden tiles
-        const test = hand.getHiddenTileArray();
+        const topPatterns = sortedRankCardHands.slice(0, 3);
+        const mediumPatterns = sortedRankCardHands.slice(3, 8);
 
-        // For each tile
-        for (let i = 0; i < test.length; i++) {
-            const tile = test[i];
+        const handTiles = hand.getHiddenTileArray();
+        for (const tile of handTiles) {
+            let recommendation = TILE_RECOMMENDATION.DISCARD; // Default to DISCARD
 
-            // Make copy of hand
-            const copyHand = hand.dupHand();
-
-            // Replace tile with a bogus non-matchable tile
-            copyHand.hiddenTileSet.tileArray[i] = new Tile(SUIT.INVALID, VNUMBER.INVALID);
-
-            // Get card rank array of copyHand
-            const copyHandRankArray = this.card.rankHandArray14(copyHand);
-            let rank = 0;
-
-            // Compute rank for this tile
-            // - compare delta in testRankArray and rankCardHands
-            // - don't discard tiles that would cause large negative deltas
-            for (let j = 0; j < rankCardHands.length; j++) {
-                let scale = 1.0;
-                if (rankCardHands[j].rank > 50) {
-                    // Weight high ranking hands more heavily, but cap to prevent over-weighting
-                    scale = Math.min(rankCardHands[j].rank, 100);
-                }
-                // Add penalty for discarding tiles that significantly hurt high-value hands
-                const delta = copyHandRankArray[j].rank - rankCardHands[j].rank;
-                if (delta < -10) {
-                    // Double penalty for large negative impacts
-                    scale *= 2.0;
-                }
-                rank += delta * scale;
+            if (tile.suit === SUIT.JOKER) {
+                recommendation = TILE_RECOMMENDATION.KEEP;
+            } else if (this.isNeededInPatterns(tile, topPatterns)) {
+                recommendation = TILE_RECOMMENDATION.KEEP;
+            } else if (this.isNeededInPatterns(tile, mediumPatterns)) {
+                recommendation = TILE_RECOMMENDATION.PASS;
             }
 
-            const tileRank = {
-                tile,
-                rank
-            };
-
-            tileRankArray.push(tileRank);
+            recommendations.push({ tile, recommendation });
         }
 
-        // Sort  (higher => lower). We want to discard tiles that have the least negative impact.
-        tileRankArray.sort((a, b) => b.rank - a.rank);
+        // For consistency and easier use later, sort by recommendation: KEEP, PASS, DISCARD
+        recommendations.sort((a, b) => {
+            const order = { [TILE_RECOMMENDATION.KEEP]: 0, [TILE_RECOMMENDATION.PASS]: 1, [TILE_RECOMMENDATION.DISCARD]: 2 };
+            return order[a.recommendation] - order[b.recommendation];
+        });
 
-        if (gdebug) {
-            debugPrint("****************");
-            this.card.sortHandRankArray(rankCardHands);
-            this.card.printHandRankArray(rankCardHands, 3);
-            this.printTileRankArray(tileRankArray, 3);
-        }
 
-        return tileRankArray;
+        return recommendations;
     }
 
-    printTileRankArray(tileRankArray, elemCount) {
-        debugPrint("Tile Rank Info\n");
-
-        let count = tileRankArray.length;
-        if (elemCount) {
-            count = Math.min(elemCount, count);
-        }
-        for (let i = 0; i < count; i++) {
-            const rankInfo = tileRankArray[i];
-            debugPrint("Tile = " + rankInfo.tile.getText() + "\n");
-            debugPrint("Rank = " + rankInfo.rank + "\n");
-        }
-    }
 
     // Return true if hand is modified by swapping jokers
     exchangeTilesForJokers(currPlayer, hand) {
         const exposedJokerArray = this.table.getExposedJokerArray();
         const rankCardHands = this.card.rankHandArray14(hand);
+        const sortedRankCardHands = [...rankCardHands].sort((a, b) => b.rank - a.rank);
         let bestRank = -100000;
         let bestTile = null;
 
@@ -147,20 +100,25 @@ export class GameAI {
             const copyHand = hand.dupHand();
             copyHand.hiddenTileSet.tileArray[i] = new Tile(SUIT.JOKER, 0);
 
-            // Get card rank array of copyHand
+            // Get card rank array of copyHand (same order as original rankCardHands before sorting)
             const copyHandRankArray = this.card.rankHandArray14(copyHand);
             let rank = 0;
 
             // Compute rank for this tile
-            // - compare delta in testRankArray and rankCardHands
+            // - compare delta in copyHandRankArray and rankCardHands (both in original unsorted order)
             // - don't discard tiles that would cause large negative deltas
             // Add weighting for joker exchanges to be more aggressive
-            for (let j = 0; j < rankCardHands.length; j++) {
+            // Only consider top 3 highest-ranked hands for focused recommendations
+            const topHandsCount = Math.min(3, sortedRankCardHands.length);
+            for (let j = 0; j < topHandsCount; j++) {
+                const topHand = sortedRankCardHands[j];
+                const originalIndex = rankCardHands.indexOf(topHand);
+
                 let scale = 1.0;
-                if (rankCardHands[j].rank > 50) {
-                    scale = Math.min(rankCardHands[j].rank, 100);
+                if (topHand.rank > 50) {
+                    scale = Math.min(topHand.rank, 100);
                 }
-                rank += (copyHandRankArray[j].rank - rankCardHands[j].rank) * scale;
+                rank += (copyHandRankArray[originalIndex].rank - rankCardHands[originalIndex].rank) * scale;
             }
 
             debugPrint("exchangeTilesForJokers.  Joker found for exchange. rank = " + rank + "\n");
@@ -228,9 +186,11 @@ export class GameAI {
             }
         } while (modified);
 
-        // Choose tile to discard
-        const tileRankArray = this.rankTiles14(hand);
-        const discardTile = tileRankArray[0].tile;
+        // Choose tile to discard using the new recommendation engine
+        const recommendations = this.getTileRecommendations(hand);
+
+        // Recommendations are sorted KEEP, PASS, DISCARD. We want to discard from the end of the list.
+        const discardTile = recommendations[recommendations.length - 1].tile;
 
         // Remove tile from player's hidden tiles
         this.table.players[currPlayer].hand.removeHidden(discardTile);
@@ -328,21 +288,30 @@ export class GameAI {
 
     // Return 3 tiles to remove in Charleston
     charlestonPass(player) {
+        const hand = this.table.players[player].hand;
         const pass = [];
 
-        // Player 1-3 will only have 13 tiles in their hands during the Charleston
-        // Add a bogus tile to make 14.
-        const tileRankArray = this.rankTiles13(this.table.players[player].hand);
+        // We have 13 tiles, but recommendation engine works on 14. Add a bogus tile.
+        const copyHand = hand.dupHand();
+        const invalidTile = new Tile(SUIT.INVALID, VNUMBER.INVALID);
+        copyHand.insertHidden(invalidTile);
 
-        // Pass tiles
+        const recommendations = this.getTileRecommendations(copyHand);
+
+        // Filter out the invalid tile and sort recommendations: DISCARD, PASS, KEEP
+        const validRecommendations = recommendations.filter(r => r.tile !== invalidTile);
+        validRecommendations.sort((a, b) => {
+            const order = { [TILE_RECOMMENDATION.DISCARD]: 0, [TILE_RECOMMENDATION.PASS]: 1, [TILE_RECOMMENDATION.KEEP]: 2 };
+            return order[a.recommendation] - order[b.recommendation];
+        });
+
+        // Select the top 3 tiles to pass (will be DISCARDs then PASSs)
         for (let i = 0; i < 3; i++) {
-            const rankInfo = tileRankArray[i];
-            const tile = rankInfo.tile;
-
-            pass.push(tile);
-
-            // Remove tile from player's hand
-            this.table.players[player].hand.removeHidden(tile);
+            if (validRecommendations.length > i) {
+                const tile = validRecommendations[i].tile;
+                pass.push(tile);
+                hand.removeHidden(tile);
+            }
         }
 
         return pass;

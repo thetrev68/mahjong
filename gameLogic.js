@@ -15,22 +15,22 @@ class HintAnimationManager {
     }
 
     // Apply glow effects to discard suggestion tiles
-    applyGlowToDiscardSuggestions(tileRankArray) {
+    applyGlowToDiscardSuggestions(recommendations) {
         this.clearAllGlows();
 
-        const top3Tiles = tileRankArray.slice(0, 3);
+        const top3Recs = recommendations.slice(0, 3);
         const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand;
 
         // Track which tiles we've already highlighted to handle duplicates
         const highlightedTiles = new Set();
 
-        // Filter out invalid tiles and ensure we process up to 3 valid tiles
-        const validTopTiles = top3Tiles.filter(rankInfo => rankInfo.tile.suit !== SUIT.INVALID);
+        // Filter out invalid tiles
+        const validTopRecs = top3Recs.filter(rec => rec.tile.suit !== SUIT.INVALID);
         
-        validTopTiles.forEach((rankInfo, index) => {
-            debugPrint(`Processing tile ${index + 1}: ${rankInfo.tile.getText()} with rank ${rankInfo.rank.toFixed(2)}`); // Debug log
+        validTopRecs.forEach((rec, index) => {
+            debugPrint(`Processing tile ${index + 1}: ${rec.tile.getText()} with recommendation ${rec.recommendation}`); // Debug log
             
-            const targetTile = this.findNextUnhighlightedTileInHand(hand, rankInfo.tile, highlightedTiles);
+            const targetTile = this.findNextUnhighlightedTileInHand(hand, rec.tile, highlightedTiles);
             if (targetTile) {
                 debugPrint(`Applying red glow to tile: ${targetTile.getText()}`); // Debug log
                 targetTile.addGlowEffect(this.gameLogic.scene, 0xff0000, 0.6);
@@ -38,14 +38,14 @@ class HintAnimationManager {
                 // Mark this specific tile instance as highlighted
                 highlightedTiles.add(targetTile);
             } else {
-                debugPrint(`Could not find tile for: ${rankInfo.tile.getText()}`); // Debug log
+                debugPrint(`Could not find tile for: ${rec.tile.getText()}`); // Debug log
             }
         });
         
-        debugPrint(`Applied glow to ${this.glowedTiles.length} tiles out of ${validTopTiles.length} valid tiles requested`); // Debug log
+        debugPrint(`Applied glow to ${this.glowedTiles.length} tiles out of ${validTopRecs.length} valid tiles requested`); // Debug log
 
         // Store current hint data for state management
-        this.currentHintData = {tileRankArray: [...tileRankArray]};
+        this.currentHintData = {recommendations: [...recommendations]};
         this.isPanelExpanded = true;
     }
 
@@ -71,13 +71,13 @@ class HintAnimationManager {
     clearAllGlows() {
         if (this.glowedTiles.length > 0) {
             // Save current glow state before clearing (avoid ternary operator)
-            let savedTileRankArray = null;
+            let savedRecommendations = null;
             if (this.currentHintData) {
-                savedTileRankArray = this.currentHintData.tileRankArray;
+                savedRecommendations = this.currentHintData.recommendations;
             }
 
             this.savedGlowData = {
-                tileRankArray: savedTileRankArray,
+                recommendations: savedRecommendations,
                 timestamp: Date.now()
             };
         }
@@ -89,16 +89,16 @@ class HintAnimationManager {
 
     // Restore glow effects from saved state
     restoreGlowEffects() {
-        if (this.savedGlowData && this.savedGlowData.tileRankArray) {
+        if (this.savedGlowData && this.savedGlowData.recommendations) {
             // Re-apply glow effects to the same tiles
-            this.applyGlowToDiscardSuggestions(this.savedGlowData.tileRankArray);
+            this.applyGlowToDiscardSuggestions(this.savedGlowData.recommendations);
             this.isPanelExpanded = true;
 
             // Clear saved state after restoration
             this.savedGlowData = null;
-        } else if (this.currentHintData && this.currentHintData.tileRankArray) {
+        } else if (this.currentHintData && this.currentHintData.recommendations) {
             // Fallback: re-calculate if saved state is not available
-            this.applyGlowToDiscardSuggestions(this.currentHintData.tileRankArray);
+            this.applyGlowToDiscardSuggestions(this.currentHintData.recommendations);
             this.isPanelExpanded = true;
         }
     }
@@ -110,58 +110,63 @@ class HintAnimationManager {
         return hintContent && !hintContent.classList.contains("hidden");
     }
 
+    // Centralized method to get recommendations from the AI engine
+    getRecommendations() {
+        const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand.dupHand();
+
+        // Add invalid tile if hand has 13 tiles, as the engine expects 14
+        if (hand.getLength() === 13) {
+            const invalidTile = new Tile(SUIT.INVALID, VNUMBER.INVALID);
+            hand.insertHidden(invalidTile);
+        }
+
+        const recommendations = this.gameLogic.gameAI.getTileRecommendations(hand);
+        
+        // Reverse for display: DISCARD, PASS, KEEP
+        return recommendations.reverse();
+    }
+
     // Update hint with new hand state
     updateHintsForNewTiles() {
         // Only update glow effects if panel is expanded
         if (!this.isHintPanelExpanded()) {
             // Panel is collapsed, just update the text content without glow effects
             this.updateHintDisplayOnly();
-
             return;
         }
 
         // Panel is expanded, proceed with full update including glow effects
+        const recommendations = this.getRecommendations();
         const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand.dupHand();
-
-        // Add invalid tile if hand has 13 tiles
         if (hand.getLength() === 13) {
-            const invalidTile = new Tile(SUIT.INVALID, VNUMBER.INVALID);
-            hand.insertHidden(invalidTile);
+            hand.insertHidden(new Tile(SUIT.INVALID, VNUMBER.INVALID));
         }
-
         const rankCardHands = this.gameLogic.card.rankHandArray14(hand);
         this.gameLogic.card.sortHandRankArray(rankCardHands);
 
-        const tileRankArray = this.gameLogic.gameAI.rankTiles14(hand);
-
         // Update visual glow effects (only if panel is expanded)
-        this.applyGlowToDiscardSuggestions(tileRankArray);
+        this.applyGlowToDiscardSuggestions(recommendations);
 
         // Always update hint text content
-        this.updateHintDisplay(rankCardHands, tileRankArray);
+        this.updateHintDisplay(rankCardHands, recommendations);
     }
 
     // New method for updating hint text without glow effects
     updateHintDisplayOnly() {
+        const recommendations = this.getRecommendations();
         const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand.dupHand();
-
-        // Add invalid tile if hand has 13 tiles
         if (hand.getLength() === 13) {
-            const invalidTile = new Tile(SUIT.INVALID, VNUMBER.INVALID);
-            hand.insertHidden(invalidTile);
+            hand.insertHidden(new Tile(SUIT.INVALID, VNUMBER.INVALID));
         }
-
         const rankCardHands = this.gameLogic.card.rankHandArray14(hand);
         this.gameLogic.card.sortHandRankArray(rankCardHands);
 
-        const tileRankArray = this.gameLogic.gameAI.rankTiles14(hand);
-
         // Update hint text content only (no glow effects)
-        this.updateHintDisplay(rankCardHands, tileRankArray);
+        this.updateHintDisplay(rankCardHands, recommendations);
     }
 
     // Update hint panel text
-    updateHintDisplay(rankCardHands, tileRankArray) {
+    updateHintDisplay(rankCardHands, recommendations) {
         let html = "<h3>Top Possible Hands:</h3>";
         for (let i = 0; i < Math.min(3, rankCardHands.length); i++) {
             const rankHand = rankCardHands[i];
@@ -169,9 +174,10 @@ class HintAnimationManager {
         }
 
         html += "<h3>Discard Suggestions (Best to Discard First):</h3>";
-        for (let i = 0; i < Math.min(3, tileRankArray.length); i++) {
-            const rankInfo = tileRankArray[i];
-            html += `<p>${rankInfo.tile.getText()} (Less Impact: ${rankInfo.rank.toFixed(2)})</p>`;
+        const validRecommendations = recommendations.filter(rec => rec.tile.suit !== SUIT.INVALID);
+        for (let i = 0; i < Math.min(3, validRecommendations.length); i++) {
+            const rec = validRecommendations[i];
+            html += `<p>${rec.tile.getText()} (Action: ${rec.recommendation})</p>`;
         }
 
         printHint(html);

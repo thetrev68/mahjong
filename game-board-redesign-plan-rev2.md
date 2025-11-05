@@ -2,9 +2,11 @@
 
 ## Overview
 
-This document provides a revised and more detailed implementation plan for the game board redesign. This plan addresses the shortcomings of the previous attempt by incorporating a deeper analysis of the existing codebase. The goal is to replace the wall tile grid tile counter, reposition the discard pile, add translucent hand racks, and adjust exposed tile positioning.
+This document provides a revised and more detailed implementation plan for the game board redesign. This plan addresses the shortcomings of the previous attempt by incorporating a deeper analysis of the existing codebase. The goal is to replace the wall tile grid with a wall tile counter, reposition the discard pile, add translucent hand racks, and adjust exposed tile positioning.
 
 This plan is based on a thorough review of `game-board-redesign-plan-rev1.md` and the following files:
+*   `homePageTileManager.js`
+*   `gameObjects.js`
 *   `GameScene.js`
 *   `gameObjects.js`
 *   `gameObjects_hand.js`
@@ -14,11 +16,140 @@ This plan is based on a thorough review of `game-board-redesign-plan-rev1.md` an
 
 ## 1. Remove Existing Wall Display
 
+**Problem:** The previous attempt failed to remove the wall display because it missed:
+1. A call to `showWall()` in `gameLogic.js`
+2. The wall-building animation in `homePageTileManager.js`
+
+**Solution:** Modify the home page animation to skip wall-building and remove all calls to `showWall()` and `showWallBack()` from the codebase.
+
+### 1.1. Modify `homePageTileManager.js`
+
+*   **File:** `homePageTileManager.js`
+*   **Method:** `animatePileToWall()`
+*   **Action:** Replace the wall-building animation with direct animation to player hand positions to preserve the beautiful animation while skipping the wall display.
+
+**Current Code (around line 141):**
+```javascript
+animatePileToWall() {
+    this.animationState = "dealing";
+    const promises = [];
+
+    for (let i = 0; i < this.tileArray.length; i++) {
+        const tile = this.tileArray[i];
+        const targetPos = this.calculateStackPosition(i);
+
+        const promise = this.animateSingleTile(tile, targetPos.x, targetPos.y, 0, 2250, i * 5);
+        promises.push(promise);
+    }
+
+    Promise.all(promises).then(() => {
+        debugPrint("All tiles have been dealt to the wall.");
+        this.isAnimating = false;
+        this.animationState = "complete";
+        if (this.onAnimationComplete) {
+            this.onAnimationComplete();
+        }
+    });
+}
+```
+
+**New Code:**
+```javascript
+animatePileToWall() {
+    this.animationState = "dealing";
+    const promises = [];
+
+    // Instead of building wall, animate tiles directly to player hand positions
+    // This preserves the animation while skipping the wall display
+    const playerHandPositions = this.calculatePlayerHandPositions();
+    
+    for (let i = 0; i < this.tileArray.length; i++) {
+        const tile = this.tileArray[i];
+        const targetPos = playerHandPositions[i % playerHandPositions.length];
+
+        const promise = this.animateSingleTile(tile, targetPos.x, targetPos.y, 0, 2250, i * 5);
+        promises.push(promise);
+    }
+
+    Promise.all(promises).then(() => {
+        debugPrint("All tiles have been dealt to player hands.");
+        this.isAnimating = false;
+        this.animationState = "complete";
+        if (this.onAnimationComplete) {
+            this.onAnimationComplete();
+        }
+    });
+}
+```
+
+*   **New Method:** Add `calculatePlayerHandPositions()` method to determine hand positions for all players.
+
+**New Method:**
+```javascript
+calculatePlayerHandPositions() {
+    const positions = [];
+    const HAND_SCALE = 0.6;
+    const TILE_WIDTH = SPRITE_WIDTH * HAND_SCALE;
+    const TILE_HEIGHT = SPRITE_HEIGHT * HAND_SCALE;
+    
+    // Bottom player hand (13 tiles)
+    for (let i = 0; i < 13; i++) {
+        positions.push({
+            x: (WINDOW_WIDTH / 2) - (6.5 * TILE_WIDTH) + (i * TILE_WIDTH),
+            y: WINDOW_HEIGHT - 100,
+            angle: 0,
+            scale: HAND_SCALE
+        });
+    }
+    
+    // Top player hand (13 tiles)
+    for (let i = 0; i < 13; i++) {
+        positions.push({
+            x: (WINDOW_WIDTH / 2) - (6.5 * TILE_WIDTH) + (i * TILE_WIDTH),
+            y: 100,
+            angle: 180,
+            scale: HAND_SCALE
+        });
+    }
+    
+    // Left player hand (13 tiles)
+    for (let i = 0; i < 13; i++) {
+        positions.push({
+            x: 100,
+            y: (WINDOW_HEIGHT / 2) - (6.5 * TILE_WIDTH) + (i * TILE_WIDTH),
+            angle: -90,
+            scale: HAND_SCALE
+        });
+    }
+    
+    // Right player hand (13 tiles)
+    for (let i = 0; i < 13; i++) {
+        positions.push({
+            x: WINDOW_WIDTH - 100,
+            y: (WINDOW_HEIGHT / 2) - (6.5 * TILE_WIDTH) + (i * TILE_WIDTH),
+            angle: 90,
+            scale: HAND_SCALE
+        });
+    }
+    
+    // Wall tiles (remaining tiles)
+    const remainingTiles = 152 - (13 * 4); // 100 wall tiles
+    for (let i = 0; i < remainingTiles; i++) {
+        const stackPos = this.calculateStackPosition(i);
+        positions.push(stackPos);
+    }
+    
+    return positions;
+}
+```
+
+## 2. Remove Existing Wall Display (Main Game Logic)
+
 **Problem:** The previous attempt failed to remove the wall display because it missed a call to `showWall()` in `gameLogic.js`.
 
 **Solution:** Remove all calls to `showWall()` and `showWallBack()` from the codebase.
 
-### 1.1. Modify `gameLogic.js`
+### 2.1. Modify `gameLogic.js`
 
 *   **File:** `gameLogic.js`
 *   **Function:** `loop()`
@@ -39,7 +170,7 @@ This plan is based on a thorough review of `game-board-redesign-plan-rev1.md` an
                 // The discard pile is now shown in processClaimArray
 ```
 
-### 1.2. Modify `gameObjects_table.js`
+### 2.2. Modify `gameObjects_table.js`
 
 *   **File:** `gameObjects_table.js`
 *   **Function:** `processClaimArray()`
@@ -72,22 +203,22 @@ This plan is based on a thorough review of `game-board-redesign-plan-rev1.md` an
         // this.wall.showWallBack(); // This is no longer needed
 ```
 
-### 1.3. Modify `gameObjects.js`
+### 2.3. Modify `gameObjects.js`
 
 *   **File:** `gameObjects.js`
 *   **Class:** `Wall`
 *   **Action:** Remove the `showWall()` and `showWallBack()` methods entirely. They are no longer needed.
 
-## 2. Implement Wall Tile Counter
+## 3. Implement Wall Tile Counter
 
 **Problem:** The progress bar did not appear in the previous attempt. This was likely due to other errors in the code. The logic for the progress bar itself was sound.
 
 **Solution:** Re-implement the progress bar and replace all updates to the old `wallText` with updates to the new progress bar.
 
-### 2.1. Modify `GameScene.js`
+### 3.1. Modify `GameScene.js`
 
 *   **File:** `GameScene.js`
-*   **Action:** Add the `createWallProgressBar` and updateWallTileCounter methods as defined in `rev1`.
+*   **Action:** Add the `createWallTileCounter` and `updateWallTileCounter` methods as defined in `rev1`.
 
 *   **Action:** In the `create()` method of `GameScene`, replace the `wallText` creation with the creation of the `wallProgressBar`.
 
@@ -111,7 +242,7 @@ this.gGameLogic.wallProgressBar.setPosition(WINDOW_WIDTH / 2, 100);
 this.gGameLogic.wallProgressBar.setVisible(false);
 ```
 
-### 2.2. Update Progress Bar in `gameLogic.js`
+### 3.2. Update Progress Bar in `gameLogic.js`
 
 *   **File:** `gameLogic.js`
 *   **Action:** Replace all instances of `this.wallText.setText(...)` with `this.scene.updateWallTileCounter(this.table.wall.getCount())`.
@@ -121,13 +252,13 @@ this.gGameLogic.wallProgressBar.setVisible(false);
 *   `pickFromWall()`
 *   `charleston1` case in `updateUI()`
 
-## 3. Reposition Discard Pile
+## 4. Reposition Discard Pile
 
 **Problem:** The discard pile positioning logic in `rev1` was complex and did not account for the existing coordinate system.
 
 **Solution:** Simplify the `showDiscards` method and use a consistent scale for the discarded tiles. The pile will be centered horizontally at `WINDOW_WIDTH / 2`, and placed at `y=150`, which is below the new wall tile counter.
 
-### 3.1. Modify `gameObjects.js`
+### 4.1. Modify `gameObjects.js`
 
 *   **File:** `gameObjects.js`
 *   **Class:** `Discards`
@@ -168,13 +299,13 @@ showDiscards(centerX, centerY) {
 }
 ```
 
-## 4. Implement Hand Racks That "Stick" to Hands
+## 5. Implement Hand Racks That "Stick" to Hands
 
 **Problem:** The previous plan treated the hand racks as static background elements, drawn once by the main `Table` object. This doesn't match the desired behavior, where the rack should be logically attached to the hand it contains, like a glow on a tile.
 
 **Solution:** To make the rack "stick" to the hand, the `Hand` object itself will become responsible for creating and drawing its own rack. This ensures that whenever the hand is drawn or moved, its rack is drawn along with it in the correct position.
 
-### 4.1. Refactor `gameObjects_table.js` to Remove Rack Logic
+### 5.1. Refactor `gameObjects_table.js` to Remove Rack Logic
 
 *   **File:** `gameObjects_table.js`
 *   **Class:** `Table`
@@ -185,7 +316,7 @@ showDiscards(centerX, centerY) {
 *   **Action:** The `Table` must pass the `scene` context down to the `Player` objects it creates, so it can eventually reach the `Hand`.
     *   Modify the `Player` instantiation to `new Player(this.scene, i)`.
 
-### 4.2. Refactor `gameObjects_player.js` to Pass Scene Context
+### 5.2. Refactor `gameObjects_player.js` to Pass Scene Context
 
 *   **File:** `gameObjects_player.js`
 *   **Class:** `Player`
@@ -193,7 +324,7 @@ showDiscards(centerX, centerY) {
     *   Modify the `constructor` to accept `scene`.
     *   Modify the `Hand` instantiation to `this.hand = new Hand(scene, this);`.
 
-### 4.3. Modify `gameObjects_hand.js` to Manage Its Own Rack
+### 5.3. Modify `gameObjects_hand.js` to Manage Its Own Rack
 
 *   **File:** `gameObjects_hand.js`
 *   **Class:** `Hand`
@@ -278,7 +409,7 @@ showHand(playerInfo, forceFaceup) {
 
 **Problem:** Exposed tiles need to be positioned correctly relative to the new hand racks, and the previous plan was not detailed enough.
 
-**Solution:** As detailed in the new `showHand` implementation in Section 4.3, exposed tile sets (pungs, kongs, quints) will be displayed on a second row *above* the player's main hidden hand.
+**Solution:** As detailed in the new `showHand` implementation in Section 5.3, exposed tile sets (pungs, kongs, quints) will be displayed on a second row *above* the player's main hidden hand.
 
 This is achieved by:
 1.  **Increasing Rack Height:** The `getHandRackPosition` method now calculates a height that can accommodate two rows of tiles plus spacing.
@@ -288,7 +419,7 @@ This is achieved by:
 
 This approach ensures the exposed tiles are clearly separated and displayed as they would be in a real game, placed on top of the player's rack.
 
-## 6. Integration and Testing Plan
+## 7. Integration and Testing Plan
 
 Follow the same integration and testing plan as `rev1`, but with the corrected logic from this document.
 
@@ -300,3 +431,5 @@ Follow the same integration and testing plan as `rev1`, but with the corrected l
 *   [ ] Player hands are rendered correctly on the bottom row of the racks.
 *   [ ] Exposed tiles are positioned correctly on the top row of the racks, above the hand.
 *   [ ] There are no JavaScript errors in the console.
+*   [ ] Home page animation preserves beautiful tile dealing while skipping wall display.
+*   [ ] Tiles animate directly to player hand positions from the center pile.
