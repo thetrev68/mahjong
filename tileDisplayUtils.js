@@ -1,0 +1,162 @@
+// tileDisplayUtils.js - Utilities for displaying colorized mahjong patterns with tile matching
+
+import { SUIT, VNUMBER, DRAGON, WIND } from "./constants.js";
+
+// Color mapping based on provided specs
+const SUIT_COLORS = {
+  [SUIT.VSUIT1]: "green",
+  [SUIT.VSUIT2]: "red",
+  [SUIT.VSUIT3]: "blue",
+  [SUIT.FLOWER]: "black",
+  [SUIT.VSUIT1_DRAGON]: "green",
+  [SUIT.VSUIT2_DRAGON]: "red",
+  [SUIT.VSUIT3_DRAGON]: "blue",
+  [SUIT.WIND]: "black",
+  [SUIT.DRAGON]: "blue",
+  [SUIT.JOKER]: "gray", // Added for jokers
+  [SUIT.CRACK]: "red", // Assuming mappings for actual suits
+  [SUIT.BAM]: "green",
+  [SUIT.DOT]: "blue"
+};
+
+// Map tile to display character and color
+export function getTileDisplayChar(tile, isEvenHand = false) {
+  if (tile.suit === SUIT.JOKER) {
+    return { char: "J", color: SUIT_COLORS[SUIT.JOKER], tile };
+  }
+  if (tile.suit === SUIT.FLOWER) {
+    return { char: "F", color: SUIT_COLORS[SUIT.FLOWER], tile };
+  }
+  if (tile.suit === SUIT.WIND) {
+    const windChars = { [WIND.NORTH]: "N", [WIND.EAST]: "E", [WIND.SOUTH]: "S", [WIND.WEST]: "W" };
+    return { char: windChars[tile.number] || "?", color: SUIT_COLORS[SUIT.WIND], tile };
+  }
+  if (tile.suit === SUIT.DRAGON || tile.suit >= SUIT.VSUIT1_DRAGON && tile.suit <= SUIT.VSUIT3_DRAGON) {
+    if (tile.number === 0) {
+      return { char: "0", color: SUIT_COLORS[tile.suit] || "white", tile }; // White dragon as 0
+    }
+    const dragonChars = { [DRAGON.RED]: "R", [DRAGON.GREEN]: "G", [DRAGON.WHITE]: "S" };
+    return { char: dragonChars[tile.number] || "?", color: SUIT_COLORS[tile.suit] || "blue", tile };
+  }
+  if (tile.number >= 1 && tile.number <= 9) {
+    return { char: tile.number.toString(), color: SUIT_COLORS[tile.suit] || "blue", tile };
+  }
+  // Virtual numbers (consecutive) - adjust for even/odd hand
+  if (tile.number >= VNUMBER.CONSECUTIVE1 && tile.number <= VNUMBER.CONSECUTIVE7) {
+    const index = tile.number - VNUMBER.CONSECUTIVE1;
+    const num = isEvenHand ? 2 + index * 2 : 1 + index * 2;
+    return { char: num.toString(), color: SUIT_COLORS[tile.suit] || "blue", tile };
+  }
+  if (tile.number === 0) {
+    return { char: "0", color: SUIT_COLORS[tile.suit] || "gray", tile }; // Handle zero as soap/blank
+  }
+  return { char: "?", color: "gray", tile }; // Fallback
+}
+
+// Tally tile counts in player's hand (normalized)
+function tally(tiles) {
+  const counts = new Map();
+  tiles.forEach(tile => {
+    const key = `${tile.suit}-${tile.number}`;
+    counts.set(key, (counts.get(key) || 0) + 1);
+  });
+  return counts;
+}
+
+// Get display chars for pattern tiles, with matching against player's hand
+// Supports joker substitution only for components with count >=3
+export function getPatternDisplayChars(patternTiles, playerTiles, componentCounts, isEvenHand) {
+  const playerCounts = tally(playerTiles);
+  const usedCounts = new Map();
+  const jokerCount = playerCounts.get(`${SUIT.JOKER}-0`) || 0;
+  let usedJokers = 0;
+
+  return patternTiles.map((tile, index) => {
+    const display = getTileDisplayChar(tile, isEvenHand);
+    const key = `${tile.suit}-${tile.number}`;
+    const componentCount = componentCounts[index];
+
+    let isMatched = false;
+
+    // Check exact match first
+    const available = (playerCounts.get(key) || 0) - (usedCounts.get(key) || 0);
+    if (available > 0) {
+      isMatched = true;
+      usedCounts.set(key, (usedCounts.get(key) || 0) + 1);
+    } else if (jokerCount > usedJokers && componentCount >= 3 && tile.suit !== SUIT.JOKER) {
+      // Joker substitution allowed only for pungs/kongs/quints
+      isMatched = true;
+      usedJokers++;
+      display.char = "J"; // Display as J for substituted joker
+      display.color = "gray";
+    }
+
+    return { ...display, isMatched };
+  });
+}
+
+// Get CSS classes for tile display (with inversion for matches)
+export function getTileCharClasses(displayChar, invert = true) {
+  const base = "tile-char"; // Use the class for consistent styling
+  const shouldInvert = invert && displayChar.isMatched;
+  const color = displayChar.color;
+
+  if (shouldInvert) {
+    return `${base} bg-${color}-600 text-white border border-${color}-700`;
+  } else {
+    return `${base} bg-white text-${color}-600 border border-${color}-200`;
+  }
+}
+
+// Render the pattern with spacing per component
+export function renderPatternVariation(rankedHand, playerTiles) {
+  const patternTiles = [];
+  const componentCounts = [];
+  const isEvenHand = rankedHand.hand.even || false;
+
+  // Use original component order
+  rankedHand.componentInfoArray.forEach((component, compIndex) => {
+    let templateTile = component.tileArray[0];
+    if (!templateTile) {
+      // Create placeholder for virtual/empty components
+      templateTile = { suit: component.component.suit || SUIT.INVALID, number: component.component.number || 0 };
+    }
+    for (let i = 0; i < component.component.count; i++) {
+      patternTiles.push(templateTile); // Repeat template for count
+      componentCounts.push(component.component.count);
+    }
+    // Add spacer after each component (except last)
+    if (compIndex < rankedHand.componentInfoArray.length - 1) {
+      patternTiles.push({ isSpacer: true });
+      componentCounts.push(0);
+    }
+  });
+
+  // Only pass actual tiles to getPatternDisplayChars
+  const actualTiles = patternTiles.filter(t => !t.isSpacer);
+  const actualCounts = componentCounts.filter((_, i) => !patternTiles[i].isSpacer);
+  const displayChars = getPatternDisplayChars(actualTiles, playerTiles, actualCounts, isEvenHand);
+
+  // Reinsert spacers into displayChars
+  const finalDisplay = [];
+  let tileIndex = 0;
+  patternTiles.forEach(item => {
+    if (item.isSpacer) {
+      finalDisplay.push({ isSpacer: true });
+    } else {
+      finalDisplay.push(displayChars[tileIndex++]);
+    }
+  });
+
+  let html = "<div class=\"pattern-row\">";
+  finalDisplay.forEach(item => {
+    if (item.isSpacer) {
+      html += "<span class=\"component-spacer\"></span>";
+    } else {
+      html += `<span class="${getTileCharClasses(item)}">${item.char}</span>`;
+    }
+  });
+  html += "</div>";
+
+  return html;
+}

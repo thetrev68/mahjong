@@ -5,6 +5,8 @@ import {Card} from "./card/card.js";
 import {Tile} from "./gameObjects.js";
 import {} from "./gameObjects_hand.js";
 
+import { renderPatternVariation } from "./tileDisplayUtils.js";
+
 class HintAnimationManager {
     constructor(gameLogic) {
         this.gameLogic = gameLogic;
@@ -126,6 +128,18 @@ class HintAnimationManager {
         return recommendations.reverse();
     }
 
+    // Get all tiles in player's hand (hidden + exposed)
+    getAllPlayerTiles() {
+        const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand;
+        const allTiles = [...hand.getHiddenTileArray()];
+        
+        hand.exposedTileSetArray.forEach(set => {
+            allTiles.push(...set.tileArray);
+        });
+        
+        return allTiles;
+    }
+
     // Update hint with new hand state
     updateHintsForNewTiles() {
         // Only update glow effects if panel is expanded
@@ -165,12 +179,20 @@ class HintAnimationManager {
         this.updateHintDisplay(rankCardHands, recommendations);
     }
 
-    // Update hint panel text
+    // Update hint panel text with colorized patterns
     updateHintDisplay(rankCardHands, recommendations) {
         let html = "<h3>Top Possible Hands:</h3>";
+        
+        // Get all player tiles for matching
+        const playerTiles = this.getAllPlayerTiles();
+        
         for (let i = 0; i < Math.min(3, rankCardHands.length); i++) {
             const rankHand = rankCardHands[i];
             html += `<p><strong>${rankHand.group.groupDescription}</strong> - ${rankHand.hand.description} (Rank: ${rankHand.rank.toFixed(2)})</p>`;
+            
+            // Render colorized pattern with matching
+            const patternHtml = renderPatternVariation(rankHand, playerTiles);
+            html += patternHtml;
         }
 
         html += "<h3>Discard Suggestions (Best to Discard First):</h3>";

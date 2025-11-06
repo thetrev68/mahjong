@@ -649,3 +649,65 @@ select {
         transform: none;
     }
 }
+/* Tile display classes for colorized patterns */
+/* Tile display classes for colorized patterns */
+.bg-green-600 { background-color: #15803d; } /* Dark green for matched */
+.text-green-600 { color: #15803d; }
+.border-green-700 { border-color: #166534; }
+.border-green-200 { border-color: #dcfce7; }
+
+.bg-red-600 { background-color: #b91c1c; } /* Dark red */
+.text-red-600 { color: #b91c1c; }
+.border-red-700 { border-color: #991b1b; }
+.border-red-200 { border-color: #fee2e2; }
+
+.bg-blue-600 { background-color: #1d4ed8; } /* Dark blue */
+.text-blue-600 { color: #1d4ed8; }
+.border-blue-700 { border-color: #1e40af; }
+.border-blue-200 { border-color: #dbeafe; }
+
+.bg-black-600 { background-color: #1f2937; } /* Dark gray for black */
+.text-black-600 { color: #1f2937; }
+.border-black-700 { border-color: #111827; }
+.border-black-200 { border-color: #e5e7eb; }
+
+.bg-gray-600 { background-color: #4b5563; } /* For jokers/unknown */
+.text-gray-600 { color: #4b5563; }
+.border-gray-700 { border-color: #374151; }
+.border-gray-200 { border-color: #e5e7eb; }
+
+/* Pattern container */
+.pattern-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1px; /* Even smaller spacing */
+  margin-bottom: 4px;
+  overflow-x: auto;
+  padding: 2px 0;
+}
+
+/* Individual tile styling */
+.tile-char {
+  min-width: 16px; /* Shrunk width */
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px; /* Shrunk font */
+  font-weight: bold;
+  border-radius: 3px;
+  padding: 0 1px; /* Minimal padding */
+  border: 1px solid;
+  box-sizing: border-box;
+}
+
+/* Component spacer */
+.component-spacer {
+  width: 8px; /* Increased gap between components */
+}
+
+/* Add visibility for unmatched */
+.bg-white {
+  background-color: #ffffff !important;
+  opacity: 1;
+}
