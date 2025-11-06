@@ -35,7 +35,7 @@ export function getTileDisplayChar(tile, isEvenHand = false) {
     if (tile.number === 0) {
       return { char: "0", color: SUIT_COLORS[tile.suit] || "white", tile }; // White dragon as 0
     }
-    const dragonChars = { [DRAGON.RED]: "R", [DRAGON.GREEN]: "G", [DRAGON.WHITE]: "S" };
+    const dragonChars = { [DRAGON.RED]: "D", [DRAGON.GREEN]: "D", [DRAGON.WHITE]: "D" };
     return { char: dragonChars[tile.number] || "?", color: SUIT_COLORS[tile.suit] || "blue", tile };
   }
   if (tile.number >= 1 && tile.number <= 9) {
@@ -125,10 +125,14 @@ export function renderPatternVariation(rankedHand, playerTiles) {
       patternTiles.push(templateTile); // Repeat template for count
       componentCounts.push(component.component.count);
     }
-    // Add spacer after each component (except last)
+    
+    // Add spacer only if not between two singles
     if (compIndex < rankedHand.componentInfoArray.length - 1) {
-      patternTiles.push({ isSpacer: true });
-      componentCounts.push(0);
+      const nextComponent = rankedHand.componentInfoArray[compIndex + 1];
+      if (!(component.component.count === 1 && nextComponent.component.count === 1)) {
+        patternTiles.push({ isSpacer: true });
+        componentCounts.push(0);
+      }
     }
   });
 
