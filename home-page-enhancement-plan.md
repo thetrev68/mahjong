@@ -106,6 +106,7 @@ withRaisedDepth(tweenFactory) {
 ### 5. Human-Like Dealing Sequence
 **Current**: `table.deal()` handles shuffling, applying training hands, inserting exposed sets, and immediately calling `players[i].showHand()` for all four seats
 **Enhanced**: Maintain `Table` as the single source of truth for tile ownership while introducing a sequence controller that animates tiles one-at-a-time without duplicating business logic
+**Status**: Implemented
 
 **Dealing Pattern**:
 1. **Initial Round**: 4 tiles to Player 0 (bottom) face-down
@@ -143,6 +144,7 @@ async sequentialDealTiles(initHands) {
 ### 6. Player 0 Tile Reveal and Analysis
 **Current**: `Table.deal()` ends by calling `showHand()` for every player, so Player 0 tiles already flip face-up and hints run immediately (gameLogic.js:300-307)
 **Enhanced**: Delay Player 0’s reveal until the sequential dealing animation completes, then trigger hints/menu visibility in a predictable order
+**Status**: Implemented
 
 **Implementation**:
 - Move the existing `hintAnimationManager.updateHintsForNewTiles()` invocation to the tail of `sequentialDealTiles`, after Player 0’s final flip animation resolves.

@@ -160,7 +160,12 @@ export class Table {
         // Sort and show all players hands
         for (let i = 0; i < 4; i++) {
             this.players[i].hand.sortSuitHidden();
-            this.players[i].showHand();
+            // Show Player 0 (human) tiles face-up, others remain face-down
+            if (i === PLAYER.BOTTOM) {
+                this.players[i].showHand(true);
+            } else {
+                this.players[i].showHand(false);
+            }
         }
     }
 
