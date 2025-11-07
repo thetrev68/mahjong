@@ -457,12 +457,9 @@ export class GameLogic {
                     // No more tiles - wall game.
                     break;
                 }
-                
-                // Update hints immediately after Player 0 draws a tile
-                // This ensures analysis runs on the complete 14-tile hand
-                if (this.currPlayer === PLAYER.BOTTOM) {
-                    this.hintAnimationManager.updateHintsForNewTiles();
-                }
+
+                // Note: For Player 0, hints are updated after a delay in pickFromWall()
+                // to allow visual feedback (blue glow) and automatic sorting
             }
             skipPick = false;
 
@@ -605,6 +602,23 @@ export class GameLogic {
             debugPrint("Player " + this.currPlayer + " picks " + tile.getText() + " from wall\n");
 
             this.table.players[this.currPlayer].hand.insertHidden(tile);
+
+            // For human player, add visual feedback and delay sorting
+            if (this.currPlayer === PLAYER.BOTTOM) {
+                // Add blue glow to newly drawn tile so user can identify it
+                tile.addGlowEffect(this.scene, 0x1e90ff, 0.7); // DodgerBlue color
+
+                // Sort after a brief delay to let user see which tile was drawn
+                // Then update hints with the sorted hand
+                setTimeout(() => {
+                    tile.removeGlowEffect();
+                    this.table.players[PLAYER.BOTTOM].hand.sortSuitHidden();
+                    this.table.players[PLAYER.BOTTOM].showHand(true);
+                    // Update hints now that hand is sorted
+                    this.hintAnimationManager.updateHintsForNewTiles();
+                }, 2500); // 2.5 second delay
+            }
+
             this.table.players[this.currPlayer].showHand(this.currPlayer === PLAYER.BOTTOM);
 
             return true;
