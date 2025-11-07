@@ -475,7 +475,7 @@ export class GameLogic {
             // Only call showHand() if tiles haven't been dragged this turn
             // Dragged tiles are already positioned correctly by drag operations
             if (!this.table.players[this.currPlayer].hand.tilesWereDraggedThisTurn) {
-                this.table.players[this.currPlayer].showHand();
+                this.table.players[this.currPlayer].showHand(this.currPlayer === PLAYER.BOTTOM);
             }
             // Reset drag flag for next turn
             this.table.players[this.currPlayer].hand.tilesWereDraggedThisTurn = false;
@@ -605,7 +605,7 @@ export class GameLogic {
             debugPrint("Player " + this.currPlayer + " picks " + tile.getText() + " from wall\n");
 
             this.table.players[this.currPlayer].hand.insertHidden(tile);
-            this.table.players[this.currPlayer].showHand();
+            this.table.players[this.currPlayer].showHand(this.currPlayer === PLAYER.BOTTOM);
 
             return true;
         }
@@ -1299,14 +1299,14 @@ export class GameLogic {
 
         this.sort1Function = function sort1Function() {
             this.table.players[PLAYER.BOTTOM].hand.sortSuitHidden();
-            this.table.players[PLAYER.BOTTOM].showHand();
+            this.table.players[PLAYER.BOTTOM].showHand(true);
             // Update hints after sorting
             this.hintAnimationManager.updateHintsForNewTiles();
         }.bind(this);
 
         this.sort2Function = function sort2Function() {
             this.table.players[PLAYER.BOTTOM].hand.sortRankHidden();
-            this.table.players[PLAYER.BOTTOM].showHand();
+            this.table.players[PLAYER.BOTTOM].showHand(true);
             // Update hints after sorting
             this.hintAnimationManager.updateHintsForNewTiles();
         }.bind(this);
