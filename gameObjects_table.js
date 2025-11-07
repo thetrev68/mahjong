@@ -179,7 +179,9 @@ export class Table {
             this.players[i].showHand();
         }
 
-        this.wall.showWallBack();
+        // Update wall counter after dealing
+        this.gameLogic.scene.updateWallTileCounter(this.wall.getCount());
+
     }
 
     // Insert pass tile arrays into players hands.
@@ -269,8 +271,7 @@ export class Table {
         if (numDiscard === 4) {
             // If no-one wants the discard, add to discard pile
             this.discards.insertDiscard(discardTile);
-            const {offsetX, offsetY} = this.wall.showWall();
-            this.discards.showDiscards(offsetX, offsetY);
+            this.discards.showDiscards();
 
             return {
                 playerOption: PLAYER_OPTION.DISCARD_TILE,

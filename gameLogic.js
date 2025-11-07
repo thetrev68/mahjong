@@ -306,6 +306,9 @@ export class GameLogic {
         } else {
             this.charleston();
         }
+
+        // Update wall counter after dealing
+        this.scene.updateWallTileCounter(this.table.wall.getCount());
     }
 
     async charleston() {
@@ -428,6 +431,9 @@ export class GameLogic {
 
         // Start main game loop
         this.loop();
+
+        // Update wall counter after charleston/courtesy
+        this.scene.updateWallTileCounter(this.table.wall.getCount());
     }
 
     // Main loop
@@ -494,8 +500,7 @@ export class GameLogic {
             if (discardTile.suit === SUIT.JOKER) {
                 // Joker discarded - add to discard pile
                 this.table.discards.insertDiscard(discardTile);
-                const {offsetX, offsetY} = this.table.wall.showWall();
-                this.table.discards.showDiscards(offsetX, offsetY);
+                this.table.discards.showDiscards();
 
                 //  Move to next player
                 this.currPlayer++;
@@ -586,8 +591,8 @@ export class GameLogic {
 
     pickFromWall() {
         const tile = this.table.wall.remove();
-
-        this.wallText.setText("Wall tile count = " + this.table.wall.getCount());
+        // Wall text is now hidden - counter handles display
+        this.scene.updateWallTileCounter(this.table.wall.getCount());
 
         if (tile) {
             printMessage("Player " + this.currPlayer + " picks from wall\n");
@@ -1097,7 +1102,7 @@ export class GameLogic {
             button1.innerText = "Pass Tiles";
             button1.disabled = true;
             button1.style.display = "";
-            this.wallText.setText("Wall tile count = " + this.table.wall.getCount());
+            // Wall text is now hidden - counter handles display
             break;
 
         case STATE.CHARLESTON_QUERY:

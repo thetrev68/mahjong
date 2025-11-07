@@ -11,7 +11,7 @@ export function printInfo(str) {
     textArea.value = str;
 }
 
-export const gdebug = 0; // Set to 0 to disable debug messages
+export const gdebug = 1; // Set to 0 to disable debug messages
 
 /** @knipignore */
 export function getGtrace() {

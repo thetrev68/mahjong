@@ -1,6 +1,6 @@
 import * as Phaser from "phaser";
 import {
-    STATE, PLAYER, SUIT, SPRITE_WIDTH,
+    STATE, PLAYER, SUIT, SPRITE_WIDTH, SPRITE_HEIGHT,
     SPRITE_SCALE, WINDOW_WIDTH, WINDOW_HEIGHT, TILE_GAP
 } from "./constants.js";
 import {debugPrint, debugTrace} from "./utils.js";
@@ -242,6 +242,64 @@ class TileSet {
         };
     }
 
+    // Show tileset within rack bounds (horizontal layout)
+    showTileSetInRack(playerInfo, startX, startY, exposed, tileWidth, gap) {
+        let x = startX;
+        const y = startY;
+
+        for (let i = 0; i < this.tileArray.length; i++) {
+            const tile = this.tileArray[i];
+
+            if (this.inputEnabled) {
+                tile.origX = x;
+                tile.origY = y;
+            }
+
+            debugPrint(`showTileSetInRack: Animating tile ${tile.getText()} to x=${x}, y=${y}, angle=${playerInfo.angle}`);
+            tile.animate(x, y, playerInfo.angle);
+            tile.scale = (playerInfo.id === PLAYER.BOTTOM) ? 1.0 : SPRITE_SCALE;
+
+            if (playerInfo.id === PLAYER.BOTTOM) {
+                tile.showTile(true, true);
+            } else {
+                tile.showTile(true, exposed);
+            }
+
+            x += tileWidth + gap;
+        }
+
+        return { x, y };
+    }
+
+    // Show tileset within rack bounds (vertical layout for left/right players)
+    showTileSetInRackVertical(playerInfo, startX, startY, exposed, tileWidth, gap) {
+        const x = startX;
+        let y = startY;
+
+        for (let i = 0; i < this.tileArray.length; i++) {
+            const tile = this.tileArray[i];
+
+            if (this.inputEnabled) {
+                tile.origX = x;
+                tile.origY = y;
+            }
+
+            debugPrint(`showTileSetInRackVertical: Animating tile ${tile.getText()} to x=${x}, y=${y}, angle=${playerInfo.angle}`);
+            tile.animate(x, y, playerInfo.angle);
+            tile.scale = SPRITE_SCALE;
+
+            if (playerInfo.id === PLAYER.BOTTOM) {
+                tile.showTile(true, true);
+            } else {
+                tile.showTile(true, exposed);
+            }
+
+            y += tileWidth + gap;
+        }
+
+        return { x, y };
+    }
+
     insert(tile) {
         this.tileArray.push(tile);
     }
@@ -301,6 +359,7 @@ export class Hand {
         // Properties for visual insertion feedback
         this.insertionFeedbackGhost = null;
         this.insertionFeedbackLine = null;
+        this.rackGraphics = null;
         // When adding new variables, make sure to update dupHand()
     }
 
@@ -323,7 +382,8 @@ export class Hand {
 
         // Note: We don't copy insertion feedback properties since they're ephemeral
         // and only exist during active drag operations
-
+        // Note: We don't copy rackGraphics since it's scene-specific
+    
         return newHand;
     }
 
@@ -392,7 +452,13 @@ export class Hand {
         
         // Clean up any visual insertion feedback that might be active
         this.clearInsertionFeedback();
-        
+
+        // Clean up rack graphics
+        if (this.rackGraphics) {
+            this.rackGraphics.destroy();
+            this.rackGraphics = null;
+        }
+
         // Reset drag tracking flag
         this.tilesWereDraggedThisTurn = false;
     }
@@ -432,6 +498,10 @@ export class Hand {
 
     showHand(playerInfo, forceFaceup) {
         debugPrint("Hand.showHand called. playerInfo:", playerInfo, "forceFaceup:", forceFaceup);
+
+        // Update rack graphics
+        this.updateRack(playerInfo);
+
         // Calculate starting position for all tiles in hand
         let x = playerInfo.x;
         let y = playerInfo.y;
@@ -457,34 +527,84 @@ export class Hand {
             break;
         }
 
-        // Display all tilesets
+        // Display all tilesets with rack positioning
         let exposed = false;
         if (forceFaceup) {
             exposed = true;
         }
-        ({x, y} = this.hiddenTileSet.showTileSet(playerInfo, x, y, exposed));
 
-        for (const tileset of this.exposedTileSetArray) {
-            const sepDist = this.getSeperatorDistance(playerInfo);
+        // Position tiles within rack based on player perspective
+        const rackPos = this.getHandRackPosition(playerInfo);
+        const tileScale = (playerInfo.id === PLAYER.BOTTOM) ? 1.0 : SPRITE_SCALE;
+        const TILE_W = SPRITE_WIDTH * tileScale;
+        const TILE_H = SPRITE_HEIGHT * tileScale;
+        const GAP = TILE_GAP;
 
-            // Separate hidden and exposed tiles
-            switch (playerInfo.id) {
-            case PLAYER.BOTTOM:
-                x += sepDist;
-                break;
-            case PLAYER.TOP:
-                x -= sepDist;
-                break;
-            case PLAYER.LEFT:
-                y += sepDist;
-                break;
-            case PLAYER.RIGHT:
-            default:
-                y -= sepDist;
-                break;
+        let hiddenX, hiddenY, exposedX, exposedY;
+
+        // Calculate actual tile group dimensions for centering
+        const hiddenCount = this.hiddenTileSet.getLength();
+        const exposedCount = this.exposedTileSetArray.reduce((sum, set) => sum + set.getLength(), 0);
+        const totalHiddenWidth = hiddenCount * (TILE_W + GAP) - GAP;
+        const totalExposedWidth = exposedCount * (TILE_W + GAP) - GAP;
+
+        switch (playerInfo.id) {
+        case PLAYER.BOTTOM:
+            // Bottom player: exposed on top row, hidden on bottom row
+            hiddenX = rackPos.x + (rackPos.width / 2) - (totalHiddenWidth / 2) + TILE_W / 2;
+            hiddenY = rackPos.y + rackPos.height - TILE_H / 2 - 5; // Small margin from bottom
+            this.hiddenTileSet.showTileSetInRack(playerInfo, hiddenX, hiddenY, exposed, TILE_W, GAP);
+
+            exposedX = rackPos.x + (rackPos.width / 2) - (totalExposedWidth / 2) + TILE_W / 2;
+            exposedY = rackPos.y + TILE_H / 2 + 5; // Small margin from top
+            for (const tileset of this.exposedTileSetArray) {
+                tileset.showTileSetInRack(playerInfo, exposedX, exposedY, true, TILE_W, GAP);
+                exposedX += tileset.getLength() * (TILE_W + GAP);
             }
+            break;
 
-            ({x, y} = tileset.showTileSet(playerInfo, x, y, true));
+        case PLAYER.TOP:
+            // Top player: exposed on bottom row, hidden on top row (from their perspective)
+            hiddenX = rackPos.x + (rackPos.width / 2) - (totalHiddenWidth / 2) + TILE_W / 2;
+            hiddenY = rackPos.y + TILE_H / 2 + 5; // Small margin from top
+            this.hiddenTileSet.showTileSetInRack(playerInfo, hiddenX, hiddenY, exposed, TILE_W, GAP);
+
+            exposedX = rackPos.x + (rackPos.width / 2) - (totalExposedWidth / 2) + TILE_W / 2;
+            exposedY = rackPos.y + rackPos.height - TILE_H / 2 - 5; // Small margin from bottom
+            for (const tileset of this.exposedTileSetArray) {
+                tileset.showTileSetInRack(playerInfo, exposedX, exposedY, true, TILE_W, GAP);
+                exposedX += tileset.getLength() * (TILE_W + GAP);
+            }
+            break;
+
+        case PLAYER.LEFT:
+            // Left player: exposed on right column, hidden on left column (from their perspective)
+            hiddenY = rackPos.y + (rackPos.height / 2) - (totalHiddenWidth / 2) + TILE_W / 2;
+            hiddenX = rackPos.x + TILE_H / 2 + 5; // Small margin from left
+            this.hiddenTileSet.showTileSetInRackVertical(playerInfo, hiddenX, hiddenY, exposed, TILE_W, GAP);
+
+            exposedY = rackPos.y + (rackPos.height / 2) - (totalExposedWidth / 2) + TILE_W / 2;
+            exposedX = rackPos.x + rackPos.width - TILE_H / 2 - 5; // Small margin from right
+            for (const tileset of this.exposedTileSetArray) {
+                tileset.showTileSetInRackVertical(playerInfo, exposedX, exposedY, true, TILE_W, GAP);
+                exposedY += tileset.getLength() * (TILE_W + GAP);
+            }
+            break;
+
+        case PLAYER.RIGHT:
+        default:
+            // Right player: exposed on left column, hidden on right column (from their perspective)
+            hiddenY = rackPos.y + (rackPos.height / 2) - (totalHiddenWidth / 2) + TILE_W / 2;
+            hiddenX = rackPos.x + rackPos.width - TILE_H / 2 - 5; // Small margin from right
+            this.hiddenTileSet.showTileSetInRackVertical(playerInfo, hiddenX, hiddenY, exposed, TILE_W, GAP);
+
+            exposedY = rackPos.y + (rackPos.height / 2) - (totalExposedWidth / 2) + TILE_W / 2;
+            exposedX = rackPos.x + TILE_H / 2 + 5; // Small margin from left
+            for (const tileset of this.exposedTileSetArray) {
+                tileset.showTileSetInRackVertical(playerInfo, exposedX, exposedY, true, TILE_W, GAP);
+                exposedY += tileset.getLength() * (TILE_W + GAP);
+            }
+            break;
         }
     }
 
@@ -637,12 +757,71 @@ export class Hand {
             this.insertionFeedbackGhost.destroy();
             this.insertionFeedbackGhost = null;
         }
-        
+
         // Remove insertion line if it exists
         if (this.insertionFeedbackLine) {
             this.insertionFeedbackLine.destroy();
             this.insertionFeedbackLine = null;
         }
+    }
+
+    // Update rack graphics for the hand
+    updateRack(playerInfo) {
+        if (!this.rackGraphics) this.rackGraphics = this.scene.add.graphics();
+        this.rackGraphics.clear();
+        const rackPos = this.getHandRackPosition(playerInfo); // Assume existing or add if needed
+        this.rackGraphics.fillStyle(0x000000, 0.3);
+        this.rackGraphics.fillRoundedRect(rackPos.x, rackPos.y, rackPos.width, rackPos.height, 10);
+        this.rackGraphics.setDepth(-1);
+    }
+
+    // Get rack position and dimensions for a player
+    getHandRackPosition(playerInfo) {
+        // Use the correct scale for each player
+        const tileScale = (playerInfo.id === PLAYER.BOTTOM) ? 1.0 : SPRITE_SCALE;
+        const TILE_W = SPRITE_WIDTH * tileScale;
+        const TILE_H = SPRITE_HEIGHT * tileScale;
+        const GAP = TILE_GAP;
+        const PADDING = 8; // Reduced padding for tighter fit
+
+        // Fixed rack size for 14 tiles (13 hand + 1 potential pickup)
+        const maxTiles = 14;
+
+        let width, height, x, y;
+
+        switch (playerInfo.id) {
+        case PLAYER.BOTTOM:
+            // Bottom rack: two rows (top: exposed, bottom: hidden)
+            width = maxTiles * (TILE_W + GAP) - GAP + (2 * PADDING);
+            height = 2 * TILE_H + GAP + (2 * PADDING); // Two rows with gap
+            x = (WINDOW_WIDTH / 2) - (width / 2);
+            y = WINDOW_HEIGHT - height - 10;
+            break;
+        case PLAYER.TOP:
+            // Top rack: two rows (bottom: exposed, top: hidden) - from top player's perspective
+            width = maxTiles * (TILE_W + GAP) - GAP + (2 * PADDING);
+            height = 2 * TILE_H + GAP + (2 * PADDING);
+            x = (WINDOW_WIDTH / 2) - (width / 2);
+            y = 10;
+            break;
+        case PLAYER.LEFT:
+            // Left rack: two columns (right: exposed, left: hidden) - from left player's perspective
+            height = maxTiles * (TILE_W + GAP) - GAP + (2 * PADDING);
+            width = 2 * TILE_H + GAP + (2 * PADDING);
+            x = 10;
+            y = (WINDOW_HEIGHT / 2) - (height / 2);
+            break;
+        case PLAYER.RIGHT:
+        default:
+            // Right rack: two columns (left: exposed, right: hidden) - from right player's perspective
+            height = maxTiles * (TILE_W + GAP) - GAP + (2 * PADDING);
+            width = 2 * TILE_H + GAP + (2 * PADDING);
+            x = WINDOW_WIDTH - width - 10;
+            y = (WINDOW_HEIGHT / 2) - (height / 2);
+            break;
+        }
+
+        return { x, y, width, height };
     }
 
     // Simplified method to reposition all tiles after drag operation

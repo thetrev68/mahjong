@@ -82,6 +82,10 @@ Focus: Eliminate wall visuals; redirect home page animation to player positions.
 
 **Checkpoint 1:** Test the home page: Click "Start Game". Verify tiles animate to player areas without forming a wall. Check console for errors. Confirm with user: "Step 1 complete. Animation works? No wall visible? Proceed?"
 
+<!-- 
+-[Trevor] notes after 1st attempt: some wall tiles hiding behind player tiles. 
+-->
+
 ### Step 2: Implement Wall Tile Counter
 Focus: Add graphical progress bar that updates dynamically.
 
@@ -117,6 +121,22 @@ Focus: Add graphical progress bar that updates dynamically.
   - After every wall modification (e.g., in `deal()`, `pickFromWall()`): `this.scene.updateWallTileCounter(this.table.wall.getCount());`.
 
 **Checkpoint 2:** Start a game and perform actions that change wall count (e.g., deal tiles). Verify the progress bar appears and updates correctly (shrinks as tiles are picked). Check for errors on invalid counts. Confirm with user: "Step 2 complete. Counter works? Updates correctly? Proceed?"
+
+<!-- 
+- [Trevor] Wall tiles still stuck behind player tiles. No wall tile counter. 
+- [Trevor] Wall tiles exist for all players, no player tiles exist. Hints did not run. Console clean.
+- [Trevor] Vite error - game won't load due to parsing error.
+- [Trevor] Code reverted to checkpoint 1. Wall tiles still under player tiles.
+- [Trevor] Gemini says code is good - retest. Code is not good.
+- [Trevor] Wall tiles under player hands fixed. Stray tile in center of table. Bad animation delay.
+- [Trevor] Delay reduced but not enough. Center tile still there.
+- [Trevor] Delay acceptable, Center tile still there.
+- [Trevor] Game won't load - reference error.
+- [Trevor] Center tile is still there.
+- [Trevor] Center tile is still there. Console is clean.
+- [Trevor] Center tile is still there. Provided console logs.
+- [Trevor] LLM Steam stopped (rate limiting) 
+-->
 
 ### Step 3: Reposition Discard Pile
 - **File:** [`gameObjects.js`](gameObjects.js:514)

@@ -54,16 +54,6 @@ export const hands2025 = {
             even: false,
             components: [
                 {
-                    suit: SUIT.DRAGON,
-                    number: DRAGON.WHITE,
-                    count: 1
-                },
-                {
-                    suit: SUIT.VSUIT1,
-                    number: 5,
-                    count: 1
-                },
-                {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 4
@@ -71,17 +61,32 @@ export const hands2025 = {
                 {
                     suit: SUIT.VSUIT1,
                     number: 2,
-                    count: 2
+                    count: 1
                 },
                 {
-                    suit: SUIT.VSUIT2,
+                    suit: SUIT.DRAGON,
+                    number: DRAGON.WHITE,
+                    count: 1
+                },
+                {
+                    suit: SUIT.VSUIT1,
+                    number: 2,
+                    count: 1
+                },                
+                {
+                    suit: SUIT.VSUIT1,
                     number: 5,
-                    count: 4
+                    count: 1
+                },                
+                {
+                    suit: SUIT.VSUIT2,
+                    number: 2,
+                    count: 3
                 },
                 {
                     suit: SUIT.VSUIT3,
-                    number: 5,
-                    count: 4
+                    number: 2,
+                    count: 3
                 }
             ]
         },
@@ -122,19 +127,24 @@ export const hands2025 = {
             even: false,
             components: [
                 {
+                    suit: SUIT.VSUIT1,
+                    number: 2,
+                    count: 1
+                },                
+                {
                     suit: SUIT.DRAGON,
                     number: DRAGON.WHITE,
                     count: 1
                 },
                 {
                     suit: SUIT.VSUIT1,
-                    number: 5,
+                    number: 2,
                     count: 1
-                },
+                },                
                 {
                     suit: SUIT.VSUIT1,
-                    number: 2,
-                    count: 2
+                    number: 5,
+                    count: 1
                 },
                 {
                     suit: SUIT.VSUIT2,

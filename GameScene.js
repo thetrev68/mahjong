@@ -2,7 +2,9 @@
 import * as Phaser from "phaser";
 import {GameLogic} from "./gameLogic.js";
 import {Table} from "./gameObjects_table.js";
-import {HomePageTileManager} from "./homePageTileManager.js";
+import { HomePageTileManager } from "./homePageTileManager.js";
+// import { debugPrint } from "./utils.js";
+import { WINDOW_WIDTH } from "./constants.js";
 
 import tilesPng from "./assets/tiles.png";
 import tilesJson from "./assets/tiles.json";
@@ -38,6 +40,7 @@ class GameScene extends Phaser.Scene {
         this.gGameLogic.table = this.gTable;
         await this.gGameLogic.init();
         this.gGameLogic.gameAI.table = this.gTable;
+
         this.gGameLogic.updateUI();
 
         // Create sprites etc
@@ -50,6 +53,9 @@ class GameScene extends Phaser.Scene {
         });
         this.gGameLogic.wallText.setOrigin(0, 0);
         this.gGameLogic.wallText.visible = false;
+        this.gGameLogic.wallText.setDepth(100); // Match counter depth
+
+        this.gGameLogic.wallCounter = this.createWallTileCounter();
 
         this.gGameLogic.errorText = this.add.text(400, 400, "", {
             font: "14px Arial",
@@ -74,15 +80,42 @@ class GameScene extends Phaser.Scene {
                 // Hide the button after it's clicked
                 startButton.style.display = "none";
 
-                this.homePageTileManager.onAnimationComplete = () => {
-                    this.homePageTileManager.transitionToWallSystem();
+                this.homePageTileManager.onAnimationComplete = async () => {
+                    await this.homePageTileManager.transitionToWallSystem();
                     this.homePageTileManager.cleanup();
                     this.homePageTileManager = null; // Release reference
+
                     this.gGameLogic.start();
                 };
                 this.homePageTileManager.animateToPileAndStartGame();
             });
         }
+    }
+
+    createWallTileCounter() {
+      const container = this.add.container(WINDOW_WIDTH / 2 - 150, 160);
+      const bar = this.add.graphics();
+      bar.fillStyle(0x2a2a2a, 1); // Darker background
+      bar.fillRoundedRect(0, 0, 300, 20, 5); // Background - wider
+      const fill = this.add.graphics();
+      container.add([bar, fill]);
+      container.setVisible(false);
+      container.setDepth(100); // High depth to appear above hands
+      return { bar: container, fill, maxTiles: 152 };
+    }
+
+    updateWallTileCounter(count) {
+      if (!this.gGameLogic.wallCounter) return;
+      const { bar, fill, maxTiles } = this.gGameLogic.wallCounter;
+      fill.clear();
+      if (count < 0 || count > maxTiles) {
+        console.error("Invalid wall count:", count);
+        count = Math.max(0, Math.min(count, maxTiles));
+      }
+      fill.fillStyle(0x4a90e2, 1); // Better blue color
+      const width = (count / maxTiles) * 300; // Updated width
+      fill.fillRoundedRect(0, 0, width, 20, 5);
+      bar.setVisible(true);
     }
 
     update() {

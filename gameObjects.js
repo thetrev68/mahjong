@@ -1,5 +1,5 @@
 import * as Phaser from "phaser";
-import {SUIT, SPRITE_HEIGHT, SPRITE_WIDTH, TILE_GAP} from "./constants.js";
+import {SUIT, SPRITE_HEIGHT, SPRITE_WIDTH, TILE_GAP, WINDOW_WIDTH, WINDOW_HEIGHT} from "./constants.js";
 import {debugPrint} from "./utils.js";
 
 // PRIVATE CONSTANTS
@@ -460,55 +460,7 @@ export class Wall {
         }
     }
 
-    showWall() {
-        const WALL_SCALE = 0.6;
 
-        // Calculate positions for all wall tiles
-        let offsetX = 200;
-        let offsetY = 200;
-        for (const tile of this.tileArray) {
-            // Tile.x = offsetX;
-            // Tile.y = offsetY;
-            // Tile.angle = 0;
-            tile.animate(offsetX, offsetY, 0);
-            offsetX += (SPRITE_WIDTH * WALL_SCALE) + TILE_GAP;
-
-            if (offsetX > 800) {
-                offsetX = 200;
-                offsetY += (SPRITE_HEIGHT * WALL_SCALE) + TILE_GAP;
-            }
-        }
-
-        // Return position where discarded tiles should start
-        if (offsetX !== 200) {
-            offsetY += (SPRITE_HEIGHT * WALL_SCALE) + TILE_GAP;
-        }
-
-        return {offsetX: 200,
-            offsetY};
-    }
-
-    showWallBack() {
-        const WALL_SCALE = 0.6;
-
-        // Calculate positions for all wall tiles (face down)
-        let offsetX = 200;
-        let offsetY = 200;
-        for (const tile of this.tileArray) {
-            tile.animate(offsetX, offsetY, 0);
-            // This will update the mask
-            tile.scale = WALL_SCALE;
-            // Show face down
-            tile.showTile(true, false);
-
-            offsetX += (SPRITE_WIDTH * WALL_SCALE) + TILE_GAP;
-
-            if (offsetX > 800) {
-                offsetX = 200;
-                offsetY += (SPRITE_HEIGHT * WALL_SCALE) + TILE_GAP;
-            }
-        }
-    }
 }
 
 export class Discards {
@@ -520,27 +472,27 @@ export class Discards {
         this.tileArray.push(tile);
     }
 
-    showDiscards(offsetX, offsetY) {
-        // Calculate positions for all discarded tiles
-        let currentOffsetX = offsetX;
-        let currentOffsetY = offsetY;
-        for (const tile of this.tileArray) {
-            const DISCARD_SCALE = 0.6;
-            // Tile.x = currentOffsetX;
-            // Tile.y = currentOffsetY;
-            // Tile.angle = 0;
-            tile.sprite.setDepth(0);
-            tile.spriteBack.setDepth(0);
-            tile.animate(currentOffsetX, currentOffsetY, 0);
-            tile.scale = DISCARD_SCALE;
-            tile.showTile(true, true);
-
-            currentOffsetX += (SPRITE_WIDTH * DISCARD_SCALE) + TILE_GAP;
-
-            if (currentOffsetX > 800) {
-                currentOffsetX = 200;
-                currentOffsetY += (SPRITE_HEIGHT * DISCARD_SCALE) + TILE_GAP;
-            }
+    showDiscards() {
+      if (this.tileArray.length === 0) return;
+      const centerX = WINDOW_WIDTH / 2;
+      const centerY = WINDOW_HEIGHT / 2 - 100;
+      const DISCARD_SCALE = 0.5;
+      const tilesPerRow = 17; // Increased from 14 to 17 for more tiles per row
+      const tileSpacing = SPRITE_WIDTH * DISCARD_SCALE + TILE_GAP;
+      const totalWidth = Math.min(this.tileArray.length, tilesPerRow) * tileSpacing - TILE_GAP;
+      let currentX = centerX - totalWidth / 2;
+      let currentY = centerY;
+      let rowCount = 0;
+      for (const tile of this.tileArray) {
+        tile.animate(currentX, currentY, 0);
+        tile.scale = DISCARD_SCALE;
+        tile.showTile(true, true);
+        currentX += tileSpacing;
+        if (++rowCount >= tilesPerRow) {
+          rowCount = 0;
+          currentX = centerX - totalWidth / 2;
+          currentY += SPRITE_HEIGHT * DISCARD_SCALE + TILE_GAP;
         }
+      }
     }
 }

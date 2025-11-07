@@ -1,6 +1,6 @@
 import * as Phaser from "phaser";
 import { Tile, gTileGroups } from "./gameObjects.js";
-import { SUIT, SPRITE_WIDTH, SPRITE_HEIGHT, TILE_GAP } from "./constants.js";
+import { SUIT, SPRITE_WIDTH, SPRITE_HEIGHT, TILE_GAP, WINDOW_WIDTH, WINDOW_HEIGHT } from "./constants.js";
 import {debugPrint} from "./utils.js";
 
 export class HomePageTileManager {
@@ -139,25 +139,21 @@ export class HomePageTileManager {
     }
 
     animatePileToWall() {
-        this.animationState = "dealing";
-        const promises = [];
-
-        for (let i = 0; i < this.tileArray.length; i++) {
-            const tile = this.tileArray[i];
-            const targetPos = this.calculateStackPosition(i);
-
-            const promise = this.animateSingleTile(tile, targetPos.x, targetPos.y, 0, 2250, i * 5);
-            promises.push(promise);
-        }
-
-        Promise.all(promises).then(() => {
-            debugPrint("All tiles have been dealt to the wall.");
-            this.isAnimating = false;
-            this.animationState = "complete";
-            if (this.onAnimationComplete) {
-                this.onAnimationComplete();
-            }
-        });
+      this.animationState = "dealing";
+      const promises = [];
+      for (let i = 0; i < this.tileArray.length; i++) {
+        const tile = this.tileArray[i];
+        // Hide all tiles off-screen
+        const promise = this.animateSingleTile(tile, -100, -100, 0, 500, i * 5);
+        promises.push(promise);
+        tile.showTile(false, false); // Hide all tiles
+      }
+      Promise.all(promises).then(() => {
+        debugPrint("All tiles moved off-screen.");
+        this.isAnimating = false;
+        this.animationState = "complete";
+        if (this.onAnimationComplete) this.onAnimationComplete();
+      });
     }
 
 
@@ -197,8 +193,8 @@ export class HomePageTileManager {
         });
     }
 
-    transitionToWallSystem() {
-        this.wall.receiveOrganizedTilesFromHomePage(this.tileArray);
+    async transitionToWallSystem() {
+        await this.wall.receiveOrganizedTilesFromHomePage(this.tileArray);
     }
 
     cleanup() {
@@ -206,5 +202,22 @@ export class HomePageTileManager {
         // We just clear the array to release the HomePageTileManager's reference to them.
         this.tileArray = [];
         debugPrint("HomePageTileManager cleaned up.");
+    }
+
+    // Add this new method at the end of the file
+    calculatePlayerHandPositions() {
+      const positions = [];
+      const HAND_SCALE = 0.6;
+      const TILE_W = SPRITE_WIDTH * HAND_SCALE;
+      const TILE_H = SPRITE_HEIGHT * HAND_SCALE;
+      // Bottom
+      for (let i = 0; i < 13; i++) positions.push({x: (WINDOW_WIDTH / 2) - (6.5 * TILE_W) + (i * TILE_W), y: WINDOW_HEIGHT - TILE_H - 10, angle: 0});
+      // Top
+      for (let i = 0; i < 13; i++) positions.push({x: (WINDOW_WIDTH / 2) - (6.5 * TILE_W) + (i * TILE_W), y: TILE_H + 10, angle: 180});
+      // Left
+      for (let i = 0; i < 13; i++) positions.push({x: TILE_H + 10, y: (WINDOW_HEIGHT / 2) - (6.5 * TILE_W) + (i * TILE_W), angle: -90});
+      // Right
+      for (let i = 0; i < 13; i++) positions.push({x: WINDOW_WIDTH - TILE_H - 10, y: (WINDOW_HEIGHT / 2) - (6.5 * TILE_W) + (i * TILE_W), angle: 90});
+      return positions;
     }
 }
