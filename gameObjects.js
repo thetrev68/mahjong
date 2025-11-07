@@ -93,6 +93,7 @@ export class Tile {
         // Default red glow
         this.glowColor = 0xff0000;
         this.glowIntensity = 0.6;
+        this.glowPriority = 0;
     }
 
     create() {
@@ -313,11 +314,19 @@ export class Tile {
     }
 
     // Dynamic glow effect methods
-    addGlowEffect(scene, color = 0xff0000, intensity = 0.6) {
+    addGlowEffect(scene, color = 0xff0000, intensity = 0.6, priority = 0) {
+        // Priority system: higher priority glows override lower priority ones
+        // Blue new-tile glow (priority 10) > Red hint glow (priority 0)
+        if (this.glowEffect && this.glowPriority > priority) {
+            // Don't override a higher priority glow
+            return;
+        }
+
         this.removeGlowEffect();
 
         this.glowColor = color;
         this.glowIntensity = intensity;
+        this.glowPriority = priority;
 
         // Create glow effect that will be positioned dynamically
         this.glowEffect = scene.add.graphics();
@@ -367,6 +376,7 @@ export class Tile {
         if (this.glowEffect) {
             this.glowEffect.destroy();
             this.glowEffect = null;
+            this.glowPriority = 0; // Reset priority when removing glow
         }
     }
 }

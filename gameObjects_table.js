@@ -201,6 +201,9 @@ export class Table {
     charlestonPass(player, charlestonPassArray) {
         const delta = player - PLAYER.BOTTOM;
 
+        // Track received tiles for player 0 (for glow effect)
+        let receivedTilesPlayer0 = [];
+
         // Insert 3 cards from player 0-3 to the appropriate player
         for (let i = 0; i < 4; i++) {
             const from = i;
@@ -211,6 +214,10 @@ export class Table {
 
             for (const tile of charlestonPassArray[from]) {
                 this.players[to].hand.insertHidden(tile);
+                // Track tiles received by player 0
+                if (to === PLAYER.BOTTOM) {
+                    receivedTilesPlayer0.push(tile);
+                }
             }
         }
 
@@ -219,8 +226,11 @@ export class Table {
             if (i !== 0) {
                 this.players[i].hand.sortSuitHidden();
             }
-            this.players[i].showHand();
+            this.players[i].showHand(i === PLAYER.BOTTOM);
         }
+
+        // Return received tiles for player 0 (for glow effect)
+        return receivedTilesPlayer0;
     }
 
     courtesyVote(courtesyVoteArray) {

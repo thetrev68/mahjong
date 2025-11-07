@@ -389,7 +389,7 @@ export class GameLogic {
         // Perform courtesy voting
         this.table.courtesyVote(courtesyVoteArray);
 
-        if (this.table.player02CourtesyVote) {
+        if (this.table.player02CourtesyVote > 0) {
             // Wait for user to select courtesy pass tiles
             await this.courtesyPass();
         }
@@ -397,27 +397,30 @@ export class GameLogic {
         this.state = STATE.COURTESY_COMPLETE;
         this.updateUI();
 
-        const courtesyPassArray = [];
+        // Only process courtesy pass if tiles are being exchanged
+        if (this.table.player02CourtesyVote > 0 || this.table.player13CourtesyVote > 0) {
+            const courtesyPassArray = [];
 
-        // Player 0 (human) pressed "Pass" button
-        courtesyPassArray[0] = this.table.players[0].hand.getSelectionHidden();
+            // Player 0 (human) pressed "Pass" button
+            courtesyPassArray[0] = this.table.players[0].hand.getSelectionHidden();
 
-        // Reset selectCount
-        this.table.players[0].hand.resetSelection();
+            // Reset selectCount
+            this.table.players[0].hand.resetSelection();
 
-        // Remove from tile set
-        for (const tile of courtesyPassArray[0]) {
-            this.table.players[0].hand.removeHidden(tile);
+            // Remove from tile set
+            for (const tile of courtesyPassArray[0]) {
+                this.table.players[0].hand.removeHidden(tile);
+            }
+
+            // Players 1 - 3, get courtesy pass.
+            // Note: tiles are removed from player's hands
+            courtesyPassArray[1] = this.gameAI.courtesyPass(1, this.table.player13CourtesyVote);
+            courtesyPassArray[2] = this.gameAI.courtesyPass(2, this.table.player02CourtesyVote);
+            courtesyPassArray[3] = this.gameAI.courtesyPass(3, this.table.player13CourtesyVote);
+
+            // Perform courtesy pass exchange
+            this.table.courtesyPass(courtesyPassArray);
         }
-
-        // Players 1 - 3, get courtesy pass.
-        // Note: tiles are removed from player's hands
-        courtesyPassArray[1] = this.gameAI.courtesyPass(1, this.table.player13CourtesyVote);
-        courtesyPassArray[2] = this.gameAI.courtesyPass(2, this.table.player02CourtesyVote);
-        courtesyPassArray[3] = this.gameAI.courtesyPass(3, this.table.player13CourtesyVote);
-
-        // Perform courtesy pass exchange
-        this.table.courtesyPass(courtesyPassArray);
 
         // Update hints after courtesy pass is complete (for player 0)
         if (this.table.players[PLAYER.BOTTOM].hand.getLength() > 0) {
@@ -606,7 +609,7 @@ export class GameLogic {
             // For human player, add visual feedback and delay sorting
             if (this.currPlayer === PLAYER.BOTTOM) {
                 // Add blue glow to newly drawn tile so user can identify it
-                tile.addGlowEffect(this.scene, 0x1e90ff, 0.7); // DodgerBlue color
+                tile.addGlowEffect(this.scene, 0x1e90ff, 0.7, 10); // DodgerBlue color, high priority
 
                 // Sort after a brief delay to let user see which tile was drawn
                 // Then update hints with the sorted hand
@@ -883,8 +886,27 @@ export class GameLogic {
                     }
 
                     // Exchange charleston passes among all players
-                    this.table.charlestonPass(playerId, charlestonPassArray);
+                    const receivedTiles = this.table.charlestonPass(playerId, charlestonPassArray);
                     printMessage("Pass " + playerText[playerId] + " complete\n");
+
+                    // Add blue glow to received tiles for player 0
+                    if (receivedTiles && receivedTiles.length > 0) {
+                        for (const tile of receivedTiles) {
+                            tile.addGlowEffect(this.scene, 0x1e90ff, 0.7, 10); // DodgerBlue color, high priority
+                        }
+
+                        // Remove glow and sort after delay
+                        setTimeout(() => {
+                            for (const tile of receivedTiles) {
+                                tile.removeGlowEffect();
+                            }
+                            // Sort hand by suit after glow ends
+                            this.table.players[PLAYER.BOTTOM].hand.sortSuitHidden();
+                            this.table.players[PLAYER.BOTTOM].showHand(true);
+                            // Update hints with the sorted hand
+                            this.hintAnimationManager.updateHintsForNewTiles();
+                        }, 2500); // 2.5 second delay
+                    }
 
                     resolve();
                 }.bind(this);
