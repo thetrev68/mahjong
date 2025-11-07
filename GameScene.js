@@ -88,6 +88,7 @@ class GameScene extends Phaser.Scene {
       bar.fillRoundedRect(0, 0, 300, 20, 5); // Background - wider
       const fill = this.add.graphics();
       container.add([bar, fill]);
+      // The container is hidden by default and is made visible by the first call to updateWallTileCounter.
       container.setVisible(false);
       container.setDepth(100); // High depth to appear above hands
       return { bar: container, fill, maxTiles: 152 };

@@ -304,8 +304,7 @@ export class GameLogic {
             this.charleston();
         }
 
-        // Update wall counter after dealing
-        this.scene.updateWallTileCounter(this.table.wall.getCount());
+
     }
 
     async charleston() {
@@ -429,8 +428,7 @@ export class GameLogic {
         // Start main game loop
         this.loop();
 
-        // Update wall counter after charleston/courtesy
-        this.scene.updateWallTileCounter(this.table.wall.getCount());
+
     }
 
     // Main loop
@@ -1072,6 +1070,7 @@ export class GameLogic {
             break;
 
         case STATE.START:
+            this.scene.updateWallTileCounter(this.table.wall.getCount());
             printMessage("Game started\n");
             startButton.disabled = true;
             sort1.style.display = "";

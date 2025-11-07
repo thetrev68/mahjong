@@ -21,6 +21,7 @@ All JavaScript code should adhere to the existing style, which follows standard 
 ### 1. Home Page Scattered Tiles Enhancement
 **Current**: All 152 tiles scattered face-down
 **Enhanced**: ~70% of tiles randomly face-up, creating visual interest
+**Status**: Implemented
 
 **Implementation**:
 - In `homePageTileManager.js`, modify the `createScatteredTiles` function. Inside the loop that creates tiles, after `tile.showTile(true, false);`, add `if (Math.random() < 0.7) { tile.showTile(true, true); }`.
@@ -28,6 +29,7 @@ All JavaScript code should adhere to the existing style, which follows standard 
 ### 2. Hide Empty Wall Counter
 **Current**: Counter container is already hidden until the game logic updates it
 **Enhanced**: Keep the default-hidden behavior and ensure the first `updateWallTileCounter` call happens exactly when gameplay begins so the UI never flashes stale state
+**Status**: Implemented
 
 **Implementation**:
 - Leave `GameScene.createWallTileCounter()`’s `setVisible(false)` intact and document the expectation in code comments to prevent regressions.
@@ -37,6 +39,7 @@ All JavaScript code should adhere to the existing style, which follows standard 
 ### 3. Z-Axis Management Fix
 **Current**: `createScatteredTiles` seeds depth via `tile.sprite.setDepth(i)` but the `Tile` class already keeps `sprite`, `spriteBack`, and glow masks in sync during `animate`
 **Enhanced**: Centralize temporary depth boosts so both front/back sprites and glow masks rise together whenever a tile animates
+**Status**: Implemented
 
 **Implementation**:
 - Extend `Tile.animate` (in `gameObjects.js`) with a helper like `withRaisedDepth(callback)` to raise `sprite.depth`, `spriteBack.depth`, and glow depth, then restore them after the tween completes. Avoid touching depth directly inside `homePageTileManager`.
@@ -72,6 +75,7 @@ withRaisedDepth(tweenFactory) {
 ### 4. Redesigned Start-Game Animation
 **Current**: Tiles gather to center, then disappear
 **Enhanced**: Sophisticated three-phase animation
+**Status**: Implemented
 
 **Phase 1: Jump and Flip**
 - Each tile performs a small jump (5-15px upward)

@@ -194,55 +194,71 @@ export class Tile {
             this.tween.stop();
         }
 
-        // Save current depth to restore after animation
-        const savedDepth = this.sprite.depth;
-        this.sprite.depth = Math.max(1, savedDepth);
-        this.spriteBack.depth = Math.max(1, savedDepth);
+        return this.withRaisedDepth(() => {
+            const tweenConfig = {
+                targets: this.sprite,
+                x,
+                y,
+                duration: time,
+                ease: "Linear",
+                onUpdate: () => {
+                    this.spriteBack.x = this.sprite.x;
+                    this.spriteBack.y = this.sprite.y;
+                    this.spriteBack.angle = this.sprite.angle;
+                    if (this.mask && this.mask.geometryMask) {
+                        this.mask.geometryMask.x = this.sprite.x;
+                        this.mask.geometryMask.y = this.sprite.y;
+                        this.mask.geometryMask.angle = this.sprite.angle;
+                    }
+                    // UPDATE GLOW POSITION DURING ANIMATION
+                    this.updateGlowPosition();
+                },
+                onComplete: () => {
+                    this.sprite.x = x;
+                    this.sprite.y = y;
+                    this.sprite.angle = angle;
+                    this.spriteBack.x = x;
+                    this.spriteBack.y = y;
+                    this.spriteBack.angle = angle;
+                    if (this.mask && this.mask.geometryMask) {
+                        this.mask.geometryMask.x = x;
+                        this.mask.geometryMask.y = y;
+                        this.mask.geometryMask.angle = angle;
+                    }
+                    this.tween = null;
+                    // FINAL GLOW POSITION UPDATE
+                    this.updateGlowPosition();
+                }
+            };
 
-        const tweenConfig = {
-            targets: this.sprite,
-            x,
-            y,
-            duration: time,
-            ease: "Linear",
-            onUpdate: () => {
-                this.spriteBack.x = this.sprite.x;
-                this.spriteBack.y = this.sprite.y;
-                this.spriteBack.angle = this.sprite.angle;
-                if (this.mask && this.mask.geometryMask) {
-                    this.mask.geometryMask.x = this.sprite.x;
-                    this.mask.geometryMask.y = this.sprite.y;
-                    this.mask.geometryMask.angle = this.sprite.angle;
-                }
-                // UPDATE GLOW POSITION DURING ANIMATION
-                this.updateGlowPosition();
-            },
-            onComplete: () => {
-                this.sprite.x = x;
-                this.sprite.y = y;
-                this.sprite.angle = angle;
-                this.spriteBack.x = x;
-                this.spriteBack.y = y;
-                this.spriteBack.angle = angle;
-                if (this.mask && this.mask.geometryMask) {
-                    this.mask.geometryMask.x = x;
-                    this.mask.geometryMask.y = y;
-                    this.mask.geometryMask.angle = angle;
-                }
-                this.sprite.depth = savedDepth;
-                this.spriteBack.depth = savedDepth;
-                this.tween = null;
-                // FINAL GLOW POSITION UPDATE
-                this.updateGlowPosition();
+            if (Phaser.Math.Angle.Wrap(this.sprite.angle) !== Phaser.Math.Angle.Wrap(angle)) {
+                tweenConfig.angle = angle;
             }
-        };
 
-         
-        if (Phaser.Math.Angle.Wrap(this.sprite.angle) !== Phaser.Math.Angle.Wrap(angle)) {
-            tweenConfig.angle = angle;
-        }
+            this.tween = this.scene.tweens.add(tweenConfig);
+            return this.tween;
+        });
+    }
 
-        this.tween = this.scene.tweens.add(tweenConfig);
+    withRaisedDepth(tweenFactory) {
+        const base = Math.max(1, this.sprite.depth);
+        const raiseBy = 100;
+        this._raisedDepthCount = (this._raisedDepthCount ?? 0) + 1;
+        const targetDepth = base + raiseBy;
+        this.sprite.depth = targetDepth;
+        this.spriteBack.depth = targetDepth;
+        if (this.glowEffect) this.glowEffect.setDepth(targetDepth - 1);
+
+        const tween = tweenFactory(targetDepth);
+        tween.once("complete", () => {
+            this._raisedDepthCount -= 1;
+            if (this._raisedDepthCount === 0) {
+                this.sprite.depth = base;
+                this.spriteBack.depth = base;
+                if (this.glowEffect) this.glowEffect.setDepth(base - 1);
+            }
+        });
+        return tween;
     }
 
     // Called at game update time

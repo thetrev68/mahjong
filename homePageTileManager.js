@@ -53,6 +53,9 @@ export class HomePageTileManager {
             tile.angle = angle;
             tile.sprite.setDepth(i); // Use index for z-depth
             tile.showTile(true, false); // Show face down
+            if (Math.random() < 0.7) {
+                tile.showTile(true, true);
+            }
         }
     }
 
@@ -89,82 +92,135 @@ export class HomePageTileManager {
 
 
 
-    animateToPileAndStartGame() {
+    async animateToPileAndStartGame() {
         this.isAnimating = true;
         this.animationState = "gathering";
 
-        const promises = [];
-        const centerX = this.scene.sys.game.config.width / 2;
-        const centerY = this.scene.sys.game.config.height / 2;
+        await this.animateJumpAndFlip();
+        await this.animateFlyOffScreen();
 
-        for (let i = 0; i < this.tileArray.length; i++) {
-            const tile = this.tileArray[i];
-            
-            // Animate to the center of the screen to form a pile
-            const promise = this.animateSingleTile(tile, centerX, centerY, 0, 1500, 0);
-            promises.push(promise);
-        }
-
-        Promise.all(promises).then(() => {
-            debugPrint("All tiles have reached the center pile.");
-            this.animationState = "piled";
-            this.animatePileToWall();
-        });
-    }
-
-    animatePileToWall() {
-      this.animationState = "dealing";
-      const promises = [];
-      for (let i = 0; i < this.tileArray.length; i++) {
-        const tile = this.tileArray[i];
-        // Hide all tiles off-screen
-        const promise = this.animateSingleTile(tile, -100, -100, 0, 500, i * 5);
-        promises.push(promise);
-        tile.showTile(false, false); // Hide all tiles
-      }
-      Promise.all(promises).then(() => {
-        debugPrint("All tiles moved off-screen.");
         this.isAnimating = false;
         this.animationState = "complete";
-        if (this.onAnimationComplete) this.onAnimationComplete();
-      });
+        if (this.onAnimationComplete) {
+            this.onAnimationComplete();
+        }
     }
 
+    animateJumpAndFlip() {
+        const promises = [];
+        this.tileArray.forEach((tile) => {
+            promises.push(new Promise(resolve => {
+                const initialY = tile.y;
+                const jumpHeight = Phaser.Math.Between(5, 15);
+                const delay = Phaser.Math.Between(0, 150);
 
-    animateSingleTile(tile, x, y, angle, duration, delay) {
-        return new Promise((resolve) => {
-            const anim = {
-                x: tile.x,
-                y: tile.y,
-                angle: tile.angle,
-                scale: tile.scale
-            };
+                tile.withRaisedDepth(() => {
+                    const timeline = this.scene.tweens.createTimeline();
 
-            this.scene.tweens.add({
-                targets: anim,
-                x: x,
-                y: y,
-                scaleX: 0.6,
-                scaleY: 0.6,
-                angle: angle,
-                duration: duration,
-                delay: delay,
-                ease: "Cubic.easeOut",
-                onUpdate: () => {
-                    tile.x = anim.x;
-                    tile.y = anim.y;
-                    tile.angle = anim.angle;
-                    tile.scale = anim.scale;
-                },
-                onComplete: () => {
-                    tile.x = x;
-                    tile.y = y;
-                    tile.angle = angle;
-                    tile.scale = 0.6;
-                    resolve();
-                }
-            });
+                    timeline.add({
+                        targets: tile,
+                        y: initialY - jumpHeight,
+                        scale: 0.65,
+                        duration: 400,
+                        ease: 'Cubic.Out',
+                        delay: delay,
+                    });
+                    
+                    timeline.add({
+                        targets: tile,
+                        y: initialY,
+                        scale: 0.6,
+                        duration: 400,
+                        ease: 'Cubic.In',
+                    });
+
+                    const flipTimeline = this.scene.tweens.createTimeline();
+
+                    flipTimeline.add({
+                        targets: { scaleY: tile.sprite.scaleY },
+                        scaleY: 0,
+                        duration: 400,
+                        ease: 'Cubic.In',
+                        delay: delay,
+                        onUpdate: (tween) => {
+                            tile.sprite.scaleY = tween.targets[0].scaleY;
+                            tile.spriteBack.scaleY = tween.targets[0].scaleY;
+                        },
+                        onComplete: () => {
+                            tile.showTile(true, false);
+                        }
+                    });
+
+                    flipTimeline.add({
+                        targets: { scaleY: 0 },
+                        scaleY: 0.6,
+                        duration: 400,
+                        ease: 'Cubic.Out',
+                        onUpdate: (tween) => {
+                            tile.sprite.scaleY = tween.targets[0].scaleY;
+                            tile.spriteBack.scaleY = tween.targets[0].scaleY;
+                        }
+                    });
+
+                    timeline.on('complete', () => resolve());
+                    
+                    timeline.play();
+                    flipTimeline.play();
+
+                    return timeline;
+                });
+            }));
         });
+        return Promise.all(promises);
+    }
+
+    animateFlyOffScreen() {
+        const promises = [];
+        const batchSize = 20;
+        const batchDelay = 150;
+
+        for (let i = 0; i < this.tileArray.length; i += batchSize) {
+            const batch = this.tileArray.slice(i, i + batchSize);
+            promises.push(new Promise(resolveBatch => {
+                this.scene.time.delayedCall(i / batchSize * batchDelay, () => {
+                    const batchPromises = batch.map(tile => new Promise(resolveTile => {
+                        const duration = Phaser.Math.Between(1200, 2000);
+                        const endX = Phaser.Math.Between(-100, 0);
+                        const endY = Phaser.Math.Between(-100, 0);
+
+                        const controlX = Phaser.Math.Between(tile.x - 100, tile.x + 100);
+                        const controlY = Phaser.Math.Between(tile.y - 200, tile.y);
+
+                        const curve = new Phaser.Curves.QuadraticBezier(
+                            new Phaser.Math.Vector2(tile.x, tile.y),
+                            new Phaser.Math.Vector2(controlX, controlY),
+                            new Phaser.Math.Vector2(endX, endY)
+                        );
+                        
+                        const path = { t: 0, vec: new Phaser.Math.Vector2() };
+
+                        this.scene.tweens.add({
+                            targets: path,
+                            t: 1,
+                            duration: duration,
+                            ease: 'Cubic.In',
+                            onUpdate: () => {
+                                curve.getPoint(path.t, path.vec);
+                                tile.x = path.vec.x;
+                                tile.y = path.vec.y;
+                            },
+                            onComplete: () => {
+                                tile.showTile(false, false);
+                                resolveTile();
+                            }
+                        });
+                    }));
+                    Promise.all(batchPromises).then(resolveBatch);
+                });
+            }));
+        }
+
+        return Promise.all(promises);
     }
 
     async transitionToWallSystem() {
