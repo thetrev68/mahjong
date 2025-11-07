@@ -115,59 +115,66 @@ export class HomePageTileManager {
                 const delay = Phaser.Math.Between(0, 150);
 
                 tile.withRaisedDepth(() => {
-                    const timeline = this.scene.tweens.createTimeline();
+                    const dummyTween = this.scene.tweens.add({
+                        targets: {},
+                        duration: 800 + delay,
+                        onComplete: () => {
+                            // Depth will be lowered here
+                        }
+                    });
 
-                    timeline.add({
+                    // Jump up
+                    this.scene.tweens.add({
                         targets: tile,
                         y: initialY - jumpHeight,
                         scale: 0.65,
                         duration: 400,
-                        ease: 'Cubic.Out',
-                        delay: delay,
+                        ease: Phaser.Math.Easing.Cubic.Out,
+                        delay: delay
                     });
-                    
-                    timeline.add({
+
+                    // Jump down
+                    this.scene.tweens.add({
                         targets: tile,
                         y: initialY,
                         scale: 0.6,
                         duration: 400,
-                        ease: 'Cubic.In',
+                        ease: Phaser.Math.Easing.Cubic.In,
+                        delay: delay + 400
                     });
 
-                    const flipTimeline = this.scene.tweens.createTimeline();
+                    return dummyTween;
+                });
 
-                    flipTimeline.add({
-                        targets: { scaleY: tile.sprite.scaleY },
-                        scaleY: 0,
-                        duration: 400,
-                        ease: 'Cubic.In',
-                        delay: delay,
-                        onUpdate: (tween) => {
-                            tile.sprite.scaleY = tween.targets[0].scaleY;
-                            tile.spriteBack.scaleY = tween.targets[0].scaleY;
-                        },
-                        onComplete: () => {
-                            tile.showTile(true, false);
-                        }
-                    });
+                // Flip to 0
+                this.scene.tweens.add({
+                    targets: { scaleY: tile.sprite.scaleY },
+                    scaleY: 0,
+                    duration: 400,
+                    ease: Phaser.Math.Easing.Cubic.In,
+                    delay: delay,
+                    onUpdate: (tween) => {
+                        tile.sprite.scaleY = tween.targets[0].scaleY;
+                        tile.spriteBack.scaleY = tween.targets[0].scaleY;
+                    },
+                    onComplete: () => {
+                        tile.showTile(true, false);
 
-                    flipTimeline.add({
-                        targets: { scaleY: 0 },
-                        scaleY: 0.6,
-                        duration: 400,
-                        ease: 'Cubic.Out',
-                        onUpdate: (tween) => {
-                            tile.sprite.scaleY = tween.targets[0].scaleY;
-                            tile.spriteBack.scaleY = tween.targets[0].scaleY;
-                        }
-                    });
-
-                    timeline.on('complete', () => resolve());
-                    
-                    timeline.play();
-                    flipTimeline.play();
-
-                    return timeline;
+                        // Flip back
+                        this.scene.tweens.add({
+                            targets: { scaleY: 0 },
+                            scaleY: 0.6,
+                            duration: 400,
+                            ease: Phaser.Math.Easing.Cubic.Out,
+                            onUpdate: (tween) => {
+                                tile.sprite.scaleY = tween.targets[0].scaleY;
+                                tile.spriteBack.scaleY = tween.targets[0].scaleY;
+                            },
+                            onComplete: () => {
+                                resolve();
+                            }
+                        });
+                    }
                 });
             }));
         });
