@@ -345,7 +345,7 @@ export class Table {
             hand.insertExposed(tilesToExpose);
         }
 
-        this.players[winningPlayer].showHand();
+        this.players[winningPlayer].showHand(winningPlayer === PLAYER.BOTTOM);
 
         return {
             playerOption: searchOption,
@@ -386,7 +386,7 @@ export class Table {
 
         // Show all players hands
         for (let i = 0; i < 4; i++) {
-            this.players[i].showHand();
+            this.players[i].showHand(i === PLAYER.BOTTOM);
         }
     }
 

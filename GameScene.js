@@ -93,16 +93,29 @@ class GameScene extends Phaser.Scene {
       bar.fillStyle(0x2a2a2a, 1); // Darker background
       bar.fillRoundedRect(0, 0, 300, 20, 5); // Background - wider
       const fill = this.add.graphics();
-      container.add([bar, fill]);
+      
+      // Add text overlay with crisp rendering
+      const text = this.add.text(150, 10, "Wall Tiles Remaining: 152", {
+        fontFamily: "Arial, sans-serif",
+        fontSize: "16px",
+        fontStyle: "bold",
+        color: "#ffffff",
+        stroke: "#000000",
+        strokeThickness: 4
+      });
+      text.setOrigin(0.5, 0.5); // Center the text
+      text.setResolution(2); // Higher resolution for crisp text when scaled
+      
+      container.add([bar, fill, text]);
       // The container is hidden by default and is made visible by the first call to updateWallTileCounter.
       container.setVisible(false);
       container.setDepth(100); // High depth to appear above hands
-      return { bar: container, fill, maxTiles: 152 };
+      return { bar: container, fill, text, maxTiles: 152 };
     }
 
     updateWallTileCounter(count) {
       if (!this.gGameLogic.wallCounter) return;
-      const { bar, fill, maxTiles } = this.gGameLogic.wallCounter;
+      const { bar, fill, text, maxTiles } = this.gGameLogic.wallCounter;
       fill.clear();
       if (count < 0 || count > maxTiles) {
         console.error("Invalid wall count:", count);
@@ -111,6 +124,10 @@ class GameScene extends Phaser.Scene {
       fill.fillStyle(0x4a90e2, 1); // Better blue color
       const width = (count / maxTiles) * 300; // Updated width
       fill.fillRoundedRect(0, 0, width, 20, 5);
+      
+      // Update text with current count
+      text.setText(`Wall Tiles Remaining: ${count}`);
+      
       bar.setVisible(true);
     }
 

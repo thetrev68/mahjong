@@ -503,6 +503,9 @@ export class Discards {
         tile.animate(currentX, currentY, 0);
         tile.scale = DISCARD_SCALE;
         tile.showTile(true, true);
+        // Set discard pile depth below pending claim tiles (which use depth 200)
+        tile.sprite.depth = 50;
+        tile.spriteBack.depth = 50;
         currentX += tileSpacing;
         if (++rowCount >= tilesPerRow) {
           rowCount = 0;

@@ -54,11 +54,11 @@ class TileSet {
 
         const playerObject = this.gameLogic.table.players[PLAYER.BOTTOM];
 
-        // SIMPLE: Reset all tiles to grid level (600)
+        // Reset all tiles to their original position
         for (const tile of this.tileArray) {
             if (tile.selected) {
                 tile.selected = false;
-                tile.animate(tile.origX, 600, playerObject.playerInfo.angle);
+                tile.animate(tile.origX, tile.origY, playerObject.playerInfo.angle);
                 this.selectCount--;
             }
         }
