@@ -426,7 +426,8 @@ export class Card {
                     group,
                     hand: validHand,
                     rank: 0,
-                    componentInfoArray: []
+                    componentInfoArray: [],
+                    vsuitArray: null  // Store the vsuitArray that produced this ranking
                 };
                 rankCardHands.push(rankInfo);
 
@@ -544,6 +545,7 @@ export class Card {
                 if (rank > rankInfo.rank) {
                     rankInfo.rank = rank;
                     rankInfo.componentInfoArray = componentInfoArray;
+                    rankInfo.vsuitArray = vsuitArray;  // Store the vsuitArray that produced this ranking
                 }
             }
         }
@@ -629,24 +631,37 @@ export class Card {
 
         // 1. Handle Exposed tilesets
         for (const tileSet of hand.exposedTileSetArray) {
-
-            let matchInfo = null;
-            for (const componentInfo of remCompInfo) {
-                matchInfo = this.rankMatchComp(tileSet.tileArray, minNum, componentInfo.component, vsuitArray);
+            // Check components in their original order
+            for (const componentInfo of componentInfoArray) {
+                if (componentInfo.tileArray.length > 0) {
+                    continue; // Already has tiles assigned
+                }
+                
+                const matchInfo = this.rankMatchComp(tileSet.tileArray, minNum, componentInfo.component, vsuitArray);
                 if (matchInfo.match) {
                     // Exactly matching component
                     componentInfo.tileArray = matchInfo.tileArray;
-
-                    // Remove this component from the remaining components array
-                    const index = remCompInfo.indexOf(componentInfo);
-                    if (index !== -1) {
-                        remCompInfo.splice(index, 1);
-                    }
                     break;
                 }
             }
-
-            if (!matchInfo.match) {
+            
+            // Verify all exposed tiles were processed
+            let allTilesProcessed = true;
+            for (const tile of tileSet.tileArray) {
+                let found = false;
+                for (const componentInfo of componentInfoArray) {
+                    if (componentInfo.tileArray.includes(tile)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    allTilesProcessed = false;
+                    break;
+                }
+            }
+            
+            if (!allTilesProcessed) {
                 // Exposures must match exactly to the component. Otherwise, we stop.
                 return componentInfoArray;
             }
@@ -666,8 +681,15 @@ export class Card {
         }
 
         // 2. Handle Hidden tiles (without jokers)
-        for (const componentInfo of remCompInfo) {
+        // Process components in their original order to maintain the pattern sequence
+        for (const componentInfo of componentInfoArray) {
             const comp = componentInfo.component;
+            
+            // Skip if this component already has tiles from exposed tile processing
+            if (componentInfo.tileArray.length > 0) {
+                continue;
+            }
+            
             const matchInfo = this.rankMatchComp(remHiddenTilesWithoutJokers, minNum, comp, vsuitArray);
 
             componentInfo.tileArray = matchInfo.tileArray;
