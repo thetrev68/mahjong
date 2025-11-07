@@ -64,7 +64,6 @@ body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background: linear-gradient(130deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0) 40%);
     pointer-events: none;
 }
 

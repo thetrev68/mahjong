@@ -1036,6 +1036,7 @@ export class GameLogic {
             sort1.style.display = "none";
             sort2.style.display = "none";
             window.document.getElementById("controldiv").style.visibility = "visible";
+            window.document.getElementById("uicenterdiv").style.visibility = "hidden";
 
             // Populate number of tiles select
             for (let i = 1; i <= 14; i++) {
@@ -1091,6 +1092,7 @@ export class GameLogic {
             button2.style.display = "none";
             button3.style.display = "none";
             button4.style.display = "none";
+            window.document.getElementById("uicenterdiv").style.visibility = "visible";
             window.document.getElementById("buttondiv").style.visibility = "visible";
             window.document.getElementById("info").style.visibility = "visible";
             this.disableTrainingForm();

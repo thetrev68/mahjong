@@ -353,6 +353,11 @@ export const handsSinglesPairs = {
                     count: 2
                 },
                 {
+                    suit: SUIT.VSUIT1,
+                    number: 2,
+                    count: 1
+                },                
+                {
                     suit: SUIT.DRAGON,
                     number: DRAGON.WHITE,
                     count: 3
@@ -360,17 +365,28 @@ export const handsSinglesPairs = {
                 {
                     suit: SUIT.VSUIT1,
                     number: 2,
-                    count: 2
+                    count: 1
                 },
                 {
                     suit: SUIT.VSUIT1,
                     number: 5,
                     count: 1
                 },
+
                 {
                     suit: SUIT.VSUIT2,
                     number: 2,
-                    count: 2
+                    count: 1
+                },                
+                {
+                    suit: SUIT.DRAGON,
+                    number: DRAGON.WHITE,
+                    count: 3
+                },
+                {
+                    suit: SUIT.VSUIT2,
+                    number: 2,
+                    count: 1
                 },
                 {
                     suit: SUIT.VSUIT2,
@@ -380,7 +396,17 @@ export const handsSinglesPairs = {
                 {
                     suit: SUIT.VSUIT3,
                     number: 2,
-                    count: 2
+                    count: 1
+                },                
+                {
+                    suit: SUIT.DRAGON,
+                    number: DRAGON.WHITE,
+                    count: 3
+                },
+                {
+                    suit: SUIT.VSUIT3,
+                    number: 2,
+                    count: 1
                 },
                 {
                     suit: SUIT.VSUIT3,
