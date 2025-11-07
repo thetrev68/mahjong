@@ -349,12 +349,12 @@ export class GameAI {
 
     courtesyPass(player, maxCount) {
         // Player 1-3 will only have 13 tiles in their hands during the courtesy
-        const tileRankArray = this.rankTiles13(this.table.players[player].hand);
+        const tileRecommendations = this.getTileRecommendations(this.table.players[player].hand);
 
         const pass = [];
-        for (let i = 0; i < maxCount; i++) {
-            const rankInfo = tileRankArray[i];
-            const tile = rankInfo.tile;
+        // Pass the lowest value tiles (DISCARD recommendations at the end of the array)
+        for (let i = tileRecommendations.length - 1; i >= 0 && pass.length < maxCount; i--) {
+            const tile = tileRecommendations[i].tile;
             this.table.players[player].hand.removeHidden(tile);
             pass.push(tile);
         }

@@ -12,6 +12,11 @@ const config = {
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
+    },
+    render: {
+        antialias: true,
+        mipmapFilter: "LINEAR_MIPMAP_LINEAR",
+        powerPreference: "high-performance"
     }
 };
 

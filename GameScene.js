@@ -24,7 +24,16 @@ class GameScene extends Phaser.Scene {
         this.load.image("back", backPng);
 
         // Load particle texture for fireworks
-        this.load.image("particle", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIUlEQVQoU2NkYGD4z0AEYBxVSFUAArQJg0BUAQAA//8Dk2gABNQmCeUAAAAASUVORK5CYII=");
+        // Create a simple 4x4 white particle texture programmatically to avoid WebGL errors
+        const particleCanvas = document.createElement("canvas");
+        particleCanvas.width = 4;
+        particleCanvas.height = 4;
+        const ctx = particleCanvas.getContext("2d");
+        if (ctx) {
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, 4, 4);
+        }
+        this.textures.addCanvas("particle", particleCanvas);
         
         // Optional: Load firework sound effect (if available)
         // this.load.audio("fireworks", "./assets/audio/fireworks.mp3");
