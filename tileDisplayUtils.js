@@ -20,6 +20,7 @@ const SUIT_COLORS = {
 };
 
 // Map tile to display character and color
+/* knip-ignore */
 export function getTileDisplayChar(tile, isEvenHand = false) {
   if (tile.suit === SUIT.JOKER) {
     return { char: "J", color: SUIT_COLORS[SUIT.JOKER], tile };
@@ -65,6 +66,7 @@ function tally(tiles) {
 
 // Get display chars for pattern tiles, with matching against player's hand
 // Supports joker substitution only for components with count >=3
+/* knip-ignore */
 export function getPatternDisplayChars(patternTiles, playerTiles, componentCounts, isEvenHand) {
   const playerCounts = tally(playerTiles);
   const usedCounts = new Map();
@@ -96,6 +98,7 @@ export function getPatternDisplayChars(patternTiles, playerTiles, componentCount
 }
 
 // Get CSS classes for tile display (with inversion for matches)
+/* knip-ignore */
 export function getTileCharClasses(displayChar, invert = true) {
   const base = "tile-char"; // Use the class for consistent styling
   const shouldInvert = invert && displayChar.isMatched;

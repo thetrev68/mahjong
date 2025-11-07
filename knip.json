@@ -10,12 +10,13 @@
     "**/*.{png,svg,json,mp3}",
     "**/*.html",
     "**/*.css",
-    "**/*.csv",
     "**/*.md"
   ],
   "ignore": [
     "dist/**",
+    "node_modules/**",
     "**/*.py"
   ],
-  "tags": ["-knipignore"]
+    
+  "tags": ["knip-ignore"]
 }
