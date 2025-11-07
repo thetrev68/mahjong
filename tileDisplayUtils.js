@@ -130,6 +130,11 @@ export function getPatternDisplayChars(patternTiles, playerTiles, componentCount
     if (available > 0) {
       isMatched = true;
       usedCounts.set(key, (usedCounts.get(key) || 0) + 1);
+      
+      // Track when we use an actual joker tile
+      if (tile.suit === SUIT.JOKER) {
+        usedJokers++;
+      }
     } else if (jokerCount > usedJokers && componentCount >= 3 && tile.suit !== SUIT.JOKER) {
       // Joker substitution allowed only for pungs/kongs/quints
       isMatched = true;
