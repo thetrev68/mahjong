@@ -164,16 +164,29 @@ export function renderPatternVariation(rankedHand, playerTiles) {
 
   // Use original component order
   rankedHand.componentInfoArray.forEach((component, compIndex) => {
-    let templateTile = component.tileArray[0];
-    if (!templateTile) {
-      // Create placeholder for virtual/empty components
-      templateTile = { suit: component.component.suit || SUIT.INVALID, number: component.component.number || 0 };
+    const expectedCount = component.component.count;
+    const actualTileCount = component.tileArray ? component.tileArray.length : 0;
+
+    // Add all the actual matched tiles
+    if (component.tileArray && component.tileArray.length > 0) {
+      component.tileArray.forEach(tile => {
+        patternTiles.push(tile);
+        componentCounts.push(expectedCount);
+      });
     }
-    for (let i = 0; i < component.component.count; i++) {
-      patternTiles.push(templateTile); // Repeat template for count
-      componentCounts.push(component.component.count);
+
+    // If we have fewer tiles than expected, add placeholders for the rest
+    if (actualTileCount < expectedCount) {
+      const placeholderTile = {
+        suit: component.component.suit || SUIT.INVALID,
+        number: component.component.number || 0
+      };
+      for (let i = actualTileCount; i < expectedCount; i++) {
+        patternTiles.push(placeholderTile);
+        componentCounts.push(expectedCount);
+      }
     }
-    
+
     // Add spacer only if not between two singles
     if (compIndex < rankedHand.componentInfoArray.length - 1) {
       const nextComponent = rankedHand.componentInfoArray[compIndex + 1];

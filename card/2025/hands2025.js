@@ -15,16 +15,6 @@ export const hands2025 = {
             even: false,
             components: [
                 {
-                    suit: SUIT.DRAGON,
-                    number: DRAGON.WHITE,
-                    count: 1
-                },
-                {
-                    suit: SUIT.VSUIT1,
-                    number: 5,
-                    count: 1
-                },
-                {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 4
@@ -32,7 +22,27 @@ export const hands2025 = {
                 {
                     suit: SUIT.VSUIT1,
                     number: 2,
-                    count: 2
+                    count: 1
+                },                
+                {
+                    suit: SUIT.DRAGON,
+                    number: DRAGON.WHITE,
+                    count: 1
+                },
+                {
+                    suit: SUIT.VSUIT1,
+                    number: 2,
+                    count: 1
+                },                
+                {
+                    suit: SUIT.VSUIT1,
+                    number: 5,
+                    count: 1
+                },                
+                {
+                    suit: SUIT.VSUIT1,
+                    number: 2,
+                    count: 1
                 },
                 {
                     suit: SUIT.VSUIT2,
@@ -47,7 +57,7 @@ export const hands2025 = {
             ]
         },
         {
-            description: "FFFF 2025 222 222 (Any 3 Suits, Like Pungs 2s or 5s In Opp. Suits)",
+            description: "FFFF 2025 555 555 (Any 3 Suits, Like Pungs 2s or 5s In Opp. Suits)",
             vsuitCount: 3,
             concealed: false,
             odd: false,
@@ -80,12 +90,12 @@ export const hands2025 = {
                 },                
                 {
                     suit: SUIT.VSUIT2,
-                    number: 2,
+                    number: 5,
                     count: 3
                 },
                 {
                     suit: SUIT.VSUIT3,
-                    number: 2,
+                    number: 5,
                     count: 3
                 }
             ]
