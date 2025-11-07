@@ -244,6 +244,9 @@ export class Table {
         // Delta = player opposite
         const delta = 2;
 
+        // Track received tiles for player 0 (for glow effect)
+        let receivedTilesPlayer0 = [];
+
         // Insert courtesy cards from player 0-3 to the appropriate player
         for (let i = 0; i < 4; i++) {
             const from = i;
@@ -254,6 +257,10 @@ export class Table {
 
             for (const tile of courtesyPassArray[from]) {
                 this.players[to].hand.insertHidden(tile);
+                // Track tiles received by player 0
+                if (to === PLAYER.BOTTOM) {
+                    receivedTilesPlayer0.push(tile);
+                }
             }
         }
 
@@ -262,8 +269,11 @@ export class Table {
             if (i !== 0) {
                 this.players[i].hand.sortSuitHidden();
             }
-            this.players[i].showHand();
+            this.players[i].showHand(i === PLAYER.BOTTOM);
         }
+
+        // Return received tiles for player 0 (for glow effect)
+        return receivedTilesPlayer0;
     }
 
     // Return
