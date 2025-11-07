@@ -186,7 +186,7 @@ export class Tile {
             console.error("Tile.animate: this.sprite is undefined, null, or destroyed for tile:", this.getText());
             return; // Prevent further errors
         }
-        const speed = 750;
+        const speed = 1500;
         const distance = Math.hypot(x - this.sprite.x, y - this.sprite.y);
         const time = (distance * 1000 / speed);
 

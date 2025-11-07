@@ -1417,70 +1417,41 @@ export class GameLogic {
         // Apply training hands and exposed sets before animated dealing
         this.table.applyTrainingHands(initPlayerHandArray);
 
-        // Define dealing sequence: [player, delayMs]
+        // Define the dealing sequence for all 52 tiles
         const DEAL_SEQUENCE = [
-            // Initial round: 4 tiles to Player 0
-            { player: PLAYER.BOTTOM, delayMs: 300 },
-            { player: PLAYER.BOTTOM, delayMs: 200 },
-            { player: PLAYER.BOTTOM, delayMs: 200 },
-            { player: PLAYER.BOTTOM, delayMs: 200 },
-            // Sequential dealing: 4 tiles to each player (1,2,3) in order
-            { player: PLAYER.RIGHT, delayMs: 200 },
-            { player: PLAYER.RIGHT, delayMs: 200 },
-            { player: PLAYER.RIGHT, delayMs: 200 },
-            { player: PLAYER.RIGHT, delayMs: 200 },
-            { player: PLAYER.TOP, delayMs: 200 },
-            { player: PLAYER.TOP, delayMs: 200 },
-            { player: PLAYER.TOP, delayMs: 200 },
-            { player: PLAYER.TOP, delayMs: 200 },
-            { player: PLAYER.LEFT, delayMs: 200 },
-            { player: PLAYER.LEFT, delayMs: 200 },
-            { player: PLAYER.LEFT, delayMs: 200 },
-            { player: PLAYER.LEFT, delayMs: 200 },
-            // Repeat: 3 more rounds of 4 tiles each
-            { player: PLAYER.BOTTOM, delayMs: 200 },
-            { player: PLAYER.BOTTOM, delayMs: 200 },
-            { player: PLAYER.BOTTOM, delayMs: 200 },
-            { player: PLAYER.BOTTOM, delayMs: 200 },
-            { player: PLAYER.RIGHT, delayMs: 200 },
-            { player: PLAYER.RIGHT, delayMs: 200 },
-            { player: PLAYER.RIGHT, delayMs: 200 },
-            { player: PLAYER.RIGHT, delayMs: 200 },
-            { player: PLAYER.TOP, delayMs: 200 },
-            { player: PLAYER.TOP, delayMs: 200 },
-            { player: PLAYER.TOP, delayMs: 200 },
-            { player: PLAYER.TOP, delayMs: 200 },
-            { player: PLAYER.LEFT, delayMs: 200 },
-            { player: PLAYER.LEFT, delayMs: 200 },
-            { player: PLAYER.LEFT, delayMs: 200 },
-            { player: PLAYER.LEFT, delayMs: 200 },
-            // Repeat: 3 more rounds of 4 tiles each
-            { player: PLAYER.BOTTOM, delayMs: 200 },
-            { player: PLAYER.BOTTOM, delayMs: 200 },
-            { player: PLAYER.BOTTOM, delayMs: 200 },
-            { player: PLAYER.BOTTOM, delayMs: 200 },
-            { player: PLAYER.RIGHT, delayMs: 200 },
-            { player: PLAYER.RIGHT, delayMs: 200 },
-            { player: PLAYER.RIGHT, delayMs: 200 },
-            { player: PLAYER.RIGHT, delayMs: 200 },
-            { player: PLAYER.TOP, delayMs: 200 },
-            { player: PLAYER.TOP, delayMs: 200 },
-            { player: PLAYER.TOP, delayMs: 200 },
-            { player: PLAYER.TOP, delayMs: 200 },
-            { player: PLAYER.LEFT, delayMs: 200 },
-            { player: PLAYER.LEFT, delayMs: 200 },
-            { player: PLAYER.LEFT, delayMs: 200 },
-            { player: PLAYER.LEFT, delayMs: 200 },
-            // Final round: 2 more tiles to Player 0, 1 more to each other player
-            { player: PLAYER.BOTTOM, delayMs: 200 },
-            { player: PLAYER.BOTTOM, delayMs: 200 },
-            { player: PLAYER.RIGHT, delayMs: 200 },
-            { player: PLAYER.TOP, delayMs: 200 },
-            { player: PLAYER.LEFT, delayMs: 200 }
+            // Round 1
+            ...Array(4).fill({ player: PLAYER.BOTTOM, delayMs: 50 }),
+            ...Array(4).fill({ player: PLAYER.RIGHT, delayMs: 50 }),
+            ...Array(4).fill({ player: PLAYER.TOP, delayMs: 50 }),
+            ...Array(4).fill({ player: PLAYER.LEFT, delayMs: 50 }),
+            // Round 2
+            ...Array(4).fill({ player: PLAYER.BOTTOM, delayMs: 50 }),
+            ...Array(4).fill({ player: PLAYER.RIGHT, delayMs: 50 }),
+            ...Array(4).fill({ player: PLAYER.TOP, delayMs: 50 }),
+            ...Array(4).fill({ player: PLAYER.LEFT, delayMs: 50 }),
+            // Round 3
+            ...Array(4).fill({ player: PLAYER.BOTTOM, delayMs: 50 }),
+            ...Array(4).fill({ player: PLAYER.RIGHT, delayMs: 50 }),
+            ...Array(4).fill({ player: PLAYER.TOP, delayMs: 50 }),
+            ...Array(4).fill({ player: PLAYER.LEFT, delayMs: 50 }),
+            // Final tiles
+            { player: PLAYER.BOTTOM, delayMs: 50 },
+            { player: PLAYER.RIGHT, delayMs: 50 },
+            { player: PLAYER.TOP, delayMs: 50 },
+            { player: PLAYER.LEFT, delayMs: 50 },
+            // Last tile for dealer
+            { player: PLAYER.BOTTOM, delayMs: 50 }
         ];
 
         // Process each step in the sequence
+        let lastPlayer = -1;
         for (const step of DEAL_SEQUENCE) {
+            // Introduce a pause when switching players
+            if (lastPlayer !== -1 && lastPlayer !== step.player) {
+                // eslint-disable-next-line no-await-in-loop
+                await this.sleep(200); // Pause before dealing to the next player
+            }
+
             const tile = this.table.wall.remove();
             if (!tile) {
                 throw new Error("No tiles remaining in wall during dealing sequence");
@@ -1497,10 +1468,7 @@ export class GameLogic {
                 // eslint-disable-next-line no-await-in-loop
                 await this.sleep(step.delayMs);
             }
-
-            // Wait for tile animation to settle before next deal
-            // eslint-disable-next-line no-await-in-loop
-            await this.sleep(100);
+            lastPlayer = step.player;
         }
 
         // Finalize hands after sequential dealing
