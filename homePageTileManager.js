@@ -192,8 +192,8 @@ export class HomePageTileManager {
                 this.scene.time.delayedCall(i / batchSize * batchDelay, () => {
                     const batchPromises = batch.map(tile => new Promise(resolveTile => {
                         const duration = Phaser.Math.Between(1200, 2000);
-                        const endX = Phaser.Math.Between(-100, 0);
-                        const endY = Phaser.Math.Between(-100, 0);
+                        const endX = Phaser.Math.Between(-200, -50);
+                        const endY = Phaser.Math.Between(-200, -50);
 
                         const controlX = Phaser.Math.Between(tile.x - 100, tile.x + 100);
                         const controlY = Phaser.Math.Between(tile.y - 200, tile.y);
@@ -203,14 +203,14 @@ export class HomePageTileManager {
                             new Phaser.Math.Vector2(controlX, controlY),
                             new Phaser.Math.Vector2(endX, endY)
                         );
-                        
+
                         const path = { t: 0, vec: new Phaser.Math.Vector2() };
 
                         this.scene.tweens.add({
                             targets: path,
                             t: 1,
                             duration: duration,
-                            ease: 'Cubic.In',
+                            ease: "Cubic.In",
                             onUpdate: () => {
                                 curve.getPoint(path.t, path.vec);
                                 tile.x = path.vec.x;

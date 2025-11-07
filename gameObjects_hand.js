@@ -214,7 +214,7 @@ class TileSet {
             }
 
             if (playerInfo.id === PLAYER.BOTTOM) {
-                tile.showTile(true, true);
+                tile.showTile(true, exposed);
             } else {
                 tile.showTile(true, exposed);
             }
@@ -260,7 +260,7 @@ class TileSet {
             tile.scale = (playerInfo.id === PLAYER.BOTTOM) ? 1.0 : SPRITE_SCALE;
 
             if (playerInfo.id === PLAYER.BOTTOM) {
-                tile.showTile(true, true);
+                tile.showTile(true, exposed);
             } else {
                 tile.showTile(true, exposed);
             }
@@ -289,7 +289,7 @@ class TileSet {
             tile.scale = SPRITE_SCALE;
 
             if (playerInfo.id === PLAYER.BOTTOM) {
-                tile.showTile(true, true);
+                tile.showTile(true, exposed);
             } else {
                 tile.showTile(true, exposed);
             }

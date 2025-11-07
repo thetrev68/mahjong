@@ -119,11 +119,8 @@ export class Table {
         this.boxes[player].visible = true;
     }
 
-    deal(initPlayerHandArray) {
-
-        // Shuffle tiles
-        this.wall.shuffle();
-
+    // Apply training hands and exposed sets before animated dealing
+    applyTrainingHands(initPlayerHandArray) {
         // Deal player hands.
         // Use initPlayerHandArray to pre-populate  (useful for testing/training mode)
         // Note: pre-populate hand may be less than a full hand
@@ -155,8 +152,21 @@ export class Table {
                 }
                 this.players[player].hand.insertExposed(tileArray);
             }
-
         }
+    }
+
+    // Finalize initial hands after sequential dealing
+    finalizeInitialHands() {
+        // Sort and show all players hands
+        for (let i = 0; i < 4; i++) {
+            this.players[i].hand.sortSuitHidden();
+            this.players[i].showHand();
+        }
+    }
+
+    deal(initPlayerHandArray) {
+        // Apply training hands and exposed sets
+        this.applyTrainingHands(initPlayerHandArray);
 
         // Deal remainder of tiles from wall
         for (let player = 0; player < 4; player++) {
@@ -174,10 +184,7 @@ export class Table {
         }
 
         // Show all players hands
-        for (let i = 0; i < 4; i++) {
-            this.players[i].hand.sortSuitHidden();
-            this.players[i].showHand();
-        }
+        this.finalizeInitialHands();
 
         // Update wall counter after dealing
         this.gameLogic.scene.updateWallTileCounter(this.wall.getCount());
