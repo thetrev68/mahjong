@@ -23,6 +23,12 @@ class GameScene extends Phaser.Scene {
         this.load.atlas("tiles", tilesPng, tilesJson);
         this.load.image("back", backPng);
 
+        // Load particle texture for fireworks
+        this.load.image("particle", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIUlEQVQoU2NkYGD4z0AEYBxVSFUAArQJg0BUAQAA//8Dk2gABNQmCeUAAAAASUVORK5CYII=");
+        
+        // Optional: Load firework sound effect (if available)
+        // this.load.audio("fireworks", "./assets/audio/fireworks.mp3");
+
         // The scale manager stuff will be handled in main.js config, so I'm omitting it here as per the plan.
         // The resizeCallback is also a separate step.
     }
@@ -274,6 +280,88 @@ class GameScene extends Phaser.Scene {
             top};
         rootStyle.setProperty("--command-bar-left", `${left}px`);
         rootStyle.setProperty("--command-bar-top", `${top}px`);
+    }
+
+    /**
+     * Creates a spectacular fireworks display for player 0 victory
+     * @param {Object} gameResult - The game result object containing mahjong status and winner
+     * @returns {Promise} - Promise that resolves when fireworks display is complete
+     */
+    createFireworksDisplay(gameResult) {
+        return new Promise((resolve) => {
+            // Only show fireworks for player 0 (human player) victories
+            if (!gameResult.mahjong || gameResult.winner !== 0) {
+                resolve();
+                return;
+            }
+
+            // Create 5-7 fireworks emitters at random locations
+            const numFireworks = Phaser.Math.Between(5, 7);
+            const fireworksEmitters = [];
+            const canvasWidth = this.sys.game.canvas.width;
+            const canvasHeight = this.sys.game.canvas.height;
+
+            // Create particle manager for fireworks
+            const particles = this.add.particles("particle");
+            particles.setDepth(300); // High depth to appear above everything
+
+            try {
+                // Play firework sound effect (if available)
+                // this.sound.play("fireworks", { volume: 0.4 });
+
+                // Create multiple fireworks
+                for (let i = 0; i < numFireworks; i++) {
+                    // Random position on screen
+                    const x = Phaser.Math.Between(100, canvasWidth - 100);
+                    const y = Phaser.Math.Between(100, canvasHeight - 200);
+
+                    // Create emitter for this firework
+                    const emitter = particles.createEmitter({
+                        // Firework burst configuration
+                        x: x,
+                        y: y,
+                        speed: { min: 200, max: 400 },
+                        angle: { min: 0, max: 360 },
+                        lifespan: { min: 1200, max: 1800 },
+                        quantity: Phaser.Math.Between(15, 25),
+                        gravityY: 300,
+                        scale: { start: 0.8, end: 0 },
+                        alpha: { start: 1, end: 0 },
+                        tint: [
+                            0xfff066, // Yellow
+                            0x66ccff, // Light blue
+                            0xff66c4, // Pink
+                            0x00ff66, // Green
+                            0xff6600, // Orange
+                            0xcc66ff  // Purple
+                        ],
+                        blendMode: "ADD",
+                        on: false // Will be triggered manually
+                    });
+
+                    fireworksEmitters.push(emitter);
+
+                    // Stagger the firework explosions
+                    this.time.delayedCall(i * 300, () => {
+                        emitter.explode(Phaser.Math.Between(15, 25), x, y);
+                    });
+                }
+
+                // Resolve promise after all fireworks should be complete
+                const totalDuration = (numFireworks - 1) * 300 + 2000; // Last firework + fade time
+                this.time.delayedCall(totalDuration, () => {
+                    // Clean up particles and emitters
+                    particles.destroy();
+                    resolve();
+                });
+
+            } catch (error) {
+                console.warn("[GameScene] Fireworks display failed:", error);
+                // Clean up on error
+                if (particles) particles.destroy();
+                resolve();
+            }
+        });
     }
 }
 

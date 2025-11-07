@@ -579,9 +579,19 @@ export class GameLogic {
         this.end();
     }
 
-    end() {
+    async end() {
         // Start button will be enabled
         this.state = STATE.END;
+        
+        // Trigger fireworks display for player 0 victory
+        if (this.gameResult.mahjong && this.gameResult.winner === 0) {
+            try {
+                await this.scene.createFireworksDisplay(this.gameResult);
+            } catch (error) {
+                console.warn("[GameLogic] Fireworks display error:", error);
+            }
+        }
+        
         this.updateUI();
     }
 

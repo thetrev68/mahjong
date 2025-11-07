@@ -1,0 +1,10 @@
+# Placeholder for fireworks sound effect
+# 
+# This is a placeholder file. To add the fireworks sound effect:
+# 1. Add a real fireworks.mp3 file to this directory
+# 2. Uncomment the audio loading and playback lines in GameScene.js
+# 3. The fireworks sound should be:
+#    - Duration: 3-4 seconds
+#    - Format: MP3, OGG, or WAV
+#    - Volume: Optimized for gameplay audio mixing
+#    - Content: Celebratory firework explosion sounds
