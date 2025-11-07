@@ -43,17 +43,6 @@ class GameScene extends Phaser.Scene {
 
         this.gGameLogic.updateUI();
 
-        // Create sprites etc
-        this.gGameLogic.wallText = this.add.text(190, 160, "", {
-            fontSize: "16px",
-            fontFamily: "Arial",
-            fill: "#ffffff",
-            align: "left",
-            resolution: 2
-        });
-        this.gGameLogic.wallText.setOrigin(0, 0);
-        this.gGameLogic.wallText.visible = false;
-        this.gGameLogic.wallText.setDepth(100); // Match counter depth
 
         this.gGameLogic.wallCounter = this.createWallTileCounter();
 

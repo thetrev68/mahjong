@@ -1,6 +1,6 @@
 import * as Phaser from "phaser";
 import { Tile, gTileGroups } from "./gameObjects.js";
-import { SUIT, SPRITE_WIDTH, SPRITE_HEIGHT, TILE_GAP, WINDOW_WIDTH, WINDOW_HEIGHT } from "./constants.js";
+import { SUIT, SPRITE_WIDTH, SPRITE_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT } from "./constants.js";
 import {debugPrint} from "./utils.js";
 
 export class HomePageTileManager {
@@ -85,32 +85,6 @@ export class HomePageTileManager {
         const angle = Phaser.Math.Between(-90, 90);
 
         return { x, y, scale, angle };
-    }
-
-    calculateStackPosition(tileIndex) {
-        // Use same logic as Wall.showWallBack()
-        const WALL_SCALE = 0.6;
-
-        let offsetX = 200;
-        let offsetY = 200;
-
-        // Calculate position for this tile in the grid
-        for (let i = 0; i <= tileIndex; i++) {
-            if (i === tileIndex) break; // This is our target position
-
-            offsetX += (SPRITE_WIDTH * WALL_SCALE) + TILE_GAP;
-            if (offsetX > 800) {
-                offsetX = 200;
-                offsetY += (SPRITE_HEIGHT * WALL_SCALE) + TILE_GAP;
-            }
-        }
-
-        return {
-            x: offsetX,
-            y: offsetY,
-            angle: 0, // Standard orientation
-            scale: WALL_SCALE // 0.6 standard game scale
-        };
     }
 
 

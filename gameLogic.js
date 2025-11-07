@@ -224,7 +224,6 @@ export class GameLogic {
         this.hintFunction = null;
         this.startButtonFunction = null;
         this.hintAnimationManager = null;
-        this.wallText = null;
         this.errorText = null;
         this.errorTextArray = [];
         this.errorTextSemaphore = 0;
@@ -292,8 +291,6 @@ export class GameLogic {
         }
 
         this.table.deal(initPlayerHandArray);
-
-        this.wallText.setText("Wall tile count = " + this.table.wall.getCount());
 
         // Start automatic hints for player 0 after initial dealing
         if (this.table.players[PLAYER.BOTTOM].hand.getLength() > 0) {
@@ -1087,7 +1084,6 @@ export class GameLogic {
             window.document.getElementById("buttondiv").style.visibility = "visible";
             window.document.getElementById("info").style.visibility = "visible";
             this.disableTrainingForm();
-            this.wallText.visible = true;
             window.document.getElementById("hintdiv").style.display = "";
             break;
 
