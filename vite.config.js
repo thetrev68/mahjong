@@ -10,5 +10,5 @@ export default defineConfig({
       overlay: false, // Disable error overlay
     },
   },
-  logLevel: "warn", // Only show warnings and errors, not info messages
+  logLevel: "info", // Show startup messages and info
 });

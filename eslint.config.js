@@ -2,7 +2,7 @@ import js from "@eslint/js";
 
 export default [
     {
-        ignores: ["**/dist/**", "**/node_modules/**"],
+        ignores: ["**/dist/**", "**/node_modules/**", "**/playwright-report/**", "**/test-results/**"],
     },
     js.configs.recommended,
     {
@@ -40,6 +40,17 @@ export default [
             // Optional: Some light style consistency (not strict)
             "semi": ["warn", "always"],     // Encourage semicolons
             "quotes": ["warn", "double"],   // Encourage double quotes
+        }
+    },
+    // Playwright config and test files need Node.js globals
+    {
+        files: ["playwright.config.js", "tests/**/*.js"],
+        languageOptions: {
+            globals: {
+                process: "readonly",
+                __dirname: "readonly",
+                __filename: "readonly"
+            }
         }
     }
 ];

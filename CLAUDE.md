@@ -14,6 +14,12 @@ npm run dev          # Start Vite dev server (usually http://localhost:5173)
 npm run build        # Build for production
 npm run preview      # Preview production build
 
+# Testing
+npm test             # Run Playwright tests (headless)
+npm run test:ui      # Run tests in UI mode (interactive)
+npm run test:headed  # Run tests with browser visible
+npm run test:report  # View last test report
+
 # Code Quality
 npm run lint         # Run ESLint
 npm run knip         # Find unused files/exports/dependencies

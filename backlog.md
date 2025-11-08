@@ -26,14 +26,6 @@ This document provides a high-level analysis of potential new features for the A
 *   **Benefit:** Medium. Enhances the game's atmosphere and provides auditory feedback.
 *   **Source:** www.zapsplat.com - Multimedia button click 16 (tile click), Multimedia button click 21 (discard), Golf club set down or drop on grass 3 (error/invalid move), Applause approx 8 people (win celebration), Game music - soft warm synth arpeggios calming soothing game (? maybe. ambient music)
 
-### 3. Colorize Hints Panel
-
-*   **Description:** Add color-coding to the hints panel to notate tile patterns and highlight tiles that match the user's hand.
-*   **Difficulty:** Medium
-*   **Effort:** Medium
-*   **Time:** 6-10 hours
-*   **Benefit:** High. Makes the hints panel much more intuitive and easy to read at a glance.
-
 ### 4. Name Players
 
 *   **Description:** Allow users to name players instead of using the default "Player 0, 1, 2, 3."
@@ -42,22 +34,6 @@ This document provides a high-level analysis of potential new features for the A
 *   **Time:** 3-5 hours
 *   **Benefit:** Medium. Adds a nice touch of personalization to the game.
 
-
-### 6. Animation for New Tiles
-
-*   **Description:** Add a "glow" animation to newly drawn tiles 
-*   **Difficulty:** Medium
-*   **Effort:** Medium
-*   **Time:** 6-10 hours
-*   **Benefit:** Medium. Provides a clear visual cue for important game events.
-
-### 8. Wall Tiles Graphics
-
-*   **Description:** Change the wall tiles from a central mass to actual walls and add a "curtsey" graphic as play continues.
-*   **Difficulty:** High
-*   **Effort:** High
-*   **Time:** 20-30 hours
-*   **Benefit:** High. A major visual and thematic improvement that would make the game feel much more like a real game of Mahjong.
 
 ### 9. House Rules Section
 

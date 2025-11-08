@@ -202,7 +202,7 @@ export class Table {
         const delta = player - PLAYER.BOTTOM;
 
         // Track received tiles for player 0 (for glow effect)
-        let receivedTilesPlayer0 = [];
+        const receivedTilesPlayer0 = [];
 
         // Insert 3 cards from player 0-3 to the appropriate player
         for (let i = 0; i < 4; i++) {
@@ -245,7 +245,7 @@ export class Table {
         const delta = 2;
 
         // Track received tiles for player 0 (for glow effect)
-        let receivedTilesPlayer0 = [];
+        const receivedTilesPlayer0 = [];
 
         // Insert courtesy cards from player 0-3 to the appropriate player
         for (let i = 0; i < 4; i++) {
