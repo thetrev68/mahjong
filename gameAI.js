@@ -298,8 +298,8 @@ export class GameAI {
 
         const recommendations = this.getTileRecommendations(copyHand);
 
-        // Filter out the invalid tile and sort recommendations: DISCARD, PASS, KEEP
-        const validRecommendations = recommendations.filter(r => r.tile !== invalidTile);
+        // Filter out the invalid tile and jokers (cannot pass jokers per NMJL rules), then sort recommendations: DISCARD, PASS, KEEP
+        const validRecommendations = recommendations.filter(r => r.tile !== invalidTile && r.tile.suit !== SUIT.JOKER);
         validRecommendations.sort((a, b) => {
             const order = { [TILE_RECOMMENDATION.DISCARD]: 0, [TILE_RECOMMENDATION.PASS]: 1, [TILE_RECOMMENDATION.KEEP]: 2 };
             return order[a.recommendation] - order[b.recommendation];
@@ -353,8 +353,13 @@ export class GameAI {
 
         const pass = [];
         // Pass the lowest value tiles (DISCARD recommendations at the end of the array)
+        // Never pass jokers per NMJL rules
         for (let i = tileRecommendations.length - 1; i >= 0 && pass.length < maxCount; i--) {
             const tile = tileRecommendations[i].tile;
+            // Skip jokers - cannot pass them during courtesy
+            if (tile.suit === SUIT.JOKER) {
+                continue;
+            }
             this.table.players[player].hand.removeHidden(tile);
             pass.push(tile);
         }

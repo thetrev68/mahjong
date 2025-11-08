@@ -58,6 +58,11 @@ class TileSet {
         for (const tile of this.tileArray) {
             if (tile.selected) {
                 tile.selected = false;
+                // Reset depth to normal level
+                tile.sprite.setDepth(0);
+                if (tile.spriteBack) {
+                    tile.spriteBack.setDepth(0);
+                }
                 tile.animate(tile.origX, tile.origY, playerObject.playerInfo.angle);
                 this.selectCount--;
             }
@@ -921,6 +926,11 @@ export class Hand {
                     if (tile.selected) {
                         // SIMPLE DESELECT: Click toggles selection state
                         tile.selected = false;
+                        // Reset depth to normal level
+                        tile.sprite.setDepth(0);
+                        if (tile.spriteBack) {
+                            tile.spriteBack.setDepth(0);
+                        }
                         const playerObject = this.gameLogic.table.players[PLAYER.BOTTOM];
                         tile.animate(tile.origX, 600, playerObject.playerInfo.angle); // Always park at 600
                         tileSet.selectCount--;
@@ -952,6 +962,11 @@ export class Hand {
 
                             if (bSelectOk) {
                                 tile.selected = true;
+                                // Raise depth so selected tiles appear above all other tiles
+                                tile.sprite.setDepth(150);
+                                if (tile.spriteBack) {
+                                    tile.spriteBack.setDepth(150);
+                                }
                                 tile.animate(tile.origX, 575, playerObject.playerInfo.angle); // Always elevate to 575
                                 tileSet.selectCount++;
                             }
@@ -1268,6 +1283,11 @@ tile.sprite.on("dragend", (_pointer, dragX, _dragY, _dropped) => {
                             tile.y = 600; // Always park at grid level
                             tile.origY = 600; // Always park at grid level
                             tile.sprite.y = 600;
+                            // Reset depth to normal level
+                            tile.sprite.setDepth(0);
+                            if (tile.spriteBack) {
+                                tile.spriteBack.setDepth(0);
+                            }
                             tileSet.selectCount--;
                             tile.selected = !tile.selected;
                         } else if (tileSet.selectCount < maxSelect) {
@@ -1297,10 +1317,16 @@ tile.sprite.on("dragend", (_pointer, dragX, _dragY, _dropped) => {
                                 tile.origX = tile.x;
                                 tile.origY = 600; // Always park at grid level
 
+                                // Raise depth so selected tiles appear above all other tiles
+                                tile.sprite.setDepth(150);
+                                if (tile.spriteBack) {
+                                    tile.spriteBack.setDepth(150);
+                                }
+
                                 // Simple elevated positioning for exposed jokers
                                 tile.y = 575; // Always elevate to 575
                                 tile.sprite.y = 575;
-                                
+
                                 tileSet.selectCount++;
                                 tile.selected = !tile.selected;
                             }
