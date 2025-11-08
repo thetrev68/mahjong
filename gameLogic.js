@@ -692,6 +692,11 @@ export class GameLogic {
 
                     button1.removeEventListener("click", this.button1Function);
                     this.button1Function = function button1Function() {
+                        // Don't allow discard while blank swap is in progress
+                        if (this.isSwappingBlank) {
+                            return;
+                        }
+
                         const discardedTile = this.table.players[this.currPlayer].hand.removeDiscard();
                         const text = discardedTile.getText();
                         printMessage("Player " + this.currPlayer + " discards " + text + " \n");
@@ -708,6 +713,11 @@ export class GameLogic {
                     const button2 = window.document.getElementById("button2");
                     button2.removeEventListener("click", this.button2Function);
                     this.button2Function = function button2Function() {
+                        // Don't allow joker swap while blank swap is in progress
+                        if (this.isSwappingBlank) {
+                            return;
+                        }
+
                         this.table.exchangeUserSelectedTileForExposedJoker();
                         window.document.getElementById("button2").disabled = true;
 
@@ -720,6 +730,11 @@ export class GameLogic {
                     const button3 = window.document.getElementById("button3");
                     button3.removeEventListener("click", this.button3Function);
                     this.button3Function = function button3Function() {
+                        // Don't allow mahjong while blank swap is in progress
+                        if (this.isSwappingBlank) {
+                            return;
+                        }
+
                         // Unselect any tiles
                         this.table.players[this.currPlayer].hand.resetSelection();
 
@@ -811,6 +826,8 @@ export class GameLogic {
         this.updateUI();
 
         // Ask user if the tile is wanted
+        // If blank swap is initiated during this, the yesNoQuery promise will remain pending
+        // until the blank swap completes
         const claimYesNo = await this.yesNoQuery();
 
         this.state = STATE.LOOP_QUERY_CLAIM_DISCARD_COMPLETE;
@@ -881,8 +898,12 @@ export class GameLogic {
                 const button1 = window.document.getElementById("button1");
                 button1.removeEventListener("click", this.button1Function);
                 this.button1Function = function button1Function() {
+                    // Don't allow yes/no while blank swap is in progress
+                    if (this.isSwappingBlank) {
+                        return;
+                    }
                     resolve(false);
-                };
+                }.bind(this);
 
                 button1.addEventListener("click", this.button1Function);
 
@@ -890,8 +911,12 @@ export class GameLogic {
                 const button2 = window.document.getElementById("button2");
                 button2.removeEventListener("click", this.button2Function);
                 this.button2Function = function button2Function() {
+                    // Don't allow yes/no while blank swap is in progress
+                    if (this.isSwappingBlank) {
+                        return;
+                    }
                     resolve(true);
-                };
+                }.bind(this);
 
                 button2.addEventListener("click", this.button2Function);
             });
@@ -1256,6 +1281,9 @@ export class GameLogic {
             break;
 
         case STATE.LOOP_PICK_FROM_WALL:
+            // Show "Swap Blank" button if blanks feature is enabled and player has blanks
+            // This allows blank swaps while waiting for other players
+            this.updateSwapBlankButton();
             break;
 
         case STATE.LOOP_CHOOSE_DISCARD:
@@ -1283,7 +1311,9 @@ export class GameLogic {
             button2.disabled = false;
             button2.style.display = "";
             button3.style.display = "none";
-            button4.style.display = "none";
+
+            // Show "Swap Blank" button if blanks feature is enabled and player has blanks
+            this.updateSwapBlankButton();
             break;
 
         case STATE.LOOP_QUERY_CLAIM_DISCARD_COMPLETE:
@@ -1732,5 +1762,29 @@ export class GameLogic {
 
         // Start the dealing sequence
         dealNextGroup();
+    }
+
+    disableAllButtons() {
+        const button1 = window.document.getElementById("button1");
+        const button2 = window.document.getElementById("button2");
+        const button3 = window.document.getElementById("button3");
+        const button4 = window.document.getElementById("button4");
+
+        if (button1) button1.disabled = true;
+        if (button2) button2.disabled = true;
+        if (button3) button3.disabled = true;
+        if (button4) button4.disabled = true;
+    }
+
+    enableAllButtons() {
+        const button1 = window.document.getElementById("button1");
+        const button2 = window.document.getElementById("button2");
+        const button3 = window.document.getElementById("button3");
+        const button4 = window.document.getElementById("button4");
+
+        if (button1) button1.disabled = false;
+        if (button2) button2.disabled = false;
+        if (button3) button3.disabled = false;
+        if (button4) button4.disabled = false;
     }
 }
