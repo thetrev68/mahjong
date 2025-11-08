@@ -5,7 +5,8 @@
       "mcp__serena__find_symbol",
       "mcp__serena__search_for_pattern",
       "Bash(npm run lint:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []
