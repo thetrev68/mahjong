@@ -442,8 +442,8 @@ export class Wall {
 
     receiveOrganizedTilesFromHomePage(homePageTiles) {
         return new Promise((resolve, reject) => {
-            // Phase 1: Use 152 tiles. Phase 2 will add dynamic tile count based on settings.
-            const expectedTileCount = 152;
+            // Phase 2: Dynamic tile count based on settings (152 or 160)
+            const expectedTileCount = window.settingsManager?.getUseBlankTiles() ? 160 : 152;
             if (homePageTiles.length !== expectedTileCount) {
                 console.error("Wall.receiveOrganizedTilesFromHomePage: Invalid tile count. Expected " + expectedTileCount + ", got " + homePageTiles.length);
                 return reject("Invalid tile count");

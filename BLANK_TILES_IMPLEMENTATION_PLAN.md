@@ -59,7 +59,7 @@ Implement a house rule feature that adds 8 blank tiles to the wall. Players can 
 - `Wall.receiveOrganizedTilesFromHomePage()` - Update validation from 152 → 160 tiles (line 433)
 
 **Sprite/Asset Requirements:**
-- Need blank tile sprite image(s)
+- Need blank tile sprite image(s) - back.png
 - Add to sprite loading in `Wall.create()` method
 - Blank tiles should have distinct visual appearance
 
