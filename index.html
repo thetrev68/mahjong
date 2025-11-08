@@ -7,8 +7,8 @@
     <title>American Mahjong</title>
     <link rel="icon" type="image/svg+xml" href="/mahjong/assets/favicon-B3WZd-3b.svg?v=4">
 
-  <script type="module" crossorigin src="/mahjong/assets/index-Beut_PHc.js"></script>
-  <link rel="stylesheet" crossorigin href="/mahjong/assets/index-1oxvMjtS.css">
+  <script type="module" crossorigin src="/mahjong/assets/index-Y6MDDiRm.js"></script>
+  <link rel="stylesheet" crossorigin href="/mahjong/assets/index-QU5MsLY7.css">
 </head>
 <body>
     <div id="parentdiv">
@@ -99,7 +99,32 @@
 
                     <section class="settings-section">
                         <h2 class="settings-section-title">Audio Controls</h2>
-                        <p class="settings-placeholder">Sound effects and music controls will be added here.</p>
+                        <div class="audio-controls">
+                            <div class="audio-controls__group">
+                                <h3 class="audio-controls__subtitle">Background Music</h3>
+                                <div class="audio-controls__item">
+                                    <label for="bgmVolume" class="audio-controls__label">Volume</label>
+                                    <input type="range" id="bgmVolume" class="audio-controls__slider" min="0" max="100" value="70">
+                                    <span id="bgmVolumeValue" class="audio-controls__value">70%</span>
+                                </div>
+                                <div class="audio-controls__item audio-controls__item--checkbox">
+                                    <input type="checkbox" id="bgmMute" class="audio-controls__checkbox">
+                                    <label for="bgmMute" class="audio-controls__checkbox-label">Mute Background Music</label>
+                                </div>
+                            </div>
+                            <div class="audio-controls__group">
+                                <h3 class="audio-controls__subtitle">Sound Effects</h3>
+                                <div class="audio-controls__item">
+                                    <label for="sfxVolume" class="audio-controls__label">Volume</label>
+                                    <input type="range" id="sfxVolume" class="audio-controls__slider" min="0" max="100" value="80">
+                                    <span id="sfxVolumeValue" class="audio-controls__value">80%</span>
+                                </div>
+                                <div class="audio-controls__item audio-controls__item--checkbox">
+                                    <input type="checkbox" id="sfxMute" class="audio-controls__checkbox">
+                                    <label for="sfxMute" class="audio-controls__checkbox-label">Mute Sound Effects</label>
+                                </div>
+                            </div>
+                        </div>
                     </section>
 
                     <section class="settings-section">
