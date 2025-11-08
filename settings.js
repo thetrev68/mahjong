@@ -64,6 +64,12 @@ class SettingsManager {
             yearSelect.addEventListener("change", () => this.saveYearSettings());
         }
 
+        // House rules event listeners
+        const useBlankTiles = document.getElementById("useBlankTiles");
+        if (useBlankTiles) {
+            useBlankTiles.addEventListener("change", () => this.saveHouseRuleSettings());
+        }
+
         // Audio controls event listeners
         this.setupAudioControls();
     }
@@ -131,6 +137,9 @@ class SettingsManager {
 
         // Apply year selection settings
         this.applyYearSettings(settings);
+
+        // Apply house rules settings
+        this.applyHouseRuleSettings(settings);
     }
 
     applyTrainingSettings(settings) {
@@ -219,6 +228,24 @@ class SettingsManager {
         if (yearSelect) {
             this.saveSetting("cardYear", yearSelect.value);
         }
+    }
+
+    saveHouseRuleSettings() {
+        const useBlankTiles = document.getElementById("useBlankTiles");
+        if (useBlankTiles) {
+            this.saveSetting("useBlankTiles", useBlankTiles.checked);
+        }
+    }
+
+    applyHouseRuleSettings(settings) {
+        const useBlankTiles = document.getElementById("useBlankTiles");
+        if (useBlankTiles && Object.prototype.hasOwnProperty.call(settings, "useBlankTiles")) {
+            useBlankTiles.checked = settings.useBlankTiles;
+        }
+    }
+
+    getUseBlankTiles() {
+        return this.getSetting("useBlankTiles", false);
     }
 
     // Audio controls setup and management
