@@ -658,6 +658,10 @@ export class GameLogic {
                     this.table.players[PLAYER.BOTTOM].showHand(true);
                     // Update hints now that hand is sorted
                     this.hintAnimationManager.updateHintsForNewTiles();
+                    // Update blank swap button availability
+                    if (this.state === STATE.LOOP_CHOOSE_DISCARD) {
+                        this.updateSwapBlankButton();
+                    }
                 }, 2000); // 2.0 second delay
             }
 
@@ -1264,6 +1268,9 @@ export class GameLogic {
             button3.innerText = "Mahjong!";
             button3.disabled = false;
             button3.style.display = "";
+
+            // Show "Swap Blank" button if blanks feature is enabled and player has blanks
+            this.updateSwapBlankButton();
             break;
 
         case STATE.LOOP_QUERY_CLAIM_DISCARD:
@@ -1275,6 +1282,7 @@ export class GameLogic {
             button2.disabled = false;
             button2.style.display = "";
             button3.style.display = "none";
+            button4.style.display = "none";
             break;
 
         case STATE.LOOP_QUERY_CLAIM_DISCARD_COMPLETE:
@@ -1366,6 +1374,46 @@ export class GameLogic {
             printMessage("ERROR - updateUI - unknown state\n");
             break;
         }
+    }
+
+    updateSwapBlankButton() {
+        // Check if blank tiles feature is enabled
+        if (!window.settingsManager || !window.settingsManager.getUseBlankTiles()) {
+            window.document.getElementById("button4").style.display = "none";
+            return;
+        }
+
+        // Check if player has blank tiles in hand
+        const playerHand = this.table.players[PLAYER.BOTTOM].hand;
+        const hiddenTiles = playerHand.getHiddenTileArray();
+        const hasBlankTiles = hiddenTiles.some(tile => tile.suit === SUIT.BLANK);
+
+        // Check if discard pile has non-joker tiles
+        const discards = this.table.discards.tileArray;
+        const hasNonJokerDiscards = discards.some(tile => tile.suit !== SUIT.JOKER);
+
+        const button4 = window.document.getElementById("button4");
+        if (hasBlankTiles && hasNonJokerDiscards) {
+            button4.innerText = "Swap Blank";
+            button4.disabled = false;
+            button4.style.display = "";
+
+            // Setup button4 click handler for blank swap
+            button4.removeEventListener("click", this.button4Function);
+            this.button4Function = function button4Function() {
+                this.initiateBlankSwap();
+            }.bind(this);
+            button4.addEventListener("click", this.button4Function);
+        } else {
+            button4.style.display = "none";
+        }
+    }
+
+    initiateBlankSwap() {
+        debugPrint("Initiating blank swap...");
+        // Placeholder for blank swap functionality
+        // Will be fully implemented in section 6
+        this.displayErrorText("Blank swap not yet implemented");
     }
 
     enableSortButtons() {
