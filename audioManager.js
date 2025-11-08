@@ -11,9 +11,9 @@ export default class AudioManager {
         this.currentBGMKey = null;
 
         // Load settings from localStorage via settingsManager
-        this.bgmVolume = this.settingsManager.getSetting("bgmVolume", 0.7);
+        this.bgmVolume = this.settingsManager.getSetting("bgmVolume", 0.25);
         this.bgmMuted = this.settingsManager.getSetting("bgmMuted", false);
-        this.sfxVolume = this.settingsManager.getSetting("sfxVolume", 0.8);
+        this.sfxVolume = this.settingsManager.getSetting("sfxVolume", 0.7);
         this.sfxMuted = this.settingsManager.getSetting("sfxMuted", false);
     }
 

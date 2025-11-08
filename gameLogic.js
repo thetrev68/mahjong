@@ -643,11 +643,6 @@ export class GameLogic {
 
             this.table.players[this.currPlayer].hand.insertHidden(tile);
 
-            // Play rack tile sound
-            if (this.scene.audioManager) {
-                this.scene.audioManager.playSFX("rack_tile");
-            }
-
             // For human player, add visual feedback and delay sorting
             if (this.currPlayer === PLAYER.BOTTOM) {
                 // Add blue glow to newly drawn tile so user can identify it
@@ -664,6 +659,8 @@ export class GameLogic {
                 }, 2500); // 2.5 second delay
             }
 
+            // Note: rack_tile sound is played in showTileSetInRack/showTileSetInRackVertical
+            // when tile animation completes (tile hits the rack)
             this.table.players[this.currPlayer].showHand(this.currPlayer === PLAYER.BOTTOM);
 
             return true;

@@ -261,7 +261,20 @@ class TileSet {
             }
 
             debugPrint(`showTileSetInRack: Animating tile ${tile.getText()} to x=${x}, y=${y}, angle=${playerInfo.angle}`);
-            tile.animate(x, y, playerInfo.angle);
+            // Use fixed duration for newly inserted tiles to keep sounds synchronized
+            const fixedDuration = tile.isNewlyInserted ? 600 : null; // 600ms for consistent timing
+            const tween = tile.animate(x, y, playerInfo.angle, fixedDuration);
+
+            // Play rack tile sound ONLY for newly inserted tiles (not for tiles sliding to make room)
+            if (tween && tile.isNewlyInserted && this.scene && this.scene.audioManager) {
+                tween.once("complete", () => {
+                    this.scene.audioManager.playSFX("rack_tile");
+                });
+            }
+
+            // Clear the flag after setting up the animation
+            tile.isNewlyInserted = false;
+
             tile.scale = (playerInfo.id === PLAYER.BOTTOM) ? 1.0 : SPRITE_SCALE;
 
             if (playerInfo.id === PLAYER.BOTTOM) {
@@ -290,7 +303,20 @@ class TileSet {
             }
 
             debugPrint(`showTileSetInRackVertical: Animating tile ${tile.getText()} to x=${x}, y=${y}, angle=${playerInfo.angle}`);
-            tile.animate(x, y, playerInfo.angle);
+            // Use fixed duration for newly inserted tiles to keep sounds synchronized
+            const fixedDuration = tile.isNewlyInserted ? 600 : null; // 600ms for consistent timing
+            const tween = tile.animate(x, y, playerInfo.angle, fixedDuration);
+
+            // Play rack tile sound ONLY for newly inserted tiles (not for tiles sliding to make room)
+            if (tween && tile.isNewlyInserted && this.scene && this.scene.audioManager) {
+                tween.once("complete", () => {
+                    this.scene.audioManager.playSFX("rack_tile");
+                });
+            }
+
+            // Clear the flag after setting up the animation
+            tile.isNewlyInserted = false;
+
             tile.scale = SPRITE_SCALE;
 
             if (playerInfo.id === PLAYER.BOTTOM) {
@@ -1222,6 +1248,8 @@ tile.sprite.on("dragend", (_pointer, dragX, _dragY, _dropped) => {
             });
         }
 
+        // Mark tile as newly inserted so we can play sound only for new arrivals
+        tile.isNewlyInserted = true;
         tileSet.insert(tile);
     }
 

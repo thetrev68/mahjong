@@ -181,7 +181,7 @@ export class Tile {
         this.updateGlowPosition();
     }
 
-    animate(x, y, angle) {
+    animate(x, y, angle, fixedDuration = null) {
         debugPrint("Tile.animate called for:", this.getText(), "this.sprite:", this.sprite);
         if (!this.sprite || !this.sprite.scene) {
             console.error("Tile.animate: this.sprite is undefined, null, or destroyed for tile:", this.getText());
@@ -189,7 +189,7 @@ export class Tile {
         }
         const speed = 1500;
         const distance = Math.hypot(x - this.sprite.x, y - this.sprite.y);
-        const time = (distance * 1000 / speed);
+        const time = fixedDuration !== null ? fixedDuration : (distance * 1000 / speed);
 
         if (this.tween) {
             this.tween.stop();
