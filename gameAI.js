@@ -45,7 +45,8 @@ export class GameAI {
         for (const tile of handTiles) {
             let recommendation = TILE_RECOMMENDATION.DISCARD; // Default to DISCARD
 
-            if (tile.suit === SUIT.JOKER) {
+            if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
+                // Blanks and jokers are always kept - AI should never discard them
                 recommendation = TILE_RECOMMENDATION.KEEP;
             } else if (this.isNeededInPatterns(tile, topPatterns)) {
                 recommendation = TILE_RECOMMENDATION.KEEP;
@@ -57,16 +58,16 @@ export class GameAI {
         }
 
         // For consistency and easier use later, sort by recommendation: KEEP, PASS, DISCARD
-        // Secondary sort: Jokers always first (never discard jokers unless absolutely no choice)
+        // Secondary sort: Jokers and blanks always first (never discard unless absolutely no choice)
         recommendations.sort((a, b) => {
             const order = { [TILE_RECOMMENDATION.KEEP]: 0, [TILE_RECOMMENDATION.PASS]: 1, [TILE_RECOMMENDATION.DISCARD]: 2 };
             const orderDiff = order[a.recommendation] - order[b.recommendation];
 
-            // If same recommendation level, jokers come first
+            // If same recommendation level, jokers and blanks come first
             if (orderDiff === 0) {
-                const aIsJoker = a.tile.suit === SUIT.JOKER ? 1 : 0;
-                const bIsJoker = b.tile.suit === SUIT.JOKER ? 1 : 0;
-                return bIsJoker - aIsJoker; // Jokers (1) before non-jokers (0)
+                const aIsSpecial = (a.tile.suit === SUIT.JOKER || a.tile.suit === SUIT.BLANK) ? 1 : 0;
+                const bIsSpecial = (b.tile.suit === SUIT.JOKER || b.tile.suit === SUIT.BLANK) ? 1 : 0;
+                return bIsSpecial - aIsSpecial; // Special tiles (1) before regular tiles (0)
             }
 
             return orderDiff;
@@ -151,6 +152,94 @@ export class GameAI {
         return false;
     }
 
+    // Return true if hand is modified by swapping blanks for discard tiles
+    // AI strategy: Only swap blanks for discard tiles when hand rank improves significantly
+    exchangeBlanksForDiscards(currPlayer, hand) {
+        // Get all blanks in the player's hand
+        const blankArray = hand.getHiddenTileArray().filter(tile => tile.suit === SUIT.BLANK);
+
+        // If no blanks, nothing to exchange
+        if (blankArray.length === 0) {
+            return false;
+        }
+
+        // Get discards (excluding jokers - can't swap for jokers)
+        const discardArray = this.table.discards.tileArray.filter(tile => tile.suit !== SUIT.JOKER);
+
+        // If no swappable discards, can't improve
+        if (discardArray.length === 0) {
+            return false;
+        }
+
+        // Evaluate current hand rank
+        const rankCardHands = this.card.rankHandArray14(hand);
+        const sortedRankCardHands = [...rankCardHands].sort((a, b) => b.rank - a.rank);
+        const currentBestRank = sortedRankCardHands[0].rank;
+
+        // Conservative strategy: only swap if hand is relatively weak (rank < 50)
+        // and the swap would significantly improve it (gain > 10)
+        if (currentBestRank > 60) {
+            debugPrint("exchangeBlanksForDiscards: Hand rank too high (" + currentBestRank + "), skipping swaps\n");
+            return false;
+        }
+
+        let bestSwap = null;
+        let bestRankGain = 5; // Minimum threshold: must improve by at least 5 points
+
+        // For each blank in hand
+        for (const blank of blankArray) {
+            // For each discard, evaluate if swapping improves hand
+            for (const discard of discardArray) {
+                // Create a copy of hand
+                const copyHand = hand.dupHand();
+
+                // Find and replace the blank with the discard tile
+                const blankIndex = copyHand.hiddenTileSet.tileArray.indexOf(blank);
+                if (blankIndex === -1) {
+                    continue;
+                }
+
+                copyHand.hiddenTileSet.tileArray[blankIndex] = new Tile(discard.suit, discard.number);
+
+                // Evaluate new hand rank
+                const copyHandRankArray = this.card.rankHandArray14(copyHand);
+                const sortedCopyRankHands = [...copyHandRankArray].sort((a, b) => b.rank - a.rank);
+                const newBestRank = sortedCopyRankHands[0].rank;
+
+                // Calculate improvement
+                const rankGain = newBestRank - currentBestRank;
+
+                debugPrint("exchangeBlanksForDiscards: Blank -> " + discard.getText() + " would give rank gain: " + rankGain + "\n");
+
+                if (rankGain > bestRankGain) {
+                    bestRankGain = rankGain;
+                    bestSwap = { blank, discard };
+                }
+            }
+        }
+
+        // If we found a beneficial swap, execute it
+        if (bestSwap && bestRankGain > 5) {
+            debugPrint("exchangeBlanksForDiscards: Executing swap with rank gain: " + bestRankGain + "\n");
+
+            // Perform the swap
+            hand.removeHidden(bestSwap.blank);
+            this.table.discards.removeDiscardTile(bestSwap.discard);
+            hand.insertHidden(bestSwap.discard);
+            this.table.discards.insertDiscard(bestSwap.blank);
+
+            // Update displays for all players
+            for (let i = 0; i < 4; i++) {
+                this.table.players[i].showHand();
+            }
+            this.table.discards.showDiscards();
+
+            return true;
+        }
+
+        return false;
+    }
+
     // Player AI
     // Just picked a new tile from wall (or completed exposure).  Hand has 14 tiles.
     // - Check for Mahjong
@@ -200,7 +289,20 @@ export class GameAI {
         const recommendations = this.getTileRecommendations(hand);
 
         // Recommendations are sorted KEEP, PASS, DISCARD. We want to discard from the end of the list.
-        const discardTile = recommendations[recommendations.length - 1].tile;
+        // Never discard blanks - find the first non-blank tile to discard
+        let discardTile = null;
+        for (let i = recommendations.length - 1; i >= 0; i--) {
+            const tile = recommendations[i].tile;
+            if (tile.suit !== SUIT.BLANK) {
+                discardTile = tile;
+                break;
+            }
+        }
+
+        // Fallback: if all remaining tiles are blanks (extreme edge case), discard a blank
+        if (!discardTile && recommendations.length > 0) {
+            discardTile = recommendations[recommendations.length - 1].tile;
+        }
 
         // Remove tile from player's hidden tiles
         this.table.players[currPlayer].hand.removeHidden(discardTile);
@@ -308,8 +410,13 @@ export class GameAI {
 
         const recommendations = this.getTileRecommendations(copyHand);
 
-        // Filter out the invalid tile and jokers (cannot pass jokers per NMJL rules), then sort recommendations: DISCARD, PASS, KEEP
-        const validRecommendations = recommendations.filter(r => r.tile !== invalidTile && r.tile.suit !== SUIT.JOKER);
+        // Filter out the invalid tile, jokers, and blanks (cannot pass jokers or blanks per NMJL rules)
+        // then sort recommendations: DISCARD, PASS, KEEP
+        const validRecommendations = recommendations.filter(r =>
+            r.tile !== invalidTile &&
+            r.tile.suit !== SUIT.JOKER &&
+            r.tile.suit !== SUIT.BLANK
+        );
         validRecommendations.sort((a, b) => {
             const order = { [TILE_RECOMMENDATION.DISCARD]: 0, [TILE_RECOMMENDATION.PASS]: 1, [TILE_RECOMMENDATION.KEEP]: 2 };
             return order[a.recommendation] - order[b.recommendation];
@@ -363,11 +470,11 @@ export class GameAI {
 
         const pass = [];
         // Pass the lowest value tiles (DISCARD recommendations at the end of the array)
-        // Never pass jokers per NMJL rules
+        // Never pass jokers or blanks per NMJL rules
         for (let i = tileRecommendations.length - 1; i >= 0 && pass.length < maxCount; i--) {
             const tile = tileRecommendations[i].tile;
-            // Skip jokers - cannot pass them during courtesy
-            if (tile.suit === SUIT.JOKER) {
+            // Skip jokers and blanks - cannot pass them during courtesy
+            if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
                 continue;
             }
             this.table.players[player].hand.removeHidden(tile);
