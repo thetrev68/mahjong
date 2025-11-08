@@ -1,5 +1,5 @@
 import * as Phaser from "phaser";
-import {SUIT, SPRITE_HEIGHT, SPRITE_WIDTH, TILE_GAP, WINDOW_WIDTH, WINDOW_HEIGHT} from "./constants.js";
+import {SUIT, SPRITE_HEIGHT, SPRITE_WIDTH, TILE_GAP, WINDOW_WIDTH, WINDOW_HEIGHT, getTotalTileCount} from "./constants.js";
 import {debugPrint} from "./utils.js";
 
 // PRIVATE CONSTANTS
@@ -443,7 +443,7 @@ export class Wall {
     receiveOrganizedTilesFromHomePage(homePageTiles) {
         return new Promise((resolve, reject) => {
             // Phase 2: Dynamic tile count based on settings (152 or 160)
-            const expectedTileCount = window.settingsManager?.getUseBlankTiles() ? 160 : 152;
+            const expectedTileCount = getTotalTileCount();
             if (homePageTiles.length !== expectedTileCount) {
                 console.error("Wall.receiveOrganizedTilesFromHomePage: Invalid tile count. Expected " + expectedTileCount + ", got " + homePageTiles.length);
                 return reject("Invalid tile count");

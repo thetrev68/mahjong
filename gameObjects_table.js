@@ -2,7 +2,8 @@ import {printMessage} from "./utils.js";
 import {
     PLAYER, PLAYER_OPTION, SUIT,
     WINDOW_WIDTH, WINDOW_HEIGHT,
-    SPRITE_HEIGHT, SPRITE_SCALE
+    SPRITE_HEIGHT, SPRITE_SCALE,
+    getTotalTileCount
 } from "./constants.js";
 import {Wall, Discards} from "./gameObjects.js";
 import {Player} from "./gameObjects_player.js";
@@ -106,8 +107,8 @@ export class Table {
         }
 
         // Verify there are 152 (or 160 with blanks) tiles in wall
-        // Phase 1: Use 152 tiles. Phase 2 will add dynamic tile count based on settings.
-        const expectedTileCount = 152;
+        // Dynamic tile count based on settings (152 or 160 with blanks)
+        const expectedTileCount = getTotalTileCount();
         if (this.wall.tileArray.length !== expectedTileCount) {
             printMessage("ERROR - table.reset() - total tile count is not " + expectedTileCount + ". Tile count = " + this.wall.tileArray.length + "\n");
         }

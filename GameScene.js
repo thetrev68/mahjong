@@ -5,7 +5,7 @@ import {Table} from "./gameObjects_table.js";
 import { HomePageTileManager } from "./homePageTileManager.js";
 import AudioManager from "./audioManager.js";
 // import { debugPrint } from "./utils.js";
-import { WINDOW_WIDTH } from "./constants.js";
+import { WINDOW_WIDTH, getTotalTileCount } from "./constants.js";
 
 import tilesPng from "./assets/tiles.png";
 import tilesJson from "./assets/tiles.json";
@@ -111,8 +111,8 @@ class GameScene extends Phaser.Scene {
       const fill = this.add.graphics();
       
       // Add text overlay with crisp rendering
-      // For Phase 1, use 152 tiles. Phase 2 will add settings support for 160 tiles.
-      const maxTiles = 152;
+      // Dynamic max tiles based on settings (152 or 160 with blanks)
+      const maxTiles = getTotalTileCount();
       const text = this.add.text(150, 10, "Wall Tiles Remaining: " + maxTiles, {
         fontFamily: "Arial, sans-serif",
         fontSize: "16px",

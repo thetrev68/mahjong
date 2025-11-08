@@ -1,5 +1,5 @@
 import {printMessage, printInfo, debugPrint, printHint, sleep} from "./utils.js";
-import {STATE, PLAYER_OPTION, PLAYER, SUIT, VNUMBER} from "./constants.js";
+import {STATE, PLAYER_OPTION, PLAYER, SUIT, VNUMBER, getTotalTileCount} from "./constants.js";
 import {GameAI} from "./gameAI.js";
 import {Card} from "./card/card.js";
 import {Tile} from "./gameObjects.js";
@@ -608,8 +608,8 @@ export class GameLogic {
             for (let i = 0; i < 4; i++) {
                 tileCount += this.table.players[i].hand.getLength();
             }
-            // Phase 1: Use 152 tiles. Phase 2 will add dynamic tile count based on settings.
-            const expectedTileCount = 152;
+            // Dynamic tile count based on settings (152 or 160 with blanks)
+            const expectedTileCount = getTotalTileCount();
             if (tileCount !== expectedTileCount) {
                 printMessage("ERROR - total tile count is not " + expectedTileCount + ". Tile count = " + tileCount + "\n");
             }

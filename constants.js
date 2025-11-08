@@ -106,3 +106,13 @@ export const DRAGON = {
     WHITE: 2
 };
 
+
+// Tile Count Helper
+export function getTotalTileCount() {
+    // Default to 152 if settingsManager is not yet initialized or method doesn't exist
+    if (!window.settingsManager || typeof window.settingsManager.getUseBlankTiles !== "function") {
+        return 152;
+    }
+    return window.settingsManager.getUseBlankTiles() ? 160 : 152;
+}
+
