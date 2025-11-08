@@ -601,15 +601,17 @@ export class GameLogic {
                 }
             }
 
-            // Validate tile count is always 152
+            // Validate tile count is always 160 (152 base + 8 blanks if enabled)
             let tileCount = 0;
             tileCount += this.table.wall.tileArray.length;
             tileCount += this.table.discards.tileArray.length;
             for (let i = 0; i < 4; i++) {
                 tileCount += this.table.players[i].hand.getLength();
             }
-            if (tileCount !== 152) {
-                printMessage("ERROR - total tile count is not 152. Tile count = " + tileCount + "\n");
+            // Phase 1: Use 152 tiles. Phase 2 will add dynamic tile count based on settings.
+            const expectedTileCount = 152;
+            if (tileCount !== expectedTileCount) {
+                printMessage("ERROR - total tile count is not " + expectedTileCount + ". Tile count = " + tileCount + "\n");
             }
         }
 

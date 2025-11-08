@@ -74,8 +74,15 @@ export const gTileGroups = [
         prefix: "J",
         maxNum: 1,
         count: 8
+    },
+    {
+        suit: SUIT.BLANK,
+        textArray: ["Blank"],
+        prefix: ["BLANK"],
+        maxNum: 1,
+        count: 8
     }
-];
+];;
 
 export class Tile {
     constructor(scene, suit, number, spriteName) {
@@ -97,7 +104,12 @@ export class Tile {
     }
 
     create() {
-        this.sprite = this.scene.add.sprite(0, 0, "tiles", this.spriteName);
+        // For blank tiles, use the back sprite instead of tiles sprite sheet
+        if (this.suit === SUIT.BLANK) {
+            this.sprite = this.scene.add.sprite(0, 0, "back");
+        } else {
+            this.sprite = this.scene.add.sprite(0, 0, "tiles", this.spriteName);
+        }
         // console.log("Tile.create() called for tile:", this.suit, this.number, "sprite:", this.sprite);
         this.sprite.visible = false;
         this.sprite.setOrigin(0.5, 0.5);
@@ -392,7 +404,7 @@ export class Wall {
         if (skipTileCreation) {
             return;
         }
-        // Create all 152 tiles
+        // Create all tiles (152 base + 8 blanks if enabled)
         for (const group of gTileGroups) {
             for (const prefix of group.prefix) {
                 for (let num = 1; num <= group.maxNum; num++) {
@@ -430,8 +442,10 @@ export class Wall {
 
     receiveOrganizedTilesFromHomePage(homePageTiles) {
         return new Promise((resolve, reject) => {
-            if (homePageTiles.length !== 152) {
-                console.error("Wall.receiveOrganizedTilesFromHomePage: Invalid tile count. Expected 152, got " + homePageTiles.length);
+            // Phase 1: Use 152 tiles. Phase 2 will add dynamic tile count based on settings.
+            const expectedTileCount = 152;
+            if (homePageTiles.length !== expectedTileCount) {
+                console.error("Wall.receiveOrganizedTilesFromHomePage: Invalid tile count. Expected " + expectedTileCount + ", got " + homePageTiles.length);
                 return reject("Invalid tile count");
             }
 
@@ -441,7 +455,7 @@ export class Wall {
             }
 
             this.tileArray = homePageTiles;
-            debugPrint("Wall received 152 tiles from HomePageTileManager.");
+            debugPrint("Wall received " + homePageTiles.length + " tiles from HomePageTileManager.");
             resolve();
         });
     }

@@ -111,7 +111,9 @@ class GameScene extends Phaser.Scene {
       const fill = this.add.graphics();
       
       // Add text overlay with crisp rendering
-      const text = this.add.text(150, 10, "Wall Tiles Remaining: 152", {
+      // For Phase 1, use 152 tiles. Phase 2 will add settings support for 160 tiles.
+      const maxTiles = 152;
+      const text = this.add.text(150, 10, "Wall Tiles Remaining: " + maxTiles, {
         fontFamily: "Arial, sans-serif",
         fontSize: "16px",
         fontStyle: "bold",
@@ -121,12 +123,12 @@ class GameScene extends Phaser.Scene {
       });
       text.setOrigin(0.5, 0.5); // Center the text
       text.setResolution(2); // Higher resolution for crisp text when scaled
-      
+
       container.add([bar, fill, text]);
       // The container is hidden by default and is made visible by the first call to updateWallTileCounter.
       container.setVisible(false);
       container.setDepth(100); // High depth to appear above hands
-      return { bar: container, fill, text, maxTiles: 152 };
+      return { bar: container, fill, text, maxTiles };
     }
 
     updateWallTileCounter(count) {

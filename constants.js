@@ -61,16 +61,17 @@ export const SUIT = {
     DRAGON: 4,
     FLOWER: 5,
     JOKER: 6,
+    BLANK: 7,
     // Virtual suits used to describe legal hands
-    VSUIT1: 7,
-    VSUIT2: 8,
-    VSUIT3: 9,
-    VSUIT1_DRAGON: 10,
-    VSUIT2_DRAGON: 11,
-    VSUIT3_DRAGON: 12,
+    VSUIT1: 8,
+    VSUIT2: 9,
+    VSUIT3: 10,
+    VSUIT1_DRAGON: 11,
+    VSUIT2_DRAGON: 12,
+    VSUIT3_DRAGON: 13,
     // INVALID - for padding hand to 14 tiles
     INVALID: 99
-};
+};;
 
 export const VNUMBER = {
     // 0 - not used

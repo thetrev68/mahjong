@@ -105,9 +105,11 @@ export class Table {
             this.wall.insert(this.discards.tileArray.pop());
         }
 
-        // Verify there are 152 tiles in wall
-        if (this.wall.tileArray.length !== 152) {
-            printMessage("ERROR - table.reset() - total tile count is not 152. Tile count = " + this.wall.tileArray.length + "\n");
+        // Verify there are 152 (or 160 with blanks) tiles in wall
+        // Phase 1: Use 152 tiles. Phase 2 will add dynamic tile count based on settings.
+        const expectedTileCount = 152;
+        if (this.wall.tileArray.length !== expectedTileCount) {
+            printMessage("ERROR - table.reset() - total tile count is not " + expectedTileCount + ". Tile count = " + this.wall.tileArray.length + "\n");
         }
     }
 

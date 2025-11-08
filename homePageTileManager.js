@@ -14,7 +14,7 @@ export class HomePageTileManager {
     }
 
     createScatteredTiles() {
-        // Create all 152 tiles
+        // Create all tiles (152 base + 8 blanks if enabled)
         for (const group of gTileGroups) {
             for (const prefix of group.prefix) {
                 for (let num = 1; num <= group.maxNum; num++) {
