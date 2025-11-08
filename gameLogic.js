@@ -280,7 +280,7 @@ export class GameLogic {
         this.deal();
     }
 
-    async deal() {
+    deal() {
         // DEAL
         this.state = STATE.DEAL;
         this.updateUI();
@@ -296,12 +296,12 @@ export class GameLogic {
         }
 
         // Perform sequential dealing animation
-        await this.sequentialDealTiles(initPlayerHandArray);
-
-        // Start automatic hints for player 0 after sequential dealing completes
-        if (this.table.players[PLAYER.BOTTOM].hand.getLength() > 0) {
-            this.hintAnimationManager.updateHintsForNewTiles();
-        }
+        this.sequentialDealTiles(initPlayerHandArray, () => {
+            // Start automatic hints for player 0 after sequential dealing completes
+            if (this.table.players[PLAYER.BOTTOM].hand.getLength() > 0) {
+                this.hintAnimationManager.updateHintsForNewTiles();
+            }
+        });
 
         // Debugging - skip charleston
         if (trainInfo.trainCheckbox && trainInfo.skipCharlestonCheckbox) {
@@ -442,7 +442,7 @@ export class GameLogic {
                     this.table.players[PLAYER.BOTTOM].showHand(true);
                     // Update hints with the sorted hand
                     this.hintAnimationManager.updateHintsForNewTiles();
-                }, 2500); // 2.5 second delay
+                }, 2000); // 2.0 second delay
             }
         }
 
@@ -656,7 +656,7 @@ export class GameLogic {
                     this.table.players[PLAYER.BOTTOM].showHand(true);
                     // Update hints now that hand is sorted
                     this.hintAnimationManager.updateHintsForNewTiles();
-                }, 2500); // 2.5 second delay
+                }, 2000); // 2.0 second delay
             }
 
             // Note: rack_tile sound is played in showTileSetInRack/showTileSetInRackVertical
@@ -944,7 +944,7 @@ export class GameLogic {
                             this.table.players[PLAYER.BOTTOM].showHand(true);
                             // Update hints with the sorted hand
                             this.hintAnimationManager.updateHintsForNewTiles();
-                        }, 2500); // 2.5 second delay
+                        }, 2000); // 2.0 second delay
                     }
 
                     resolve();
@@ -1491,12 +1491,8 @@ export class GameLogic {
         this.errorText.visible = false;
     }
 
-    sleep(ms) {
-        return new Promise((resolve) => setTimeout(resolve, ms));
-    }
-
-    // Sequential dealing sequence with animation
-    async sequentialDealTiles(initPlayerHandArray) {
+    // Sequential dealing sequence with animation using Phaser tween callbacks
+    sequentialDealTiles(initPlayerHandArray, onComplete) {
         // Shuffle the wall before dealing
         this.table.wall.shuffle();
 
@@ -1506,58 +1502,88 @@ export class GameLogic {
         // Define the dealing sequence for all 52 tiles
         const DEAL_SEQUENCE = [
             // Round 1
-            ...Array(4).fill({ player: PLAYER.BOTTOM, delayMs: 50 }),
-            ...Array(4).fill({ player: PLAYER.RIGHT, delayMs: 50 }),
-            ...Array(4).fill({ player: PLAYER.TOP, delayMs: 50 }),
-            ...Array(4).fill({ player: PLAYER.LEFT, delayMs: 50 }),
+            ...Array(4).fill(PLAYER.BOTTOM),
+            ...Array(4).fill(PLAYER.RIGHT),
+            ...Array(4).fill(PLAYER.TOP),
+            ...Array(4).fill(PLAYER.LEFT),
             // Round 2
-            ...Array(4).fill({ player: PLAYER.BOTTOM, delayMs: 50 }),
-            ...Array(4).fill({ player: PLAYER.RIGHT, delayMs: 50 }),
-            ...Array(4).fill({ player: PLAYER.TOP, delayMs: 50 }),
-            ...Array(4).fill({ player: PLAYER.LEFT, delayMs: 50 }),
+            ...Array(4).fill(PLAYER.BOTTOM),
+            ...Array(4).fill(PLAYER.RIGHT),
+            ...Array(4).fill(PLAYER.TOP),
+            ...Array(4).fill(PLAYER.LEFT),
             // Round 3
-            ...Array(4).fill({ player: PLAYER.BOTTOM, delayMs: 50 }),
-            ...Array(4).fill({ player: PLAYER.RIGHT, delayMs: 50 }),
-            ...Array(4).fill({ player: PLAYER.TOP, delayMs: 50 }),
-            ...Array(4).fill({ player: PLAYER.LEFT, delayMs: 50 }),
+            ...Array(4).fill(PLAYER.BOTTOM),
+            ...Array(4).fill(PLAYER.RIGHT),
+            ...Array(4).fill(PLAYER.TOP),
+            ...Array(4).fill(PLAYER.LEFT),
             // Final tiles
-            { player: PLAYER.BOTTOM, delayMs: 50 },
-            { player: PLAYER.RIGHT, delayMs: 50 },
-            { player: PLAYER.TOP, delayMs: 50 },
-            { player: PLAYER.LEFT, delayMs: 50 },
+            PLAYER.BOTTOM,
+            PLAYER.RIGHT,
+            PLAYER.TOP,
+            PLAYER.LEFT,
             // Last tile for dealer
-            { player: PLAYER.BOTTOM, delayMs: 50 }
+            PLAYER.BOTTOM
         ];
 
-        // Process each step in the sequence
-        let lastPlayer = -1;
-        for (const step of DEAL_SEQUENCE) {
-            // Introduce a pause when switching players
-            if (lastPlayer !== -1 && lastPlayer !== step.player) {
-                // eslint-disable-next-line no-await-in-loop
-                await this.sleep(200); // Pause before dealing to the next player
+        // Process dealing sequence recursively using tween callbacks
+        let currentIndex = 0;
+
+        const dealNextTile = () => {
+            if (currentIndex >= DEAL_SEQUENCE.length) {
+                // All tiles dealt - finalize hands
+                this.table.finalizeInitialHands();
+
+                // Call completion callback if provided
+                if (onComplete) {
+                    onComplete();
+                }
+                return;
             }
 
+            const playerIndex = DEAL_SEQUENCE[currentIndex];
             const tile = this.table.wall.remove();
             if (!tile) {
                 throw new Error("No tiles remaining in wall during dealing sequence");
             }
 
-            this.table.players[step.player].hand.insertHidden(tile);
-            this.table.players[step.player].showHand(false);
+            this.table.players[playerIndex].hand.insertHidden(tile);
+            this.table.players[playerIndex].showHand(false);
 
             // Update wall counter after each tile
             this.scene.updateWallTileCounter(this.table.wall.getCount());
 
-            // Wait for the specified delay
-            if (step.delayMs > 0) {
-                // eslint-disable-next-line no-await-in-loop
-                await this.sleep(step.delayMs);
-            }
-            lastPlayer = step.player;
-        }
+            // Get the last tile that was inserted to hook into its animation
+            const hand = this.table.players[playerIndex].hand;
+            const lastTile = hand.hiddenTileSet.tileArray[hand.hiddenTileSet.tileArray.length - 1];
 
-        // Finalize hands after sequential dealing
-        this.table.finalizeInitialHands();
+            // Check if we're switching players for the pause
+            const nextPlayerIndex = DEAL_SEQUENCE[currentIndex + 1];
+            const shouldPauseForPlayerSwitch = nextPlayerIndex !== undefined && nextPlayerIndex !== playerIndex;
+
+            // Wait for the tile's tween to complete, then deal next tile
+            if (lastTile && lastTile.tween) {
+                lastTile.tween.once("complete", () => {
+                    currentIndex++;
+                    if (shouldPauseForPlayerSwitch) {
+                        // Add a 200ms pause when switching players
+                        this.scene.time.delayedCall(200, dealNextTile);
+                    } else {
+                        // Continue immediately to next tile for same player
+                        dealNextTile();
+                    }
+                });
+            } else {
+                // Fallback if no tween exists (shouldn't happen, but safety net)
+                currentIndex++;
+                if (shouldPauseForPlayerSwitch) {
+                    this.scene.time.delayedCall(200, dealNextTile);
+                } else {
+                    dealNextTile();
+                }
+            }
+        };
+
+        // Start the dealing sequence
+        dealNextTile();
     }
 }
