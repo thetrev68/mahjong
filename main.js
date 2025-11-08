@@ -20,5 +20,7 @@ const config = {
     }
 };
 
-// eslint-disable-next-line no-unused-vars
 const game = new Phaser.Game(config);
+
+// Expose game instance to window for settings manager access
+window.game = game;

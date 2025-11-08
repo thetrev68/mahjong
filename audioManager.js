@@ -43,7 +43,9 @@ export default class AudioManager {
     setBGMVolume(volume) {
         // Volume should be 0-1 scale
         this.bgmVolume = Math.max(0, Math.min(1, volume));
-        this.settingsManager.saveSetting("bgmVolume", this.bgmVolume);
+
+        // Don't save if called from settings manager to avoid circular updates
+        // Settings manager already saves before calling this
 
         if (this.bgm && !this.bgmMuted) {
             this.bgm.setVolume(this.bgmVolume);
@@ -52,7 +54,9 @@ export default class AudioManager {
 
     muteBGM(muted) {
         this.bgmMuted = muted;
-        this.settingsManager.saveSetting("bgmMuted", this.bgmMuted);
+
+        // Don't save if called from settings manager to avoid circular updates
+        // Settings manager already saves before calling this
 
         if (this.bgm) {
             this.bgm.setVolume(this.bgmMuted ? 0 : this.bgmVolume);
@@ -82,12 +86,16 @@ export default class AudioManager {
     setSFXVolume(volume) {
         // Volume should be 0-1 scale
         this.sfxVolume = Math.max(0, Math.min(1, volume));
-        this.settingsManager.saveSetting("sfxVolume", this.sfxVolume);
+
+        // Don't save if called from settings manager to avoid circular updates
+        // Settings manager already saves before calling this
     }
 
     muteSFX(muted) {
         this.sfxMuted = muted;
-        this.settingsManager.saveSetting("sfxMuted", this.sfxMuted);
+
+        // Don't save if called from settings manager to avoid circular updates
+        // Settings manager already saves before calling this
     }
 
     getSFXVolume() {

@@ -523,7 +523,7 @@ export class GameLogic {
                 this.table.discards.insertDiscard(discardTile);
                 this.table.discards.showDiscards();
 
-                // Play tile dropping sound
+                // Play tile dropping sound (Jokers don't animate, so play immediately)
                 if (this.scene.audioManager) {
                     this.scene.audioManager.playSFX("tile_dropping");
                 }
@@ -551,7 +551,14 @@ export class GameLogic {
 
             // Now animate. The glow will follow automatically because the
             // animate() method is being updated to handle it.
-            discardTile.animate(350, 420, 0);
+            const discardTween = discardTile.animate(350, 420, 0);
+
+            // Add onComplete callback to play sound when tile hits discard pile
+            if (discardTween && this.scene.audioManager) {
+                discardTween.on("complete", () => {
+                    this.scene.audioManager.playSFX("tile_dropping");
+                });
+            }
 
             // Ask all players if the discard is wanted  (currPlayer == i automatically returns discard)
             const claimArray = [];

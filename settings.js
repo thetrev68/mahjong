@@ -230,6 +230,13 @@ class SettingsManager {
         const sfxVolumeValue = document.getElementById("sfxVolumeValue");
         const sfxMuteCheckbox = document.getElementById("sfxMute");
 
+        debugPrint("Setting up audio controls...", {
+            bgmVolumeSlider: !!bgmVolumeSlider,
+            bgmMuteCheckbox: !!bgmMuteCheckbox,
+            sfxVolumeSlider: !!sfxVolumeSlider,
+            sfxMuteCheckbox: !!sfxMuteCheckbox
+        });
+
         // Load saved audio settings
         const savedBgmVolume = this.getSetting("bgmVolume", 0.7);
         const savedBgmMuted = this.getSetting("bgmMuted", false);
@@ -260,6 +267,7 @@ class SettingsManager {
         if (bgmVolumeSlider) {
             bgmVolumeSlider.addEventListener("input", (e) => {
                 const volume = parseInt(e.target.value, 10) / 100;
+                debugPrint(`BGM volume changed to: ${volume}`);
                 if (bgmVolumeValue) {
                     bgmVolumeValue.textContent = `${e.target.value}%`;
                 }
@@ -302,24 +310,35 @@ class SettingsManager {
     updateAudioManager(setting, value) {
         // Access the audio manager through the game scene if available
         // The game scene will be created after DOM loads, so this may be called before it exists
+        debugPrint(`updateAudioManager called: ${setting} = ${value}`);
+        debugPrint("window.game exists:", !!window.game);
+
         if (window.game && window.game.scene && window.game.scene.getScene("GameScene")) {
             const scene = window.game.scene.getScene("GameScene");
+            debugPrint("GameScene found, audioManager exists:", !!scene.audioManager);
+
             if (scene.audioManager) {
                 switch (setting) {
                     case "bgmVolume":
                         scene.audioManager.setBGMVolume(value);
+                        debugPrint(`Set BGM volume to ${value}`);
                         break;
                     case "bgmMuted":
                         scene.audioManager.muteBGM(value);
+                        debugPrint(`Set BGM muted to ${value}`);
                         break;
                     case "sfxVolume":
                         scene.audioManager.setSFXVolume(value);
+                        debugPrint(`Set SFX volume to ${value}`);
                         break;
                     case "sfxMuted":
                         scene.audioManager.muteSFX(value);
+                        debugPrint(`Set SFX muted to ${value}`);
                         break;
                 }
             }
+        } else {
+            debugPrint("Audio manager not available yet - game scene not created");
         }
     }
 

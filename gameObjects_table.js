@@ -305,10 +305,7 @@ export class Table {
             this.discards.insertDiscard(discardTile);
             this.discards.showDiscards();
 
-            // Play tile dropping sound
-            if (this.scene.audioManager) {
-                this.scene.audioManager.playSFX("tile_dropping");
-            }
+            // Note: tile_dropping sound is played in gameLogic.js when animation completes
 
             return {
                 playerOption: PLAYER_OPTION.DISCARD_TILE,
