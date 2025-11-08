@@ -272,6 +272,11 @@ export class GameLogic {
         // Clear glow effects when starting new game
         this.hintAnimationManager.clearAllGlows();
 
+        // Start background music
+        if (this.scene.audioManager) {
+            this.scene.audioManager.playBGM("bgm");
+        }
+
         this.deal();
     }
 
@@ -518,6 +523,11 @@ export class GameLogic {
                 this.table.discards.insertDiscard(discardTile);
                 this.table.discards.showDiscards();
 
+                // Play tile dropping sound
+                if (this.scene.audioManager) {
+                    this.scene.audioManager.playSFX("tile_dropping");
+                }
+
                 //  Move to next player
                 this.currPlayer++;
                 if (this.currPlayer > 3) {
@@ -625,6 +635,11 @@ export class GameLogic {
             debugPrint("Player " + this.currPlayer + " picks " + tile.getText() + " from wall\n");
 
             this.table.players[this.currPlayer].hand.insertHidden(tile);
+
+            // Play rack tile sound
+            if (this.scene.audioManager) {
+                this.scene.audioManager.playSFX("rack_tile");
+            }
 
             // For human player, add visual feedback and delay sorting
             if (this.currPlayer === PLAYER.BOTTOM) {

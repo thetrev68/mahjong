@@ -63,6 +63,9 @@ class SettingsManager {
         if (yearSelect) {
             yearSelect.addEventListener("change", () => this.saveYearSettings());
         }
+
+        // Audio controls event listeners
+        this.setupAudioControls();
     }
 
     showSettings() {
@@ -215,6 +218,108 @@ class SettingsManager {
         const yearSelect = document.getElementById("yearSelect");
         if (yearSelect) {
             this.saveSetting("cardYear", yearSelect.value);
+        }
+    }
+
+    // Audio controls setup and management
+    setupAudioControls() {
+        const bgmVolumeSlider = document.getElementById("bgmVolume");
+        const bgmVolumeValue = document.getElementById("bgmVolumeValue");
+        const bgmMuteCheckbox = document.getElementById("bgmMute");
+        const sfxVolumeSlider = document.getElementById("sfxVolume");
+        const sfxVolumeValue = document.getElementById("sfxVolumeValue");
+        const sfxMuteCheckbox = document.getElementById("sfxMute");
+
+        // Load saved audio settings
+        const savedBgmVolume = this.getSetting("bgmVolume", 0.7);
+        const savedBgmMuted = this.getSetting("bgmMuted", false);
+        const savedSfxVolume = this.getSetting("sfxVolume", 0.8);
+        const savedSfxMuted = this.getSetting("sfxMuted", false);
+
+        // Apply saved settings to UI
+        if (bgmVolumeSlider) {
+            bgmVolumeSlider.value = Math.round(savedBgmVolume * 100);
+            if (bgmVolumeValue) {
+                bgmVolumeValue.textContent = `${Math.round(savedBgmVolume * 100)}%`;
+            }
+        }
+        if (bgmMuteCheckbox) {
+            bgmMuteCheckbox.checked = savedBgmMuted;
+        }
+        if (sfxVolumeSlider) {
+            sfxVolumeSlider.value = Math.round(savedSfxVolume * 100);
+            if (sfxVolumeValue) {
+                sfxVolumeValue.textContent = `${Math.round(savedSfxVolume * 100)}%`;
+            }
+        }
+        if (sfxMuteCheckbox) {
+            sfxMuteCheckbox.checked = savedSfxMuted;
+        }
+
+        // BGM volume slider
+        if (bgmVolumeSlider) {
+            bgmVolumeSlider.addEventListener("input", (e) => {
+                const volume = parseInt(e.target.value, 10) / 100;
+                if (bgmVolumeValue) {
+                    bgmVolumeValue.textContent = `${e.target.value}%`;
+                }
+                this.saveSetting("bgmVolume", volume);
+                this.updateAudioManager("bgmVolume", volume);
+            });
+        }
+
+        // BGM mute checkbox
+        if (bgmMuteCheckbox) {
+            bgmMuteCheckbox.addEventListener("change", (e) => {
+                const muted = e.target.checked;
+                this.saveSetting("bgmMuted", muted);
+                this.updateAudioManager("bgmMuted", muted);
+            });
+        }
+
+        // SFX volume slider
+        if (sfxVolumeSlider) {
+            sfxVolumeSlider.addEventListener("input", (e) => {
+                const volume = parseInt(e.target.value, 10) / 100;
+                if (sfxVolumeValue) {
+                    sfxVolumeValue.textContent = `${e.target.value}%`;
+                }
+                this.saveSetting("sfxVolume", volume);
+                this.updateAudioManager("sfxVolume", volume);
+            });
+        }
+
+        // SFX mute checkbox
+        if (sfxMuteCheckbox) {
+            sfxMuteCheckbox.addEventListener("change", (e) => {
+                const muted = e.target.checked;
+                this.saveSetting("sfxMuted", muted);
+                this.updateAudioManager("sfxMuted", muted);
+            });
+        }
+    }
+
+    updateAudioManager(setting, value) {
+        // Access the audio manager through the game scene if available
+        // The game scene will be created after DOM loads, so this may be called before it exists
+        if (window.game && window.game.scene && window.game.scene.getScene("GameScene")) {
+            const scene = window.game.scene.getScene("GameScene");
+            if (scene.audioManager) {
+                switch (setting) {
+                    case "bgmVolume":
+                        scene.audioManager.setBGMVolume(value);
+                        break;
+                    case "bgmMuted":
+                        scene.audioManager.muteBGM(value);
+                        break;
+                    case "sfxVolume":
+                        scene.audioManager.setSFXVolume(value);
+                        break;
+                    case "sfxMuted":
+                        scene.audioManager.muteSFX(value);
+                        break;
+                }
+            }
         }
     }
 

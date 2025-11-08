@@ -607,6 +607,103 @@ select {
     margin-top: var(--spacing-sm);
 }
 
+/* Audio controls styles */
+.audio-controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.audio-controls__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.audio-controls__subtitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    margin: 0 0 var(--spacing-xs);
+    letter-spacing: 0.02em;
+}
+
+.audio-controls__item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.audio-controls__item--checkbox {
+    margin-top: var(--spacing-xs);
+}
+
+.audio-controls__label {
+    min-width: 80px;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.audio-controls__slider {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.audio-controls__slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--color-accent);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.audio-controls__slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+}
+
+.audio-controls__slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: var(--color-accent);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.audio-controls__slider::-moz-range-thumb:hover {
+    transform: scale(1.15);
+}
+
+.audio-controls__value {
+    min-width: 45px;
+    text-align: right;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.audio-controls__checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--color-accent);
+}
+
+.audio-controls__checkbox-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
 /* Responsive adjustments for settings */
 @media (max-width: 720px) {
     .settings-overlay {

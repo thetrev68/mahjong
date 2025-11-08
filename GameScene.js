@@ -3,6 +3,7 @@ import * as Phaser from "phaser";
 import {GameLogic} from "./gameLogic.js";
 import {Table} from "./gameObjects_table.js";
 import { HomePageTileManager } from "./homePageTileManager.js";
+import AudioManager from "./audioManager.js";
 // import { debugPrint } from "./utils.js";
 import { WINDOW_WIDTH } from "./constants.js";
 
@@ -34,9 +35,12 @@ class GameScene extends Phaser.Scene {
             ctx.fillRect(0, 0, 4, 4);
         }
         this.textures.addCanvas("particle", particleCanvas);
-        
-        // Optional: Load firework sound effect (if available)
-        // this.load.audio("fireworks", "./assets/audio/fireworks.mp3");
+
+        // Load audio assets
+        this.load.audio("bgm", "./assets/audio/2406haidao_bgm_loop.mp3");
+        this.load.audio("rack_tile", "./assets/audio/rack_tile.mp3");
+        this.load.audio("tile_dropping", "./assets/audio/tile_dropping.mp3");
+        this.load.audio("fireworks", "./assets/audio/fireworks.mp3");
 
         // The scale manager stuff will be handled in main.js config, so I'm omitting it here as per the plan.
         // The resizeCallback is also a separate step.
@@ -48,6 +52,9 @@ class GameScene extends Phaser.Scene {
         this.input.dragDistanceThreshold = 20;
 
         this.scale.on("resize", this.resize, this);
+
+        // Create audio manager
+        this.audioManager = new AudioManager(this, window.settingsManager);
 
         // Create game objects
         this.gGameLogic = new GameLogic(this);

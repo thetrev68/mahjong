@@ -305,6 +305,11 @@ export class Table {
             this.discards.insertDiscard(discardTile);
             this.discards.showDiscards();
 
+            // Play tile dropping sound
+            if (this.scene.audioManager) {
+                this.scene.audioManager.playSFX("tile_dropping");
+            }
+
             return {
                 playerOption: PLAYER_OPTION.DISCARD_TILE,
                 winningPlayer: 0
