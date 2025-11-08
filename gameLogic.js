@@ -1333,8 +1333,16 @@ export class GameLogic {
                 printMessage(str + "\n");
                 printInfo(str);
                 debugPrint(str + "\n");
+
+                // Show all players' hands so user can see what bots had
+                for (let i = 0; i < 4; i++) {
+                    const player = this.table.players[i];
+                    player.hand.sortSuitHidden();
+                    player.showHand(true);
+                }
             }
             printMessage("===============================\n");
+            printMessage("Click 'Start Game' to play again\n");
             button1.style.display = "none";
             button2.style.display = "none";
             button3.style.display = "none";
@@ -1345,6 +1353,9 @@ export class GameLogic {
             sort2.style.display = "none";
             this.enableTrainingForm();
 
+            // Make Start Game button visible and enabled again
+            window.document.getElementById("controldiv").style.visibility = "visible";
+            startButton.style.display = ""; // Reset display (was set to "none" on click)
             startButton.disabled = false;
 
             break;

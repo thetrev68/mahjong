@@ -57,9 +57,19 @@ export class GameAI {
         }
 
         // For consistency and easier use later, sort by recommendation: KEEP, PASS, DISCARD
+        // Secondary sort: Jokers always first (never discard jokers unless absolutely no choice)
         recommendations.sort((a, b) => {
             const order = { [TILE_RECOMMENDATION.KEEP]: 0, [TILE_RECOMMENDATION.PASS]: 1, [TILE_RECOMMENDATION.DISCARD]: 2 };
-            return order[a.recommendation] - order[b.recommendation];
+            const orderDiff = order[a.recommendation] - order[b.recommendation];
+
+            // If same recommendation level, jokers come first
+            if (orderDiff === 0) {
+                const aIsJoker = a.tile.suit === SUIT.JOKER ? 1 : 0;
+                const bIsJoker = b.tile.suit === SUIT.JOKER ? 1 : 0;
+                return bIsJoker - aIsJoker; // Jokers (1) before non-jokers (0)
+            }
+
+            return orderDiff;
         });
 
 
