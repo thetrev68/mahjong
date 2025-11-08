@@ -230,6 +230,7 @@ export class GameLogic {
         this.discardTile = null;
         this.gameResult = {mahjong: false,
             winner: 0};
+        this.isSwappingBlank = false;
     }
 
     async init() {
@@ -1411,9 +1412,112 @@ export class GameLogic {
 
     initiateBlankSwap() {
         debugPrint("Initiating blank swap...");
-        // Placeholder for blank swap functionality
-        // Will be fully implemented in section 6
-        this.displayErrorText("Blank swap not yet implemented");
+
+        // Mark swap as in progress
+        this.isSwappingBlank = true;
+
+        // Disable game buttons during swap
+        this.disableAllButtons();
+
+        // Get the player's hand (human player at BOTTOM)
+        const playerHand = this.table.players[PLAYER.BOTTOM].hand;
+
+        // Get blank tiles in the player's hand
+        const blankTiles = playerHand.getHiddenTileArray().filter(tile => tile.suit === SUIT.BLANK);
+
+        if (blankTiles.length === 0) {
+            this.displayErrorText("No blank tiles in hand");
+            this.isSwappingBlank = false;
+            this.enableAllButtons();
+            return;
+        }
+
+        // Get selectable discards (non-jokers)
+        const selectableDiscards = this.table.discards.getSelectableDiscards();
+
+        if (selectableDiscards.length === 0) {
+            this.displayErrorText("No tiles available to swap for");
+            this.isSwappingBlank = false;
+            this.enableAllButtons();
+            return;
+        }
+
+        this.displayErrorText("Click a blank tile to swap, then select a discard tile");
+
+        // Enable selection of blank tiles in hand
+        const selectedBlankRef = { tile: null };
+        const blankSelectionHandler = (tile) => {
+            return () => {
+                if (selectedBlankRef.tile) {
+                    // Deselect previous blank
+                    selectedBlankRef.tile.sprite.clearTint();
+                }
+
+                // Select this blank
+                selectedBlankRef.tile = tile;
+                tile.sprite.setTint(0x00aa00); // Darker green for selected blank
+
+                // Now enable discard selection
+                this.table.discards.enableDiscardSelection((discardTile) => {
+                    // Perform the swap
+                    this.swapBlankForDiscard(tile, discardTile);
+                });
+            };
+        };
+
+        for (const blankTile of blankTiles) {
+            blankTile.sprite.setInteractive();
+            blankTile.sprite.setTint(0x00ff00); // Green tint for selectable blanks
+            blankTile.sprite.on("pointerup", blankSelectionHandler(blankTile));
+        }
+    }
+
+    swapBlankForDiscard(blankTile, discardTile) {
+        debugPrint("Swapping blank tile for discard tile:", discardTile.getText());
+
+        // Get the player's hand (human player at BOTTOM)
+        const playerHand = this.table.players[PLAYER.BOTTOM].hand;
+
+        // Remove blank from player's hand
+        playerHand.removeHidden(blankTile);
+
+        // Remove discard tile from discard pile
+        this.table.discards.removeDiscardTile(discardTile);
+
+        // Add discard tile to player's hand
+        playerHand.insertHidden(discardTile);
+
+        // Add blank to discard pile
+        this.table.discards.insertDiscard(blankTile);
+
+        // Disable discard selection
+        this.table.discards.disableDiscardSelection();
+
+        // Clean up blank tile selection handlers
+        const remainingBlanks = playerHand.getHiddenTileArray().filter(tile => tile.suit === SUIT.BLANK);
+        for (const blank of remainingBlanks) {
+            blank.sprite.clearTint();
+            blank.sprite.removeInteractive();
+            blank.sprite.off("pointerup");
+        }
+
+        // Update displays
+        playerHand.showHand(true);
+        this.table.discards.showDiscards();
+
+        // Reset swap state
+        this.isSwappingBlank = false;
+
+        // Re-enable game buttons
+        this.enableAllButtons();
+
+        // Display success message
+        this.displayErrorText("Blank swapped successfully!");
+
+        if (remainingBlanks.length > 0) {
+            // Offer to swap another blank
+            this.displayErrorText("Click 'Swap Blank' to swap another blank tile");
+        }
     }
 
     enableSortButtons() {

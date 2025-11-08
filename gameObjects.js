@@ -506,6 +506,8 @@ export class Wall {
 export class Discards {
     constructor() {
         this.tileArray = [];
+        this.selectionEnabled = false;
+        this.selectionCallback = null;
     }
 
     insertDiscard(tile) {
@@ -537,5 +539,55 @@ export class Discards {
           currentY += SPRITE_HEIGHT * DISCARD_SCALE + TILE_GAP;
         }
       }
+    }
+
+    getSelectableDiscards() {
+        // Return array of tiles in discard pile that aren't jokers
+        return this.tileArray.filter(tile => tile.suit !== SUIT.JOKER);
+    }
+
+    enableDiscardSelection(onSelectCallback) {
+        // Make non-joker discard tiles clickable
+        this.selectionEnabled = true;
+        this.selectionCallback = onSelectCallback;
+
+        for (const tile of this.getSelectableDiscards()) {
+            // Add pointer events to enable clicking
+            tile.sprite.setInteractive();
+            tile.sprite.on("pointerup", () => {
+                if (this.selectionEnabled && this.selectionCallback) {
+                    this.selectionCallback(tile);
+                }
+            });
+
+            // Visual feedback - highlight selectable tiles
+            tile.sprite.setTint(0xffff00); // Yellow tint to indicate selectable
+        }
+    }
+
+    disableDiscardSelection() {
+        // Disable discard selection and remove visual feedback
+        this.selectionEnabled = false;
+        this.selectionCallback = null;
+
+        for (const tile of this.tileArray) {
+            // Remove click handler and tint
+            tile.sprite.clearTint();
+            tile.sprite.removeInteractive();
+            tile.sprite.off("pointerup");
+        }
+    }
+
+    removeDiscardTile(tile) {
+        // Remove specific tile from discard pile
+        const index = this.tileArray.indexOf(tile);
+        if (index > -1) {
+            this.tileArray.splice(index, 1);
+            // Remove sprite from display
+            tile.sprite.destroy();
+            if (tile.spriteBack) {
+                tile.spriteBack.destroy();
+            }
+        }
     }
 }

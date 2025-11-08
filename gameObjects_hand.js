@@ -980,9 +980,9 @@ export class Hand {
 
                             if (this.gameLogic.state === STATE.CHARLESTON1 || this.gameLogic.state === STATE.CHARLESTON2 ||
                                 this.gameLogic.state === STATE.COURTESY) {
-                                if (tile.suit === SUIT.JOKER) {
+                                if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
                                     bSelectOk = false;
-                                    this.gameLogic.displayErrorText(" Joker cannot be passed during Charleston ");
+                                    this.gameLogic.displayErrorText(" Joker and Blank tiles cannot be passed during Charleston ");
                                 }
                             }
 
