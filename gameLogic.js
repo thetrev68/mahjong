@@ -1492,6 +1492,7 @@ export class GameLogic {
     }
 
     // Sequential dealing sequence with animation using Phaser tween callbacks
+    // Deals tiles in groups (4 at a time, then 1 at a time for final round)
     sequentialDealTiles(initPlayerHandArray, onComplete) {
         // Shuffle the wall before dealing
         this.table.wall.shuffle();
@@ -1499,37 +1500,36 @@ export class GameLogic {
         // Apply training hands and exposed sets before animated dealing
         this.table.applyTrainingHands(initPlayerHandArray);
 
-        // Define the dealing sequence for all 52 tiles
+        // Define the dealing sequence: each entry is [playerIndex, tileCount]
         const DEAL_SEQUENCE = [
-            // Round 1
-            ...Array(4).fill(PLAYER.BOTTOM),
-            ...Array(4).fill(PLAYER.RIGHT),
-            ...Array(4).fill(PLAYER.TOP),
-            ...Array(4).fill(PLAYER.LEFT),
-            // Round 2
-            ...Array(4).fill(PLAYER.BOTTOM),
-            ...Array(4).fill(PLAYER.RIGHT),
-            ...Array(4).fill(PLAYER.TOP),
-            ...Array(4).fill(PLAYER.LEFT),
-            // Round 3
-            ...Array(4).fill(PLAYER.BOTTOM),
-            ...Array(4).fill(PLAYER.RIGHT),
-            ...Array(4).fill(PLAYER.TOP),
-            ...Array(4).fill(PLAYER.LEFT),
-            // Final tiles
-            PLAYER.BOTTOM,
-            PLAYER.RIGHT,
-            PLAYER.TOP,
-            PLAYER.LEFT,
+            // Round 1 - 4 tiles each
+            [PLAYER.BOTTOM, 4],
+            [PLAYER.RIGHT, 4],
+            [PLAYER.TOP, 4],
+            [PLAYER.LEFT, 4],
+            // Round 2 - 4 tiles each
+            [PLAYER.BOTTOM, 4],
+            [PLAYER.RIGHT, 4],
+            [PLAYER.TOP, 4],
+            [PLAYER.LEFT, 4],
+            // Round 3 - 4 tiles each
+            [PLAYER.BOTTOM, 4],
+            [PLAYER.RIGHT, 4],
+            [PLAYER.TOP, 4],
+            [PLAYER.LEFT, 4],
+            // Final tiles - 1 tile each
+            [PLAYER.BOTTOM, 1],
+            [PLAYER.RIGHT, 1],
+            [PLAYER.TOP, 1],
+            [PLAYER.LEFT, 1],
             // Last tile for dealer
-            PLAYER.BOTTOM
+            [PLAYER.BOTTOM, 1]
         ];
 
-        // Process dealing sequence recursively using tween callbacks
-        let currentIndex = 0;
+        let currentStepIndex = 0;
 
-        const dealNextTile = () => {
-            if (currentIndex >= DEAL_SEQUENCE.length) {
+        const dealNextGroup = () => {
+            if (currentStepIndex >= DEAL_SEQUENCE.length) {
                 // All tiles dealt - finalize hands
                 this.table.finalizeInitialHands();
 
@@ -1540,50 +1540,43 @@ export class GameLogic {
                 return;
             }
 
-            const playerIndex = DEAL_SEQUENCE[currentIndex];
-            const tile = this.table.wall.remove();
-            if (!tile) {
-                throw new Error("No tiles remaining in wall during dealing sequence");
+            const [playerIndex, tileCount] = DEAL_SEQUENCE[currentStepIndex];
+
+            // Deal all tiles for this player at once
+            for (let i = 0; i < tileCount; i++) {
+                const tile = this.table.wall.remove();
+                if (!tile) {
+                    throw new Error("No tiles remaining in wall during dealing sequence");
+                }
+
+                this.table.players[playerIndex].hand.insertHidden(tile);
             }
 
-            this.table.players[playerIndex].hand.insertHidden(tile);
+            // Show all tiles at once (triggers animations for all)
             this.table.players[playerIndex].showHand(false);
 
-            // Update wall counter after each tile
+            // Update wall counter after dealing tiles
             this.scene.updateWallTileCounter(this.table.wall.getCount());
 
             // Get the last tile that was inserted to hook into its animation
             const hand = this.table.players[playerIndex].hand;
             const lastTile = hand.hiddenTileSet.tileArray[hand.hiddenTileSet.tileArray.length - 1];
 
-            // Check if we're switching players for the pause
-            const nextPlayerIndex = DEAL_SEQUENCE[currentIndex + 1];
-            const shouldPauseForPlayerSwitch = nextPlayerIndex !== undefined && nextPlayerIndex !== playerIndex;
-
-            // Wait for the tile's tween to complete, then deal next tile
+            // Wait for the last tile's tween to complete, then deal next group
             if (lastTile && lastTile.tween) {
                 lastTile.tween.once("complete", () => {
-                    currentIndex++;
-                    if (shouldPauseForPlayerSwitch) {
-                        // Add a 200ms pause when switching players
-                        this.scene.time.delayedCall(200, dealNextTile);
-                    } else {
-                        // Continue immediately to next tile for same player
-                        dealNextTile();
-                    }
+                    currentStepIndex++;
+                    // Add a small pause between players for visual clarity
+                    this.scene.time.delayedCall(150, dealNextGroup);
                 });
             } else {
                 // Fallback if no tween exists (shouldn't happen, but safety net)
-                currentIndex++;
-                if (shouldPauseForPlayerSwitch) {
-                    this.scene.time.delayedCall(200, dealNextTile);
-                } else {
-                    dealNextTile();
-                }
+                currentStepIndex++;
+                this.scene.time.delayedCall(150, dealNextGroup);
             }
         };
 
         // Start the dealing sequence
-        dealNextTile();
+        dealNextGroup();
     }
 }
