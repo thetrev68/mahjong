@@ -1,4 +1,4 @@
-import {printMessage, printInfo, debugPrint, printHint} from "./utils.js";
+import {printMessage, printInfo, debugPrint, printHint, sleep} from "./utils.js";
 import {STATE, PLAYER_OPTION, PLAYER, SUIT, VNUMBER} from "./constants.js";
 import {GameAI} from "./gameAI.js";
 import {Card} from "./card/card.js";
@@ -507,7 +507,7 @@ export class GameLogic {
 
             if (this.currPlayer !== PLAYER.BOTTOM) {
                 // eslint-disable-next-line no-await-in-loop
-                await this.sleep(500);
+                await sleep(500);
             }
 
             if (discardInfo.playerOption === PLAYER_OPTION.MAHJONG) {
@@ -1485,7 +1485,7 @@ export class GameLogic {
             const str = this.errorTextArray.shift();
             this.errorText.setText(str);
             // eslint-disable-next-line no-await-in-loop
-            await this.sleep(4000);
+            await sleep(4000);
             this.errorTextSemaphore--;
         }
         this.errorText.visible = false;
