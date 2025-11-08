@@ -9,20 +9,25 @@ test.describe("Game Initialization", () => {
   test("should load the game page successfully", async ({ page }) => {
     await page.goto("/");
 
+    // Wait for game to initialize
+    await page.waitForSelector("#controldiv", { state: "visible" });
+
     // Check for main game container
-    await expect(page.locator("#game-container")).toBeVisible();
+    await expect(page.locator("#parentdiv")).toBeVisible();
 
     // Check for start button
-    await expect(page.locator("#start-button")).toBeVisible();
+    await expect(page.locator("#start")).toBeVisible();
   });
 
   test("should show game controls", async ({ page }) => {
     await page.goto("/");
 
-    // Check for main control buttons
-    await expect(page.locator("#settings-button")).toBeVisible();
-    await expect(page.locator("#card-button")).toBeVisible();
-    await expect(page.locator("#log-button")).toBeVisible();
+    // Wait for game to initialize
+    await page.waitForSelector("#controldiv", { state: "visible" });
+
+    // Check for main control buttons (sort buttons are hidden initially)
+    await expect(page.locator("#settings")).toBeVisible();
+    await expect(page.locator("#start")).toBeVisible();
   });
 });
 
@@ -30,19 +35,22 @@ test.describe("Game Start", () => {
   test("should start a new game when Start Game is clicked", async ({ page }) => {
     await page.goto("/");
 
-    // Click start button
-    await page.click("#start-button");
-
     // Wait for game to initialize
-    await page.waitForTimeout(1000);
+    await page.waitForSelector("#controldiv", { state: "visible" });
 
-    // Check if game state has changed (tiles should be visible)
-    // This is a basic check - you'll want to add more specific assertions
-    const gameState = await page.evaluate(() => {
-      return window.game?.scene?.scenes[0]?.gameLogic?.table?.state;
-    });
+    // Verify start button is visible initially
+    const startButton = page.locator("#start");
+    await expect(startButton).toBeVisible();
+    await expect(startButton).toBeEnabled();
 
-    expect(gameState).toBeDefined();
+    // Click start button
+    await startButton.click();
+
+    // Wait for the game to hide the start button (proof that game started)
+    await page.waitForTimeout(500);
+
+    // Verify the button is now hidden (game successfully started)
+    await expect(startButton).toBeHidden();
   });
 });
 
@@ -50,57 +58,51 @@ test.describe("Settings Panel", () => {
   test("should open and close settings overlay", async ({ page }) => {
     await page.goto("/");
 
+    // Wait for game to initialize
+    await page.waitForSelector("#controldiv", { state: "visible" });
+
     // Open settings
-    await page.click("#settings-button");
+    await page.click("#settings");
     await expect(page.locator("#settings-overlay")).toBeVisible();
 
     // Close settings
-    await page.click("#close-settings");
+    await page.click("#settings-back");
     await expect(page.locator("#settings-overlay")).toBeHidden();
   });
 
   test("should toggle training mode", async ({ page }) => {
     await page.goto("/");
 
+    // Wait for game to initialize
+    await page.waitForSelector("#controldiv", { state: "visible" });
+
     // Open settings
-    await page.click("#settings-button");
+    await page.click("#settings");
 
     // Check initial state
-    const initialState = await page.isChecked("#training-mode");
+    const initialState = await page.isChecked("#trainCheckbox");
 
     // Toggle training mode
-    await page.click("#training-mode");
+    await page.click("#trainCheckbox");
 
     // Verify it changed
-    const newState = await page.isChecked("#training-mode");
+    const newState = await page.isChecked("#trainCheckbox");
     expect(newState).toBe(!initialState);
   });
 });
 
-test.describe("Game Log", () => {
-  test("should open and close game log", async ({ page }) => {
+test.describe("UI Elements", () => {
+  test("should display game log area", async ({ page }) => {
     await page.goto("/");
 
-    // Open log
-    await page.click("#log-button");
-    await expect(page.locator("#log-overlay")).toBeVisible();
-
-    // Close log
-    await page.click("#close-log");
-    await expect(page.locator("#log-overlay")).toBeHidden();
+    // Check that game log is visible
+    await expect(page.locator("#messages")).toBeVisible();
   });
-});
 
-test.describe("Card Display", () => {
-  test("should open and close card display", async ({ page }) => {
+  test("should display hint section", async ({ page }) => {
     await page.goto("/");
 
-    // Open card
-    await page.click("#card-button");
-    await expect(page.locator("#card-overlay")).toBeVisible();
-
-    // Close card
-    await page.click("#close-card");
-    await expect(page.locator("#card-overlay")).toBeHidden();
+    // Check that hint toggle button is visible
+    await expect(page.locator("#hint-toggle")).toBeVisible();
   });
 });

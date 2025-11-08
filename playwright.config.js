@@ -25,7 +25,7 @@ export default defineConfig({
   // Shared settings for all the projects below
   use: {
     // Base URL for tests (Vite dev server)
-    baseURL: "http://localhost:5173",
+    baseURL: "http://localhost:5173?playwright=true",
 
     // Collect trace when retrying the failed test
     trace: "on-first-retry",
