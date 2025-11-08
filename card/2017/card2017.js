@@ -11,7 +11,7 @@ import {handsSinglesPairs} from "../../card/2017/handsSinglesPairs.js";
 
 
 // PRIVATE CONSTANTS
-export const validHandGroups2017 = [
+export const validHandGroups = [
     hands2017,
     hands2468,
     handsLikeNumbers,
