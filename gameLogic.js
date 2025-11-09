@@ -132,12 +132,18 @@ class HintAnimationManager {
     getAllPlayerTiles() {
         const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand;
         const allTiles = [...hand.getHiddenTileArray()];
-        
+
         hand.exposedTileSetArray.forEach(set => {
             allTiles.push(...set.tileArray);
         });
-        
+
         return allTiles;
+    }
+
+    // Get only hidden tiles in player's hand
+    getHiddenPlayerTiles() {
+        const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand;
+        return hand.getHiddenTileArray();
     }
 
     // Update hint with new hand state
@@ -182,16 +188,19 @@ class HintAnimationManager {
     // Update hint panel text with colorized patterns
     updateHintDisplay(rankCardHands, recommendations) {
         let html = "<h3>Top Possible Hands:</h3>";
-        
-        // Get all player tiles for matching
+
+        // Get all player tiles for matching (includes exposed tiles)
         const playerTiles = this.getAllPlayerTiles();
-        
+
+        // Get only hidden tiles (for joker substitution availability)
+        const hiddenTiles = this.getHiddenPlayerTiles();
+
         for (let i = 0; i < Math.min(3, rankCardHands.length); i++) {
             const rankHand = rankCardHands[i];
             html += `<p><strong>${rankHand.group.groupDescription}</strong> - ${rankHand.hand.description} (Rank: ${rankHand.rank.toFixed(2)})</p>`;
-            
+
             // Render colorized pattern with matching
-            const patternHtml = renderPatternVariation(rankHand, playerTiles);
+            const patternHtml = renderPatternVariation(rankHand, playerTiles, hiddenTiles);
             html += patternHtml;
         }
 
@@ -1519,6 +1528,27 @@ export class GameLogic {
 
         // Remove discard tile from discard pile
         this.table.discards.removeDiscardTile(discardTile);
+
+        // CRITICAL: Destroy the discard tile's old sprite before moving it to hand
+        // The sprite was created in the discard pile's scene context and won't work in hand
+        if (discardTile.sprite) {
+            discardTile.sprite.destroy();
+            discardTile.sprite = null;
+        }
+        if (discardTile.spriteBack) {
+            discardTile.spriteBack.destroy();
+            discardTile.spriteBack = null;
+        }
+        if (discardTile.mask && discardTile.mask.geometryMask) {
+            discardTile.mask.geometryMask.destroy();
+            discardTile.mask = null;
+        }
+
+        // Update the tile's scene reference to the hand's scene
+        discardTile.scene = playerHand.scene;
+
+        // Recreate the sprite in the hand's scene context
+        discardTile.create();
 
         // Add discard tile to player's hand
         playerHand.insertHidden(discardTile);

@@ -229,6 +229,28 @@ export class GameAI {
             // Perform the swap
             hand.removeHidden(bestSwap.blank);
             this.table.discards.removeDiscardTile(bestSwap.discard);
+
+            // CRITICAL: Destroy the discard tile's old sprite before moving it to hand
+            // The sprite was created in the discard pile's scene context and won't work in hand
+            if (bestSwap.discard.sprite) {
+                bestSwap.discard.sprite.destroy();
+                bestSwap.discard.sprite = null;
+            }
+            if (bestSwap.discard.spriteBack) {
+                bestSwap.discard.spriteBack.destroy();
+                bestSwap.discard.spriteBack = null;
+            }
+            if (bestSwap.discard.mask && bestSwap.discard.mask.geometryMask) {
+                bestSwap.discard.mask.geometryMask.destroy();
+                bestSwap.discard.mask = null;
+            }
+
+            // Update the tile's scene reference to the hand's scene
+            bestSwap.discard.scene = hand.scene;
+
+            // Recreate the sprite in the hand's scene context
+            bestSwap.discard.create();
+
             hand.insertHidden(bestSwap.discard);
             this.table.discards.insertDiscard(bestSwap.blank);
 

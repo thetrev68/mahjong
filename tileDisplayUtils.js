@@ -112,10 +112,14 @@ function tally(tiles) {
 // Get display chars for pattern tiles, with matching against player's hand
 // Supports joker substitution only for components with count >=3
 /* knip-ignore */
-export function getPatternDisplayChars(patternTiles, playerTiles, componentCounts, isEvenHand, vsuitArray = null) {
+export function getPatternDisplayChars(patternTiles, playerTiles, componentCounts, isEvenHand, vsuitArray = null, hiddenTiles = null) {
   const playerCounts = tally(playerTiles);
   const usedCounts = new Map();
-  const jokerCount = playerCounts.get(`${SUIT.JOKER}-0`) || 0;
+
+  // Count available jokers - only hidden jokers can be used for substitution
+  // Exposed jokers are already committed and can't be used elsewhere
+  const hiddenCounts = hiddenTiles ? tally(hiddenTiles) : playerCounts;
+  const availableJokers = hiddenCounts.get(`${SUIT.JOKER}-0`) || 0;
   let usedJokers = 0;
 
   return patternTiles.map((tile, index) => {
@@ -130,13 +134,14 @@ export function getPatternDisplayChars(patternTiles, playerTiles, componentCount
     if (available > 0) {
       isMatched = true;
       usedCounts.set(key, (usedCounts.get(key) || 0) + 1);
-      
-      // Track when we use an actual joker tile
+
+      // Track when we use an actual joker tile (exposed or hidden)
       if (tile.suit === SUIT.JOKER) {
         usedJokers++;
       }
-    } else if (jokerCount > usedJokers && componentCount >= 3 && tile.suit !== SUIT.JOKER) {
+    } else if (availableJokers > usedJokers && componentCount >= 3 && tile.suit !== SUIT.JOKER) {
       // Joker substitution allowed only for pungs/kongs/quints
+      // Only use hidden jokers that aren't already committed to exposures
       isMatched = true;
       usedJokers++;
       display.char = "J"; // Display as J for substituted joker
@@ -162,7 +167,7 @@ export function getTileCharClasses(displayChar, invert = true) {
 }
 
 // Render the pattern with spacing per component
-export function renderPatternVariation(rankedHand, playerTiles) {
+export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = null) {
   const patternTiles = [];
   const componentCounts = [];
   const isEvenHand = rankedHand.hand.even || false;
@@ -205,7 +210,7 @@ export function renderPatternVariation(rankedHand, playerTiles) {
   // Only pass actual tiles to getPatternDisplayChars
   const actualTiles = patternTiles.filter(t => !t.isSpacer);
   const actualCounts = componentCounts.filter((_, i) => !patternTiles[i].isSpacer);
-  const displayChars = getPatternDisplayChars(actualTiles, playerTiles, actualCounts, isEvenHand, rankedHand.vsuitArray);
+  const displayChars = getPatternDisplayChars(actualTiles, playerTiles, actualCounts, isEvenHand, rankedHand.vsuitArray, hiddenTiles);
 
   // Reinsert spacers into displayChars
   const finalDisplay = [];
