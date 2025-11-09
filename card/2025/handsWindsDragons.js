@@ -1,8 +1,8 @@
 import {SUIT, WIND, DRAGON, VNUMBER} from "../../constants.js";
 
 // Rules for describing hands
-//  - put exact singles (non-virtual suit) first in components array
-//      (E.g. single white dragon used as 0)
+//  - Components must be in the exact order shown on the NMJL card
+//  - This order is used for display in the hint panel
 
 export const handsWindsDragons = {
     groupDescription: "WindsDragons",

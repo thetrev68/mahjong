@@ -1,8 +1,8 @@
 import {SUIT, DRAGON, WIND} from "../../constants.js";
 
 // Rules for describing hands
-//  - put exact singles (non-virtual suit) first in components array
-//      (E.g. single white dragon used as 0)
+//  - Components must be in the exact order shown on the NMJL card
+//  - This order is used for display in the hint panel
 
 export const hands2018 = {
     groupDescription: "2018",
@@ -22,12 +22,12 @@ export const hands2018 = {
                 {
                     suit: SUIT.DRAGON,
                     number: DRAGON.WHITE,
-                    count: 3
+                    count: 4
                 },
                 {
                     suit: SUIT.VSUIT2,
                     number: 1,
-                    count: 4
+                    count: 3
                 },
                 {
                     suit: SUIT.VSUIT3,
@@ -44,11 +44,6 @@ export const hands2018 = {
             even: false,
             components: [
                 {
-                    suit: SUIT.DRAGON,
-                    number: DRAGON.WHITE,
-                    count: 1
-                },
-                {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
@@ -56,6 +51,11 @@ export const hands2018 = {
                 {
                     suit: SUIT.VSUIT1,
                     number: 2,
+                    count: 1
+                },
+                {
+                    suit: SUIT.DRAGON,
+                    number: DRAGON.WHITE,
                     count: 1
                 },
                 {
@@ -88,11 +88,6 @@ export const hands2018 = {
             even: false,
             components: [
                 {
-                    suit: SUIT.DRAGON,
-                    number: DRAGON.WHITE,
-                    count: 1
-                },
-                {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
@@ -100,6 +95,11 @@ export const hands2018 = {
                 {
                     suit: SUIT.VSUIT1,
                     number: 2,
+                    count: 1
+                },
+                {
+                    suit: SUIT.DRAGON,
+                    number: DRAGON.WHITE,
                     count: 1
                 },
                 {
@@ -132,11 +132,6 @@ export const hands2018 = {
             even: false,
             components: [
                 {
-                    suit: SUIT.DRAGON,
-                    number: DRAGON.WHITE,
-                    count: 1
-                },
-                {
                     suit: SUIT.FLOWER,
                     number: 0,
                     count: 2
@@ -144,6 +139,11 @@ export const hands2018 = {
                 {
                     suit: SUIT.VSUIT1,
                     number: 2,
+                    count: 1
+                },
+                {
+                    suit: SUIT.DRAGON,
+                    number: DRAGON.WHITE,
                     count: 1
                 },
                 {
@@ -210,6 +210,16 @@ export const hands2018 = {
             even: false,
             components: [
                 {
+                    suit: SUIT.VSUIT1,
+                    number: 2,
+                    count: 2
+                },
+                {
+                    suit: SUIT.DRAGON,
+                    number: DRAGON.WHITE,
+                    count: 3
+                },
+                {
                     suit: SUIT.WIND,
                     number: WIND.NORTH,
                     count: 1
@@ -228,16 +238,6 @@ export const hands2018 = {
                     suit: SUIT.WIND,
                     number: WIND.SOUTH,
                     count: 1
-                },
-                {
-                    suit: SUIT.VSUIT1,
-                    number: 2,
-                    count: 2
-                },
-                {
-                    suit: SUIT.DRAGON,
-                    number: DRAGON.WHITE,
-                    count: 3
                 },
                 {
                     suit: SUIT.VSUIT1,

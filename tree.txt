@@ -3,9 +3,9 @@ mahjong/
 │   ├── audio/
 │   │   ├── 2404ba_bgm_loop.mp3
 │   │   ├── 2406haidao_bgm_loop.mp3
-│   │   ├── discard_tile.mp3
 │   │   ├── fireworks.mp3
 │   │   ├── normalflyin.mp3
+│   │   ├── rack_tile.mp3
 │   │   └── tile_dropping.mp3
 │   ├── back.png
 │   ├── tiles.json
@@ -74,36 +74,40 @@ mahjong/
 │   │   ├── handsQuints.js (96 lines)
 │   │   ├── handsSinglesPairs.js (416 lines)
 │   │   └── handsWindsDragons.js (379 lines)
-│   └── card.js (651 lines)
+│   └── card.js (665 lines)
+├── tests/
+│   └── game-basic.spec.js (80 lines)
+├── audioManager.js (92 lines)
+├── BLANK_TILES_IMPLEMENTATION_PLAN.md
 ├── CLAUDE.md
-├── constants.js (99 lines)
+├── constants.js (108 lines)
 ├── favicon.ico
 ├── favicon.svg
-├── gameAI.js (294 lines)
-├── gameLogic.js (1253 lines)
-├── gameObjects.js (453 lines)
-├── gameObjects_hand.js (1097 lines)
+├── gameAI.js (431 lines)
+├── gameLogic.js (1493 lines)
+├── gameObjects.js (509 lines)
+├── gameObjects_hand.js (1165 lines)
 ├── gameObjects_player.js (24 lines)
-├── gameObjects_table.js (414 lines)
-├── GameScene.js (330 lines)
-├── home-page-enhancement-plan.md
+├── gameObjects_table.js (418 lines)
+├── GameScene.js (338 lines)
 ├── homePageTileManager.js (226 lines)
-├── index.html (104 lines)
-├── main.js (22 lines)
+├── index.html (145 lines)
+├── main.js (27 lines)
+├── playwright.config.js (48 lines)
 ├── README.md
-├── settings.js (190 lines)
-├── styles.css (614 lines)
-├── tileDisplayUtils.js (202 lines)
-└── utils.js (35 lines)
+├── settings.js (324 lines)
+├── styles.css (756 lines)
+├── tileDisplayUtils.js (210 lines)
+└── utils.js (38 lines)
 
 ==================================================
 DIRECTORY TREE STATISTICS
 ==================================================
-Total directories: 8
-Total files: 88
-Files with line counts: 73
-Total lines of code: 20,650
+Total directories: 9
+Total files: 91
+Files with line counts: 76
+Total lines of code: 21,739
 
 Configuration:
-  Excluded directories: .archive, .claude, .geminiignore, .git, .github, .gitignore, .idea, .kilocode, .pytest_cache, .ruff_cache, .serena, .vite, .vscode, __pycache__, agents.md, backlog.md, build, claude.md, coverage, dist, docs, eslint.config.js, gemini.md, jules-scratch, knip.json, legacy, logs, node_modules, package-lock.json, package.json, public, tree.txt, tree_scanner.py, venv, vite.config.js
+  Excluded directories: .archive, .claude, .geminiignore, .git, .github, .gitignore, .idea, .kilocode, .pytest_cache, .ruff_cache, .serena, .vite, .vscode, __pycache__, agents.md, backlog.md, build, claude.md, coverage, dist, docs, eslint.config.js, gemini.md, jules-scratch, knip.json, legacy, logs, node_modules, package-lock.json, package.json, playwright-report, public, test-results, tree.txt, tree_scanner.py, venv, vite.config.js
   Line counting for: .c, .cpp, .css, .dart, .h, .html, .java, .js, .ts, .tsx
