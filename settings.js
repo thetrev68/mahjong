@@ -4,8 +4,12 @@ import {debugPrint} from "./utils.js";
 class SettingsManager {
     constructor() {
         this.overlay = document.getElementById("settings-overlay");
-        this.backButton = document.getElementById("settings-back");
+        this.saveButton = document.getElementById("settings-save");
+        this.cancelButton = document.getElementById("settings-cancel");
         this.settingsButton = document.getElementById("settings");
+
+        // Store original settings for cancel functionality
+        this.originalSettings = {};
 
         this.init();
         this.loadSettings();
@@ -17,57 +21,36 @@ class SettingsManager {
             this.showSettings();
         });
 
-        // Back button event listener
-        this.backButton.addEventListener("click", () => {
-            this.hideSettings();
+        // Save button event listener
+        this.saveButton.addEventListener("click", () => {
+            this.saveAndClose();
+        });
+
+        // Cancel button event listener
+        this.cancelButton.addEventListener("click", () => {
+            this.cancelAndClose();
         });
 
         // Close on overlay click (outside container)
         this.overlay.addEventListener("click", (event) => {
             if (event.target === this.overlay) {
-                this.hideSettings();
+                this.cancelAndClose();
             }
         });
 
-        // Close on Escape key
+        // Close on Escape key - cancel instead of back
         document.addEventListener("keydown", (event) => {
             if (event.key === "Escape" && this.overlay.style.display !== "none") {
-                this.hideSettings();
+                this.cancelAndClose();
             }
         });
 
-        // Training mode checkbox change listener
+        // Training mode checkbox change listener - only update visibility, don't auto-save
         const trainCheckbox = document.getElementById("trainCheckbox");
         if (trainCheckbox) {
             trainCheckbox.addEventListener("change", () => {
                 this.updateTrainingFormVisibility();
-                this.saveTrainingSettings();
             });
-        }
-
-        // Training form change listeners for auto-save
-        const handSelect = document.getElementById("handSelect");
-        const numTileSelect = document.getElementById("numTileSelect");
-        const skipCharlestonCheckbox = document.getElementById("skipCharlestonCheckbox");
-        const yearSelect = document.getElementById("yearSelect");
-
-        if (handSelect) {
-            handSelect.addEventListener("change", () => this.saveTrainingSettings());
-        }
-        if (numTileSelect) {
-            numTileSelect.addEventListener("change", () => this.saveTrainingSettings());
-        }
-        if (skipCharlestonCheckbox) {
-            skipCharlestonCheckbox.addEventListener("change", () => this.saveTrainingSettings());
-        }
-        if (yearSelect) {
-            yearSelect.addEventListener("change", () => this.saveYearSettings());
-        }
-
-        // House rules event listeners
-        const useBlankTiles = document.getElementById("useBlankTiles");
-        if (useBlankTiles) {
-            useBlankTiles.addEventListener("change", () => this.saveHouseRuleSettings());
         }
 
         // Audio controls event listeners
@@ -76,14 +59,89 @@ class SettingsManager {
 
     showSettings() {
         this.overlay.style.display = "flex";
+        // Store current settings state for cancel functionality
+        this.storeCurrentSettingsState();
         // Focus management for accessibility
-        this.backButton.focus();
+        this.saveButton.focus();
     }
 
     hideSettings() {
         this.overlay.style.display = "none";
         // Return focus to settings button
         this.settingsButton.focus();
+    }
+
+    storeCurrentSettingsState() {
+        // Store all current UI values to restore if user cancels
+        this.originalSettings = {
+            trainingMode: document.getElementById("trainCheckbox")?.checked ?? false,
+            trainingHand: document.getElementById("handSelect")?.value ?? "",
+            trainingTileCount: document.getElementById("numTileSelect")?.value ?? "9",
+            skipCharleston: document.getElementById("skipCharlestonCheckbox")?.checked ?? false,
+            cardYear: document.getElementById("yearSelect")?.value ?? "2025",
+            useBlankTiles: document.getElementById("useBlankTiles")?.checked ?? false,
+            bgmVolume: document.getElementById("bgmVolume")?.value ?? "70",
+            bgmMuted: document.getElementById("bgmMute")?.checked ?? false,
+            sfxVolume: document.getElementById("sfxVolume")?.value ?? "80",
+            sfxMuted: document.getElementById("sfxMute")?.checked ?? false
+        };
+    }
+
+    restoreOriginalSettings() {
+        // Restore all UI elements to their original values
+        const trainCheckbox = document.getElementById("trainCheckbox");
+        const handSelect = document.getElementById("handSelect");
+        const numTileSelect = document.getElementById("numTileSelect");
+        const skipCharlestonCheckbox = document.getElementById("skipCharlestonCheckbox");
+        const yearSelect = document.getElementById("yearSelect");
+        const useBlankTiles = document.getElementById("useBlankTiles");
+        const bgmVolumeSlider = document.getElementById("bgmVolume");
+        const bgmVolumeValue = document.getElementById("bgmVolumeValue");
+        const bgmMuteCheckbox = document.getElementById("bgmMute");
+        const sfxVolumeSlider = document.getElementById("sfxVolume");
+        const sfxVolumeValue = document.getElementById("sfxVolumeValue");
+        const sfxMuteCheckbox = document.getElementById("sfxMute");
+
+        if (trainCheckbox) trainCheckbox.checked = this.originalSettings.trainingMode;
+        if (handSelect) handSelect.value = this.originalSettings.trainingHand;
+        if (numTileSelect) numTileSelect.value = this.originalSettings.trainingTileCount;
+        if (skipCharlestonCheckbox) skipCharlestonCheckbox.checked = this.originalSettings.skipCharleston;
+        if (yearSelect) yearSelect.value = this.originalSettings.cardYear;
+        if (useBlankTiles) useBlankTiles.checked = this.originalSettings.useBlankTiles;
+
+        if (bgmVolumeSlider) {
+            bgmVolumeSlider.value = this.originalSettings.bgmVolume;
+            if (bgmVolumeValue) {
+                bgmVolumeValue.textContent = `${this.originalSettings.bgmVolume}%`;
+            }
+        }
+        if (bgmMuteCheckbox) bgmMuteCheckbox.checked = this.originalSettings.bgmMuted;
+
+        if (sfxVolumeSlider) {
+            sfxVolumeSlider.value = this.originalSettings.sfxVolume;
+            if (sfxVolumeValue) {
+                sfxVolumeValue.textContent = `${this.originalSettings.sfxVolume}%`;
+            }
+        }
+        if (sfxMuteCheckbox) sfxMuteCheckbox.checked = this.originalSettings.sfxMuted;
+
+        // Update form visibility
+        this.updateTrainingFormVisibility();
+    }
+
+    saveAndClose() {
+        // Save all current settings
+        this.saveTrainingSettings();
+        this.saveYearSettings();
+        this.saveHouseRuleSettings();
+        this.saveAudioSettings();
+        this.hideSettings();
+    }
+
+    cancelAndClose() {
+        // Restore original settings and close without saving
+        this.restoreOriginalSettings();
+        this.hideSettings();
     }
 
     getCardYear() {
@@ -237,6 +295,28 @@ class SettingsManager {
         }
     }
 
+    saveAudioSettings() {
+        const bgmVolumeSlider = document.getElementById("bgmVolume");
+        const bgmMuteCheckbox = document.getElementById("bgmMute");
+        const sfxVolumeSlider = document.getElementById("sfxVolume");
+        const sfxMuteCheckbox = document.getElementById("sfxMute");
+
+        if (bgmVolumeSlider) {
+            const volume = parseInt(bgmVolumeSlider.value, 10) / 100;
+            this.saveSetting("bgmVolume", volume);
+        }
+        if (bgmMuteCheckbox) {
+            this.saveSetting("bgmMuted", bgmMuteCheckbox.checked);
+        }
+        if (sfxVolumeSlider) {
+            const volume = parseInt(sfxVolumeSlider.value, 10) / 100;
+            this.saveSetting("sfxVolume", volume);
+        }
+        if (sfxMuteCheckbox) {
+            this.saveSetting("sfxMuted", sfxMuteCheckbox.checked);
+        }
+    }
+
     applyHouseRuleSettings(settings) {
         const useBlankTiles = document.getElementById("useBlankTiles");
         if (useBlankTiles && Object.prototype.hasOwnProperty.call(settings, "useBlankTiles")) {
@@ -290,7 +370,7 @@ class SettingsManager {
             sfxMuteCheckbox.checked = savedSfxMuted;
         }
 
-        // BGM volume slider
+        // BGM volume slider - update UI and audio manager, but don't save to localStorage yet
         if (bgmVolumeSlider) {
             bgmVolumeSlider.addEventListener("input", (e) => {
                 const volume = parseInt(e.target.value, 10) / 100;
@@ -298,37 +378,33 @@ class SettingsManager {
                 if (bgmVolumeValue) {
                     bgmVolumeValue.textContent = `${e.target.value}%`;
                 }
-                this.saveSetting("bgmVolume", volume);
                 this.updateAudioManager("bgmVolume", volume);
             });
         }
 
-        // BGM mute checkbox
+        // BGM mute checkbox - update audio manager, but don't save to localStorage yet
         if (bgmMuteCheckbox) {
             bgmMuteCheckbox.addEventListener("change", (e) => {
                 const muted = e.target.checked;
-                this.saveSetting("bgmMuted", muted);
                 this.updateAudioManager("bgmMuted", muted);
             });
         }
 
-        // SFX volume slider
+        // SFX volume slider - update UI and audio manager, but don't save to localStorage yet
         if (sfxVolumeSlider) {
             sfxVolumeSlider.addEventListener("input", (e) => {
                 const volume = parseInt(e.target.value, 10) / 100;
                 if (sfxVolumeValue) {
                     sfxVolumeValue.textContent = `${e.target.value}%`;
                 }
-                this.saveSetting("sfxVolume", volume);
                 this.updateAudioManager("sfxVolume", volume);
             });
         }
 
-        // SFX mute checkbox
+        // SFX mute checkbox - update audio manager, but don't save to localStorage yet
         if (sfxMuteCheckbox) {
             sfxMuteCheckbox.addEventListener("change", (e) => {
                 const muted = e.target.checked;
-                this.saveSetting("sfxMuted", muted);
                 this.updateAudioManager("sfxMuted", muted);
             });
         }

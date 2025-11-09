@@ -539,6 +539,7 @@ select:focus {
 .settings-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: var(--spacing-md);
     padding: var(--spacing-lg) var(--spacing-xl);
     background: linear-gradient(180deg, rgba(6, 36, 21, 0.95) 0%, rgba(4, 22, 13, 0.97) 100%);
@@ -546,24 +547,52 @@ select:focus {
     backdrop-filter: blur(6px);
 }
 
-.settings-back-button {
+.settings-header-actions {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.settings-button {
     appearance: none;
-    background: none;
     border: none;
-    color: var(--color-accent);
     font-size: var(--font-size-sm);
     font-weight: 600;
     cursor: pointer;
-    padding: var(--spacing-xs) var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-lg);
     border-radius: var(--radius-sm);
-    transition: background-color 120ms ease;
+    transition: background-color 120ms ease, transform 120ms ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.settings-back-button:hover,
-.settings-back-button:focus-visible {
-    background: rgba(255, 209, 102, 0.1);
+.settings-button--primary {
+    background: var(--color-accent);
+    color: var(--color-accent-contrast);
+}
+
+.settings-button--primary:hover,
+.settings-button--primary:focus-visible {
+    background: var(--color-accent-dark);
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.settings-button--secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.settings-button--secondary:hover,
+.settings-button--secondary:focus-visible {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
     outline: 2px solid rgba(255, 209, 102, 0.36);
     outline-offset: 2px;
+}
+
+.settings-button:active {
+    transform: scale(0.98);
 }
 
 .settings-title {
@@ -571,6 +600,8 @@ select:focus {
     font-weight: 600;
     color: var(--color-text-primary);
     margin: 0;
+    flex-grow: 1;
+    text-align: center;
 }
 
 .settings-content {
@@ -805,12 +836,12 @@ select:focus {
     .button,
     #uicenterdiv,
     .sidebar__section,
-    .settings-back-button {
+    .settings-button {
         transition: none;
     }
 
     .button:hover,
-    .settings-back-button:hover {
+    .settings-button:hover {
         transform: none;
     }
 }

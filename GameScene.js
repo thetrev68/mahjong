@@ -393,7 +393,9 @@ class GameScene extends Phaser.Scene {
                 console.warn("[GameScene] Fireworks display failed:", error);
                 // Clean up on error
                 emittersList.forEach(emitter => {
-                    try { emitter.destroy(); } catch (e) { /* ignore */ }
+                    try { emitter.destroy(); } catch {
+                        /* ignore errors during cleanup */
+                    }
                 });
                 resolve();
             }
