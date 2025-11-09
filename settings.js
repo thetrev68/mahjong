@@ -145,6 +145,11 @@ class SettingsManager {
         if (yearChanged && window.game && window.game.scene && window.game.scene.getScene("GameScene")) {
             const scene = window.game.scene.getScene("GameScene");
             if (scene.gGameLogic) {
+                // Clear hand select before reinitializing
+                const handSelect = document.getElementById("handSelect");
+                if (handSelect) {
+                    handSelect.innerHTML = "";
+                }
                 // Reinitialize card with new year
                 scene.gGameLogic.init().then(() => {
                     debugPrint(`Card year updated to ${newYear}`);
