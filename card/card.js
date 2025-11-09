@@ -135,6 +135,52 @@ export class Card {
         return this.validateHand(test, hand.isAllHidden());
     }
 
+    // Diagnose why a hand is invalid by finding the closest matching hand
+    // and identifying which tiles match vs. don't match
+    diagnoseInvalidHand(hand) {
+        // Get all possible hands ranked by closeness
+        const rankedHands = this.rankHandArray14(hand);
+        this.sortHandRankArray(rankedHands);
+        
+        // The top-ranked hand is the closest match
+        const closestMatch = rankedHands[0];
+        
+        // Collect all tiles that matched components
+        const matchedTiles = new Set();
+        for (const componentInfo of closestMatch.componentInfoArray) {
+            for (const tile of componentInfo.tileArray) {
+                matchedTiles.add(tile);
+            }
+        }
+        
+        // Get all tiles in hand (hidden + exposed)
+        const allTiles = [];
+        allTiles.push(...hand.getHiddenTileArray());
+        for (const tileSet of hand.exposedTileSetArray) {
+            allTiles.push(...tileSet.tileArray);
+        }
+        
+        // Separate into matching and non-matching tiles
+        const matchingTiles = [];
+        const nonMatchingTiles = [];
+        
+        for (const tile of allTiles) {
+            if (matchedTiles.has(tile)) {
+                matchingTiles.push(tile);
+            } else {
+                nonMatchingTiles.push(tile);
+            }
+        }
+        
+        return {
+            closestHand: closestMatch.hand.description,
+            closestGroup: closestMatch.group.groupDescription,
+            rank: closestMatch.rank,
+            matchingTiles,
+            nonMatchingTiles
+        };
+    }
+
     validateHand13(hand, singleTile) {
         // Consolidate hand + singleTile to test array
         const test = hand.getTileArray();

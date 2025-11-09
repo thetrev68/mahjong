@@ -1379,10 +1379,27 @@ export class GameLogic {
                     hand.sortSuitHidden();
                     this.table.players[this.gameResult.winner].showHand(true);
                 } else {
-                    const str = "Game over - Invalid Mahjong by player " + this.gameResult.winner;
+                    // Invalid mahjong - show diagnostics
+                    const diagnostics = this.card.diagnoseInvalidHand(hand);
+
+                    let str = "Game over - Invalid Mahjong by player " + this.gameResult.winner;
                     printMessage(str + "\n");
                     printInfo(str);
                     debugPrint(str + "\n");
+
+                    str = "Closest hand: " + diagnostics.closestGroup + " - " + diagnostics.closestHand;
+                    printMessage(str + "\n");
+                    printInfo(str);
+
+                    str = "Rank: " + diagnostics.rank.toFixed(2) + "% match";
+                    printMessage(str + "\n");
+
+                    // Show the hand with highlighting
+                    hand.sortSuitHidden();
+                    this.table.players[this.gameResult.winner].showHand(true);
+
+                    // Apply visual highlighting (green = matching, red = non-matching)
+                    this.highlightInvalidMahjongTiles(diagnostics);
                 }
             } else {
                 const str = "Game over - Wall game";
@@ -1713,6 +1730,20 @@ export class GameLogic {
         } else {
             this.errorTextSemaphore++;
             this.errorTextArray.push(str);
+        }
+    }
+
+    // Highlight tiles for invalid mahjong diagnosis
+    // Green for matching tiles, red for non-matching tiles
+    highlightInvalidMahjongTiles(diagnostics) {
+        // Apply green glow to matching tiles
+        for (const tile of diagnostics.matchingTiles) {
+            tile.addGlowEffect(this.scene, 0x00ff00, 0.7); // Green
+        }
+
+        // Apply red glow to non-matching tiles
+        for (const tile of diagnostics.nonMatchingTiles) {
+            tile.addGlowEffect(this.scene, 0xff0000, 0.7); // Red
         }
     }
 
