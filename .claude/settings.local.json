@@ -2,12 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(npm test:*)",
-      "mcp__serena__find_symbol",
-      "mcp__serena__search_for_pattern",
       "Bash(npm run lint:*)",
       "Bash(npm run build:*)",
       "Bash(pkill:*)",
-      "Bash(exit)"
+      "Bash(exit)",
+      "mcp__serena__*"
     ],
     "deny": [],
     "ask": []

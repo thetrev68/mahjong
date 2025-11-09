@@ -71,9 +71,4 @@ This document provides a high-level analysis of potential new features for the A
 *   **Time:** 20-30 hours (includes asset creation)
 *   **Benefit:** Medium. Adds personalization and visual variety.
 
-### 15. Game Over Hand Analysis and Explanation
-*   **Description:** When the game ends without the player winning, instead of just displaying "GAME OVER - INVALID MAHJONG BY PLAYER 0", provide a detailed tile-by-tile analysis of the player's hand. Highlight incorrect tiles visually in the hand display and provide a verbal explanation of what was wrong with the hand and how it could have been improved.
-*   **Difficulty:** Medium
-*   **Effort:** Medium
-*   **Time:** 10-15 hours
-*   **Benefit:** High. Helps players understand their mistakes, learn the game better, and improve their strategy for future games.
+
