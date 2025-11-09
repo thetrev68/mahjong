@@ -370,6 +370,14 @@ class TileSet {
             this.tileArray.splice(index, 1);
         }
 
+        // Destroy the sprites to clear them from the display
+        if (tile.sprite) {
+            tile.sprite.destroy();
+        }
+        if (tile.spriteBack) {
+            tile.spriteBack.destroy();
+        }
+
         return tile;
     }
 
