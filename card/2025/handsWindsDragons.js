@@ -285,13 +285,18 @@ export const handsWindsDragons = {
                 {
                     suit: SUIT.VSUIT1,
                     number: 2,
-                    count: 2
+                    count: 1
                 },
                 {
                     suit: SUIT.DRAGON,
                     number: DRAGON.WHITE,
                     count: 1
                 },
+                {
+                    suit: SUIT.VSUIT1,
+                    number: 2,
+                    count: 1
+                },                
                 {
                     suit: SUIT.VSUIT1,
                     number: 5,
@@ -329,13 +334,18 @@ export const handsWindsDragons = {
                 {
                     suit: SUIT.VSUIT1,
                     number: 2,
-                    count: 2
+                    count: 1
                 },
                 {
                     suit: SUIT.DRAGON,
                     number: DRAGON.WHITE,
                     count: 1
                 },
+                {
+                    suit: SUIT.VSUIT1,
+                    number: 2,
+                    count: 1
+                },                
                 {
                     suit: SUIT.VSUIT1,
                     number: 5,

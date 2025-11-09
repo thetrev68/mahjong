@@ -91,14 +91,20 @@ class GameScene extends Phaser.Scene {
                 // Hide the button after it's clicked
                 startButton.style.display = "none";
 
-                this.homePageTileManager.onAnimationComplete = async () => {
-                    await this.homePageTileManager.transitionToWallSystem();
-                    this.homePageTileManager.cleanup();
-                    this.homePageTileManager = null; // Release reference
+                if (this.homePageTileManager) {
+                    // First game - animate tiles and transition
+                    this.homePageTileManager.onAnimationComplete = async () => {
+                        await this.homePageTileManager.transitionToWallSystem();
+                        this.homePageTileManager.cleanup();
+                        this.homePageTileManager = null; // Release reference
 
+                        this.gGameLogic.start();
+                    };
+                    this.homePageTileManager.animateToPileAndStartGame();
+                } else {
+                    // Subsequent games - start directly without animation
                     this.gGameLogic.start();
-                };
-                this.homePageTileManager.animateToPileAndStartGame();
+                }
             });
         }
     }

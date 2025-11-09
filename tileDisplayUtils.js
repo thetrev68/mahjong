@@ -33,28 +33,27 @@ export function getTileDisplayChar(tile, isEvenHand = false, vsuitArray = null) 
     return { char: windChars[tile.number] || "?", color: SUIT_COLORS[SUIT.WIND], tile };
   }
   if (tile.suit === SUIT.DRAGON || tile.suit >= SUIT.VSUIT1_DRAGON && tile.suit <= SUIT.VSUIT3_DRAGON) {
-    // White dragons always display as 0 and are blue
-    if (tile.number === DRAGON.WHITE) {
+    // White dragon as "0" (soap): Only when suit is SUIT.DRAGON and number is DRAGON.WHITE
+    if (tile.suit === SUIT.DRAGON && tile.number === DRAGON.WHITE) {
       return { char: "0", color: "blue", tile };
     }
-    
-    // For all other dragons (red, green, and virtual dragons with number 0 or 1) - display as D
-    const dragonChars = { [DRAGON.RED]: "D", [DRAGON.GREEN]: "D" };
-    
-    // For virtual suit dragons with number 0, treat as DRAGON.RED for display purposes
-    let displayNumber = tile.number;
-    if (tile.suit >= SUIT.VSUIT1_DRAGON && tile.suit <= SUIT.VSUIT3_DRAGON) {
-      if (tile.number === 0) {
-        displayNumber = DRAGON.RED; // Treat 0 as red dragon for virtual dragons
-      }
-    }
-    
+
+    // All other cases display as "D" - includes:
+    // - SUIT.DRAGON with number RED (0) or GREEN (1)
+    // - SUIT.VSUITx_DRAGON with number 0 (colored dragons matching their suit)
+
     let dragonColor = "blue"; // default
     if (tile.suit === SUIT.DRAGON) {
-      // Regular dragon - use suit color
-      dragonColor = SUIT_COLORS[SUIT.DRAGON] || "blue";
+      // Regular dragon - color depends on the dragon type (number)
+      // RED (0) = red, GREEN (1) = green, WHITE (2) = blue (though WHITE is handled above as "0")
+      const dragonColors = {
+        [DRAGON.RED]: "red",
+        [DRAGON.GREEN]: "green",
+        [DRAGON.WHITE]: "blue"
+      };
+      dragonColor = dragonColors[tile.number] || "blue";
     } else if (tile.suit >= SUIT.VSUIT1_DRAGON && tile.suit <= SUIT.VSUIT3_DRAGON) {
-      // Virtual suit dragons - should match their corresponding virtual suit color using vsuitArray
+      // Virtual suit dragons - match their corresponding virtual suit color using vsuitArray
       if (vsuitArray) {
         // Map virtual dragon to real suit using vsuitArray
         const realSuit = vsuitArray[tile.suit - SUIT.VSUIT1_DRAGON];
@@ -66,8 +65,8 @@ export function getTileDisplayChar(tile, isEvenHand = false, vsuitArray = null) 
         dragonColor = vsuitColors[vsuitIndex] || "blue";
       }
     }
-    
-    return { char: dragonChars[displayNumber] || "D", color: dragonColor, tile };
+
+    return { char: "D", color: dragonColor, tile };
   }
   if (tile.number >= 1 && tile.number <= 9) {
     // Handle virtual suits with dynamic color mapping
@@ -112,7 +111,7 @@ function tally(tiles) {
 // Get display chars for pattern tiles, with matching against player's hand
 // Supports joker substitution only for components with count >=3
 /* knip-ignore */
-export function getPatternDisplayChars(patternTiles, playerTiles, componentCounts, isEvenHand, vsuitArray = null, hiddenTiles = null) {
+export function getPatternDisplayChars(patternTiles, playerTiles, componentCounts, isEvenHand, vsuitArray = null, hiddenTiles = null, consecutiveMapping = null) {
   const playerCounts = tally(playerTiles);
   const usedCounts = new Map();
 
@@ -123,7 +122,21 @@ export function getPatternDisplayChars(patternTiles, playerTiles, componentCount
   let usedJokers = 0;
 
   return patternTiles.map((tile, index) => {
-    const display = getTileDisplayChar(tile, isEvenHand, vsuitArray);
+    let display;
+
+    // Use the consistent consecutive mapping for display if provided
+    if (consecutiveMapping && tile.number >= VNUMBER.CONSECUTIVE1 && tile.number <= VNUMBER.CONSECUTIVE7) {
+      const mappedNumber = consecutiveMapping.get(tile.number);
+      if (mappedNumber !== undefined) {
+        const modifiedTile = { ...tile, number: mappedNumber };
+        display = getTileDisplayChar(modifiedTile, isEvenHand, vsuitArray);
+      } else {
+        display = getTileDisplayChar(tile, isEvenHand, vsuitArray);
+      }
+    } else {
+      display = getTileDisplayChar(tile, isEvenHand, vsuitArray);
+    }
+
     const key = `${tile.suit}-${tile.number}`;
     const componentCount = componentCounts[index];
 
@@ -172,6 +185,31 @@ export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = nu
   const componentCounts = [];
   const isEvenHand = rankedHand.hand.even || false;
 
+  // Build a consistent mapping for VNUMBER.CONSECUTIVE values by examining actual matched tiles
+  // This ensures all CONSECUTIVE1 instances resolve to the same number across the entire hand
+  const consecutiveMapping = new Map();
+
+  rankedHand.componentInfoArray.forEach(component => {
+    if (component.tileArray && component.tileArray.length > 0) {
+      // Check if this component uses a consecutive number
+      const componentNumber = component.component.number;
+      if (componentNumber >= VNUMBER.CONSECUTIVE1 && componentNumber <= VNUMBER.CONSECUTIVE7) {
+        // Find the actual number from the matched tiles (excluding jokers)
+        const actualTile = component.tileArray.find(tile => tile.suit !== SUIT.JOKER);
+        if (actualTile && consecutiveMapping.size === 0) {
+          // Found the first consecutive number - use it to map ALL consecutive numbers
+          const consecutiveIndex = componentNumber - VNUMBER.CONSECUTIVE1; // 0-6
+          const baseNumber = actualTile.number - consecutiveIndex; // The number that corresponds to CONSECUTIVE1
+
+          // Map all 7 consecutive numbers based on this base
+          for (let i = 0; i < 7; i++) {
+            consecutiveMapping.set(VNUMBER.CONSECUTIVE1 + i, baseNumber + i);
+          }
+        }
+      }
+    }
+  });
+
   // Use original component order
   rankedHand.componentInfoArray.forEach((component, compIndex) => {
     const expectedCount = component.component.count;
@@ -210,7 +248,7 @@ export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = nu
   // Only pass actual tiles to getPatternDisplayChars
   const actualTiles = patternTiles.filter(t => !t.isSpacer);
   const actualCounts = componentCounts.filter((_, i) => !patternTiles[i].isSpacer);
-  const displayChars = getPatternDisplayChars(actualTiles, playerTiles, actualCounts, isEvenHand, rankedHand.vsuitArray, hiddenTiles);
+  const displayChars = getPatternDisplayChars(actualTiles, playerTiles, actualCounts, isEvenHand, rankedHand.vsuitArray, hiddenTiles, consecutiveMapping);
 
   // Reinsert spacers into displayChars
   const finalDisplay = [];

@@ -35,14 +35,6 @@ This document provides a high-level analysis of potential new features for the A
 *   **Benefit:** Medium. Adds a nice touch of personalization to the game.
 
 
-### 9. House Rules Section
-
-*   **Description:** Add a "House Rules" section to the settings page, starting with an option to "use blanks."
-*   **Difficulty:** Low
-*   **Effort:** Medium (depending on the number of rules)
-*   **Time:** 5-10 hours
-*   **Benefit:** High. Adds a great deal of flexibility and replayability to the game.
-
 ### 10. End Game Screen Animation
 
 *   **Description:** Design a more elaborate end-game screen with animations and a summary for both wall games and Mahjongs.
