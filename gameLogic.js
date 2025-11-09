@@ -20,18 +20,19 @@ class HintAnimationManager {
     applyGlowToDiscardSuggestions(recommendations) {
         this.clearAllGlows();
 
-        // Filter to only DISCARD recommendations (exclude KEEP)
+        // Filter to only DISCARD recommendations
         const discardRecs = recommendations.filter(rec =>
-            rec.tile.suit !== SUIT.INVALID && rec.recommendation !== "KEEP"
+            rec.tile.suit !== SUIT.INVALID && rec.recommendation === "DISCARD"
         );
 
-        const top3Recs = discardRecs.slice(0, 3);
+        // Highlight ALL discard recommendations (not limited to 3)
+        // This ensures we show all available discards, even if only 1 or 2
         const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand;
 
         // Track which tiles we've already highlighted to handle duplicates
         const highlightedTiles = new Set();
 
-        top3Recs.forEach((rec, index) => {
+        discardRecs.forEach((rec, index) => {
             debugPrint(`Processing tile ${index + 1}: ${rec.tile.getText()} with recommendation ${rec.recommendation}`); // Debug log
 
             const targetTile = this.findNextUnhighlightedTileInHand(hand, rec.tile, highlightedTiles);
@@ -46,7 +47,7 @@ class HintAnimationManager {
             }
         });
 
-        debugPrint(`Applied glow to ${this.glowedTiles.length} tiles out of ${top3Recs.length} discard tiles requested`); // Debug log
+        debugPrint(`Applied glow to ${this.glowedTiles.length} tiles out of ${discardRecs.length} discard tiles requested`); // Debug log
 
         // Store current hint data for state management
         this.currentHintData = {recommendations: [...recommendations]};
@@ -202,11 +203,13 @@ class HintAnimationManager {
 
         for (let i = 0; i < Math.min(3, rankCardHands.length); i++) {
             const rankHand = rankCardHands[i];
-            const isConsidered = i < consideredPatternCount;
+            // Pattern #1 (index 0) is never dimmed
+            const isConsidered = i === 0 || i < consideredPatternCount;
             const dimStyle = isConsidered ? "" : "opacity: 0.4;";
 
             html += `<p style="${dimStyle}"><strong>${rankHand.group.groupDescription}</strong> - ${rankHand.hand.description} (Rank: ${rankHand.rank.toFixed(2)})`;
-            if (!isConsidered) {
+            // Only show "not considered" label for patterns after #1
+            if (!isConsidered && i > 0) {
                 html += ` <em>(not considered)</em>`;
             }
             html += `</p>`;
@@ -217,10 +220,14 @@ class HintAnimationManager {
         }
 
         html += "<h3>Discard Suggestions (Best to Discard First):</h3>";
-        const validRecommendations = recommendations.filter(rec => rec.tile.suit !== SUIT.INVALID);
-        for (let i = 0; i < Math.min(3, validRecommendations.length); i++) {
-            const rec = validRecommendations[i];
-            html += `<p>${rec.tile.getText()} (Action: ${rec.recommendation})</p>`;
+        // Only show DISCARD recommendations, and limit to actual count available (not artificially capped at 3)
+        const discardRecommendations = recommendations.filter(rec =>
+            rec.tile.suit !== SUIT.INVALID && rec.recommendation === "DISCARD"
+        );
+        const displayCount = discardRecommendations.length;
+        for (let i = 0; i < displayCount; i++) {
+            const rec = discardRecommendations[i];
+            html += `<p>${rec.tile.getText()}</p>`;
         }
 
         printHint(html);
