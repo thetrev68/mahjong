@@ -583,11 +583,8 @@ export class Discards {
         const index = this.tileArray.indexOf(tile);
         if (index > -1) {
             this.tileArray.splice(index, 1);
-            // Remove sprite from display
-            tile.sprite.destroy();
-            if (tile.spriteBack) {
-                tile.spriteBack.destroy();
-            }
         }
+        // Note: Sprite is NOT destroyed to allow tile reuse (e.g., blank tile swaps)
+        return tile;
     }
 }

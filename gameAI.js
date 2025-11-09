@@ -153,7 +153,7 @@ export class GameAI {
     }
 
     // Return true if hand is modified by swapping blanks for discard tiles
-    // AI strategy: Only swap blanks for discard tiles when hand rank improves significantly
+    // AI strategy: Blanks are extremely valuable - only trade them for critical tiles very late in game
     exchangeBlanksForDiscards(currPlayer, hand) {
         // Get all blanks in the player's hand
         const blankArray = hand.getHiddenTileArray().filter(tile => tile.suit === SUIT.BLANK);
@@ -163,8 +163,10 @@ export class GameAI {
             return false;
         }
 
-        // Get discards (excluding jokers - can't swap for jokers)
-        const discardArray = this.table.discards.tileArray.filter(tile => tile.suit !== SUIT.JOKER);
+        // Get discards (excluding jokers and blanks - can't swap for those)
+        const discardArray = this.table.discards.tileArray.filter(tile =>
+            tile.suit !== SUIT.JOKER && tile.suit !== SUIT.BLANK
+        );
 
         // If no swappable discards, can't improve
         if (discardArray.length === 0) {
@@ -176,15 +178,17 @@ export class GameAI {
         const sortedRankCardHands = [...rankCardHands].sort((a, b) => b.rank - a.rank);
         const currentBestRank = sortedRankCardHands[0].rank;
 
-        // Conservative strategy: only swap if hand is relatively weak (rank < 50)
-        // and the swap would significantly improve it (gain > 10)
-        if (currentBestRank > 60) {
-            debugPrint("exchangeBlanksForDiscards: Hand rank too high (" + currentBestRank + "), skipping swaps\n");
+        // AI should be EXTREMELY conservative about trading blanks
+        // Only consider if:
+        // 1. Hand rank is already very high (>80) - close to winning
+        // 2. The swap would result in immediate Mahjong or massive improvement (>20 points)
+        if (currentBestRank < 80) {
+            debugPrint("exchangeBlanksForDiscards: Hand rank too low (" + currentBestRank + "), hoarding blanks\n");
             return false;
         }
 
         let bestSwap = null;
-        let bestRankGain = 5; // Minimum threshold: must improve by at least 5 points
+        let bestRankGain = 20; // Very high threshold: must improve by at least 20 points
 
         // For each blank in hand
         for (const blank of blankArray) {
@@ -218,8 +222,8 @@ export class GameAI {
             }
         }
 
-        // If we found a beneficial swap, execute it
-        if (bestSwap && bestRankGain > 5) {
+        // Only execute swap if it gives massive improvement
+        if (bestSwap && bestRankGain > 20) {
             debugPrint("exchangeBlanksForDiscards: Executing swap with rank gain: " + bestRankGain + "\n");
 
             // Perform the swap
