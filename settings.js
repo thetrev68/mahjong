@@ -130,11 +130,28 @@ class SettingsManager {
     }
 
     saveAndClose() {
+        // Check if card year changed before saving
+        const oldYear = this.getSetting("cardYear", "2025");
+        const newYear = document.getElementById("yearSelect")?.value ?? "2025";
+        const yearChanged = oldYear !== newYear;
+
         // Save all current settings
         this.saveTrainingSettings();
         this.saveYearSettings();
         this.saveHouseRuleSettings();
         this.saveAudioSettings();
+
+        // If year changed, reinitialize the card in game logic
+        if (yearChanged && window.game && window.game.scene && window.game.scene.getScene("GameScene")) {
+            const scene = window.game.scene.getScene("GameScene");
+            if (scene.gGameLogic) {
+                // Reinitialize card with new year
+                scene.gGameLogic.init().then(() => {
+                    debugPrint(`Card year updated to ${newYear}`);
+                });
+            }
+        }
+
         this.hideSettings();
     }
 
