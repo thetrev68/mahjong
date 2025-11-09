@@ -20,18 +20,20 @@ class HintAnimationManager {
     applyGlowToDiscardSuggestions(recommendations) {
         this.clearAllGlows();
 
-        const top3Recs = recommendations.slice(0, 3);
+        // Filter to only DISCARD and PASS recommendations (exclude KEEP)
+        const discardRecs = recommendations.filter(rec =>
+            rec.tile.suit !== SUIT.INVALID && rec.recommendation !== "KEEP"
+        );
+
+        const top3Recs = discardRecs.slice(0, 3);
         const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand;
 
         // Track which tiles we've already highlighted to handle duplicates
         const highlightedTiles = new Set();
 
-        // Filter out invalid tiles
-        const validTopRecs = top3Recs.filter(rec => rec.tile.suit !== SUIT.INVALID);
-        
-        validTopRecs.forEach((rec, index) => {
+        top3Recs.forEach((rec, index) => {
             debugPrint(`Processing tile ${index + 1}: ${rec.tile.getText()} with recommendation ${rec.recommendation}`); // Debug log
-            
+
             const targetTile = this.findNextUnhighlightedTileInHand(hand, rec.tile, highlightedTiles);
             if (targetTile) {
                 debugPrint(`Applying red glow to tile: ${targetTile.getText()}`); // Debug log
@@ -43,8 +45,8 @@ class HintAnimationManager {
                 debugPrint(`Could not find tile for: ${rec.tile.getText()}`); // Debug log
             }
         });
-        
-        debugPrint(`Applied glow to ${this.glowedTiles.length} tiles out of ${validTopRecs.length} valid tiles requested`); // Debug log
+
+        debugPrint(`Applied glow to ${this.glowedTiles.length} tiles out of ${top3Recs.length} discard/pass tiles requested`); // Debug log
 
         // Store current hint data for state management
         this.currentHintData = {recommendations: [...recommendations]};

@@ -37,27 +37,55 @@ export class GameAI {
         const recommendations = [];
         const rankCardHands = this.card.rankHandArray14(hand);
         const sortedRankCardHands = [...rankCardHands].sort((a, b) => b.rank - a.rank);
-
-        const topPatterns = sortedRankCardHands.slice(0, 3);
-        const mediumPatterns = sortedRankCardHands.slice(3, 8);
-
         const handTiles = hand.getHiddenTileArray();
+
+        // Dynamically determine how many patterns to consider for KEEP
+        // Start with all patterns and reduce until we have at least 3 discardable tiles
+        let keepPatternCount = sortedRankCardHands.length;
+
+        while (keepPatternCount > 0) {
+            const keepPatterns = sortedRankCardHands.slice(0, keepPatternCount);
+
+            // Count how many tiles would NOT be marked as KEEP (i.e., discardable)
+            let discardableCount = 0;
+            for (const tile of handTiles) {
+                // Jokers and blanks are always KEEP, so skip them
+                if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
+                    continue;
+                }
+                // If tile is not needed in any keep pattern, it's discardable
+                if (!this.isNeededInPatterns(tile, keepPatterns)) {
+                    discardableCount++;
+                }
+            }
+
+            // If we have at least 3 discardable tiles, we're done
+            if (discardableCount >= 3) {
+                break;
+            }
+
+            // Not enough discardable tiles, reduce the number of patterns considered
+            keepPatternCount--;
+        }
+
+        // Now generate recommendations with the determined pattern count
+        const keepPatterns = sortedRankCardHands.slice(0, keepPatternCount);
+
         for (const tile of handTiles) {
             let recommendation = TILE_RECOMMENDATION.DISCARD; // Default to DISCARD
 
             if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
                 // Blanks and jokers are always kept - AI should never discard them
                 recommendation = TILE_RECOMMENDATION.KEEP;
-            } else if (this.isNeededInPatterns(tile, topPatterns)) {
+            } else if (this.isNeededInPatterns(tile, keepPatterns)) {
                 recommendation = TILE_RECOMMENDATION.KEEP;
-            } else if (this.isNeededInPatterns(tile, mediumPatterns)) {
-                recommendation = TILE_RECOMMENDATION.PASS;
             }
+            // No PASS category anymore - tiles are either KEEP or DISCARD
 
             recommendations.push({ tile, recommendation });
         }
 
-        // For consistency and easier use later, sort by recommendation: KEEP, PASS, DISCARD
+        // For consistency and easier use later, sort by recommendation: KEEP, DISCARD
         // Secondary sort: Jokers and blanks always first (never discard unless absolutely no choice)
         recommendations.sort((a, b) => {
             const order = { [TILE_RECOMMENDATION.KEEP]: 0, [TILE_RECOMMENDATION.PASS]: 1, [TILE_RECOMMENDATION.DISCARD]: 2 };
