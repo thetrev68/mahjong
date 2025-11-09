@@ -571,10 +571,12 @@ export class Discards {
         this.selectionCallback = null;
 
         for (const tile of this.tileArray) {
-            // Remove click handler and tint
-            tile.sprite.clearTint();
-            tile.sprite.removeInteractive();
-            tile.sprite.off("pointerup");
+            // Remove click handler and tint (check if sprite exists first)
+            if (tile.sprite) {
+                tile.sprite.clearTint();
+                tile.sprite.removeInteractive();
+                tile.sprite.off("pointerup");
+            }
         }
     }
 

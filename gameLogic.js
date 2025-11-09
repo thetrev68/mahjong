@@ -1530,7 +1530,7 @@ export class GameLogic {
         this.table.discards.removeDiscardTile(discardTile);
 
         // CRITICAL: Destroy the discard tile's old sprite before moving it to hand
-        // The sprite was created in the discard pile's scene context and won't work in hand
+        // The sprite needs to be recreated for proper positioning and interaction
         if (discardTile.sprite) {
             discardTile.sprite.destroy();
             discardTile.sprite = null;
@@ -1544,14 +1544,31 @@ export class GameLogic {
             discardTile.mask = null;
         }
 
-        // Update the tile's scene reference to the hand's scene
-        discardTile.scene = playerHand.scene;
-
-        // Recreate the sprite in the hand's scene context
+        // All tiles share the same scene (main game scene)
+        // No need to update scene reference - just recreate the sprite
         discardTile.create();
 
         // Add discard tile to player's hand
         playerHand.insertHidden(discardTile);
+
+        // CRITICAL: Destroy the blank tile's old sprite before moving it to discard pile
+        // The sprite was created in the hand's scene context and needs to be recreated for discard
+        if (blankTile.sprite) {
+            blankTile.sprite.destroy();
+            blankTile.sprite = null;
+        }
+        if (blankTile.spriteBack) {
+            blankTile.spriteBack.destroy();
+            blankTile.spriteBack = null;
+        }
+        if (blankTile.mask && blankTile.mask.geometryMask) {
+            blankTile.mask.geometryMask.destroy();
+            blankTile.mask = null;
+        }
+
+        // Scene is the same for all tiles (the main game scene)
+        // No need to update scene reference - just recreate the sprite
+        blankTile.create();
 
         // Add blank to discard pile
         this.table.discards.insertDiscard(blankTile);
@@ -1567,23 +1584,24 @@ export class GameLogic {
             blank.sprite.off("pointerup");
         }
 
+        // Sort hand by suit (like after drawing a tile)
+        playerHand.sortSuitHidden();
+
         // Update displays
-        playerHand.showHand(true);
+        this.table.players[PLAYER.BOTTOM].showHand(true);
         this.table.discards.showDiscards();
 
         // Reset swap state
         this.isSwappingBlank = false;
 
-        // Re-enable game buttons
-        this.enableAllButtons();
+        // Re-enable game buttons and restore UI state for current game state
+        this.updateUI();
+
+        // Update hints after blank swap
+        this.hintAnimationManager.updateHintsForNewTiles();
 
         // Display success message
-        this.displayErrorText("Blank swapped successfully!");
-
-        if (remainingBlanks.length > 0) {
-            // Offer to swap another blank
-            this.displayErrorText("Click 'Swap Blank' to swap another blank tile");
-        }
+        this.displayErrorText("Blank swapped successfully! Select a tile to discard.");
     }
 
     enableSortButtons() {
