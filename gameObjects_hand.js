@@ -281,8 +281,16 @@ class TileSet {
             }
 
             debugPrint(`showTileSetInRack: Animating tile ${tile.getText()} to x=${x}, y=${y}, angle=${playerInfo.angle}`);
-            // Use fixed duration for newly inserted tiles to keep sounds synchronized
-            const fixedDuration = tile.isNewlyInserted ? 600 : null; // 600ms for consistent timing
+            // Stagger animation timing: each tile finishes slightly earlier based on index
+            // This creates a rapid-fire "click-click-click-click" sound effect instead of a single loud click
+            let fixedDuration = null;
+            if (tile.isNewlyInserted) {
+                const baseAnimationTime = 400; // Base animation duration in ms (reduced from 600 for faster dealing)
+                const staggerPerTile = 70; // Time offset between tiles in ms (reduced from 100)
+                // Tile 0 finishes at 120ms, tile 1 at 190ms, tile 2 at 260ms, tile 3 at 330ms
+                // This creates an overlapping animation with staggered sound effects
+                fixedDuration = baseAnimationTime - (this.tileArray.length - 1 - i) * staggerPerTile;
+            }
             const tween = tile.animate(x, y, playerInfo.angle, fixedDuration);
 
             // Play rack tile sound ONLY for newly inserted tiles (not for tiles sliding to make room)
@@ -323,8 +331,16 @@ class TileSet {
             }
 
             debugPrint(`showTileSetInRackVertical: Animating tile ${tile.getText()} to x=${x}, y=${y}, angle=${playerInfo.angle}`);
-            // Use fixed duration for newly inserted tiles to keep sounds synchronized
-            const fixedDuration = tile.isNewlyInserted ? 600 : null; // 600ms for consistent timing
+            // Stagger animation timing: each tile finishes slightly earlier based on index
+            // This creates a rapid-fire "click-click-click-click" sound effect instead of a single loud click
+            let fixedDuration = null;
+            if (tile.isNewlyInserted) {
+                const baseAnimationTime = 400; // Base animation duration in ms (reduced from 600 for faster dealing)
+                const staggerPerTile = 70; // Time offset between tiles in ms (reduced from 100)
+                // Tile 0 finishes at 120ms, tile 1 at 190ms, tile 2 at 260ms, tile 3 at 330ms
+                // This creates an overlapping animation with staggered sound effects
+                fixedDuration = baseAnimationTime - (this.tileArray.length - 1 - i) * staggerPerTile;
+            }
             const tween = tile.animate(x, y, playerInfo.angle, fixedDuration);
 
             // Play rack tile sound ONLY for newly inserted tiles (not for tiles sliding to make room)

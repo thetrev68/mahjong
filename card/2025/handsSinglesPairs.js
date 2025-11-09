@@ -360,7 +360,7 @@ export const handsSinglesPairs = {
                 {
                     suit: SUIT.DRAGON,
                     number: DRAGON.WHITE,
-                    count: 3
+                    count: 1
                 },
                 {
                     suit: SUIT.VSUIT1,
@@ -381,7 +381,7 @@ export const handsSinglesPairs = {
                 {
                     suit: SUIT.DRAGON,
                     number: DRAGON.WHITE,
-                    count: 3
+                    count: 1
                 },
                 {
                     suit: SUIT.VSUIT2,
@@ -401,7 +401,7 @@ export const handsSinglesPairs = {
                 {
                     suit: SUIT.DRAGON,
                     number: DRAGON.WHITE,
-                    count: 3
+                    count: 1
                 },
                 {
                     suit: SUIT.VSUIT3,
