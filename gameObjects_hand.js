@@ -370,12 +370,13 @@ class TileSet {
             this.tileArray.splice(index, 1);
         }
 
-        // Destroy the sprites to clear them from the display
+        // Hide the sprites and remove them from display without destroying
+        // (tiles will be reused when drawn again)
         if (tile.sprite) {
-            tile.sprite.destroy();
+            tile.sprite.visible = false;
         }
         if (tile.spriteBack) {
-            tile.spriteBack.destroy();
+            tile.spriteBack.visible = false;
         }
 
         return tile;
