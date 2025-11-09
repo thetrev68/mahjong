@@ -115,6 +115,7 @@ class TileSet {
 
         this.moveFlowerToFront();
         this.moveJokerToFront();
+        this.moveBlankToFront();
     }
 
     sortSuit() {
@@ -127,6 +128,7 @@ class TileSet {
 
         this.moveFlowerToFront();
         this.moveJokerToFront();
+        this.moveBlankToFront();
     }
 
     moveJokerToFront() {
@@ -143,6 +145,24 @@ class TileSet {
             this.tileArray.splice(this.tileArray.indexOf(tile), 1);
             // Insert in front of array
             this.tileArray.unshift(tile);
+        }
+    }
+
+    moveBlankToFront() {
+        const blanks = [];
+
+        for (const tile of this.tileArray) {
+            if (tile.suit === SUIT.BLANK) {
+                blanks.unshift(tile);
+            }
+        }
+
+        for (const tile of blanks) {
+            // Remove tile
+            this.tileArray.splice(this.tileArray.indexOf(tile), 1);
+            // Insert after jokers
+            const jokerCount = this.tileArray.filter(t => t.suit === SUIT.JOKER).length;
+            this.tileArray.splice(jokerCount, 0, tile);
         }
     }
 

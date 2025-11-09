@@ -149,6 +149,22 @@ export class Card {
     // Input - tile array of length 14, allHidden
     // Output - validation info object
     validateHand(test, allHidden) {
+        // Filter out blank tiles before validation
+        const validationTiles = test.filter(tile => tile.suit !== SUIT.BLANK);
+
+        // Must have exactly 14 non-blank tiles to win
+        if (validationTiles.length !== 14) {
+            return {
+                valid: false,
+                tileCount: test.length,
+                numJokers: 0,
+                minNumLow: 9999,
+                minNumHigh: 9999,
+                suits: [],
+                allHidden
+            };
+        }
+
         // Validation info
         const info = {
             valid: false,
@@ -161,7 +177,7 @@ export class Card {
         };
 
         // Determine all suits  (dragons will be translated to CRACK, bam, dot)
-        for (const tile of test) {
+        for (const tile of validationTiles) {
             let suit = tile.suit;
             if (suit === SUIT.DRAGON) {
                 suit = tile.number;
@@ -177,7 +193,7 @@ export class Card {
         // Determine tile with smallest number
         info.minNumLow = 9999;
         info.minNumHigh = 9999;
-        for (const tile of test) {
+        for (const tile of validationTiles) {
             if (tile.suit === SUIT.CRACK || tile.suit === SUIT.BAM || tile.suit === SUIT.DOT) {
                 if (tile.number < info.minNumHigh) {
                     info.minNumHigh = tile.number;
@@ -192,7 +208,7 @@ export class Card {
         }
 
         // Validate number of tiles
-        info.tileCount = test.length;
+        info.tileCount = validationTiles.length;
 
         if (info.tileCount !== 14) {
             return info;
@@ -209,7 +225,7 @@ export class Card {
 
                 debugTrace("Match hand: " + validHand.description + "\n");
 
-                if (this.matchHand(test, info, group, validHand)) {
+                if (this.matchHand(validationTiles, info, group, validHand)) {
                     debugTrace("Match hand: found match\n");
                     found = true;
                     break outerLoop;
