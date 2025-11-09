@@ -336,35 +336,26 @@ class GameScene extends Phaser.Scene {
                 return;
             }
 
-            // Create 5-7 fireworks emitters at random locations
-            const numFireworks = Phaser.Math.Between(5, 7);
-            const fireworksEmitters = [];
             const canvasWidth = this.sys.game.canvas.width;
             const canvasHeight = this.sys.game.canvas.height;
-
-            // Create particle manager for fireworks
-            const particles = this.add.particles("particle");
-            particles.setDepth(300); // High depth to appear above everything
+            const numFireworks = Phaser.Math.Between(5, 7);
+            const emittersList = [];
 
             try {
                 // Play firework sound effect (if available)
-                // this.sound.play("fireworks", { volume: 0.4 });
+                // this.audioManager.playSFX("fireworks");
 
-                // Create multiple fireworks
+                // Create multiple fireworks with individual emitters (Phaser 3.60+ API)
                 for (let i = 0; i < numFireworks; i++) {
                     // Random position on screen
                     const x = Phaser.Math.Between(100, canvasWidth - 100);
                     const y = Phaser.Math.Between(100, canvasHeight - 200);
 
-                    // Create emitter for this firework
-                    const emitter = particles.createEmitter({
-                        // Firework burst configuration
-                        x: x,
-                        y: y,
+                    // Create emitter directly using Phaser 3.60+ API
+                    const emitter = this.add.particles(x, y, "particle", {
                         speed: { min: 200, max: 400 },
                         angle: { min: 0, max: 360 },
                         lifespan: { min: 1200, max: 1800 },
-                        quantity: Phaser.Math.Between(15, 25),
                         gravityY: 300,
                         scale: { start: 0.8, end: 0 },
                         alpha: { start: 1, end: 0 },
@@ -376,30 +367,34 @@ class GameScene extends Phaser.Scene {
                             0xff6600, // Orange
                             0xcc66ff  // Purple
                         ],
-                        blendMode: "ADD",
-                        on: false // Will be triggered manually
+                        blendMode: "ADD"
                     });
 
-                    fireworksEmitters.push(emitter);
+                    emitter.setDepth(300); // High depth to appear above everything
+
+                    emittersList.push(emitter);
 
                     // Stagger the firework explosions
                     this.time.delayedCall(i * 300, () => {
-                        emitter.explode(Phaser.Math.Between(15, 25), x, y);
+                        const quantity = Phaser.Math.Between(15, 25);
+                        emitter.emitParticleAt(x, y, quantity);
                     });
                 }
 
                 // Resolve promise after all fireworks should be complete
                 const totalDuration = (numFireworks - 1) * 300 + 2000; // Last firework + fade time
                 this.time.delayedCall(totalDuration, () => {
-                    // Clean up particles and emitters
-                    particles.destroy();
+                    // Clean up emitters
+                    emittersList.forEach(emitter => emitter.destroy());
                     resolve();
                 });
 
             } catch (error) {
                 console.warn("[GameScene] Fireworks display failed:", error);
                 // Clean up on error
-                if (particles) particles.destroy();
+                emittersList.forEach(emitter => {
+                    try { emitter.destroy(); } catch (e) { /* ignore */ }
+                });
                 resolve();
             }
         });

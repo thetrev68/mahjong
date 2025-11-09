@@ -2,6 +2,9 @@
 node_modules/
 /dist
 
+# Playwright test results
+test-results/
+
 # Logs
 logs
 *.log
@@ -73,5 +76,7 @@ web_modules/
 
 # parcel-bundler cache files
 .cache
+
+
 
 
