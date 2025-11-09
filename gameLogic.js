@@ -20,7 +20,7 @@ class HintAnimationManager {
     applyGlowToDiscardSuggestions(recommendations) {
         this.clearAllGlows();
 
-        // Filter to only DISCARD and PASS recommendations (exclude KEEP)
+        // Filter to only DISCARD recommendations (exclude KEEP)
         const discardRecs = recommendations.filter(rec =>
             rec.tile.suit !== SUIT.INVALID && rec.recommendation !== "KEEP"
         );
@@ -46,7 +46,7 @@ class HintAnimationManager {
             }
         });
 
-        debugPrint(`Applied glow to ${this.glowedTiles.length} tiles out of ${top3Recs.length} discard/pass tiles requested`); // Debug log
+        debugPrint(`Applied glow to ${this.glowedTiles.length} tiles out of ${top3Recs.length} discard tiles requested`); // Debug log
 
         // Store current hint data for state management
         this.currentHintData = {recommendations: [...recommendations]};
@@ -124,10 +124,13 @@ class HintAnimationManager {
             hand.insertHidden(invalidTile);
         }
 
-        const recommendations = this.gameLogic.gameAI.getTileRecommendations(hand);
-        
-        // Reverse for display: DISCARD, PASS, KEEP
-        return recommendations.reverse();
+        const result = this.gameLogic.gameAI.getTileRecommendations(hand);
+
+        // Reverse recommendations for display: DISCARD, PASS, KEEP
+        return {
+            recommendations: result.recommendations.reverse(),
+            consideredPatternCount: result.consideredPatternCount
+        };
     }
 
     // Get all tiles in player's hand (hidden + exposed)
@@ -158,7 +161,7 @@ class HintAnimationManager {
         }
 
         // Panel is expanded, proceed with full update including glow effects
-        const recommendations = this.getRecommendations();
+        const result = this.getRecommendations();
         const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand.dupHand();
         if (hand.getLength() === 13) {
             hand.insertHidden(new Tile(SUIT.INVALID, VNUMBER.INVALID));
@@ -167,15 +170,15 @@ class HintAnimationManager {
         this.gameLogic.card.sortHandRankArray(rankCardHands);
 
         // Update visual glow effects (only if panel is expanded)
-        this.applyGlowToDiscardSuggestions(recommendations);
+        this.applyGlowToDiscardSuggestions(result.recommendations);
 
         // Always update hint text content
-        this.updateHintDisplay(rankCardHands, recommendations);
+        this.updateHintDisplay(rankCardHands, result.recommendations, result.consideredPatternCount);
     }
 
     // New method for updating hint text without glow effects
     updateHintDisplayOnly() {
-        const recommendations = this.getRecommendations();
+        const result = this.getRecommendations();
         const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand.dupHand();
         if (hand.getLength() === 13) {
             hand.insertHidden(new Tile(SUIT.INVALID, VNUMBER.INVALID));
@@ -184,11 +187,11 @@ class HintAnimationManager {
         this.gameLogic.card.sortHandRankArray(rankCardHands);
 
         // Update hint text content only (no glow effects)
-        this.updateHintDisplay(rankCardHands, recommendations);
+        this.updateHintDisplay(rankCardHands, result.recommendations, result.consideredPatternCount);
     }
 
     // Update hint panel text with colorized patterns
-    updateHintDisplay(rankCardHands, recommendations) {
+    updateHintDisplay(rankCardHands, recommendations, consideredPatternCount) {
         let html = "<h3>Top Possible Hands:</h3>";
 
         // Get all player tiles for matching (includes exposed tiles)
@@ -199,11 +202,18 @@ class HintAnimationManager {
 
         for (let i = 0; i < Math.min(3, rankCardHands.length); i++) {
             const rankHand = rankCardHands[i];
-            html += `<p><strong>${rankHand.group.groupDescription}</strong> - ${rankHand.hand.description} (Rank: ${rankHand.rank.toFixed(2)})</p>`;
+            const isConsidered = i < consideredPatternCount;
+            const dimStyle = isConsidered ? "" : "opacity: 0.4;";
+
+            html += `<p style="${dimStyle}"><strong>${rankHand.group.groupDescription}</strong> - ${rankHand.hand.description} (Rank: ${rankHand.rank.toFixed(2)})`;
+            if (!isConsidered) {
+                html += ` <em>(not considered)</em>`;
+            }
+            html += `</p>`;
 
             // Render colorized pattern with matching
             const patternHtml = renderPatternVariation(rankHand, playerTiles, hiddenTiles);
-            html += patternHtml;
+            html += `<div style="${dimStyle}">${patternHtml}</div>`;
         }
 
         html += "<h3>Discard Suggestions (Best to Discard First):</h3>";

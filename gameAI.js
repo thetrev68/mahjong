@@ -39,25 +39,29 @@ export class GameAI {
         const sortedRankCardHands = [...rankCardHands].sort((a, b) => b.rank - a.rank);
         const handTiles = hand.getHiddenTileArray();
 
-        // Dynamically determine how many patterns to consider for KEEP
+        debugPrint(`Total patterns available: ${sortedRankCardHands.length}`);
+
+        // Dynamically determine how many patterns to consider
         // Start with all patterns and reduce until we have at least 3 discardable tiles
-        let keepPatternCount = sortedRankCardHands.length;
+        let patternCount = sortedRankCardHands.length;
 
-        while (keepPatternCount > 0) {
-            const keepPatterns = sortedRankCardHands.slice(0, keepPatternCount);
+        while (patternCount > 0) {
+            const consideredPatterns = sortedRankCardHands.slice(0, patternCount);
 
-            // Count how many tiles would NOT be marked as KEEP (i.e., discardable)
+            // Count how many tiles would NOT be needed in any considered pattern (i.e., discardable)
             let discardableCount = 0;
             for (const tile of handTiles) {
                 // Jokers and blanks are always KEEP, so skip them
                 if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
                     continue;
                 }
-                // If tile is not needed in any keep pattern, it's discardable
-                if (!this.isNeededInPatterns(tile, keepPatterns)) {
+                // If tile is not needed in any considered pattern, it's discardable
+                if (!this.isNeededInPatterns(tile, consideredPatterns)) {
                     discardableCount++;
                 }
             }
+
+            debugPrint(`Considering ${patternCount} patterns: ${discardableCount} discardable tiles`);
 
             // If we have at least 3 discardable tiles, we're done
             if (discardableCount >= 3) {
@@ -65,11 +69,13 @@ export class GameAI {
             }
 
             // Not enough discardable tiles, reduce the number of patterns considered
-            keepPatternCount--;
+            patternCount--;
         }
 
+        debugPrint(`Final decision: considering ${patternCount} patterns`);
+
         // Now generate recommendations with the determined pattern count
-        const keepPatterns = sortedRankCardHands.slice(0, keepPatternCount);
+        const consideredPatterns = sortedRankCardHands.slice(0, patternCount);
 
         for (const tile of handTiles) {
             let recommendation = TILE_RECOMMENDATION.DISCARD; // Default to DISCARD
@@ -77,16 +83,15 @@ export class GameAI {
             if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
                 // Blanks and jokers are always kept - AI should never discard them
                 recommendation = TILE_RECOMMENDATION.KEEP;
-            } else if (this.isNeededInPatterns(tile, keepPatterns)) {
+            } else if (this.isNeededInPatterns(tile, consideredPatterns)) {
                 recommendation = TILE_RECOMMENDATION.KEEP;
             }
-            // No PASS category anymore - tiles are either KEEP or DISCARD
 
             recommendations.push({ tile, recommendation });
         }
 
         // For consistency and easier use later, sort by recommendation: KEEP, DISCARD
-        // Secondary sort: Jokers and blanks always first (never discard unless absolutely no choice)
+        // Secondary sort: Jokers and blanks always first
         recommendations.sort((a, b) => {
             const order = { [TILE_RECOMMENDATION.KEEP]: 0, [TILE_RECOMMENDATION.PASS]: 1, [TILE_RECOMMENDATION.DISCARD]: 2 };
             const orderDiff = order[a.recommendation] - order[b.recommendation];
@@ -102,7 +107,7 @@ export class GameAI {
         });
 
 
-        return recommendations;
+        return { recommendations, consideredPatternCount: patternCount };
     }
 
 
@@ -358,7 +363,8 @@ export class GameAI {
         } while (modified);
 
         // Choose tile to discard using the new recommendation engine
-        const recommendations = this.getTileRecommendations(hand);
+        const result = this.getTileRecommendations(hand);
+        const recommendations = result.recommendations;
 
         // Recommendations are sorted KEEP, PASS, DISCARD. We want to discard from the end of the list.
         // Never discard blanks - find the first non-blank tile to discard
@@ -480,7 +486,8 @@ export class GameAI {
         const invalidTile = new Tile(SUIT.INVALID, VNUMBER.INVALID);
         copyHand.insertHidden(invalidTile);
 
-        const recommendations = this.getTileRecommendations(copyHand);
+        const result = this.getTileRecommendations(copyHand);
+        const recommendations = result.recommendations;
 
         // Filter out the invalid tile, jokers, and blanks (cannot pass jokers or blanks per NMJL rules)
         // then sort recommendations: DISCARD, PASS, KEEP
@@ -538,7 +545,8 @@ export class GameAI {
 
     courtesyPass(player, maxCount) {
         // Player 1-3 will only have 13 tiles in their hands during the courtesy
-        const tileRecommendations = this.getTileRecommendations(this.table.players[player].hand);
+        const result = this.getTileRecommendations(this.table.players[player].hand);
+        const tileRecommendations = result.recommendations;
 
         const pass = [];
         // Pass the lowest value tiles (DISCARD recommendations at the end of the array)
