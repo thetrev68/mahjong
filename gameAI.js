@@ -45,7 +45,7 @@ export class GameAI {
         // Start with all patterns and reduce until we have at least 3 discardable tiles
         let patternCount = sortedRankCardHands.length;
 
-        while (patternCount > 0) {
+        while (patternCount > 1) {  // Changed from > 0 to > 1 - always keep at least pattern #1
             const consideredPatterns = sortedRankCardHands.slice(0, patternCount);
 
             // Count how many tiles would NOT be needed in any considered pattern (i.e., discardable)
@@ -70,6 +70,11 @@ export class GameAI {
 
             // Not enough discardable tiles, reduce the number of patterns considered
             patternCount--;
+        }
+
+        // Ensure we always consider at least pattern #1
+        if (patternCount === 0) {
+            patternCount = 1;
         }
 
         debugPrint(`Final decision: considering ${patternCount} patterns`);
