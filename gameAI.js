@@ -19,18 +19,75 @@ export class GameAI {
     }
 
 
-    isNeededInPatterns(tile, patterns) {
+    // Calculate how many of each tile type are needed across all considered patterns
+    // Returns a Map with keys like "SUIT-NUMBER" and values like {needed: N, have: M}
+    calculateTileNeeds(handTiles, patterns) {
+        const tileNeeds = new Map();
+
+        // For each pattern, count how many of each tile type it needs
+        // Then take the MAXIMUM across all patterns (union of all needs)
         for (const ranked of patterns) {
-            // Check if tile appears in this pattern's tile sequence
+            const patternNeeds = new Map();
+
+            // Count tiles needed in this specific pattern
             for (const compInfo of ranked.componentInfoArray) {
                 for (const compTile of compInfo.tileArray) {
-                    if (tile.suit === compTile.suit && tile.number === compTile.number) {
-                        return true;
-                    }
+                    const tileKey = `${compTile.suit}-${compTile.number}`;
+                    patternNeeds.set(tileKey, (patternNeeds.get(tileKey) || 0) + 1);
                 }
             }
+
+            // Update global needs with max from this pattern
+            for (const [tileKey, count] of patternNeeds.entries()) {
+                if (!tileNeeds.has(tileKey)) {
+                    tileNeeds.set(tileKey, { needed: 0, have: 0 });
+                }
+                const current = tileNeeds.get(tileKey);
+                current.needed = Math.max(current.needed, count);
+            }
         }
-        return false;
+
+        // Count how many of each tile we actually have
+        for (const tile of handTiles) {
+            if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
+                continue;
+            }
+            const tileKey = `${tile.suit}-${tile.number}`;
+            if (!tileNeeds.has(tileKey)) {
+                tileNeeds.set(tileKey, { needed: 0, have: 0 });
+            }
+            tileNeeds.get(tileKey).have++;
+        }
+
+        // For each tile type, the "needed" count is how many we should KEEP
+        // If pattern needs 2 and we have 3, we KEEP 2 and DISCARD 1
+        // If pattern needs 2 and we have 1, we KEEP 1 (still need 1 more)
+        for (const counts of tileNeeds.values()) {
+            counts.needed = Math.min(counts.needed, counts.have);
+        }
+
+        return tileNeeds;
+    }
+
+    // Count how many tiles in handTiles are discardable given the considered patterns
+    countDiscardableTiles(handTiles, patterns) {
+        const tileNeeds = this.calculateTileNeeds(handTiles, patterns);
+        let discardableCount = 0;
+
+        for (const tile of handTiles) {
+            if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
+                continue; // Jokers/blanks are never discardable
+            }
+
+            const tileKey = `${tile.suit}-${tile.number}`;
+            const need = tileNeeds.get(tileKey);
+
+            if (!need || need.needed === 0) {
+                discardableCount++;
+            }
+        }
+
+        return discardableCount;
     }
 
     getTileRecommendations(hand) {
@@ -47,19 +104,7 @@ export class GameAI {
 
         while (patternCount > 1) {  // Changed from > 0 to > 1 - always keep at least pattern #1
             const consideredPatterns = sortedRankCardHands.slice(0, patternCount);
-
-            // Count how many tiles would NOT be needed in any considered pattern (i.e., discardable)
-            let discardableCount = 0;
-            for (const tile of handTiles) {
-                // Jokers and blanks are always KEEP, so skip them
-                if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
-                    continue;
-                }
-                // If tile is not needed in any considered pattern, it's discardable
-                if (!this.isNeededInPatterns(tile, consideredPatterns)) {
-                    discardableCount++;
-                }
-            }
+            const discardableCount = this.countDiscardableTiles(handTiles, consideredPatterns);
 
             debugPrint(`Considering ${patternCount} patterns: ${discardableCount} discardable tiles`);
 
@@ -82,14 +127,25 @@ export class GameAI {
         // Now generate recommendations with the determined pattern count
         const consideredPatterns = sortedRankCardHands.slice(0, patternCount);
 
+        // Build a map of how many of each tile type we need vs. have
+        const tileNeeds = this.calculateTileNeeds(handTiles, consideredPatterns);
+
         for (const tile of handTiles) {
             let recommendation = TILE_RECOMMENDATION.DISCARD; // Default to DISCARD
 
             if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
                 // Blanks and jokers are always kept - AI should never discard them
                 recommendation = TILE_RECOMMENDATION.KEEP;
-            } else if (this.isNeededInPatterns(tile, consideredPatterns)) {
-                recommendation = TILE_RECOMMENDATION.KEEP;
+            } else {
+                const tileKey = `${tile.suit}-${tile.number}`;
+                const need = tileNeeds.get(tileKey);
+
+                if (need && need.needed > 0) {
+                    // We still need this tile for a pattern
+                    recommendation = TILE_RECOMMENDATION.KEEP;
+                    need.needed--; // Decrement so next instance might be DISCARD
+                }
+                // else: tile not needed or we have excess, so DISCARD
             }
 
             recommendations.push({ tile, recommendation });

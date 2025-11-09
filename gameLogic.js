@@ -210,9 +210,9 @@ class HintAnimationManager {
             html += `<p style="${dimStyle}"><strong>${rankHand.group.groupDescription}</strong> - ${rankHand.hand.description} (Rank: ${rankHand.rank.toFixed(2)})`;
             // Only show "not considered" label for patterns after #1
             if (!isConsidered && i > 0) {
-                html += ` <em>(not considered)</em>`;
+                html += " <em>(not considered)</em>";
             }
-            html += `</p>`;
+            html += "</p>";
 
             // Render colorized pattern with matching
             const patternHtml = renderPatternVariation(rankHand, playerTiles, hiddenTiles);
