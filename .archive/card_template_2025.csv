@@ -1,0 +1,4 @@
+Description,VsuitCount,Concealed,Odd,Even,Suit1,Number1,Count1,Suit2,Number2,Count2,Suit3,Number3,Count3,Suit4,Number4,Count4,Suit5,Number5,Count5,Suit6,Number6,Count6,Suit7,Number7,Count7,Suit8,Number8,Count8
+33 66 333 666 9999 (any 3 suit),3,false,true,false,VSUIT1,3,2,VSUIT1,6,2,VSUIT2,3,3,VSUIT2,6,3,VSUIT3,9,4,,,,,
+333 6666 666 9999 (any 2 suit),2,false,true,false,VSUIT1,3,3,VSUIT1,6,4,VSUIT2,6,3,VSUIT2,9,4,,,,,,
+3333 666 9999 DDD (any 2 suits, 6 and dragon match),2,false,true,false,VSUIT1,3,4,VSUIT2,6,3,VSUIT1,9,4,VSUIT2_DRAGON,0,3,,,,,
