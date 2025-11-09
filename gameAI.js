@@ -285,6 +285,24 @@ export class GameAI {
             }
         } while (modified);
 
+        // Exchange blanks (if possible and it improves hand)
+        do {
+            modified = this.exchangeBlanksForDiscards(currPlayer, hand);
+
+            if (modified) {
+                // Check for mahjong again
+                validInfo = this.card.validateHand14(hand);
+
+                if (validInfo.valid) {
+                    // Mahjong!
+                    return {
+                        playerOption: PLAYER_OPTION.MAHJONG,
+                        tileArray: null
+                    };
+                }
+            }
+        } while (modified);
+
         // Choose tile to discard using the new recommendation engine
         const recommendations = this.getTileRecommendations(hand);
 

@@ -1024,6 +1024,12 @@ export class GameLogic {
 
                 button3.removeEventListener("click", this.button3Function);
                 this.button3Function = function button3Function() {
+                    // Validate: Cannot declare Mahjong while holding blank tiles
+                    if (this.table.players[PLAYER.BOTTOM].hand.hasBlankTiles()) {
+                        this.displayErrorText("Cannot declare Mahjong while holding blank tiles");
+                        return;
+                    }
+
                     // Unselect any tiles
                     this.table.players[PLAYER.BOTTOM].hand.resetSelection();
                     resolve({

@@ -492,6 +492,11 @@ export class Hand {
         return jokerArray;
     }
 
+    // Check if hand contains any blank tiles
+    hasBlankTiles() {
+        return this.tileArray.some(tile => tile.suit === SUIT.BLANK);
+    }
+
     reset(wall) {
         // Reset hand - return all tiles to wall
         this.hiddenTileSet.reset(wall);
