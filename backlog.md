@@ -9,22 +9,6 @@ This document provides a high-level analysis of potential new features for the A
 
 ---
 
-### 1. Enable AI Difficulty Scaling
-
-*   **Description:** Implement difficulty scaling for bot players. The user would always play as an "Advanced AI."
-*   **Difficulty:** Medium
-*   **Effort:** Medium
-*   **Time:** 8-12 hours
-*   **Benefit:** High. Adds replayability and allows users to adjust the game's challenge to their skill level.
-
-### 2. Game Audio
-
-*   **Description:** Add background music and sound effects with controls in the settings page.
-*   **Difficulty:** Medium
-*   **Effort:** Medium
-*   **Time:** 10-15 hours (includes sound asset sourcing/creation)
-*   **Benefit:** Medium. Enhances the game's atmosphere and provides auditory feedback.
-*   **Source:** www.zapsplat.com - Multimedia button click 16 (tile click), Multimedia button click 21 (discard), Golf club set down or drop on grass 3 (error/invalid move), Applause approx 8 people (win celebration), Game music - soft warm synth arpeggios calming soothing game (? maybe. ambient music)
 
 ### 4. Name Players
 
