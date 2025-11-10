@@ -1,4 +1,4 @@
-import {debugPrint} from "./utils.js";
+import {debugPrint, gdebug, sleep} from "./utils.js";
 import {PLAYER_OPTION, SUIT, VNUMBER} from "./constants.js";
 import {Tile} from "./gameObjects.js";
 
@@ -13,11 +13,103 @@ const TILE_RECOMMENDATION = {
 // PRIVATE GLOBALS
 
 export class GameAI {
-    constructor(card, table) {
+    constructor(card, table, difficulty = "medium") {
         this.card = card;
         this.table = table;
+        this.difficulty = difficulty;
+        this.config = this.getDifficultyConfig(difficulty);
     }
 
+    getDifficultyConfig(difficulty) {
+        const configs = {
+            easy: {
+                // Pattern consideration
+                maxPatterns: 2,              // Only look at top 2 winning patterns (tunnel vision)
+                minDiscardable: 5,           // Need 5 tiles to throw away (very conservative)
+
+                // Exposure strategy
+                exposureThreshold: 70,       // Only expose tiles when hand is 70+ rank (very close to winning)
+
+                // Courtesy pass voting
+                courtesyThresholds: [55, 65, 75],  // More willing to pass tiles (helps opponents)
+
+                // Blank tile usage
+                blankExchangeRank: 999,      // Never exchange blanks (999 means impossible threshold)
+                blankExchangeGain: 999,      // Never exchange blanks
+
+                // Joker optimization
+                jokerTopHands: 1,            // Only consider 1 pattern when evaluating joker swaps
+                jokerRankThreshold: 60,      // Only optimize jokers when hand rank > 60
+                jokerScaling: 0.8,           // Less aggressive joker optimization (80% effectiveness)
+
+                // Mistake rate
+                discardRandomness: 0.3,      // 30% chance to discard a suboptimal tile
+
+                // Decision timing (makes AI seem "slower" and more human-like)
+                decisionDelayMin: 800,       // Minimum 800ms delay
+                decisionDelayMax: 1400       // Maximum 1400ms delay
+            },
+
+            medium: {
+                // Pattern consideration
+                maxPatterns: 5,              // Look at top 5 winning patterns (good flexibility)
+                minDiscardable: 4,           // Need 4 tiles to throw away (balanced)
+
+                // Exposure strategy
+                exposureThreshold: 55,       // Expose tiles when hand is 55+ rank (moderate timing)
+
+                // Courtesy pass voting
+                courtesyThresholds: [50, 60, 68],  // Balanced courtesy decisions
+
+                // Blank tile usage
+                blankExchangeRank: 85,       // Exchange blanks when hand rank > 85 (conservative)
+                blankExchangeGain: 25,       // Only if improvement is > 25 points (significant gain)
+
+                // Joker optimization
+                jokerTopHands: 2,            // Consider top 2 patterns for joker swaps
+                jokerRankThreshold: 55,      // Optimize jokers when hand rank > 55
+                jokerScaling: 0.9,           // Moderate joker optimization (90% effectiveness)
+
+                // Mistake rate
+                discardRandomness: 0.1,      // 10% chance to discard a suboptimal tile
+
+                // Decision timing
+                decisionDelayMin: 400,       // Minimum 400ms delay
+                decisionDelayMax: 800        // Maximum 800ms delay
+            },
+
+            hard: {
+                // Pattern consideration
+                maxPatterns: 999,            // Look at all patterns dynamically (maximum flexibility)
+                minDiscardable: 3,           // Need only 3 tiles to throw away (aggressive)
+
+                // Exposure strategy
+                exposureThreshold: 45,       // Expose tiles when hand is 45+ rank (aggressive timing)
+
+                // Courtesy pass voting
+                courtesyThresholds: [45, 55, 65],  // Optimal courtesy decisions
+
+                // Blank tile usage
+                blankExchangeRank: 80,       // Exchange blanks when hand rank > 80 (aggressive)
+                blankExchangeGain: 20,       // Exchange if improvement > 20 points (moderate gain)
+
+                // Joker optimization
+                jokerTopHands: 3,            // Consider top 3 patterns for joker swaps
+                jokerRankThreshold: 50,      // Optimize jokers when hand rank > 50
+                jokerScaling: 1.0,           // Full joker optimization (100% effectiveness)
+
+                // Mistake rate
+                discardRandomness: 0,        // 0% chance of mistakes (perfect play)
+
+                // Decision timing
+                decisionDelayMin: 200,       // Minimum 200ms delay
+                decisionDelayMax: 400        // Maximum 400ms delay
+            }
+        };
+
+        // Return the config for the requested difficulty, or medium if invalid
+        return configs[difficulty] || configs.medium;
+    }
 
     // Calculate how many of each tile type are needed across all considered patterns
     // Returns a Map with keys like "SUIT-NUMBER" and values like {needed: N, have: M}
@@ -102,6 +194,11 @@ export class GameAI {
         // Start with all patterns and reduce until we have at least 3 discardable tiles
         let patternCount = sortedRankCardHands.length;
 
+        // Apply difficulty-based pattern limit
+        if (this.config.maxPatterns < 999) {
+            patternCount = Math.min(patternCount, this.config.maxPatterns);
+        }
+
         while (patternCount > 1) {  // Changed from > 0 to > 1 - always keep at least pattern #1
             const consideredPatterns = sortedRankCardHands.slice(0, patternCount);
             const discardableCount = this.countDiscardableTiles(handTiles, consideredPatterns);
@@ -109,7 +206,7 @@ export class GameAI {
             debugPrint(`Considering ${patternCount} patterns: ${discardableCount} discardable tiles`);
 
             // If we have at least 3 discardable tiles, we're done
-            if (discardableCount >= 3) {
+            if (discardableCount >= this.config.minDiscardable) {
                 break;
             }
 
@@ -214,14 +311,14 @@ export class GameAI {
             // - don't discard tiles that would cause large negative deltas
             // Add weighting for joker exchanges to be more aggressive
             // Only consider top 3 highest-ranked hands for focused recommendations
-            const topHandsCount = Math.min(3, sortedRankCardHands.length);
+            const topHandsCount = Math.min(this.config.jokerTopHands, sortedRankCardHands.length);
             for (let j = 0; j < topHandsCount; j++) {
                 const topHand = sortedRankCardHands[j];
                 const originalIndex = rankCardHands.indexOf(topHand);
 
                 let scale = 1.0;
-                if (topHand.rank > 50) {
-                    scale = Math.min(topHand.rank, 100);
+                if (topHand.rank > this.config.jokerRankThreshold) {
+                    scale = Math.min(topHand.rank * this.config.jokerScaling, 100);
                 }
                 rank += (copyHandRankArray[originalIndex].rank - rankCardHands[originalIndex].rank) * scale;
             }
@@ -276,13 +373,13 @@ export class GameAI {
         // Only consider if:
         // 1. Hand rank is already very high (>80) - close to winning
         // 2. The swap would result in immediate Mahjong or massive improvement (>20 points)
-        if (currentBestRank < 80) {
+        if (currentBestRank < this.config.blankExchangeRank) {
             debugPrint("exchangeBlanksForDiscards: Hand rank too low (" + currentBestRank + "), hoarding blanks\n");
             return false;
         }
 
         let bestSwap = null;
-        let bestRankGain = 20; // Very high threshold: must improve by at least 20 points
+        let bestRankGain = this.config.blankExchangeGain; // Very high threshold: must improve by at least 20 points
 
         // For each blank in hand
         for (const blank of blankArray) {
@@ -369,7 +466,11 @@ export class GameAI {
     //
     // Return
     //    {playerOption, tileArray}
-    chooseDiscard(currPlayer) {
+    async chooseDiscard(currPlayer) {
+        // Add human-like delay based on difficulty
+        const delay = this.config.decisionDelayMin +
+                      Math.random() * (this.config.decisionDelayMax - this.config.decisionDelayMin);
+        await sleep(delay);
 
         // Just picked new tile from wall. Hand will contain 14 tiles.
         const hand = this.table.players[currPlayer].hand;
@@ -427,14 +528,33 @@ export class GameAI {
         const result = this.getTileRecommendations(hand);
         const recommendations = result.recommendations;
 
-        // Recommendations are sorted KEEP, PASS, DISCARD. We want to discard from the end of the list.
-        // Never discard blanks - find the first non-blank tile to discard
         let discardTile = null;
-        for (let i = recommendations.length - 1; i >= 0; i--) {
-            const tile = recommendations[i].tile;
-            if (tile.suit !== SUIT.BLANK) {
-                discardTile = tile;
-                break;
+
+        // Get all discardable recommendations (excluding blanks)
+        const discardableRecommendations = recommendations.filter(
+            (r) => r.recommendation === "DISCARD" && r.tile.suit !== SUIT.BLANK
+        );
+
+        // Apply difficulty-based randomness
+        if (this.config.discardRandomness > 0 && Math.random() < this.config.discardRandomness) {
+            // Easy/Medium: Sometimes make a suboptimal choice
+            // Pick one of the worst 3 tiles randomly instead of the absolute worst
+            const randomIndex = Math.floor(
+                Math.random() * Math.min(3, discardableRecommendations.length)
+            );
+            discardTile = discardableRecommendations[randomIndex].tile;
+
+            if (gdebug) {
+                console.log(`[AI ${currPlayer.position}] Made suboptimal discard choice (difficulty: ${this.difficulty})`);
+            }
+        } else {
+            // Hard: Always pick the optimal (worst-ranked) tile
+            for (let i = recommendations.length - 1; i >= 0; i--) {
+                const tile = recommendations[i].tile;
+                if (tile.suit !== SUIT.BLANK) {
+                    discardTile = tile;
+                    break;
+                }
             }
         }
 
@@ -481,7 +601,11 @@ export class GameAI {
     //
     // Return
     //    {playerOption, tileArray}
-    claimDiscard(player, discardTile) {
+    async claimDiscard(player, discardTile) {
+        // Add human-like delay based on difficulty
+        const delay = this.config.decisionDelayMin +
+                      Math.random() * (this.config.decisionDelayMax - this.config.decisionDelayMin);
+        await sleep(delay);
         // Duplicate hand
         const copyHand = this.table.players[player].hand.dupHand();
 
@@ -506,7 +630,7 @@ export class GameAI {
 
         // Allow exposure if we have already exposed, or hand rank is greater than a certain level
         // Lower threshold to encourage more exposures and prevent wall games
-        if (!copyHand.isAllHidden() || (!rankInfo.hand.concealed && rankInfo.rank > 45)) {
+        if (!copyHand.isAllHidden() || (!rankInfo.hand.concealed && rankInfo.rank > this.config.exposureThreshold)) {
 
             // Find component with the discarded tile
             let compInfo = null;
@@ -538,7 +662,11 @@ export class GameAI {
     }
 
     // Return 3 tiles to remove in Charleston
-    charlestonPass(player) {
+    async charlestonPass(player) {
+        // Add human-like delay based on difficulty
+        const delay = this.config.decisionDelayMin +
+                      Math.random() * (this.config.decisionDelayMax - this.config.decisionDelayMin);
+        await sleep(delay);
         const hand = this.table.players[player].hand;
         const pass = [];
 
@@ -574,7 +702,11 @@ export class GameAI {
         return pass;
     }
 
-    courtesyVote(player) {
+    async courtesyVote(player) {
+        // Add human-like delay based on difficulty
+        const delay = this.config.decisionDelayMin +
+                      Math.random() * (this.config.decisionDelayMax - this.config.decisionDelayMin);
+        await sleep(delay);
         // Player 1-3 will only have 13 tiles in their hands during the courtesy
         // Add a bogus tile to make 14.
         const copyHand = this.table.players[player].hand.dupHand();
@@ -591,17 +723,19 @@ export class GameAI {
 
         // Adjust courtesy voting to be more aggressive in early game
         // Encourage tile exchange to improve hands and prevent stagnation
-        if (rank < 45) {
-            return 3;
+        const thresholds = this.config.courtesyThresholds;
+
+        if (rank < thresholds[0]) {
+            return 3;  // Vote to pass 3 tiles
         }
-        if (rank < 55) {
-            return 2;
+        if (rank < thresholds[1]) {
+            return 2;  // Vote to pass 2 tiles
         }
-        if (rank < 65) {
-            return 1;
+        if (rank < thresholds[2]) {
+            return 1;  // Vote to pass 1 tile
         }
 
-        return 0;
+        return 0;  // Vote to pass 0 tiles (decline courtesy)
     }
 
     courtesyPass(player, maxCount) {

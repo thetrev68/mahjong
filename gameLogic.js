@@ -265,7 +265,9 @@ export class GameLogic {
         const year = window.settingsManager.getCardYear();
         this.card = new Card(year);
         await this.card.init();
-        this.gameAI = new GameAI(this.card, this.table);
+        // Get difficulty setting from SettingsManager
+        const difficulty = window.settingsManager ? window.settingsManager.getDifficulty() : "medium";
+        this.gameAI = new GameAI(this.card, this.table, difficulty);
         this.hintAnimationManager = new HintAnimationManager(this);
 
         printMessage("Using " + this.card.year + " Mahjong card\n\n");
@@ -413,7 +415,7 @@ export class GameLogic {
 
         courtesyVoteArray[0] = player0CourtesyVote;
         for (let i = 1; i < 4; i++) {
-            courtesyVoteArray[i] = this.gameAI.courtesyVote(i);
+            courtesyVoteArray[i] = await this.gameAI.courtesyVote(i);
         }
 
         for (let i = 0; i < 4; i++) {
@@ -448,9 +450,9 @@ export class GameLogic {
 
             // Players 1 - 3, get courtesy pass.
             // Note: tiles are removed from player's hands
-            courtesyPassArray[1] = this.gameAI.courtesyPass(1, this.table.player13CourtesyVote);
-            courtesyPassArray[2] = this.gameAI.courtesyPass(2, this.table.player02CourtesyVote);
-            courtesyPassArray[3] = this.gameAI.courtesyPass(3, this.table.player13CourtesyVote);
+            courtesyPassArray[1] = await this.gameAI.courtesyPass(1, this.table.player13CourtesyVote);
+            courtesyPassArray[2] = await this.gameAI.courtesyPass(2, this.table.player02CourtesyVote);
+            courtesyPassArray[3] = await this.gameAI.courtesyPass(3, this.table.player13CourtesyVote);
 
             // Perform courtesy pass exchange
             const receivedTiles = this.table.courtesyPass(courtesyPassArray);
@@ -707,13 +709,11 @@ export class GameLogic {
     // Return promise with discard info
     //      Discard/mahjong
     //      TileArray (if discard)
-    chooseDiscard() {
-        let promise = null;
-
+    async chooseDiscard() {
         // Player i picks discard
         if (this.currPlayer === PLAYER.BOTTOM) {
             // Create promise to return the discarded tile (async operation)
-            promise = new Promise(
+            return new Promise(
                 (resolve) => {
                     // Human player picks own discard. Setup discard button.
                     const button1 = window.document.getElementById("button1");
@@ -773,20 +773,15 @@ export class GameLogic {
                     button3.addEventListener("click", this.button3Function);
                 });
         } else {
-            // Create promise to return the discarded tile (async operation)
-            promise = new Promise(
-                (resolve) => {
-                    const resolveResult = this.gameAI.chooseDiscard(this.currPlayer);
+            // AI player - use async method
+            const resolveResult = await this.gameAI.chooseDiscard(this.currPlayer);
 
-                    if (resolveResult.playerOption === PLAYER_OPTION.DISCARD_TILE) {
-                        const text = resolveResult.tileArray[0].getText();
-                        printMessage("Player " + this.currPlayer + " discards " + text + " \n");
-                    }
-                    resolve(resolveResult);
-                });
+            if (resolveResult.playerOption === PLAYER_OPTION.DISCARD_TILE) {
+                const text = resolveResult.tileArray[0].getText();
+                printMessage("Player " + this.currPlayer + " discards " + text + " \n");
+            }
+            return resolveResult;
         }
-
-        return promise;
     }
 
     canPlayerClaimExposure(player, discardTile) {
@@ -831,13 +826,8 @@ export class GameLogic {
         }
 
         if (player !== PLAYER.BOTTOM) {
-            // Create promise to return the claim info (async operation)
-            return new Promise(
-                (resolve) => {
-                    // Player (1-3)
-                    const resolveResult = this.gameAI.claimDiscard(player, discardTile);
-                    resolve(resolveResult);
-                });
+            // AI player - use async method
+            return this.gameAI.claimDiscard(player, discardTile);
         }
         // Player 0  (PLAYER.BOTTOM)
         const canMahjong = this.canPlayerMahjongWithDiscard(player, discardTile);
@@ -950,7 +940,7 @@ export class GameLogic {
             });
     }
 
-    charlestonPass(playerId) {
+    async charlestonPass(playerId) {
         // Create promise to wait for player input (async operation)
         // No value returned in promise
         return new Promise(
@@ -964,7 +954,7 @@ export class GameLogic {
 
                 button1.removeEventListener("click", this.button1Function);
 
-                this.button1Function = function button1Function() {
+                this.button1Function = async function button1Function() {
                     const charlestonPassArray = [];
 
                     // Player 0 (human) pressed "Pass" button
@@ -981,7 +971,7 @@ export class GameLogic {
 
                     // Remove 3 cards for player 1, 2, 3
                     for (let i = 1; i < 4; i++) {
-                        charlestonPassArray[i] = this.gameAI.charlestonPass(i);
+                        charlestonPassArray[i] = await this.gameAI.charlestonPass(i);
                     }
 
                     // Exchange charleston passes among all players

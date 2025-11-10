@@ -66,7 +66,7 @@ test.describe("Settings Panel", () => {
     await expect(page.locator("#settings-overlay")).toBeVisible();
 
     // Close settings
-    await page.click("#settings-back");
+    await page.click("#settings-cancel");
     await expect(page.locator("#settings-overlay")).toBeHidden();
   });
 

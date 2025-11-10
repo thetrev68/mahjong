@@ -137,6 +137,7 @@ class SettingsManager {
 
         // Save all current settings
         this.saveTrainingSettings();
+        this.saveDifficultySettings();
         this.saveYearSettings();
         this.saveHouseRuleSettings();
         this.saveAudioSettings();
@@ -164,6 +165,10 @@ class SettingsManager {
         // Restore original settings and close without saving
         this.restoreOriginalSettings();
         this.hideSettings();
+    }
+
+    getDifficulty() {
+        return this.getSetting("aiDifficulty", "medium");
     }
 
     getCardYear() {
@@ -215,6 +220,9 @@ class SettingsManager {
         // Apply training mode settings
         this.applyTrainingSettings(settings);
 
+        // Apply difficulty settings
+        this.applyDifficultySettings(settings);
+
         // Apply year selection settings
         this.applyYearSettings(settings);
 
@@ -246,6 +254,13 @@ class SettingsManager {
 
         // Update form visibility based on loaded settings
         this.updateTrainingFormVisibility();
+    }
+
+    applyDifficultySettings(settings) {
+        const difficultySelect = document.getElementById("difficultySelect");
+        if (difficultySelect && settings.aiDifficulty) {
+            difficultySelect.value = settings.aiDifficulty;
+        }
     }
 
     applyYearSettings(settings) {
@@ -301,6 +316,13 @@ class SettingsManager {
         Object.keys(trainingSettings).forEach((key) => {
             this.saveSetting(key, trainingSettings[key]);
         });
+    }
+
+    saveDifficultySettings() {
+        const difficultySelect = document.getElementById("difficultySelect");
+        if (difficultySelect) {
+            this.saveSetting("aiDifficulty", difficultySelect.value);
+        }
     }
 
     saveYearSettings() {
