@@ -414,9 +414,15 @@ export class GameLogic {
         const courtesyVoteArray = [];
 
         courtesyVoteArray[0] = player0CourtesyVote;
-        for (let i = 1; i < 4; i++) {
-            courtesyVoteArray[i] = await this.gameAI.courtesyVote(i);
-        }
+        // Get all AI votes in parallel instead of sequential loop
+        const aiVotes = await Promise.all([
+            this.gameAI.courtesyVote(1),
+            this.gameAI.courtesyVote(2),
+            this.gameAI.courtesyVote(3)
+        ]);
+        courtesyVoteArray[1] = aiVotes[0];
+        courtesyVoteArray[2] = aiVotes[1];
+        courtesyVoteArray[3] = aiVotes[2];
 
         for (let i = 0; i < 4; i++) {
             printMessage("Player " + i + " wants to exchange " + courtesyVoteArray[i] + " tiles\n");
@@ -920,6 +926,9 @@ export class GameLogic {
                     if (this.isSwappingBlank) {
                         return;
                     }
+                    // Clean up listeners before resolving
+                    button1.removeEventListener("click", this.button1Function);
+                    button2.removeEventListener("click", this.button2Function);
                     resolve(false);
                 }.bind(this);
 
@@ -933,6 +942,9 @@ export class GameLogic {
                     if (this.isSwappingBlank) {
                         return;
                     }
+                    // Clean up listeners before resolving
+                    button1.removeEventListener("click", this.button1Function);
+                    button2.removeEventListener("click", this.button2Function);
                     resolve(true);
                 }.bind(this);
 
@@ -940,7 +952,7 @@ export class GameLogic {
             });
     }
 
-    async charlestonPass(playerId) {
+    charlestonPass(playerId) {
         // Create promise to wait for player input (async operation)
         // No value returned in promise
         return new Promise(
@@ -969,10 +981,15 @@ export class GameLogic {
                         this.table.players[0].hand.removeHidden(tile);
                     }
 
-                    // Remove 3 cards for player 1, 2, 3
-                    for (let i = 1; i < 4; i++) {
-                        charlestonPassArray[i] = await this.gameAI.charlestonPass(i);
-                    }
+                    // Remove 3 cards for player 1, 2, 3 (in parallel)
+                    const aiPasses = await Promise.all([
+                        this.gameAI.charlestonPass(1),
+                        this.gameAI.charlestonPass(2),
+                        this.gameAI.charlestonPass(3)
+                    ]);
+                    charlestonPassArray[1] = aiPasses[0];
+                    charlestonPassArray[2] = aiPasses[1];
+                    charlestonPassArray[3] = aiPasses[2];
 
                     // Exchange charleston passes among all players
                     const receivedTiles = this.table.charlestonPass(playerId, charlestonPassArray);

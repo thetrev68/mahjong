@@ -1,4 +1,4 @@
-import {debugPrint, gdebug, sleep} from "./utils.js";
+import {debugPrint, gdebug} from "./utils.js";
 import {PLAYER_OPTION, SUIT, VNUMBER} from "./constants.js";
 import {Tile} from "./gameObjects.js";
 
@@ -43,11 +43,7 @@ export class GameAI {
                 jokerScaling: 0.8,           // Less aggressive joker optimization (80% effectiveness)
 
                 // Mistake rate
-                discardRandomness: 0.3,      // 30% chance to discard a suboptimal tile
-
-                // Decision timing (makes AI seem "slower" and more human-like)
-                decisionDelayMin: 800,       // Minimum 800ms delay
-                decisionDelayMax: 1400       // Maximum 1400ms delay
+                discardRandomness: 0.3       // 30% chance to discard a suboptimal tile
             },
 
             medium: {
@@ -71,11 +67,7 @@ export class GameAI {
                 jokerScaling: 0.9,           // Moderate joker optimization (90% effectiveness)
 
                 // Mistake rate
-                discardRandomness: 0.1,      // 10% chance to discard a suboptimal tile
-
-                // Decision timing
-                decisionDelayMin: 400,       // Minimum 400ms delay
-                decisionDelayMax: 800        // Maximum 800ms delay
+                discardRandomness: 0.1       // 10% chance to discard a suboptimal tile
             },
 
             hard: {
@@ -99,11 +91,7 @@ export class GameAI {
                 jokerScaling: 1.0,           // Full joker optimization (100% effectiveness)
 
                 // Mistake rate
-                discardRandomness: 0,        // 0% chance of mistakes (perfect play)
-
-                // Decision timing
-                decisionDelayMin: 200,       // Minimum 200ms delay
-                decisionDelayMax: 400        // Maximum 400ms delay
+                discardRandomness: 0         // 0% chance of mistakes (perfect play)
             }
         };
 
@@ -466,12 +454,8 @@ export class GameAI {
     //
     // Return
     //    {playerOption, tileArray}
+    // eslint-disable-next-line require-await
     async chooseDiscard(currPlayer) {
-        // Add human-like delay based on difficulty
-        const delay = this.config.decisionDelayMin +
-                      Math.random() * (this.config.decisionDelayMax - this.config.decisionDelayMin);
-        await sleep(delay);
-
         // Just picked new tile from wall. Hand will contain 14 tiles.
         const hand = this.table.players[currPlayer].hand;
 
@@ -601,11 +585,8 @@ export class GameAI {
     //
     // Return
     //    {playerOption, tileArray}
+    // eslint-disable-next-line require-await
     async claimDiscard(player, discardTile) {
-        // Add human-like delay based on difficulty
-        const delay = this.config.decisionDelayMin +
-                      Math.random() * (this.config.decisionDelayMax - this.config.decisionDelayMin);
-        await sleep(delay);
         // Duplicate hand
         const copyHand = this.table.players[player].hand.dupHand();
 
@@ -662,11 +643,8 @@ export class GameAI {
     }
 
     // Return 3 tiles to remove in Charleston
+    // eslint-disable-next-line require-await
     async charlestonPass(player) {
-        // Add human-like delay based on difficulty
-        const delay = this.config.decisionDelayMin +
-                      Math.random() * (this.config.decisionDelayMax - this.config.decisionDelayMin);
-        await sleep(delay);
         const hand = this.table.players[player].hand;
         const pass = [];
 
@@ -702,11 +680,8 @@ export class GameAI {
         return pass;
     }
 
+    // eslint-disable-next-line require-await
     async courtesyVote(player) {
-        // Add human-like delay based on difficulty
-        const delay = this.config.decisionDelayMin +
-                      Math.random() * (this.config.decisionDelayMax - this.config.decisionDelayMin);
-        await sleep(delay);
         // Player 1-3 will only have 13 tiles in their hands during the courtesy
         // Add a bogus tile to make 14.
         const copyHand = this.table.players[player].hand.dupHand();
