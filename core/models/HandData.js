@@ -167,12 +167,12 @@ export class HandData {
  * ExposureData - Represents an exposed tile set (Pung, Kong, Quint)
  */
 export class ExposureData {
-    constructor() {
+    constructor(data = {}) {
         /** @type {string} Type: 'PUNG', 'KONG', 'QUINT' */
-        this.type = "";
+        this.type = data.type || "";
 
         /** @type {TileData[]} Tiles in this exposure */
-        this.tiles = [];
+        this.tiles = data.tiles || [];
     }
 
     /**

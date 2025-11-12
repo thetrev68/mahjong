@@ -1,0 +1,186 @@
+import {TileData} from "../../core/models/TileData.js";
+
+/**
+ * DiscardPile - Displays discarded tiles in center area
+ *
+ * Responsibilities:
+ * - Render discards in 9-column grid
+ * - Highlight most recent discard (yellow border + pulse)
+ * - Scroll vertically when more than ~108 tiles
+ * - Allow clicking discards to see who discarded them
+ */
+export class DiscardPile {
+    /**
+     * @param {HTMLElement} container - DOM element to render into
+     * @param {GameController} gameController - Core game controller instance
+     */
+    constructor(container, gameController) {
+        this.container = container;
+        this.gameController = gameController;
+        this.discards = []; // Array of {tile: TileData, player: number}
+        this.element = null;
+
+        this.render();
+        this.setupEventListeners();
+    }
+
+    /**
+     * Initial render of discard pile
+     */
+    render() {
+        this.element = document.createElement("div");
+        this.element.className = "discard-pile";
+        this.container.appendChild(this.element);
+    }
+
+    /**
+     * Set up GameController event subscriptions
+     */
+    setupEventListeners() {
+        this.gameController.on("TILE_DISCARDED", (data) => {
+            const tile = TileData.fromJSON(data.tile);
+            this.addDiscard(tile, data.player);
+        });
+
+        this.gameController.on("DISCARD_CLAIMED", () => {
+            this.removeLatestDiscard();
+        });
+
+        this.gameController.on("GAME_STARTED", () => {
+            this.clear();
+        });
+    }
+
+    /**
+     * Add a discard to the pile
+     * @param {TileData} tile - The discarded tile
+     * @param {number} player - Player who discarded (0-3)
+     */
+    addDiscard(tile, player) {
+        // Add to discards array
+        this.discards.push({ tile, player });
+
+        // Create tile element
+        const tileElement = this.createDiscardTile(tile, player);
+        this.element.appendChild(tileElement);
+
+        // Mark as latest discard
+        this.highlightLatest(tileElement);
+
+        // Scroll to bottom if needed
+        this.scrollToBottom();
+    }
+
+    /**
+     * Create a tile element for the discard pile
+     * @param {TileData} tile - Tile data
+     * @param {number} player - Player who discarded
+     * @returns {HTMLElement} Tile element
+     */
+    createDiscardTile(tile, player) {
+        const tileElement = document.createElement("div");
+        tileElement.className = "discard-tile";
+        tileElement.dataset.player = player;
+        tileElement.title = `Discarded by ${this.getPlayerName(player)}`;
+
+        // Use text-in-box approach (like tileDisplayUtils.js)
+        tileElement.innerHTML = `
+            <div class="discard-tile-face">
+                <span class="tile-text">${this.getTileText(tile)}</span>
+            </div>
+        `;
+
+        // Click to show discard info
+        tileElement.addEventListener("click", () => {
+            this.showDiscardInfo(tile, player);
+        });
+
+        return tileElement;
+    }
+
+    /**
+     * Get tile text for display
+     * @param {TileData} tile - Tile data
+     * @returns {string} Display text
+     */
+    getTileText(tile) {
+        // Use TileData.getText() method
+        return tile.getText();
+    }
+
+    /**
+     * Get player name from position
+     * @param {number} player - Player position (0-3)
+     * @returns {string} Player name
+     */
+    getPlayerName(player) {
+        const names = ["You", "Opponent 1", "Opponent 2", "Opponent 3"];
+        return names[player] || "Unknown";
+    }
+
+    /**
+     * Highlight the latest discard
+     * @param {HTMLElement} tileElement - The latest tile element
+     */
+    highlightLatest(tileElement) {
+        // Remove highlight from all tiles
+        this.element.querySelectorAll(".discard-tile").forEach(tile => {
+            tile.classList.remove("latest");
+        });
+
+        // Add highlight to latest tile
+        tileElement.classList.add("latest");
+    }
+
+    /**
+     * Remove the latest discard (when claimed by another player)
+     */
+    removeLatestDiscard() {
+        if (this.discards.length > 0) {
+            this.discards.pop();
+            const lastTile = this.element.querySelector(".discard-tile:last-child");
+            if (lastTile) {
+                lastTile.remove();
+            }
+        }
+    }
+
+    /**
+     * Show info about a discarded tile
+     * @param {TileData} tile - The tile
+     * @param {number} player - Who discarded it
+     */
+    showDiscardInfo(tile, player) {
+        // Simple alert for now (can be enhanced with modal later)
+        // eslint-disable-next-line no-undef
+        alert(`${tile.getText()}\nDiscarded by: ${this.getPlayerName(player)}`);
+    }
+
+    /**
+     * Scroll to bottom of discard pile
+     */
+    scrollToBottom() {
+        this.element.scrollTop = this.element.scrollHeight;
+    }
+
+    /**
+     * Clear all discards
+     */
+    clear() {
+        this.discards = [];
+        this.element.innerHTML = "";
+    }
+
+    /**
+     * Destroy this component
+     */
+    destroy() {
+        this.gameController.off("TILE_DISCARDED");
+        this.gameController.off("DISCARD_CLAIMED");
+        this.gameController.off("GAME_STARTED");
+        if (this.element && this.element.parentNode) {
+            this.element.parentNode.removeChild(this.element);
+        }
+        this.element = null;
+    }
+}

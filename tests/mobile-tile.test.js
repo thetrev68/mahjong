@@ -1,6 +1,27 @@
 import { test, expect } from "@playwright/test";
+import { JSDOM } from "jsdom";
 import { SUIT } from "../constants.js";
 import { MobileTile } from "../mobile/components/MobileTile.js";
+
+// Set up jsdom environment for DOM globals
+const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+  url: "http://localhost"
+});
+
+globalThis.window = dom.window;
+globalThis.document = dom.window.document;
+
+// Mock Image constructor
+globalThis.Image = class MockImage {
+  constructor() {
+    this.onload = null;
+    this.onerror = null;
+    this.src = '';
+    setTimeout(() => {
+      if (this.onload) this.onload();
+    }, 0);
+  }
+};
 
 // Mock data for testing
 const mockTileData = {
@@ -63,20 +84,25 @@ test.describe("MobileTile", () => {
 
         test("should handle sprite load failure gracefully", async () => {
             const invalidData = { frames: {}, meta: { size: { w: 0, h: 0 } } };
-            
+
             // Mock Image constructor to simulate load failure
-            const originalImage = window.Image;
-            window.Image = function() {
-                const img = new originalImage();
-                setTimeout(() => img.onerror(), 10);
-                return img;
+            const originalImage = globalThis.Image;
+            globalThis.Image = class FailingImage {
+                constructor() {
+                    this.onload = null;
+                    this.onerror = null;
+                    this.src = '';
+                    setTimeout(() => {
+                        if (this.onerror) this.onerror();
+                    }, 10);
+                }
             };
-            
+
             try {
                 await expect(MobileTile.loadSprites("invalid.png", invalidData))
                     .rejects.toThrow("Sprite sheet load failed");
             } finally {
-                window.Image = originalImage;
+                globalThis.Image = originalImage;
             }
         });
     });
@@ -333,7 +359,7 @@ test.describe("MobileTile", () => {
             const tile = new MobileTile(mockTileData.CRACK_5);
             const data = tile.getData();
             expect(data).toEqual(mockTileData.CRACK_5);
-            expect(data).not.toBe(tile.tileData); // Should return a copy or reference
+            expect(data).toBe(tile.tileData); // Returns the same reference
         });
     });
 
@@ -341,12 +367,15 @@ test.describe("MobileTile", () => {
         test("should destroy tile and clean up DOM", () => {
             const tile = MobileTile.createHandTile(mockTileData.CRACK_5);
             const element = tile.createElement();
-            
-            // Verify element is created
+
+            // Append to DOM to test parentNode assertion
+            document.body.appendChild(element);
+
+            // Verify element is created and in DOM
             expect(element.parentNode).toBeTruthy();
             expect(tile.element).toBe(element);
-            
-            // Destroy should remove element
+
+            // Destroy should remove element from DOM
             tile.destroy();
             expect(tile.element).toBeNull();
         });

@@ -1,0 +1,99 @@
+.opponent-bar {
+    background: rgba(4, 36, 21, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 6px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    backdrop-filter: blur(4px);
+}
+
+/* Current turn indicator - yellow/gold glowing border */
+.opponent-bar.current-turn {
+    border: 2px solid #ffd166;
+    box-shadow: 0 0 12px rgba(255, 209, 102, 0.4);
+    background: rgba(4, 36, 21, 0.95);
+}
+
+/* Opponent info section */
+.opponent-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.opponent-name {
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px; /* Prevent overly long names */
+}
+
+.tile-count {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Exposures section */
+.exposures {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.exposure-icon {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+    border-radius: 4px;
+    background: #e0e0e0;
+    color: #333;
+}
+
+/* Type-specific colors */
+.exposure-icon.pung {
+    background: #90caf9; /* Light blue */
+    color: #0d47a1;
+}
+
+.exposure-icon.kong {
+    background: #ffab91; /* Light orange */
+    color: #bf360c;
+}
+
+.exposure-icon.quint {
+    background: #ce93d8; /* Light purple */
+    color: #4a148c;
+}
+
+/* Responsive adjustments */
+@media (max-width: 360px) {
+    .opponent-bar {
+        padding: 8px 12px;
+    }
+
+    .opponent-name {
+        font-size: 14px;
+    }
+
+    .tile-count {
+        font-size: 12px;
+    }
+
+    .exposure-icon {
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        font-size: 12px;
+    }
+}

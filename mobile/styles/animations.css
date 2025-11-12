@@ -1,0 +1,198 @@
+/* ===== Tile Draw Animation ===== */
+@keyframes tile-draw {
+    0% {
+        transform: translate3d(var(--start-x, 0px), var(--start-y, -200px), 0) scale(0.5);
+        opacity: 0;
+    }
+    100% {
+        transform: translate3d(var(--end-x, 0px), var(--end-y, 0px), 0) scale(1);
+        opacity: 1;
+    }
+}
+
+.tile-drawing {
+    animation: tile-draw var(--tile-draw-duration, 300ms) var(--tile-draw-easing, ease-out) forwards;
+}
+
+/* ===== Tile Discard Animation ===== */
+@keyframes tile-discard {
+    0% {
+        transform: translate3d(var(--start-x, 0px), var(--start-y, 0px), 0) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translate3d(
+            calc((var(--start-x, 0px) + var(--target-x, 0px)) / 2),
+            calc((var(--start-y, 0px) + var(--target-y, 100px)) / 2 - 30px),
+            0
+        ) scale(1.1);
+        opacity: 0.85;
+    }
+    100% {
+        transform: translate3d(var(--target-x, 0px), var(--target-y, 100px), 0) scale(0.85);
+        opacity: 0;
+    }
+}
+
+.tile-discarding {
+    animation: tile-discard var(--tile-discard-duration, 400ms) var(--tile-discard-easing, ease-in) forwards;
+}
+
+/* ===== Tile Claim Animations ===== */
+@keyframes claim-pulse {
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+    }
+    50% {
+        transform: scale(1.2);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 1);
+    }
+}
+
+.tile-claiming-pulse {
+    animation: claim-pulse 500ms ease-in-out;
+}
+
+@keyframes claim-move {
+    0% {
+        transform: translate3d(var(--claim-offset-x, 0px), var(--claim-offset-y, -200px), 0);
+        opacity: 1;
+    }
+    100% {
+        transform: translate3d(var(--target-x, 0px), var(--target-y, 0px), 0);
+        opacity: 0.3;
+    }
+}
+
+.tile-claiming-move {
+    animation: claim-move var(--tile-claim-duration, 300ms) ease-out forwards;
+}
+
+/* ===== Turn Indicator Animations ===== */
+@keyframes turn-start {
+    0% {
+        border-left-width: 0;
+        box-shadow: none;
+    }
+    50% {
+        border-left-width: 8px;
+        box-shadow: 0 0 24px rgba(255, 215, 0, 1);
+    }
+    100% {
+        border-left-width: 4px;
+        box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+    }
+}
+
+.turn-starting {
+    animation: turn-start 600ms ease-out forwards;
+}
+
+@keyframes turn-end {
+    0% {
+        border-left-width: 4px;
+        box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+    }
+    100% {
+        border-left-width: 0;
+        box-shadow: none;
+    }
+}
+
+.turn-ending {
+    animation: turn-end 300ms ease-in forwards;
+}
+
+/* ===== Hand Sort Animation ===== */
+@keyframes hand-sort {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.hand-sorting .mobile-tile {
+    animation: hand-sort 400ms ease-in-out;
+}
+
+/* ===== Exposure Animation ===== */
+@keyframes tile-expose {
+    0% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translate3d(0, -40px, 0) rotate(5deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate3d(var(--target-x, 0px), var(--target-y, 0px), 0) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.tile-exposing {
+    animation: tile-expose 300ms ease-out forwards;
+}
+
+/* ===== Invalid Action Animation ===== */
+@keyframes shake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-5px);
+    }
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(5px);
+    }
+}
+
+.invalid-action {
+    animation: shake 500ms ease-in-out;
+    border-color: #f44336 !important;
+}
+
+/* ===== Performance Optimization ===== */
+.tile-drawing,
+.tile-discarding,
+.tile-claiming-pulse,
+.tile-claiming-move,
+.tile-exposing {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+}
+
+.turn-starting,
+.turn-ending {
+    will-change: border-left-width, box-shadow;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tile-drawing,
+    .tile-discarding,
+    .tile-claiming-pulse,
+    .tile-claiming-move,
+    .tile-exposing,
+    .turn-starting,
+    .turn-ending,
+    .hand-sorting .mobile-tile,
+    .invalid-action {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

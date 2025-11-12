@@ -28,10 +28,10 @@
  */
 
 import {EventEmitter} from "./events/EventEmitter.js";
-import {STATE, PLAYER, SUIT, VNUMBER} from "../constants.js";
+import {STATE, PLAYER, SUIT} from "../constants.js";
 import {TileData} from "./models/TileData.js";
-import {HandData} from "./models/HandData.js";
 import {PlayerData} from "./models/PlayerData.js";
+import {ExposureData} from "./models/HandData.js";
 
 export class GameController extends EventEmitter {
     constructor() {
@@ -400,8 +400,12 @@ export class GameController extends EventEmitter {
         // If at least 2 players voted yes, do courtesy pass
         const yesVotes = votes.filter(v => v.vote).length;
         if (yesVotes >= 2) {
-            this.setState(STATE.COURTESY);
-            // TODO: Implement courtesy pass logic (opposite players exchange 1 tile)
+            this.emit("MESSAGE", {
+                text: "Courtesy pass approved. Tile exchange logic is not yet implemented.",
+                type: "info"
+            });
+            // TODO: Implement courtesy pass logic (opposite players exchange 1-3 tiles)
+            await this.sleep(1000); // Give user time to read the message
         }
 
         this.setState(STATE.COURTESY_COMPLETE);
@@ -465,7 +469,7 @@ export class GameController extends EventEmitter {
         }
 
         // Draw tile from wall
-        const tile = this.wall.shift();
+        const tile = this.wall.pop();
         const player = this.players[this.currentPlayer];
 
         player.hand.addTile(tile);
@@ -619,10 +623,10 @@ export class GameController extends EventEmitter {
             tilesToExpose.forEach(t => player.hand.removeTile(t));
 
             // Add to exposures
-            const exposure = {
+            const exposure = new ExposureData({
                 type: exposureType.toUpperCase(),
                 tiles: tilesToExpose
-            };
+            });
             player.hand.addExposure(exposure);
 
             this.emit("TILES_EXPOSED", {

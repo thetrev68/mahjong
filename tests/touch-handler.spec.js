@@ -15,11 +15,13 @@ test.describe("TouchHandler", () => {
             enableLongPress: true
         });
         handler.init();
+        window.touchHandlerReady = true;
         handler.on('tap', (e) => window.events.push(e));
         handler.on('doubletap', (e) => window.events.push(e));
         handler.on('longpress', (e) => window.events.push(e));
       </script>
     `);
+    await page.waitForFunction(() => window.touchHandlerReady);
   });
 
   test("should detect a tap gesture", async ({ page }) => {

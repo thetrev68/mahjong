@@ -436,6 +436,8 @@ export class Hand {
         this.insertionFeedbackGhost = null;
         this.insertionFeedbackLine = null;
         this.rackGraphics = null;
+        // Track tile selection handlers to avoid removing handlers added elsewhere
+        this.tileSelectionHandlers = new Map();
         // When adding new variables, make sure to update dupHand()
     }
 
@@ -459,7 +461,8 @@ export class Hand {
         // Note: We don't copy insertion feedback properties since they're ephemeral
         // and only exist during active drag operations
         // Note: We don't copy rackGraphics since it's scene-specific
-    
+        // Note: We don't copy tileSelectionHandlers since they're ephemeral
+
         return newHand;
     }
 
@@ -1448,13 +1451,18 @@ tile.sprite.on("dragend", (_pointer, dragX, _dragY, _dropped) => {
         const tileArray = this.hiddenTileSet.tileArray;
 
         for (const tile of tileArray) {
+            // Guard: avoid re-adding if a handler is already tracked for this tile
+            if (this.tileSelectionHandlers.has(tile.sprite)) {
+                continue;
+            }
+
             // Make tile interactive if not already
             if (!tile.sprite.input) {
                 tile.sprite.setInteractive();
             }
 
-            // Add one-time click handler
-            tile.sprite.once("pointerup", () => {
+            // Create the handler function
+            const handler = () => {
                 // Ignore if tile was dragged
                 if (tile.drag) {
                     return;
@@ -1465,21 +1473,33 @@ tile.sprite.on("dragend", (_pointer, dragX, _dragY, _dropped) => {
 
                 // Cleanup
                 this.disableTileSelection();
-            });
+            };
+
+            // Store the handler in the Map
+            this.tileSelectionHandlers.set(tile.sprite, handler);
+
+            // Add one-time click handler
+            tile.sprite.once("pointerup", handler);
         }
     }
 
     /**
      * Disable tile selection (Phase 2B)
-     * Removes all pointerup listeners from tiles
+     * Removes only the tracked pointerup listeners from tiles
      */
     disableTileSelection() {
         const tileArray = this.hiddenTileSet.tileArray;
 
         for (const tile of tileArray) {
-            // Remove all pointerup listeners
-            tile.sprite.removeAllListeners("pointerup");
+            // Remove only the tracked handler
+            const handler = this.tileSelectionHandlers.get(tile.sprite);
+            if (handler) {
+                tile.sprite.off("pointerup", handler);
+            }
         }
+
+        // Clear the Map
+        this.tileSelectionHandlers.clear();
     }
 
 

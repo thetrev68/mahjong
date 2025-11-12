@@ -12,9 +12,8 @@
  */
 
 import {TileData} from "../../core/models/TileData.js";
-import {HandData} from "../../core/models/HandData.js";
 import {Tile} from "../../gameObjects.js";
-import {PLAYER, STATE, SUIT} from "../../constants.js";
+import {PLAYER, SUIT} from "../../constants.js";
 import {printMessage, printInfo} from "../../utils.js";
 
 export class PhaserAdapter {
@@ -593,10 +592,12 @@ export class PhaserAdapter {
 
         button1.textContent = "Yes";
         button1.disabled = false;
+        button1.style.display = "block";
         button1.onclick = () => this.respondYesNo("Yes");
 
         button2.textContent = "No";
         button2.disabled = false;
+        button2.style.display = "block";
         button2.onclick = () => this.respondYesNo("No");
 
         // Hide other buttons
