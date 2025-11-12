@@ -3,7 +3,7 @@
 **Project:** American Mahjong Mobile/PWA Implementation
 **Strategy:** Partition desktop/mobile with shared core, delegated implementation
 **Timeline:** Phased approach with parallel task execution
-**Last Updated:** 2025-11-11
+**Last Updated:** 2025-11-12
 
 ---
 
@@ -956,10 +956,10 @@ document.getElementById('start').addEventListener('click', async () => {
 | 5A | PWA manifest | Haiku | Low | 1K | ✅ Complete |
 | 5B | Install prompt | Gemini Flash | Low | 2K | ✅ Complete |
 | 5C | Service worker | MiniMax2 | Low | 4K | ✅ Complete |
-| 6A | AIEngine | **Sonnet (You)** | High | 20K | Not Started |
-| 6B | SettingsManager | Haiku | Low | 3K | Not Started |
-| 6C | Settings UI | Gemini Pro | Medium | 6K | Not Started |
-| 7A | Mobile tests | Gemini Flash | Medium | 5K | Not Started |
+| 6A | AIEngine | **Sonnet (You)** | High | 20K | ✅ Complete |
+| 6B | SettingsManager | Haiku | Low | 3K | ✅ Complete |
+| 6C | Settings UI | Gemini Pro | Medium | 6K | ✅ Complete |
+| 7A | Mobile tests | Gemini Flash | Medium | 5K | ✅ Complete |
 | 7B | Final QA | **Sonnet (You)** | High | 10K | Not Started |
 | 7C | Performance | Grok X1 | Medium | 6K | Not Started |
 
@@ -1383,8 +1383,8 @@ Before merging each phase:
 
 ---
 
-**Plan Status:** v1.2 - Phase 1B and 2A complete
-**Next Action:** Phase 2B, 2C (delegated tasks), then Phase 3A (mobile mockup)
+**Plan Status:** v1.3 - Phase 7A complete
+**Next Action:** Phase 7B, 7C (remaining phases)
 
 ## Phase 1B Completion Summary
 
@@ -1440,3 +1440,54 @@ Phase 2B and 2C can proceed in parallel (delegated to Haiku/Gemini Flash). Phase
 - Manifest can be validated at https://manifest-validator.appspot.com/
 - Icons display correctly in Chrome DevTools Application → Manifest
 - Ready for Phase 5B (install prompt) and Phase 5C (service worker) implementation
+
+## Phase 6B Completion Summary
+
+✅ **Completed Files:**
+- `shared/SettingsManager.js` - Cross-platform settings persistence module (322 lines)
+
+**Key Implementation Details:**
+1. Static class with load/save/get/set methods for all game settings
+2. localStorage-based persistence with "mahjong_" prefix to avoid conflicts
+3. Type validation ensures correct data types (number, boolean, string)
+4. Default values provided for all settings (cardYear: 2025, difficulty: "medium", etc.)
+5. Advanced features: JSON export/import, cross-tab sync via storage events, localStorage availability check
+6. Platform-agnostic design works identically on desktop and mobile
+7. Console logging for debugging and error handling for invalid operations
+
+**Settings Supported:**
+- Game: cardYear, useBlankTiles, difficulty
+- Training: trainingMode, trainingHand, trainingTileCount, skipCharleston
+- Audio: bgmVolume, bgmMuted, sfxVolume, sfxMuted
+
+**Testing Ready:**
+- Ready for Phase 6C (cross-platform settings UI integration)
+- Can be imported and used immediately: `import SettingsManager from './shared/SettingsManager.js'`
+- All methods tested for basic functionality (load/save/get/set)
+
+## Phase 6C Completion Summary
+
+✅ **Completed Files:**
+- `mobile/components/SettingsSheet.js` - Mobile bottom sheet settings UI (341 lines)
+- `mobile/styles/SettingsSheet.css` - Mobile settings styles (270 lines)
+- `settings.js` - Updated to use SettingsManager for persistence
+- `styles.css` - Added responsive breakpoint at 768px
+
+**Key Implementation Details:**
+1. Bottom sheet design follows mobile platform conventions (slides up from bottom)
+2. Touch-optimized UI with large controls (48px toggle switches, 24px slider thumbs)
+3. Settings persistence via shared SettingsManager (cross-platform compatibility)
+4. Responsive breakpoint at 768px to hide desktop settings on mobile
+5. Event-based communication between platforms via CustomEvent
+6. Consistent styling with mobile design system (colors from mockup.css)
+
+**Features Supported:**
+- Game settings: cardYear, difficulty, useBlankTiles
+- Audio settings: bgmVolume, bgmMuted, sfxVolume, sfxMuted
+- Training mode: trainingMode, trainingTileCount, skipCharleston
+
+**Mobile UX Improvements:**
+- Bottom sheet with smooth animation (300ms ease-out)
+- Large touch targets following iOS/Android guidelines (44px minimum)
+- Visual feedback on all interactions (active states, transitions)
+- Backdrop blur for depth and focus

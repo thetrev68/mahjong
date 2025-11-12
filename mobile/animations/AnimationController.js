@@ -350,7 +350,7 @@ export class AnimationController {
         }
         element.classList.remove(className);
         // Force a reflow so the animation restarts even if the class was already present
-        // eslint-disable-next-line no-unused-expressions
+         
         element.offsetWidth;
         element.classList.add(className);
     }

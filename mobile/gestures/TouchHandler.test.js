@@ -8,11 +8,11 @@ const simulateTouch = (element, eventType, x, y) => {
         bubbles: true,
         cancelable: true
     });
-    Object.defineProperty(event, 'touches', {
+    Object.defineProperty(event, "touches", {
         value: [touch],
         enumerable: false
     });
-    Object.defineProperty(event, 'changedTouches', {
+    Object.defineProperty(event, "changedTouches", {
         value: [touch],
         enumerable: false
     });

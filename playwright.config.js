@@ -34,21 +34,23 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
 
-  // Configure projects for major browsers
+  // Configure projects for major browsers and mobile
   projects: [
     {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      name: "desktop",
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 720 },
+      },
     },
-
     {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
-
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
+      name: "mobile",
+      use: {
+        ...devices['iPhone 12'],
+        viewport: { width: 390, height: 844 },
+        hasTouch: true,
+        isMobile: true,
+      },
     },
   ],
 

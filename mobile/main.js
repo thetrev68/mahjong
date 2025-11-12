@@ -1,7 +1,12 @@
 import InstallPrompt from './components/InstallPrompt.js';
+import SettingsSheet from './components/SettingsSheet.js';
+import '../mobile/styles/SettingsSheet.css';
 
 // Initialize install prompt manager
 const installPrompt = new InstallPrompt();
+
+// Initialize settings sheet
+let settingsSheet;
 
 // TODO: Call this when a game ends
 // Example integration point:
@@ -24,6 +29,19 @@ document.addEventListener('DOMContentLoaded', () => {
         loading.style.display = 'none';
     }
 
+    // Initialize settings sheet
+    settingsSheet = new SettingsSheet();
+    
+    // Add settings button to bottom menu if it doesn't exist yet
+    if (!document.getElementById('mobile-settings-btn')) {
+        const bottomMenu = document.querySelector('.bottom-menu') || createBottomMenu();
+        const settingsBtn = document.createElement('button');
+        settingsBtn.id = 'mobile-settings-btn';
+        settingsBtn.className = 'menu-btn';
+        settingsBtn.innerHTML = '⚙️ SETTINGS';
+        bottomMenu.appendChild(settingsBtn);
+    }
+
     // TODO: Initialize mobile game components here
     // - GameController
     // - HandRenderer
@@ -33,6 +51,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Register Service Worker
     registerServiceWorker();
 });
+
+/**
+ * Create bottom menu if it doesn't exist yet
+ */
+function createBottomMenu() {
+    const bottomMenu = document.createElement('div');
+    bottomMenu.className = 'bottom-menu';
+    document.body.appendChild(bottomMenu);
+    return bottomMenu;
+}
 
 /**
  * Register Service Worker

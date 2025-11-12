@@ -9,7 +9,12 @@
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "test:mobile": "playwright test --project=mobile",
+    "test:mobile:ui": "playwright test --project=mobile --ui",
+    "test:mobile:headed": "playwright test --project=mobile --headed",
+    "test:mobile:debug": "playwright test --project=mobile --debug",
+    "test:all": "playwright test"
   },
   "dependencies": {
     "phaser": "^3.90.0"
