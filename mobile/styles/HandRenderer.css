@@ -1,0 +1,125 @@
+.hand-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 16px 20px;
+    background: linear-gradient(180deg, rgba(12, 109, 58, 0.08), rgba(12, 109, 58, 0.02));
+    border-radius: 24px 24px 12px 12px;
+}
+
+.exposed-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.exposure-set {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+}
+
+.hand-container {
+    display: grid;
+    gap: 6px;
+    grid-auto-rows: minmax(60px, auto);
+    justify-content: center;
+}
+
+.hand-grid {
+    grid-template-columns: repeat(7, minmax(40px, 45px));
+    padding: 8px;
+}
+
+.tile-btn,
+.exposed-tile {
+    width: 45px;
+    height: 60px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: "Courier New", monospace;
+    border-radius: 6px;
+    border: 2px solid #1f3c2a;
+    background: #fff;
+    color: #111;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.tile-btn {
+    cursor: pointer;
+}
+
+.tile-btn.selected {
+    background: #ffeb3b;
+    border-color: #f57c00;
+    transform: translateY(-4px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.tile-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.tile-btn:focus-visible,
+.exposed-tile:focus-visible {
+    outline: 3px solid #0c6d3a;
+    outline-offset: 2px;
+}
+
+.tile-btn[data-suit="CRACK"],
+.exposed-tile[data-suit="CRACK"] {
+    color: #d32f2f;
+}
+
+.tile-btn[data-suit="BAM"],
+.exposed-tile[data-suit="BAM"] {
+    color: #1b5e20;
+}
+
+.tile-btn[data-suit="DOT"],
+.exposed-tile[data-suit="DOT"] {
+    color: #1565c0;
+}
+
+.tile-btn[data-suit="WIND"],
+.exposed-tile[data-suit="WIND"],
+.tile-btn[data-suit="DRAGON"],
+.exposed-tile[data-suit="DRAGON"] {
+    color: #111;
+}
+
+.tile-btn[data-suit="FLOWER"],
+.exposed-tile[data-suit="FLOWER"] {
+    color: #6a1b9a;
+}
+
+.tile-btn[data-suit="JOKER"],
+.exposed-tile[data-suit="JOKER"] {
+    color: #ef6c00;
+}
+
+.tile-btn[data-suit="BLANK"],
+.exposed-tile[data-suit="BLANK"] {
+    color: #616161;
+}
+
+@media (max-width: 374px) {
+    .hand-grid {
+        grid-template-columns: repeat(7, minmax(36px, 42px));
+        padding: 6px;
+    }
+
+    .tile-btn,
+    .exposed-tile {
+        width: 42px;
+        height: 56px;
+        font-size: 15px;
+    }
+}

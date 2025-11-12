@@ -58,6 +58,7 @@ export class PhaserAdapter {
         gc.on("TILE_DISCARDED", (data) => this.onTileDiscarded(data));
         gc.on("DISCARD_CLAIMED", (data) => this.onDiscardClaimed(data));
         gc.on("TILES_EXPOSED", (data) => this.onTilesExposed(data));
+        gc.on("JOKER_SWAPPED", (data) => this.onJokerSwapped(data));
 
         // Hand events
         gc.on("HAND_UPDATED", (data) => this.onHandUpdated(data));
@@ -320,6 +321,90 @@ export class PhaserAdapter {
         // TODO: Implement exposure display (Phase 2B)
 
         printMessage(`${player.playerInfo.name} exposed ${exposureType}: ${phaserTiles.length} tiles`);
+    }
+
+    onJokerSwapped(data) {
+        this.handleJokerSwap(data);
+    }
+
+    handleJokerSwap(data = {}) {
+        const {
+            player,
+            exposureIndex = 0,
+            jokerIndex = null,
+            replacementTile,
+            recipient = PLAYER.BOTTOM
+        } = data;
+
+        if (typeof player !== "number") {
+            printMessage("JOKER_SWAPPED event missing player index");
+            return;
+        }
+
+        const exposureOwner = this.table.players[player];
+        if (!exposureOwner || !exposureOwner.hand) {
+            printMessage(`JOKER_SWAPPED ignore: player ${player} missing hand`);
+            return;
+        }
+
+        const exposureSets = exposureOwner.hand.exposedTileSetArray || [];
+        const targetExposure = exposureSets[exposureIndex];
+        if (!targetExposure) {
+            printMessage(`JOKER_SWAPPED ignore: exposure ${exposureIndex} missing for player ${player}`);
+            return;
+        }
+
+        const jokerTile = this.findJokerTile(targetExposure, jokerIndex);
+        if (!jokerTile) {
+            printMessage(`JOKER_SWAPPED ignore: joker index ${jokerIndex ?? "auto"} missing for player ${player}`);
+            return;
+        }
+
+        targetExposure.remove(jokerTile);
+
+        const replacementData = replacementTile instanceof TileData
+            ? replacementTile
+            : (replacementTile ? TileData.fromJSON(replacementTile) : null);
+
+        if (replacementData) {
+            const replacementPhaserTile = this.createPhaserTile(replacementData);
+            if (replacementPhaserTile) {
+                replacementPhaserTile.showTile(true, true);
+                targetExposure.insert(replacementPhaserTile);
+            }
+        }
+
+        const recipientPlayer = this.table.players[recipient] || this.table.players[PLAYER.BOTTOM];
+        if (recipientPlayer && recipientPlayer.hand) {
+            recipientPlayer.hand.insertHidden(jokerTile);
+        } else {
+            this.table.wall.insert(jokerTile);
+        }
+
+        this.table.players.forEach((tablePlayer, index) => {
+            tablePlayer.showHand(index === PLAYER.BOTTOM);
+        });
+
+        if (replacementData) {
+            printInfo(`${exposureOwner.playerInfo.name} swapped a joker for ${replacementData.getText()}`);
+        } else {
+            printInfo(`${exposureOwner.playerInfo.name} joker swap complete`);
+        }
+    }
+
+    findJokerTile(tileSet, jokerIndex) {
+        if (!tileSet || !Array.isArray(tileSet.tileArray)) {
+            return null;
+        }
+
+        if (typeof jokerIndex === "number") {
+            const exactMatch = tileSet.tileArray.find(tile => tile.index === jokerIndex);
+            if (exactMatch) {
+                return exactMatch;
+            }
+        }
+
+        return tileSet.tileArray.find(tile => tile.suit === SUIT.JOKER) || null;
     }
 
     onHandUpdated(data) {

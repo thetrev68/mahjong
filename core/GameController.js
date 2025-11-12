@@ -15,7 +15,7 @@
  * - TILE_DISCARDED: {player, tile}
  * - HAND_UPDATED: {player, hand}
  * - TURN_CHANGED: {currentPlayer, previousPlayer}
- * - CHARLESTON_PHASE: {phase: 1|2, passDirection}
+ * - CHARLESTON_PHASE: {phase: 1|2, direction}
  * - CHARLESTON_PASS: {player, tiles, direction}
  * - COURTESY_VOTE: {player, vote}
  * - COURTESY_PASS: {fromPlayer, toPlayer, tile}
@@ -32,6 +32,17 @@ import {STATE, PLAYER, SUIT} from "../constants.js";
 import {TileData} from "./models/TileData.js";
 import {PlayerData} from "./models/PlayerData.js";
 import {ExposureData} from "./models/HandData.js";
+
+const CHARLESTON_DIRECTION_SEQUENCE = {
+    1: ["right", "across", "left"],
+    2: ["left", "across", "right"]
+};
+
+const CHARLESTON_DIRECTION_OFFSETS = {
+    right: PLAYER.RIGHT,
+    across: PLAYER.TOP,
+    left: PLAYER.LEFT
+};
 
 export class GameController extends EventEmitter {
     constructor() {
@@ -283,16 +294,14 @@ export class GameController extends EventEmitter {
      * @param {number} phase - 1 or 2
      */
     async executeCharlestonPasses(phase) {
-        const passDirections = phase === 1
-            ? [PLAYER.RIGHT, PLAYER.TOP, PLAYER.LEFT]
-            : [PLAYER.LEFT, PLAYER.TOP, PLAYER.RIGHT];
-        const directionNames = phase === 1
-            ? ["right", "across", "left"]
-            : ["left", "across", "right"];
+        const directionSequence = CHARLESTON_DIRECTION_SEQUENCE[phase] || CHARLESTON_DIRECTION_SEQUENCE[1];
 
-        for (let i = 0; i < 3; i++) {
-            const direction = passDirections[i];
-            const directionName = directionNames[i];
+        for (let i = 0; i < directionSequence.length; i++) {
+            const directionName = directionSequence[i];
+            const direction = CHARLESTON_DIRECTION_OFFSETS[directionName];
+            if (typeof direction !== "number") {
+                continue;
+            }
             this.setState(phase === 1 ? STATE.CHARLESTON1 : STATE.CHARLESTON2);
 
             this.emit("CHARLESTON_PHASE", {

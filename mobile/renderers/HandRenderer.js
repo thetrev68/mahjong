@@ -58,7 +58,7 @@ export class HandRenderer {
         this.container.appendChild(this.exposedSection);
 
         this.handContainer = document.createElement("div");
-        this.handContainer.className = "hand-container";
+        this.handContainer.className = "hand-container hand-grid";
         this.container.appendChild(this.handContainer);
     }
 

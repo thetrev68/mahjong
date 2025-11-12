@@ -1,6 +1,7 @@
-import InstallPrompt from './components/InstallPrompt.js';
-import SettingsSheet from './components/SettingsSheet.js';
-import '../mobile/styles/SettingsSheet.css';
+import InstallPrompt from "./components/InstallPrompt.js";
+import SettingsSheet from "./components/SettingsSheet.js";
+import "./styles/SettingsSheet.css";
+import "./styles/HandRenderer.css";
 
 // Initialize install prompt manager
 const installPrompt = new InstallPrompt();
@@ -20,25 +21,25 @@ function onGameEnd() {
 }
 
 // Placeholder for mobile app initialization
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Mobile Mahjong app initializing...');
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("Mobile Mahjong app initializing...");
 
     // Hide loading message
-    const loading = document.getElementById('loading');
+    const loading = document.getElementById("loading");
     if (loading) {
-        loading.style.display = 'none';
+        loading.style.display = "none";
     }
 
     // Initialize settings sheet
     settingsSheet = new SettingsSheet();
     
     // Add settings button to bottom menu if it doesn't exist yet
-    if (!document.getElementById('mobile-settings-btn')) {
-        const bottomMenu = document.querySelector('.bottom-menu') || createBottomMenu();
-        const settingsBtn = document.createElement('button');
-        settingsBtn.id = 'mobile-settings-btn';
-        settingsBtn.className = 'menu-btn';
-        settingsBtn.innerHTML = '⚙️ SETTINGS';
+    if (!document.getElementById("mobile-settings-btn")) {
+        const bottomMenu = document.querySelector(".bottom-menu") || createBottomMenu();
+        const settingsBtn = document.createElement("button");
+        settingsBtn.id = "mobile-settings-btn";
+        settingsBtn.className = "menu-btn";
+        settingsBtn.innerHTML = "⚙️ SETTINGS";
         bottomMenu.appendChild(settingsBtn);
     }
 
@@ -56,8 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
  * Create bottom menu if it doesn't exist yet
  */
 function createBottomMenu() {
-    const bottomMenu = document.createElement('div');
-    bottomMenu.className = 'bottom-menu';
+    const bottomMenu = document.createElement("div");
+    bottomMenu.className = "bottom-menu";
     document.body.appendChild(bottomMenu);
     return bottomMenu;
 }
@@ -67,39 +68,39 @@ function createBottomMenu() {
  */
 async function registerServiceWorker() {
     // Check if service workers are supported
-    if (!('serviceWorker' in navigator)) {
-        console.log('Service workers not supported');
+    if (!("serviceWorker" in navigator)) {
+        console.log("Service workers not supported");
         return;
     }
 
     try {
         // Register the service worker
         const registration = await navigator.serviceWorker.register(
-            '/mahjong/pwa/service-worker.js',
-            { scope: '/mahjong/' }
+            "/mahjong/pwa/service-worker.js",
+            { scope: "/mahjong/" }
         );
 
-        console.log('Service worker registered:', registration);
+        console.log("Service worker registered:", registration);
 
         // Check for updates on page load
         registration.update();
 
         // Listen for updates
-        registration.addEventListener('updatefound', () => {
+        registration.addEventListener("updatefound", () => {
             const newWorker = registration.installing;
-            console.log('Service worker update found');
+            console.log("Service worker update found");
 
-            newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            newWorker.addEventListener("statechange", () => {
+                if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
                     // New service worker available
-                    console.log('New service worker installed, ready to activate');
+                    console.log("New service worker installed, ready to activate");
                     showUpdateNotification(registration);
                 }
             });
         });
 
     } catch (error) {
-        console.error('Service worker registration failed:', error);
+        console.error("Service worker registration failed:", error);
     }
 }
 
@@ -108,8 +109,8 @@ async function registerServiceWorker() {
  */
 function showUpdateNotification(registration) {
     // Create update banner
-    const banner = document.createElement('div');
-    banner.id = 'update-banner';
+    const banner = document.createElement("div");
+    banner.id = "update-banner";
     banner.innerHTML = `
         <div style="
             position: fixed;
@@ -141,6 +142,6 @@ function showUpdateNotification(registration) {
 
     // Tell the waiting service worker to skip waiting
     if (registration.waiting) {
-        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        registration.waiting.postMessage({ type: "SKIP_WAITING" });
     }
 }
