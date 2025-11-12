@@ -949,13 +949,13 @@ document.getElementById('start').addEventListener('click', async () => {
 | 3B | Mobile architecture | **Sonnet (You)** | High | 12K | ✅ Complete |
 | 3C | TouchHandler | MiniMax2 | Medium | 8K | ✅ Complete |
 | 3D | MobileTile | MiniMax2/Grok X1| Medium | 6K | ✅ Complete |
-| 4A | HandRenderer | Gemini Pro | Medium | 10K | ? Complete |
+| 4A | HandRenderer | Gemini Pro | Medium | 10K | ✅ Complete |
 | 4B | OpponentBar | Haiku | Low | 4K | ✅ Complete |
 | 4C | DiscardPile | Gemini Flash | Low | 3K | ✅ Complete |
 | 4D | Animations | Gemini Pro | Medium | 7K | ✅ Complete |
-| 5A | PWA manifest | Haiku | Low | 1K | Not Started |
-| 5B | Install prompt | Gemini Flash | Low | 2K | Not Started |
-| 5C | Service worker | MiniMax2 | Low | 4K | Not Started |
+| 5A | PWA manifest | Haiku | Low | 1K | ✅ Complete |
+| 5B | Install prompt | Gemini Flash | Low | 2K | ✅ Complete |
+| 5C | Service worker | MiniMax2 | Low | 4K | ✅ Complete |
 | 6A | AIEngine | **Sonnet (You)** | High | 20K | Not Started |
 | 6B | SettingsManager | Haiku | Low | 3K | Not Started |
 | 6C | Settings UI | Gemini Pro | Medium | 6K | Not Started |
@@ -1419,3 +1419,24 @@ Before merging each phase:
 
 **Next Critical Task:**
 Phase 2B and 2C can proceed in parallel (delegated to Haiku/Gemini Flash). Phase 3A (mobile mockups) can start independently.
+
+## Phase 5A Completion Summary
+
+✅ **Completed Files:**
+- `pwa/manifest.json` - Complete PWA manifest with proper metadata and icon references
+- `pwa/icons/` - 11 icon files generated from favicon.svg (72px to 512px + maskable variants)
+- `scripts/generate-icons.js` - Node.js script using Sharp library for automated icon generation
+- `mobile/index.html` - Basic mobile HTML page with PWA manifest links and iOS meta tags
+
+**Key Implementation Details:**
+1. Manifest includes all required fields for GitHub Pages deployment (`/mahjong/` scope)
+2. Icons generated in all PWA-required sizes (72, 96, 128, 144, 152, 180, 192, 384, 512px)
+3. Maskable icons created with 20% safe zone padding using background color #0c6d3a
+4. iOS-specific 180px icon generated for home screen installation
+5. Mobile HTML includes proper viewport, manifest link, and iOS PWA meta tags
+6. Sharp library installed as dev dependency for reliable SVG-to-PNG conversion
+
+**Testing Ready:**
+- Manifest can be validated at https://manifest-validator.appspot.com/
+- Icons display correctly in Chrome DevTools Application → Manifest
+- Ready for Phase 5B (install prompt) and Phase 5C (service worker) implementation
