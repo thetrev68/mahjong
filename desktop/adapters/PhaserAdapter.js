@@ -12,9 +12,8 @@
  */
 
 import {TileData} from "../../core/models/TileData.js";
-import {HandData} from "../../core/models/HandData.js";
 import {Tile} from "../../gameObjects.js";
-import {PLAYER, STATE, SUIT} from "../../constants.js";
+import {PLAYER, SUIT} from "../../constants.js";
 import {printMessage, printInfo} from "../../utils.js";
 
 export class PhaserAdapter {

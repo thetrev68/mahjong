@@ -479,6 +479,12 @@ const handler = new TouchHandler(element, {
 
 **Goal:** Build mobile UI components that connect to GameController
 
+**CRITICAL:** All Phase 4 tasks MUST follow the design in [mobile/mockup.html](mobile/mockup.html) and [mobile/mockup.css](mobile/mockup.css):
+- **Hand:** 7-column grid, 2 rows, tiles 45px×60px (NOT horizontal scrolling)
+- **Discard pile:** 9-column grid, tiles 32px height (NOT 4 columns)
+- **Opponent bars:** Dark green background with yellow turn indicator
+- **All CSS:** Use mockup.css exactly (don't create custom styles)
+
 ### 4A: Hand Renderer
 **Assignee:** Gemini Pro 2.5
 **Complexity:** Medium
@@ -941,11 +947,11 @@ document.getElementById('start').addEventListener('click', async () => {
 | 2C | Manual Testing | **Sonnet (You)** | Low | 5K | ✅ Complete |
 | 3A | Mobile mockup | Grok X1 | Medium | 5K | ✅ Complete |
 | 3B | Mobile architecture | **Sonnet (You)** | High | 12K | ✅ Complete |
-| 3C | TouchHandler | Gemini Pro | Medium | 8K | Not Started |
-| 3D | MobileTile | Gemini Pro | Medium | 6K | Not Started |
+| 3C | TouchHandler | MiniMax2 | Medium | 8K | ✅ Complete |
+| 3D | MobileTile | MiniMax2/Grok X1| Medium | 6K | ✅ Complete |
 | 4A | HandRenderer | Gemini Pro | Medium | 10K | ? Complete |
-| 4B | OpponentBar | Haiku | Low | 4K | Not Started |
-| 4C | DiscardPile | Gemini Flash | Low | 3K | Not Started |
+| 4B | OpponentBar | Haiku | Low | 4K | ✅ Complete |
+| 4C | DiscardPile | Gemini Flash | Low | 3K | ✅ Complete |
 | 4D | Animations | Gemini Pro | Medium | 7K | Not Started |
 | 5A | PWA manifest | Haiku | Low | 1K | Not Started |
 | 5B | Install prompt | Gemini Flash | Low | 2K | Not Started |

@@ -17,6 +17,7 @@ export class MobileTile {
      * @param {string} spritePath - Path to tiles.png
      * @param {Object} spriteData - Parsed tiles.json
      */
+    // eslint-disable-next-line require-await
     static async loadSprites(spritePath, spriteData) {
         MobileTile.spritePath = spritePath;
         MobileTile.spriteData = spriteData;

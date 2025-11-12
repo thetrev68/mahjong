@@ -28,9 +28,8 @@
  */
 
 import {EventEmitter} from "./events/EventEmitter.js";
-import {STATE, PLAYER, SUIT, VNUMBER} from "../constants.js";
+import {STATE, PLAYER, SUIT} from "../constants.js";
 import {TileData} from "./models/TileData.js";
-import {HandData} from "./models/HandData.js";
 import {PlayerData} from "./models/PlayerData.js";
 
 export class GameController extends EventEmitter {
