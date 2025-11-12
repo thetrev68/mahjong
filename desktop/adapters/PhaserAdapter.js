@@ -592,10 +592,12 @@ export class PhaserAdapter {
 
         button1.textContent = "Yes";
         button1.disabled = false;
+        button1.style.display = "block";
         button1.onclick = () => this.respondYesNo("Yes");
 
         button2.textContent = "No";
         button2.disabled = false;
+        button2.style.display = "block";
         button2.onclick = () => this.respondYesNo("No");
 
         // Hide other buttons

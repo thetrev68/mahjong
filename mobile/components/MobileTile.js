@@ -88,9 +88,9 @@ export class MobileTile {
             div.style.width = `${this.options.width}px`;
             div.style.height = `${this.options.height}px`;
             div.style.backgroundImage = `url(${MobileTile.spritePath})`;
-            
+
             if (frame) {
-                div.style.backgroundPosition = `-${frame.frame.x}px 0px`;
+                div.style.backgroundPosition = `-${frame.frame.x * this.getScale()}px -${frame.frame.y * this.getScale()}px`;
                 div.style.backgroundSize = `${MobileTile.spriteData.meta.size.w * this.getScale()}px auto`;
             } else {
                 console.warn(`Sprite frame not found: ${frameName}, falling back to text`);
@@ -164,26 +164,26 @@ export class MobileTile {
         const { suit, number } = this.tileData;
 
         // Define lookup tables to avoid lexical declaration issues
-        const winds = ["N", "S", "W", "E"];
-        const dragons = ["DB", "DC", "DD"];
+        const winds = ["north", "south", "west", "east"];
+        const dragons = ["red", "green", "white"];
 
         switch (suit) {
             case SUIT.CRACK:
-                return `${number}C.png`;
+                return `crack${number}.png`;
             case SUIT.BAM:
-                return `${number}B.png`;
+                return `bam${number}.png`;
             case SUIT.DOT:
-                return `${number}D.png`;
+                return `dot${number}.png`;
             case SUIT.WIND:
                 // number: 0=North, 1=South, 2=West, 3=East
                 return `${winds[number]}.png`;
             case SUIT.DRAGON:
-                // number: 0=Red (DB), 1=Green (DC), 2=White (DD)
+                // number: 0=Red, 1=Green, 2=White
                 return `${dragons[number]}.png`;
             case SUIT.JOKER:
-                return "J.png";
+                return "joker.png";
             case SUIT.FLOWER:
-                return `F${number + 1}.png`;  // Flowers are 1-indexed
+                return `flower${number + 1}.png`;  // Flowers are 1-indexed
             case SUIT.BLANK:
                 return "blank.png";  // Fallback if no blank sprite
             default:

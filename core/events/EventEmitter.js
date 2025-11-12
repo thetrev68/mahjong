@@ -24,9 +24,15 @@ export class EventEmitter {
         // Return unsubscribe function
         return () => {
             const callbacks = this.listeners.get(eventType);
+            if (!callbacks || callbacks.length === 0) {
+                return;
+            }
             const index = callbacks.indexOf(callback);
             if (index > -1) {
                 callbacks.splice(index, 1);
+                if (callbacks.length === 0) {
+                    this.listeners.delete(eventType);
+                }
             }
         };
     }
@@ -51,7 +57,7 @@ export class EventEmitter {
     emit(eventType, data) {
         const callbacks = this.listeners.get(eventType);
         if (callbacks) {
-            callbacks.forEach(callback => {
+            callbacks.slice().forEach(callback => {
                 try {
                     callback(data);
                 } catch (error) {

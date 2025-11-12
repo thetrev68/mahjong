@@ -4,11 +4,17 @@ import { TouchHandler } from "./TouchHandler.js";
 // Helper to simulate touch events
 const simulateTouch = (element, eventType, x, y) => {
     const touch = { clientX: x, clientY: y, target: element };
-    const event = new TouchEvent(eventType, {
+    const event = new Event(eventType, {
         bubbles: true,
-        cancelable: true,
-        touches: [touch],
-        changedTouches: [touch]
+        cancelable: true
+    });
+    Object.defineProperty(event, 'touches', {
+        value: [touch],
+        enumerable: false
+    });
+    Object.defineProperty(event, 'changedTouches', {
+        value: [touch],
+        enumerable: false
     });
     element.dispatchEvent(event);
 };
