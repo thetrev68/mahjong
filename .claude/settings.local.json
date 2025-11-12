@@ -1,12 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm test:*)",
-      "Bash(npm run lint:*)",
-      "Bash(npm run build:*)",
-      "Bash(pkill:*)",
-      "Bash(exit)",
-      "mcp__serena__*"
+      "Bash(npm run lint)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []
