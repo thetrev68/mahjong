@@ -930,9 +930,9 @@ class Card {
 - [x] MOBILE_INTERFACES.md (this document)
 
 ### Phase 2A (You): Desktop Adapter
-- [ ] PhaserAdapter.js
-- [ ] Update desktop/main.js to use GameController
-- [ ] Bridge all events to existing Phaser code
+- [x] PhaserAdapter.js
+- [x] Update desktop/main.js to use GameController
+- [x] Bridge all events to existing Phaser code
 
 ### Phase 3C (Gemini Pro): Touch Handler
 - [ ] TouchHandler.js

@@ -1,0 +1,472 @@
+/* Mobile Mahjong Mockup Styles */
+
+:root {
+    --color-table-base: #0c6d3a;
+    --color-table-dark: #044328;
+    --color-table-highlight: #178c4e;
+    --gradient-table: radial-gradient(circle at 35% 18%, var(--color-table-highlight) 0%, var(--color-table-base) 45%, var(--color-table-dark) 98%), radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.15) 0%, transparent 60%), radial-gradient(circle at 20% 60%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.08) 0%, transparent 45%);
+}
+
+/* Base layout */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', monospace;
+    background: var(--gradient-table);
+    color: #333;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent scrolling */
+}
+
+/* Opponent bars section */
+.opponents-section {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px;
+}
+
+.opponent-bar {
+    background: rgba(4, 36, 21, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 6px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    backdrop-filter: blur(4px);
+}
+
+.opponent-bar[data-current-turn="true"] {
+    border: 2px solid #ffd166;
+    box-shadow: 0 0 12px rgba(255, 209, 102, 0.4);
+    background: rgba(4, 36, 21, 0.95);
+}
+
+.opponent-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 140px;
+}
+
+.opponent-name {
+    font-weight: 600;
+    color: #f5fbf7;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+}
+
+.tile-count {
+    color: rgba(237, 244, 239, 0.65);
+    font-size: 11px;
+}
+
+.opponent-exposed {
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+}
+
+.opp-tile {
+    width: 32px;
+    height: 42px;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    padding: 2px;
+    border: 1px solid #666;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Apply suit colors to opponent tiles */
+.opp-tile {
+    color: #ff0000; /* Default crack color for example */
+}
+
+/* Wall Counter */
+.wall-counter {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(4, 24, 14, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    padding: 4px 10px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    backdrop-filter: blur(4px);
+    z-index: 100;
+}
+
+.wall-label {
+    color: rgba(237, 244, 239, 0.7);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.wall-tiles {
+    color: #ffd166;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+}
+
+/* Discard pile section */
+.discard-section {
+    flex: 1; /* Take remaining space */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 8px;
+    overflow-y: auto; /* Allow scrolling for 100+ tiles */
+    position: relative;
+}
+
+.discard-pile {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr); /* 9 columns × 12 rows = 108 tiles */
+    gap: 2px;
+    max-width: 100%;
+    width: 100%;
+    align-content: start;
+}
+
+.discard-tile {
+    aspect-ratio: 3/4; /* Tile proportions */
+    background: white;
+    border: 1px solid #333;
+    border-radius: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 10px;
+    font-weight: bold;
+    height: 32px; /* Fixed size - 9 cols × 32px = ~300px width fits on 390px screen */
+    width: auto;
+}
+
+.discard-tile.latest {
+    border: 3px solid #ffeb3b;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 235, 59, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0); }
+}
+
+/* Hand section */
+.hand-section {
+    flex: 0 0 auto; /* Auto height based on content */
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Exposed tiles section */
+.exposed-section {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.exposure-set {
+    display: flex;
+    gap: 2px;
+    padding: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.exposed-tile {
+    width: 32px;
+    height: 42px;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    padding: 2px;
+    border: 1px solid #666;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hand-container {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 tiles per row */
+    gap: 3px;
+    justify-items: center;
+    max-width: 100%;
+}
+
+/* Tile buttons - larger for better touch */
+.tile-btn {
+    width: 45px;
+    height: 60px;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    padding: 4px;
+    border: 2px solid #333;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.tile-btn.selected {
+    background: #ffeb3b;
+    border: 2px solid #f57c00;
+}
+
+.tile-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Color by suit - applies to both hand tiles and exposed tiles */
+.tile-btn[data-suit="CRACK"],
+.exposed-tile[data-suit="CRACK"] {
+    color: #ff0000;
+}
+
+.tile-btn[data-suit="BAM"],
+.exposed-tile[data-suit="BAM"] {
+    color: #00aa00;
+}
+
+.tile-btn[data-suit="DOT"],
+.exposed-tile[data-suit="DOT"] {
+    color: #0066ff;
+}
+
+.tile-btn[data-suit="WIND"],
+.tile-btn[data-suit="FLOWER"],
+.tile-btn[data-suit="JOKER"],
+.exposed-tile[data-suit="WIND"],
+.exposed-tile[data-suit="FLOWER"],
+.exposed-tile[data-suit="JOKER"] {
+    color: #000000;
+}
+
+/* Dragon colors match their suit equivalents */
+.tile-btn[data-suit="DRAGON"][data-number="0"],
+.exposed-tile[data-suit="DRAGON"][data-number="0"] { /* Red Dragon */
+    color: #ff0000;
+}
+
+.tile-btn[data-suit="DRAGON"][data-number="1"],
+.exposed-tile[data-suit="DRAGON"][data-number="1"] { /* Green Dragon */
+    color: #00aa00;
+}
+
+.tile-btn[data-suit="DRAGON"][data-number="2"],
+.exposed-tile[data-suit="DRAGON"][data-number="2"] { /* White Dragon */
+    color: #0066ff;
+}
+
+.tile-btn[data-suit="BLANK"],
+.exposed-tile[data-suit="BLANK"] {
+    color: #888888;
+}
+
+/* Discard pile tile colors */
+.discard-tile[data-suit="CRACK"] .tile-text {
+    color: #ff0000;
+}
+
+.discard-tile[data-suit="BAM"] .tile-text {
+    color: #00aa00;
+}
+
+.discard-tile[data-suit="DOT"] .tile-text {
+    color: #0066ff;
+}
+
+.discard-tile[data-suit="WIND"] .tile-text,
+.discard-tile[data-suit="FLOWER"] .tile-text,
+.discard-tile[data-suit="JOKER"] .tile-text {
+    color: #000000;
+}
+
+.discard-tile[data-suit="DRAGON"][data-number="0"] .tile-text { /* Red Dragon */
+    color: #ff0000;
+}
+
+.discard-tile[data-suit="DRAGON"][data-number="1"] .tile-text { /* Green Dragon */
+    color: #00aa00;
+}
+
+.discard-tile[data-suit="DRAGON"][data-number="2"] .tile-text { /* White Dragon */
+    color: #0066ff;
+}
+
+/* Bottom menu */
+.bottom-menu {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+    padding: 0;
+    background: rgba(4, 24, 14, 0.95);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.menu-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 8px;
+    background: transparent;
+    border: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: background 0.2s;
+    min-height: 60px;
+}
+
+.menu-btn:last-child {
+    border-right: none;
+}
+
+.menu-btn:active {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.menu-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.menu-label {
+    font-size: 11px;
+    color: rgba(237, 244, 239, 0.7);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Confirmation popup */
+.tile-confirm-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 300px;
+    width: 90%;
+}
+
+.tile-preview {
+    font-size: 48px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    padding: 16px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+.btn-confirm,
+.btn-cancel {
+    margin: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    min-width: 100px;
+}
+
+.btn-confirm {
+    background: #4caf50;
+    color: white;
+}
+
+.btn-cancel {
+    background: #f44336;
+    color: white;
+}
+
+/* Mobile viewport adjustments */
+@media (max-width: 375px) {
+    .tile-btn {
+        width: 42px; /* Slightly smaller on very small screens */
+        height: 56px;
+        font-size: 15px;
+    }
+
+    .exposed-tile, .opp-tile {
+        width: 30px;
+        height: 40px;
+        font-size: 11px;
+    }
+
+    .discard-tile {
+        height: 30px;
+        font-size: 9px;
+    }
+}
+
+/* Larger screens (tablets in portrait) */
+@media (min-width: 768px) {
+    .tile-btn {
+        width: 60px; /* Larger tiles on bigger screens */
+        height: 80px;
+        font-size: 20px;
+    }
+
+    .exposed-tile, .opp-tile {
+        width: 40px;
+        height: 54px;
+        font-size: 14px;
+    }
+
+    .discard-pile {
+        grid-template-columns: repeat(12, 1fr); /* More columns on larger screens */
+    }
+
+    .discard-tile {
+        height: 38px;
+        font-size: 11px;
+    }
+}

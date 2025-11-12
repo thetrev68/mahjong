@@ -10,9 +10,27 @@
 
 ---
 
+## ⚠️ CRITICAL REQUIREMENTS
+
+1. **NO HORIZONTAL SCROLLING on hand** - All 13-14 tiles MUST fit on one line
+2. **Compact keyboard-style tiles** - 22-28px wide, 1-2 character labels (e.g., "3C", "J", "N")
+3. **Tap-to-confirm pattern** - Tap tile → confirmation popup with full details
+4. **Color scheme:**
+   - Cracks = RED, Bams = GREEN, Dots = BLUE
+   - Red Dragon = RED (matches Cracks)
+   - Green Dragon = GREEN (matches Bams)
+   - White Dragon = BLUE (matches Dots)
+   - Winds, Flowers, Jokers = BLACK
+   - Blanks = GRAY
+5. **Include joker/blank swap mode** in state designs
+
+---
+
 ## Task Overview
 
 Design a portrait-mode mobile layout for American Mahjong that works on phones (not tablets). The layout should be fundamentally different from the desktop 4-player table view.
+
+**Key Innovation:** Compact, keyboard-style tile buttons that fit all tiles on one line without scrolling.
 
 ---
 
@@ -53,6 +71,7 @@ Design a portrait-mode mobile layout for American Mahjong that works on phones (
 - Each bar shows: Name, Position, Tile Count, Exposures
 - Current turn indicator (glowing border or icon)
 - Compact design (max 50px height each)
+- **Exposures:** Show exposed tiles in compact form (e.g., "P:3C" for Pung of Crack 3, "K:J" for Kong of Jokers)
 
 **Example HTML:**
 ```html
@@ -105,34 +124,70 @@ Design a portrait-mode mobile layout for American Mahjong that works on phones (
 
 ### 3. Your Hand (Bottom Section)
 
+**CRITICAL REQUIREMENT:** All 13-14 tiles MUST fit on a single line without horizontal scrolling. Use compact keyboard-style buttons.
+
 **Requirements:**
-- Horizontal row of 13-14 tiles
-- Each tile 80-100px wide (touch-friendly)
-- Scroll horizontally if tiles don't fit
-- Selected tile: Raised appearance (translateY -10px)
+- Horizontal row of 13-14 tiles (NO SCROLLING)
+- Each tile 22-28px wide (compact, like keyboard keys)
+- Single-character representation (1-2 chars max)
+- Tap a tile: Shows full-size confirmation popup with tile image/details
+- Selected tile: Highlighted border or background color
 - Support tile sorting (by suit, by number)
+
+**Keyboard-Style Layout:**
+```
+Exposed: [P:3C] [K:J]           ← Your exposed sets (shown above hand)
+Hand:    [J][J][1C][2C][3C][4C][1B][2B][1D][2D][N][S][R]
+         ^compact buttons, ~25px wide each
+```
+
+**Note:** Player's exposed sets should be displayed ABOVE the hand in a separate row, also using compact representation (e.g., "P:3C" with tap-to-view-details).
 
 **Example HTML:**
 ```html
-<div class="hand-container">
-    <div class="mobile-tile" data-suit="CRACK" data-number="1" data-index="5">
-        <div class="tile-face">
-            <span class="tile-text">1C</span>
-        </div>
+<div class="hand-section">
+    <!-- Exposed tiles row (if player has any) -->
+    <div class="exposed-container">
+        <button class="exposed-set" data-type="PUNG" data-tile="3C">
+            P:3C
+        </button>
+        <button class="exposed-set" data-type="KONG" data-tile="J">
+            K:J
+        </button>
     </div>
-    <div class="mobile-tile selected" data-suit="CRACK" data-number="2" data-index="8">
-        <div class="tile-face">
-            <span class="tile-text">2C</span>
-        </div>
+
+    <!-- Hidden hand (compact tile buttons) -->
+    <div class="hand-container">
+        <button class="tile-btn" data-suit="CRACK" data-number="1" data-index="5">
+            1C
+        </button>
+        <button class="tile-btn selected" data-suit="CRACK" data-number="2" data-index="8">
+            2C
+        </button>
+        <button class="tile-btn" data-suit="JOKER" data-number="0" data-index="12">
+            J
+        </button>
+        <!-- More tiles (13-14 total)... -->
     </div>
-    <!-- More tiles... -->
+</div>
+
+<!-- Confirmation popup (shown on tap) -->
+<div class="tile-confirm-popup" style="display: none;">
+    <div class="popup-content">
+        <div class="tile-preview">3C</div>
+        <p>Crack 3 - Confirm discard?</p>
+        <button class="btn-confirm">✓ Discard</button>
+        <button class="btn-cancel">✗ Cancel</button>
+    </div>
 </div>
 ```
 
 **Visual Design:**
-- Text-in-box tiles (same as discard pile, but larger)
-- Selected state: Raised shadow, different border color
-- Disabled state: 50% opacity (can't discard during AI turns)
+- Compact buttons with minimal padding (2-3px)
+- Font size: 14-16px (readable but compact)
+- Selected state: Yellow background or thick border
+- Disabled state: 50% opacity (can't interact during AI turns)
+- Tap opens confirmation popup with full tile details
 
 ---
 
@@ -180,46 +235,90 @@ Design a portrait-mode mobile layout for American Mahjong that works on phones (
 - Text: Dark `#333333` on light backgrounds
 
 **Suit Colors (for text-in-box tiles):**
-- Cracks: `#2196f3` (blue)
-- Bams: `#4caf50` (green)
-- Dots: `#f44336` (red)
-- Winds: `#9c27b0` (purple)
-- Dragons: `#ff5722` (orange-red)
-- Jokers: `#ffeb3b` (yellow)
+- Cracks: `#ff0000` (red)
+- Bams: `#00aa00` (green)
+- Dots: `#0066ff` (blue)
+- Winds: `#000000` (black)
+- Dragons:
+  - Red Dragon (R): `#ff0000` (red - matches Cracks)
+  - Green Dragon (G): `#00aa00` (green - matches Bams)
+  - White Dragon (W): `#0066ff` (blue - matches Dots)
+- Flowers: `#000000` (black)
+- Jokers: `#000000` (black)
+- Blanks: `#888888` (gray)
 
 ---
 
 ## Tile Text Format
 
-Use single-character representation (like tileDisplayUtils.js):
+Use 1-2 character representation (like tileDisplayUtils.js):
 
 ```
-Cracks: 1C, 2C, 3C, ..., 9C
-Bams:   1B, 2B, 3B, ..., 9B
-Dots:   1D, 2D, 3D, ..., 9D
-Winds:  N, S, W, E
-Dragons: R (red), G (green), W (white)
-Flowers: F1, F2, F3, F4
-Jokers: J
+Cracks:  1C, 2C, 3C, ..., 9C  (red text)
+Bams:    1B, 2B, 3B, ..., 9B  (green text)
+Dots:    1D, 2D, 3D, ..., 9D  (blue text)
+Winds:   N, S, W, E           (black text)
+Dragons: R, G, W              (red/green/blue text - matches corresponding suit)
+Flowers: F1, F2, F3, F4       (black text)
+Jokers:  J                    (black text)
+Blanks:  BL                   (gray text)
 ```
 
-**Example CSS for text tiles:**
+**Example CSS for compact tile buttons:**
 ```css
-.tile-text {
-    font-size: 24px;
+.tile-btn {
+    width: 24px;
+    height: 32px;
+    font-size: 14px;
     font-weight: bold;
-    font-family: monospace;
+    font-family: 'Courier New', monospace;
+    padding: 2px;
+    margin: 1px;
+    border: 1px solid #333;
+    background: white;
+    border-radius: 3px;
 }
 
-.tile-face[data-suit="CRACK"] .tile-text {
-    color: #2196f3;
+.tile-btn.selected {
+    background: #ffeb3b;
+    border: 2px solid #f57c00;
 }
 
-.tile-face[data-suit="BAM"] .tile-text {
-    color: #4caf50;
+/* Color by suit */
+.tile-btn[data-suit="CRACK"] {
+    color: #ff0000;
 }
 
-/* ... more suits ... */
+.tile-btn[data-suit="BAM"] {
+    color: #00aa00;
+}
+
+.tile-btn[data-suit="DOT"] {
+    color: #0066ff;
+}
+
+.tile-btn[data-suit="WIND"],
+.tile-btn[data-suit="FLOWER"],
+.tile-btn[data-suit="JOKER"] {
+    color: #000000;
+}
+
+/* Dragon colors match their suit equivalents */
+.tile-btn[data-suit="DRAGON"][data-number="0"] { /* Red Dragon */
+    color: #ff0000;
+}
+
+.tile-btn[data-suit="DRAGON"][data-number="1"] { /* Green Dragon */
+    color: #00aa00;
+}
+
+.tile-btn[data-suit="DRAGON"][data-number="2"] { /* White Dragon */
+    color: #0066ff;
+}
+
+.tile-btn[data-suit="BLANK"] {
+    color: #888888;
+}
 ```
 
 ---
@@ -234,11 +333,20 @@ Jokers: J
 5. **Tap discard pile tile** - Show info ("Opponent 2 discarded this")
 
 ### States to Design
-- **Idle** - Waiting for AI turns
-- **Your turn - draw phase** - Can't interact yet
-- **Your turn - discard phase** - Can select tiles
+- **Idle** - Waiting for AI turns (tiles disabled/grayed)
+- **Your turn - draw phase** - Can't interact yet (just drew tile)
+- **Your turn - discard phase** - Can select tiles to discard
 - **Claim prompt** - Show buttons (Mahjong, Pung, Kong, Pass)
-- **Charleston phase** - Multi-select mode (select 3 tiles)
+- **Charleston phase** - Multi-select mode (select 3 tiles to pass)
+- **Joker swap mode** - Select exposed joker + replacement tile from hand
+  - User taps exposed joker → highlights it
+  - User taps matching tile from hand → swap animation
+  - Must have matching tile to replace joker
+- **Blank swap mode** - Similar to joker swap (for blank tiles if enabled)
+  - Tap exposed blank → select replacement → swap
+- **Exposure selection** - After claiming discard, select tiles to expose
+  - For Pung: Select 2 matching tiles from hand
+  - For Kong: Select 3 matching tiles from hand
 
 ---
 
@@ -313,20 +421,23 @@ Document explaining:
         </div>
     </div>
 
-    <!-- Your Hand -->
+    <!-- Your Hand (Compact Keyboard-Style) -->
     <div class="hand-section">
         <div class="hand-container">
-            <div class="mobile-tile" data-suit="CRACK" data-number="1">
-                <div class="tile-face">
-                    <span class="tile-text">1C</span>
-                </div>
-            </div>
-            <div class="mobile-tile selected" data-suit="CRACK" data-number="2">
-                <div class="tile-face">
-                    <span class="tile-text">2C</span>
-                </div>
-            </div>
-            <!-- More tiles... -->
+            <button class="tile-btn" data-suit="JOKER" data-number="0">J</button>
+            <button class="tile-btn" data-suit="JOKER" data-number="0">J</button>
+            <button class="tile-btn" data-suit="CRACK" data-number="1">1C</button>
+            <button class="tile-btn selected" data-suit="CRACK" data-number="2">2C</button>
+            <button class="tile-btn" data-suit="CRACK" data-number="3">3C</button>
+            <button class="tile-btn" data-suit="CRACK" data-number="4">4C</button>
+            <button class="tile-btn" data-suit="BAM" data-number="1">1B</button>
+            <button class="tile-btn" data-suit="BAM" data-number="2">2B</button>
+            <button class="tile-btn" data-suit="DOT" data-number="1">1D</button>
+            <button class="tile-btn" data-suit="DOT" data-number="2">2D</button>
+            <button class="tile-btn" data-suit="WIND" data-number="0">N</button>
+            <button class="tile-btn" data-suit="WIND" data-number="1">S</button>
+            <button class="tile-btn" data-suit="DRAGON" data-number="0">R</button>
+            <!-- 13 tiles total, all fit on one line -->
         </div>
     </div>
 

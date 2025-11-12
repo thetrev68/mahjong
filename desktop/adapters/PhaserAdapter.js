@@ -191,9 +191,24 @@ export class PhaserAdapter {
         const {oldState, newState} = data;
         console.log(`State: ${oldState} → ${newState}`);
 
-        // Update desktop UI
+        // Phase 2B: Update state but don't call updateUI() - we manage buttons directly now
         this.gameLogic.state = newState;
-        this.gameLogic.updateUI();
+        // this.gameLogic.updateUI(); // Disabled in Phase 2B
+
+        // Manage button state based on new state
+        this.updateButtonState(newState);
+    }
+
+    /**
+     * Update button visibility/state based on game state
+     * Phase 2B: Replaces GameLogic.updateUI() for button management
+     */
+    updateButtonState(state) {
+        // Hide all buttons by default
+        this.hideButtons();
+
+        // Show specific buttons based on state
+        // This is handled by UI_PROMPT events, so we just ensure cleanup here
     }
 
     onGameStarted(data) {
@@ -385,6 +400,8 @@ export class PhaserAdapter {
             this.setupDiscardPrompt(options);
         } else if (promptType === "CLAIM_DISCARD") {
             this.setupClaimPrompt(options);
+        } else if (promptType === "CHARLESTON_PASS") {
+            this.setupCharlestonPassPrompt(options);
         } else if (promptType === "CHARLESTON_CONTINUE") {
             this.setupCharlestonContinuePrompt(options);
         } else if (promptType === "COURTESY_VOTE") {
@@ -394,25 +411,33 @@ export class PhaserAdapter {
 
     /**
      * Setup discard tile selection (human player)
-     *
-     * Phase 2A: For now, we rely on existing GameLogic drag-and-drop system.
-     * The user drags a tile to discard, which triggers GameLogic.loop_pickFromWall()
-     * GameController will be notified via the existing flow.
-     *
-     * Phase 2B will implement proper integration where PhaserAdapter enables selection
-     * and captures the tile choice to pass back to GameController.
+     * Phase 2B: Enable tile selection with callback
      */
     setupDiscardPrompt(options) {
-        // Phase 2A: Use existing GameLogic drag-and-drop
-        // No changes needed - tiles are already interactive via Hand.insertHidden()
+        const player = this.table.players[PLAYER.BOTTOM];
+
         printInfo("Select a tile to discard");
 
-        // TODO Phase 2B: Implement proper tile selection callback
-        // For now, GameLogic handles the discard action directly
+        // Enable tile selection with callback
+        player.hand.enableTileSelection((selectedTile) => {
+            // User selected a tile to discard
+            if (this.pendingPromptCallback) {
+                // Convert Phaser Tile → TileData
+                const tileData = TileData.fromPhaserTile(selectedTile);
+
+                // Call the callback with the selected tile
+                this.pendingPromptCallback(tileData);
+
+                // Clear pending state
+                this.pendingPromptCallback = null;
+                this.currentPromptType = null;
+            }
+        });
     }
 
     /**
      * Setup claim discard prompt (Mahjong/Pung/Kong/Pass)
+     * Phase 2B: Show only available claim options
      */
     setupClaimPrompt(options) {
         const {tile: tileData, options: claimOptions} = options;
@@ -421,29 +446,27 @@ export class PhaserAdapter {
 
         printInfo(`Claim ${tileDataObj.getText()}?`);
 
-        // Setup buttons: Mahjong, Pung, Kong, Pass
-        // Use existing desktop button system from gameLogic.js
+        // Setup buttons based on available options
+        const buttons = ["button1", "button2", "button3", "button4"];
+        const buttonLabels = ["Mahjong", "Pung", "Kong", "Pass"];
 
-        const button1 = document.getElementById("button1");
-        const button2 = document.getElementById("button2");
-        const button3 = document.getElementById("button3");
-        const button4 = document.getElementById("button4");
+        buttons.forEach((btnId, index) => {
+            const btn = document.getElementById(btnId);
+            const label = buttonLabels[index];
 
-        button1.textContent = "Mahjong";
-        button1.disabled = false;
-        button1.onclick = () => this.respondToClaim("Mahjong");
-
-        button2.textContent = "Pung";
-        button2.disabled = false;
-        button2.onclick = () => this.respondToClaim("Pung");
-
-        button3.textContent = "Kong";
-        button3.disabled = false;
-        button3.onclick = () => this.respondToClaim("Kong");
-
-        button4.textContent = "Pass";
-        button4.disabled = false;
-        button4.onclick = () => this.respondToClaim("Pass");
+            if (claimOptions.includes(label) || label === "Pass") {
+                // Show and enable button
+                btn.textContent = label;
+                btn.disabled = false;
+                btn.style.display = "block";
+                btn.onclick = () => this.respondToClaim(label);
+            } else {
+                // Hide unavailable buttons
+                btn.style.display = "none";
+                btn.disabled = true;
+                btn.onclick = null;
+            }
+        });
     }
 
     /**
@@ -461,6 +484,77 @@ export class PhaserAdapter {
     }
 
     /**
+     * Setup Charleston pass tile selection (3 tiles)
+     * Phase 2B: Let user select 3 tiles to pass
+     */
+    setupCharlestonPassPrompt(options) {
+        const {direction, requiredCount} = options;
+        const player = this.table.players[PLAYER.BOTTOM];
+
+        printInfo(`Choose ${requiredCount} tiles to pass ${direction}`);
+
+        // Enable multi-tile selection (up to 3)
+        const selectedTiles = [];
+
+        // Use existing selection system from Hand
+        // The Hand class already supports multi-select during Charleston state
+
+        // Setup "Pass" button
+        const button1 = document.getElementById("button1");
+        button1.textContent = "Pass";
+        button1.disabled = true;  // Enable when 3 tiles selected
+        button1.style.display = "block";
+
+        // Monitor tile selection
+        const checkSelection = () => {
+            const selection = player.hand.hiddenTileSet.getSelection();
+            if (selection.length === requiredCount) {
+                button1.disabled = false;
+            } else {
+                button1.disabled = true;
+            }
+        };
+
+        // Button click handler
+        button1.onclick = () => {
+            const selection = player.hand.hiddenTileSet.getSelection();
+
+            if (selection.length === requiredCount && this.pendingPromptCallback) {
+                // Convert Phaser Tiles → TileData array
+                const tileDatas = selection.map(tile => TileData.fromPhaserTile(tile));
+
+                // Reset selection
+                player.hand.hiddenTileSet.resetSelection();
+
+                // Call callback
+                this.pendingPromptCallback(tileDatas);
+
+                // Clear pending state
+                this.pendingPromptCallback = null;
+                this.currentPromptType = null;
+
+                // Hide button
+                this.hideButtons();
+            }
+        };
+
+        // Use existing tile selection mechanism (pointerup handlers already exist)
+        // Just need to monitor selection count
+        const monitorInterval = window.setInterval(() => {
+            if (this.currentPromptType !== "CHARLESTON_PASS") {
+                window.clearInterval(monitorInterval);
+                return;
+            }
+            checkSelection();
+        }, 100);
+
+        // Hide other buttons
+        document.getElementById("button2").style.display = "none";
+        document.getElementById("button3").style.display = "none";
+        document.getElementById("button4").style.display = "none";
+    }
+
+    /**
      * Setup Charleston continue query (Yes/No)
      */
     setupCharlestonContinuePrompt(options) {
@@ -473,10 +567,12 @@ export class PhaserAdapter {
 
         button1.textContent = "Yes";
         button1.disabled = false;
+        button1.style.display = "block";
         button1.onclick = () => this.respondYesNo("Yes");
 
         button2.textContent = "No";
         button2.disabled = false;
+        button2.style.display = "block";
         button2.onclick = () => this.respondYesNo("No");
 
         // Hide other buttons

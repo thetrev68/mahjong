@@ -114,9 +114,8 @@ export class GameController extends EventEmitter {
     /**
      * Start a new game
      *
-     * Phase 2A: Placeholder implementation
-     * GameLogic still handles actual game flow.
-     * This method will be fully implemented in Phase 2B.
+     * Phase 2B: Full implementation
+     * GameController now handles entire game flow.
      */
     async startGame() {
         this.setState(STATE.START);
@@ -127,55 +126,124 @@ export class GameController extends EventEmitter {
         this.discards = [];
         this.currentPlayer = PLAYER.BOTTOM;
 
-        // Phase 2A: Skip wall creation - use existing Phaser wall from GameLogic
-        // this.createWall();
+        // Create wall
+        this.createWall();
 
         // Emit game started event
         this.emit("GAME_STARTED", {
-            players: this.players.map(p => p.toJSON())
+            players: this.players.map(player => player.toJSON())
         });
 
-        // Phase 2A: Skip dealing - GameLogic handles this
-        // await this.dealTiles();
+        // Deal tiles to all players
+        await this.dealTiles();
 
-        // Phase 2A: Skip Charleston and game loop - GameLogic handles these
-        // if (!this.settings.skipCharleston) {
-        //     await this.charlestonPhase();
-        // } else {
-        //     await this.gameLoop();
-        // }
+        // Charleston phase or skip to game loop
+        if (!this.settings.skipCharleston) {
+            await this.charlestonPhase();
+        } else {
+            await this.gameLoop();
+        }
     }
 
     /**
      * Create the wall of tiles
+     * Matches the tile generation logic from gameObjects.js
      */
     createWall() {
         this.wall = [];
-        const tileCount = this.settings.useBlankTiles ? 160 : 152;
+        let index = 0;
 
-        // TODO: This needs to match the tile generation logic from gameObjects.js
-        // For now, create a placeholder implementation
-        // Phase 2A (PhaserAdapter) will handle actual tile creation
+        const tileGroups = [
+            {suit: SUIT.CRACK, prefix: ["C"], maxNum: 9, count: 4},
+            {suit: SUIT.BAM, prefix: ["B"], maxNum: 9, count: 4},
+            {suit: SUIT.DOT, prefix: ["D"], maxNum: 9, count: 4},
+            {suit: SUIT.WIND, prefix: ["N", "S", "W", "E"], maxNum: 1, count: 4},
+            {suit: SUIT.DRAGON, prefix: ["DC", "DB", "DD"], maxNum: 1, count: 4},
+            {suit: SUIT.FLOWER, prefix: ["F1", "F2", "F3", "F4", "F1", "F2", "F3", "F4"], maxNum: 1, count: 1},
+            {suit: SUIT.JOKER, prefix: ["J"], maxNum: 1, count: 8}
+        ];
+
+        // Add BLANK tiles if enabled
+        if (this.settings.useBlankTiles) {
+            tileGroups.push({suit: SUIT.BLANK, prefix: ["BLANK"], maxNum: 1, count: 8});
+        }
+
+        // Generate tiles
+        for (const group of tileGroups) {
+            for (const prefix of group.prefix) {
+                for (let num = 1; num <= group.maxNum; num++) {
+                    let number = num;
+
+                    // Special handling for non-numeric tiles
+                    if (group.maxNum === 1) {
+                        if (group.suit === SUIT.FLOWER) {
+                            number = 0;  // Flowers always use 0
+                        } else {
+                            number = group.prefix.indexOf(prefix);  // Wind/Dragon index
+                        }
+                    }
+
+                    // Create duplicate tiles (4 of each crack/bam/dot, 8 jokers, etc.)
+                    for (let j = 0; j < group.count; j++) {
+                        const tile = new TileData(group.suit, number, index);
+                        this.wall.push(tile);
+                        index++;
+                    }
+                }
+            }
+        }
+
+        // Shuffle wall using Fisher-Yates algorithm
+        this.shuffleWall();
 
         this.emit("MESSAGE", {
-            text: `Wall created with ${tileCount} tiles`,
+            text: `Wall created with ${this.wall.length} tiles`,
             type: "info"
         });
     }
 
     /**
-     * Deal tiles to all players
+     * Shuffle the wall using Fisher-Yates algorithm
+     */
+    shuffleWall() {
+        for (let i = this.wall.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.wall[i], this.wall[j]] = [this.wall[j], this.wall[i]];
+        }
+    }
+
+    /**
+     * Deal tiles to all players (13 tiles each)
      */
     async dealTiles() {
         this.setState(STATE.DEAL);
 
-        // TODO: Implement actual dealing logic
-        // For now, emit event to signal dealing phase
+        // Deal 13 tiles to each player
+        for (let round = 0; round < 13; round++) {
+            for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
+                const tile = this.wall.pop();
+                if (!tile) {
+                    throw new Error("Wall empty during dealing!");
+                }
+
+                this.players[playerIndex].hand.addTile(tile);
+
+                this.emit("TILE_DRAWN", {
+                    player: playerIndex,
+                    tile: tile.toJSON()
+                });
+
+                // Small delay for animation (optional, configurable)
+                if (this.settings.animateDealing) {
+                    await this.sleep(50);
+                }
+            }
+        }
 
         this.emit("TILES_DEALT", {
-            players: this.players.map(p => ({
-                position: p.position,
-                tileCount: p.hand.getLength()
+            players: this.players.map(player => ({
+                position: player.position,
+                tileCount: player.hand.getLength()
             }))
         });
 
@@ -216,41 +284,69 @@ export class GameController extends EventEmitter {
      */
     async executeCharlestonPasses(phase) {
         const passDirections = phase === 1
+            ? [PLAYER.RIGHT, PLAYER.TOP, PLAYER.LEFT]
+            : [PLAYER.LEFT, PLAYER.TOP, PLAYER.RIGHT];
+        const directionNames = phase === 1
             ? ["right", "across", "left"]
             : ["left", "across", "right"];
 
         for (let i = 0; i < 3; i++) {
             const direction = passDirections[i];
+            const directionName = directionNames[i];
             this.setState(phase === 1 ? STATE.CHARLESTON1 : STATE.CHARLESTON2);
 
             this.emit("CHARLESTON_PHASE", {
                 phase,
                 passCount: i + 1,
-                direction
+                direction: directionName
             });
 
-            // Each player selects 3 tiles to pass
+            // Collect tiles from all players
+            const charlestonPassArray = [];
+
             for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
                 const player = this.players[playerIndex];
 
                 let tilesToPass;
                 if (player.isHuman) {
                     // Prompt human player
-                    tilesToPass = await this.promptHumanCharlestonPass(direction);
+                    tilesToPass = await this.promptUI("CHARLESTON_PASS", {
+                        direction: directionName,
+                        requiredCount: 3
+                    });
                 } else {
                     // AI selects tiles
                     tilesToPass = await this.aiEngine.charlestonPass(player.hand, direction);
                 }
 
+                // Remove tiles from player's hand
+                tilesToPass.forEach(tile => player.hand.removeTile(tile));
+
+                charlestonPassArray[playerIndex] = tilesToPass;
+
                 this.emit("CHARLESTON_PASS", {
                     player: playerIndex,
-                    tiles: tilesToPass,
-                    direction
+                    tiles: tilesToPass.map(t => t.toJSON()),
+                    direction: directionName
                 });
             }
 
-            // TODO: Actually move tiles between players
-            // This requires tracking which tiles go where
+            // Exchange tiles between players based on direction
+            for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
+                const fromPlayer = playerIndex;
+                const toPlayer = (playerIndex + direction) % 4;
+
+                // Add tiles to receiving player
+                charlestonPassArray[fromPlayer].forEach(tile => {
+                    this.players[toPlayer].hand.addTile(tile);
+                });
+
+                // Emit hand updated for receiving player
+                this.emit("HAND_UPDATED", {
+                    player: toPlayer,
+                    hand: this.players[toPlayer].hand.toJSON()
+                });
+            }
 
             await this.sleep(500);
         }
@@ -312,38 +408,49 @@ export class GameController extends EventEmitter {
     }
 
     /**
-     * Main game loop
+     * Main game loop (draw → discard → claim check → repeat)
      */
     async gameLoop() {
-        while (this.state !== STATE.END) {
-            // Pick from wall
+        this.setState(STATE.LOOP_PICK_FROM_WALL);
+
+        while (this.state !== STATE.END && this.wall.length > 0) {
+            // Current player draws a tile
             await this.pickFromWall();
 
-            // Choose tile to discard
-            await this.chooseDiscard();
-
-            // Query other players to claim discard
-            const claimResult = await this.queryClaimDiscard();
-
-            if (claimResult.claimed) {
-                // Tile was claimed
-                await this.handleDiscardam(claimResult);
-            }
-
-            // Check for mahjong
+            // Check for Mahjong after drawing (self-draw win)
             if (this.checkMahjong()) {
                 await this.endGame("mahjong");
                 return;
             }
 
-            // Check for wall game
-            if (this.wall.length === 0) {
-                await this.endGame("wall_game");
-                return;
-            }
+            // Current player chooses tile to discard
+            await this.chooseDiscard();
 
-            // Next player's turn
-            this.advanceTurn();
+            // Query other players to claim the discard
+            const claimResult = await this.queryClaimDiscard();
+
+            if (claimResult.claimed) {
+                // Tile was claimed - handle the claim
+                await this.handleDiscardClaim(claimResult);
+
+                // Check if claiming player won with Mahjong
+                if (this.gameResult.mahjong) {
+                    return;  // Game ended
+                }
+
+                // Claiming player must discard a tile
+                await this.chooseDiscard();
+
+                // Continue loop with current player (the claimer)
+            } else {
+                // No claim - advance to next player
+                this.advanceTurn();
+            }
+        }
+
+        // Wall is empty - wall game
+        if (this.wall.length === 0 && !this.gameResult.mahjong) {
+            await this.endGame("wall_game");
         }
     }
 

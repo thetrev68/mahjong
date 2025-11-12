@@ -86,6 +86,9 @@ class GameScene extends Phaser.Scene {
             this.gGameLogic
         );
 
+        // Expose for testing
+        window.gameController = this.gameController;
+
         this.gGameLogic.updateUI();
 
 
@@ -121,21 +124,14 @@ class GameScene extends Phaser.Scene {
                         this.homePageTileManager.cleanup();
                         this.homePageTileManager = null; // Release reference
 
-                        // Phase 2A: Call GameController.startGame() to test event system
-                        // This only emits GAME_STARTED event; GameLogic still handles actual game
+                        // Phase 2B: GameController now handles complete game flow
                         await this.gameController.startGame();
-
-                        // GameLogic still handles the actual game flow
-                        this.gGameLogic.start();
                     };
                     this.homePageTileManager.animateToPileAndStartGame();
                 } else {
                     // Subsequent games - start directly without animation
-                    // Phase 2A: Call GameController.startGame() to test event system
+                    // Phase 2B: GameController now handles complete game flow
                     await this.gameController.startGame();
-
-                    // GameLogic still handles the actual game flow
-                    this.gGameLogic.start();
                 }
             });
         }

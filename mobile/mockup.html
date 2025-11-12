@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Mahjong - UI Mockup</title>
+    <link rel="stylesheet" href="mockup.css">
+</head>
+<body>
+    <!-- Opponent Bars -->
+    <div class="opponents-section">
+        <div class="opponent-bar" data-position="right" data-current-turn="false">
+            <div class="opponent-info">
+                <span class="opponent-name">Opponent 1 (East)</span>
+                <span class="tile-count">13 tiles</span>
+            </div>
+            <div class="opponent-exposed">
+                <!-- No exposures -->
+            </div>
+        </div>
+        <div class="opponent-bar" data-position="top" data-current-turn="true">
+            <div class="opponent-info">
+                <span class="opponent-name">Opponent 2 (South)</span>
+                <span class="tile-count">9 tiles</span>
+            </div>
+            <div class="opponent-exposed">
+                <button class="opp-tile">3C</button>
+                <button class="opp-tile">3C</button>
+                <button class="opp-tile">3C</button>
+            </div>
+        </div>
+        <div class="opponent-bar" data-position="left" data-current-turn="false">
+            <div class="opponent-info">
+                <span class="opponent-name">Opponent 3 (West)</span>
+                <span class="tile-count">13 tiles</span>
+            </div>
+            <div class="opponent-exposed">
+                <!-- No exposures -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Wall Counter -->
+    <div class="wall-counter">
+        <span class="wall-label">Wall</span>
+        <span class="wall-tiles">48</span>
+    </div>
+
+    <!-- Discard Pile -->
+    <div class="discard-section">
+        <div class="discard-pile">
+            <!-- Example tiles -->
+            <div class="discard-tile" data-suit="CRACK" data-number="5">
+                <span class="tile-text">5C</span>
+            </div>
+            <div class="discard-tile latest" data-suit="BAM" data-number="3">
+                <span class="tile-text">3B</span>
+            </div>
+            <div class="discard-tile" data-suit="DOT" data-number="7">
+                <span class="tile-text">7D</span>
+            </div>
+            <div class="discard-tile" data-suit="WIND" data-number="0">
+                <span class="tile-text">N</span>
+            </div>
+            <div class="discard-tile" data-suit="DRAGON" data-number="0">
+                <span class="tile-text">R</span>
+            </div>
+            <div class="discard-tile" data-suit="JOKER" data-number="0">
+                <span class="tile-text">J</span>
+            </div>
+            <div class="discard-tile" data-suit="CRACK" data-number="2">
+                <span class="tile-text">2C</span>
+            </div>
+            <div class="discard-tile" data-suit="BAM" data-number="8">
+                <span class="tile-text">8B</span>
+            </div>
+            <div class="discard-tile" data-suit="DOT" data-number="1">
+                <span class="tile-text">1D</span>
+            </div>
+            <div class="discard-tile" data-suit="WIND" data-number="2">
+                <span class="tile-text">W</span>
+            </div>
+            <div class="discard-tile" data-suit="DRAGON" data-number="1">
+                <span class="tile-text">G</span>
+            </div>
+            <div class="discard-tile" data-suit="FLOWER" data-number="0">
+                <span class="tile-text">F1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Your Hand (2-Row Layout with Larger Tiles) -->
+    <div class="hand-section">
+        <!-- Exposed Tiles Section (if player has exposures) -->
+        <div class="exposed-section">
+            <div class="exposure-set" data-type="KONG">
+                <button class="exposed-tile" data-suit="JOKER" data-number="0">J</button>
+                <button class="exposed-tile" data-suit="JOKER" data-number="0">J</button>
+                <button class="exposed-tile" data-suit="JOKER" data-number="0">J</button>
+                <button class="exposed-tile" data-suit="JOKER" data-number="0">J</button>
+            </div>
+        </div>
+
+        <!-- Hidden Hand (2 rows, larger tiles) -->
+        <div class="hand-container">
+            <!-- Row 1: 7 tiles -->
+            <button class="tile-btn" data-suit="CRACK" data-number="1">1C</button>
+            <button class="tile-btn selected" data-suit="CRACK" data-number="2">2C</button>
+            <button class="tile-btn" data-suit="CRACK" data-number="3">3C</button>
+            <button class="tile-btn" data-suit="CRACK" data-number="4">4C</button>
+            <button class="tile-btn" data-suit="BAM" data-number="1">1B</button>
+            <button class="tile-btn" data-suit="BAM" data-number="2">2B</button>
+            <button class="tile-btn" data-suit="BAM" data-number="8">8B</button>
+
+            <!-- Row 2: 6 tiles (13 total - 4 exposed = 9 in hand) -->
+            <button class="tile-btn" data-suit="DOT" data-number="1">1D</button>
+            <button class="tile-btn" data-suit="DOT" data-number="2">2D</button>
+            <button class="tile-btn" data-suit="WIND" data-number="0">N</button>
+            <button class="tile-btn" data-suit="WIND" data-number="1">S</button>
+            <button class="tile-btn" data-suit="DRAGON" data-number="0">R</button>
+            <button class="tile-btn" data-suit="DRAGON" data-number="1">G</button>
+        </div>
+    </div>
+
+    <!-- Bottom Menu -->
+    <div class="bottom-menu">
+        <button class="menu-btn" id="gameBtn">
+            <span class="menu-icon">🎮</span>
+            <span class="menu-label">Game</span>
+        </button>
+        <button class="menu-btn" id="handBtn">
+            <span class="menu-icon">🀄</span>
+            <span class="menu-label">Hand</span>
+        </button>
+        <button class="menu-btn" id="settingsBtn">
+            <span class="menu-icon">⚙️</span>
+            <span class="menu-label">Settings</span>
+        </button>
+    </div>
+
+    <!-- Confirmation popup (shown on tap) -->
+    <div class="tile-confirm-popup" id="tileConfirmPopup" style="display: none;">
+        <div class="popup-content">
+            <div class="tile-preview">2C</div>
+            <p>Crack 2 - Confirm discard?</p>
+            <button class="btn-confirm">✓ Discard</button>
+            <button class="btn-cancel">✗ Cancel</button>
+        </div>
+    </div>
+</body>
+</html>
