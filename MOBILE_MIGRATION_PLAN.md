@@ -943,7 +943,7 @@ document.getElementById('start').addEventListener('click', async () => {
 | 3B | Mobile architecture | **Sonnet (You)** | High | 12K | ✅ Complete |
 | 3C | TouchHandler | Gemini Pro | Medium | 8K | Not Started |
 | 3D | MobileTile | Gemini Pro | Medium | 6K | Not Started |
-| 4A | HandRenderer | Gemini Pro | Medium | 10K | Not Started |
+| 4A | HandRenderer | Gemini Pro | Medium | 10K | ? Complete |
 | 4B | OpponentBar | Haiku | Low | 4K | Not Started |
 | 4C | DiscardPile | Gemini Flash | Low | 3K | Not Started |
 | 4D | Animations | Gemini Pro | Medium | 7K | Not Started |
