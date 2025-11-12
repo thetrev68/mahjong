@@ -952,7 +952,7 @@ document.getElementById('start').addEventListener('click', async () => {
 | 4A | HandRenderer | Gemini Pro | Medium | 10K | ? Complete |
 | 4B | OpponentBar | Haiku | Low | 4K | ✅ Complete |
 | 4C | DiscardPile | Gemini Flash | Low | 3K | ✅ Complete |
-| 4D | Animations | Gemini Pro | Medium | 7K | Not Started |
+| 4D | Animations | Gemini Pro | Medium | 7K | ✅ Complete |
 | 5A | PWA manifest | Haiku | Low | 1K | Not Started |
 | 5B | Install prompt | Gemini Flash | Low | 2K | Not Started |
 | 5C | Service worker | MiniMax2 | Low | 4K | Not Started |
