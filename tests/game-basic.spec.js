@@ -129,10 +129,10 @@ test.describe("Game Logic", () => {
     // Set up a listener for GameController events
     await page.evaluate(() => {
       window.capturedEvents = [];
-      window.gameController.on("GAME_STARTED", (data) => {
+      window.gameController.on("GAME_STARTED", () => {
         window.capturedEvents.push("GAME_STARTED");
       });
-      window.gameController.on("TILES_DEALT", (data) => {
+      window.gameController.on("TILES_DEALT", () => {
         window.capturedEvents.push("TILES_DEALT");
       });
     });
