@@ -106,3 +106,70 @@ test.describe("UI Elements", () => {
     await expect(page.locator("#hint-toggle")).toBeVisible();
   });
 });
+
+test.describe("Game Logic", () => {
+  test("desktop game has no console errors", async ({ page }) => {
+    const errors = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "error") {
+        errors.push(msg.text());
+      }
+    });
+
+    await page.goto("/");
+    await page.click("#start");
+    await page.waitForTimeout(5000); // Let game run
+
+    expect(errors).toEqual([]);
+  });
+
+  test("GameController emits events", async ({ page }) => {
+    await page.goto("/");
+
+    // Set up a listener for GameController events
+    await page.evaluate(() => {
+      window.capturedEvents = [];
+      window.gameController.on("GAME_STARTED", () => {
+        window.capturedEvents.push("GAME_STARTED");
+      });
+      window.gameController.on("TILES_DEALT", () => {
+        window.capturedEvents.push("TILES_DEALT");
+      });
+    });
+
+    await page.click("#start");
+    await page.waitForTimeout(3000);
+
+    // Retrieve the captured events
+    const events = await page.evaluate(() => window.capturedEvents);
+
+    // Verify key events were emitted
+    expect(events).toContain("GAME_STARTED");
+    expect(events).toContain("TILES_DEALT");
+  });
+
+  test("game progresses through states", async ({ page }) => {
+    await page.goto("/");
+
+    // Set up a listener for state changes
+    await page.evaluate(() => {
+      window.capturedStates = [];
+      window.gameController.on("STATE_CHANGED", (data) => {
+        window.capturedStates.push(data.newState);
+      });
+    });
+
+    await page.click("#start");
+
+    // Wait for a few seconds to allow the game to progress
+    await page.waitForTimeout(5000);
+
+    // Retrieve the captured states
+    const states = await page.evaluate(() => window.capturedStates);
+
+    // Check that the game has progressed through several states
+    expect(states).toContain("DEAL");
+    expect(states).toContain("CHARLESTON1");
+    expect(states).toContain("LOOP_PICK_FROM_WALL");
+  });
+});

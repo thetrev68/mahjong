@@ -1440,5 +1440,47 @@ tile.sprite.on("dragend", (_pointer, dragX, _dragY, _dropped) => {
         return tile;
     }
 
+    /**
+     * Enable tile selection with a callback (Phase 2B)
+     * @param {Function} callback - Called when a tile is selected, receives the selected Tile object
+     */
+    enableTileSelection(callback) {
+        const tileArray = this.hiddenTileSet.tileArray;
+
+        for (const tile of tileArray) {
+            // Make tile interactive if not already
+            if (!tile.sprite.input) {
+                tile.sprite.setInteractive();
+            }
+
+            // Add one-time click handler
+            tile.sprite.once("pointerup", () => {
+                // Ignore if tile was dragged
+                if (tile.drag) {
+                    return;
+                }
+
+                // Call callback with the selected tile
+                callback(tile);
+
+                // Cleanup
+                this.disableTileSelection();
+            });
+        }
+    }
+
+    /**
+     * Disable tile selection (Phase 2B)
+     * Removes all pointerup listeners from tiles
+     */
+    disableTileSelection() {
+        const tileArray = this.hiddenTileSet.tileArray;
+
+        for (const tile of tileArray) {
+            // Remove all pointerup listeners
+            tile.sprite.removeAllListeners("pointerup");
+        }
+    }
+
 
 }

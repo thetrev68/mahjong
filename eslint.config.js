@@ -15,7 +15,20 @@ export default [
                 document: "readonly",
                 navigator: "readonly",
                 setTimeout: "readonly",
+                clearTimeout: "readonly",
+                setInterval: "readonly",
+                clearInterval: "readonly",
                 localStorage: "readonly",
+                Image: "readonly",
+                TouchEvent: "readonly",
+                Event: "readonly",
+                HTMLElement: "readonly",
+                HTMLButtonElement: "readonly",
+                HTMLDivElement: "readonly",
+                HTMLImageElement: "readonly",
+                HTMLCanvasElement: "readonly",
+                CanvasRenderingContext2D: "readonly",
+                globalThis: "readonly",
                 Phaser: "readonly"
             }
         },
@@ -42,14 +55,26 @@ export default [
             "quotes": ["warn", "double"],   // Encourage double quotes
         }
     },
-    // Playwright config and test files need Node.js globals
+    // Playwright config and test files need Node.js globals and test framework
     {
-        files: ["playwright.config.js", "tests/**/*.js"],
+        files: ["playwright.config.js", "tests/**/*.js", "mobile/**/*.test.js"],
         languageOptions: {
             globals: {
                 process: "readonly",
                 __dirname: "readonly",
-                __filename: "readonly"
+                __filename: "readonly",
+                // Playwright test globals
+                test: "readonly",
+                expect: "readonly",
+                describe: "readonly",
+                it: "readonly",
+                beforeEach: "readonly",
+                afterEach: "readonly",
+                beforeAll: "readonly",
+                afterAll: "readonly",
+                page: "readonly",
+                browser: "readonly",
+                context: "readonly"
             }
         }
     }

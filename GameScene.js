@@ -4,6 +4,8 @@ import {GameLogic} from "./gameLogic.js";
 import {Table} from "./gameObjects_table.js";
 import { HomePageTileManager } from "./homePageTileManager.js";
 import AudioManager from "./audioManager.js";
+import {GameController} from "./core/GameController.js";
+import {PhaserAdapter} from "./desktop/adapters/PhaserAdapter.js";
 // import { debugPrint } from "./utils.js";
 import { WINDOW_WIDTH, getTotalTileCount } from "./constants.js";
 
@@ -63,6 +65,30 @@ class GameScene extends Phaser.Scene {
         await this.gGameLogic.init();
         this.gGameLogic.gameAI.table = this.gTable;
 
+        // Phase 2A: Create GameController + PhaserAdapter
+        this.gameController = new GameController();
+        await this.gameController.init({
+            aiEngine: this.gGameLogic.gameAI,
+            cardValidator: this.gGameLogic.card,
+            settings: {
+                year: window.settingsManager.getCardYear(),
+                difficulty: window.settingsManager.getDifficulty(),
+                useBlankTiles: window.settingsManager.getUseBlankTiles(),
+                skipCharleston: false
+            }
+        });
+
+        // Create PhaserAdapter to bridge GameController events to Phaser
+        this.adapter = new PhaserAdapter(
+            this.gameController,
+            this,  // scene
+            this.gTable,
+            this.gGameLogic
+        );
+
+        // Expose for testing
+        window.gameController = this.gameController;
+
         this.gGameLogic.updateUI();
 
 
@@ -87,7 +113,7 @@ class GameScene extends Phaser.Scene {
         // Start Game button event listener
         const startButton = document.getElementById("start");
         if (startButton) {
-            startButton.addEventListener("click", () => {
+            startButton.addEventListener("click", async () => {
                 // Hide the button after it's clicked
                 startButton.style.display = "none";
 
@@ -98,12 +124,14 @@ class GameScene extends Phaser.Scene {
                         this.homePageTileManager.cleanup();
                         this.homePageTileManager = null; // Release reference
 
-                        this.gGameLogic.start();
+                        // Phase 2B: GameController now handles complete game flow
+                        await this.gameController.startGame();
                     };
                     this.homePageTileManager.animateToPileAndStartGame();
                 } else {
                     // Subsequent games - start directly without animation
-                    this.gGameLogic.start();
+                    // Phase 2B: GameController now handles complete game flow
+                    await this.gameController.startGame();
                 }
             });
         }
