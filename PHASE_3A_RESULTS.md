@@ -8,7 +8,7 @@
 
 ## Summary of Changes
 
-Fixed 7 major issues identified in initial mockup review:
+Fixed 8 major issues identified in initial mockup review:
 
 ### 1. ✅ Starburst Gradient Background
 - **Issue:** Plain green background (`#0c6d3a`)
@@ -36,12 +36,12 @@ Fixed 7 major issues identified in initial mockup review:
 - **Layout:** Vertical scrolling for overflow
 
 ### 5. ✅ Bottom Menu Added
-- **Issue:** Missing navigation menu
-- **Fixed:** Added 3-button bottom menu bar
-  - **Game** 🎮 - New game, restart, etc.
-  - **Hand** 🀄 - Hand actions, sort, etc.
-  - **Settings** ⚙️ - Game settings
+- **Issue:** Missing action buttons
+- **Fixed:** Added 2-button action menu
+  - **DRAW** (primary button, green accent) - Draw tile from wall
+  - **SORT** (secondary button) - Sort hand by suit/rank
 - **Styling:** Matches desktop dark green theme with proper borders and shadows
+- **Layout:** Full-width buttons, no icons/emojis, text-only labels
 
 ### 6. ✅ Wall Counter Added
 - **Issue:** No way to track remaining tiles in wall
@@ -57,6 +57,15 @@ Fixed 7 major issues identified in initial mockup review:
   - Active turn: Gold border (#ffd166) with glow
   - Text colors: Light text on dark background
   - Backdrop blur for depth
+
+### 8. ✅ AI Hints/Recommendations Panel Added
+- **Issue:** Missing AI pattern recommendations
+- **Fixed:** Added collapsible hints panel above bottom menu
+  - **Toggle Button:** "HINTS" in gold accent color
+  - **Content:** Shows top 3 matching patterns with scores
+  - **Styling:** Matches desktop hint panel (dark theme, compact)
+  - **Layout:** Between hand section and bottom menu, max-height 120px with scroll
+- **Note:** Discards marked red for dangerous tiles (handled in Phase 3B implementation)
 
 ---
 
@@ -80,7 +89,11 @@ Fixed 7 major issues identified in initial mockup review:
 │ Hand Row 1: [1C][2C][3C].. │ ← 7 tiles × 45px
 │ Hand Row 2: [1D][2D][N]... │ ← 6 tiles × 45px
 ├────────────────────────────┤
-│ [🎮 Game][🀄 Hand][⚙️ Set] │ ← 60px menu bar
+│        [HINTS ▼]           │ ← Collapsible hints panel
+│ Top Patterns:              │   (max 120px, scrollable)
+│ • 2025 #15 - Consec... (8) │
+├────────────────────────────┤
+│   [DRAW]    │   [SORT]     │ ← 54px action buttons
 └────────────────────────────┘
 ```
 
@@ -160,17 +173,24 @@ Fixed 7 major issues identified in initial mockup review:
    - Define ExposedTilesRenderer (player + opponents)
    - Define DiscardPileRenderer with 9×12 grid
    - Define OpponentBar with exposed tile support
+   - Define HintsPanel with pattern recommendations
    - Define TouchHandler for tile interactions
 
-3. **Wall Counter Logic**
+3. **AI Integration**
+   - Connect hints panel to AI recommendations
+   - Mark dangerous discards in red
+   - Update hints in real-time as hand changes
+   - Show pattern scores and missing tiles
+
+4. **Wall Counter Logic**
    - Connect to GameController wall state
    - Update counter on tile draws
    - Animate counter changes
 
-4. **Bottom Menu Actions**
-   - Wire up Game menu (new game, restart, exit)
-   - Wire up Hand menu (sort, joker swap, etc.)
-   - Wire up Settings menu (opens settings overlay)
+5. **Bottom Menu Actions**
+   - Wire up DRAW button (draw from wall)
+   - Wire up SORT button (toggle sort modes)
+   - Add disabled states during AI turns
 
 ---
 
@@ -184,10 +204,13 @@ Fixed 7 major issues identified in initial mockup review:
 - [x] Discard pile scrolls vertically
 - [x] Hand tiles are 45×60px
 - [x] Wall counter visible in top-right
-- [x] Bottom menu has 3 buttons
-- [x] Bottom menu styled like desktop
+- [x] Bottom menu has DRAW and SORT buttons
+- [x] Bottom menu styled like desktop (no emojis)
+- [x] Hints panel added above bottom menu
+- [x] Hints panel matches desktop styling
 - [x] Responsive breakpoints work
 - [ ] Sprite tiles render correctly (Phase 3B)
+- [ ] Hints panel connects to AI (Phase 3B)
 
 ---
 
@@ -195,15 +218,17 @@ Fixed 7 major issues identified in initial mockup review:
 
 1. **[mobile/mockup.html](mobile/mockup.html)**
    - Updated opponent bars with exposed tiles
-   - Added wall counter
-   - Replaced action bar with bottom menu
+   - Added wall counter (top-right overlay)
+   - Added hints panel with pattern recommendations
+   - Updated bottom menu to DRAW and SORT buttons (no emojis)
 
 2. **[mobile/mockup.css](mobile/mockup.css)**
-   - Added CSS variables for desktop theme
-   - Updated opponent bar styling (dark theme)
-   - Changed discard pile to 9 columns
-   - Added wall counter styles
-   - Replaced action bar with bottom menu styles
+   - Added CSS variables for desktop theme (gradient, colors)
+   - Updated opponent bar styling (dark theme, proper transparency)
+   - Changed discard pile to 9 columns (from 6)
+   - Added wall counter styles (absolute positioned)
+   - Added hints panel styles (collapsible, desktop-themed)
+   - Updated bottom menu styles (text-only, 2 buttons, primary/secondary)
    - Fixed media queries for consistency
 
 3. **[MOBILE_DESIGN_RATIONALE.md](MOBILE_DESIGN_RATIONALE.md)**

@@ -940,7 +940,7 @@ document.getElementById('start').addEventListener('click', async () => {
 | 2B | Desktop Integration | **Sonnet (You)** | High | 50K | ✅ Complete |
 | 2C | Manual Testing | **Sonnet (You)** | Low | 5K | ✅ Complete |
 | 3A | Mobile mockup | Grok X1 | Medium | 5K | ✅ Complete |
-| 3B | Mobile architecture | **Sonnet (You)** | High | 12K | Not Started |
+| 3B | Mobile architecture | **Sonnet (You)** | High | 12K | ✅ Complete |
 | 3C | TouchHandler | Gemini Pro | Medium | 8K | Not Started |
 | 3D | MobileTile | Gemini Pro | Medium | 6K | Not Started |
 | 4A | HandRenderer | Gemini Pro | Medium | 10K | Not Started |
