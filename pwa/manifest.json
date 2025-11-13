@@ -1,0 +1,91 @@
+{
+    "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+    "lang": "en-US",
+    "dir": "ltr",
+    "name": "American Mahjong",
+    "short_name": "Mahjong",
+    "description": "American Mahjong game with AI opponents. Play authentic American Mahjong with Charleston, courtesy passes, and smart AI opponents.",
+    "start_url": "/mahjong/mobile/",
+    "scope": "/mahjong/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "theme_color": "#0c6d3a",
+    "background_color": "#0c6d3a",
+    "categories": ["games", "entertainment"],
+    "icons": [
+        {
+            "src": "/mahjong/icons/icon-72.png",
+            "sizes": "72x72",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/mahjong/icons/icon-96.png",
+            "sizes": "96x96",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/mahjong/icons/icon-128.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/mahjong/icons/icon-144.png",
+            "sizes": "144x144",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/mahjong/icons/icon-152.png",
+            "sizes": "152x152",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/mahjong/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/mahjong/icons/icon-384.png",
+            "sizes": "384x384",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/mahjong/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/mahjong/icons/icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/mahjong/icons/icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "New Game",
+            "short_name": "New Game",
+            "description": "Start a new game immediately",
+            "url": "/mahjong/mobile/?action=new",
+            "icons": [
+                {
+                    "src": "/mahjong/icons/icon-96.png",
+                    "sizes": "96x96"
+                }
+            ]
+        }
+    ]
+}

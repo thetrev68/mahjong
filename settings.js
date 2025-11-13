@@ -1,7 +1,8 @@
 import {debugPrint} from "./utils.js";
+import SettingsManager from "./shared/SettingsManager.js";
 
 // Settings.js - Settings management for American Mahjong
-class SettingsManager {
+class DesktopSettingsManager {
     constructor() {
         this.overlay = document.getElementById("settings-overlay");
         this.saveButton = document.getElementById("settings-save");
@@ -175,46 +176,26 @@ class SettingsManager {
         return this.getSetting("cardYear", "2025");
     }
 
-    // Settings persistence using localStorage
+    // Settings persistence using SettingsManager
     saveSetting(key, value) {
         try {
-            const settings = this.getAllSettings();
-            settings[key] = value;
-            localStorage.setItem("mahjong-settings", JSON.stringify(settings));
+            SettingsManager.set(key, value);
         } catch (error) {
             console.warn("Failed to save setting:", error);
         }
     }
 
     getSetting(key, defaultValue = null) {
-        const settings = this.getAllSettings();
-
-        if (Object.prototype.hasOwnProperty.call(settings, key)) {
-            return settings[key];
-        }
-
-        return defaultValue;
+        return SettingsManager.get(key) ?? defaultValue;
     }
 
     getAllSettings() {
-        try {
-            const stored = localStorage.getItem("mahjong-settings");
-
-            if (stored) {
-                return JSON.parse(stored);
-            }
-
-            return {};
-        } catch (error) {
-            console.warn("Failed to load settings:", error);
-
-            return {};
-        }
+        return SettingsManager.load();
     }
 
     loadSettings() {
-        // Load and apply saved settings
-        const settings = this.getAllSettings();
+        // Load and apply saved settings from SettingsManager
+        const settings = SettingsManager.load();
         debugPrint("Loaded settings:", settings);
 
         // Apply training mode settings
@@ -228,6 +209,9 @@ class SettingsManager {
 
         // Apply house rules settings
         this.applyHouseRuleSettings(settings);
+        
+        // Apply audio settings
+        this.applyAudioSettings(settings);
     }
 
     applyTrainingSettings(settings) {
@@ -281,95 +265,90 @@ class SettingsManager {
     }
 
     saveTrainingSettings() {
-        const trainCheckbox = document.getElementById("trainCheckbox");
-        const handSelect = document.getElementById("handSelect");
-        const numTileSelect = document.getElementById("numTileSelect");
-        const skipCharlestonCheckbox = document.getElementById("skipCharlestonCheckbox");
+        const settings = {};
+        
+        settings.trainingMode = document.getElementById("trainCheckbox")?.checked ?? false;
+        settings.trainingHand = document.getElementById("handSelect")?.value ?? "";
+        settings.trainingTileCount = parseInt(document.getElementById("numTileSelect")?.value ?? "9", 10);
+        settings.skipCharleston = document.getElementById("skipCharlestonCheckbox")?.checked ?? true;
 
-        const trainingSettings = {};
-
-        if (trainCheckbox) {
-            trainingSettings.trainingMode = trainCheckbox.checked;
-        } else {
-            trainingSettings.trainingMode = false;
-        }
-
-        if (handSelect) {
-            trainingSettings.trainingHand = handSelect.value;
-        } else {
-            trainingSettings.trainingHand = "";
-        }
-
-        if (numTileSelect) {
-            trainingSettings.trainingTileCount = parseInt(numTileSelect.value, 10);
-        } else {
-            trainingSettings.trainingTileCount = 9;
-        }
-
-        if (skipCharlestonCheckbox) {
-            trainingSettings.skipCharleston = skipCharlestonCheckbox.checked;
-        } else {
-            trainingSettings.skipCharleston = true;
-        }
-
-        // Save each setting individually
-        Object.keys(trainingSettings).forEach((key) => {
-            this.saveSetting(key, trainingSettings[key]);
-        });
+        // Save settings to SettingsManager
+        SettingsManager.save(settings);
+        
+        // Dispatch event so game can react to settings changes
+        window.dispatchEvent(new window.CustomEvent("settingsChanged", { detail: settings }));
     }
 
     saveDifficultySettings() {
-        const difficultySelect = document.getElementById("difficultySelect");
-        if (difficultySelect) {
-            this.saveSetting("aiDifficulty", difficultySelect.value);
-        }
+        const settings = {};
+        settings.difficulty = document.getElementById("difficultySelect")?.value ?? "medium";
+        SettingsManager.save(settings);
     }
 
     saveYearSettings() {
-        const yearSelect = document.getElementById("yearSelect");
-        if (yearSelect) {
-            this.saveSetting("cardYear", yearSelect.value);
-        }
+        const settings = {};
+        settings.cardYear = parseInt(document.getElementById("yearSelect")?.value ?? "2025", 10);
+        SettingsManager.save(settings);
     }
 
     saveHouseRuleSettings() {
-        const useBlankTiles = document.getElementById("useBlankTiles");
-        if (useBlankTiles) {
-            this.saveSetting("useBlankTiles", useBlankTiles.checked);
-        }
+        const settings = {};
+        settings.useBlankTiles = document.getElementById("useBlankTiles")?.checked ?? false;
+        SettingsManager.save(settings);
     }
 
     saveAudioSettings() {
-        const bgmVolumeSlider = document.getElementById("bgmVolume");
-        const bgmMuteCheckbox = document.getElementById("bgmMute");
-        const sfxVolumeSlider = document.getElementById("sfxVolume");
-        const sfxMuteCheckbox = document.getElementById("sfxMute");
-
-        if (bgmVolumeSlider) {
-            const volume = parseInt(bgmVolumeSlider.value, 10) / 100;
-            this.saveSetting("bgmVolume", volume);
-        }
-        if (bgmMuteCheckbox) {
-            this.saveSetting("bgmMuted", bgmMuteCheckbox.checked);
-        }
-        if (sfxVolumeSlider) {
-            const volume = parseInt(sfxVolumeSlider.value, 10) / 100;
-            this.saveSetting("sfxVolume", volume);
-        }
-        if (sfxMuteCheckbox) {
-            this.saveSetting("sfxMuted", sfxMuteCheckbox.checked);
-        }
+        const settings = {};
+        
+        settings.bgmVolume = parseInt(document.getElementById("bgmVolume")?.value ?? "70", 10);
+        settings.bgmMuted = document.getElementById("bgmMute")?.checked ?? false;
+        settings.sfxVolume = parseInt(document.getElementById("sfxVolume")?.value ?? "80", 10);
+        settings.sfxMuted = document.getElementById("sfxMute")?.checked ?? false;
+        
+        SettingsManager.save(settings);
     }
 
     applyHouseRuleSettings(settings) {
         const useBlankTiles = document.getElementById("useBlankTiles");
-        if (useBlankTiles && Object.prototype.hasOwnProperty.call(settings, "useBlankTiles")) {
+        if (useBlankTiles) {
             useBlankTiles.checked = settings.useBlankTiles;
+        }
+    }
+    
+    applyAudioSettings(settings) {
+        // Apply audio settings to UI
+        const bgmVolumeSlider = document.getElementById("bgmVolume");
+        const bgmVolumeValue = document.getElementById("bgmVolumeValue");
+        const bgmMuteCheckbox = document.getElementById("bgmMute");
+        const sfxVolumeSlider = document.getElementById("sfxVolume");
+        const sfxVolumeValue = document.getElementById("sfxVolumeValue");
+        const sfxMuteCheckbox = document.getElementById("sfxMute");
+        
+        if (bgmVolumeSlider) {
+            bgmVolumeSlider.value = settings.bgmVolume;
+            if (bgmVolumeValue) {
+                bgmVolumeValue.textContent = `${settings.bgmVolume}%`;
+            }
+        }
+        
+        if (bgmMuteCheckbox) {
+            bgmMuteCheckbox.checked = settings.bgmMuted;
+        }
+        
+        if (sfxVolumeSlider) {
+            sfxVolumeSlider.value = settings.sfxVolume;
+            if (sfxVolumeValue) {
+                sfxVolumeValue.textContent = `${settings.sfxVolume}%`;
+            }
+        }
+        
+        if (sfxMuteCheckbox) {
+            sfxMuteCheckbox.checked = settings.sfxMuted;
         }
     }
 
     getUseBlankTiles() {
-        return this.getSetting("useBlankTiles", false);
+        return SettingsManager.get("useBlankTiles");
     }
 
     // Audio controls setup and management
@@ -388,33 +367,10 @@ class SettingsManager {
             sfxMuteCheckbox: !!sfxMuteCheckbox
         });
 
-        // Load saved audio settings
-        const savedBgmVolume = this.getSetting("bgmVolume", 0.7);
-        const savedBgmMuted = this.getSetting("bgmMuted", false);
-        const savedSfxVolume = this.getSetting("sfxVolume", 0.8);
-        const savedSfxMuted = this.getSetting("sfxMuted", false);
+        // Load settings from SettingsManager
+        const settings = SettingsManager.load();
 
-        // Apply saved settings to UI
-        if (bgmVolumeSlider) {
-            bgmVolumeSlider.value = Math.round(savedBgmVolume * 100);
-            if (bgmVolumeValue) {
-                bgmVolumeValue.textContent = `${Math.round(savedBgmVolume * 100)}%`;
-            }
-        }
-        if (bgmMuteCheckbox) {
-            bgmMuteCheckbox.checked = savedBgmMuted;
-        }
-        if (sfxVolumeSlider) {
-            sfxVolumeSlider.value = Math.round(savedSfxVolume * 100);
-            if (sfxVolumeValue) {
-                sfxVolumeValue.textContent = `${Math.round(savedSfxVolume * 100)}%`;
-            }
-        }
-        if (sfxMuteCheckbox) {
-            sfxMuteCheckbox.checked = savedSfxMuted;
-        }
-
-        // BGM volume slider - update UI and audio manager, but don't save to localStorage yet
+        // BGM volume slider - update UI and audio manager, but don't save to SettingsManager yet
         if (bgmVolumeSlider) {
             bgmVolumeSlider.addEventListener("input", (e) => {
                 const volume = parseInt(e.target.value, 10) / 100;
@@ -426,7 +382,7 @@ class SettingsManager {
             });
         }
 
-        // BGM mute checkbox - update audio manager, but don't save to localStorage yet
+        // BGM mute checkbox - update audio manager, but don't save to SettingsManager yet
         if (bgmMuteCheckbox) {
             bgmMuteCheckbox.addEventListener("change", (e) => {
                 const muted = e.target.checked;
@@ -434,7 +390,7 @@ class SettingsManager {
             });
         }
 
-        // SFX volume slider - update UI and audio manager, but don't save to localStorage yet
+        // SFX volume slider - update UI and audio manager, but don't save to SettingsManager yet
         if (sfxVolumeSlider) {
             sfxVolumeSlider.addEventListener("input", (e) => {
                 const volume = parseInt(e.target.value, 10) / 100;
@@ -445,7 +401,7 @@ class SettingsManager {
             });
         }
 
-        // SFX mute checkbox - update audio manager, but don't save to localStorage yet
+        // SFX mute checkbox - update audio manager, but don't save to SettingsManager yet
         if (sfxMuteCheckbox) {
             sfxMuteCheckbox.addEventListener("change", (e) => {
                 const muted = e.target.checked;
@@ -499,7 +455,33 @@ class SettingsManager {
 
 // Initialize settings manager when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
-    window.settingsManager = new SettingsManager();
+    window.settingsManager = new DesktopSettingsManager();
+    
+    // Listen for settings changes from mobile
+    window.addEventListener("settingsChanged", (event) => {
+        const newSettings = event.detail;
+        console.log("Settings changed from mobile:", newSettings);
+        
+        // Update UI if settings panel is open
+        if (window.settingsManager && window.settingsManager.overlay.style.display !== "none") {
+            window.settingsManager.loadSettings();
+        }
+        
+        // Update game if needed
+        if (window.game && window.game.scene && window.game.scene.getScene("GameScene")) {
+            const scene = window.game.scene.getScene("GameScene");
+            if (scene.gGameLogic) {
+                // Check if card year changed
+                const oldYear = window.settingsManager.getCardYear();
+                if (newSettings.cardYear && oldYear !== newSettings.cardYear) {
+                    // Reinitialize card with new year
+                    scene.gGameLogic.init().then(() => {
+                        debugPrint(`Card year updated to ${newSettings.cardYear}`);
+                    });
+                }
+            }
+        }
+    });
 });
 
-export default SettingsManager;
+export default DesktopSettingsManager;

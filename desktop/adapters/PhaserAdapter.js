@@ -58,6 +58,7 @@ export class PhaserAdapter {
         gc.on("TILE_DISCARDED", (data) => this.onTileDiscarded(data));
         gc.on("DISCARD_CLAIMED", (data) => this.onDiscardClaimed(data));
         gc.on("TILES_EXPOSED", (data) => this.onTilesExposed(data));
+        gc.on("JOKER_SWAPPED", (data) => this.onJokerSwapped(data));
 
         // Hand events
         gc.on("HAND_UPDATED", (data) => this.onHandUpdated(data));
@@ -265,11 +266,29 @@ export class PhaserAdapter {
         const tileDataObj = TileData.fromJSON(tileData);
         const phaserTile = this.createPhaserTile(tileDataObj);
 
+        // Position tile at wall location initially
+        const wallX = 640; // Center of screen (wall position)
+        const wallY = 360;
+        phaserTile.sprite.setPosition(wallX, wallY);
+        phaserTile.sprite.setAlpha(0);
+
         // Add to player's hand
         player.hand.insertHidden(phaserTile);
 
-        // Animate tile draw
-        // TODO: Add animation (slide from wall to hand)
+        // Animate tile draw (slide from wall to hand)
+        const targetPos = player.hand.calculateTilePosition(player.playerInfo, player.hand.hiddenTileSet.getLength() - 1);
+        this.scene.tweens.add({
+            targets: phaserTile.sprite,
+            x: targetPos.x,
+            y: targetPos.y,
+            alpha: 1,
+            duration: 200,
+            ease: "Power2",
+            onComplete: () => {
+                // Refresh hand display after animation
+                player.showHand(playerIndex === PLAYER.BOTTOM);
+            }
+        });
 
         // Update wall counter
         if (this.scene.updateWallTileCounter) {
@@ -289,14 +308,31 @@ export class PhaserAdapter {
         const phaserTile = this.findPhaserTile(tileDataObj);
 
         if (phaserTile) {
+            // Store original position
+            const startX = phaserTile.sprite.x;
+            const startY = phaserTile.sprite.y;
+
             // Remove from hand
             player.hand.removeTile(phaserTile);
 
-            // Add to discard pile
+            // Add to discard pile (this sets final position)
             this.table.discards.add(phaserTile, player.playerInfo);
 
-            // Animate discard
-            // TODO: Add animation (move to discard pile)
+            // Get target position from discard pile
+            const targetX = phaserTile.sprite.x;
+            const targetY = phaserTile.sprite.y;
+
+            // Reset to start position for animation
+            phaserTile.sprite.setPosition(startX, startY);
+
+            // Animate discard (move to discard pile)
+            this.scene.tweens.add({
+                targets: phaserTile.sprite,
+                x: targetX,
+                y: targetY,
+                duration: 250,
+                ease: "Power2"
+            });
 
             printMessage(`${player.playerInfo.name} discarded ${tileDataObj.getText()}`);
         }
@@ -316,10 +352,106 @@ export class PhaserAdapter {
         // Convert to Phaser tiles
         const phaserTiles = tileDatas.map(td => this.findPhaserTile(TileData.fromJSON(td)));
 
-        // Create exposed tile set
-        // TODO: Implement exposure display (Phase 2B)
+        // Create exposed tile set and add to player's hand
+        const exposedTileSet = new window.TileSet(this.scene, this.gameLogic, false);
+        phaserTiles.forEach(tile => {
+            // Remove from hidden tiles if present
+            player.hand.hiddenTileSet.remove(tile);
+            // Add to exposed set
+            exposedTileSet.insert(tile);
+        });
+
+        // Add exposed set to player's hand
+        player.hand.exposedTileSetArray.push(exposedTileSet);
+
+        // Refresh hand display
+        player.showHand(playerIndex === 0);
 
         printMessage(`${player.playerInfo.name} exposed ${exposureType}: ${phaserTiles.length} tiles`);
+    }
+
+    onJokerSwapped(data) {
+        this.handleJokerSwap(data);
+    }
+
+    handleJokerSwap(data = {}) {
+        const {
+            player,
+            exposureIndex = 0,
+            jokerIndex = null,
+            replacementTile,
+            recipient = PLAYER.BOTTOM
+        } = data;
+
+        if (typeof player !== "number") {
+            printMessage("JOKER_SWAPPED event missing player index");
+            return;
+        }
+
+        const exposureOwner = this.table.players[player];
+        if (!exposureOwner || !exposureOwner.hand) {
+            printMessage(`JOKER_SWAPPED ignore: player ${player} missing hand`);
+            return;
+        }
+
+        const exposureSets = exposureOwner.hand.exposedTileSetArray || [];
+        const targetExposure = exposureSets[exposureIndex];
+        if (!targetExposure) {
+            printMessage(`JOKER_SWAPPED ignore: exposure ${exposureIndex} missing for player ${player}`);
+            return;
+        }
+
+        const jokerTile = this.findJokerTile(targetExposure, jokerIndex);
+        if (!jokerTile) {
+            printMessage(`JOKER_SWAPPED ignore: joker index ${jokerIndex ?? "auto"} missing for player ${player}`);
+            return;
+        }
+
+        targetExposure.remove(jokerTile);
+
+        const replacementData = replacementTile instanceof TileData
+            ? replacementTile
+            : (replacementTile ? TileData.fromJSON(replacementTile) : null);
+
+        if (replacementData) {
+            const replacementPhaserTile = this.createPhaserTile(replacementData);
+            if (replacementPhaserTile) {
+                replacementPhaserTile.showTile(true, true);
+                targetExposure.insert(replacementPhaserTile);
+            }
+        }
+
+        const recipientPlayer = this.table.players[recipient] || this.table.players[PLAYER.BOTTOM];
+        if (recipientPlayer && recipientPlayer.hand) {
+            recipientPlayer.hand.insertHidden(jokerTile);
+        } else {
+            this.table.wall.insert(jokerTile);
+        }
+
+        this.table.players.forEach((tablePlayer, index) => {
+            tablePlayer.showHand(index === PLAYER.BOTTOM);
+        });
+
+        if (replacementData) {
+            printInfo(`${exposureOwner.playerInfo.name} swapped a joker for ${replacementData.getText()}`);
+        } else {
+            printInfo(`${exposureOwner.playerInfo.name} joker swap complete`);
+        }
+    }
+
+    findJokerTile(tileSet, jokerIndex) {
+        if (!tileSet || !Array.isArray(tileSet.tileArray)) {
+            return null;
+        }
+
+        if (typeof jokerIndex === "number") {
+            const exactMatch = tileSet.tileArray.find(tile => tile.index === jokerIndex);
+            if (exactMatch) {
+                return exactMatch;
+            }
+        }
+
+        return tileSet.tileArray.find(tile => tile.suit === SUIT.JOKER) || null;
     }
 
     onHandUpdated(data) {
@@ -379,7 +511,16 @@ export class PhaserAdapter {
             printMessage(`ERROR: ${text}`);
         } else if (type === "hint") {
             // Hint messages (for hint panel)
-            // TODO: Implement hint display
+            const hintContent = document.getElementById("hint-content");
+            if (hintContent) {
+                const hintText = document.createElement("div");
+                hintText.className = "hint-message";
+                hintText.textContent = text;
+                hintContent.appendChild(hintText);
+
+                // Auto-scroll to bottom
+                hintContent.scrollTop = hintContent.scrollHeight;
+            }
         } else {
             printMessage(text);
         }

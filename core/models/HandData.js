@@ -16,6 +16,14 @@ export class HandData {
     }
 
     /**
+     * Compatibility getter for old Card code that expects exposedTileSetArray
+     * @returns {ExposureData[]}
+     */
+    get exposedTileSetArray() {
+        return this.exposures;
+    }
+
+    /**
      * Get total number of tiles (hidden + exposed)
      * @returns {number}
      */
@@ -30,6 +38,24 @@ export class HandData {
      */
     getHiddenCount() {
         return this.tiles.length;
+    }
+
+    /**
+     * Compatibility helper for legacy Card/AI code that expects Phaser Hand API
+     * @returns {TileData[]}
+     */
+    getHiddenTileArray() {
+        return this.tiles;
+    }
+
+    /**
+     * Get all tiles (hidden tiles only for card validation)
+     * The Card class uses this to validate hands.
+     * Hidden tiles are what count for validation.
+     * @returns {TileData[]}
+     */
+    getTileArray() {
+        return this.tiles;
     }
 
     /**
@@ -69,6 +95,15 @@ export class HandData {
      */
     hasTile(tile) {
         return this.tiles.some(t => t.equals(tile));
+    }
+
+    /**
+     * Check if all tiles are hidden (no exposures)
+     * Compatibility method for Card validation code
+     * @returns {boolean}
+     */
+    isAllHidden() {
+        return this.exposures.length === 0;
     }
 
     /**
@@ -195,6 +230,30 @@ export class ExposureData {
             type: this.type,
             tiles: this.tiles.map(t => t.toJSON())
         };
+    }
+
+    /**
+     * Compatibility getter to mimic Phaser TileSet API (tileSet.tileArray)
+     * @returns {TileData[]}
+     */
+    get tileArray() {
+        return this.tiles;
+    }
+
+    /**
+     * Legacy helper matching TileSet.getTileArray()
+     * @returns {TileData[]}
+     */
+    getTileArray() {
+        return this.tiles;
+    }
+
+    /**
+     * Legacy helper matching TileSet.getLength()
+     * @returns {number}
+     */
+    getLength() {
+        return this.tiles.length;
     }
 
     /**

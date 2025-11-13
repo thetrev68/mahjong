@@ -832,6 +832,19 @@ select:focus {
     }
 }
 
+/* Mobile Adaptation (< 768px) */
+@media (max-width: 768px) {
+    .settings-overlay {
+        /* Hide desktop settings on mobile */
+        display: none !important;
+    }
+
+    /* Mobile settings button should trigger SettingsSheet instead */
+    #settings {
+        /* Button still visible, but opens mobile sheet */
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .button,
     #uicenterdiv,

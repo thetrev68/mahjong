@@ -46,6 +46,7 @@ export class OpponentBar {
      * @param {PlayerData} playerData - Updated player data
      */
     update(playerData) {
+        if (!this.element) return;
         this.playerData = playerData;
 
         // Update name and position
@@ -124,6 +125,7 @@ export class OpponentBar {
      * @param {boolean} isCurrent - Is this player's turn?
      */
     setCurrentTurn(isCurrent) {
+        if (!this.element) return;
         if (isCurrent) {
             this.element.classList.add("current-turn");
         } else {

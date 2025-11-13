@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="American Mahjong game - Mobile">
+    <meta name="keywords" content="Mahjong, free, game, javascript, mobile">
+    <title>American Mahjong - Mobile</title>
+
+    <!-- PWA Manifest (disabled during development - causes console warnings) -->
+    <!-- <link rel="manifest" href="%BASE_URL%manifest.json"> -->
+
+    <!-- iOS-specific meta tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mahjong">
+    <link rel="apple-touch-icon" href="%BASE_URL%icons/icon-180.png">
+
+    <!-- Theme color for browsers -->
+    <meta name="theme-color" content="#0c6d3a">
+
+    <!-- Viewport for mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- Mobile styles will be loaded by main.js -->
+</head>
+<body>
+    <div id="mobile-app">
+        <!-- Top: Opponent information bars -->
+        <div id="opponents-container" class="opponents-container">
+            <div id="opponent-left" class="opponent-bar"></div>
+            <div id="opponent-top" class="opponent-bar"></div>
+            <div id="opponent-right" class="opponent-bar"></div>
+        </div>
+
+        <!-- Center: Discard pile and game status -->
+        <div id="game-center" class="game-center">
+            <div id="game-status" class="game-status">Loading American Mahjong...</div>
+            <div id="discard-container" class="discard-container"></div>
+        </div>
+
+        <!-- Bottom: Player hand and action buttons -->
+        <div id="hand-area" class="hand-area">
+            <div id="hand-container" class="hand-container"></div>
+            <div class="bottom-menu">
+                <button id="new-game-btn" class="menu-btn primary">NEW GAME</button>
+                <button id="mobile-settings-btn" class="menu-btn">⚙️</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile scripts -->
+    <script src="main.js" type="module"></script>
+</body>
+</html>

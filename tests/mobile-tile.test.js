@@ -4,7 +4,7 @@ import { SUIT } from "../constants.js";
 import { MobileTile } from "../mobile/components/MobileTile.js";
 
 // Set up jsdom environment for DOM globals
-const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
   url: "http://localhost"
 });
 
@@ -16,7 +16,7 @@ globalThis.Image = class MockImage {
   constructor() {
     this.onload = null;
     this.onerror = null;
-    this.src = '';
+    this.src = "";
     setTimeout(() => {
       if (this.onload) this.onload();
     }, 0);
@@ -91,7 +91,7 @@ test.describe("MobileTile", () => {
                 constructor() {
                     this.onload = null;
                     this.onerror = null;
-                    this.src = '';
+                    this.src = "";
                     setTimeout(() => {
                         if (this.onerror) this.onerror();
                     }, 10);
