@@ -1,7 +1,7 @@
 import InstallPrompt from "./components/InstallPrompt.js";
-// import SettingsSheet from "./components/SettingsSheet.js";
-// import {HandRenderer} from "./renderers/HandRenderer.js";
-// import {TouchHandler} from "./gestures/TouchHandler.js";
+import SettingsSheet from "./components/SettingsSheet.js";
+import {HandRenderer} from "./renderers/HandRenderer.js";
+import {TouchHandler} from "./gestures/TouchHandler.js";
 import {GameController} from "../core/GameController.js";
 import {AIEngine} from "../core/AIEngine.js";
 import {Card} from "../card/card.js";
@@ -14,11 +14,11 @@ import "./styles/MobileGame.css";
 // const installPrompt = new InstallPrompt();
 
 // Game instances
-// let settingsSheet;
+let settingsSheet;
 let gameController;
 let aiEngine;
-// let handRenderer;
-// let touchHandler;
+let handRenderer;
+let touchHandler;
 
 /**
  * Hook to call when a game ends
@@ -126,10 +126,10 @@ async function initializeGame() {
     gameContainer.insertBefore(statusDisplay, handContainer);
 
     // Initialize Hand Renderer
-    // handRenderer = new HandRenderer(handContainer, gameController);
+    handRenderer = new HandRenderer(handContainer, gameController);
 
     // Initialize Touch Handler
-    // touchHandler = new TouchHandler(handContainer);
+    touchHandler = new TouchHandler(handContainer);
 
     // Subscribe to game events
     gameController.on("GAME_ENDED", () => {
