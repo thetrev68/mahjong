@@ -1,6 +1,9 @@
 import InstallPrompt from "./components/InstallPrompt.js";
 import SettingsSheet from "./components/SettingsSheet.js";
 import {HandRenderer} from "./renderers/HandRenderer.js";
+import {OpponentBar} from "./components/OpponentBar.js";
+import {DiscardPile} from "./components/DiscardPile.js";
+import {AnimationController} from "./animations/AnimationController.js";
 import {TouchHandler} from "./gestures/TouchHandler.js";
 import {GameController} from "../core/GameController.js";
 import {AIEngine} from "../core/AIEngine.js";
@@ -10,15 +13,16 @@ import "./styles/SettingsSheet.css";
 import "./styles/HandRenderer.css";
 import "./styles/MobileGame.css";
 
-// Initialize install prompt manager
-// const installPrompt = new InstallPrompt();
-
 // Game instances
-let settingsSheet;
 let gameController;
 let aiEngine;
 let handRenderer;
+let discardPile;
+let animationController;
+let opponentBars = [];
 let touchHandler;
+let statusDisplay;
+let settingsSheet;
 
 /**
  * Hook to call when a game ends
@@ -67,24 +71,13 @@ document.addEventListener("DOMContentLoaded", () => {
 async function initializeGame() {
     console.log("Initializing mobile game...");
 
-    // Create game container if it doesn't exist
-    let gameContainer = document.getElementById("game-container");
-    if (!gameContainer) {
-        gameContainer = document.createElement("div");
-        gameContainer.id = "game-container";
-        gameContainer.className = "mobile-game-container";
-
-        const mobileApp = document.getElementById("mobile-app");
-        if (mobileApp) {
-            mobileApp.appendChild(gameContainer);
-        }
-    }
-
-    // Create hand container
-    const handContainer = document.createElement("div");
-    handContainer.id = "hand-container";
-    handContainer.className = "hand-container";
-    gameContainer.appendChild(handContainer);
+    // Get DOM containers
+    const handContainer = document.getElementById("hand-container");
+    const discardContainer = document.getElementById("discard-container");
+    const statusElement = document.getElementById("game-status");
+    const opponentLeftContainer = document.getElementById("opponent-left");
+    const opponentTopContainer = document.getElementById("opponent-top");
+    const opponentRightContainer = document.getElementById("opponent-right");
 
     // Initialize Card validator
     const card = new Card(2025);
@@ -105,31 +98,33 @@ async function initializeGame() {
         }
     });
 
-    // Create a status display
-    const statusDisplay = document.createElement("div");
-    statusDisplay.id = "game-status";
-    statusDisplay.style.cssText = `
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: #ffd166;
-        font-family: 'Courier New', monospace;
-        font-size: 16px;
-        padding: 40px;
-        text-align: center;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-        overflow-y: auto;
-    `;
-    gameContainer.insertBefore(statusDisplay, handContainer);
+    // Initialize Animation Controller
+    animationController = new AnimationController();
 
     // Initialize Hand Renderer
     handRenderer = new HandRenderer(handContainer, gameController);
 
+    // Initialize Discard Pile
+    discardPile = new DiscardPile(discardContainer, gameController);
+
+    // Initialize Opponent Bars (Right, Top, Left positions - index 1, 2, 3)
+    const opponentPositions = [
+        { container: opponentRightContainer, playerIndex: 1, position: "RIGHT" },
+        { container: opponentTopContainer, playerIndex: 2, position: "TOP" },
+        { container: opponentLeftContainer, playerIndex: 3, position: "LEFT" }
+    ];
+
+    for (const {container, playerIndex, position} of opponentPositions) {
+        const player = gameController.players[playerIndex];
+        const bar = new OpponentBar(container, player);
+        opponentBars.push({bar, playerIndex});
+    }
+
     // Initialize Touch Handler
     touchHandler = new TouchHandler(handContainer);
+
+    // Store status display for global access
+    statusDisplay = statusElement;
 
     // Subscribe to game events
     gameController.on("GAME_ENDED", () => {
@@ -151,6 +146,19 @@ async function initializeGame() {
     gameController.on("HAND_UPDATED", (data) => {
         const player = gameController.players[data.player];
         statusDisplay.textContent = `Player ${data.player} (${player.name}):\n${data.hand.tiles.length} hidden tiles\n${data.hand.exposures.length} exposures`;
+
+        // Update opponent bars when their hands change
+        const opponentBar = opponentBars.find(ob => ob.playerIndex === data.player);
+        if (opponentBar) {
+            opponentBar.bar.update(player);
+        }
+    });
+
+    gameController.on("TURN_CHANGED", (data) => {
+        // Update all opponent bars to show current turn
+        opponentBars.forEach(({bar}) => {
+            bar.update(bar.playerData);
+        });
     });
 
     gameController.on("UI_PROMPT", async (data) => {
@@ -171,47 +179,37 @@ async function initializeGame() {
         }
     });
 
-    // Add New Game button
-    addNewGameButton(gameContainer);
+    // Wire up New Game button
+    const newGameBtn = document.getElementById("new-game-btn");
+    if (newGameBtn) {
+        newGameBtn.onclick = async () => {
+            console.log("NEW GAME button clicked!");
+            try {
+                console.log("Starting game...", gameController);
+                await gameController.startGame();
+                console.log("Game started successfully");
+            } catch (error) {
+                console.error("Error starting game:", error);
+                statusDisplay.textContent = `Error: ${error.message}`;
+            }
+        };
+    }
+
+    // Wire up Settings button
+    const settingsBtn = document.getElementById("mobile-settings-btn");
+    if (settingsBtn && !settingsSheet) {
+        settingsSheet = new SettingsSheet();
+        settingsBtn.onclick = () => {
+            settingsSheet.show();
+        };
+    }
+
+    // Hide loading message
+    statusDisplay.textContent = "Ready to play! Click NEW GAME to start.";
 
     console.log("Mobile game initialized successfully");
 }
 
-/**
- * Add new game button
- */
-function addNewGameButton(container) {
-    const buttonContainer = document.createElement("div");
-    buttonContainer.className = "game-controls";
-
-    const newGameBtn = document.createElement("button");
-    newGameBtn.id = "new-game-btn";
-    newGameBtn.className = "primary-btn";
-    newGameBtn.textContent = "NEW GAME";
-    newGameBtn.onclick = async () => {
-        console.log("NEW GAME button clicked!");
-        try {
-            console.log("Starting game...", gameController);
-            await gameController.startGame();
-            console.log("Game started successfully");
-        } catch (error) {
-            console.error("Error starting game:", error);
-        }
-    };
-
-    buttonContainer.appendChild(newGameBtn);
-    container.appendChild(buttonContainer);
-}
-
-/**
- * Create bottom menu if it doesn't exist yet
- */
-function createBottomMenu() {
-    const bottomMenu = document.createElement("div");
-    bottomMenu.className = "bottom-menu";
-    document.body.appendChild(bottomMenu);
-    return bottomMenu;
-}
 
 /**
  * Register Service Worker

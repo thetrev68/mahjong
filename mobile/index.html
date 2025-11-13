@@ -25,8 +25,27 @@
 </head>
 <body>
     <div id="mobile-app">
-        <!-- Mobile components will be rendered here -->
-        <div id="loading">Loading American Mahjong...</div>
+        <!-- Top: Opponent information bars -->
+        <div id="opponents-container" class="opponents-container">
+            <div id="opponent-left" class="opponent-bar"></div>
+            <div id="opponent-top" class="opponent-bar"></div>
+            <div id="opponent-right" class="opponent-bar"></div>
+        </div>
+
+        <!-- Center: Discard pile and game status -->
+        <div id="game-center" class="game-center">
+            <div id="game-status" class="game-status">Loading American Mahjong...</div>
+            <div id="discard-container" class="discard-container"></div>
+        </div>
+
+        <!-- Bottom: Player hand and action buttons -->
+        <div id="hand-area" class="hand-area">
+            <div id="hand-container" class="hand-container"></div>
+            <div class="bottom-menu">
+                <button id="new-game-btn" class="menu-btn primary">NEW GAME</button>
+                <button id="mobile-settings-btn" class="menu-btn">⚙️</button>
+            </div>
+        </div>
     </div>
 
     <!-- Mobile scripts -->
