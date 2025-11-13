@@ -1,9 +1,9 @@
 // scripts/generate-icons.js
-import sharp from 'sharp';
-import { readFileSync } from 'fs';
+import sharp from "sharp";
+import { readFileSync } from "fs";
 
 const sizes = [72, 96, 128, 144, 152, 180, 192, 384, 512];
-const svgBuffer = readFileSync('favicon.svg');
+const svgBuffer = readFileSync("favicon.svg");
 
 for (const size of sizes) {
     await sharp(svgBuffer)
@@ -37,4 +37,4 @@ for (const size of [192, 512]) {
         .toFile(`pwa/icons/icon-maskable-${size}.png`);
 }
 
-console.log('✅ Icons generated successfully');
+console.log("✅ Icons generated successfully");

@@ -1,20 +1,29 @@
 import InstallPrompt from "./components/InstallPrompt.js";
 import SettingsSheet from "./components/SettingsSheet.js";
+import {HandRenderer} from "./renderers/HandRenderer.js";
+import {TouchHandler} from "./gestures/TouchHandler.js";
+import {GameController} from "../core/GameController.js";
+import {AIEngine} from "../core/ai/AIEngine.js";
 import "./styles/SettingsSheet.css";
 import "./styles/HandRenderer.css";
+import "./styles/MobileGame.css";
 
 // Initialize install prompt manager
 const installPrompt = new InstallPrompt();
 
-// Initialize settings sheet
+// Game instances
 let settingsSheet;
+let gameController;
+let aiEngine;
+let handRenderer;
+let touchHandler;
 
-// TODO: Call this when a game ends
-// Example integration point:
-function onGameEnd() {
-    // Existing game end logic...
-
-    // Increment games played counter
+/**
+ * Hook to call when a game ends
+ * This function should be called by GameController when emitting GAME_ENDED event
+ */
+export function onGameEnd() {
+    // Increment games played counter for install prompt
     InstallPrompt.incrementGamesPlayed();
 
     // The InstallPrompt will automatically check and show prompt if conditions are met
@@ -43,15 +52,85 @@ document.addEventListener("DOMContentLoaded", () => {
         bottomMenu.appendChild(settingsBtn);
     }
 
-    // TODO: Initialize mobile game components here
-    // - GameController
-    // - HandRenderer
-    // - TouchHandler
-    // - etc.
+    // Initialize mobile game components
+    initializeGame();
 
     // Register Service Worker
     registerServiceWorker();
 });
+
+/**
+ * Initialize the mobile game
+ */
+function initializeGame() {
+    console.log("Initializing mobile game...");
+
+    // Create game container if it doesn't exist
+    let gameContainer = document.getElementById("game-container");
+    if (!gameContainer) {
+        gameContainer = document.createElement("div");
+        gameContainer.id = "game-container";
+        gameContainer.className = "mobile-game-container";
+
+        const mobileApp = document.getElementById("mobile-app");
+        if (mobileApp) {
+            mobileApp.appendChild(gameContainer);
+        }
+    }
+
+    // Create hand container
+    const handContainer = document.createElement("div");
+    handContainer.id = "hand-container";
+    handContainer.className = "hand-container";
+    gameContainer.appendChild(handContainer);
+
+    // Initialize AI Engine
+    aiEngine = new AIEngine();
+
+    // Initialize Game Controller
+    gameController = new GameController();
+    gameController.setAIEngine(aiEngine);
+
+    // Initialize Hand Renderer
+    handRenderer = new HandRenderer(handContainer, gameController);
+
+    // Initialize Touch Handler
+    touchHandler = new TouchHandler(handContainer);
+
+    // Subscribe to game end events
+    gameController.on("GAME_ENDED", () => {
+        onGameEnd();
+    });
+
+    // Add New Game button
+    addNewGameButton(gameContainer);
+
+    console.log("Mobile game initialized successfully");
+}
+
+/**
+ * Add new game button
+ */
+function addNewGameButton(container) {
+    const buttonContainer = document.createElement("div");
+    buttonContainer.className = "game-controls";
+
+    const newGameBtn = document.createElement("button");
+    newGameBtn.id = "new-game-btn";
+    newGameBtn.className = "primary-btn";
+    newGameBtn.textContent = "NEW GAME";
+    newGameBtn.onclick = async () => {
+        try {
+            await gameController.startNewGame();
+        } catch (error) {
+            console.error("Error starting game:", error);
+            alert("Failed to start game. Check console for details.");
+        }
+    };
+
+    buttonContainer.appendChild(newGameBtn);
+    container.appendChild(buttonContainer);
+}
 
 /**
  * Create bottom menu if it doesn't exist yet
@@ -74,9 +153,9 @@ async function registerServiceWorker() {
     }
 
     try {
-        // Register the service worker
+        // Register the service worker (must be at root or higher than scope)
         const registration = await navigator.serviceWorker.register(
-            "/mahjong/pwa/service-worker.js",
+            "/mahjong/service-worker.js",
             { scope: "/mahjong/" }
         );
 

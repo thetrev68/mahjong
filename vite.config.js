@@ -6,8 +6,8 @@ export default defineConfig({
     chunkSizeWarningLimit: 1500, // phaser is large
     rollupOptions: {
       input: {
-        desktop: 'index.html',              // Desktop entry
-        mobile: 'mobile/index.html'         // Mobile entry
+        desktop: "index.html",              // Desktop entry
+        mobile: "mobile/index.html"         // Mobile entry
       }
     }
   },
@@ -17,6 +17,6 @@ export default defineConfig({
     },
   },
   // Exclude service worker from processing
-  publicDir: 'pwa',  // Serve pwa/ as static files
+  publicDir: "pwa",  // Serve pwa/ as static files
   logLevel: "info", // Show startup messages and info
 });

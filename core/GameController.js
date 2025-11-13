@@ -409,12 +409,95 @@ export class GameController extends EventEmitter {
         // If at least 2 players voted yes, do courtesy pass
         const yesVotes = votes.filter(v => v.vote).length;
         if (yesVotes >= 2) {
-            this.emit("MESSAGE", {
-                text: "Courtesy pass approved. Tile exchange logic is not yet implemented.",
-                type: "info"
-            });
-            // TODO: Implement courtesy pass logic (opposite players exchange 1-3 tiles)
-            await this.sleep(1000); // Give user time to read the message
+            this.setState(STATE.COURTESY);
+
+            // Calculate courtesy vote counts (opposite players must agree)
+            const player02Vote = Math.min(votes[0].vote ? 3 : 0, votes[2].vote ? 3 : 0);
+            const player13Vote = Math.min(votes[1].vote ? 3 : 0, votes[3].vote ? 3 : 0);
+
+            if (player02Vote > 0 || player13Vote > 0) {
+                this.emit("MESSAGE", {
+                    text: "Courtesy pass approved. Select 1-3 tiles to exchange with opposite player.",
+                    type: "info"
+                });
+
+                // Collect tiles from each player
+                const tilesToPass = [];
+
+                // Sequential processing required - human player needs to select tiles via UI
+                for (let i = 0; i < 4; i++) {
+                    const player = this.players[i];
+                    const maxTiles = (i === 0 || i === 2) ? player02Vote : player13Vote;
+
+                    if (maxTiles === 0) {
+                        tilesToPass[i] = [];
+                        continue;
+                    }
+
+                    let selectedTiles;
+                    if (player.isHuman) {
+                        // Prompt human to select tiles
+                        selectedTiles = await this.promptUI("SELECT_TILES", {
+                            question: `Select ${maxTiles} tile(s) to pass to opposite player`,
+                            minTiles: maxTiles,
+                            maxTiles: maxTiles
+                        });
+                    } else {
+                        // AI selects tiles using courtesyPass method
+                        selectedTiles = await this.aiEngine.courtesyPass(player.hand, maxTiles);
+                    }
+
+                    tilesToPass[i] = selectedTiles;
+
+                    // Remove tiles from player's hand
+                    selectedTiles.forEach(tile => player.hand.removeTile(tile));
+
+                    this.emit("COURTESY_PASS", {
+                        player: i,
+                        tiles: selectedTiles.map(t => t.toJSON()),
+                        count: selectedTiles.length
+                    });
+                }
+
+                // Exchange tiles with opposite players (0↔2, 1↔3)
+                for (let i = 0; i < 4; i++) {
+                    const oppositePlayer = (i + 2) % 4;
+                    const receivedTiles = tilesToPass[oppositePlayer];
+
+                    receivedTiles.forEach(tile => this.players[i].hand.addTile(tile));
+
+                    if (receivedTiles.length > 0) {
+                        this.emit("TILES_RECEIVED", {
+                            player: i,
+                            tiles: receivedTiles.map(t => t.toJSON()),
+                            fromPlayer: oppositePlayer
+                        });
+                    }
+                }
+
+                // Sort all hands
+                this.players.forEach(player => player.hand.sortBySuit());
+
+                // Emit hand updates for all players
+                this.players.forEach((player, i) => {
+                    this.emit("HAND_UPDATED", {
+                        player: i,
+                        hand: player.hand.toJSON()
+                    });
+                });
+
+                this.emit("MESSAGE", {
+                    text: "Courtesy pass complete.",
+                    type: "info"
+                });
+            } else {
+                this.emit("MESSAGE", {
+                    text: "Courtesy pass skipped (opposite players must both agree).",
+                    type: "info"
+                });
+            }
+
+            await this.sleep(1000);
         }
 
         this.setState(STATE.COURTESY_COMPLETE);

@@ -19,6 +19,7 @@ export class DiscardPile {
         this.gameController = gameController;
         this.discards = []; // Array of {tile: TileData, player: number}
         this.element = null;
+        this.eventUnsubscribers = [];
 
         this.render();
         this.setupEventListeners();
@@ -37,18 +38,24 @@ export class DiscardPile {
      * Set up GameController event subscriptions
      */
     setupEventListeners() {
-        this.gameController.on("TILE_DISCARDED", (data) => {
-            const tile = TileData.fromJSON(data.tile);
-            this.addDiscard(tile, data.player);
-        });
+        this.eventUnsubscribers.push(
+            this.gameController.on("TILE_DISCARDED", (data) => {
+                const tile = TileData.fromJSON(data.tile);
+                this.addDiscard(tile, data.player);
+            })
+        );
 
-        this.gameController.on("DISCARD_CLAIMED", () => {
-            this.removeLatestDiscard();
-        });
+        this.eventUnsubscribers.push(
+            this.gameController.on("DISCARD_CLAIMED", () => {
+                this.removeLatestDiscard();
+            })
+        );
 
-        this.gameController.on("GAME_STARTED", () => {
-            this.clear();
-        });
+        this.eventUnsubscribers.push(
+            this.gameController.on("GAME_STARTED", () => {
+                this.clear();
+            })
+        );
     }
 
     /**
@@ -175,9 +182,8 @@ export class DiscardPile {
      * Destroy this component
      */
     destroy() {
-        this.gameController.off("TILE_DISCARDED");
-        this.gameController.off("DISCARD_CLAIMED");
-        this.gameController.off("GAME_STARTED");
+        this.eventUnsubscribers.forEach(unsub => unsub());
+        this.eventUnsubscribers = [];
         if (this.element && this.element.parentNode) {
             this.element.parentNode.removeChild(this.element);
         }

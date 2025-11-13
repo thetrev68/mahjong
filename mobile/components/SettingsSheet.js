@@ -5,7 +5,7 @@
  * Uses shared/SettingsManager for persistence.
  */
 
-import SettingsManager from '../../shared/SettingsManager.js';
+import SettingsManager from "../../shared/SettingsManager.js";
 
 class SettingsSheet {
     constructor() {
@@ -23,14 +23,14 @@ class SettingsSheet {
      */
     createUI() {
         // Create overlay backdrop
-        const overlay = document.createElement('div');
-        overlay.id = 'settings-overlay-mobile';
-        overlay.className = 'settings-overlay-mobile';
+        const overlay = document.createElement("div");
+        overlay.id = "settings-overlay-mobile";
+        overlay.className = "settings-overlay-mobile";
 
         // Create bottom sheet
-        const sheet = document.createElement('div');
-        sheet.id = 'settings-sheet';
-        sheet.className = 'settings-sheet';
+        const sheet = document.createElement("div");
+        sheet.id = "settings-sheet";
+        sheet.className = "settings-sheet";
 
         sheet.innerHTML = `
             <div class="settings-sheet__header">
@@ -156,23 +156,23 @@ class SettingsSheet {
         const settings = SettingsManager.load();
 
         // Game settings
-        document.getElementById('mobile-year').value = settings.cardYear;
-        document.getElementById('mobile-difficulty').value = settings.difficulty;
-        document.getElementById('mobile-blank-tiles').checked = settings.useBlankTiles;
+        document.getElementById("mobile-year").value = settings.cardYear;
+        document.getElementById("mobile-difficulty").value = settings.difficulty;
+        document.getElementById("mobile-blank-tiles").checked = settings.useBlankTiles;
 
         // Audio settings
-        document.getElementById('mobile-bgm-volume').value = settings.bgmVolume;
-        document.getElementById('mobile-bgm-value').textContent = settings.bgmVolume;
-        document.getElementById('mobile-bgm-mute').checked = settings.bgmMuted;
+        document.getElementById("mobile-bgm-volume").value = settings.bgmVolume;
+        document.getElementById("mobile-bgm-value").textContent = settings.bgmVolume;
+        document.getElementById("mobile-bgm-mute").checked = settings.bgmMuted;
 
-        document.getElementById('mobile-sfx-volume').value = settings.sfxVolume;
-        document.getElementById('mobile-sfx-value').textContent = settings.sfxVolume;
-        document.getElementById('mobile-sfx-mute').checked = settings.sfxMuted;
+        document.getElementById("mobile-sfx-volume").value = settings.sfxVolume;
+        document.getElementById("mobile-sfx-value").textContent = settings.sfxVolume;
+        document.getElementById("mobile-sfx-mute").checked = settings.sfxMuted;
 
         // Training mode
-        document.getElementById('mobile-training-mode').checked = settings.trainingMode;
-        document.getElementById('mobile-training-tiles').value = settings.trainingTileCount;
-        document.getElementById('mobile-skip-charleston').checked = settings.skipCharleston;
+        document.getElementById("mobile-training-mode").checked = settings.trainingMode;
+        document.getElementById("mobile-training-tiles").value = settings.trainingTileCount;
+        document.getElementById("mobile-skip-charleston").checked = settings.skipCharleston;
 
         // Show/hide training controls
         this.updateTrainingVisibility(settings.trainingMode);
@@ -183,44 +183,44 @@ class SettingsSheet {
      */
     attachEventListeners() {
         // Open button (in mobile UI)
-        const openBtn = document.getElementById('mobile-settings-btn');
+        const openBtn = document.getElementById("mobile-settings-btn");
         if (openBtn) {
-            openBtn.addEventListener('click', () => this.open());
+            openBtn.addEventListener("click", () => this.open());
         }
 
         // Close button
-        this.sheet.querySelector('.settings-sheet__close').addEventListener('click', () => this.close());
+        this.sheet.querySelector(".settings-sheet__close").addEventListener("click", () => this.close());
 
         // Overlay click (close on backdrop tap)
-        this.overlay.addEventListener('click', (e) => {
+        this.overlay.addEventListener("click", (e) => {
             if (e.target === this.overlay) {
                 this.close();
             }
         });
 
         // Volume sliders (update value display)
-        document.getElementById('mobile-bgm-volume').addEventListener('input', (e) => {
-            document.getElementById('mobile-bgm-value').textContent = e.target.value;
+        document.getElementById("mobile-bgm-volume").addEventListener("input", (e) => {
+            document.getElementById("mobile-bgm-value").textContent = e.target.value;
         });
 
-        document.getElementById('mobile-sfx-volume').addEventListener('input', (e) => {
-            document.getElementById('mobile-sfx-value').textContent = e.target.value;
+        document.getElementById("mobile-sfx-volume").addEventListener("input", (e) => {
+            document.getElementById("mobile-sfx-value").textContent = e.target.value;
         });
 
         // Training mode toggle (show/hide controls)
-        document.getElementById('mobile-training-mode').addEventListener('change', (e) => {
+        document.getElementById("mobile-training-mode").addEventListener("change", (e) => {
             this.updateTrainingVisibility(e.target.checked);
         });
 
         // Save button
-        document.getElementById('mobile-settings-save').addEventListener('click', () => {
+        document.getElementById("mobile-settings-save").addEventListener("click", () => {
             this.saveSettings();
             this.close();
         });
 
         // Reset button
-        document.getElementById('mobile-settings-reset').addEventListener('click', () => {
-            if (window.confirm('Reset all settings to defaults?')) {
+        document.getElementById("mobile-settings-reset").addEventListener("click", () => {
+            if (window.confirm("Reset all settings to defaults?")) {
                 SettingsManager.reset();
                 this.loadSettings();
             }
@@ -232,40 +232,40 @@ class SettingsSheet {
      */
     saveSettings() {
         const settings = {
-            cardYear: parseInt(document.getElementById('mobile-year').value),
-            difficulty: document.getElementById('mobile-difficulty').value,
-            useBlankTiles: document.getElementById('mobile-blank-tiles').checked,
+            cardYear: parseInt(document.getElementById("mobile-year").value),
+            difficulty: document.getElementById("mobile-difficulty").value,
+            useBlankTiles: document.getElementById("mobile-blank-tiles").checked,
 
-            bgmVolume: parseInt(document.getElementById('mobile-bgm-volume').value),
-            bgmMuted: document.getElementById('mobile-bgm-mute').checked,
-            sfxVolume: parseInt(document.getElementById('mobile-sfx-volume').value),
-            sfxMuted: document.getElementById('mobile-sfx-mute').checked,
+            bgmVolume: parseInt(document.getElementById("mobile-bgm-volume").value),
+            bgmMuted: document.getElementById("mobile-bgm-mute").checked,
+            sfxVolume: parseInt(document.getElementById("mobile-sfx-volume").value),
+            sfxMuted: document.getElementById("mobile-sfx-mute").checked,
 
-            trainingMode: document.getElementById('mobile-training-mode').checked,
-            trainingTileCount: parseInt(document.getElementById('mobile-training-tiles').value),
-            skipCharleston: document.getElementById('mobile-skip-charleston').checked,
+            trainingMode: document.getElementById("mobile-training-mode").checked,
+            trainingTileCount: parseInt(document.getElementById("mobile-training-tiles").value),
+            skipCharleston: document.getElementById("mobile-skip-charleston").checked,
             trainingHand: ""  // Not used on mobile
         };
 
         SettingsManager.save(settings);
-        console.log('Settings saved:', settings);
+        console.log("Settings saved:", settings);
 
         // Dispatch event so game can react to settings changes
-        window.dispatchEvent(new window.CustomEvent('settingsChanged', { detail: settings }));
+        window.dispatchEvent(new window.CustomEvent("settingsChanged", { detail: settings }));
     }
 
     /**
      * Show/hide training mode controls
      */
     updateTrainingVisibility(enabled) {
-        const controls = document.getElementById('mobile-training-controls');
-        const skipControl = document.getElementById('mobile-training-skip');
+        const controls = document.getElementById("mobile-training-controls");
+        const skipControl = document.getElementById("mobile-training-skip");
 
         if (controls) {
-            controls.style.display = enabled ? 'block' : 'none';
+            controls.style.display = enabled ? "block" : "none";
         }
         if (skipControl) {
-            skipControl.style.display = enabled ? 'flex' : 'none';
+            skipControl.style.display = enabled ? "flex" : "none";
         }
     }
 
@@ -274,9 +274,9 @@ class SettingsSheet {
      */
     open() {
         this.isOpen = true;
-        this.overlay.classList.add('open');
-        this.sheet.classList.add('open');
-        document.body.style.overflow = 'hidden';  // Prevent scrolling
+        this.overlay.classList.add("open");
+        this.sheet.classList.add("open");
+        document.body.style.overflow = "hidden";  // Prevent scrolling
     }
 
     /**
@@ -284,9 +284,9 @@ class SettingsSheet {
      */
     close() {
         this.isOpen = false;
-        this.overlay.classList.remove('open');
-        this.sheet.classList.remove('open');
-        document.body.style.overflow = '';
+        this.overlay.classList.remove("open");
+        this.sheet.classList.remove("open");
+        document.body.style.overflow = "";
     }
 }
 

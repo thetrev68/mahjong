@@ -1,5 +1,5 @@
 import {debugPrint} from "./utils.js";
-import SettingsManager from './shared/SettingsManager.js';
+import SettingsManager from "./shared/SettingsManager.js";
 
 // Settings.js - Settings management for American Mahjong
 class DesktopSettingsManager {
@@ -276,7 +276,7 @@ class DesktopSettingsManager {
         SettingsManager.save(settings);
         
         // Dispatch event so game can react to settings changes
-        window.dispatchEvent(new window.CustomEvent('settingsChanged', { detail: settings }));
+        window.dispatchEvent(new window.CustomEvent("settingsChanged", { detail: settings }));
     }
 
     saveDifficultySettings() {
@@ -458,12 +458,12 @@ document.addEventListener("DOMContentLoaded", () => {
     window.settingsManager = new DesktopSettingsManager();
     
     // Listen for settings changes from mobile
-    window.addEventListener('settingsChanged', (event) => {
+    window.addEventListener("settingsChanged", (event) => {
         const newSettings = event.detail;
-        console.log('Settings changed from mobile:', newSettings);
+        console.log("Settings changed from mobile:", newSettings);
         
         // Update UI if settings panel is open
-        if (window.settingsManager && window.settingsManager.overlay.style.display !== 'none') {
+        if (window.settingsManager && window.settingsManager.overlay.style.display !== "none") {
             window.settingsManager.loadSettings();
         }
         

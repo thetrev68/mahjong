@@ -39,14 +39,14 @@ export default defineConfig({
     {
       name: "desktop",
       use: {
-        ...devices['Desktop Chrome'],
+        ...devices["Desktop Chrome"],
         viewport: { width: 1280, height: 720 },
       },
     },
     {
       name: "mobile",
       use: {
-        ...devices['iPhone 12'],
+        ...devices["iPhone 12"],
         viewport: { width: 390, height: 844 },
         hasTouch: true,
         isMobile: true,

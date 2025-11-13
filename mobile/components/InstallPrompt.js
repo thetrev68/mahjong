@@ -18,22 +18,22 @@ class InstallPrompt {
 
     init() {
         // Listen for the beforeinstallprompt event
-        window.addEventListener('beforeinstallprompt', (e) => {
+        window.addEventListener("beforeinstallprompt", (e) => {
             // Prevent the default browser prompt
             e.preventDefault();
 
             // Store the event for later use
             this.deferredPrompt = e;
 
-            console.log('PWA install prompt captured');
+            console.log("PWA install prompt captured");
 
             // Check if we should show the prompt
             this.checkShouldShowPrompt();
         });
 
         // Listen for successful installation
-        window.addEventListener('appinstalled', () => {
-            console.log('PWA installed successfully');
+        window.addEventListener("appinstalled", () => {
+            console.log("PWA installed successfully");
             this.markAsInstalled();
             this.hidePrompt();
         });
@@ -48,13 +48,13 @@ class InstallPrompt {
     checkShouldShowPrompt() {
         // Don't show if already installed
         if (this.isAlreadyInstalled()) {
-            console.log('App already installed, skipping prompt');
+            console.log("App already installed, skipping prompt");
             return;
         }
 
         // Don't show if user dismissed recently
         if (this.wasRecentlyDismissed()) {
-            console.log('User dismissed prompt recently, skipping');
+            console.log("User dismissed prompt recently, skipping");
             return;
         }
 
@@ -74,7 +74,7 @@ class InstallPrompt {
      * Get number of games played from localStorage
      */
     getGamesPlayed() {
-        return parseInt(localStorage.getItem('gamesPlayed') || '0', 10);
+        return parseInt(localStorage.getItem("gamesPlayed") || "0", 10);
     }
 
     /**
@@ -82,8 +82,8 @@ class InstallPrompt {
      * Call this from mobile/main.js when a game ends
      */
     static incrementGamesPlayed() {
-        const current = parseInt(localStorage.getItem('gamesPlayed') || '0', 10);
-        localStorage.setItem('gamesPlayed', (current + 1).toString());
+        const current = parseInt(localStorage.getItem("gamesPlayed") || "0", 10);
+        localStorage.setItem("gamesPlayed", (current + 1).toString());
         console.log(`Games played: ${current + 1}`);
     }
 
@@ -92,19 +92,19 @@ class InstallPrompt {
      */
     isAlreadyInstalled() {
         // Check if running in standalone mode (installed)
-        if (window.matchMedia('(display-mode: standalone)').matches) {
+        if (window.matchMedia("(display-mode: standalone)").matches) {
             return true;
         }
 
         // Check localStorage flag
-        return localStorage.getItem('appInstalled') === 'true';
+        return localStorage.getItem("appInstalled") === "true";
     }
 
     /**
      * Check if user dismissed the prompt recently
      */
     wasRecentlyDismissed() {
-        const dismissedAt = localStorage.getItem('installPromptDismissedAt');
+        const dismissedAt = localStorage.getItem("installPromptDismissedAt");
         if (!dismissedAt) return false;
 
         // Don't show again for 7 days after dismissal
@@ -119,7 +119,7 @@ class InstallPrompt {
      * Mark app as installed
      */
     markAsInstalled() {
-        localStorage.setItem('appInstalled', 'true');
+        localStorage.setItem("appInstalled", "true");
     }
 
     /**
@@ -127,10 +127,10 @@ class InstallPrompt {
      */
     createBannerUI() {
         // Create banner element
-        this.installBanner = document.createElement('div');
-        this.installBanner.id = 'install-banner';
-        this.installBanner.className = 'install-banner';
-        this.installBanner.style.display = 'none';
+        this.installBanner = document.createElement("div");
+        this.installBanner.id = "install-banner";
+        this.installBanner.className = "install-banner";
+        this.installBanner.style.display = "none";
 
         this.installBanner.innerHTML = `
             <div class="install-banner__content">
@@ -160,11 +160,11 @@ class InstallPrompt {
         document.body.appendChild(this.installBanner);
 
         // Add event listeners
-        const installBtn = this.installBanner.querySelector('#install-btn');
-        const dismissBtn = this.installBanner.querySelector('#dismiss-btn');
+        const installBtn = this.installBanner.querySelector("#install-btn");
+        const dismissBtn = this.installBanner.querySelector("#dismiss-btn");
 
-        installBtn.addEventListener('click', () => this.handleInstall());
-        dismissBtn.addEventListener('click', () => this.handleDismiss());
+        installBtn.addEventListener("click", () => this.handleInstall());
+        dismissBtn.addEventListener("click", () => this.handleDismiss());
 
         // Add CSS
         this.injectStyles();
@@ -174,7 +174,7 @@ class InstallPrompt {
      * Inject CSS styles for install banner
      */
     injectStyles() {
-        const style = document.createElement('style');
+        const style = document.createElement("style");
         style.textContent = `
             .install-banner {
                 position: fixed;
@@ -296,12 +296,12 @@ class InstallPrompt {
      */
     showPrompt() {
         if (!this.deferredPrompt) {
-            console.log('No deferred prompt available');
+            console.log("No deferred prompt available");
             return;
         }
 
-        this.installBanner.style.display = 'block';
-        console.log('Install banner shown');
+        this.installBanner.style.display = "block";
+        console.log("Install banner shown");
     }
 
     /**
@@ -309,7 +309,7 @@ class InstallPrompt {
      */
     hidePrompt() {
         if (this.installBanner) {
-            this.installBanner.style.display = 'none';
+            this.installBanner.style.display = "none";
         }
     }
 
@@ -318,7 +318,7 @@ class InstallPrompt {
      */
     async handleInstall() {
         if (!this.deferredPrompt) {
-            console.error('No deferred prompt available');
+            console.error("No deferred prompt available");
             return;
         }
 
@@ -329,11 +329,11 @@ class InstallPrompt {
         const { outcome } = await this.deferredPrompt.userChoice;
         console.log(`Install prompt outcome: ${outcome}`);
 
-        if (outcome === 'accepted') {
-            console.log('User accepted install');
+        if (outcome === "accepted") {
+            console.log("User accepted install");
             this.markAsInstalled();
         } else {
-            console.log('User dismissed install');
+            console.log("User dismissed install");
             this.handleDismiss();
         }
 
@@ -349,8 +349,8 @@ class InstallPrompt {
      */
     handleDismiss() {
         // Record dismissal time
-        localStorage.setItem('installPromptDismissedAt', Date.now().toString());
-        console.log('Install prompt dismissed by user');
+        localStorage.setItem("installPromptDismissedAt", Date.now().toString());
+        console.log("Install prompt dismissed by user");
 
         // Hide the banner
         this.hidePrompt();
