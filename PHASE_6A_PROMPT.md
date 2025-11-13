@@ -50,7 +50,7 @@ This system should be **preserved exactly** in the refactored code.
 
 ### New File Structure
 
-```
+```text
 core/
 ├── AIEngine.js              # NEW - Platform-agnostic AI
 ├── models/
@@ -516,7 +516,7 @@ When complete, the AIEngine must:
 
 ## File Locations
 
-```
+```text
 core/
 └── AIEngine.js              # NEW - 800-1000 lines (similar to gameAI.js)
 

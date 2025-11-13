@@ -3,7 +3,7 @@
     "allow": [
       "Bash(npm run lint)",
       "Bash(npm run dev:*)",
-      "Bash(npm test:*)",
+      "Bash(npm run test:*)",
       "Bash(npm install:*)",
       "Bash(npx playwright@latest install:*)"
     ],

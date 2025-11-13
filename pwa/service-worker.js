@@ -9,7 +9,7 @@
  */
 
 // Cache version - increment this to force cache refresh
-const CACHE_VERSION = "v1.0.0";
+const CACHE_VERSION = "v1.0.1";
 const CACHE_NAME = `mahjong-${CACHE_VERSION}`;
 
 /* eslint-disable no-undef */

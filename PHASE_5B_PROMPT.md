@@ -536,7 +536,7 @@ When complete, provide:
 
 ## File Locations Summary
 
-```
+```text
 mobile/
 ├── components/
 │   └── InstallPrompt.js         # NEW - Install prompt manager

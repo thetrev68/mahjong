@@ -200,7 +200,7 @@ async function initializeGame() {
     if (settingsBtn && !settingsSheet) {
         settingsSheet = new SettingsSheet();
         settingsBtn.onclick = () => {
-            settingsSheet.show();
+            settingsSheet.open();
         };
     }
 
@@ -224,7 +224,7 @@ async function registerServiceWorker() {
     try {
         // Register the service worker (must be at root or higher than scope)
         const registration = await navigator.serviceWorker.register(
-            "/mahjong/service-worker.js",
+            "/mahjong/pwa/service-worker.js",
             { scope: "/mahjong/" }
         );
 

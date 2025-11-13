@@ -303,7 +303,7 @@ export class AIEngine {
         );
 
         // Apply difficulty-based randomness
-        if (this.config.discardRandomness > 0 && Math.random() < this.config.discardRandomness) {
+        if (this.config.discardRandomness > 0 && Math.random() < this.config.discardRandomness && discardableRecommendations.length > 0) {
             // Easy/Medium: Sometimes make a suboptimal choice
             // Pick one of the worst 3 tiles randomly instead of the absolute worst
             const randomIndex = Math.floor(

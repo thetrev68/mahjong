@@ -281,7 +281,7 @@ class DesktopSettingsManager {
 
     saveDifficultySettings() {
         const settings = {};
-        settings.difficulty = document.getElementById("difficultySelect")?.value ?? "medium";
+        settings.aiDifficulty = document.getElementById("difficultySelect")?.value ?? "medium";
         SettingsManager.save(settings);
     }
 

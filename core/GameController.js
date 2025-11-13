@@ -388,16 +388,19 @@ export class GameController extends EventEmitter {
     async courtesyPhase() {
         this.setState(STATE.COURTESY_QUERY);
 
-        // Each player votes whether to do courtesy pass
+        // Each player votes on how many tiles to pass for courtesy (0-3)
         const votes = [];
         for (const player of this.players) {
             let vote;
             if (player.isHuman) {
-                vote = await this.promptUI("COURTESY_VOTE", {
-                    question: "Participate in courtesy pass?",
-                    options: ["Yes", "No"]
+                const voteStr = await this.promptUI("COURTESY_VOTE", {
+                    question: "Courtesy Pass: How many tiles to exchange with opposite player?",
+                    options: ["0", "1", "2", "3"]
                 });
-                vote = vote === "Yes";
+                vote = parseInt(voteStr, 10);
+                if (isNaN(vote) || vote < 0 || vote > 3) {
+                    vote = 0; // Default to 0 for safety
+                }
             } else {
                 vote = await this.aiEngine.courtesyVote(player.hand);
             }
@@ -406,18 +409,18 @@ export class GameController extends EventEmitter {
             this.emit("COURTESY_VOTE", {player: player.position, vote});
         }
 
-        // If at least 2 players voted yes, do courtesy pass
-        const yesVotes = votes.filter(v => v.vote).length;
+        // If at least 2 players voted for more than 0 tiles, do courtesy pass
+        const yesVotes = votes.filter(v => v.vote > 0).length;
         if (yesVotes >= 2) {
             this.setState(STATE.COURTESY);
 
-            // Calculate courtesy vote counts (opposite players must agree)
-            const player02Vote = Math.min(votes[0].vote ? 3 : 0, votes[2].vote ? 3 : 0);
-            const player13Vote = Math.min(votes[1].vote ? 3 : 0, votes[3].vote ? 3 : 0);
+            // Calculate agreed-upon courtesy pass counts for opposite players
+            const player02Vote = Math.min(votes[0].vote, votes[2].vote);
+            const player13Vote = Math.min(votes[1].vote, votes[3].vote);
 
             if (player02Vote > 0 || player13Vote > 0) {
                 this.emit("MESSAGE", {
-                    text: "Courtesy pass approved. Select 1-3 tiles to exchange with opposite player.",
+                    text: `Courtesy pass approved. P0-P2 pass ${player02Vote}, P1-P3 pass ${player13Vote}.`,
                     type: "info"
                 });
 
