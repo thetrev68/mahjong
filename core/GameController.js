@@ -28,7 +28,7 @@
  */
 
 import {EventEmitter} from "./events/EventEmitter.js";
-import {STATE, PLAYER, SUIT} from "../constants.js";
+import {STATE, PLAYER, SUIT, PLAYER_OPTION} from "../constants.js";
 import {TileData} from "./models/TileData.js";
 import {PlayerData} from "./models/PlayerData.js";
 import {ExposureData} from "./models/HandData.js";
@@ -640,7 +640,25 @@ export class GameController extends EventEmitter {
                 });
             } else {
                 // AI decides
-                claimDecision = await this.aiEngine.claimDiscard(player.hand, lastDiscard);
+                const aiDecision = await this.aiEngine.claimDiscard(lastDiscard, playerIndex, player.hand);
+
+                // Convert PLAYER_OPTION enum to string for consistency
+                if (aiDecision.playerOption === PLAYER_OPTION.MAHJONG) {
+                    claimDecision = "Mahjong";
+                } else if (aiDecision.playerOption === PLAYER_OPTION.EXPOSE_TILES) {
+                    // Determine exposure type based on number of tiles
+                    const tileCount = aiDecision.tileArray.length;
+                    if (tileCount === 3) {
+                        claimDecision = "Pung";
+                    } else if (tileCount === 4) {
+                        claimDecision = "Kong";
+                    } else if (tileCount === 5) {
+                        claimDecision = "Quint";
+                    }
+                } else {
+                    // PLAYER_OPTION.DISCARD_TILE or unknown
+                    claimDecision = "Pass";
+                }
             }
 
             if (claimDecision !== "Pass") {
@@ -749,8 +767,11 @@ export class GameController extends EventEmitter {
 
         // Use card validator to check for winning hand
         if (this.cardValidator) {
-            const isWinning = this.cardValidator.validateHand(player.hand);
-            if (isWinning) {
+            // Card validator expects array of tiles and allHidden flag
+            const tiles = player.hand.tiles;
+            const allHidden = player.hand.exposures.length === 0;
+            const isWinning = this.cardValidator.validateHand(tiles, allHidden);
+            if (isWinning && isWinning.valid) {
                 this.gameResult.mahjong = true;
                 this.gameResult.winner = this.currentPlayer;
                 return true;

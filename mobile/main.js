@@ -1,22 +1,24 @@
 import InstallPrompt from "./components/InstallPrompt.js";
-import SettingsSheet from "./components/SettingsSheet.js";
-import {HandRenderer} from "./renderers/HandRenderer.js";
-import {TouchHandler} from "./gestures/TouchHandler.js";
+// import SettingsSheet from "./components/SettingsSheet.js";
+// import {HandRenderer} from "./renderers/HandRenderer.js";
+// import {TouchHandler} from "./gestures/TouchHandler.js";
 import {GameController} from "../core/GameController.js";
-import {AIEngine} from "../core/ai/AIEngine.js";
+import {AIEngine} from "../core/AIEngine.js";
+import {Card} from "../card/card.js";
+import "./styles/base.css";
 import "./styles/SettingsSheet.css";
 import "./styles/HandRenderer.css";
 import "./styles/MobileGame.css";
 
 // Initialize install prompt manager
-const installPrompt = new InstallPrompt();
+// const installPrompt = new InstallPrompt();
 
 // Game instances
-let settingsSheet;
+// let settingsSheet;
 let gameController;
 let aiEngine;
-let handRenderer;
-let touchHandler;
+// let handRenderer;
+// let touchHandler;
 
 /**
  * Hook to call when a game ends
@@ -40,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Initialize settings sheet
-    settingsSheet = new SettingsSheet();
+    // settingsSheet = new SettingsSheet();
     
     // Add settings button to bottom menu if it doesn't exist yet
     if (!document.getElementById("mobile-settings-btn")) {
@@ -55,14 +57,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize mobile game components
     initializeGame();
 
-    // Register Service Worker
-    registerServiceWorker();
+    // Register Service Worker (disabled during development)
+    // registerServiceWorker();
 });
 
 /**
  * Initialize the mobile game
  */
-function initializeGame() {
+async function initializeGame() {
     console.log("Initializing mobile game...");
 
     // Create game container if it doesn't exist
@@ -84,22 +86,89 @@ function initializeGame() {
     handContainer.className = "hand-container";
     gameContainer.appendChild(handContainer);
 
-    // Initialize AI Engine
-    aiEngine = new AIEngine();
+    // Initialize Card validator
+    const card = new Card(2025);
+    await card.init();
+
+    // Initialize AI Engine with card validator
+    aiEngine = new AIEngine(card, null, "medium");
 
     // Initialize Game Controller
     gameController = new GameController();
-    gameController.setAIEngine(aiEngine);
+    await gameController.init({
+        aiEngine: aiEngine,
+        cardValidator: card,
+        settings: {
+            year: 2025,
+            difficulty: "medium",
+            skipCharleston: true  // Skip Charleston for now until UI is implemented
+        }
+    });
+
+    // Create a status display
+    const statusDisplay = document.createElement("div");
+    statusDisplay.id = "game-status";
+    statusDisplay.style.cssText = `
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #ffd166;
+        font-family: 'Courier New', monospace;
+        font-size: 16px;
+        padding: 40px;
+        text-align: center;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-y: auto;
+    `;
+    gameContainer.insertBefore(statusDisplay, handContainer);
 
     // Initialize Hand Renderer
-    handRenderer = new HandRenderer(handContainer, gameController);
+    // handRenderer = new HandRenderer(handContainer, gameController);
 
     // Initialize Touch Handler
-    touchHandler = new TouchHandler(handContainer);
+    // touchHandler = new TouchHandler(handContainer);
 
-    // Subscribe to game end events
+    // Subscribe to game events
     gameController.on("GAME_ENDED", () => {
         onGameEnd();
+        statusDisplay.textContent = "Game Ended!";
+    });
+
+    // Debug: Log all game events
+    gameController.on("STATE_CHANGED", (data) => {
+        console.log("State changed:", data);
+        statusDisplay.textContent = `State: ${data.newState}`;
+    });
+
+    gameController.on("MESSAGE", (data) => {
+        console.log("Game message:", data.text);
+        statusDisplay.textContent = data.text;
+    });
+
+    gameController.on("HAND_UPDATED", (data) => {
+        const player = gameController.players[data.player];
+        statusDisplay.textContent = `Player ${data.player} (${player.name}):\n${data.hand.tiles.length} hidden tiles\n${data.hand.exposures.length} exposures`;
+    });
+
+    gameController.on("UI_PROMPT", async (data) => {
+        console.log("UI_PROMPT received:", data.promptType, data.options);
+
+        // Temporary: Auto-respond to UI prompts until UI is implemented
+        if (data.promptType === "CHOOSE_DISCARD") {
+            // Have AI choose discard for human player temporarily
+            const player = gameController.players[0];
+            statusDisplay.textContent = "Choosing discard...";
+            const tileToDiscard = await aiEngine.chooseDiscard(player.hand);
+            console.log("Auto-discarding tile:", tileToDiscard);
+            data.callback(tileToDiscard);
+        } else if (data.promptType === "CLAIM_DISCARD") {
+            // Auto-pass on claims for now
+            statusDisplay.textContent = "Passing claim...";
+            data.callback("Pass");
+        }
     });
 
     // Add New Game button
@@ -120,11 +189,13 @@ function addNewGameButton(container) {
     newGameBtn.className = "primary-btn";
     newGameBtn.textContent = "NEW GAME";
     newGameBtn.onclick = async () => {
+        console.log("NEW GAME button clicked!");
         try {
-            await gameController.startNewGame();
+            console.log("Starting game...", gameController);
+            await gameController.startGame();
+            console.log("Game started successfully");
         } catch (error) {
             console.error("Error starting game:", error);
-            alert("Failed to start game. Check console for details.");
         }
     };
 
