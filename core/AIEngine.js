@@ -503,15 +503,49 @@ export class AIEngine {
      * Vote whether to continue Charleston to phase 2
      * @returns {boolean} True to continue, false to skip phase 2
      */
-    charlestonContinueVote() {
-        // This method is called after phase 1, with no specific hand data
-        // Strategy: Vote to continue Phase 2 if we haven't seen a good hand yet
-        // Since we don't have access to hand here, use a simple heuristic based on difficulty
-        // Easy/Medium: 80% yes (want more tile exchanges)
-        // Hard: 60% yes (more strategic)
+    charlestonContinueVote(handData) {
+        // Evaluate hand strength and vote to continue Phase 2 based on whether we have a good hand
+        // Strong hands: less likely to continue (want to keep what we have)
+        // Weak hands: more likely to continue (need more tile exchanges)
 
-        const continueThreshold = this.config.charlestonContinueThreshold || 0.7;
-        return Math.random() < continueThreshold;
+        const copyHand = handData.clone();
+        const invalidTile = new TileData(SUIT.INVALID, VNUMBER.INVALID);
+        copyHand.addTile(invalidTile);
+
+        const rankCardHands = this.card.rankHandArray14(copyHand);
+        this.card.sortHandRankArray(rankCardHands);
+        const rankInfo = rankCardHands[0];
+        const rank = rankInfo.rank;
+
+        debugPrint("charlestonContinueVote: rank = " + rank);
+
+        // Adjust voting based on hand strength and difficulty
+        // Weak hands (high rank value): vote YES to continue (more exchanges)
+        // Strong hands (low rank value): vote NO to stop (keep what we have)
+        const baseThreshold = this.config.charlestonContinueThreshold || 0.7;
+
+        // Scale threshold based on hand rank
+        // If rank is very high (bad hand): increase threshold (more likely to vote YES)
+        // If rank is very low (good hand): decrease threshold (more likely to vote NO)
+        let adjustedThreshold = baseThreshold;
+
+        // Thresholds for voting: adjust based on how close we are to winning
+        const thresholds = this.config.courtesyThresholds;
+        if (rank >= thresholds[2]) {
+            // Very weak hand: strongly encourage continuation
+            adjustedThreshold = baseThreshold + 0.2;
+        } else if (rank >= thresholds[1]) {
+            // Weak hand: slightly encourage continuation
+            adjustedThreshold = baseThreshold + 0.1;
+        } else if (rank >= thresholds[0]) {
+            // Moderate hand: use base threshold
+            adjustedThreshold = baseThreshold;
+        } else {
+            // Strong hand: discourage continuation
+            adjustedThreshold = Math.max(baseThreshold - 0.2, 0.3);
+        }
+
+        return Math.random() < adjustedThreshold;
     }
 
     /**

@@ -564,10 +564,10 @@ export class PhaserAdapter {
      * Handle courtesy pass
      */
     onCourtesyPass(data) {
-        const {fromPlayer, toPlayer, tile: tileData} = data;
+        const {fromPlayer, toPlayer, tiles} = data;
 
-        const tileDataObj = TileData.fromJSON(tileData);
-        printMessage(`Courtesy pass: ${this.table.players[fromPlayer].playerInfo.name} → ${this.table.players[toPlayer].playerInfo.name} (${tileDataObj.getText()})`);
+        const tileTexts = tiles.map(tile => TileData.fromJSON(tile).getText()).join(", ");
+        printMessage(`Courtesy pass: ${this.table.players[fromPlayer].playerInfo.name} → ${this.table.players[toPlayer].playerInfo.name} (${tileTexts})`);
     }
 
     /**
