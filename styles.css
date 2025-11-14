@@ -858,6 +858,30 @@ select:focus {
         transform: none;
     }
 }
+
+/* Dialog animations for notifications and messages */
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 /* Tile display classes for colorized patterns */
 /* Tile display classes for colorized patterns */
 .bg-green-600 { background-color: #15803d; } /* Dark green for matched */

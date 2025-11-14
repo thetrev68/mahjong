@@ -170,7 +170,7 @@ async function initializeGame() {
 
     gameController.on("TURN_CHANGED", (data) => {
         // Update all opponent bars to show current turn
-        const currentPlayerIndex = data.currentPlayer || gameController.currentPlayer;
+        const currentPlayerIndex = data.currentPlayer ?? gameController.currentPlayer;
         opponentBars.forEach(({bar, playerIndex}) => {
             const player = gameController.players[playerIndex];
             // Update the player data before rendering

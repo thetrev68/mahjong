@@ -66,47 +66,135 @@ mahjong/
 │   │   ├── card2025.js (21 lines)
 │   │   ├── card2025.xlsx
 │   │   ├── hands13579.js (583 lines)
-│   │   ├── hands2025.js (209 lines)
+│   │   ├── hands2025.js (204 lines)
 │   │   ├── hands2468.js (339 lines)
 │   │   ├── hands369.js (397 lines)
 │   │   ├── handsConsecutive.js (388 lines)
 │   │   ├── handsLikeNumbers.js (116 lines)
 │   │   ├── handsQuints.js (96 lines)
 │   │   ├── handsSinglesPairs.js (416 lines)
-│   │   └── handsWindsDragons.js (379 lines)
-│   └── card.js (665 lines)
+│   │   └── handsWindsDragons.js (389 lines)
+│   └── card.js (704 lines)
+├── core/
+│   ├── card/
+│   ├── events/
+│   │   ├── EventEmitter.js (76 lines)
+│   │   └── GameEvents.js (307 lines)
+│   ├── models/
+│   │   ├── HandData.js (256 lines)
+│   │   ├── PlayerData.js (87 lines)
+│   │   ├── test-data-models.js (162 lines)
+│   │   └── TileData.js (160 lines)
+│   ├── AIEngine.js (511 lines)
+│   ├── GameController.js (737 lines)
+│   └── tileDefinitions.js (64 lines)
+├── desktop/
+│   ├── adapters/
+│   │   └── PhaserAdapter.js (618 lines)
+│   ├── animations/
+│   │   └── AnimationLibrary.js (360 lines)
+│   ├── assets/
+│   └── managers/
+│       ├── ButtonManager.js (422 lines)
+│       ├── DialogManager.js (409 lines)
+│       ├── HintAnimationManager.js (202 lines)
+│       └── TileManager.js (482 lines)
+├── mobile/
+│   ├── animations/
+│   │   └── AnimationController.js (381 lines)
+│   ├── assets/
+│   ├── components/
+│   │   ├── DiscardPile.js (169 lines)
+│   │   ├── InstallPrompt.js (307 lines)
+│   │   ├── MobileTile.css (160 lines)
+│   │   ├── MobileTile.js (253 lines)
+│   │   ├── OpponentBar.js (128 lines)
+│   │   └── SettingsSheet.js (249 lines)
+│   ├── gestures/
+│   │   ├── TouchHandler.js (239 lines)
+│   │   └── TouchHandler.test.js (155 lines)
+│   ├── renderers/
+│   │   └── HandRenderer.js (347 lines)
+│   ├── styles/
+│   │   ├── animations.css (178 lines)
+│   │   ├── base.css (30 lines)
+│   │   ├── HandRenderer.css (107 lines)
+│   │   ├── MobileGame.css (73 lines)
+│   │   ├── OpponentBar.css (86 lines)
+│   │   └── SettingsSheet.css (236 lines)
+│   ├── index.html (46 lines)
+│   ├── main.js (401 lines)
+│   ├── MOBILE_INTERFACES.md
+│   ├── mockup.css (466 lines)
+│   └── mockup.html (152 lines)
+├── pwa/
+│   ├── icons/
+│   │   ├── icon-128.png
+│   │   ├── icon-144.png
+│   │   ├── icon-152.png
+│   │   ├── icon-180.png
+│   │   ├── icon-192.png
+│   │   ├── icon-384.png
+│   │   ├── icon-512.png
+│   │   ├── icon-72.png
+│   │   ├── icon-96.png
+│   │   ├── icon-maskable-192.png
+│   │   └── icon-maskable-512.png
+│   ├── manifest.json
+│   └── service-worker.js (272 lines)
+├── shared/
+│   └── SettingsManager.js (227 lines)
 ├── tests/
-│   └── game-basic.spec.js (80 lines)
+│   ├── aiengine.test.js (224 lines)
+│   ├── game-basic.spec.js (133 lines)
+│   ├── mobile-helpers.js (75 lines)
+│   ├── mobile-tile.test.js (343 lines)
+│   ├── mobile.spec.js (191 lines)
+│   └── touch-handler.spec.js (57 lines)
+├── AIENGINE_REFACTOR_NOTE.md
 ├── audioManager.js (92 lines)
-├── BLANK_TILES_IMPLEMENTATION_PLAN.md
 ├── CLAUDE.md
 ├── constants.js (108 lines)
 ├── favicon.ico
 ├── favicon.svg
-├── gameAI.js (431 lines)
-├── gameLogic.js (1493 lines)
-├── gameObjects.js (509 lines)
-├── gameObjects_hand.js (1165 lines)
+├── gameObjects.js (511 lines)
+├── gameObjects_hand.js (1271 lines)
 ├── gameObjects_player.js (24 lines)
-├── gameObjects_table.js (418 lines)
-├── GameScene.js (338 lines)
-├── homePageTileManager.js (226 lines)
-├── index.html (145 lines)
-├── main.js (27 lines)
-├── playwright.config.js (48 lines)
+├── gameObjects_table.js (420 lines)
+├── GameScene.js (380 lines)
+├── homePageTileManager.js (233 lines)
+├── index.html (156 lines)
+├── main.js (28 lines)
+├── MOBILE_RENDERER_INTEGRATION.md
+├── PHASE1_AIENGINE_COMPATIBILITY.md
+├── PHASE1_COMPLETION_SUMMARY.md
+├── PHASE2_HANDOFF.md
+├── PHASE2_IMPLEMENTATION_SUMMARY.md
+├── playwright.config.js (52 lines)
 ├── README.md
-├── settings.js (324 lines)
-├── styles.css (756 lines)
-├── tileDisplayUtils.js (210 lines)
+├── REFACTOR.md
+├── REFACTOR_CHECKLIST.md
+├── REFACTOR_INDEX.md
+├── REFACTOR_PHASE1.md
+├── REFACTOR_PHASE1_ANALYSIS.md
+├── REFACTOR_PHASE2.md
+├── REFACTOR_PHASE3.5.md
+├── REFACTOR_PHASE3.md
+├── REFACTOR_PHASE4.md
+├── REFACTOR_SUMMARY.md
+├── settings.js (418 lines)
+├── START_HERE.md
+├── styles.css (793 lines)
+├── tileDisplayUtils.js (249 lines)
 └── utils.js (38 lines)
 
 ==================================================
 DIRECTORY TREE STATISTICS
 ==================================================
-Total directories: 9
-Total files: 91
-Files with line counts: 76
-Total lines of code: 21,739
+Total directories: 28
+Total files: 160
+Files with line counts: 116
+Total lines of code: 30,662
 
 Configuration:
   Excluded directories: .archive, .claude, .geminiignore, .git, .github, .gitignore, .idea, .kilocode, .pytest_cache, .ruff_cache, .serena, .vite, .vscode, __pycache__, agents.md, backlog.md, build, claude.md, coverage, dist, docs, eslint.config.js, gemini.md, jules-scratch, knip.json, legacy, logs, node_modules, package-lock.json, package.json, playwright-report, public, test-results, tree.txt, tree_scanner.py, venv, vite.config.js

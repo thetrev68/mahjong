@@ -355,7 +355,7 @@ export class GameController extends EventEmitter {
         // AI players vote
         const aiVotes = this.players
             .filter(p => !p.isHuman)
-            .map(() => this.aiEngine.charlestonContinueVote());
+            .map(p => this.aiEngine.charlestonContinueVote(p.hand));
 
         const yesVotes = [humanVote === "Yes", ...aiVotes].filter(v => v).length;
 

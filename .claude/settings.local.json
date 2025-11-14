@@ -12,7 +12,10 @@
       "Bash(mkdir:*)",
       "Bash(sha256sum:*)",
       "Bash(del \"c:\\Repos\\mahjong\\gameLogic.js\")",
-      "WebFetch(domain:code.claude.com)"
+      "WebFetch(domain:code.claude.com)",
+      "Bash(npm run knip:*)",
+      "Bash(cat:*)",
+      "Bash(npm run lint:*)"
     ],
     "deny": [],
     "ask": []
