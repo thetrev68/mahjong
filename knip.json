@@ -3,6 +3,8 @@
     "index.html",
     "main.js",
     "settings.js",
+    "mobile/index.html",
+    "mobile/main.js",
     "card/**/card*.js"
   ],
   "project": [
@@ -15,7 +17,8 @@
   "ignore": [
     "dist/**",
     "node_modules/**",
-    "**/*.py"
+    "**/*.py",
+    "pwa/service-worker.js"
   ],
     
   "tags": ["knip-ignore"]
