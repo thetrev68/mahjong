@@ -33,6 +33,7 @@ import {EventEmitter} from "./events/EventEmitter.js";
 import {STATE, PLAYER, PLAYER_OPTION} from "../constants.js";
 import {PlayerData} from "./models/PlayerData.js";
 import {ExposureData} from "./models/HandData.js";
+import * as GameEvents from "./events/GameEvents.js";
 
 const CHARLESTON_DIRECTION_SEQUENCE = {
     1: ["right", "across", "left"],
@@ -119,10 +120,12 @@ export class GameController extends EventEmitter {
             new PlayerData(PLAYER.LEFT, "Opponent 3")
         ];
 
-        this.emit("MESSAGE", {
-            text: `Game initialized with ${this.settings.year} card`,
-            type: "info"
-        });
+        // Emit initialization message
+        const msgEvent = GameEvents.createMessageEvent(
+            `Game initialized with ${this.settings.year} card`,
+            "info"
+        );
+        this.emit("MESSAGE", msgEvent);
     }
 
     /**
@@ -143,10 +146,11 @@ export class GameController extends EventEmitter {
         // Create wall
         this.createWall();
 
-        // Emit game started event
-        this.emit("GAME_STARTED", {
-            players: this.players.map(player => player.toJSON())
-        });
+        // Emit game started event with rich structure
+        const gameStartedEvent = GameEvents.createGameStartedEvent(
+            this.players.map(player => player.toJSON())
+        );
+        this.emit("GAME_STARTED", gameStartedEvent);
 
         // Deal tiles to all players
         await this.dealTiles();
@@ -201,14 +205,19 @@ export class GameController extends EventEmitter {
                 // Add Phaser Tile directly to player hand
                 this.players[playerIndex].hand.addTile(phaserTile);
 
-                // Emit event with tile data for animation
-                this.emit("TILE_DRAWN", {
-                    player: playerIndex,
-                    tile: {
-                        suit: phaserTile.suit,
-                        number: phaserTile.number
-                    }
+                // Emit rich event with animation parameters
+                const tileData = {
+                    suit: phaserTile.suit,
+                    number: phaserTile.number
+                };
+
+                const event = GameEvents.createTileDrawnEvent(playerIndex, tileData, {
+                    type: "deal-slide",
+                    duration: 200,  // Fast dealing animation
+                    easing: "Quad.easeOut"
                 });
+
+                this.emit("TILE_DRAWN", event);
 
                 // Small delay for animation (optional, configurable)
                 if (this.settings.animateDealing) {
@@ -217,17 +226,18 @@ export class GameController extends EventEmitter {
             }
         }
 
-        this.emit("TILES_DEALT", {
-            players: this.players.map(player => ({
+        // Emit deal complete event with animation info
+        const dealtEvent = GameEvents.createTilesDealtEvent(
+            this.players.map(player => ({
                 position: player.position,
                 tileCount: player.hand.getLength()
             }))
-        });
+        );
+        this.emit("TILES_DEALT", dealtEvent);
 
-        this.emit("MESSAGE", {
-            text: "Tiles dealt to all players",
-            type: "info"
-        });
+        // Emit message event
+        const msgEvent = GameEvents.createMessageEvent("Tiles dealt to all players", "info");
+        this.emit("MESSAGE", msgEvent);
     }
 
     /**
@@ -535,18 +545,21 @@ export class GameController extends EventEmitter {
 
         player.hand.addTile(phaserTile);
 
-        this.emit("TILE_DRAWN", {
-            player: this.currentPlayer,
-            tile: {
-                suit: phaserTile.suit,
-                number: phaserTile.number
-            }
+        // Emit rich tile drawn event with animation
+        const tileData = {
+            suit: phaserTile.suit,
+            number: phaserTile.number
+        };
+        const drawnEvent = GameEvents.createTileDrawnEvent(this.currentPlayer, tileData, {
+            type: "wall-draw",
+            duration: 300,
+            easing: "Quad.easeOut"
         });
+        this.emit("TILE_DRAWN", drawnEvent);
 
-        this.emit("HAND_UPDATED", {
-            player: this.currentPlayer,
-            hand: player.hand.toJSON()
-        });
+        // Emit hand updated event
+        const handEvent = GameEvents.createHandUpdatedEvent(this.currentPlayer, player.hand.toJSON());
+        this.emit("HAND_UPDATED", handEvent);
 
         await this.sleep(300);
     }
@@ -576,15 +589,21 @@ export class GameController extends EventEmitter {
         // Add to discard pile
         this.discards.push(tileToDiscard);
 
-        this.emit("TILE_DISCARDED", {
-            player: this.currentPlayer,
-            tile: tileToDiscard.toJSON()
+        // Emit rich tile discarded event with animation
+        const tileData = {
+            suit: tileToDiscard.suit,
+            number: tileToDiscard.number
+        };
+        const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, tileData, {
+            type: "discard-slide",
+            duration: 300,
+            easing: "Power2.easeInOut"
         });
+        this.emit("TILE_DISCARDED", discardEvent);
 
-        this.emit("HAND_UPDATED", {
-            player: this.currentPlayer,
-            hand: player.hand.toJSON()
-        });
+        // Emit hand updated event
+        const handEvent = GameEvents.createHandUpdatedEvent(this.currentPlayer, player.hand.toJSON());
+        this.emit("HAND_UPDATED", handEvent);
 
         await this.sleep(500);
     }
@@ -764,10 +783,9 @@ export class GameController extends EventEmitter {
         this.players[previousPlayer].isCurrentTurn = false;
         this.players[this.currentPlayer].isCurrentTurn = true;
 
-        this.emit("TURN_CHANGED", {
-            currentPlayer: this.currentPlayer,
-            previousPlayer
-        });
+        // Emit rich turn changed event
+        const turnEvent = GameEvents.createTurnChangedEvent(this.currentPlayer, previousPlayer);
+        this.emit("TURN_CHANGED", turnEvent);
     }
 
     /**
@@ -777,23 +795,21 @@ export class GameController extends EventEmitter {
     endGame(reason) {
         this.setState(STATE.END);
 
-        this.emit("GAME_ENDED", {
+        // Emit rich game ended event
+        const gameEndEvent = GameEvents.createGameEndedEvent(
             reason,
-            winner: this.gameResult.winner,
-            mahjong: this.gameResult.mahjong
-        });
+            this.gameResult.winner,
+            this.gameResult.mahjong
+        );
+        this.emit("GAME_ENDED", gameEndEvent);
 
         if (reason === "mahjong") {
             const winner = this.players[this.gameResult.winner];
-            this.emit("MESSAGE", {
-                text: `${winner.name} wins with Mahjong!`,
-                type: "info"
-            });
+            const msgEvent = GameEvents.createMessageEvent(`${winner.name} wins with Mahjong!`, "info");
+            this.emit("MESSAGE", msgEvent);
         } else if (reason === "wall_game") {
-            this.emit("MESSAGE", {
-                text: "Wall game - no winner",
-                type: "info"
-            });
+            const msgEvent = GameEvents.createMessageEvent("Wall game - no winner", "info");
+            this.emit("MESSAGE", msgEvent);
         }
     }
 
@@ -805,10 +821,9 @@ export class GameController extends EventEmitter {
         const oldState = this.state;
         this.state = newState;
 
-        this.emit("STATE_CHANGED", {
-            oldState,
-            newState
-        });
+        // Emit rich state change event
+        const stateEvent = GameEvents.createStateChangedEvent(oldState, newState);
+        this.emit("STATE_CHANGED", stateEvent);
     }
 
     /**
