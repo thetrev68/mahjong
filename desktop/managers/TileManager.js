@@ -176,6 +176,7 @@ export class TileManager {
      *
      * @param {TileData} tileData - Tile data object
      * @returns {Phaser.Physics.Arcade.Sprite} Phaser sprite
+     * @throws {Error} If sprite does not exist and cannot be created
      */
     createTileSprite(tileData) {
         // Check if already exists
@@ -183,9 +184,15 @@ export class TileManager {
             return this.tileSprites.get(tileData.index);
         }
 
-        // Create new sprite (would come from table.wall in real implementation)
-        // For now, we rely on sprites already existing in the scene
-        return null;
+        // TODO: Implement actual sprite creation from table.wall
+        // Currently, sprites must be pre-registered via registerTileSprite()
+        // See: https://github.com/anthropics/mahjong/issues/XXX
+        throw new Error(
+            `Sprite creation not implemented. Tile index ${tileData.index} ` +
+            `(suit: ${tileData.suit}, number: ${tileData.number}) ` +
+            `not found in sprite registry. Ensure registerTileSprite() ` +
+            `is called during initialization.`
+        );
     }
 
     /**
