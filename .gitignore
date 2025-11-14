@@ -77,6 +77,12 @@ web_modules/
 # parcel-bundler cache files
 .cache
 
+# local only
+.claude/
+.kilocode/
+.serena/cache/
+jules-scratch/
+playwright-report/
 
 
 
