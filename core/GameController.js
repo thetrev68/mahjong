@@ -299,7 +299,7 @@ export class GameController extends EventEmitter {
                     });
                 } else {
                     // AI selects tiles
-                    tilesToPass = await this.aiEngine.charlestonPass(player.hand, direction);
+                    tilesToPass = await this.aiEngine.charlestonPass(player.hand);
                 }
 
                 // Remove tiles from player's hand

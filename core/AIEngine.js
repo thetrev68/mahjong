@@ -48,6 +48,9 @@ export class AIEngine {
                 // Courtesy pass voting
                 courtesyThresholds: [55, 65, 75],  // More willing to pass tiles (helps opponents)
 
+                // Charleston continuation voting
+                charlestonContinueThreshold: 0.8,  // 80% chance to vote yes (wants more exchanges)
+
                 // Blank tile usage
                 blankExchangeRank: 999,      // Never exchange blanks (999 means impossible threshold)
                 blankExchangeGain: 999,      // Never exchange blanks
@@ -72,6 +75,9 @@ export class AIEngine {
                 // Courtesy pass voting
                 courtesyThresholds: [50, 60, 68],  // Balanced courtesy decisions
 
+                // Charleston continuation voting
+                charlestonContinueThreshold: 0.65, // 65% chance to vote yes (balanced)
+
                 // Blank tile usage
                 blankExchangeRank: 85,       // Exchange blanks when hand rank > 85 (conservative)
                 blankExchangeGain: 25,       // Only if improvement is > 25 points (significant gain)
@@ -95,6 +101,9 @@ export class AIEngine {
 
                 // Courtesy pass voting
                 courtesyThresholds: [45, 55, 65],  // Optimal courtesy decisions
+
+                // Charleston continuation voting
+                charlestonContinueThreshold: 0.6,  // 60% chance to vote yes (strategic)
 
                 // Blank tile usage
                 blankExchangeRank: 80,       // Exchange blanks when hand rank > 80 (aggressive)
@@ -488,6 +497,21 @@ export class AIEngine {
         }
 
         return 0;  // Vote to pass 0 tiles (decline courtesy)
+    }
+
+    /**
+     * Vote whether to continue Charleston to phase 2
+     * @returns {boolean} True to continue, false to skip phase 2
+     */
+    charlestonContinueVote() {
+        // This method is called after phase 1, with no specific hand data
+        // Strategy: Vote to continue Phase 2 if we haven't seen a good hand yet
+        // Since we don't have access to hand here, use a simple heuristic based on difficulty
+        // Easy/Medium: 80% yes (want more tile exchanges)
+        // Hard: 60% yes (more strategic)
+
+        const continueThreshold = this.config.charlestonContinueThreshold || 0.7;
+        return Math.random() < continueThreshold;
     }
 
     /**
