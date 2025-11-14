@@ -63,7 +63,7 @@ After Phases 1 & 2 are complete, Phase 3 deletes the obsolete GameLogic code and
 - `gameObjects_hand.js` - Hand class (used by GameController)
 - `gameObjects_table.js` - Table class (used by GameController)
 - `gameObjects_player.js` - Player class (used by GameController)
-- `gameAI.js` - AI engine (used by GameController)
+- `core/AIEngine.js` - AI engine (used by GameController) - REFACTORED from gameAI.js
 - `card/` - Hand validation (used by GameController)
 
 **Actions**:
@@ -85,20 +85,25 @@ After Phases 1 & 2 are complete, Phase 3 deletes the obsolete GameLogic code and
 
 **Goal**: Remove GameLogic from GameScene
 
-**Current**:
+**Current** (after Phase 1 & 2):
 ```javascript
 this.gGameLogic = new GameLogic(this);
 this.gTable = new Table(this, this.gGameLogic);
 this.gGameLogic.table = this.gTable;
 await this.gGameLogic.init();
-this.gGameLogic.gameAI.table = this.gTable;
+// AIEngine is created inside GameLogic.init()
+// GameController gets access via options in Phase 1
 ```
 
-**Desired**:
+**Desired** (after Phase 3):
 ```javascript
+// Table creation (if still needed for gameObjects)
 this.gTable = new Table(this);  // No GameLogic
 await this.gTable.init();       // If needed
-// GameController handles everything else
+
+// GameController is now the sole game engine
+// AIEngine is created by GameController via dependency injection
+// All game logic flows through GameController → AIEngine
 ```
 
 **Changes**:

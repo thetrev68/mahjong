@@ -42,7 +42,7 @@ Converting the mahjong game from a hybrid architecture (broken GameLogic + incom
 | Code | Current Location | Future |
 |------|------------------|--------|
 | Tile, Hand, Table, Player classes | gameObjects*.js | **Keep, use from GameController** |
-| AI Engine | gameAI.js | **Keep, use from GameController** |
+| AI Engine | core/AIEngine.js | **Keep, use from GameController** (refactored from gameAI.js) |
 | Card validation | card/ | **Keep, use from GameController** |
 
 ### Created/Enhanced
