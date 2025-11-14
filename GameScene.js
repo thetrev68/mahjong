@@ -70,6 +70,7 @@ class GameScene extends Phaser.Scene {
         await this.gameController.init({
             aiEngine: this.gGameLogic.gameAI,
             cardValidator: this.gGameLogic.card,
+            sharedTable: this.gTable,  // Share the GameLogic table with GameController
             settings: {
                 year: window.settingsManager.getCardYear(),
                 difficulty: window.settingsManager.getDifficulty(),

@@ -46,6 +46,32 @@ const CHARLESTON_DIRECTION_OFFSETS = {
     left: PLAYER.LEFT
 };
 
+/**
+ * Wrapper to make a Phaser Wall act like a GameController wall
+ * Converts between Phaser Tile objects and TileData
+ */
+class WallDataWrapper {
+    constructor(phaserWall) {
+        this.phaserWall = phaserWall;
+    }
+
+    pop() {
+        const phaserTile = this.phaserWall.remove();
+        if (!phaserTile) return null;
+
+        // Convert Phaser Tile to TileData
+        return new TileData(phaserTile.suit, phaserTile.number, phaserTile.index);
+    }
+
+    getCount() {
+        return this.phaserWall.getCount();
+    }
+
+    shuffle() {
+        return this.phaserWall.shuffle();
+    }
+}
+
 export class GameController extends EventEmitter {
     constructor() {
         super();
@@ -105,6 +131,7 @@ export class GameController extends EventEmitter {
     init(options = {}) {
         this.aiEngine = options.aiEngine;
         this.cardValidator = options.cardValidator;
+        this.sharedTable = options.sharedTable; // Share the Phaser table with GameLogic
 
         if (options.settings) {
             this.settings = {...this.settings, ...options.settings};
@@ -163,6 +190,22 @@ export class GameController extends EventEmitter {
      * Matches the tile generation logic from gameObjects.js
      */
     createWall() {
+        // If we have a shared table (GameLogic's table), use it directly
+        if (this.sharedTable && this.sharedTable.wall) {
+            // Shuffle the existing wall
+            this.sharedTable.wall.shuffle();
+
+            // Create a wrapper to make wall.pop() work with TileData conversion
+            this.wall = new WallDataWrapper(this.sharedTable.wall);
+
+            this.emit("MESSAGE", {
+                text: `Wall created with ${this.sharedTable.wall.getCount()} tiles`,
+                type: "info"
+            });
+            return;
+        }
+
+        // Fallback: Create standalone wall (for non-Phaser environments)
         this.wall = [];
         let index = 0;
 

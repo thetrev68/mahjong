@@ -194,12 +194,11 @@ export class PhaserAdapter {
         const {oldState, newState} = data;
         console.log(`State: ${oldState} → ${newState}`);
 
-        // Phase 2B: Update state but don't call updateUI() - we manage buttons directly now
+        // Update gameLogic state to keep it in sync
         this.gameLogic.state = newState;
-        // this.gameLogic.updateUI(); // Disabled in Phase 2B
 
-        // Manage button state based on new state
-        this.updateButtonState(newState);
+        // Call updateUI() to properly manage button state and UI updates
+        this.gameLogic.updateUI();
     }
 
     /**
@@ -249,16 +248,15 @@ export class PhaserAdapter {
         }
     }
 
-    onTilesDealt(data) {
-        // Update wall counter
-        const totalDealt = data.players.reduce((sum, p) => sum + p.tileCount, 0);
-        const remainingInWall = this.table.wall.getCount() - totalDealt;
-
+    onTilesDealt() {
+        // Tiles are already dealt at this point - this is just a notification
+        // The actual animation was triggered by the sequence of TILE_DRAWN events
+        // Update wall counter to reflect remaining tiles
         if (this.scene.updateWallTileCounter) {
+            const totalTileCount = this.gameController.settings.useBlankTiles ? 160 : 152;
+            const remainingInWall = totalTileCount - this.tilesRemovedFromWall;
             this.scene.updateWallTileCounter(remainingInWall);
         }
-
-        printMessage("Tiles dealt to all players");
     }
 
     onTileDrawn(data) {

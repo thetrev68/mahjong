@@ -575,6 +575,14 @@ export class GameLogic {
 
             // CLAIM DISCARD? (for exposure/mahjong).
 
+            // Make tile visible if it was hidden (it will be hidden if human player discarded it)
+            if (!discardTile.sprite.visible) {
+                discardTile.sprite.visible = true;
+            }
+            if (discardTile.spriteBack && !discardTile.spriteBack.visible) {
+                discardTile.spriteBack.visible = true;
+            }
+
             // Animate and show tile
             discardTile.scale = 1.0;
             discardTile.showTile(true, true);
@@ -592,7 +600,7 @@ export class GameLogic {
 
             // Add onComplete callback to play sound when tile hits discard pile
             if (discardTween && this.scene.audioManager) {
-                discardTween.on("complete", () => {
+                discardTween.once("complete", () => {
                     this.scene.audioManager.playSFX("tile_dropping");
                 });
             }
@@ -1338,6 +1346,9 @@ export class GameLogic {
             button3.innerText = "Mahjong!";
             button3.disabled = false;
             button3.style.display = "";
+
+            // Enable sort buttons during discard selection
+            this.enableSortButtons();
 
             // Show "Swap Blank" button if blanks feature is enabled and player has blanks
             this.updateSwapBlankButton();
