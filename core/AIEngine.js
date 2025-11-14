@@ -204,7 +204,7 @@ export class AIEngine {
         const recommendations = [];
         const rankCardHands = this.card.rankHandArray14(handData);
         const sortedRankCardHands = [...rankCardHands].sort((a, b) => b.rank - a.rank);
-        const handTiles = handData.tiles;
+        const handTiles = handData.getTileArray();
 
         debugPrint(`Total patterns available: ${sortedRankCardHands.length}`);
 

@@ -312,8 +312,8 @@ export class PhaserAdapter {
             const startX = phaserTile.sprite.x;
             const startY = phaserTile.sprite.y;
 
-            // Remove from hand
-            player.hand.removeTile(phaserTile);
+            // Remove from hand (uses removeHidden for hidden tiles)
+            player.hand.removeHidden(phaserTile);
 
             // Add to discard pile (this sets final position)
             this.table.discards.add(phaserTile, player.playerInfo);
