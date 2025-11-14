@@ -208,12 +208,8 @@ export class GameController extends EventEmitter {
                 this.players[playerIndex].hand.addTile(tileDataObject);
 
                 // Emit rich event with animation parameters
-                const tileData = {
-                    suit: phaserTile.suit,
-                    number: phaserTile.number
-                };
-
-                const event = GameEvents.createTileDrawnEvent(playerIndex, tileData, {
+                // Pass the Phaser Tile object directly so PhaserAdapter doesn't need to reconstruct it
+                const event = GameEvents.createTileDrawnEvent(playerIndex, phaserTile, {
                     type: "deal-slide",
                     duration: 200,  // Fast dealing animation
                     easing: "Quad.easeOut"
@@ -565,11 +561,8 @@ export class GameController extends EventEmitter {
         player.hand.addTile(tileDataObject);
 
         // Emit rich tile drawn event with animation
-        const tileEventData = {
-            suit: phaserTile.suit,
-            number: phaserTile.number
-        };
-        const drawnEvent = GameEvents.createTileDrawnEvent(this.currentPlayer, tileEventData, {
+        // Pass the Phaser Tile object directly so PhaserAdapter doesn't need to reconstruct it
+        const drawnEvent = GameEvents.createTileDrawnEvent(this.currentPlayer, phaserTile, {
             type: "wall-draw",
             duration: 300,
             easing: "Quad.easeOut"
@@ -609,11 +602,8 @@ export class GameController extends EventEmitter {
         this.discards.push(tileToDiscard);
 
         // Emit rich tile discarded event with animation
-        const tileData = {
-            suit: tileToDiscard.suit,
-            number: tileToDiscard.number
-        };
-        const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, tileData, {
+        // Pass the Phaser Tile object directly so PhaserAdapter doesn't need to reconstruct it
+        const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, tileToDiscard, {
             type: "discard-slide",
             duration: 300,
             easing: "Power2.easeInOut"

@@ -63,9 +63,6 @@ class GameScene extends Phaser.Scene {
         // Create game objects
         this.gTable = new Table(this);
 
-        // Create AI engine and card validator
-        const aiEngine = new AIEngine();
-
         // Determine card year
         let year = 2025;  // Default year
         if (window.settingsManager && window.settingsManager.getCardYear) {
@@ -78,6 +75,9 @@ class GameScene extends Phaser.Scene {
         // Create card with year and initialize it
         const card = new Card(year);
         await card.init();
+
+        // Create AI engine with card validator
+        const aiEngine = new AIEngine(card);
 
         // Phase 2A: Create GameController + PhaserAdapter
         this.gameController = new GameController();

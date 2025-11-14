@@ -292,12 +292,23 @@ export class PhaserAdapter {
      * Handle tile drawn from wall
      */
     onTileDrawn(data) {
-        const {player: playerIndex, tile: tileData} = data;
+        const {player: playerIndex, tile} = data;
         const player = this.table.players[playerIndex];
 
-        // Create Phaser tile
-        const tileDataObj = TileData.fromJSON(tileData);
-        const phaserTile = this.createPhaserTile(tileDataObj);
+        // Get the Phaser Tile object (passed directly from GameController)
+        let phaserTile;
+        if (tile && tile.sprite) {
+            // Tile is a Phaser Tile object passed directly
+            phaserTile = tile;
+            // Store in map if not already there
+            if (tile.index !== undefined && !this.tileMap.has(tile.index)) {
+                this.tileMap.set(tile.index, tile);
+            }
+        } else {
+            // Fallback: reconstruct from TileData (shouldn't normally happen)
+            const tileDataObj = TileData.fromJSON(tile);
+            phaserTile = this.createPhaserTile(tileDataObj);
+        }
 
         // Position tile at wall location initially
         const wallX = 640; // Center of screen (wall position)
@@ -334,6 +345,7 @@ export class PhaserAdapter {
         }
 
         if (playerIndex === PLAYER.BOTTOM) {
+            const tileDataObj = TileData.fromPhaserTile(phaserTile);
             printInfo(`You drew: ${tileDataObj.getText()}`);
         }
     }
@@ -342,11 +354,23 @@ export class PhaserAdapter {
      * Handle tile discarded
      */
     onTileDiscarded(data) {
-        const {player: playerIndex, tile: tileData} = data;
+        const {player: playerIndex, tile} = data;
         const player = this.table.players[playerIndex];
 
-        const tileDataObj = TileData.fromJSON(tileData);
-        const phaserTile = this.findPhaserTile(tileDataObj);
+        // Get the Phaser Tile object (passed directly from GameController)
+        let phaserTile;
+        if (tile && tile.sprite) {
+            // Tile is a Phaser Tile object passed directly
+            phaserTile = tile;
+            // Store in map if not already there
+            if (tile.index !== undefined && !this.tileMap.has(tile.index)) {
+                this.tileMap.set(tile.index, tile);
+            }
+        } else {
+            // Fallback: reconstruct from TileData
+            const tileDataObj = TileData.fromJSON(tile);
+            phaserTile = this.findPhaserTile(tileDataObj);
+        }
 
         if (phaserTile) {
             // Remove from hand
@@ -364,7 +388,9 @@ export class PhaserAdapter {
             // Show discards (updates layout)
             this.table.discards.showDiscards();
 
-            printMessage(`${player.playerInfo.name} discarded ${tileDataObj.getText()}`);
+            const playerName = this.getPlayerName(playerIndex);
+            const tileDataObj = TileData.fromPhaserTile(phaserTile);
+            printMessage(`${playerName} discarded ${tileDataObj.getText()}`);
         }
     }
 
@@ -545,9 +571,8 @@ export class PhaserAdapter {
      */
     onCharlestonPass(data) {
         const {player: playerIndex, direction} = data;
-        const player = this.table.players[playerIndex];
-
-        printMessage(`${player.playerInfo.name} passed 3 tiles ${direction}`);
+        const playerName = this.getPlayerName(playerIndex);
+        printMessage(`${playerName} passed 3 tiles ${direction}`);
     }
 
     /**
@@ -760,6 +785,20 @@ export class PhaserAdapter {
                 if (callback) callback([]);
             }
         });
+    }
+
+    /**
+     * Safely get player name, handling undefined playerInfo
+     */
+    getPlayerName(playerIndex) {
+        if (playerIndex < 0 || playerIndex >= this.table.players.length) {
+            return `Player ${playerIndex}`;
+        }
+        const player = this.table.players[playerIndex];
+        if (!player || !player.playerInfo) {
+            return `Player ${playerIndex}`;
+        }
+        return player.playerInfo.name || `Player ${playerIndex}`;
     }
 
     /**
