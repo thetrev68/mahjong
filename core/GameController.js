@@ -441,10 +441,10 @@ export class GameController extends EventEmitter {
 
                     let selectedTiles;
                     if (player.isHuman) {
-                        // Prompt human to select tiles
+                        // Prompt human to select tiles (flexible range: 1 to maxTiles)
                         selectedTiles = await this.promptUI("SELECT_TILES", {
-                            question: `Select ${maxTiles} tile(s) to pass to opposite player`,
-                            minTiles: maxTiles,
+                            question: `Select 1–${maxTiles} tile(s) to pass to opposite player`,
+                            minTiles: 1,
                             maxTiles: maxTiles
                         });
                     } else {
