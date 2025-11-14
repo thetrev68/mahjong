@@ -1,5 +1,5 @@
 import {debugPrint, debugTrace, gdebug} from "../utils.js";
-import {Tile} from "../gameObjects.js";
+import {TileData} from "../core/models/TileData.js";
 import {Hand} from "../gameObjects_hand.js";
 import {SUIT, VNUMBER} from "../constants.js";
 
@@ -82,7 +82,7 @@ export class Card {
 
             if (tileCounts[compIndex] >= 4) {
                 // Quint - use joker
-                hand.insertHidden(new Tile(SUIT.JOKER, 0));
+                hand.insertHidden(new TileData(SUIT.JOKER, 0));
             } else {
                 let minNum = 1;
                 if (hand.even) {
@@ -102,7 +102,7 @@ export class Card {
                     }
                 }
 
-                hand.insertHidden(new Tile(suit, number));
+                hand.insertHidden(new TileData(suit, number));
             }
             tileCounts[compIndex]++;
 
