@@ -168,11 +168,24 @@ async function initializeGame() {
         }
     });
 
-    gameController.on("TURN_CHANGED", () => {
+    gameController.on("TURN_CHANGED", (data) => {
         // Update all opponent bars to show current turn
-        opponentBars.forEach(({bar}) => {
-            bar.update(bar.playerData);
+        const currentPlayerIndex = data.currentPlayer || gameController.currentPlayer;
+        opponentBars.forEach(({bar, playerIndex}) => {
+            const player = gameController.players[playerIndex];
+            // Update the player data before rendering
+            player.isCurrentTurn = playerIndex === currentPlayerIndex;
+            bar.update(player);
         });
+    });
+
+    gameController.on("TILES_EXPOSED", (data) => {
+        // Update the opponent bar for this player when they expose tiles
+        const opponentBar = opponentBars.find(ob => ob.playerIndex === data.player);
+        if (opponentBar) {
+            const player = gameController.players[data.player];
+            opponentBar.bar.update(player);
+        }
     });
 
     gameController.on("UI_PROMPT", (data) => {
