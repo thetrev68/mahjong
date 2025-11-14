@@ -5,7 +5,9 @@
       "Bash(npm run dev:*)",
       "Bash(npm run test:*)",
       "Bash(npm install:*)",
-      "Bash(npx playwright@latest install:*)"
+      "Bash(npx playwright@latest install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

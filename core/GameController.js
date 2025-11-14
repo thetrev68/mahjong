@@ -30,8 +30,7 @@
  */
 
 import {EventEmitter} from "./events/EventEmitter.js";
-import {STATE, PLAYER, SUIT, PLAYER_OPTION} from "../constants.js";
-import {TileData} from "./models/TileData.js";
+import {STATE, PLAYER, PLAYER_OPTION} from "../constants.js";
 import {PlayerData} from "./models/PlayerData.js";
 import {ExposureData} from "./models/HandData.js";
 
@@ -46,31 +45,6 @@ const CHARLESTON_DIRECTION_OFFSETS = {
     left: PLAYER.LEFT
 };
 
-/**
- * Wrapper to make a Phaser Wall act like a GameController wall
- * Converts between Phaser Tile objects and TileData
- */
-class WallDataWrapper {
-    constructor(phaserWall) {
-        this.phaserWall = phaserWall;
-    }
-
-    pop() {
-        const phaserTile = this.phaserWall.remove();
-        if (!phaserTile) return null;
-
-        // Convert Phaser Tile to TileData
-        return new TileData(phaserTile.suit, phaserTile.number, phaserTile.index);
-    }
-
-    getCount() {
-        return this.phaserWall.getCount();
-    }
-
-    shuffle() {
-        return this.phaserWall.shuffle();
-    }
-}
 
 export class GameController extends EventEmitter {
     constructor() {
@@ -187,89 +161,30 @@ export class GameController extends EventEmitter {
 
     /**
      * Create the wall of tiles
-     * Matches the tile generation logic from gameObjects.js
+     * Works with Phaser Wall from shared table
      */
     createWall() {
-        // If we have a shared table (GameLogic's table), use it directly
-        if (this.sharedTable && this.sharedTable.wall) {
-            // Shuffle the existing wall
-            this.sharedTable.wall.shuffle();
-
-            // Create a wrapper to make wall.pop() work with TileData conversion
-            this.wall = new WallDataWrapper(this.sharedTable.wall);
-
-            this.emit("MESSAGE", {
-                text: `Wall created with ${this.sharedTable.wall.getCount()} tiles`,
-                type: "info"
-            });
-            return;
+        // GameController expects wall to be from shared Phaser Table
+        if (!this.sharedTable || !this.sharedTable.wall) {
+            throw new Error("GameController requires sharedTable with Phaser Wall");
         }
 
-        // Fallback: Create standalone wall (for non-Phaser environments)
-        this.wall = [];
-        let index = 0;
+        // Shuffle the existing wall
+        this.sharedTable.wall.shuffle();
 
-        const tileGroups = [
-            {suit: SUIT.CRACK, prefix: ["C"], maxNum: 9, count: 4},
-            {suit: SUIT.BAM, prefix: ["B"], maxNum: 9, count: 4},
-            {suit: SUIT.DOT, prefix: ["D"], maxNum: 9, count: 4},
-            {suit: SUIT.WIND, prefix: ["N", "S", "W", "E"], maxNum: 1, count: 4},
-            {suit: SUIT.DRAGON, prefix: ["DC", "DB", "DD"], maxNum: 1, count: 4},
-            {suit: SUIT.FLOWER, prefix: ["F1", "F2", "F3", "F4", "F1", "F2", "F3", "F4"], maxNum: 1, count: 1},
-            {suit: SUIT.JOKER, prefix: ["J"], maxNum: 1, count: 8}
-        ];
-
-        // Add BLANK tiles if enabled
-        if (this.settings.useBlankTiles) {
-            tileGroups.push({suit: SUIT.BLANK, prefix: ["BLANK"], maxNum: 1, count: 8});
-        }
-
-        // Generate tiles
-        for (const group of tileGroups) {
-            for (const prefix of group.prefix) {
-                for (let num = 1; num <= group.maxNum; num++) {
-                    let number = num;
-
-                    // Special handling for non-numeric tiles
-                    if (group.maxNum === 1) {
-                        if (group.suit === SUIT.FLOWER) {
-                            number = 0;  // Flowers always use 0
-                        } else {
-                            number = group.prefix.indexOf(prefix);  // Wind/Dragon index
-                        }
-                    }
-
-                    // Create duplicate tiles (4 of each crack/bam/dot, 8 jokers, etc.)
-                    for (let j = 0; j < group.count; j++) {
-                        const tile = new TileData(group.suit, number, index);
-                        this.wall.push(tile);
-                        index++;
-                    }
-                }
-            }
-        }
-
-        // Shuffle wall using Fisher-Yates algorithm
-        this.shuffleWall();
+        // Store reference to shared wall - will be used via pop() directly
+        this.wall = this.sharedTable.wall;
 
         this.emit("MESSAGE", {
-            text: `Wall created with ${this.wall.length} tiles`,
+            text: `Wall created with ${this.wall.getCount()} tiles`,
             type: "info"
         });
     }
 
-    /**
-     * Shuffle the wall using Fisher-Yates algorithm
-     */
-    shuffleWall() {
-        for (let i = this.wall.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [this.wall[i], this.wall[j]] = [this.wall[j], this.wall[i]];
-        }
-    }
 
     /**
      * Deal tiles to all players (13 tiles each)
+     * Pops Phaser Tile objects from the wall and adds them to player hands
      */
     async dealTiles() {
         this.setState(STATE.DEAL);
@@ -277,16 +192,22 @@ export class GameController extends EventEmitter {
         // Deal 13 tiles to each player
         for (let round = 0; round < 13; round++) {
             for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
-                const tile = this.wall.pop();
-                if (!tile) {
+                // Pop Phaser Tile from wall
+                const phaserTile = this.wall.remove();
+                if (!phaserTile) {
                     throw new Error("Wall empty during dealing!");
                 }
 
-                this.players[playerIndex].hand.addTile(tile);
+                // Add Phaser Tile directly to player hand
+                this.players[playerIndex].hand.addTile(phaserTile);
 
+                // Emit event with tile data for animation
                 this.emit("TILE_DRAWN", {
                     player: playerIndex,
-                    tile: tile.toJSON()
+                    tile: {
+                        suit: phaserTile.suit,
+                        number: phaserTile.number
+                    }
                 });
 
                 // Small delay for animation (optional, configurable)
@@ -557,7 +478,7 @@ export class GameController extends EventEmitter {
     async gameLoop() {
         this.setState(STATE.LOOP_PICK_FROM_WALL);
 
-        while (this.state !== STATE.END && this.wall.length > 0) {
+        while (this.state !== STATE.END && this.wall.getCount() > 0) {
             // Current player draws a tile
             await this.pickFromWall();
 
@@ -593,7 +514,7 @@ export class GameController extends EventEmitter {
         }
 
         // Wall is empty - wall game
-        if (this.wall.length === 0 && !this.gameResult.mahjong) {
+        if (this.wall.getCount() === 0 && !this.gameResult.mahjong) {
             this.endGame("wall_game");
         }
     }
@@ -604,19 +525,22 @@ export class GameController extends EventEmitter {
     async pickFromWall() {
         this.setState(STATE.LOOP_PICK_FROM_WALL);
 
-        if (this.wall.length === 0) {
+        if (this.wall.getCount() === 0) {
             return;  // Wall game
         }
 
-        // Draw tile from wall
-        const tile = this.wall.pop();
+        // Draw tile from wall (Phaser Tile object)
+        const phaserTile = this.wall.remove();
         const player = this.players[this.currentPlayer];
 
-        player.hand.addTile(tile);
+        player.hand.addTile(phaserTile);
 
         this.emit("TILE_DRAWN", {
             player: this.currentPlayer,
-            tile: tile.toJSON()
+            tile: {
+                suit: phaserTile.suit,
+                number: phaserTile.number
+            }
         });
 
         this.emit("HAND_UPDATED", {
@@ -922,7 +846,7 @@ export class GameController extends EventEmitter {
             state: this.state,
             currentPlayer: this.currentPlayer,
             players: this.players.map(p => p.toJSON()),
-            wallCount: this.wall.length,
+            wallCount: this.wall.getCount ? this.wall.getCount() : this.wall.length,
             discardCount: this.discards.length,
             gameResult: this.gameResult
         };
