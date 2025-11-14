@@ -1,11 +1,12 @@
 // GameScene.js
 import * as Phaser from "phaser";
-import {GameLogic} from "./gameLogic.js";
 import {Table} from "./gameObjects_table.js";
 import { HomePageTileManager } from "./homePageTileManager.js";
 import AudioManager from "./audioManager.js";
 import {GameController} from "./core/GameController.js";
 import {PhaserAdapter} from "./desktop/adapters/PhaserAdapter.js";
+import { GameLogicStub } from "./gameLogicStub.js";
+import { HintAnimationManager } from "./hintAnimationManager.js";
 // import { debugPrint } from "./utils.js";
 import { WINDOW_WIDTH, getTotalTileCount } from "./constants.js";
 
@@ -59,18 +60,12 @@ class GameScene extends Phaser.Scene {
         this.audioManager = new AudioManager(this, window.settingsManager);
 
         // Create game objects
-        this.gGameLogic = new GameLogic(this);
-        this.gTable = new Table(this, this.gGameLogic);
-        this.gGameLogic.table = this.gTable;
-        await this.gGameLogic.init();
-        this.gGameLogic.gameAI.table = this.gTable;
+        this.gTable = new Table(this);
 
         // Phase 2A: Create GameController + PhaserAdapter
         this.gameController = new GameController();
         await this.gameController.init({
-            aiEngine: this.gGameLogic.gameAI,
-            cardValidator: this.gGameLogic.card,
-            sharedTable: this.gTable,  // Share the GameLogic table with GameController
+            sharedTable: this.gTable,  // Share the table with GameController
             settings: {
                 year: window.settingsManager.getCardYear(),
                 difficulty: window.settingsManager.getDifficulty(),
@@ -79,29 +74,43 @@ class GameScene extends Phaser.Scene {
             }
         });
 
+        // Create minimal GameLogic stub for legacy Hand/TileSet code
+        // Must be after GameController.init() so we can use aiEngine and cardValidator
+        this.gGameLogic = new GameLogicStub(this, this.gTable, this.gameController.aiEngine, this.gameController.cardValidator);
+
+        // Initialize HintAnimationManager
+        this.gGameLogic.hintAnimationManager = new HintAnimationManager(this.gGameLogic);
+
+        // Update Table's gameLogic reference for backward compatibility
+        this.gTable.gameLogic = this.gGameLogic;
+        for (let i = 0; i < this.gTable.players.length; i++) {
+            this.gTable.players[i].hand.gameLogic = this.gGameLogic;
+            this.gTable.players[i].hand.hiddenTileSet.gameLogic = this.gGameLogic;
+            for (const tileSet of this.gTable.players[i].hand.exposedTileSetArray) {
+                tileSet.gameLogic = this.gGameLogic;
+            }
+        }
+
         // Create PhaserAdapter to bridge GameController events to Phaser
         this.adapter = new PhaserAdapter(
             this.gameController,
             this,  // scene
-            this.gTable,
-            this.gGameLogic
+            this.gTable
         );
 
         // Expose for testing
         window.gameController = this.gameController;
 
-        // this.gGameLogic.updateUI(); // Disabled in Phase 2B - adapter handles UI now
+        // Create wall counter and error text
+        this.wallCounter = this.createWallTileCounter();
 
-
-        this.gGameLogic.wallCounter = this.createWallTileCounter();
-
-        this.gGameLogic.errorText = this.add.text(400, 400, "", {
+        this.errorText = this.add.text(400, 400, "", {
             font: "14px Arial",
             fill: "#ff8080",
             backgroundColor: "rgba(0,0,0,1)",
             align: "left"
         });
-        this.gGameLogic.errorText.visible = false;
+        this.errorText.visible = false;
 
         this.gTable.create(true); // Don't create wall tiles yet
         this.homePageTileManager = new HomePageTileManager(this, this.gTable.wall);
@@ -173,8 +182,8 @@ class GameScene extends Phaser.Scene {
     }
 
     updateWallTileCounter(count) {
-      if (!this.gGameLogic.wallCounter) return;
-      const { bar, fill, text, maxTiles } = this.gGameLogic.wallCounter;
+      if (!this.wallCounter) return;
+      const { bar, fill, text, maxTiles } = this.wallCounter;
       fill.clear();
       if (count < 0 || count > maxTiles) {
         console.error("Invalid wall count:", count);

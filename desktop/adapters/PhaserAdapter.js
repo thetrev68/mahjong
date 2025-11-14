@@ -29,11 +29,15 @@ export class PhaserAdapter {
      * @param {Table} table - Existing Phaser table object
      * @param {GameLogic} gameLogic - Existing game logic (for data access only)
      */
-    constructor(gameController, scene, table, gameLogic) {
+    /**
+     * @param {GameController} gameController - Core game controller
+     * @param {GameScene} scene - Phaser scene
+     * @param {Table} table - Existing Phaser table object
+     */
+    constructor(gameController, scene, table) {
         this.gameController = gameController;
         this.scene = scene;
         this.table = table;
-        this.gameLogic = gameLogic;  // Keep for data access, not UI
 
         /** @type {Map<number, Tile>} Map tile index → Phaser Tile object */
         this.tileMap = new Map();
@@ -351,6 +355,9 @@ export class PhaserAdapter {
     /**
      * Handle tiles exposed
      */
+    /**
+     * Handle tiles exposed
+     */
     onTilesExposed(data) {
         const {player: playerIndex, exposureType, tiles: tileDatas} = data;
         const player = this.table.players[playerIndex];
@@ -359,7 +366,7 @@ export class PhaserAdapter {
         const phaserTiles = tileDatas.map(td => this.findPhaserTile(TileData.fromJSON(td)));
 
         // Create exposed tile set and add to player's hand
-        const exposedTileSet = new window.TileSet(this.scene, this.gameLogic, false);
+        const exposedTileSet = new window.TileSet(this.scene, this.scene.gGameLogic, false);
         phaserTiles.forEach(tile => {
             // Remove from hidden tiles if present
             player.hand.hiddenTileSet.remove(tile);
@@ -472,6 +479,9 @@ export class PhaserAdapter {
     /**
      * Handle hand updated
      */
+    /**
+     * Handle hand updated
+     */
     onHandUpdated(data) {
         const {player: playerIndex, hand: handData} = data;
 
@@ -479,8 +489,8 @@ export class PhaserAdapter {
         console.log(`Hand updated for player ${playerIndex}: ${handData.tiles.length} hidden, ${handData.exposures.length} exposed`);
 
         // Update hint if human player
-        if (playerIndex === PLAYER.BOTTOM && this.gameLogic.hintAnimationManager) {
-            this.gameLogic.hintAnimationManager.updateHintsForNewTiles();
+        if (playerIndex === PLAYER.BOTTOM && this.scene.gGameLogic && this.scene.gGameLogic.hintAnimationManager) {
+            this.scene.gGameLogic.hintAnimationManager.updateHintsForNewTiles();
         }
     }
 
