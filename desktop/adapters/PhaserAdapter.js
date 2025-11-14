@@ -526,6 +526,12 @@ export class PhaserAdapter {
         this.pendingPromptCallback = callback;
         this.currentPromptType = promptType;
 
+        // Make action pane visible when showing prompts
+        const infoTextarea = document.getElementById("info");
+        const buttonDiv = document.getElementById("buttondiv");
+        if (infoTextarea) infoTextarea.style.visibility = "visible";
+        if (buttonDiv) buttonDiv.style.visibility = "visible";
+
         if (promptType === "CHOOSE_DISCARD") {
             this.setupDiscardPrompt(options);
         } else if (promptType === "CLAIM_DISCARD") {
@@ -759,6 +765,12 @@ export class PhaserAdapter {
                 btn.onclick = null;
             }
         });
+
+        // Hide action pane when clearing prompts
+        const infoTextarea = document.getElementById("info");
+        const buttonDiv = document.getElementById("buttondiv");
+        if (infoTextarea) infoTextarea.style.visibility = "hidden";
+        if (buttonDiv) buttonDiv.style.visibility = "hidden";
     }
 
     /**
