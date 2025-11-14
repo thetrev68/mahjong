@@ -281,6 +281,15 @@ class TileSet {
             }
 
             debugPrint(`showTileSetInRack: Animating tile ${tile.getText()} to x=${x}, y=${y}, angle=${playerInfo.angle}`);
+
+            // Make tile visible BEFORE animation starts so we can see it animate
+            tile.scale = (playerInfo.id === PLAYER.BOTTOM) ? 1.0 : SPRITE_SCALE;
+            if (playerInfo.id === PLAYER.BOTTOM) {
+                tile.showTile(true, exposed);
+            } else {
+                tile.showTile(true, exposed);
+            }
+
             // Stagger animation timing: each tile finishes slightly earlier based on index
             // This creates a rapid-fire "click-click-click-click" sound effect instead of a single loud click
             let fixedDuration = null;
@@ -302,14 +311,6 @@ class TileSet {
 
             // Clear the flag after setting up the animation
             tile.isNewlyInserted = false;
-
-            tile.scale = (playerInfo.id === PLAYER.BOTTOM) ? 1.0 : SPRITE_SCALE;
-
-            if (playerInfo.id === PLAYER.BOTTOM) {
-                tile.showTile(true, exposed);
-            } else {
-                tile.showTile(true, exposed);
-            }
 
             x += tileWidth + gap;
         }
@@ -331,6 +332,15 @@ class TileSet {
             }
 
             debugPrint(`showTileSetInRackVertical: Animating tile ${tile.getText()} to x=${x}, y=${y}, angle=${playerInfo.angle}`);
+
+            // Make tile visible BEFORE animation starts so we can see it animate
+            tile.scale = SPRITE_SCALE;
+            if (playerInfo.id === PLAYER.BOTTOM) {
+                tile.showTile(true, exposed);
+            } else {
+                tile.showTile(true, exposed);
+            }
+
             // Stagger animation timing: each tile finishes slightly earlier based on index
             // This creates a rapid-fire "click-click-click-click" sound effect instead of a single loud click
             let fixedDuration = null;
@@ -352,14 +362,6 @@ class TileSet {
 
             // Clear the flag after setting up the animation
             tile.isNewlyInserted = false;
-
-            tile.scale = SPRITE_SCALE;
-
-            if (playerInfo.id === PLAYER.BOTTOM) {
-                tile.showTile(true, exposed);
-            } else {
-                tile.showTile(true, exposed);
-            }
 
             y += tileWidth + gap;
         }

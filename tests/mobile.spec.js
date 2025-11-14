@@ -1,13 +1,6 @@
+/* eslint-disable no-await-in-loop */
+
 import { test, expect } from "@playwright/test";
-import {
-    waitForMobileGameLoad,
-    tapTile,
-    doubleTapTile,
-    swipeUp,
-    selectCharlestonTiles,
-    verifyOpponentBar,
-    startGameWithTrainingHand
-} from "./mobile-helpers.js";
 
 test.describe("Mobile Interface", () => {
     
@@ -121,29 +114,41 @@ test.describe("Mobile Interface", () => {
         test("settings persist across page reloads", async ({ page }) => {
             await page.goto("/mobile/");
 
+            // Wait for mobile app to load
+            await page.waitForSelector("#mobile-settings-btn");
+
             // Open settings
-            await page.click("#settings-button");
+            await page.click("#mobile-settings-btn");
+
+            // Wait for settings sheet to appear
+            await page.waitForSelector("#settings-sheet");
 
             // Change settings
-            await page.selectOption("#card-year-select", "2020");
-            await page.selectOption("#difficulty-select", "hard");
-            await page.fill("#bgm-volume", "50");
-            await page.check("#use-blank-tiles");
+            await page.selectOption("#mobile-year", "2020");
+            await page.selectOption("#mobile-difficulty", "hard");
+            await page.fill("#mobile-bgm-volume", "50");
+            await page.check("#mobile-blank-tiles");
 
             // Save settings
-            await page.click("#save-settings");
+            await page.click("#mobile-settings-save");
 
             // Reload page
             await page.reload();
 
+            // Wait for mobile app to load again
+            await page.waitForSelector("#mobile-settings-btn");
+
             // Open settings again
-            await page.click("#settings-button");
+            await page.click("#mobile-settings-btn");
+
+            // Wait for settings sheet to appear
+            await page.waitForSelector("#settings-sheet");
 
             // Verify settings persisted
-            await expect(page.locator("#card-year-select")).toHaveValue("2020");
-            await expect(page.locator("#difficulty-select")).toHaveValue("hard");
-            await expect(page.locator("#bgm-volume")).toHaveValue("50");
-            await expect(page.locator("#use-blank-tiles")).toBeChecked();
+            await expect(page.locator("#mobile-year")).toHaveValue("2020");
+            await expect(page.locator("#mobile-difficulty")).toHaveValue("hard");
+            await expect(page.locator("#mobile-bgm-volume")).toHaveValue("50");
+            await expect(page.locator("#mobile-blank-tiles")).toBeChecked();
         });
     });
 
@@ -160,11 +165,10 @@ test.describe("Mobile Interface", () => {
             await expect(opponentBars).toHaveCount(3);
 
             // Check initial tile counts (should be 13 each after deal)
-            const barPromises = [0, 1, 2].map(async i => {
+            for (let i = 0; i < 3; i++) {
                 const bar = opponentBars.nth(i);
                 await expect(bar.locator(".tile-count")).toContainText("13");
-            });
-            await Promise.all(barPromises);
+            }
 
             // Check that one bar has "current turn" indicator
             await expect(page.locator(".opponent-bar.current-turn")).toHaveCount(1);
@@ -197,11 +201,15 @@ test.describe("Mobile Interface", () => {
             // Perform swipe-up gesture (expose tiles)
             const handContainer = page.locator("#mobile-hand-container");
             const box = await handContainer.boundingBox();
-            await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height - 20);
-            await page.touchscreen.swipe(
-                { x: box.x + box.width / 2, y: box.y + box.height - 20 },
-                { x: box.x + box.width / 2, y: box.y + 20 }
-            );
+            const startX = box.x + box.width / 2;
+            const startY = box.y + box.height - 20;
+            const endY = box.y + 20;
+
+            // Simulate touch swipe gesture
+            await page.touchscreen.down({ x: startX, y: startY });
+            await page.touchscreen.move({ x: startX, y: startY - 50 }); // Move up halfway
+            await page.touchscreen.move({ x: startX, y: endY }); // Move to final position
+            await page.touchscreen.up();
 
             // Verify exposure was created
             await page.waitForSelector(".exposure-icon");

@@ -1,6 +1,6 @@
-import {debugPrint, gdebug} from "./utils.js";
-import {PLAYER_OPTION, SUIT, VNUMBER} from "./constants.js";
-import {Tile} from "./gameObjects.js";
+import {debugPrint, gdebug} from "../utils.js";
+import {PLAYER_OPTION, SUIT, VNUMBER} from "../constants.js";
+import {Tile} from "../gameObjects.js";
 
 // PRIVATE CONSTANTS
 const TILE_RECOMMENDATION = {

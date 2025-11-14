@@ -12,6 +12,7 @@ const config = {
     width: WINDOW_WIDTH,
     height: WINDOW_HEIGHT,
     transparent: true,
+    hideBanner: true,
     parent: "gamediv",
     scene: [GameScene],
     scale: {

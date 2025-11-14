@@ -74,7 +74,7 @@ class GameScene extends Phaser.Scene {
                 year: window.settingsManager.getCardYear(),
                 difficulty: window.settingsManager.getDifficulty(),
                 useBlankTiles: window.settingsManager.getUseBlankTiles(),
-                skipCharleston: false
+                skipCharleston: window.settingsManager.getSetting("skipCharleston", false)
             }
         });
 
@@ -89,7 +89,7 @@ class GameScene extends Phaser.Scene {
         // Expose for testing
         window.gameController = this.gameController;
 
-        this.gGameLogic.updateUI();
+        // this.gGameLogic.updateUI(); // Disabled in Phase 2B - adapter handles UI now
 
 
         this.gGameLogic.wallCounter = this.createWallTileCounter();
@@ -116,6 +116,12 @@ class GameScene extends Phaser.Scene {
             startButton.addEventListener("click", async () => {
                 // Hide the button after it's clicked
                 startButton.style.display = "none";
+
+                // Show the action panel
+                const uiCenterDiv = document.getElementById("uicenterdiv");
+                if (uiCenterDiv) {
+                    uiCenterDiv.style.display = "flex";
+                }
 
                 if (this.homePageTileManager) {
                     // First game - animate tiles and transition

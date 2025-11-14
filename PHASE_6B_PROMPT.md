@@ -489,7 +489,7 @@ Test in:
 
 ## File Locations
 
-```
+```text
 shared/
 └── SettingsManager.js       # NEW - 200-250 lines
 ```

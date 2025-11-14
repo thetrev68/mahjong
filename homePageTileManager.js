@@ -15,7 +15,13 @@ export class HomePageTileManager {
 
     createScatteredTiles() {
         // Create all tiles (152 base + 8 blanks if enabled)
+        const useBlankTiles = window.settingsManager ? window.settingsManager.getUseBlankTiles() : false;
+        let index = 0;
         for (const group of gTileGroups) {
+            // Skip blank tiles if not enabled
+            if (group.suit === SUIT.BLANK && !useBlankTiles) {
+                continue;
+            }
             for (const prefix of group.prefix) {
                 for (let num = 1; num <= group.maxNum; num++) {
                     let number = num;
@@ -37,6 +43,7 @@ export class HomePageTileManager {
                     for (let j = 0; j < group.count; j++) {
                         const tile = new Tile(this.scene, group.suit, number, spriteName);
                         tile.create();
+                        tile.index = index++;  // Assign unique index
                         this.tileArray.push(tile);
                     }
                 }

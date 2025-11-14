@@ -204,7 +204,7 @@ export class AIEngine {
         const recommendations = [];
         const rankCardHands = this.card.rankHandArray14(handData);
         const sortedRankCardHands = [...rankCardHands].sort((a, b) => b.rank - a.rank);
-        const handTiles = handData.tiles;
+        const handTiles = handData.getTileArray();
 
         debugPrint(`Total patterns available: ${sortedRankCardHands.length}`);
 
@@ -303,7 +303,7 @@ export class AIEngine {
         );
 
         // Apply difficulty-based randomness
-        if (this.config.discardRandomness > 0 && Math.random() < this.config.discardRandomness) {
+        if (this.config.discardRandomness > 0 && Math.random() < this.config.discardRandomness && discardableRecommendations.length > 0) {
             // Easy/Medium: Sometimes make a suboptimal choice
             // Pick one of the worst 3 tiles randomly instead of the absolute worst
             const randomIndex = Math.floor(

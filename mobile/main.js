@@ -1,13 +1,14 @@
 import InstallPrompt from "./components/InstallPrompt.js";
 import SettingsSheet from "./components/SettingsSheet.js";
-import {HandRenderer} from "./renderers/HandRenderer.js";
+// import {HandRenderer} from "./renderers/HandRenderer.js";
 import {OpponentBar} from "./components/OpponentBar.js";
-import {DiscardPile} from "./components/DiscardPile.js";
-import {AnimationController} from "./animations/AnimationController.js";
-import {TouchHandler} from "./gestures/TouchHandler.js";
+// import {DiscardPile} from "./components/DiscardPile.js";
+// import {AnimationController} from "./animations/AnimationController.js";
+// import {TouchHandler} from "./gestures/TouchHandler.js";
 import {GameController} from "../core/GameController.js";
 import {AIEngine} from "../core/AIEngine.js";
 import {Card} from "../card/card.js";
+import {TileData} from "../core/models/TileData.js";
 import "./styles/base.css";
 import "./styles/SettingsSheet.css";
 import "./styles/HandRenderer.css";
@@ -16,11 +17,7 @@ import "./styles/MobileGame.css";
 // Game instances
 let gameController;
 let aiEngine;
-let handRenderer;
-let discardPile;
-let animationController;
-let opponentBars = [];
-let touchHandler;
+const opponentBars = [];
 let statusDisplay;
 let settingsSheet;
 
@@ -33,6 +30,16 @@ export function onGameEnd() {
     InstallPrompt.incrementGamesPlayed();
 
     // The InstallPrompt will automatically check and show prompt if conditions are met
+}
+
+/**
+ * Create bottom menu element if it doesn't exist
+ */
+function createBottomMenu() {
+    const bottomMenu = document.createElement("div");
+    bottomMenu.className = "bottom-menu";
+    document.body.appendChild(bottomMenu);
+    return bottomMenu;
 }
 
 // Placeholder for mobile app initialization
@@ -72,8 +79,8 @@ async function initializeGame() {
     console.log("Initializing mobile game...");
 
     // Get DOM containers
-    const handContainer = document.getElementById("hand-container");
-    const discardContainer = document.getElementById("discard-container");
+    // const handContainer = document.getElementById("hand-container");
+    // const discardContainer = document.getElementById("discard-container");
     const statusElement = document.getElementById("game-status");
     const opponentLeftContainer = document.getElementById("opponent-left");
     const opponentTopContainer = document.getElementById("opponent-top");
@@ -99,13 +106,13 @@ async function initializeGame() {
     });
 
     // Initialize Animation Controller
-    animationController = new AnimationController();
+    // const animationController = new AnimationController();
 
     // Initialize Hand Renderer
-    handRenderer = new HandRenderer(handContainer, gameController);
+    // const handRenderer = new HandRenderer(handContainer, gameController);
 
     // Initialize Discard Pile
-    discardPile = new DiscardPile(discardContainer, gameController);
+    // const discardPile = new DiscardPile(discardContainer, gameController);
 
     // Initialize Opponent Bars (Right, Top, Left positions - index 1, 2, 3)
     const opponentPositions = [
@@ -114,14 +121,14 @@ async function initializeGame() {
         { container: opponentLeftContainer, playerIndex: 3, position: "LEFT" }
     ];
 
-    for (const {container, playerIndex, position} of opponentPositions) {
+    for (const {container, playerIndex} of opponentPositions) {
         const player = gameController.players[playerIndex];
         const bar = new OpponentBar(container, player);
         opponentBars.push({bar, playerIndex});
     }
 
     // Initialize Touch Handler
-    touchHandler = new TouchHandler(handContainer);
+    // const touchHandler = new TouchHandler(handContainer);
 
     // Store status display for global access
     statusDisplay = statusElement;
@@ -154,7 +161,7 @@ async function initializeGame() {
         }
     });
 
-    gameController.on("TURN_CHANGED", (data) => {
+    gameController.on("TURN_CHANGED", () => {
         // Update all opponent bars to show current turn
         opponentBars.forEach(({bar}) => {
             bar.update(bar.playerData);
@@ -164,18 +171,43 @@ async function initializeGame() {
     gameController.on("UI_PROMPT", async (data) => {
         console.log("UI_PROMPT received:", data.promptType, data.options);
 
-        // Temporary: Auto-respond to UI prompts until UI is implemented
+        // Handle UI prompts for human player
         if (data.promptType === "CHOOSE_DISCARD") {
-            // Have AI choose discard for human player temporarily
+            // Human player chooses discard
             const player = gameController.players[0];
-            statusDisplay.textContent = "Choosing discard...";
-            const tileToDiscard = await aiEngine.chooseDiscard(player.hand);
-            console.log("Auto-discarding tile:", tileToDiscard);
-            data.callback(tileToDiscard);
+            const hand = player.hand.tiles;
+            const handText = hand.map((tile, index) => `${index}: ${tile.getText()}`).join('\n');
+            const choice = window.prompt(`Choose a tile to discard:\n${handText}\nEnter tile index (0-${hand.length - 1}):`);
+            const index = parseInt(choice, 10);
+            if (!isNaN(index) && index >= 0 && index < hand.length) {
+                statusDisplay.textContent = `Discarding ${hand[index].getText()}...`;
+                data.callback(hand[index]);
+            } else {
+                // Invalid choice, choose first tile as fallback
+                statusDisplay.textContent = "Invalid choice, discarding first tile...";
+                data.callback(hand[0]);
+            }
         } else if (data.promptType === "CLAIM_DISCARD") {
-            // Auto-pass on claims for now
-            statusDisplay.textContent = "Passing claim...";
-            data.callback("Pass");
+            // Human player decides on claim
+            const {tile: tileData, options: claimOptions} = data.options;
+            const tileText = TileData.fromJSON(tileData).getText();
+            const optionsText = claimOptions.join(', ');
+            const choice = window.prompt(`Claim ${tileText}? Options: ${optionsText}`);
+            if (claimOptions.includes(choice)) {
+                statusDisplay.textContent = `Claiming: ${choice}`;
+                data.callback(choice);
+            } else {
+                // Default to Pass
+                statusDisplay.textContent = "Passing claim...";
+                data.callback("Pass");
+            }
+        } else {
+            // For other prompts, auto-pass or handle as needed
+            console.log("Unhandled prompt type:", data.promptType);
+            // For now, call callback with null or appropriate default
+            if (data.callback) {
+                data.callback(null);
+            }
         }
     });
 
@@ -200,7 +232,7 @@ async function initializeGame() {
     if (settingsBtn && !settingsSheet) {
         settingsSheet = new SettingsSheet();
         settingsBtn.onclick = () => {
-            settingsSheet.show();
+            settingsSheet.open();
         };
     }
 
@@ -214,7 +246,8 @@ async function initializeGame() {
 /**
  * Register Service Worker
  */
-async function registerServiceWorker() {
+/*
+// async function registerServiceWorker() {
     // Check if service workers are supported
     if (!("serviceWorker" in navigator)) {
         console.log("Service workers not supported");
@@ -224,7 +257,7 @@ async function registerServiceWorker() {
     try {
         // Register the service worker (must be at root or higher than scope)
         const registration = await navigator.serviceWorker.register(
-            "/mahjong/service-worker.js",
+            "/mahjong/pwa/service-worker.js",
             { scope: "/mahjong/" }
         );
 
@@ -251,10 +284,12 @@ async function registerServiceWorker() {
         console.error("Service worker registration failed:", error);
     }
 }
+*/
 
 /**
  * Show notification when update is available
  */
+/*
 function showUpdateNotification(registration) {
     // Create update banner
     const banner = document.createElement("div");
@@ -293,3 +328,4 @@ function showUpdateNotification(registration) {
         registration.waiting.postMessage({ type: "SKIP_WAITING" });
     }
 }
+*/

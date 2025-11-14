@@ -169,7 +169,7 @@ class DesktopSettingsManager {
     }
 
     getDifficulty() {
-        return this.getSetting("aiDifficulty", "medium");
+        return this.getSetting("difficulty", "medium");
     }
 
     getCardYear() {
@@ -242,8 +242,8 @@ class DesktopSettingsManager {
 
     applyDifficultySettings(settings) {
         const difficultySelect = document.getElementById("difficultySelect");
-        if (difficultySelect && settings.aiDifficulty) {
-            difficultySelect.value = settings.aiDifficulty;
+        if (difficultySelect && settings.difficulty) {
+            difficultySelect.value = settings.difficulty;
         }
     }
 
@@ -368,7 +368,7 @@ class DesktopSettingsManager {
         });
 
         // Load settings from SettingsManager
-        const settings = SettingsManager.load();
+        // const settings = SettingsManager.load();
 
         // BGM volume slider - update UI and audio manager, but don't save to SettingsManager yet
         if (bgmVolumeSlider) {
@@ -456,6 +456,17 @@ class DesktopSettingsManager {
 // Initialize settings manager when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
     window.settingsManager = new DesktopSettingsManager();
+
+    // Initial UI state setup
+    const controlDiv = document.getElementById("controldiv");
+    const uiCenterDiv = document.getElementById("uicenterdiv");
+
+    if (controlDiv) {
+        controlDiv.style.visibility = "visible";
+    }
+    if (uiCenterDiv) {
+        uiCenterDiv.style.display = "none";
+    }
     
     // Listen for settings changes from mobile
     window.addEventListener("settingsChanged", (event) => {

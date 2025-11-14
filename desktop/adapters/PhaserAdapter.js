@@ -38,6 +38,9 @@ export class PhaserAdapter {
         /** @type {string|null} Current prompt type */
         this.currentPromptType = null;
 
+        /** @type {number} Track tiles removed from wall (for counter) */
+        this.tilesRemovedFromWall = 0;
+
         this.setupEventListeners();
     }
 
@@ -203,7 +206,7 @@ export class PhaserAdapter {
      * Update button visibility/state based on game state
      * Phase 2B: Replaces GameLogic.updateUI() for button management
      */
-    updateButtonState(state) {
+    updateButtonState() {
         // Hide all buttons by default
         this.hideButtons();
 
@@ -211,7 +214,7 @@ export class PhaserAdapter {
         // This is handled by UI_PROMPT events, so we just ensure cleanup here
     }
 
-    onGameStarted(data) {
+    onGameStarted() {
         printMessage("Game started!");
 
         // Reset Phaser table
@@ -249,7 +252,7 @@ export class PhaserAdapter {
     onTilesDealt(data) {
         // Update wall counter
         const totalDealt = data.players.reduce((sum, p) => sum + p.tileCount, 0);
-        const remainingInWall = this.table.wall.getLength() - totalDealt;
+        const remainingInWall = this.table.wall.getCount() - totalDealt;
 
         if (this.scene.updateWallTileCounter) {
             this.scene.updateWallTileCounter(remainingInWall);
@@ -290,9 +293,14 @@ export class PhaserAdapter {
             }
         });
 
-        // Update wall counter
+        // Track that one tile was removed from the wall
+        this.tilesRemovedFromWall++;
+
+        // Update wall counter (subtract removed tiles from initial count)
         if (this.scene.updateWallTileCounter) {
-            this.scene.updateWallTileCounter(this.table.wall.getLength());
+            const initialTileCount = this.gameController.settings.useBlankTiles ? 160 : 152;
+            const remainingTiles = initialTileCount - this.tilesRemovedFromWall;
+            this.scene.updateWallTileCounter(remainingTiles);
         }
 
         if (playerIndex === PLAYER.BOTTOM) {
@@ -308,31 +316,14 @@ export class PhaserAdapter {
         const phaserTile = this.findPhaserTile(tileDataObj);
 
         if (phaserTile) {
-            // Store original position
-            const startX = phaserTile.sprite.x;
-            const startY = phaserTile.sprite.y;
+            // Remove from hand (uses removeHidden for hidden tiles)
+            player.hand.removeHidden(phaserTile);
 
-            // Remove from hand
-            player.hand.removeTile(phaserTile);
+            // Add to discard pile
+            this.table.discards.insertDiscard(phaserTile);
 
-            // Add to discard pile (this sets final position)
-            this.table.discards.add(phaserTile, player.playerInfo);
-
-            // Get target position from discard pile
-            const targetX = phaserTile.sprite.x;
-            const targetY = phaserTile.sprite.y;
-
-            // Reset to start position for animation
-            phaserTile.sprite.setPosition(startX, startY);
-
-            // Animate discard (move to discard pile)
-            this.scene.tweens.add({
-                targets: phaserTile.sprite,
-                x: targetX,
-                y: targetY,
-                duration: 250,
-                ease: "Power2"
-            });
+            // Show discards (updates layout)
+            this.table.discards.showDiscards();
 
             printMessage(`${player.playerInfo.name} discarded ${tileDataObj.getText()}`);
         }
@@ -456,7 +447,6 @@ export class PhaserAdapter {
 
     onHandUpdated(data) {
         const {player: playerIndex, hand: handData} = data;
-        const player = this.table.players[playerIndex];
 
         // For now, just log - full hand sync will happen in Phase 2B
         console.log(`Hand updated for player ${playerIndex}: ${handData.tiles.length} hidden, ${handData.exposures.length} exposed`);
@@ -468,7 +458,7 @@ export class PhaserAdapter {
     }
 
     onTurnChanged(data) {
-        const {currentPlayer, previousPlayer} = data;
+        const {currentPlayer} = data;
 
         this.table.switchPlayer(currentPlayer);
 
@@ -482,7 +472,7 @@ export class PhaserAdapter {
     }
 
     onCharlestonPass(data) {
-        const {player: playerIndex, tiles: tileDatas, direction} = data;
+        const {player: playerIndex, direction} = data;
         const player = this.table.players[playerIndex];
 
         printMessage(`${player.playerInfo.name} passed 3 tiles ${direction}`);
@@ -536,6 +526,12 @@ export class PhaserAdapter {
         this.pendingPromptCallback = callback;
         this.currentPromptType = promptType;
 
+        // Make action pane visible when showing prompts
+        const infoTextarea = document.getElementById("info");
+        const buttonDiv = document.getElementById("buttondiv");
+        if (infoTextarea) infoTextarea.style.visibility = "visible";
+        if (buttonDiv) buttonDiv.style.visibility = "visible";
+
         if (promptType === "CHOOSE_DISCARD") {
             this.setupDiscardPrompt(options);
         } else if (promptType === "CLAIM_DISCARD") {
@@ -553,7 +549,7 @@ export class PhaserAdapter {
      * Setup discard tile selection (human player)
      * Phase 2B: Enable tile selection with callback
      */
-    setupDiscardPrompt(options) {
+    setupDiscardPrompt() {
         const player = this.table.players[PLAYER.BOTTOM];
 
         printInfo("Select a tile to discard");
@@ -632,9 +628,6 @@ export class PhaserAdapter {
         const player = this.table.players[PLAYER.BOTTOM];
 
         printInfo(`Choose ${requiredCount} tiles to pass ${direction}`);
-
-        // Enable multi-tile selection (up to 3)
-        const selectedTiles = [];
 
         // Use existing selection system from Hand
         // The Hand class already supports multi-select during Charleston state
@@ -772,6 +765,12 @@ export class PhaserAdapter {
                 btn.onclick = null;
             }
         });
+
+        // Hide action pane when clearing prompts
+        const infoTextarea = document.getElementById("info");
+        const buttonDiv = document.getElementById("buttondiv");
+        if (infoTextarea) infoTextarea.style.visibility = "hidden";
+        if (buttonDiv) buttonDiv.style.visibility = "hidden";
     }
 
     /**

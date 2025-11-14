@@ -481,7 +481,7 @@ npm run preview
 - [ ] GitHub Pages deploy script works
 - [ ] Landing page (index.html) redirects correctly
 - [ ] Service worker caches all assets
-- [ ] Manifest.json validates (https://manifest-validator.appspot.com/)
+- [ ] Manifest.json validates ([manifest-validator.appspot.com](https://manifest-validator.appspot.com/))
 
 ### Security
 - [ ] No sensitive data in localStorage (no API keys, passwords)

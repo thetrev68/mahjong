@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+
 /**
  * GameController - Platform-agnostic game state machine
  *
@@ -100,7 +102,7 @@ export class GameController extends EventEmitter {
      * @param {Object} options.cardValidator - Hand validation system
      * @param {Object} options.settings - Game settings
      */
-    async init(options = {}) {
+    init(options = {}) {
         this.aiEngine = options.aiEngine;
         this.cardValidator = options.cardValidator;
 
@@ -375,7 +377,7 @@ export class GameController extends EventEmitter {
         // AI players vote
         const aiVotes = this.players
             .filter(p => !p.isHuman)
-            .map(p => this.aiEngine.charlestonContinueVote());
+            .map(() => this.aiEngine.charlestonContinueVote());
 
         const yesVotes = [humanVote === "Yes", ...aiVotes].filter(v => v).length;
 
@@ -388,16 +390,19 @@ export class GameController extends EventEmitter {
     async courtesyPhase() {
         this.setState(STATE.COURTESY_QUERY);
 
-        // Each player votes whether to do courtesy pass
+        // Each player votes on how many tiles to pass for courtesy (0-3)
         const votes = [];
         for (const player of this.players) {
             let vote;
             if (player.isHuman) {
-                vote = await this.promptUI("COURTESY_VOTE", {
-                    question: "Participate in courtesy pass?",
-                    options: ["Yes", "No"]
+                const voteStr = await this.promptUI("COURTESY_VOTE", {
+                    question: "Courtesy Pass: How many tiles to exchange with opposite player?",
+                    options: ["0", "1", "2", "3"]
                 });
-                vote = vote === "Yes";
+                vote = parseInt(voteStr, 10);
+                if (isNaN(vote) || vote < 0 || vote > 3) {
+                    vote = 0; // Default to 0 for safety
+                }
             } else {
                 vote = await this.aiEngine.courtesyVote(player.hand);
             }
@@ -406,18 +411,18 @@ export class GameController extends EventEmitter {
             this.emit("COURTESY_VOTE", {player: player.position, vote});
         }
 
-        // If at least 2 players voted yes, do courtesy pass
-        const yesVotes = votes.filter(v => v.vote).length;
+        // If at least 2 players voted for more than 0 tiles, do courtesy pass
+        const yesVotes = votes.filter(v => v.vote > 0).length;
         if (yesVotes >= 2) {
             this.setState(STATE.COURTESY);
 
-            // Calculate courtesy vote counts (opposite players must agree)
-            const player02Vote = Math.min(votes[0].vote ? 3 : 0, votes[2].vote ? 3 : 0);
-            const player13Vote = Math.min(votes[1].vote ? 3 : 0, votes[3].vote ? 3 : 0);
+            // Calculate agreed-upon courtesy pass counts for opposite players
+            const player02Vote = Math.min(votes[0].vote, votes[2].vote);
+            const player13Vote = Math.min(votes[1].vote, votes[3].vote);
 
             if (player02Vote > 0 || player13Vote > 0) {
                 this.emit("MESSAGE", {
-                    text: "Courtesy pass approved. Select 1-3 tiles to exchange with opposite player.",
+                    text: `Courtesy pass approved. P0-P2 pass ${player02Vote}, P1-P3 pass ${player13Vote}.`,
                     type: "info"
                 });
 
@@ -436,10 +441,10 @@ export class GameController extends EventEmitter {
 
                     let selectedTiles;
                     if (player.isHuman) {
-                        // Prompt human to select tiles
+                        // Prompt human to select tiles (flexible range: 1 to maxTiles)
                         selectedTiles = await this.promptUI("SELECT_TILES", {
-                            question: `Select ${maxTiles} tile(s) to pass to opposite player`,
-                            minTiles: maxTiles,
+                            question: `Select 1–${maxTiles} tile(s) to pass to opposite player`,
+                            minTiles: 1,
                             maxTiles: maxTiles
                         });
                     } else {
@@ -515,7 +520,7 @@ export class GameController extends EventEmitter {
 
             // Check for Mahjong after drawing (self-draw win)
             if (this.checkMahjong()) {
-                await this.endGame("mahjong");
+                this.endGame("mahjong");
                 return;
             }
 
@@ -527,7 +532,7 @@ export class GameController extends EventEmitter {
 
             if (claimResult.claimed) {
                 // Tile was claimed - handle the claim
-                await this.handleDiscardClaim(claimResult);
+                this.handleDiscardClaim(claimResult);
 
                 // Check if claiming player won with Mahjong
                 if (this.gameResult.mahjong) {
@@ -546,7 +551,7 @@ export class GameController extends EventEmitter {
 
         // Wall is empty - wall game
         if (this.wall.length === 0 && !this.gameResult.mahjong) {
-            await this.endGame("wall_game");
+            this.endGame("wall_game");
         }
     }
 
@@ -678,7 +683,7 @@ export class GameController extends EventEmitter {
      * Handle a claimed discard
      * @param {Object} claimResult
      */
-    async handleDiscardClaim(claimResult) {
+    handleDiscardClaim(claimResult) {
         const {player: claimingPlayerIndex, claimType} = claimResult;
         const tile = this.discards.pop();  // Remove from discard pile
 
@@ -688,7 +693,7 @@ export class GameController extends EventEmitter {
             // Player won with this tile
             this.gameResult.mahjong = true;
             this.gameResult.winner = claimingPlayerIndex;
-            await this.endGame("mahjong");
+            this.endGame("mahjong");
             return;
         }
 
@@ -703,7 +708,7 @@ export class GameController extends EventEmitter {
 
         // Expose tiles
         this.setState(STATE.LOOP_EXPOSE_TILES);
-        await this.exposeTiles(claimingPlayerIndex, claimType, tile);
+        this.exposeTiles(claimingPlayerIndex, claimType, tile);
 
         // Claiming player becomes current player
         this.currentPlayer = claimingPlayerIndex;
@@ -719,7 +724,7 @@ export class GameController extends EventEmitter {
      * @param {string} exposureType
      * @param {TileData} claimedTile
      */
-    async exposeTiles(playerIndex, exposureType, claimedTile) {
+    exposeTiles(playerIndex, exposureType, claimedTile) {
         const player = this.players[playerIndex];
 
         // Find matching tiles in hand
@@ -802,7 +807,7 @@ export class GameController extends EventEmitter {
      * End the game
      * @param {string} reason - 'mahjong', 'wall_game', 'quit'
      */
-    async endGame(reason) {
+    endGame(reason) {
         this.setState(STATE.END);
 
         this.emit("GAME_ENDED", {
