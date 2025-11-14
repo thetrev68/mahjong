@@ -38,6 +38,9 @@ export class PhaserAdapter {
         /** @type {string|null} Current prompt type */
         this.currentPromptType = null;
 
+        /** @type {number} Track tiles removed from wall (for counter) */
+        this.tilesRemovedFromWall = 0;
+
         this.setupEventListeners();
     }
 
@@ -290,9 +293,14 @@ export class PhaserAdapter {
             }
         });
 
-        // Update wall counter
+        // Track that one tile was removed from the wall
+        this.tilesRemovedFromWall++;
+
+        // Update wall counter (subtract removed tiles from initial count)
         if (this.scene.updateWallTileCounter) {
-            this.scene.updateWallTileCounter(this.table.wall.getCount());
+            const initialTileCount = this.gameController.settings.useBlankTiles ? 160 : 152;
+            const remainingTiles = initialTileCount - this.tilesRemovedFromWall;
+            this.scene.updateWallTileCounter(remainingTiles);
         }
 
         if (playerIndex === PLAYER.BOTTOM) {
@@ -308,31 +316,14 @@ export class PhaserAdapter {
         const phaserTile = this.findPhaserTile(tileDataObj);
 
         if (phaserTile) {
-            // Store original position
-            const startX = phaserTile.sprite.x;
-            const startY = phaserTile.sprite.y;
-
             // Remove from hand (uses removeHidden for hidden tiles)
             player.hand.removeHidden(phaserTile);
 
-            // Add to discard pile (this sets final position)
-            this.table.discards.add(phaserTile, player.playerInfo);
+            // Add to discard pile
+            this.table.discards.insertDiscard(phaserTile);
 
-            // Get target position from discard pile
-            const targetX = phaserTile.sprite.x;
-            const targetY = phaserTile.sprite.y;
-
-            // Reset to start position for animation
-            phaserTile.sprite.setPosition(startX, startY);
-
-            // Animate discard (move to discard pile)
-            this.scene.tweens.add({
-                targets: phaserTile.sprite,
-                x: targetX,
-                y: targetY,
-                duration: 250,
-                ease: "Power2"
-            });
+            // Show discards (updates layout)
+            this.table.discards.showDiscards();
 
             printMessage(`${player.playerInfo.name} discarded ${tileDataObj.getText()}`);
         }
