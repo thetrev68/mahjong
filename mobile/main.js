@@ -268,6 +268,58 @@ async function initializeGame() {
             } else {
                 data.callback(false);
             }
+        } else if (data.promptType === "CHARLESTON_PASS") {
+            // Charleston phase: select 3 tiles to pass
+            const {direction = "?", requiredCount = 3} = data.options || {};
+            const player = gameController.players[0];
+            const hand = player.hand.tiles;
+            const handText = hand.map((tile, index) => `${index}: ${tile.getText()}`).join("\n");
+            const msg = `Charleston Pass [${direction}]:\nSelect ${requiredCount} tiles to pass (comma-separated indices):\n${handText}\nExample: 0,2,5`;
+            const choice = window.prompt(msg);
+
+            if (choice) {
+                const indices = choice.split(",").map(x => parseInt(x.trim(), 10)).filter(i => !isNaN(i));
+                const selectedTiles = indices
+                    .filter(i => i >= 0 && i < hand.length)
+                    .map(i => hand[i]);
+
+                if (selectedTiles.length === requiredCount) {
+                    statusDisplay.textContent = `Passing ${requiredCount} tiles ${direction}...`;
+                    data.callback(selectedTiles);
+                } else {
+                    statusDisplay.textContent = `Invalid selection (need exactly ${requiredCount} tiles)`;
+                    // Fallback: first requiredCount tiles
+                    data.callback(hand.slice(0, requiredCount));
+                }
+            } else {
+                // Cancelled, return first requiredCount tiles
+                statusDisplay.textContent = "Charleston pass cancelled, using first tiles...";
+                data.callback(hand.slice(0, requiredCount));
+            }
+        } else if (data.promptType === "CHARLESTON_CONTINUE") {
+            // Vote on continuing to Charleston phase 2
+            const {question = "Continue to Charleston phase 2?"} = data.options || {};
+            const choice = window.prompt(`${question} (Yes/No)`);
+            if (choice && (choice.toLowerCase() === "yes" || choice.toLowerCase() === "y")) {
+                statusDisplay.textContent = "Voting YES to continue...";
+                data.callback("Yes");
+            } else {
+                statusDisplay.textContent = "Voting NO to end...";
+                data.callback("No");
+            }
+        } else if (data.promptType === "COURTESY_VOTE") {
+            // Vote on courtesy pass tile count (0-3)
+            const {question = "Courtesy Pass: How many tiles to exchange?", options = ["0", "1", "2", "3"]} = data.options || {};
+            const optionText = options.join("/");
+            const choice = window.prompt(`${question}\nOptions: ${optionText}`);
+            const vote = parseInt(choice, 10);
+            if (!isNaN(vote) && vote >= 0 && vote <= 3) {
+                statusDisplay.textContent = `Voted for ${vote} tiles...`;
+                data.callback(String(vote));
+            } else {
+                statusDisplay.textContent = "Invalid vote, defaulting to 0...";
+                data.callback("0");
+            }
         } else {
             // For other prompts, auto-pass or handle as needed
             console.log("Unhandled prompt type:", data.promptType);
