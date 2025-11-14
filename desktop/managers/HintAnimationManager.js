@@ -10,7 +10,7 @@
 
 import {debugPrint, printHint} from "../../utils.js";
 import {PLAYER, SUIT, VNUMBER} from "../../constants.js";
-import {Tile} from "../../gameObjects.js";
+import {TileData} from "../../core/models/TileData.js";
 import { renderPatternVariation } from "../../tileDisplayUtils.js";
 
 export class HintAnimationManager {
@@ -130,7 +130,7 @@ export class HintAnimationManager {
 
         // Add invalid tile if hand has 13 tiles, as the engine expects 14
         if (hand.getLength() === 13) {
-            const invalidTile = new Tile(this.scene, SUIT.INVALID, VNUMBER.INVALID);
+            const invalidTile = new TileData(SUIT.INVALID, VNUMBER.INVALID);
             hand.insertHidden(invalidTile);
         }
 
@@ -174,7 +174,7 @@ export class HintAnimationManager {
         const result = this.getRecommendations();
         const hand = this.table.players[PLAYER.BOTTOM].hand.dupHand();
         if (hand.getLength() === 13) {
-            hand.insertHidden(new Tile(this.scene, SUIT.INVALID, VNUMBER.INVALID));
+            hand.insertHidden(new TileData(SUIT.INVALID, VNUMBER.INVALID));
         }
         const rankCardHands = this.card.rankHandArray14(hand);
         this.card.sortHandRankArray(rankCardHands);
@@ -191,7 +191,7 @@ export class HintAnimationManager {
         const result = this.getRecommendations();
         const hand = this.table.players[PLAYER.BOTTOM].hand.dupHand();
         if (hand.getLength() === 13) {
-            hand.insertHidden(new Tile(this.scene, SUIT.INVALID, VNUMBER.INVALID));
+            hand.insertHidden(new TileData(SUIT.INVALID, VNUMBER.INVALID));
         }
         const rankCardHands = this.card.rankHandArray14(hand);
         this.card.sortHandRankArray(rankCardHands);
