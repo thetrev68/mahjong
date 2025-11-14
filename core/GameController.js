@@ -180,6 +180,11 @@ export class GameController extends EventEmitter {
         // Store reference to shared wall - will be used via pop() directly
         this.wall = this.sharedTable.wall;
 
+        // Emit event so PhaserAdapter can initialize its tile map
+        this.emit("WALL_CREATED", {
+            tileCount: this.wall.getCount()
+        });
+
         this.emit("MESSAGE", {
             text: `Wall created with ${this.wall.getCount()} tiles`,
             type: "info"
@@ -208,8 +213,14 @@ export class GameController extends EventEmitter {
                 this.players[playerIndex].hand.addTile(tileDataObject);
 
                 // Emit rich event with animation parameters
-                // Pass the Phaser Tile object directly so PhaserAdapter doesn't need to reconstruct it
-                const event = GameEvents.createTileDrawnEvent(playerIndex, phaserTile, {
+                // Pass complete TileData including index
+                const tileData = {
+                    suit: phaserTile.suit,
+                    number: phaserTile.number,
+                    index: phaserTile.index
+                };
+
+                const event = GameEvents.createTileDrawnEvent(playerIndex, tileData, {
                     type: "deal-slide",
                     duration: 200,  // Fast dealing animation
                     easing: "Quad.easeOut"
@@ -561,8 +572,13 @@ export class GameController extends EventEmitter {
         player.hand.addTile(tileDataObject);
 
         // Emit rich tile drawn event with animation
-        // Pass the Phaser Tile object directly so PhaserAdapter doesn't need to reconstruct it
-        const drawnEvent = GameEvents.createTileDrawnEvent(this.currentPlayer, phaserTile, {
+        // Pass complete TileData including index
+        const tileEventData = {
+            suit: phaserTile.suit,
+            number: phaserTile.number,
+            index: phaserTile.index
+        };
+        const drawnEvent = GameEvents.createTileDrawnEvent(this.currentPlayer, tileEventData, {
             type: "wall-draw",
             duration: 300,
             easing: "Quad.easeOut"
@@ -602,8 +618,13 @@ export class GameController extends EventEmitter {
         this.discards.push(tileToDiscard);
 
         // Emit rich tile discarded event with animation
-        // Pass the Phaser Tile object directly so PhaserAdapter doesn't need to reconstruct it
-        const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, tileToDiscard, {
+        // Pass complete TileData including index
+        const tileData = {
+            suit: tileToDiscard.suit,
+            number: tileToDiscard.number,
+            index: tileToDiscard.index
+        };
+        const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, tileData, {
             type: "discard-slide",
             duration: 300,
             easing: "Power2.easeInOut"

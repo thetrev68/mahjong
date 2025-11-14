@@ -54,6 +54,20 @@ export class PhaserAdapter {
     }
 
     /**
+     * Initialize tile map with all tiles from wall
+     * Must be called after wall is created and shuffled
+     */
+    initializeTileMap() {
+        if (this.table && this.table.wall && this.table.wall.tileArray) {
+            for (const tile of this.table.wall.tileArray) {
+                if (tile.index !== undefined && tile.index >= 0) {
+                    this.tileMap.set(tile.index, tile);
+                }
+            }
+        }
+    }
+
+    /**
      * Subscribe to all GameController events
      */
     setupEventListeners() {
@@ -63,6 +77,11 @@ export class PhaserAdapter {
         gc.on("STATE_CHANGED", (data) => this.onStateChanged(data));
         gc.on("GAME_STARTED", (data) => this.onGameStarted(data));
         gc.on("GAME_ENDED", (data) => this.onGameEnded(data));
+
+        // Wall setup event
+        gc.on("WALL_CREATED", (data) => {
+            this.initializeTileMap();
+        });
 
         // Tile events
         gc.on("TILES_DEALT", (data) => this.onTilesDealt(data));
@@ -292,22 +311,23 @@ export class PhaserAdapter {
      * Handle tile drawn from wall
      */
     onTileDrawn(data) {
-        const {player: playerIndex, tile} = data;
+        const {player: playerIndex, tile: tileData} = data;
         const player = this.table.players[playerIndex];
 
-        // Get the Phaser Tile object (passed directly from GameController)
-        let phaserTile;
-        if (tile && tile.sprite) {
-            // Tile is a Phaser Tile object passed directly
-            phaserTile = tile;
-            // Store in map if not already there
-            if (tile.index !== undefined && !this.tileMap.has(tile.index)) {
-                this.tileMap.set(tile.index, tile);
-            }
-        } else {
-            // Fallback: reconstruct from TileData (shouldn't normally happen)
-            const tileDataObj = TileData.fromJSON(tile);
-            phaserTile = this.createPhaserTile(tileDataObj);
+        // Convert TileData to Phaser Tile using the pre-populated tile map
+        const tileDataObj = TileData.fromJSON(tileData);
+
+        // Look up the Phaser Tile object by index
+        let phaserTile = this.tileMap.get(tileDataObj.index);
+
+        if (!phaserTile) {
+            // Fallback: try to find in wall (shouldn't normally happen if tileMap initialized correctly)
+            phaserTile = this.findTileInWall(tileDataObj.index);
+        }
+
+        if (!phaserTile) {
+            console.error(`Could not find Phaser Tile for index ${tileDataObj.index}. Tile map has ${this.tileMap.size} tiles.`);
+            return;
         }
 
         // Position tile at wall location initially
@@ -354,44 +374,37 @@ export class PhaserAdapter {
      * Handle tile discarded
      */
     onTileDiscarded(data) {
-        const {player: playerIndex, tile} = data;
+        const {player: playerIndex, tile: tileData} = data;
         const player = this.table.players[playerIndex];
 
-        // Get the Phaser Tile object (passed directly from GameController)
-        let phaserTile;
-        if (tile && tile.sprite) {
-            // Tile is a Phaser Tile object passed directly
-            phaserTile = tile;
-            // Store in map if not already there
-            if (tile.index !== undefined && !this.tileMap.has(tile.index)) {
-                this.tileMap.set(tile.index, tile);
-            }
-        } else {
-            // Fallback: reconstruct from TileData
-            const tileDataObj = TileData.fromJSON(tile);
-            phaserTile = this.findPhaserTile(tileDataObj);
+        // Convert TileData to Phaser Tile using the pre-populated tile map
+        const tileDataObj = TileData.fromJSON(tileData);
+
+        // Look up the Phaser Tile object by index
+        let phaserTile = this.tileMap.get(tileDataObj.index);
+
+        if (!phaserTile) {
+            console.error(`Could not find Phaser Tile for index ${tileDataObj.index}`);
+            return;
         }
 
-        if (phaserTile) {
-            // Remove from hand
-            player.hand.removeHidden(phaserTile);
+        // Remove from hand
+        player.hand.removeHidden(phaserTile);
 
-            // Add to discard pile
-            this.table.discards.insertDiscard(phaserTile);
+        // Add to discard pile
+        this.table.discards.insertDiscard(phaserTile);
 
-            // Phase 3.5: Set discard tile for exposure validation (human player)
-            if (playerIndex === PLAYER.BOTTOM) {
-                const humanHand = this.table.players[PLAYER.BOTTOM].hand;
-                humanHand.setDiscardTile(phaserTile);
-            }
-
-            // Show discards (updates layout)
-            this.table.discards.showDiscards();
-
-            const playerName = this.getPlayerName(playerIndex);
-            const tileDataObj = TileData.fromPhaserTile(phaserTile);
-            printMessage(`${playerName} discarded ${tileDataObj.getText()}`);
+        // Phase 3.5: Set discard tile for exposure validation (human player)
+        if (playerIndex === PLAYER.BOTTOM) {
+            const humanHand = this.table.players[PLAYER.BOTTOM].hand;
+            humanHand.setDiscardTile(phaserTile);
         }
+
+        // Show discards (updates layout)
+        this.table.discards.showDiscards();
+
+        const playerName = this.getPlayerName(playerIndex);
+        printMessage(`${playerName} discarded ${tileDataObj.getText()}`);
     }
 
     /**
