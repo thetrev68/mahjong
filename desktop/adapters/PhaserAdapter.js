@@ -630,6 +630,10 @@ export class PhaserAdapter {
                 this.handleCourtesyPassPrompt(options, callback);
                 break;
 
+            case "SELECT_TILES":
+                this.handleSelectTilesPrompt(options, callback);
+                break;
+
             default:
                 console.warn(`Unknown prompt type: ${promptType}`);
                 if (callback) callback(null);
@@ -716,6 +720,42 @@ export class PhaserAdapter {
 
         this.dialogManager.showCourtesyPassDialog(maxTiles, (result) => {
             if (callback) callback(result);
+        });
+    }
+
+    /**
+     * Handle tile selection prompt
+     * Used for courtesy pass phase and other contexts requiring flexible tile selection
+     *
+     * @param {Object} options - Selection options
+     * @param {number} options.minTiles - Minimum number of tiles to select
+     * @param {number} options.maxTiles - Maximum number of tiles to select
+     * @param {Function} callback - Called with array of selected TileData objects
+     */
+    handleSelectTilesPrompt(options, callback) {
+        const {minTiles = 1, maxTiles = 3} = options || {};
+        const player = this.table.players[PLAYER.BOTTOM];
+
+        printInfo(`Select ${minTiles}–${maxTiles} tiles`);
+
+        this.dialogManager.showSelectTilesDialog(minTiles, maxTiles, (result) => {
+            if (result === "select" && callback) {
+                // Get selected tiles from hand
+                const selection = player.hand.hiddenTileSet.getSelection();
+                if (selection.length >= minTiles && selection.length <= maxTiles) {
+                    const tileDatas = selection.map(tile => TileData.fromPhaserTile(tile));
+                    player.hand.hiddenTileSet.resetSelection();
+                    callback(tileDatas);
+                } else {
+                    // Invalid selection, cancel
+                    player.hand.hiddenTileSet.resetSelection();
+                    if (callback) callback([]);
+                }
+            } else {
+                // Cancelled, return empty array
+                player.hand.hiddenTileSet.resetSelection();
+                if (callback) callback([]);
+            }
         });
     }
 

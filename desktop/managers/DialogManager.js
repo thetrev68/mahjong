@@ -111,6 +111,34 @@ export class DialogManager {
     }
 
     /**
+     * Show tile selection dialog
+     * Allows player to select a variable number of tiles (min to max)
+     *
+     * @param {number} minTiles - Minimum tiles to select
+     * @param {number} maxTiles - Maximum tiles to select
+     * @param {Function} callback - Called with "select" or null
+     * @returns {Promise}
+     */
+    showSelectTilesDialog(minTiles = 1, maxTiles = 3, callback) {
+        return new Promise((resolve) => {
+            this.pendingCallback = callback;
+            const options = [
+                {label: "Cancel", value: null},
+                {label: "Confirm Selection", value: "select"}
+            ];
+
+            this.showModalDialog(
+                `Select ${minTiles}–${maxTiles} tiles`,
+                options,
+                (result) => {
+                    if (callback) callback(result);
+                    resolve(result);
+                }
+            );
+        });
+    }
+
+    /**
      * Show exposure selection dialog
      * Allows player to choose which exposure type (Pung, Kong, Quint)
      *
