@@ -1063,7 +1063,10 @@ export class Hand {
                             let bSelectOk = true;
 
                             if (this.validationMode === "expose") {
-                                if (tile.suit !== SUIT.JOKER &&
+                                if (!tileSet.discardTile) {
+                                    bSelectOk = false;
+                                    this.displayErrorText("No discard tile set for exposure validation");
+                                } else if (tile.suit !== SUIT.JOKER &&
                                     (tile.suit !== tileSet.discardTile.suit || tile.number !== tileSet.discardTile.number)) {
                                     bSelectOk = false;
                                     this.displayErrorText(" Select same tile or joker to form pung/kong/quint ");
