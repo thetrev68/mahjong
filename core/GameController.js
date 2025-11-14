@@ -32,6 +32,7 @@
 import {EventEmitter} from "./events/EventEmitter.js";
 import {STATE, PLAYER, PLAYER_OPTION} from "../constants.js";
 import {PlayerData} from "./models/PlayerData.js";
+import {TileData} from "./models/TileData.js";
 import {ExposureData} from "./models/HandData.js";
 import * as GameEvents from "./events/GameEvents.js";
 
@@ -202,8 +203,9 @@ export class GameController extends EventEmitter {
                     throw new Error("Wall empty during dealing!");
                 }
 
-                // Add Phaser Tile directly to player hand
-                this.players[playerIndex].hand.addTile(phaserTile);
+                // Convert Phaser Tile to TileData and add to player hand
+                const tileDataObject = TileData.fromPhaserTile(phaserTile);
+                this.players[playerIndex].hand.addTile(tileDataObject);
 
                 // Emit rich event with animation parameters
                 const tileData = {
@@ -558,14 +560,16 @@ export class GameController extends EventEmitter {
         const phaserTile = this.wall.remove();
         const player = this.players[this.currentPlayer];
 
-        player.hand.addTile(phaserTile);
+        // Convert Phaser Tile to TileData
+        const tileDataObject = TileData.fromPhaserTile(phaserTile);
+        player.hand.addTile(tileDataObject);
 
         // Emit rich tile drawn event with animation
-        const tileData = {
+        const tileEventData = {
             suit: phaserTile.suit,
             number: phaserTile.number
         };
-        const drawnEvent = GameEvents.createTileDrawnEvent(this.currentPlayer, tileData, {
+        const drawnEvent = GameEvents.createTileDrawnEvent(this.currentPlayer, tileEventData, {
             type: "wall-draw",
             duration: 300,
             easing: "Quad.easeOut"

@@ -8,6 +8,8 @@ import {PhaserAdapter} from "./desktop/adapters/PhaserAdapter.js";
 import { HintAnimationManager } from "./desktop/managers/HintAnimationManager.js";
 // import { debugPrint } from "./utils.js";
 import { WINDOW_WIDTH, getTotalTileCount } from "./constants.js";
+import {AIEngine} from "./core/AIEngine.js";
+import {Card} from "./card/card.js";
 
 import tilesPng from "./assets/tiles.png";
 import tilesJson from "./assets/tiles.json";
@@ -56,20 +58,34 @@ class GameScene extends Phaser.Scene {
         this.scale.on("resize", this.resize, this);
 
         // Create audio manager
-        this.audioManager = new AudioManager(this, window.settingsManager);
+        this.audioManager = new AudioManager(this, window.settingsManager || {});
 
         // Create game objects
         this.gTable = new Table(this);
+
+        // Create AI engine and card validator
+        const aiEngine = new AIEngine();
+        const card = new Card();
+        let year = 2025;  // Default year
+        if (window.settingsManager && window.settingsManager.getCardYear) {
+            const yearValue = window.settingsManager.getCardYear();
+            if (yearValue) {
+                year = parseInt(yearValue);
+            }
+        }
+        await card.init(year);
 
         // Phase 2A: Create GameController + PhaserAdapter
         this.gameController = new GameController();
         await this.gameController.init({
             sharedTable: this.gTable,  // Share the table with GameController
+            aiEngine: aiEngine,
+            cardValidator: card,
             settings: {
-                year: window.settingsManager.getCardYear(),
-                difficulty: window.settingsManager.getDifficulty(),
-                useBlankTiles: window.settingsManager.getUseBlankTiles(),
-                skipCharleston: window.settingsManager.getSetting("skipCharleston", false)
+                year: year,
+                difficulty: (window.settingsManager && window.settingsManager.getDifficulty?.()) || "medium",
+                useBlankTiles: (window.settingsManager && window.settingsManager.getUseBlankTiles?.()) || false,
+                skipCharleston: (window.settingsManager && window.settingsManager.getSetting?.("skipCharleston", false)) || false
             }
         });
 
