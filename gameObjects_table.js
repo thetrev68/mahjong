@@ -62,9 +62,9 @@ const gPlayerInfo = [
 
 
 export class Table {
-    constructor(scene, gameLogic) {
+    constructor(scene) {
         this.scene = scene;
-        this.gameLogic = gameLogic;
+        this.gameLogic = null;  // Will be set after construction
         this.wall = new Wall(scene);
         this.discards = new Discards();
 
@@ -76,7 +76,7 @@ export class Table {
         // Create players
         this.players = [];
         for (let i = 0; i < 4; i++) {
-            this.players[i] = new Player(scene, gameLogic, gPlayerInfo[i]);
+            this.players[i] = new Player(scene, gPlayerInfo[i], this);
         }
 
         this.player02CourtesyVote = 0;
@@ -195,7 +195,9 @@ export class Table {
         this.finalizeInitialHands();
 
         // Update wall counter after dealing
-        this.gameLogic.scene.updateWallTileCounter(this.wall.getCount());
+        if (this.scene.updateWallTileCounter) {
+            this.scene.updateWallTileCounter(this.wall.getCount());
+        }
 
     }
 

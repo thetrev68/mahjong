@@ -2,44 +2,53 @@
  * PhaserAdapter - Bridges GameController (platform-agnostic) to Phaser (desktop-specific)
  *
  * This adapter listens to GameController events and translates them into Phaser sprite updates.
- * It also handles UI prompts by interfacing with the existing desktop button system.
+ * It also handles UI prompts by interfacing with the managers and dialogs.
  *
  * Architecture:
- * GameController (core/) emits events → PhaserAdapter listens → Updates Phaser objects (gameObjects_*.js)
+ * GameController (core/) emits events → PhaserAdapter listens → Updates Phaser objects via Managers
  *
- * During Phase 2, this adapter keeps desktop working while mobile is built.
- * Eventually, GameController will fully replace GameLogic, and this becomes the permanent desktop bridge.
+ * Phase 2: Complete implementation using:
+ * - AnimationLibrary for all animations
+ * - TileManager for sprite management
+ * - ButtonManager for button state
+ * - DialogManager for prompts
  */
 
 import {TileData} from "../../core/models/TileData.js";
 import {Tile} from "../../gameObjects.js";
 import {PLAYER, SUIT} from "../../constants.js";
 import {printMessage, printInfo} from "../../utils.js";
+import {TileManager} from "../managers/TileManager.js";
+import {ButtonManager} from "../managers/ButtonManager.js";
+import {DialogManager} from "../managers/DialogManager.js";
 
 export class PhaserAdapter {
     /**
      * @param {GameController} gameController - Core game controller
      * @param {GameScene} scene - Phaser scene
      * @param {Table} table - Existing Phaser table object
-     * @param {GameLogic} gameLogic - Existing game logic (for UI functions)
+     * @param {GameLogic} gameLogic - Existing game logic (for data access only)
      */
-    constructor(gameController, scene, table, gameLogic) {
+    /**
+     * @param {GameController} gameController - Core game controller
+     * @param {GameScene} scene - Phaser scene
+     * @param {Table} table - Existing Phaser table object
+     */
+    constructor(gameController, scene, table) {
         this.gameController = gameController;
         this.scene = scene;
         this.table = table;
-        this.gameLogic = gameLogic;  // Keep for updateUI(), button functions
 
         /** @type {Map<number, Tile>} Map tile index → Phaser Tile object */
         this.tileMap = new Map();
 
-        /** @type {Function|null} Pending UI prompt callback */
-        this.pendingPromptCallback = null;
-
-        /** @type {string|null} Current prompt type */
-        this.currentPromptType = null;
-
         /** @type {number} Track tiles removed from wall (for counter) */
         this.tilesRemovedFromWall = 0;
+
+        // Initialize Phase 2 managers
+        this.tileManager = new TileManager(scene, table);
+        this.buttonManager = new ButtonManager(scene, gameController);
+        this.dialogManager = new DialogManager(scene);
 
         this.setupEventListeners();
     }
@@ -190,43 +199,59 @@ export class PhaserAdapter {
     // EVENT HANDLERS
     // ============================================================================
 
+    /**
+     * Handle state changes - update button visibility
+     */
     onStateChanged(data) {
         const {oldState, newState} = data;
         console.log(`State: ${oldState} → ${newState}`);
 
-        // Phase 2B: Update state but don't call updateUI() - we manage buttons directly now
-        this.gameLogic.state = newState;
-        // this.gameLogic.updateUI(); // Disabled in Phase 2B
+        // Update button visibility and state based on new game state
+        this.buttonManager.updateForState(newState);
 
-        // Manage button state based on new state
-        this.updateButtonState(newState);
+        // Phase 3.5: Set validation mode on player hands based on state
+        const humanHand = this.table.players[0].hand; // PLAYER.BOTTOM
+        switch (newState) {
+        case "CHARLESTON1":
+        case "CHARLESTON2":
+            humanHand.setValidationMode("charleston");
+            break;
+        case "COURTESY":
+            humanHand.setValidationMode("courtesy");
+            break;
+        case "LOOP_CHOOSE_DISCARD":
+            humanHand.setValidationMode("play");
+            break;
+        case "LOOP_EXPOSE_TILES":
+            humanHand.setValidationMode("expose");
+            break;
+        default:
+            humanHand.setValidationMode(null);
+        }
     }
 
     /**
-     * Update button visibility/state based on game state
-     * Phase 2B: Replaces GameLogic.updateUI() for button management
+     * Handle game start
      */
-    updateButtonState() {
-        // Hide all buttons by default
-        this.hideButtons();
-
-        // Show specific buttons based on state
-        // This is handled by UI_PROMPT events, so we just ensure cleanup here
-    }
-
     onGameStarted() {
         printMessage("Game started!");
 
         // Reset Phaser table
         this.table.reset();
 
-        // Hide start button (already done in GameScene.js)
+        // Hide start button
         const startButton = document.getElementById("start");
         if (startButton) {
             startButton.style.display = "none";
         }
+
+        // Reset tile counter
+        this.tilesRemovedFromWall = 0;
     }
 
+    /**
+     * Handle game end
+     */
     onGameEnded(data) {
         const {reason, winner, mahjong} = data;
 
@@ -249,18 +274,23 @@ export class PhaserAdapter {
         }
     }
 
-    onTilesDealt(data) {
-        // Update wall counter
-        const totalDealt = data.players.reduce((sum, p) => sum + p.tileCount, 0);
-        const remainingInWall = this.table.wall.getCount() - totalDealt;
-
+    /**
+     * Handle initial tiles dealt
+     */
+    onTilesDealt() {
+        // Tiles are already dealt at this point - this is just a notification
+        // The actual animation was triggered by the sequence of TILE_DRAWN events
+        // Update wall counter to reflect remaining tiles
         if (this.scene.updateWallTileCounter) {
+            const totalTileCount = this.gameController.settings.useBlankTiles ? 160 : 152;
+            const remainingInWall = totalTileCount - this.tilesRemovedFromWall;
             this.scene.updateWallTileCounter(remainingInWall);
         }
-
-        printMessage("Tiles dealt to all players");
     }
 
+    /**
+     * Handle tile drawn from wall
+     */
     onTileDrawn(data) {
         const {player: playerIndex, tile: tileData} = data;
         const player = this.table.players[playerIndex];
@@ -308,6 +338,9 @@ export class PhaserAdapter {
         }
     }
 
+    /**
+     * Handle tile discarded
+     */
     onTileDiscarded(data) {
         const {player: playerIndex, tile: tileData} = data;
         const player = this.table.players[playerIndex];
@@ -316,11 +349,17 @@ export class PhaserAdapter {
         const phaserTile = this.findPhaserTile(tileDataObj);
 
         if (phaserTile) {
-            // Remove from hand (uses removeHidden for hidden tiles)
+            // Remove from hand
             player.hand.removeHidden(phaserTile);
 
             // Add to discard pile
             this.table.discards.insertDiscard(phaserTile);
+
+            // Phase 3.5: Set discard tile for exposure validation (human player)
+            if (playerIndex === PLAYER.BOTTOM) {
+                const humanHand = this.table.players[PLAYER.BOTTOM].hand;
+                humanHand.setDiscardTile(phaserTile);
+            }
 
             // Show discards (updates layout)
             this.table.discards.showDiscards();
@@ -329,6 +368,9 @@ export class PhaserAdapter {
         }
     }
 
+    /**
+     * Handle discard claimed
+     */
     onDiscardClaimed(data) {
         const {player: claimingPlayer, tile: tileData, claimType} = data;
 
@@ -336,6 +378,12 @@ export class PhaserAdapter {
         printMessage(`${this.table.players[claimingPlayer].playerInfo.name} claimed ${tileDataObj.getText()} for ${claimType}`);
     }
 
+    /**
+     * Handle tiles exposed
+     */
+    /**
+     * Handle tiles exposed
+     */
     onTilesExposed(data) {
         const {player: playerIndex, exposureType, tiles: tileDatas} = data;
         const player = this.table.players[playerIndex];
@@ -344,7 +392,7 @@ export class PhaserAdapter {
         const phaserTiles = tileDatas.map(td => this.findPhaserTile(TileData.fromJSON(td)));
 
         // Create exposed tile set and add to player's hand
-        const exposedTileSet = new window.TileSet(this.scene, this.gameLogic, false);
+        const exposedTileSet = new window.TileSet(this.scene, this.table, false);
         phaserTiles.forEach(tile => {
             // Remove from hidden tiles if present
             player.hand.hiddenTileSet.remove(tile);
@@ -361,10 +409,16 @@ export class PhaserAdapter {
         printMessage(`${player.playerInfo.name} exposed ${exposureType}: ${phaserTiles.length} tiles`);
     }
 
+    /**
+     * Handle joker swapped
+     */
     onJokerSwapped(data) {
         this.handleJokerSwap(data);
     }
 
+    /**
+     * Process joker swap logic
+     */
     handleJokerSwap(data = {}) {
         const {
             player,
@@ -430,6 +484,9 @@ export class PhaserAdapter {
         }
     }
 
+    /**
+     * Find joker tile in exposure set
+     */
     findJokerTile(tileSet, jokerIndex) {
         if (!tileSet || !Array.isArray(tileSet.tileArray)) {
             return null;
@@ -445,18 +502,27 @@ export class PhaserAdapter {
         return tileSet.tileArray.find(tile => tile.suit === SUIT.JOKER) || null;
     }
 
+    /**
+     * Handle hand updated
+     */
+    /**
+     * Handle hand updated
+     */
     onHandUpdated(data) {
         const {player: playerIndex, hand: handData} = data;
 
-        // For now, just log - full hand sync will happen in Phase 2B
+        // For now, just log - full hand sync will happen from tile events
         console.log(`Hand updated for player ${playerIndex}: ${handData.tiles.length} hidden, ${handData.exposures.length} exposed`);
 
         // Update hint if human player
-        if (playerIndex === PLAYER.BOTTOM && this.gameLogic.hintAnimationManager) {
-            this.gameLogic.hintAnimationManager.updateHintsForNewTiles();
+        if (playerIndex === PLAYER.BOTTOM && this.scene.hintAnimationManager) {
+            this.scene.hintAnimationManager.updateHintsForNewTiles();
         }
     }
 
+    /**
+     * Handle turn changed
+     */
     onTurnChanged(data) {
         const {currentPlayer} = data;
 
@@ -466,11 +532,17 @@ export class PhaserAdapter {
         printMessage(`${currentPlayerObj.playerInfo.name}'s turn`);
     }
 
+    /**
+     * Handle Charleston phase started
+     */
     onCharlestonPhase(data) {
         const {phase, passCount, direction} = data;
         printMessage(`Charleston Phase ${phase}, Pass ${passCount}: Pass ${direction}`);
     }
 
+    /**
+     * Handle Charleston pass executed
+     */
     onCharlestonPass(data) {
         const {player: playerIndex, direction} = data;
         const player = this.table.players[playerIndex];
@@ -478,6 +550,9 @@ export class PhaserAdapter {
         printMessage(`${player.playerInfo.name} passed 3 tiles ${direction}`);
     }
 
+    /**
+     * Handle courtesy vote
+     */
     onCourtesyVote(data) {
         const {player: playerIndex, vote} = data;
         const player = this.table.players[playerIndex];
@@ -485,6 +560,9 @@ export class PhaserAdapter {
         printMessage(`${player.playerInfo.name} voted ${vote ? "YES" : "NO"} for courtesy pass`);
     }
 
+    /**
+     * Handle courtesy pass
+     */
     onCourtesyPass(data) {
         const {fromPlayer, toPlayer, tile: tileData} = data;
 
@@ -492,6 +570,9 @@ export class PhaserAdapter {
         printMessage(`Courtesy pass: ${this.table.players[fromPlayer].playerInfo.name} → ${this.table.players[toPlayer].playerInfo.name} (${tileDataObj.getText()})`);
     }
 
+    /**
+     * Handle message from game
+     */
     onMessage(data) {
         const {text, type} = data;
 
@@ -499,6 +580,7 @@ export class PhaserAdapter {
             printInfo(text);
         } else if (type === "error") {
             printMessage(`ERROR: ${text}`);
+            this.dialogManager.showError(text);
         } else if (type === "hint") {
             // Hint messages (for hint panel)
             const hintContent = document.getElementById("hint-content");
@@ -518,259 +600,123 @@ export class PhaserAdapter {
 
     /**
      * Handle UI prompts from GameController
-     * Maps to existing desktop button system
+     * This is called when the game needs user input
      */
     onUIPrompt(data) {
         const {promptType, options, callback} = data;
 
-        this.pendingPromptCallback = callback;
-        this.currentPromptType = promptType;
+        switch (promptType) {
+            case "CHOOSE_DISCARD":
+                this.handleDiscardPrompt(callback);
+                break;
 
-        // Make action pane visible when showing prompts
-        const infoTextarea = document.getElementById("info");
-        const buttonDiv = document.getElementById("buttondiv");
-        if (infoTextarea) infoTextarea.style.visibility = "visible";
-        if (buttonDiv) buttonDiv.style.visibility = "visible";
+            case "CLAIM_DISCARD":
+                this.handleClaimPrompt(options, callback);
+                break;
 
-        if (promptType === "CHOOSE_DISCARD") {
-            this.setupDiscardPrompt(options);
-        } else if (promptType === "CLAIM_DISCARD") {
-            this.setupClaimPrompt(options);
-        } else if (promptType === "CHARLESTON_PASS") {
-            this.setupCharlestonPassPrompt(options);
-        } else if (promptType === "CHARLESTON_CONTINUE") {
-            this.setupCharlestonContinuePrompt(options);
-        } else if (promptType === "COURTESY_VOTE") {
-            this.setupCourtesyVotePrompt(options);
+            case "CHARLESTON_PASS":
+                this.handleCharlestonPassPrompt(options, callback);
+                break;
+
+            case "CHARLESTON_CONTINUE":
+                this.handleCharlestonContinuePrompt(callback);
+                break;
+
+            case "COURTESY_VOTE":
+                this.handleCourtesyVotePrompt(callback);
+                break;
+
+            case "COURTESY_PASS":
+                this.handleCourtesyPassPrompt(options, callback);
+                break;
+
+            default:
+                console.warn(`Unknown prompt type: ${promptType}`);
+                if (callback) callback(null);
         }
     }
 
     /**
-     * Setup discard tile selection (human player)
-     * Phase 2B: Enable tile selection with callback
+     * Handle discard tile selection prompt
      */
-    setupDiscardPrompt() {
+    handleDiscardPrompt(callback) {
         const player = this.table.players[PLAYER.BOTTOM];
 
         printInfo("Select a tile to discard");
 
         // Enable tile selection with callback
         player.hand.enableTileSelection((selectedTile) => {
-            // User selected a tile to discard
-            if (this.pendingPromptCallback) {
+            if (callback) {
                 // Convert Phaser Tile → TileData
                 const tileData = TileData.fromPhaserTile(selectedTile);
-
-                // Call the callback with the selected tile
-                this.pendingPromptCallback(tileData);
-
-                // Clear pending state
-                this.pendingPromptCallback = null;
-                this.currentPromptType = null;
+                callback(tileData);
             }
         });
     }
 
     /**
-     * Setup claim discard prompt (Mahjong/Pung/Kong/Pass)
-     * Phase 2B: Show only available claim options
+     * Handle claim discard prompt
      */
-    setupClaimPrompt(options) {
-        const {tile: tileData, options: claimOptions} = options;
+    handleClaimPrompt(options, callback) {
+        const {options: claimOptions} = options;
 
-        const tileDataObj = TileData.fromJSON(tileData);
-
-        printInfo(`Claim ${tileDataObj.getText()}?`);
-
-        // Setup buttons based on available options
-        const buttons = ["button1", "button2", "button3", "button4"];
-        const buttonLabels = ["Mahjong", "Pung", "Kong", "Pass"];
-
-        buttons.forEach((btnId, index) => {
-            const btn = document.getElementById(btnId);
-            const label = buttonLabels[index];
-
-            if (claimOptions.includes(label) || label === "Pass") {
-                // Show and enable button
-                btn.textContent = label;
-                btn.disabled = false;
-                btn.style.display = "block";
-                btn.onclick = () => this.respondToClaim(label);
-            } else {
-                // Hide unavailable buttons
-                btn.style.display = "none";
-                btn.disabled = true;
-                btn.onclick = null;
-            }
+        this.dialogManager.showClaimDialog(claimOptions, (result) => {
+            if (callback) callback(result);
         });
     }
 
     /**
-     * Respond to claim prompt
+     * Handle Charleston pass tile selection
      */
-    respondToClaim(decision) {
-        if (this.pendingPromptCallback) {
-            this.pendingPromptCallback(decision);
-            this.pendingPromptCallback = null;
-            this.currentPromptType = null;
-        }
-
-        // Hide buttons
-        this.hideButtons();
-    }
-
-    /**
-     * Setup Charleston pass tile selection (3 tiles)
-     * Phase 2B: Let user select 3 tiles to pass
-     */
-    setupCharlestonPassPrompt(options) {
+    handleCharlestonPassPrompt(options, callback) {
         const {direction, requiredCount} = options;
         const player = this.table.players[PLAYER.BOTTOM];
 
         printInfo(`Choose ${requiredCount} tiles to pass ${direction}`);
 
-        // Use existing selection system from Hand
-        // The Hand class already supports multi-select during Charleston state
-
-        // Setup "Pass" button
-        const button1 = document.getElementById("button1");
-        button1.textContent = "Pass";
-        button1.disabled = true;  // Enable when 3 tiles selected
-        button1.style.display = "block";
-
-        // Monitor tile selection
-        const checkSelection = () => {
-            const selection = player.hand.hiddenTileSet.getSelection();
-            if (selection.length === requiredCount) {
-                button1.disabled = false;
-            } else {
-                button1.disabled = true;
-            }
-        };
-
-        // Button click handler
-        button1.onclick = () => {
-            const selection = player.hand.hiddenTileSet.getSelection();
-
-            if (selection.length === requiredCount && this.pendingPromptCallback) {
-                // Convert Phaser Tiles → TileData array
-                const tileDatas = selection.map(tile => TileData.fromPhaserTile(tile));
-
-                // Reset selection
-                player.hand.hiddenTileSet.resetSelection();
-
-                // Call callback
-                this.pendingPromptCallback(tileDatas);
-
-                // Clear pending state
-                this.pendingPromptCallback = null;
-                this.currentPromptType = null;
-
-                // Hide button
-                this.hideButtons();
-            }
-        };
-
-        // Use existing tile selection mechanism (pointerup handlers already exist)
-        // Just need to monitor selection count
-        const monitorInterval = window.setInterval(() => {
-            if (this.currentPromptType !== "CHARLESTON_PASS") {
-                window.clearInterval(monitorInterval);
-                return;
-            }
-            checkSelection();
-        }, 100);
-
-        // Hide other buttons
-        document.getElementById("button2").style.display = "none";
-        document.getElementById("button3").style.display = "none";
-        document.getElementById("button4").style.display = "none";
-    }
-
-    /**
-     * Setup Charleston continue query (Yes/No)
-     */
-    setupCharlestonContinuePrompt(options) {
-        const {question} = options;
-
-        printInfo(question);
-
-        const button1 = document.getElementById("button1");
-        const button2 = document.getElementById("button2");
-
-        button1.textContent = "Yes";
-        button1.disabled = false;
-        button1.style.display = "block";
-        button1.onclick = () => this.respondYesNo("Yes");
-
-        button2.textContent = "No";
-        button2.disabled = false;
-        button2.style.display = "block";
-        button2.onclick = () => this.respondYesNo("No");
-
-        // Hide other buttons
-        document.getElementById("button3").style.display = "none";
-        document.getElementById("button4").style.display = "none";
-    }
-
-    /**
-     * Setup courtesy vote prompt (Yes/No)
-     */
-    setupCourtesyVotePrompt(options) {
-        const {question} = options;
-
-        printInfo(question);
-
-        const button1 = document.getElementById("button1");
-        const button2 = document.getElementById("button2");
-
-        button1.textContent = "Yes";
-        button1.disabled = false;
-        button1.style.display = "block";
-        button1.onclick = () => this.respondYesNo("Yes");
-
-        button2.textContent = "No";
-        button2.disabled = false;
-        button2.style.display = "block";
-        button2.onclick = () => this.respondYesNo("No");
-
-        // Hide other buttons
-        document.getElementById("button3").style.display = "none";
-        document.getElementById("button4").style.display = "none";
-    }
-
-    /**
-     * Respond to Yes/No prompt
-     */
-    respondYesNo(answer) {
-        if (this.pendingPromptCallback) {
-            this.pendingPromptCallback(answer);
-            this.pendingPromptCallback = null;
-            this.currentPromptType = null;
-        }
-
-        this.hideButtons();
-    }
-
-    /**
-     * Hide all buttons
-     */
-    hideButtons() {
-        const buttons = ["button1", "button2", "button3", "button4"];
-        buttons.forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                btn.style.display = "none";
-                btn.disabled = true;
-                btn.onclick = null;
+        this.dialogManager.showCharlestonPassDialog((result) => {
+            if (result === "pass" && callback) {
+                // Get selected tiles from hand
+                const selection = player.hand.hiddenTileSet.getSelection();
+                if (selection.length === requiredCount) {
+                    const tileDatas = selection.map(tile => TileData.fromPhaserTile(tile));
+                    player.hand.hiddenTileSet.resetSelection();
+                    callback(tileDatas);
+                }
             }
         });
+    }
 
-        // Hide action pane when clearing prompts
-        const infoTextarea = document.getElementById("info");
-        const buttonDiv = document.getElementById("buttondiv");
-        if (infoTextarea) infoTextarea.style.visibility = "hidden";
-        if (buttonDiv) buttonDiv.style.visibility = "hidden";
+    /**
+     * Handle Charleston continue query
+     */
+    handleCharlestonContinuePrompt(callback) {
+        this.dialogManager.showYesNoDialog(
+            "Continue to next Charleston phase?",
+            (result) => {
+                if (callback) callback(result);
+            }
+        );
+    }
+
+    /**
+     * Handle courtesy vote prompt
+     */
+    handleCourtesyVotePrompt(callback) {
+        this.dialogManager.showCourtesyVoteDialog((result) => {
+            if (callback) callback(result);
+        });
+    }
+
+    /**
+     * Handle courtesy pass prompt
+     */
+    handleCourtesyPassPrompt(options, callback) {
+        const {maxTiles} = options;
+
+        this.dialogManager.showCourtesyPassDialog(maxTiles, (result) => {
+            if (callback) callback(result);
+        });
     }
 
     /**
@@ -779,6 +725,8 @@ export class PhaserAdapter {
     destroy() {
         this.gameController.clear();  // Remove all event listeners
         this.tileMap.clear();
-        this.pendingPromptCallback = null;
+        if (this.dialogManager) {
+            this.dialogManager.closeDialog();
+        }
     }
 }

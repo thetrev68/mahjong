@@ -5,9 +5,17 @@
       "Bash(npm run dev:*)",
       "Bash(npm run test:*)",
       "Bash(npm install:*)",
-      "Bash(npx playwright@latest install:*)"
+      "Bash(npx playwright@latest install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npm run build:*)",
+      "Bash(mkdir:*)",
+      "Bash(sha256sum:*)",
+      "Bash(del \"c:\\Repos\\mahjong\\gameLogic.js\")",
+      "WebFetch(domain:code.claude.com)"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enableAllProjectMcpServers": true
 }
