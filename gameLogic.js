@@ -1,6 +1,6 @@
 import {printMessage, printInfo, debugPrint, printHint, sleep} from "./utils.js";
 import {STATE, PLAYER_OPTION, PLAYER, SUIT, VNUMBER, getTotalTileCount} from "./constants.js";
-import {GameAI} from "./gameAI.js";
+import {AIEngine} from "./core/AIEngine.js";
 import {Card} from "./card/card.js";
 import {Tile} from "./gameObjects.js";
 import {} from "./gameObjects_hand.js";
@@ -267,7 +267,7 @@ export class GameLogic {
         await this.card.init();
         // Get difficulty setting from SettingsManager
         const difficulty = window.settingsManager ? window.settingsManager.getDifficulty() : "medium";
-        this.gameAI = new GameAI(this.card, this.table, difficulty);
+        this.gameAI = new AIEngine(this.card, this.table, difficulty);
         this.hintAnimationManager = new HintAnimationManager(this);
 
         printMessage("Using " + this.card.year + " Mahjong card\n\n");
@@ -369,16 +369,16 @@ export class GameLogic {
 
         // Continue Charleston?
         this.state = STATE.CHARLESTON_QUERY;
-        this.updateUI();
+        // this.updateUI(); // Disabled in Phase 2B
 
         const query = await this.yesNoQuery();
 
         this.state = STATE.CHARLESTON_QUERY_COMPLETE;
-        this.updateUI();
+        // this.updateUI(); // Disabled in Phase 2B
 
         if (query === true) {
             this.state = STATE.CHARLESTON2;
-            this.updateUI();
+            // this.updateUI(); // Disabled in Phase 2B
 
             await this.charlestonPass(PLAYER.LEFT);
             // Update hints after Charleston pass 4 is complete
@@ -400,15 +400,15 @@ export class GameLogic {
         }
 
         this.state = STATE.COURTESY_QUERY;
-        this.updateUI();
+        // this.updateUI(); // Disabled in Phase 2B
 
         const player0CourtesyVote = await this.courtesyQuery();
 
         this.state = STATE.COURTESY_QUERY_COMPLETE;
-        this.updateUI();
+        // this.updateUI(); // Disabled in Phase 2B
 
         this.state = STATE.COURTESY;
-        this.updateUI();
+        // this.updateUI(); // Disabled in Phase 2B
 
         // Get courtesy votes for all players
         const courtesyVoteArray = [];
@@ -437,7 +437,7 @@ export class GameLogic {
         }
 
         this.state = STATE.COURTESY_COMPLETE;
-        this.updateUI();
+        // this.updateUI(); // Disabled in Phase 2B
 
         // Only process courtesy pass if tiles are being exchanged
         if (this.table.player02CourtesyVote > 0 || this.table.player13CourtesyVote > 0) {
@@ -513,7 +513,7 @@ export class GameLogic {
             this.table.switchPlayer(this.currPlayer);
 
             this.state = STATE.LOOP_PICK_FROM_WALL;
-            this.updateUI();
+            // this.updateUI(); // Disabled in Phase 2B
 
             // PICK TILE FROM WALL
             if (!skipPick) {
@@ -529,7 +529,7 @@ export class GameLogic {
             skipPick = false;
 
             this.state = STATE.LOOP_CHOOSE_DISCARD;
-            this.updateUI();
+            // this.updateUI(); // Disabled in Phase 2B
 
             // CHOOSE TILE TO DISCARD (or mahjong!)
             // eslint-disable-next-line no-await-in-loop
@@ -668,7 +668,7 @@ export class GameLogic {
             }
         }
         
-        this.updateUI();
+        // this.updateUI(); // Disabled in Phase 2B
     }
 
     pickFromWall() {
@@ -847,7 +847,7 @@ export class GameLogic {
         }
 
         this.state = STATE.LOOP_QUERY_CLAIM_DISCARD;
-        this.updateUI();
+        // this.updateUI(); // Disabled in Phase 2B
 
         // Ask user if the tile is wanted
         // If blank swap is initiated during this, the yesNoQuery promise will remain pending
@@ -855,7 +855,7 @@ export class GameLogic {
         const claimYesNo = await this.yesNoQuery();
 
         this.state = STATE.LOOP_QUERY_CLAIM_DISCARD_COMPLETE;
-        this.updateUI();
+        // this.updateUI(); // Disabled in Phase 2B
 
         if (claimYesNo) {
             // Tile is wanted - wait for user to expose tiles (or cancel)
@@ -865,7 +865,7 @@ export class GameLogic {
             // 3. mahjong
 
             this.state = STATE.LOOP_EXPOSE_TILES;
-            this.updateUI();
+            // this.updateUI(); // Disabled in Phase 2B
 
             // Save discardTile so it can be accessed by Hand object when selecting tiles
             this.discardTile = discardTile;
@@ -873,7 +873,7 @@ export class GameLogic {
             const exposeInfo = await this.exposeTiles();
 
             this.state = STATE.LOOP_EXPOSE_TILES_COMPLETE;
-            this.updateUI();
+            // this.updateUI(); // Disabled in Phase 2B
 
             switch (exposeInfo.playerOption) {
             case PLAYER_OPTION.EXPOSE_TILES:
@@ -1638,7 +1638,7 @@ export class GameLogic {
         this.isSwappingBlank = false;
 
         // Re-enable game buttons and restore UI state for current game state
-        this.updateUI();
+        // this.updateUI(); // Disabled in Phase 2B
 
         // Update hints after blank swap
         this.hintAnimationManager.updateHintsForNewTiles();

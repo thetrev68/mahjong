@@ -456,6 +456,17 @@ class DesktopSettingsManager {
 // Initialize settings manager when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
     window.settingsManager = new DesktopSettingsManager();
+
+    // Initial UI state setup
+    const controlDiv = document.getElementById("controldiv");
+    const uiCenterDiv = document.getElementById("uicenterdiv");
+
+    if (controlDiv) {
+        controlDiv.style.visibility = "visible";
+    }
+    if (uiCenterDiv) {
+        uiCenterDiv.style.display = "none";
+    }
     
     // Listen for settings changes from mobile
     window.addEventListener("settingsChanged", (event) => {
