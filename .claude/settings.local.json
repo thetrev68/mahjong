@@ -11,9 +11,11 @@
       "Bash(npm run build:*)",
       "Bash(mkdir:*)",
       "Bash(sha256sum:*)",
-      "Bash(del \"c:\\Repos\\mahjong\\gameLogic.js\")"
+      "Bash(del \"c:\\Repos\\mahjong\\gameLogic.js\")",
+      "WebFetch(domain:code.claude.com)"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enableAllProjectMcpServers": true
 }

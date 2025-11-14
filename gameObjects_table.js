@@ -76,7 +76,7 @@ export class Table {
         // Create players
         this.players = [];
         for (let i = 0; i < 4; i++) {
-            this.players[i] = new Player(scene, gPlayerInfo[i]);
+            this.players[i] = new Player(scene, gPlayerInfo[i], this);
         }
 
         this.player02CourtesyVote = 0;

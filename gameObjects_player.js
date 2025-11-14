@@ -8,7 +8,7 @@ import {Hand} from "./gameObjects_hand.js";
 
 
 export class Player {
-    constructor(scene, playerInfo) {
+    constructor(scene, playerInfo, table) {
         // Player ID
         // 0 - player, bottom of screen
         // 1 - computer, right
@@ -18,7 +18,7 @@ export class Player {
         // This is in "turn" order
         this.playerInfo = playerInfo;
         const inputEnabled = (playerInfo.id === PLAYER.BOTTOM);
-        this.hand = new Hand(scene, null, inputEnabled);  // gameLogic will be set after construction
+        this.hand = new Hand(scene, table, inputEnabled);  // Pass table directly to Hand
     }
 
 

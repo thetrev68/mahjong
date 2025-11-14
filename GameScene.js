@@ -5,8 +5,7 @@ import { HomePageTileManager } from "./homePageTileManager.js";
 import AudioManager from "./audioManager.js";
 import {GameController} from "./core/GameController.js";
 import {PhaserAdapter} from "./desktop/adapters/PhaserAdapter.js";
-import { GameLogicStub } from "./gameLogicStub.js";
-import { HintAnimationManager } from "./hintAnimationManager.js";
+import { HintAnimationManager } from "./desktop/managers/HintAnimationManager.js";
 // import { debugPrint } from "./utils.js";
 import { WINDOW_WIDTH, getTotalTileCount } from "./constants.js";
 
@@ -74,20 +73,20 @@ class GameScene extends Phaser.Scene {
             }
         });
 
-        // Create minimal GameLogic stub for legacy Hand/TileSet code
-        // Must be after GameController.init() so we can use aiEngine and cardValidator
-        this.gGameLogic = new GameLogicStub(this, this.gTable, this.gameController.aiEngine, this.gameController.cardValidator);
+        // Initialize HintAnimationManager with direct dependencies (Phase 3.5: Direct dependencies, no gameLogicStub)
+        this.hintAnimationManager = new HintAnimationManager(
+            this,
+            this.gTable,
+            this.gameController.aiEngine,
+            this.gameController.cardValidator
+        );
 
-        // Initialize HintAnimationManager
-        this.gGameLogic.hintAnimationManager = new HintAnimationManager(this.gGameLogic);
-
-        // Update Table's gameLogic reference for backward compatibility
-        this.gTable.gameLogic = this.gGameLogic;
+        // Set table references for Hand/TileSet (Phase 3.5 refactoring)
         for (let i = 0; i < this.gTable.players.length; i++) {
-            this.gTable.players[i].hand.gameLogic = this.gGameLogic;
-            this.gTable.players[i].hand.hiddenTileSet.gameLogic = this.gGameLogic;
+            this.gTable.players[i].hand.table = this.gTable;
+            this.gTable.players[i].hand.hiddenTileSet.table = this.gTable;
             for (const tileSet of this.gTable.players[i].hand.exposedTileSetArray) {
-                tileSet.gameLogic = this.gGameLogic;
+                tileSet.table = this.gTable;
             }
         }
 

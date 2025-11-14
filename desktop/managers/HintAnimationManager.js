@@ -2,22 +2,23 @@
  * HintAnimationManager - Manages hint display and glow effects for player tiles
  * Extracted from legacy gameLogic.js during Phase 3 refactor
  *
- * TODO (Phase 3.5): Update to receive aiEngine, card, scene, table directly instead of gameLogicStub
- * Currently receives gameLogicStub but will be refactored to accept:
- * - scene (for error text display)
- * - table (for player hand data)
- * - aiEngine (from GameController - NOT legacy gameAI)
- * - card (from GameController for hand ranking)
+ * Phase 3.5 Refactoring:
+ * - Moved from root to desktop/managers/
+ * - Updated to receive aiEngine, card, scene, table directly (not gameLogicStub)
+ * - No longer depends on gameLogic stub
  */
 
-import {debugPrint, printHint} from "./utils.js";
-import {PLAYER, SUIT, VNUMBER} from "./constants.js";
-import {Tile} from "./gameObjects.js";
-import { renderPatternVariation } from "./tileDisplayUtils.js";
+import {debugPrint, printHint} from "../../utils.js";
+import {PLAYER, SUIT, VNUMBER} from "../../constants.js";
+import {Tile} from "../../gameObjects.js";
+import { renderPatternVariation } from "../../tileDisplayUtils.js";
 
 export class HintAnimationManager {
-    constructor(gameLogicStub) {
-        this.gameLogic = gameLogicStub;  // TEMPORARY: Will be refactored in Phase 3.5 to use direct references
+    constructor(scene, table, aiEngine, card) {
+        this.scene = scene;
+        this.table = table;
+        this.aiEngine = aiEngine;  // Modern name, not legacy gameAI
+        this.card = card;
         this.savedGlowData = null;
         this.currentHintData = null;
         this.isPanelExpanded = false;
@@ -35,7 +36,7 @@ export class HintAnimationManager {
 
         // Highlight ALL discard recommendations (not limited to 3)
         // This ensures we show all available discards, even if only 1 or 2
-        const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand;
+        const hand = this.table.players[PLAYER.BOTTOM].hand;
 
         // Track which tiles we've already highlighted to handle duplicates
         const highlightedTiles = new Set();
@@ -46,7 +47,7 @@ export class HintAnimationManager {
             const targetTile = this.findNextUnhighlightedTileInHand(hand, rec.tile, highlightedTiles);
             if (targetTile) {
                 debugPrint(`Applying red glow to tile: ${targetTile.getText()}`); // Debug log
-                targetTile.addGlowEffect(this.gameLogic.scene, 0xff0000, 0.6);
+                targetTile.addGlowEffect(this.scene, 0xff0000, 0.6);
                 this.glowedTiles.push(targetTile);
                 // Mark this specific tile instance as highlighted
                 highlightedTiles.add(targetTile);
@@ -125,7 +126,7 @@ export class HintAnimationManager {
 
     // Centralized method to get recommendations from the AI engine
     getRecommendations() {
-        const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand.dupHand();
+        const hand = this.table.players[PLAYER.BOTTOM].hand.dupHand();
 
         // Add invalid tile if hand has 13 tiles, as the engine expects 14
         if (hand.getLength() === 13) {
@@ -133,7 +134,7 @@ export class HintAnimationManager {
             hand.insertHidden(invalidTile);
         }
 
-        const result = this.gameLogic.gameAI.getTileRecommendations(hand);
+        const result = this.aiEngine.getTileRecommendations(hand);
 
         // Reverse recommendations for display: DISCARD, PASS, KEEP
         return {
@@ -144,7 +145,7 @@ export class HintAnimationManager {
 
     // Get all tiles in player's hand (hidden + exposed)
     getAllPlayerTiles() {
-        const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand;
+        const hand = this.table.players[PLAYER.BOTTOM].hand;
         const allTiles = [...hand.getHiddenTileArray()];
 
         hand.exposedTileSetArray.forEach(set => {
@@ -156,7 +157,7 @@ export class HintAnimationManager {
 
     // Get only hidden tiles in player's hand
     getHiddenPlayerTiles() {
-        const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand;
+        const hand = this.table.players[PLAYER.BOTTOM].hand;
         return hand.getHiddenTileArray();
     }
 
@@ -171,12 +172,12 @@ export class HintAnimationManager {
 
         // Panel is expanded, proceed with full update including glow effects
         const result = this.getRecommendations();
-        const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand.dupHand();
+        const hand = this.table.players[PLAYER.BOTTOM].hand.dupHand();
         if (hand.getLength() === 13) {
             hand.insertHidden(new Tile(SUIT.INVALID, VNUMBER.INVALID));
         }
-        const rankCardHands = this.gameLogic.card.rankHandArray14(hand);
-        this.gameLogic.card.sortHandRankArray(rankCardHands);
+        const rankCardHands = this.card.rankHandArray14(hand);
+        this.card.sortHandRankArray(rankCardHands);
 
         // Update visual glow effects (only if panel is expanded)
         this.applyGlowToDiscardSuggestions(result.recommendations);
@@ -188,12 +189,12 @@ export class HintAnimationManager {
     // New method for updating hint text without glow effects
     updateHintDisplayOnly() {
         const result = this.getRecommendations();
-        const hand = this.gameLogic.table.players[PLAYER.BOTTOM].hand.dupHand();
+        const hand = this.table.players[PLAYER.BOTTOM].hand.dupHand();
         if (hand.getLength() === 13) {
             hand.insertHidden(new Tile(SUIT.INVALID, VNUMBER.INVALID));
         }
-        const rankCardHands = this.gameLogic.card.rankHandArray14(hand);
-        this.gameLogic.card.sortHandRankArray(rankCardHands);
+        const rankCardHands = this.card.rankHandArray14(hand);
+        this.card.sortHandRankArray(rankCardHands);
 
         // Update hint text content only (no glow effects)
         this.updateHintDisplay(rankCardHands, result.recommendations, result.consideredPatternCount);

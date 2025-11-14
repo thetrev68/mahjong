@@ -1,6 +1,6 @@
 import * as Phaser from "phaser";
 import {
-    STATE, PLAYER, SUIT, SPRITE_WIDTH, SPRITE_HEIGHT,
+    PLAYER, SUIT, SPRITE_WIDTH, SPRITE_HEIGHT,
     SPRITE_SCALE, WINDOW_WIDTH, WINDOW_HEIGHT, TILE_GAP
 } from "./constants.js";
 import {debugPrint, debugTrace} from "./utils.js";
@@ -12,12 +12,22 @@ import {debugPrint, debugTrace} from "./utils.js";
 
 
 class TileSet {
-    constructor(scene, gameLogic, inputEnabled) {
+    constructor(scene, table, inputEnabled) {
         this.scene = scene;
-        this.gameLogic = gameLogic;
+        this.table = table;  // Direct table reference instead of via gameLogic
         this.tileArray = [];
         this.inputEnabled = inputEnabled;
         this.selectCount = 0;
+        this.validationMode = null;  // 'charleston', 'courtesy', 'play', 'expose', null
+        this.discardTile = null;  // Set when needed for exposure validation
+    }
+
+    setValidationMode(mode) {
+        this.validationMode = mode;
+    }
+
+    setDiscardTile(tile) {
+        this.discardTile = tile;
     }
 
     getLength() {
@@ -52,7 +62,7 @@ class TileSet {
 
         window.document.getElementById("button1").disabled = true;
 
-        const playerObject = this.gameLogic.table.players[PLAYER.BOTTOM];
+        const playerObject = this.table.players[PLAYER.BOTTOM];
 
         // Reset all tiles to their original position
         for (const tile of this.tileArray) {
@@ -427,10 +437,10 @@ class TileSet {
 }
 
 export class Hand {
-    constructor(scene, gameLogic, inputEnabled) {
+    constructor(scene, table, inputEnabled) {
         this.scene = scene;
-        this.gameLogic = gameLogic;
-        this.hiddenTileSet = new TileSet(scene, gameLogic, inputEnabled);
+        this.table = table;  // Direct table reference instead of via gameLogic
+        this.hiddenTileSet = new TileSet(scene, table, inputEnabled);
         this.exposedTileSetArray = [];
         // Track if tiles were dragged this turn to avoid showHand() interference
         this.tilesWereDraggedThisTurn = false;
@@ -440,20 +450,22 @@ export class Hand {
         this.rackGraphics = null;
         // Track tile selection handlers to avoid removing handlers added elsewhere
         this.tileSelectionHandlers = new Map();
+        // Validation mode for tile selection
+        this.validationMode = null;
         // When adding new variables, make sure to update dupHand()
     }
 
     // Duplicate hand
     // - hiddenTileSet and exposedTileSetArray can then be freely manipulated
     dupHand() {
-        const newHand = new Hand(this.scene, this.gameLogic, false);
+        const newHand = new Hand(this.scene, this.table, false);
 
         for (const tile of this.hiddenTileSet.tileArray) {
             newHand.hiddenTileSet.tileArray.push(tile);
         }
 
         for (const tileset of this.exposedTileSetArray) {
-            const newTileSet = new TileSet(this.scene, this.gameLogic, false);
+            const newTileSet = new TileSet(this.scene, this.table, false);
             for (const tile of tileset.tileArray) {
                 newTileSet.insert(tile);
             }
@@ -764,13 +776,13 @@ export class Hand {
     // Helper method to show visual insertion feedback
     showInsertionFeedback(insertionIndex, tileArray, draggedTile, dragX) {
         debugPrint(`Showing insertion feedback at index ${insertionIndex} for dragX ${dragX}`);
-        
+
         // Clear any existing feedback first
         this.clearInsertionFeedback();
-        
+
         // Only show feedback if we have a valid insertion index
         if (insertionIndex >= 0 && insertionIndex < tileArray.length) {
-            const currentPlayerInfo = this.gameLogic.table.players[PLAYER.BOTTOM].playerInfo;
+            const currentPlayerInfo = this.table.players[PLAYER.BOTTOM].playerInfo;
             const tileWidth = this.hiddenTileSet.getTileWidth(currentPlayerInfo);
             const tileGap = TILE_GAP;
             
@@ -945,6 +957,31 @@ export class Hand {
         }
     }
 
+    // Set validation mode for all tile sets
+    setValidationMode(mode) {
+        this.validationMode = mode;
+        this.hiddenTileSet.setValidationMode(mode);
+        for (const tileSet of this.exposedTileSetArray) {
+            tileSet.setValidationMode(mode);
+        }
+    }
+
+    // Set current discard tile for exposure validation
+    setDiscardTile(tile) {
+        this.hiddenTileSet.setDiscardTile(tile);
+        for (const tileSet of this.exposedTileSetArray) {
+            tileSet.setDiscardTile(tile);
+        }
+    }
+
+    // Display error message to user
+    displayErrorText(message) {
+        if (this.scene && this.scene.errorText) {
+            this.scene.errorText.setText(message);
+            this.scene.errorText.visible = true;
+        }
+    }
+
     // Return selected tiles from hidden group
     //  - will not remove from hand
     //  - will not unselect
@@ -978,21 +1015,21 @@ export class Hand {
                 let maxSelect = 3;
                 let minSelect = 3;
 
-                switch (this.gameLogic.state) {
-                case STATE.LOOP_CHOOSE_DISCARD:
+                // Determine min/max selection based on validation mode
+                switch (this.validationMode) {
+                case "play":
                     maxSelect = 1;
                     minSelect = 1;
                     break;
-                case STATE.CHARLESTON1:
-                case STATE.CHARLESTON2:
+                case "charleston":
                     maxSelect = 3;
                     minSelect = 3;
                     break;
-                case STATE.COURTESY:
-                    maxSelect = this.gameLogic.table.player02CourtesyVote;
-                    minSelect = this.gameLogic.table.player02CourtesyVote;
+                case "courtesy":
+                    maxSelect = this.table.player02CourtesyVote;
+                    minSelect = this.table.player02CourtesyVote;
                     break;
-                case STATE.LOOP_EXPOSE_TILES:
+                case "expose":
                     maxSelect = 4;
                     minSelect = 2;
                     break;
@@ -1001,7 +1038,7 @@ export class Hand {
                     minSelect = 0;
                     break;
                 }
-                debugPrint(`Tile clicked. State: ${this.gameLogic.state}, selectCount: ${tileSet.selectCount}, min: ${minSelect}, max: ${maxSelect}`);
+                debugPrint(`Tile clicked. Mode: ${this.validationMode}, selectCount: ${tileSet.selectCount}, min: ${minSelect}, max: ${maxSelect}`);
 
                 if (maxSelect) {
                     if (tile.selected) {
@@ -1012,7 +1049,7 @@ export class Hand {
                         if (tile.spriteBack) {
                             tile.spriteBack.setDepth(0);
                         }
-                        const playerObject = this.gameLogic.table.players[PLAYER.BOTTOM];
+                        const playerObject = this.table.players[PLAYER.BOTTOM];
                         tile.animate(tile.origX, 600, playerObject.playerInfo.angle); // Always park at 600
                         tileSet.selectCount--;
                     } else {
@@ -1022,22 +1059,21 @@ export class Hand {
 
                         if (tileSet.selectCount < maxSelect) {
                             // SIMPLE SELECT: Click toggles selection state
-                            const playerObject = this.gameLogic.table.players[PLAYER.BOTTOM];
+                            const playerObject = this.table.players[PLAYER.BOTTOM];
                             let bSelectOk = true;
 
-                            if (this.gameLogic.state === STATE.LOOP_EXPOSE_TILES) {
+                            if (this.validationMode === "expose") {
                                 if (tile.suit !== SUIT.JOKER &&
-                                    (tile.suit !== this.gameLogic.discardTile.suit || tile.number !== this.gameLogic.discardTile.number)) {
+                                    (tile.suit !== tileSet.discardTile.suit || tile.number !== tileSet.discardTile.number)) {
                                     bSelectOk = false;
-                                    this.gameLogic.displayErrorText(" Select same tile or joker to form pung/kong/quint ");
+                                    this.displayErrorText(" Select same tile or joker to form pung/kong/quint ");
                                 }
                             }
 
-                            if (this.gameLogic.state === STATE.CHARLESTON1 || this.gameLogic.state === STATE.CHARLESTON2 ||
-                                this.gameLogic.state === STATE.COURTESY) {
+                            if (this.validationMode === "charleston" || this.validationMode === "courtesy") {
                                 if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
                                     bSelectOk = false;
-                                    this.gameLogic.displayErrorText(" Joker and Blank tiles cannot be passed during Charleston ");
+                                    this.displayErrorText(" Joker and Blank tiles cannot be passed during Charleston ");
                                 }
                             }
 
@@ -1257,7 +1293,7 @@ tile.sprite.on("dragend", (_pointer, dragX, _dragY, _dropped) => {
                 }
 
                 // CRITICAL: Position the tile at the target location after successful array manipulation
-                const currentPlayerInfo = this.gameLogic.table.players[PLAYER.BOTTOM].playerInfo;
+                const currentPlayerInfo = this.table.players[PLAYER.BOTTOM].playerInfo;
                 const finalPos = this.calculateTilePosition(currentPlayerInfo, finalTargetIndex);
                 
                 // Update origX/origY BEFORE positioning to prevent other animations from overriding
@@ -1327,7 +1363,7 @@ tile.sprite.on("dragend", (_pointer, dragX, _dragY, _dropped) => {
         let uniqueTile = null;
 
         // Create new "exposed" TileSet
-        const tileSet = new TileSet(this.scene, this.gameLogic, true);
+        const tileSet = new TileSet(this.scene, this.table, true);
 
         for (const tile of tileArray) {
             tileSet.insert(tile);
@@ -1348,15 +1384,13 @@ tile.sprite.on("dragend", (_pointer, dragX, _dragY, _dropped) => {
                     let maxSelect = 1;
                     let minSelect = 1;
 
-                    switch (this.gameLogic.state) {
-                    case STATE.LOOP_CHOOSE_DISCARD:
+                    // Only allow exposed joker selection during LOOP_CHOOSE_DISCARD (play phase)
+                    if (this.validationMode === "play") {
                         maxSelect = 1;
                         minSelect = 1;
-                        break;
-                    default:
+                    } else {
                         maxSelect = 0;
                         minSelect = 0;
-                        break;
                     }
 
                     if (maxSelect) {
@@ -1376,20 +1410,20 @@ tile.sprite.on("dragend", (_pointer, dragX, _dragY, _dropped) => {
                         } else if (tileSet.selectCount < maxSelect) {
                             let bSelectOk = true;
 
-                            if (this.gameLogic.table.players[PLAYER.BOTTOM].hand.getSelectionHiddenCount() !== 1) {
+                            if (this.table.players[PLAYER.BOTTOM].hand.getSelectionHiddenCount() !== 1) {
                                 bSelectOk = false;
-                                this.gameLogic.displayErrorText(" To swap for an exposed joker, please select a hidden tile first ");
+                                this.displayErrorText(" To swap for an exposed joker, please select a hidden tile first ");
                             } else if (this.getSelectionExposedCount() > 0) {
                                 bSelectOk = false;
-                                this.gameLogic.displayErrorText(" Only one joker can be selected ");
+                                this.displayErrorText(" Only one joker can be selected ");
                             } else {
-                                const hiddenTileArray = this.gameLogic.table.players[PLAYER.BOTTOM].hand.getSelectionHidden();
+                                const hiddenTileArray = this.table.players[PLAYER.BOTTOM].hand.getSelectionHidden();
                                 const hiddenTile = hiddenTileArray[0];
 
                                 if (uniqueTile) {
                                     if (hiddenTile.suit !== uniqueTile.suit || hiddenTile.number !== uniqueTile.number) {
                                         bSelectOk = false;
-                                        this.gameLogic.displayErrorText(" To swap for an exposed joker, tile must match exposed pung/kong/quint ");
+                                        this.displayErrorText(" To swap for an exposed joker, tile must match exposed pung/kong/quint ");
                                     }
                                 } else {
                                     bSelectOk = false;

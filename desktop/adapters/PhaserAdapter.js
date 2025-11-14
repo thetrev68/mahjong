@@ -208,6 +208,26 @@ export class PhaserAdapter {
 
         // Update button visibility and state based on new game state
         this.buttonManager.updateForState(newState);
+
+        // Phase 3.5: Set validation mode on player hands based on state
+        const humanHand = this.table.players[0].hand; // PLAYER.BOTTOM
+        switch (newState) {
+        case "CHARLESTON1":
+        case "CHARLESTON2":
+            humanHand.setValidationMode("charleston");
+            break;
+        case "COURTESY":
+            humanHand.setValidationMode("courtesy");
+            break;
+        case "LOOP_CHOOSE_DISCARD":
+            humanHand.setValidationMode("play");
+            break;
+        case "LOOP_EXPOSE_TILES":
+            humanHand.setValidationMode("expose");
+            break;
+        default:
+            humanHand.setValidationMode(null);
+        }
     }
 
     /**
@@ -335,6 +355,12 @@ export class PhaserAdapter {
             // Add to discard pile
             this.table.discards.insertDiscard(phaserTile);
 
+            // Phase 3.5: Set discard tile for exposure validation (human player)
+            if (playerIndex === PLAYER.BOTTOM) {
+                const humanHand = this.table.players[PLAYER.BOTTOM].hand;
+                humanHand.setDiscardTile(phaserTile);
+            }
+
             // Show discards (updates layout)
             this.table.discards.showDiscards();
 
@@ -366,7 +392,7 @@ export class PhaserAdapter {
         const phaserTiles = tileDatas.map(td => this.findPhaserTile(TileData.fromJSON(td)));
 
         // Create exposed tile set and add to player's hand
-        const exposedTileSet = new window.TileSet(this.scene, this.scene.gGameLogic, false);
+        const exposedTileSet = new window.TileSet(this.scene, this.table, false);
         phaserTiles.forEach(tile => {
             // Remove from hidden tiles if present
             player.hand.hiddenTileSet.remove(tile);
@@ -489,8 +515,8 @@ export class PhaserAdapter {
         console.log(`Hand updated for player ${playerIndex}: ${handData.tiles.length} hidden, ${handData.exposures.length} exposed`);
 
         // Update hint if human player
-        if (playerIndex === PLAYER.BOTTOM && this.scene.gGameLogic && this.scene.gGameLogic.hintAnimationManager) {
-            this.scene.gGameLogic.hintAnimationManager.updateHintsForNewTiles();
+        if (playerIndex === PLAYER.BOTTOM && this.scene.hintAnimationManager) {
+            this.scene.hintAnimationManager.updateHintsForNewTiles();
         }
     }
 
