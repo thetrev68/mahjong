@@ -717,7 +717,7 @@ export class GameController extends EventEmitter {
         claimingPlayer.hand.addTile(tile);
 
         // Emit rich discard claimed event
-        const tileData = {suit: tile.suit, number: tile.number};
+        const tileData = {suit: tile.suit, number: tile.number, index: tile.index};
         const claimedEvent = GameEvents.createDiscardClaimedEvent(claimingPlayerIndex, tileData, claimType);
         this.emit("DISCARD_CLAIMED", claimedEvent);
 
@@ -761,7 +761,7 @@ export class GameController extends EventEmitter {
             const exposedEvent = GameEvents.createTilesExposedEvent(
                 playerIndex,
                 exposureType,
-                tilesToExpose.map(t => ({suit: t.suit, number: t.number})),
+                tilesToExpose.map(t => ({suit: t.suit, number: t.number, index: t.index})),
                 {duration: 300}
             );
             this.emit("TILES_EXPOSED", exposedEvent);
