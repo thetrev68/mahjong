@@ -342,7 +342,7 @@ export class DialogManager {
         this.isOpen = true;
 
         // Prevent interaction with game while dialog open
-        if (this.scene.input) {
+        if (this.scene && this.scene.input) {
             this.scene.input.enabled = false;
         }
     }
@@ -360,7 +360,7 @@ export class DialogManager {
         this.pendingCallback = null;
 
         // Re-enable game input
-        if (this.scene.input) {
+        if (this.scene && this.scene.input) {
             this.scene.input.enabled = true;
         }
     }
