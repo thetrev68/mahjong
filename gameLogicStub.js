@@ -1,12 +1,16 @@
 /**
- * GameLogicStub - Minimal stub to support legacy Hand/TileSet and HintAnimationManager
+ * GameLogicStub - TEMPORARY BRIDGE - TO BE REMOVED IN PHASE 3.5
+ *
  * This stub provides the minimal interface needed by Hand, TileSet, and HintAnimationManager classes
  * that still have UI interaction code tied to gameLogic state.
  *
- * This is a temporary bridge during the refactor. These dependencies will be fully
- * refactored in Phase 4 when Hand/TileSet UI code is moved to PhaserAdapter.
+ * Phase 3.5 will eliminate this stub by:
+ * - Moving HintAnimationManager to desktop/managers/ with direct aiEngine reference
+ * - Refactoring Hand/TileSet to not depend on gameLogic (state, discardTile, displayErrorText)
+ * - Deleting gameLogicStub.js completely
  *
- * TODO (Phase 4): Refactor Hand/TileSet to remove gameLogic dependency
+ * DEPRECATED: Do not add new functionality here. Use directly from GameController or PhaserAdapter.
+ * NOTE: gameAI is legacy naming - use aiEngine from GameController instead
  */
 
 export class GameLogicStub {

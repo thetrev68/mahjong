@@ -1,6 +1,13 @@
 /**
  * HintAnimationManager - Manages hint display and glow effects for player tiles
  * Extracted from legacy gameLogic.js during Phase 3 refactor
+ *
+ * TODO (Phase 3.5): Update to receive aiEngine, card, scene, table directly instead of gameLogicStub
+ * Currently receives gameLogicStub but will be refactored to accept:
+ * - scene (for error text display)
+ * - table (for player hand data)
+ * - aiEngine (from GameController - NOT legacy gameAI)
+ * - card (from GameController for hand ranking)
  */
 
 import {debugPrint, printHint} from "./utils.js";
@@ -10,7 +17,7 @@ import { renderPatternVariation } from "./tileDisplayUtils.js";
 
 export class HintAnimationManager {
     constructor(gameLogicStub) {
-        this.gameLogic = gameLogicStub;  // Reference to GameLogicStub for accessing table, gameAI, card, scene
+        this.gameLogic = gameLogicStub;  // TEMPORARY: Will be refactored in Phase 3.5 to use direct references
         this.savedGlowData = null;
         this.currentHintData = null;
         this.isPanelExpanded = false;

@@ -236,33 +236,47 @@ if (tile.suit !== this.gameLogic.discardTile.suit ||
 
 ### Task 3.5.7: Update HintAnimationManager Dependencies
 
-**Goal**: HintAnimationManager should not reference gameLogicStub
+**Goal**: HintAnimationManager should NOT reference gameLogicStub (or legacy gameAI)
 
-**Current State**: HintAnimationManager receives gameLogicStub in constructor
+**Current State**:
+- HintAnimationManager receives gameLogicStub in constructor
+- References `this.gameLogic.gameAI.getTileRecommendations()` (line 129)
+- gameLogicStub wraps `gameController.aiEngine` as `gameAI`
+
+**Important**: gameAI is legacy naming. The modern name is `aiEngine` from GameController.
 
 **Actions**:
-1. Update HintAnimationManager constructor:
+1. Update HintAnimationManager constructor to accept AIEngine directly:
    ```javascript
-   constructor(scene, table, gameAI, card) {
+   constructor(scene, table, aiEngine, card) {
        this.scene = scene;
        this.table = table;
-       this.gameAI = gameAI;
+       this.aiEngine = aiEngine;  // Direct reference, not wrapped
        this.card = card;
    }
    ```
-2. Replace all `this.gameLogic.X` with direct field access
-3. In GameScene, pass dependencies directly:
+2. Replace all `this.gameLogic.gameAI` with `this.aiEngine`:
+   ```javascript
+   // Before (line 129)
+   const result = this.gameLogic.gameAI.getTileRecommendations(hand);
+
+   // After
+   const result = this.aiEngine.getTileRecommendations(hand);
+   ```
+3. Replace all `this.gameLogic.X` references with direct field access
+4. In GameScene, pass dependencies directly:
    ```javascript
    const hintManager = new HintAnimationManager(
        this,
        this.gTable,
-       this.gameController.aiEngine,
+       this.gameController.aiEngine,  // Modern name, not gameAI
        this.gameController.cardValidator
    );
    ```
-4. Test: Hints still work
+5. Verify HintAnimationManager constructor reference comment is updated
+6. Test: Hints still work
 
-**Output**: HintAnimationManager has explicit dependencies
+**Output**: HintAnimationManager has explicit dependencies, uses modern aiEngine naming
 
 ---
 
