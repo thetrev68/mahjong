@@ -368,7 +368,7 @@ class DesktopSettingsManager {
         });
 
         // Load settings from SettingsManager
-        const settings = SettingsManager.load();
+        // const settings = SettingsManager.load();
 
         // BGM volume slider - update UI and audio manager, but don't save to SettingsManager yet
         if (bgmVolumeSlider) {

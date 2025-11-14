@@ -1,10 +1,10 @@
 import InstallPrompt from "./components/InstallPrompt.js";
 import SettingsSheet from "./components/SettingsSheet.js";
-import {HandRenderer} from "./renderers/HandRenderer.js";
+// import {HandRenderer} from "./renderers/HandRenderer.js";
 import {OpponentBar} from "./components/OpponentBar.js";
-import {DiscardPile} from "./components/DiscardPile.js";
-import {AnimationController} from "./animations/AnimationController.js";
-import {TouchHandler} from "./gestures/TouchHandler.js";
+// import {DiscardPile} from "./components/DiscardPile.js";
+// import {AnimationController} from "./animations/AnimationController.js";
+// import {TouchHandler} from "./gestures/TouchHandler.js";
 import {GameController} from "../core/GameController.js";
 import {AIEngine} from "../core/AIEngine.js";
 import {Card} from "../card/card.js";
@@ -16,11 +16,7 @@ import "./styles/MobileGame.css";
 // Game instances
 let gameController;
 let aiEngine;
-let handRenderer;
-let discardPile;
-let animationController;
-let opponentBars = [];
-let touchHandler;
+const opponentBars = [];
 let statusDisplay;
 let settingsSheet;
 
@@ -33,6 +29,16 @@ export function onGameEnd() {
     InstallPrompt.incrementGamesPlayed();
 
     // The InstallPrompt will automatically check and show prompt if conditions are met
+}
+
+/**
+ * Create bottom menu element if it doesn't exist
+ */
+function createBottomMenu() {
+    const bottomMenu = document.createElement("div");
+    bottomMenu.className = "bottom-menu";
+    document.body.appendChild(bottomMenu);
+    return bottomMenu;
 }
 
 // Placeholder for mobile app initialization
@@ -72,8 +78,8 @@ async function initializeGame() {
     console.log("Initializing mobile game...");
 
     // Get DOM containers
-    const handContainer = document.getElementById("hand-container");
-    const discardContainer = document.getElementById("discard-container");
+    // const handContainer = document.getElementById("hand-container");
+    // const discardContainer = document.getElementById("discard-container");
     const statusElement = document.getElementById("game-status");
     const opponentLeftContainer = document.getElementById("opponent-left");
     const opponentTopContainer = document.getElementById("opponent-top");
@@ -99,13 +105,13 @@ async function initializeGame() {
     });
 
     // Initialize Animation Controller
-    animationController = new AnimationController();
+    // const animationController = new AnimationController();
 
     // Initialize Hand Renderer
-    handRenderer = new HandRenderer(handContainer, gameController);
+    // const handRenderer = new HandRenderer(handContainer, gameController);
 
     // Initialize Discard Pile
-    discardPile = new DiscardPile(discardContainer, gameController);
+    // const discardPile = new DiscardPile(discardContainer, gameController);
 
     // Initialize Opponent Bars (Right, Top, Left positions - index 1, 2, 3)
     const opponentPositions = [
@@ -114,14 +120,14 @@ async function initializeGame() {
         { container: opponentLeftContainer, playerIndex: 3, position: "LEFT" }
     ];
 
-    for (const {container, playerIndex, position} of opponentPositions) {
+    for (const {container, playerIndex} of opponentPositions) {
         const player = gameController.players[playerIndex];
         const bar = new OpponentBar(container, player);
         opponentBars.push({bar, playerIndex});
     }
 
     // Initialize Touch Handler
-    touchHandler = new TouchHandler(handContainer);
+    // const touchHandler = new TouchHandler(handContainer);
 
     // Store status display for global access
     statusDisplay = statusElement;
@@ -154,7 +160,7 @@ async function initializeGame() {
         }
     });
 
-    gameController.on("TURN_CHANGED", (data) => {
+    gameController.on("TURN_CHANGED", () => {
         // Update all opponent bars to show current turn
         opponentBars.forEach(({bar}) => {
             bar.update(bar.playerData);
@@ -214,7 +220,8 @@ async function initializeGame() {
 /**
  * Register Service Worker
  */
-async function registerServiceWorker() {
+/*
+// async function registerServiceWorker() {
     // Check if service workers are supported
     if (!("serviceWorker" in navigator)) {
         console.log("Service workers not supported");
@@ -251,10 +258,12 @@ async function registerServiceWorker() {
         console.error("Service worker registration failed:", error);
     }
 }
+*/
 
 /**
  * Show notification when update is available
  */
+/*
 function showUpdateNotification(registration) {
     // Create update banner
     const banner = document.createElement("div");
@@ -293,3 +302,4 @@ function showUpdateNotification(registration) {
         registration.waiting.postMessage({ type: "SKIP_WAITING" });
     }
 }
+*/

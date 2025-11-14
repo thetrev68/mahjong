@@ -203,7 +203,7 @@ export class PhaserAdapter {
      * Update button visibility/state based on game state
      * Phase 2B: Replaces GameLogic.updateUI() for button management
      */
-    updateButtonState(state) {
+    updateButtonState() {
         // Hide all buttons by default
         this.hideButtons();
 
@@ -211,7 +211,7 @@ export class PhaserAdapter {
         // This is handled by UI_PROMPT events, so we just ensure cleanup here
     }
 
-    onGameStarted(data) {
+    onGameStarted() {
         printMessage("Game started!");
 
         // Reset Phaser table
@@ -456,7 +456,6 @@ export class PhaserAdapter {
 
     onHandUpdated(data) {
         const {player: playerIndex, hand: handData} = data;
-        const player = this.table.players[playerIndex];
 
         // For now, just log - full hand sync will happen in Phase 2B
         console.log(`Hand updated for player ${playerIndex}: ${handData.tiles.length} hidden, ${handData.exposures.length} exposed`);
@@ -468,7 +467,7 @@ export class PhaserAdapter {
     }
 
     onTurnChanged(data) {
-        const {currentPlayer, previousPlayer} = data;
+        const {currentPlayer} = data;
 
         this.table.switchPlayer(currentPlayer);
 
@@ -482,7 +481,7 @@ export class PhaserAdapter {
     }
 
     onCharlestonPass(data) {
-        const {player: playerIndex, tiles: tileDatas, direction} = data;
+        const {player: playerIndex, direction} = data;
         const player = this.table.players[playerIndex];
 
         printMessage(`${player.playerInfo.name} passed 3 tiles ${direction}`);
@@ -553,7 +552,7 @@ export class PhaserAdapter {
      * Setup discard tile selection (human player)
      * Phase 2B: Enable tile selection with callback
      */
-    setupDiscardPrompt(options) {
+    setupDiscardPrompt() {
         const player = this.table.players[PLAYER.BOTTOM];
 
         printInfo("Select a tile to discard");
@@ -632,9 +631,6 @@ export class PhaserAdapter {
         const player = this.table.players[PLAYER.BOTTOM];
 
         printInfo(`Choose ${requiredCount} tiles to pass ${direction}`);
-
-        // Enable multi-tile selection (up to 3)
-        const selectedTiles = [];
 
         // Use existing selection system from Hand
         // The Hand class already supports multi-select during Charleston state

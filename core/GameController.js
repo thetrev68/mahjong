@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+
 /**
  * GameController - Platform-agnostic game state machine
  *
@@ -100,7 +102,7 @@ export class GameController extends EventEmitter {
      * @param {Object} options.cardValidator - Hand validation system
      * @param {Object} options.settings - Game settings
      */
-    async init(options = {}) {
+    init(options = {}) {
         this.aiEngine = options.aiEngine;
         this.cardValidator = options.cardValidator;
 
@@ -375,7 +377,7 @@ export class GameController extends EventEmitter {
         // AI players vote
         const aiVotes = this.players
             .filter(p => !p.isHuman)
-            .map(p => this.aiEngine.charlestonContinueVote());
+            .map(() => this.aiEngine.charlestonContinueVote());
 
         const yesVotes = [humanVote === "Yes", ...aiVotes].filter(v => v).length;
 
@@ -518,7 +520,7 @@ export class GameController extends EventEmitter {
 
             // Check for Mahjong after drawing (self-draw win)
             if (this.checkMahjong()) {
-                await this.endGame("mahjong");
+                this.endGame("mahjong");
                 return;
             }
 
@@ -530,7 +532,7 @@ export class GameController extends EventEmitter {
 
             if (claimResult.claimed) {
                 // Tile was claimed - handle the claim
-                await this.handleDiscardClaim(claimResult);
+                this.handleDiscardClaim(claimResult);
 
                 // Check if claiming player won with Mahjong
                 if (this.gameResult.mahjong) {
@@ -549,7 +551,7 @@ export class GameController extends EventEmitter {
 
         // Wall is empty - wall game
         if (this.wall.length === 0 && !this.gameResult.mahjong) {
-            await this.endGame("wall_game");
+            this.endGame("wall_game");
         }
     }
 
@@ -681,7 +683,7 @@ export class GameController extends EventEmitter {
      * Handle a claimed discard
      * @param {Object} claimResult
      */
-    async handleDiscardClaim(claimResult) {
+    handleDiscardClaim(claimResult) {
         const {player: claimingPlayerIndex, claimType} = claimResult;
         const tile = this.discards.pop();  // Remove from discard pile
 
@@ -691,7 +693,7 @@ export class GameController extends EventEmitter {
             // Player won with this tile
             this.gameResult.mahjong = true;
             this.gameResult.winner = claimingPlayerIndex;
-            await this.endGame("mahjong");
+            this.endGame("mahjong");
             return;
         }
 
@@ -706,7 +708,7 @@ export class GameController extends EventEmitter {
 
         // Expose tiles
         this.setState(STATE.LOOP_EXPOSE_TILES);
-        await this.exposeTiles(claimingPlayerIndex, claimType, tile);
+        this.exposeTiles(claimingPlayerIndex, claimType, tile);
 
         // Claiming player becomes current player
         this.currentPlayer = claimingPlayerIndex;
@@ -722,7 +724,7 @@ export class GameController extends EventEmitter {
      * @param {string} exposureType
      * @param {TileData} claimedTile
      */
-    async exposeTiles(playerIndex, exposureType, claimedTile) {
+    exposeTiles(playerIndex, exposureType, claimedTile) {
         const player = this.players[playerIndex];
 
         // Find matching tiles in hand
@@ -805,7 +807,7 @@ export class GameController extends EventEmitter {
      * End the game
      * @param {string} reason - 'mahjong', 'wall_game', 'quit'
      */
-    async endGame(reason) {
+    endGame(reason) {
         this.setState(STATE.END);
 
         this.emit("GAME_ENDED", {

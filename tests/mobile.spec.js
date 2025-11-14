@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+
 import { test, expect } from "@playwright/test";
 
 test.describe("Mobile Interface", () => {

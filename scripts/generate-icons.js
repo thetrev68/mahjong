@@ -1,5 +1,8 @@
-// scripts/generate-icons.js
 /* eslint-env node */
+/* global process */
+/* eslint-disable no-await-in-loop */
+
+// scripts/generate-icons.js
 import sharp from "sharp";
 import { readFileSync, existsSync, mkdirSync } from "fs";
 
