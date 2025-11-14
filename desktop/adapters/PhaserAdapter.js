@@ -249,7 +249,7 @@ export class PhaserAdapter {
     onTilesDealt(data) {
         // Update wall counter
         const totalDealt = data.players.reduce((sum, p) => sum + p.tileCount, 0);
-        const remainingInWall = this.table.wall.getLength() - totalDealt;
+        const remainingInWall = this.table.wall.getCount() - totalDealt;
 
         if (this.scene.updateWallTileCounter) {
             this.scene.updateWallTileCounter(remainingInWall);
@@ -292,7 +292,7 @@ export class PhaserAdapter {
 
         // Update wall counter
         if (this.scene.updateWallTileCounter) {
-            this.scene.updateWallTileCounter(this.table.wall.getLength());
+            this.scene.updateWallTileCounter(this.table.wall.getCount());
         }
 
         if (playerIndex === PLAYER.BOTTOM) {

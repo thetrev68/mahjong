@@ -290,7 +290,7 @@ export class GameLogic {
     start() {
         // START
         this.state = STATE.START;
-        this.updateUI();
+        // this.updateUI(); // Disabled in Phase 2B
 
         this.gameResult.mahjong = false;
         this.gameResult.winner = 0;
@@ -314,7 +314,7 @@ export class GameLogic {
     deal() {
         // DEAL
         this.state = STATE.DEAL;
-        this.updateUI();
+        // this.updateUI(); // Disabled in Phase 2B
 
         // Create hand for debugging / testing
         const initPlayerHandArray = [null, null, null, null];
@@ -347,7 +347,7 @@ export class GameLogic {
     async charleston() {
         // CHARLESTON
         this.state = STATE.CHARLESTON1;
-        this.updateUI();
+        // this.updateUI(); // Disabled in Phase 2B
 
         await this.charlestonPass(PLAYER.RIGHT);
         // Update hints after Charleston pass 1 is complete (player 0 has received tiles)

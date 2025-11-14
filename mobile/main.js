@@ -8,6 +8,7 @@ import {OpponentBar} from "./components/OpponentBar.js";
 import {GameController} from "../core/GameController.js";
 import {AIEngine} from "../core/AIEngine.js";
 import {Card} from "../card/card.js";
+import {TileData} from "../core/models/TileData.js";
 import "./styles/base.css";
 import "./styles/SettingsSheet.css";
 import "./styles/HandRenderer.css";
@@ -170,18 +171,43 @@ async function initializeGame() {
     gameController.on("UI_PROMPT", async (data) => {
         console.log("UI_PROMPT received:", data.promptType, data.options);
 
-        // Temporary: Auto-respond to UI prompts until UI is implemented
+        // Handle UI prompts for human player
         if (data.promptType === "CHOOSE_DISCARD") {
-            // Have AI choose discard for human player temporarily
+            // Human player chooses discard
             const player = gameController.players[0];
-            statusDisplay.textContent = "Choosing discard...";
-            const tileToDiscard = await aiEngine.chooseDiscard(player.hand);
-            console.log("Auto-discarding tile:", tileToDiscard);
-            data.callback(tileToDiscard);
+            const hand = player.hand.tiles;
+            const handText = hand.map((tile, index) => `${index}: ${tile.getText()}`).join('\n');
+            const choice = window.prompt(`Choose a tile to discard:\n${handText}\nEnter tile index (0-${hand.length - 1}):`);
+            const index = parseInt(choice, 10);
+            if (!isNaN(index) && index >= 0 && index < hand.length) {
+                statusDisplay.textContent = `Discarding ${hand[index].getText()}...`;
+                data.callback(hand[index]);
+            } else {
+                // Invalid choice, choose first tile as fallback
+                statusDisplay.textContent = "Invalid choice, discarding first tile...";
+                data.callback(hand[0]);
+            }
         } else if (data.promptType === "CLAIM_DISCARD") {
-            // Auto-pass on claims for now
-            statusDisplay.textContent = "Passing claim...";
-            data.callback("Pass");
+            // Human player decides on claim
+            const {tile: tileData, options: claimOptions} = data.options;
+            const tileText = TileData.fromJSON(tileData).getText();
+            const optionsText = claimOptions.join(', ');
+            const choice = window.prompt(`Claim ${tileText}? Options: ${optionsText}`);
+            if (claimOptions.includes(choice)) {
+                statusDisplay.textContent = `Claiming: ${choice}`;
+                data.callback(choice);
+            } else {
+                // Default to Pass
+                statusDisplay.textContent = "Passing claim...";
+                data.callback("Pass");
+            }
+        } else {
+            // For other prompts, auto-pass or handle as needed
+            console.log("Unhandled prompt type:", data.promptType);
+            // For now, call callback with null or appropriate default
+            if (data.callback) {
+                data.callback(null);
+            }
         }
     });
 

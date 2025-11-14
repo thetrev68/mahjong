@@ -89,7 +89,7 @@ class GameScene extends Phaser.Scene {
         // Expose for testing
         window.gameController = this.gameController;
 
-        this.gGameLogic.updateUI();
+        // this.gGameLogic.updateUI(); // Disabled in Phase 2B - adapter handles UI now
 
 
         this.gGameLogic.wallCounter = this.createWallTileCounter();

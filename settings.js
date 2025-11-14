@@ -169,7 +169,7 @@ class DesktopSettingsManager {
     }
 
     getDifficulty() {
-        return this.getSetting("aiDifficulty", "medium");
+        return this.getSetting("difficulty", "medium");
     }
 
     getCardYear() {
@@ -242,8 +242,8 @@ class DesktopSettingsManager {
 
     applyDifficultySettings(settings) {
         const difficultySelect = document.getElementById("difficultySelect");
-        if (difficultySelect && settings.aiDifficulty) {
-            difficultySelect.value = settings.aiDifficulty;
+        if (difficultySelect && settings.difficulty) {
+            difficultySelect.value = settings.difficulty;
         }
     }
 
@@ -281,7 +281,7 @@ class DesktopSettingsManager {
 
     saveDifficultySettings() {
         const settings = {};
-        settings.aiDifficulty = document.getElementById("difficultySelect")?.value ?? "medium";
+        settings.difficulty = document.getElementById("difficultySelect")?.value ?? "medium";
         SettingsManager.save(settings);
     }
 
