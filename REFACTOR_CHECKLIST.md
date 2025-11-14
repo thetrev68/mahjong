@@ -266,67 +266,67 @@ Use this checklist to track progress through all four phases.
 ## Phase 3.5: Eliminate GameLogicStub and Refactor Legacy Dependencies
 
 ### Task 3.5.1: Analyze Hand/TileSet Dependencies
-- [ ] Document all gameLogic references
-- [ ] Identify usage patterns
-- [ ] Create dependency analysis
+- [x] Document all gameLogic references
+- [x] Identify usage patterns
+- [x] Create dependency analysis
 
 ### Task 3.5.2: Move HintAnimationManager to Desktop
-- [ ] Move to `desktop/managers/HintAnimationManager.js`
-- [ ] Update imports in GameScene.js
-- [ ] Update HintAnimationManager constructor
-- [ ] Test: npm run lint passes
+- [x] Move to `desktop/managers/HintAnimationManager.js`
+- [x] Update imports in GameScene.js
+- [x] Update HintAnimationManager constructor
+- [x] Test: npm run lint passes
 
 ### Task 3.5.3: Refactor Hand/TileSet Error Display
-- [ ] Remove gameLogic parameter from Hand constructor
-- [ ] Update error display to use scene.errorText directly
-- [ ] Replace all displayErrorText() calls
-- [ ] Test: Error messages still display
+- [x] Remove gameLogic parameter from Hand constructor
+- [x] Update error display to use scene.errorText directly
+- [x] Replace all displayErrorText() calls
+- [x] Test: Error messages still display
 
 ### Task 3.5.4: Refactor Hand/TileSet State Checks
-- [ ] Add validation mode to Hand/TileSet
-- [ ] Add setValidationMode() method
-- [ ] Replace state checks with mode checks
-- [ ] Update PhaserAdapter to set modes
-- [ ] Test: Selection validation works
+- [x] Add validation mode to Hand/TileSet
+- [x] Add setValidationMode() method
+- [x] Replace state checks with mode checks
+- [x] Update PhaserAdapter to set modes
+- [x] Test: Selection validation works
 
 ### Task 3.5.5: Refactor Hand/TileSet discardTile Access
-- [ ] Add discardTile field to Hand
-- [ ] Add setDiscardTile() method
-- [ ] Replace gameLogic.discardTile references
-- [ ] Update PhaserAdapter to set discardTile
-- [ ] Test: Exposure validation works
+- [x] Add discardTile field to Hand
+- [x] Add setDiscardTile() method
+- [x] Replace gameLogic.discardTile references
+- [x] Update PhaserAdapter to set discardTile
+- [x] Test: Exposure validation works
 
 ### Task 3.5.6: Clean Up Table Reference
-- [ ] Verify direct table access
-- [ ] Update Hand constructor as needed
-- [ ] Test: Hand can access data
+- [x] Verify direct table access
+- [x] Update Hand constructor as needed
+- [x] Test: Hand can access data
 
 ### Task 3.5.7: Update HintAnimationManager Dependencies
-- [ ] Update constructor to accept scene, table, gameAI, card directly
-- [ ] Replace all gameLogic references
-- [ ] Update GameScene initialization
-- [ ] Test: Hints still work
+- [x] Update constructor to accept scene, table, aiEngine, card directly
+- [x] Replace all gameLogic references
+- [x] Update GameScene initialization
+- [x] Test: Hints still work
 
 ### Task 3.5.8: Delete gameLogicStub.js
-- [ ] Verify no references remain
-- [ ] Delete file
-- [ ] Remove import from GameScene
-- [ ] Test: npm run lint passes, npm run build succeeds
+- [x] Verify no references remain
+- [x] Delete file
+- [x] Remove import from GameScene
+- [x] Test: npm run lint passes, npm run build succeeds
 
 ### Task 3.5.9: Update References Throughout
-- [ ] Search for all gameLogicStub references
-- [ ] Remove imports and initialization
-- [ ] Test: Game plays without errors
-- [ ] Commit: "refactor: Remove gameLogicStub completely"
+- [x] Search for all gameLogicStub references
+- [x] Remove imports and initialization
+- [x] Test: Game plays without errors
+- [x] Commit: "refactor: Remove gameLogicStub completely"
 
 ### Phase 3.5 Final Checks
-- [ ] `npm run lint` passes
-- [ ] `npm run build` succeeds
-- [ ] Game plays without errors
-- [ ] All validation works
-- [ ] No legacy dependencies exist
+- [x] `npm run lint` passes
+- [x] `npm run build` succeeds
+- [x] Game plays without errors
+- [x] All validation works
+- [x] No legacy dependencies exist
 
-**Phase 3.5 Status**: ⬜ Not Started / 🟡 In Progress / ✅ Complete
+**Phase 3.5 Status**: ⬜ Not Started / 🟡 In Progress / ✅ Complete ← HERE
 
 ---
 
