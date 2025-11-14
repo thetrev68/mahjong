@@ -263,55 +263,146 @@ Use this checklist to track progress through all four phases.
 
 ---
 
-## Phase 4: Create Mobile Renderer (POC)
+## Phase 3.5: Eliminate GameLogicStub and Refactor Legacy Dependencies
 
-### Task 4.1: Create MobileRenderer Base
-- [ ] Create mobile/renderers/MobileRenderer.js
-- [ ] Set up event listener structure
-- [ ] Create stub event handlers
-- [ ] Test: MobileRenderer initializes without errors
+### Task 3.5.1: Analyze Hand/TileSet Dependencies
+- [ ] Document all gameLogic references
+- [ ] Identify usage patterns
+- [ ] Create dependency analysis
 
-### Task 4.2: Implement Charleston Phase UI
-- [ ] Create HTML structure for Charleston
-- [ ] Implement tile selection
-- [ ] Implement pass button
-- [ ] Implement event handlers
-- [ ] Implement callbacks to GameController
-- [ ] Test: Charleston phase playable
-- [ ] Commit: "feat: Add mobile Charleston phase"
+### Task 3.5.2: Move HintAnimationManager to Desktop
+- [ ] Move to `desktop/managers/HintAnimationManager.js`
+- [ ] Update imports in GameScene.js
+- [ ] Update HintAnimationManager constructor
+- [ ] Test: npm run lint passes
 
-### Task 4.3: Implement Main Loop (Simplified)
-- [ ] Extend HTML for main loop
-- [ ] Implement tile draw display
-- [ ] Implement discard pile
-- [ ] Implement turn display
-- [ ] Implement claim dialogs
-- [ ] Test: Can play multiple turns
-- [ ] Commit: "feat: Add mobile main loop"
+### Task 3.5.3: Refactor Hand/TileSet Error Display
+- [ ] Remove gameLogic parameter from Hand constructor
+- [ ] Update error display to use scene.errorText directly
+- [ ] Replace all displayErrorText() calls
+- [ ] Test: Error messages still display
 
-### Task 4.4: Document Renderer Pattern
-- [ ] Create MOBILE_RENDERER_PATTERN.md
-- [ ] Document event subscription
-- [ ] Document callback patterns
-- [ ] Document best practices
-- [ ] Create code examples
+### Task 3.5.4: Refactor Hand/TileSet State Checks
+- [ ] Add validation mode to Hand/TileSet
+- [ ] Add setValidationMode() method
+- [ ] Replace state checks with mode checks
+- [ ] Update PhaserAdapter to set modes
+- [ ] Test: Selection validation works
 
-### Task 4.5: Create Test Harness
-- [ ] Create mobile/test-harness.html
-- [ ] Set up GameController initialization
-- [ ] Set up MobileRenderer
-- [ ] Add event logging
-- [ ] Add manual progression buttons
-- [ ] Test: Test harness works
-- [ ] Commit: "feat: Add mobile test harness"
+### Task 3.5.5: Refactor Hand/TileSet discardTile Access
+- [ ] Add discardTile field to Hand
+- [ ] Add setDiscardTile() method
+- [ ] Replace gameLogic.discardTile references
+- [ ] Update PhaserAdapter to set discardTile
+- [ ] Test: Exposure validation works
+
+### Task 3.5.6: Clean Up Table Reference
+- [ ] Verify direct table access
+- [ ] Update Hand constructor as needed
+- [ ] Test: Hand can access data
+
+### Task 3.5.7: Update HintAnimationManager Dependencies
+- [ ] Update constructor to accept scene, table, gameAI, card directly
+- [ ] Replace all gameLogic references
+- [ ] Update GameScene initialization
+- [ ] Test: Hints still work
+
+### Task 3.5.8: Delete gameLogicStub.js
+- [ ] Verify no references remain
+- [ ] Delete file
+- [ ] Remove import from GameScene
+- [ ] Test: npm run lint passes, npm run build succeeds
+
+### Task 3.5.9: Update References Throughout
+- [ ] Search for all gameLogicStub references
+- [ ] Remove imports and initialization
+- [ ] Test: Game plays without errors
+- [ ] Commit: "refactor: Remove gameLogicStub completely"
+
+### Phase 3.5 Final Checks
+- [ ] `npm run lint` passes
+- [ ] `npm run build` succeeds
+- [ ] Game plays without errors
+- [ ] All validation works
+- [ ] No legacy dependencies exist
+
+**Phase 3.5 Status**: ⬜ Not Started / 🟡 In Progress / ✅ Complete
+
+---
+
+## Phase 4: Wire Mobile Renderer to GameController
+
+### Task 4.1: Connect GameController to Mobile main.js
+- [ ] Create GameController instance in mobile/main.js
+- [ ] Wire initialization with same options as desktop
+- [ ] Test: GameController initializes without Phaser
+
+### Task 4.2: Wire Opponent Bars
+- [ ] Create OpponentBar elements for 3 AI players
+- [ ] Subscribe to STATE_CHANGED events
+- [ ] Subscribe to TILE_DRAWN events
+- [ ] Subscribe to TURN_CHANGED events
+- [ ] Test: Opponent bars display and update
+
+### Task 4.3: Wire Hand Renderer for Human Player
+- [ ] Connect HandRenderer to GameController
+- [ ] Subscribe to TILES_DEALT events
+- [ ] Subscribe to TILE_DRAWN events
+- [ ] Subscribe to TILE_DISCARDED events
+- [ ] Subscribe to TILES_EXPOSED events
+- [ ] Wire TouchHandler for selection
+- [ ] Test: Can select/deselect tiles
+
+### Task 4.4: Wire Discard Pile Display
+- [ ] Connect DiscardPile component
+- [ ] Subscribe to TILE_DISCARDED events
+- [ ] Display recent discards
+- [ ] Test: Discards display and update
+
+### Task 4.5: Implement Charleston Phase UI
+- [ ] Handle UI_PROMPT for Charleston
+- [ ] Implement tile selection with validation
+- [ ] Implement "Pass" button
+- [ ] Validate selections (prevent joker/blank passing)
+- [ ] Test: Charleston phase playable on mobile
+
+### Task 4.6: Implement Main Loop Interaction
+- [ ] Handle LOOP_CHOOSE_DISCARD prompts
+- [ ] Handle LOOP_QUERY_CLAIM_DISCARD prompts
+- [ ] Handle LOOP_EXPOSE_TILES prompts
+- [ ] Implement dialogs for yes/no choices
+- [ ] Test: Main loop playable on mobile
+
+### Task 4.7: Wire Audio (Optional)
+- [ ] Create audio player for mobile
+- [ ] Subscribe to tile events
+- [ ] Play sounds for pickup, discard, drop
+- [ ] Test: Audio plays (optional but nice)
+
+### Task 4.8: Document Mobile Renderer Integration
+- [ ] Create MOBILE_RENDERER_INTEGRATION.md
+- [ ] Document event subscription pattern
+- [ ] Document UI prompt handling
+- [ ] Document user input wiring
+- [ ] Provide code examples
+
+### Task 4.9: Test Mobile with Same GameController as Desktop
+- [ ] Play game on desktop (Phaser)
+- [ ] Play same game on mobile (HTML/CSS)
+- [ ] Verify identical behavior
+- [ ] Test with different settings
+- [ ] Commit: "feat: Wire mobile renderer to GameController"
 
 ### Phase 4 Final Checks
-- [ ] Mobile renderer can play Charleston phase
-- [ ] Mobile renderer can play main loop
-- [ ] Same GameController used for both desktop and mobile
-- [ ] No modifications to GameController needed for mobile
-- [ ] Test harness works
-- [ ] Documentation complete
+- [ ] GameController runs in mobile context
+- [ ] All components connected and working
+- [ ] Charleston phase playable
+- [ ] Main loop playable
+- [ ] Mobile and desktop use identical GameController
+- [ ] No GameController modifications needed
+- [ ] `npm run lint` passes
+- [ ] `npm run build` succeeds
+- [ ] No console errors
 
 **Phase 4 Status**: ⬜ Not Started / 🟡 In Progress / ✅ Complete
 
@@ -371,8 +462,9 @@ Use this checklist to track progress through all four phases.
 | 1: GameController | ✅ Complete | 2024-11-xx | 2024-11-xx |
 | 2: PhaserAdapter | ✅ Complete | 2024-11-14 | 2024-11-14 |
 | 3: Remove GameLogic | ✅ Complete | 2024-11-14 | 2024-11-14 |
-| 4: Mobile POC | ⬜ Not Started | - | - |
-| **TOTAL** | 🟡 75% Complete | 2024-11-xx | - |
+| 3.5: Eliminate Stub | ⬜ Not Started | - | - |
+| 4: Wire Mobile | ⬜ Not Started | - | - |
+| **TOTAL** | 🟡 75% Complete (3/5) | 2024-11-xx | - |
 
 ---
 

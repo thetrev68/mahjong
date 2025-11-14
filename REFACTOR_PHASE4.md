@@ -1,292 +1,346 @@
-# Phase 4: Create Mobile Renderer (Proof of Concept)
+# Phase 4: Wire Mobile Renderer to GameController
 
 ## Overview
 
-After Phases 1-3 are complete, Phase 4 creates a non-Phaser renderer that listens to the same GameController events, proving the separation works for multiple platforms.
+Mobile renderer infrastructure is already built (AnimationController, HandRenderer, components, CSS). Phase 4 wires this existing renderer to GameController, proving the architecture works across platforms.
 
-This is **NOT** a full mobile implementation, but rather a proof of concept showing that GameController is truly platform-agnostic.
+**This is NOT building a mobile renderer - it's integrating the existing one.**
 
-## Current State
+## Current State (After Phase 3.5)
 
 - GameController is complete and pure logic
 - PhaserAdapter is complete Phaser rendering
-- GameLogic is deleted
+- Mobile renderer components exist but are disconnected
+- gameLogicStub and legacy dependencies are eliminated
+- Hand/TileSet are clean data structures
 
-## Goal
+## Mobile Infrastructure Already Built
 
-Create a minimal mobile renderer that:
-- Listens to same GameController events as PhaserAdapter
-- Renders to a simple HTML/CSS UI (not Phaser)
-- Demonstrates that GameController works for multiple platforms
-- Shows that alternative renderers can be built without modifying GameController
+### Existing Files
+- `mobile/main.js` - Entry point (partially complete)
+- `mobile/renderers/HandRenderer.js` - Renders player hand
+- `mobile/components/DiscardPile.js` - Shows discard pile
+- `mobile/components/MobileTile.js` - Individual tile component
+- `mobile/components/OpponentBar.js` - Shows opponent status
+- `mobile/components/SettingsSheet.js` - Settings UI
+- `mobile/components/InstallPrompt.js` - PWA install prompt
+- `mobile/gestures/TouchHandler.js` - Touch input handling
+- `mobile/animations/AnimationController.js` - Animation orchestration
+- `mobile/styles/` - Complete CSS for all components
+
+### What Needs to Happen
+
+Mobile main.js needs to:
+1. Create GameController (same way desktop does)
+2. Create mobile renderer components
+3. Subscribe to GameController events
+4. Update mobile UI based on events
+5. Wire user interactions back to GameController
 
 ## Architecture
 
 ```
-GameController (unchanged)
-       ↓
-   Events
-       ↓
-   ┌─────┬──────────────┐
-   ↓     ↓              ↓
-PhaserAdapter  MobileRenderer  (Future renderers)
-(Desktop)      (Mobile)
+GameController
+    ↓ (events)
+    ├─→ PhaserAdapter (Phaser/Desktop)
+    │
+    └─→ MobileRenderer (HTML/CSS/Mobile)
+        ├─→ HandRenderer
+        ├─→ DiscardPile
+        ├─→ OpponentBar
+        └─→ TouchHandler
 ```
 
 ## Tasks
 
-### Task 4.1: Create MobileRenderer Base Structure
+### Task 4.1: Connect GameController to Mobile main.js
 
-**Goal**: Skeleton renderer that listens to GameController events
+**Goal**: Create GameController instance in mobile context
 
-**Create**: `mobile/renderers/MobileRenderer.js`
+**Current State**: mobile/main.js has skeleton structure but doesn't create GameController
 
-**Structure**:
-```javascript
-class MobileRenderer {
-  constructor(gameController, container) {
-    this.gameController = gameController;
-    this.container = container;  // HTML element
-    this.setupEventListeners();
-  }
+**Actions**:
+1. In mobile/main.js DOMContentLoaded handler:
+   ```javascript
+   // Create GameController
+   gameController = new GameController();
+   await gameController.init({
+       sharedTable: null,  // Mobile creates its own data structures
+       settings: {
+           year: window.settingsManager.getCardYear(),
+           difficulty: window.settingsManager.getDifficulty(),
+           useBlankTiles: window.settingsManager.getUseBlankTiles(),
+           skipCharleston: false
+       }
+   });
+   ```
+2. Verify GameController initializes without Phaser
+3. Test: No errors on mobile/index.html load
 
-  setupEventListeners() {
-    // Subscribe to all GameController events
-    // (same as PhaserAdapter)
-  }
-
-  // Event handlers
-  onStateChanged(data) { }
-  onGameStarted(data) { }
-  onTileDrawn(data) { }
-  onTileDiscarded(data) { }
-  // ... etc
-}
-```
-
-**Features**:
-- Subscribes to all GameController events
-- Has stubs for all event handlers
-- Can be initialized in test harness
-
-**Testing**:
-- Create simple HTML page with MobileRenderer
-- Verify event listeners are registered
-- Verify no errors on initialization
-
-**Output**: MobileRenderer skeleton
+**Output**: GameController running in mobile context
 
 ---
 
-### Task 4.2: Implement Charleston Phase UI
+### Task 4.2: Wire Opponent Bars
 
-**Goal**: First playable phase in mobile renderer
+**Goal**: Display opponent status during game
 
-**Why Charleston**:
-- Smaller scope than full game
-- Good demonstration of interactivity
-- Shows dialog/prompt system
+**Current State**: OpponentBar components exist but not connected
 
-**Implementation**:
-1. Create HTML structure for Charleston phase
-2. Implement event handlers:
-   - onStateChanged → Update UI for Charleston state
-   - onCharlestonPhase → Show Charleston interface
-   - onUIPrompt → Show tile selection UI
-   - onCharlestonPass → Update hand display after pass
+**Actions**:
+1. Create 3 opponent bar elements (Right, Top, Left players)
+2. Subscribe to GameController events:
+   - STATE_CHANGED - update button availability
+   - TILE_DRAWN - update tile count
+   - TILE_DISCARDED - update discard display
+   - TURN_CHANGED - highlight current player
 
-3. Implement user interaction:
-   - Tile selection (click to toggle)
-   - "Pass" button to confirm selection
-   - Display current selected tiles
+3. Implement event handlers:
+   ```javascript
+   gameController.on("TURN_CHANGED", (data) => {
+       const {currentPlayer} = data;
+       opponentBars.forEach((bar, i) => {
+           bar.setActive(i === currentPlayer - 1); // Adjust for player indexing
+       });
+   });
 
-4. Send callbacks to GameController:
-   - When user selects tiles → notify GameController
-   - When user clicks pass → confirm selection
+   gameController.on("TILE_DRAWN", (data) => {
+       const {player, tile} = data;
+       if (player !== PLAYER.BOTTOM) {
+           opponentBars[player - 1].addTile(tile);
+       }
+   });
+   ```
+4. Test: Opponent bars update during game
 
-**HTML Structure**:
-```html
-<div id="mobile-container">
-  <div id="phase-info">Charleston Phase 1: Select 3 tiles to pass</div>
-  <div id="player-hand">
-    <div class="tile" data-index="0">C1</div>
-    <div class="tile" data-index="1">C2</div>
-    <!-- ... -->
-  </div>
-  <div id="selected-tiles">Selected: 0</div>
-  <button id="pass-btn">Pass Tiles</button>
-</div>
-```
-
-**CSS**:
-- Simple layout, no animations needed
-- Tiles as clickable elements
-- Show selected state
-
-**Testing**:
-- Start game
-- Reach Charleston phase
-- Can select 3 tiles
-- Can pass and move to next phase
-- Hand updates correctly
-
-**Output**: Working Charleston UI in MobileRenderer
+**Output**: Opponent display working
 
 ---
 
-### Task 4.3: Implement Main Loop Phase (Simplified)
+### Task 4.3: Wire Hand Renderer for Human Player
 
-**Goal**: Extend MobileRenderer to handle basic main loop
+**Goal**: Display and enable interaction with human player's hand
 
-**Features**:
-1. Display current player
-2. Show player's hand
-3. Show discard pile
-4. Handle discard selection
-5. Handle claim dialog
+**Current State**: HandRenderer exists but not connected to GameController
 
-**Handlers**:
-- onTileDrawn → Add to hand display
-- onTileDiscarded → Show in discard pile
-- onTurnChanged → Update current player highlight
-- onUIPrompt → Show dialogs (discard selection, claim?)
+**Actions**:
+1. In mobile/main.js:
+   ```javascript
+   const handRenderer = new HandRenderer(
+       document.getElementById("player-hand-container"),
+       gameController,
+       table  // or null, HandRenderer creates its own?
+   );
+   ```
+2. Subscribe to hand-related events:
+   - TILES_DEALT - render initial hand
+   - TILE_DRAWN - add tile to hand
+   - TILE_DISCARDED - remove from hand
+   - TILES_EXPOSED - show exposed sets
 
-**Implementation**:
-```html
-<div id="game-phase">
-  <div id="current-player">Player 0's Turn</div>
-  <div id="player-hand"><!-- tiles --></div>
-  <div id="discard-pile">
-    <div class="discard-tile">C5</div>
-    <!-- ... -->
-  </div>
-  <div id="action-area">
-    <!-- dialogs appear here -->
-  </div>
-</div>
-```
+3. Wire user interactions (via TouchHandler):
+   - Tile tap → select tile
+   - Tile drag → reorder tiles
+   - Sort button → request sort
 
-**Testing**:
-- Play through several turns
-- Can discard tiles
-- Can claim discards
-- Hand updates
-- Discard pile updates
-- Turns cycle correctly
+4. HandRenderer converts user actions to GameController callbacks:
+   ```javascript
+   onTileSelected(tile) {
+       // This should trigger a callback in the current UI prompt
+       // The prompt has a resolve() callback for user selection
+   }
+   ```
 
-**Output**: Simplified main loop UI
+5. Test: Can see hand, select tiles, hand updates
+
+**Output**: Hand rendering and selection working
 
 ---
 
-### Task 4.4: Document Mobile Renderer Pattern
+### Task 4.4: Wire Discard Pile Display
 
-**Goal**: Show how to create a new renderer
+**Goal**: Show discarded tiles in central display
 
-**Create**: `MOBILE_RENDERER_PATTERN.md`
+**Current State**: DiscardPile component exists
+
+**Actions**:
+1. Subscribe to TILE_DISCARDED events
+2. Add tile to discard pile display
+3. Show discard pile in easy-to-read format (maybe last 5 tiles?)
+4. Test: Discards appear and update
+
+**Output**: Discard pile display working
+
+---
+
+### Task 4.5: Implement Charleston Phase UI
+
+**Goal**: First interactive phase in mobile
+
+**Current Implementation Details**:
+- Charleston requires selecting 3 tiles
+- "Pass" button confirms selection
+- Need to prevent invalid selections (jokers, blanks during pass)
+
+**Actions**:
+1. GameController emits UI_PROMPT for Charleston
+2. Mobile receives prompt, identifies it as "select_tiles" with count=3
+3. DialogManager equivalent in mobile:
+   ```javascript
+   gameController.on("UI_PROMPT", async (data) => {
+       if (data.type === "select_tiles") {
+           const {minTiles, maxTiles} = data;
+
+           // Hand is now in selection mode
+           handRenderer.setSelectionMode({
+               minTiles,
+               maxTiles,
+               validation: 'charleston'  // Prevents joker/blank selection
+           });
+
+           // User selects tiles
+           // Hand renderer calls resolve callback when done
+           const selectedTiles = await new Promise(resolve => {
+               handRenderer.onSelectionComplete = resolve;
+           });
+
+           // Return to GameController
+           return selectedTiles;
+       }
+   });
+   ```
+4. Test: Can play through Charleston phase on mobile
+
+**Output**: Charleston phase playable on mobile
+
+---
+
+### Task 4.6: Implement Main Loop Interaction
+
+**Goal**: Play basic main loop on mobile (discard, claim, expose)
+
+**Actions**:
+1. Handle LOOP_CHOOSE_DISCARD state:
+   - Highlight hand, require selection of 1 tile
+   - "Discard" button confirms
+
+2. Handle LOOP_QUERY_CLAIM_DISCARD state:
+   - Show dialog: "Claim discard? Yes/No"
+   - Buttons for response
+
+3. Handle LOOP_EXPOSE_TILES state:
+   - Show dialog: "Expose tiles? Yes/No"
+   - Or if yes, select which tiles to expose
+   - Validate selection (must contain discard tile)
+
+4. Implement via UI_PROMPT handler similar to Charleston
+
+5. Test: Play multiple turns on mobile
+
+**Output**: Main loop playable on mobile
+
+---
+
+### Task 4.7: Wire Audio (Optional)
+
+**Goal**: Play same audio as desktop during events
+
+**Actions**:
+1. Create simple audio player manager for mobile
+2. Subscribe to audio events (from PhaserAdapter pattern)
+3. Play sounds for:
+   - Tile pickup
+   - Tile discard
+   - Tile drop
+   - Game complete
+
+**Note**: This is optional but nice-to-have for parity with desktop
+
+**Output**: Audio feedback on mobile (optional)
+
+---
+
+### Task 4.8: Document Mobile Renderer Integration
+
+**Goal**: Explain how to integrate any renderer with GameController
+
+**Create**: `MOBILE_RENDERER_INTEGRATION.md`
 
 **Contents**:
-1. How to subscribe to GameController events
-2. How to convert events to UI updates
-3. How to convert user input to GameController callbacks
-4. Key event structure
-5. Common patterns (dialogs, lists, updates)
-6. Best practices
+1. How GameController events work
+2. How to subscribe to events
+3. How to convert UI prompts to mobile dialogs
+4. How to wire user input back to GameController
+5. Key event examples with mobile implementations
+6. Architecture pattern for new renderers
 
-**Example**:
-```javascript
-// Subscribe to an event
-gameController.on("TILE_DRAWN", (data) => {
-  const {player, tile, animation} = data;
-
-  // Update your UI
-  updatePlayerHand(player, tile);
-
-  // If animation data provided, use it
-  if (animation) {
-    playAnimation(animation);
-  }
-});
-
-// User action → GameController callback
-userSelectsTile(tile, () => {
-  // User selected a tile
-  // Notify GameController via callback in event
-  // or call method on GameController
-  gameController.selectTile(tile);
-});
-```
-
-**Output**: Documentation for creating renderers
+**Output**: Documentation for future renderers
 
 ---
 
-### Task 4.5: Create Test Harness
+### Task 4.9: Test Mobile with Same GameController as Desktop
 
-**Goal**: Easy way to test MobileRenderer without full game
+**Goal**: Prove both use identical GameController
 
-**Create**: `mobile/test-harness.html`
+**Test Plan**:
+1. Start desktop (Phaser) - play one game
+2. Open mobile (HTML/CSS) - play same game with same seed/settings
+3. Both should:
+   - Deal same tiles
+   - Progress through same phases
+   - Require same user inputs
+   - End game same way
 
-**Features**:
-- Initialize GameController
-- Initialize MobileRenderer
-- Buttons to trigger key events
-- Debug logging of all events/callbacks
-- Manual game progression
+4. Try different settings:
+   - Different difficulty
+   - Different card year
+   - With/without blank tiles
 
-**Usage**:
-```
-Open test-harness.html in browser
-→ See MobileRenderer initialized
-→ Click "Start Game" button
-→ Game progresses through phases
-→ Can interact with UI
-```
-
-**Testing**:
-- Open test-harness.html
-- Verify MobileRenderer loads
-- Click through phases
-- Verify interactions work
-
-**Output**: Working test harness
+**Output**: Confidence that GameController is truly platform-agnostic
 
 ---
 
 ## Phase 4 Completion Criteria
 
-- [ ] MobileRenderer base structure created
-- [ ] Charleston phase UI working
-- [ ] Main loop phase UI working (simplified)
-- [ ] User interactions trigger GameController callbacks
-- [ ] GameController events update mobile UI
-- [ ] Mobile renderer pattern documented
-- [ ] Test harness created and working
-- [ ] Game can be played through multiple phases in mobile view
-- [ ] No modification to GameController needed for mobile
+- [ ] GameController runs in mobile context
+- [ ] Opponent bars display and update
+- [ ] Hand renderer displays and allows interaction
+- [ ] Discard pile displays
+- [ ] Charleston phase is playable on mobile
+- [ ] Main loop is playable on mobile
+- [ ] User interactions wire back to GameController
+- [ ] GameController events drive all mobile UI
+- [ ] Mobile and desktop use identical GameController
+- [ ] No GameController modifications needed for mobile
+- [ ] Documentation complete
+- [ ] No console errors on mobile
+- [ ] Lint and build pass
 
 ## Success Indicator
 
 When you can:
-1. Open desktop Phaser version → play game with animations
-2. Open mobile HTML version → play same game without Phaser
-3. Both use the SAME GameController code
 
-**Then you have proven Option C works.**
+1. **Desktop**: Start Phaser app → play full game with animations and audio
+2. **Mobile**: Start HTML app → play same full game without Phaser
+3. **Both**: Use identical GameController code, make same decisions, reach same end state
+
+**Then you have proven Option C works and the codebase is ready for multiple renderers.**
+
+## Future Enhancements (Post-Phase 4)
+
+Once wiring is complete:
+1. Add mobile-specific touches (swipe for select/discard)
+2. Add mobile-specific styling (responsive design)
+3. Add proper PWA setup for app installation
+4. Add offline support / service workers
+5. Build as actual mobile app (React Native, Flutter, etc.)
+
+All without touching GameController.
 
 ## Notes
 
-- This is a proof of concept, not production code
-- Focus on showing the architecture works
-- Don't worry about mobile responsiveness/styling
-- The point is to demonstrate GameController is truly platform-agnostic
-- This unblocks future mobile development
-
-## Future Mobile Development
-
-Once this POC is proven:
-1. Extend MobileRenderer to full game support
-2. Add proper mobile styling/responsiveness
-3. Add touch gestures (swipe to select, etc.)
-4. Build as actual mobile app (React Native, Flutter, etc.)
-5. All without modifying GameController
-
+- This is the final proof that the refactor works
+- After this, GameController is truly platform-agnostic
+- The codebase is ready for production mobile development
+- Mobile development can proceed independently from desktop
+- Any future renderer (web, native, terminal, AI) can use same GameController
