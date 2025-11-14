@@ -679,14 +679,17 @@ export class PhaserAdapter {
         printInfo(`Choose ${requiredCount} tiles to pass ${direction}`);
 
         this.dialogManager.showCharlestonPassDialog((result) => {
-            if (result === "pass" && callback) {
-                // Get selected tiles from hand
-                const selection = player.hand.hiddenTileSet.getSelection();
-                if (selection.length === requiredCount) {
-                    const tileDatas = selection.map(tile => TileData.fromPhaserTile(tile));
-                    player.hand.hiddenTileSet.resetSelection();
-                    callback(tileDatas);
-                }
+            const selection = player.hand.hiddenTileSet.getSelection();
+
+            if (result === "pass" && selection.length === requiredCount) {
+                // Valid selection: convert and return tiles
+                const tileDatas = selection.map(tile => TileData.fromPhaserTile(tile));
+                player.hand.hiddenTileSet.resetSelection();
+                if (callback) callback(tileDatas);
+            } else {
+                // Invalid selection or cancelled: reset and return empty array
+                player.hand.hiddenTileSet.resetSelection();
+                if (callback) callback([]);
             }
         });
     }
