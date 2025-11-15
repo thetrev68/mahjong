@@ -15,7 +15,8 @@ What we're seeing:
 
 What should happen:
 - Tiles should animate from wall position to player hands during dealing
-- Each player should have exactly 13 tiles after dealing
+- Each player should have exactly 13 tiles after dealing 
+    (Trevor: Player 0 gets 14 tiles)
 - Charleston phase should show tile selection UI
 - Game should smoothly transition between phases
 
@@ -54,7 +55,7 @@ Need to verify:
 - Mobile (HTML/CSS): ❌ BROKEN - Mobile doesn't have Phaser Tile objects!
 
 **Question**: Does mobile have its own tile representation? Where does it create tiles?
-
+    (Trevor: see mobile/renderers/HandRenderer.js and mobile/components/MobileTile.js)
 ---
 
 ## Changes Made Today
@@ -74,10 +75,16 @@ Need to verify:
 npm run dev
 // Then in browser:
 1. Click "Start Game"
-2. Watch tiles - do they animate?
+2. Watch tiles - do they animate? 
+    (Trevor: Sort of. They animate off the home page, then magically appear in player hands. The deal animation does not run.)
 3. Do all 4 players have 13 tiles?
+    (Trevor: Player 0 has 14, others ahve 13. All are correct.)
 4. Does Charleston start?
+    (Trevor: No. And in fact we have lost our original code that properly handles tile selection. The action panel is empty - no buttons or text.)
 5. Can you select tiles to pass?
+    (Trevor: Sort of. I can click a tile and it discards immediately. But it is not supposed to. I should click a tile and have it raise up to a selected position (575 vs 600) then wait for me to press discard (or pass) on the action panel.)
+
+    [Trevor: It appears a substantial amount of our original code has been re-written poorly. commit 07c41b91f015a12473d641564e2b454d324fb742 was the last known good fully functional desktop version.]
 ```
 
 ### Mobile Test (if applicable)
