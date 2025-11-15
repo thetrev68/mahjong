@@ -76,6 +76,9 @@ class GameScene extends Phaser.Scene {
         const card = new Card(year);
         await card.init();
 
+        // Populate training mode dropdowns after card is initialized
+        this.populateTrainingForm(card);
+
         // Create AI engine with card validator
         const aiEngine = new AIEngine(card);
 
@@ -463,6 +466,50 @@ class GameScene extends Phaser.Scene {
                 resolve();
             }
         });
+    }
+
+    /**
+     * Populate training mode form dropdowns
+     * @param {Card} card - Card instance with valid hands
+     */
+    populateTrainingForm(card) {
+        // Populate hand select dropdown
+        const handSelect = document.getElementById("handSelect");
+        if (handSelect && card.validHandGroups) {
+            // Clear existing options
+            handSelect.innerHTML = "";
+
+            // Add hand options from card
+            for (const group of card.validHandGroups) {
+                const optionGroup = document.createElement("optgroup");
+                optionGroup.label = group.groupDescription;
+                handSelect.add(optionGroup);
+
+                for (const validHand of group.hands) {
+                    const option = document.createElement("option");
+                    option.text = validHand.description;
+                    handSelect.add(option);
+                }
+            }
+        }
+
+        // Populate number of tiles dropdown (1-14)
+        const numTileSelect = document.getElementById("numTileSelect");
+        if (numTileSelect) {
+            // Clear existing options
+            numTileSelect.innerHTML = "";
+
+            // Add options 1-14
+            for (let i = 1; i <= 14; i++) {
+                const option = document.createElement("option");
+                option.text = i;
+                option.value = i;
+                numTileSelect.add(option);
+            }
+
+            // Set default to 9 tiles
+            numTileSelect.selectedIndex = 8;  // 0-indexed, so 8 = 9th option
+        }
     }
 }
 

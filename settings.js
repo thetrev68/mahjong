@@ -310,40 +310,42 @@ class DesktopSettingsManager {
 
     applyHouseRuleSettings(settings) {
         const useBlankTiles = document.getElementById("useBlankTiles");
-        if (useBlankTiles) {
+        if (useBlankTiles && Object.prototype.hasOwnProperty.call(settings, "useBlankTiles")) {
             useBlankTiles.checked = settings.useBlankTiles;
         }
     }
     
     applyAudioSettings(settings) {
-        // Apply audio settings to UI
+        // Apply audio settings to UI with defaults
         const bgmVolumeSlider = document.getElementById("bgmVolume");
         const bgmVolumeValue = document.getElementById("bgmVolumeValue");
         const bgmMuteCheckbox = document.getElementById("bgmMute");
         const sfxVolumeSlider = document.getElementById("sfxVolume");
         const sfxVolumeValue = document.getElementById("sfxVolumeValue");
         const sfxMuteCheckbox = document.getElementById("sfxMute");
-        
+
         if (bgmVolumeSlider) {
-            bgmVolumeSlider.value = settings.bgmVolume;
+            const volume = settings.bgmVolume ?? 70;
+            bgmVolumeSlider.value = volume;
             if (bgmVolumeValue) {
-                bgmVolumeValue.textContent = `${settings.bgmVolume}%`;
+                bgmVolumeValue.textContent = `${volume}%`;
             }
         }
-        
+
         if (bgmMuteCheckbox) {
-            bgmMuteCheckbox.checked = settings.bgmMuted;
+            bgmMuteCheckbox.checked = settings.bgmMuted ?? false;
         }
-        
+
         if (sfxVolumeSlider) {
-            sfxVolumeSlider.value = settings.sfxVolume;
+            const volume = settings.sfxVolume ?? 80;
+            sfxVolumeSlider.value = volume;
             if (sfxVolumeValue) {
-                sfxVolumeValue.textContent = `${settings.sfxVolume}%`;
+                sfxVolumeValue.textContent = `${volume}%`;
             }
         }
-        
+
         if (sfxMuteCheckbox) {
-            sfxMuteCheckbox.checked = settings.sfxMuted;
+            sfxMuteCheckbox.checked = settings.sfxMuted ?? false;
         }
     }
 
