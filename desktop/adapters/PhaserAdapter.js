@@ -7,8 +7,8 @@
  * Architecture:
  * GameController (core/) emits events → PhaserAdapter listens → Updates Phaser objects via Managers
  *
- * Phase 2: Complete implementation using:
- * - AnimationLibrary for all animations
+ * Implementation uses:
+ * - Tile.animate() method for all tile animations
  * - TileManager for sprite management
  * - ButtonManager for button state
  * - DialogManager for prompts
@@ -356,19 +356,27 @@ export class PhaserAdapter {
         player.hand.insertHidden(phaserTile);
 
         // Animate tile draw (slide from wall to hand)
-        const targetPos = player.hand.calculateTilePosition(player.playerInfo, player.hand.hiddenTileSet.getLength() - 1);
+        const targetPos = player.hand.calculateTilePosition(
+            player.playerInfo,
+            player.hand.hiddenTileSet.getLength() - 1
+        );
+
+        // Animate to hand with tile.animate() method
+        const tween = phaserTile.animate(targetPos.x, targetPos.y, player.playerInfo.angle, 200);
+
+        // Fade in during animation
         this.scene.tweens.add({
             targets: phaserTile.sprite,
-            x: targetPos.x,
-            y: targetPos.y,
             alpha: 1,
-            duration: 200,
-            ease: "Power2",
-            onComplete: () => {
-                // Refresh hand display after animation
-                player.showHand(playerIndex === PLAYER.BOTTOM);
-            }
+            duration: 200
         });
+
+        // Refresh hand after animation completes
+        if (tween) {
+            tween.on("complete", () => {
+                player.showHand(playerIndex === PLAYER.BOTTOM);
+            });
+        }
 
         // Track that one tile was removed from the wall
         this.tilesRemovedFromWall++;
@@ -406,6 +414,16 @@ export class PhaserAdapter {
 
         // Remove from hand
         player.hand.removeHidden(phaserTile);
+
+        // Animate to discard pile center (350, 420 from 07c41b9)
+        const discardTween = phaserTile.animate(350, 420, 0);
+
+        // Play tile dropping sound when animation completes
+        if (discardTween && this.scene.audioManager) {
+            discardTween.on("complete", () => {
+                this.scene.audioManager.playSFX("tile_dropping");
+            });
+        }
 
         // Add to discard pile
         this.table.discards.insertDiscard(phaserTile);
