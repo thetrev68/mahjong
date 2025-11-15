@@ -1,4 +1,4 @@
-import { SUIT, PLAYER } from "./constants.js";
+import { SUIT, PLAYER } from "../../constants.js";
 
 /**
  * SelectionManager - Manages tile selection state and visual feedback
