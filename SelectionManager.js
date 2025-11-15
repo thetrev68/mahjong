@@ -1,3 +1,5 @@
+import { SUIT, PLAYER } from "./constants.js";
+
 /**
  * SelectionManager - Manages tile selection state and visual feedback
  *
@@ -14,21 +16,24 @@ export class SelectionManager {
     /**
      * Create a new SelectionManager
      * @param {Hand} hand - The Hand object containing tiles to manage selection for
-     * @param {Object} tileManager - Object with methods for visual feedback on tiles
+     * @param {Object} table - Table object for accessing player info
      */
-    constructor(hand, tileManager) {
+    constructor(hand, table) {
         this.hand = hand;
-        this.tileManager = tileManager;
+        this.table = table;
 
         // Selection state
         this.selectedTiles = new Set();     // Fast lookup: is tile selected?
         this.minCount = 1;                  // Minimum tiles that must be selected
         this.maxCount = 3;                  // Maximum tiles allowed to be selected
         this.mode = null;                   // Current mode: "charleston", "courtesy", "play", "expose"
-        this.isEnabled = false;             // Is selection currently active?
+        this._isEnabled = false;            // Is selection currently active?
 
         // For expose mode validation
         this.discardTile = null;            // The discarded tile (for expose mode)
+
+        // Track click handlers for cleanup
+        this.clickHandlers = new Map();     // tile -> handler function
     }
 
     // ============================================================================
@@ -65,12 +70,19 @@ export class SelectionManager {
      * selectionManager.enableTileSelection(1, 4, "expose");
      */
     enableTileSelection(minCount, maxCount, mode) {
-        // TODO: Implement
-        // - Set this.minCount, this.maxCount, this.mode
-        // - Set this.isEnabled = true
-        // - Clear any previous selection via clearSelection()
-        // - Attach click handlers to all tiles via _attachClickHandlers()
-        // - Update button state via _updateButtonState()
+        this.minCount = minCount;
+        this.maxCount = maxCount;
+        this.mode = mode;
+        this._isEnabled = true;
+
+        // Clear any previous selection
+        this.clearSelection();
+
+        // Attach click handlers to all tiles
+        this._attachClickHandlers();
+
+        // Update button state (should be disabled initially since no selection)
+        this._updateButtonState();
     }
 
     /**
@@ -87,12 +99,19 @@ export class SelectionManager {
      * selectionManager.disableTileSelection();
      */
     disableTileSelection() {
-        // TODO: Implement
-        // - Set this.isEnabled = false
-        // - Call clearSelection()
-        // - Remove all click event listeners from tiles
-        // - Set this.mode = null
-        // - Reset this.minCount/maxCount to defaults (1, 3)
+        this._isEnabled = false;
+
+        // Clear selection and visual feedback
+        this.clearSelection();
+
+        // Remove all click event listeners
+        this._removeClickHandlers();
+
+        // Reset to defaults
+        this.mode = null;
+        this.minCount = 1;
+        this.maxCount = 3;
+        this.discardTile = null;
     }
 
     // ============================================================================
@@ -129,13 +148,16 @@ export class SelectionManager {
      * }
      */
     toggleTile(tile) {
-        // TODO: Implement
-        // - Check if tile.selected is true or false
-        // - If selected: call deselectTile() (checks minCount constraint)
-        // - If not selected:
-        //   - If maxCount === 1: call clearSelection() first
-        //   - Call selectTile() (checks maxCount and mode validation)
-        // - Return new selection state of tile
+        if (tile.selected) {
+            // Deselect
+            return !this.deselectTile(tile); // Return false if deselected
+        } else {
+            // Select - clear others first if maxCount === 1
+            if (this.maxCount === 1) {
+                this.clearSelection();
+            }
+            return this.selectTile(tile);
+        }
     }
 
     /**
@@ -165,15 +187,28 @@ export class SelectionManager {
      * }
      */
     selectTile(tile) {
-        // TODO: Implement
-        // - If tile.selected is already true, return true (idempotent)
-        // - Check capacity: if this.getSelectionCount() >= this.maxCount, return false
-        // - Check mode validation: if !_validateTileForMode(tile), return false
-        // - Set tile.selected = true
-        // - Add tile to this.selectedTiles
-        // - Call visualizeTile(tile, true)
-        // - Call _updateButtonState()
-        // - Return true
+        // Idempotent - if already selected, succeed
+        if (tile.selected) {
+            return true;
+        }
+
+        // Check capacity
+        if (this.getSelectionCount() >= this.maxCount) {
+            return false;
+        }
+
+        // Check mode-specific validation
+        if (!this._validateTileForMode(tile)) {
+            return false;
+        }
+
+        // Perform selection
+        tile.selected = true;
+        this.selectedTiles.add(tile);
+        this.visualizeTile(tile, true);
+        this._updateButtonState();
+
+        return true;
     }
 
     /**
@@ -197,13 +232,18 @@ export class SelectionManager {
      * selectionManager.deselectTile(currentSelection[0]);
      */
     deselectTile(tile) {
-        // TODO: Implement
-        // - If tile.selected is already false, return false (already deselected)
-        // - Set tile.selected = false
-        // - Remove tile from this.selectedTiles
-        // - Call visualizeTile(tile, false)
-        // - Call _updateButtonState()
-        // - Return true
+        // Idempotent - if already deselected, nothing to do
+        if (!tile.selected) {
+            return false;
+        }
+
+        // Perform deselection
+        tile.selected = false;
+        this.selectedTiles.delete(tile);
+        this.visualizeTile(tile, false);
+        this._updateButtonState();
+
+        return true;
     }
 
     /**
@@ -222,12 +262,22 @@ export class SelectionManager {
      * selectionManager.clearSelection();
      */
     clearSelection() {
-        // TODO: Implement
-        // - Get all currently selected tiles via this.getSelection()
-        // - For each tile in selection: call deselectTile(tile)
-        // - Clear this.selectedTiles (make it empty)
-        // - Call unhighlightTiles()
-        // - Disable button via _updateButtonState()
+        // Get copy of selected tiles before clearing
+        const selectedTiles = Array.from(this.selectedTiles);
+
+        // Deselect each tile
+        for (const tile of selectedTiles) {
+            this.deselectTile(tile);
+        }
+
+        // Ensure selectedTiles is empty (should already be from deselectTile calls)
+        this.selectedTiles.clear();
+
+        // Ensure all visual feedback is cleared
+        this.unhighlightTiles();
+
+        // Update button (should disable since count is 0)
+        this._updateButtonState();
     }
 
     // ============================================================================
@@ -250,11 +300,17 @@ export class SelectionManager {
      * }
      */
     getSelection() {
-        // TODO: Implement
-        // - Create empty temp array
-        // - Iterate through all tiles in this.hand.getTileArray()
-        // - For each tile where tile.selected === true, add to temp array
-        // - Return temp array
+        // Return array of selected tiles from the hand's hidden tileset
+        const temp = [];
+        const tiles = this.hand.hiddenTileSet.getTileArray();
+
+        for (const tile of tiles) {
+            if (tile.selected) {
+                temp.push(tile);
+            }
+        }
+
+        return temp;
     }
 
     /**
@@ -271,8 +327,7 @@ export class SelectionManager {
      * }
      */
     getSelectionCount() {
-        // TODO: Implement
-        // - Return this.selectedTiles.size (or count by iterating hand.getTileArray())
+        return this.selectedTiles.size;
     }
 
     /**
@@ -289,10 +344,16 @@ export class SelectionManager {
      * console.log("Selected positions:", indices); // [0, 3, 5]
      */
     getSelectedTileIndices() {
-        // TODO: Implement
-        // - Get all tiles via this.hand.getTileArray()
-        // - For each tile, if tile.selected is true, record its index
-        // - Return array of indices
+        const indices = [];
+        const tiles = this.hand.hiddenTileSet.getTileArray();
+
+        for (let i = 0; i < tiles.length; i++) {
+            if (tiles[i].selected) {
+                indices.push(i);
+            }
+        }
+
+        return indices;
     }
 
     // ============================================================================
@@ -312,9 +373,8 @@ export class SelectionManager {
      * confirmButton.disabled = !selectionManager.isValidSelection();
      */
     isValidSelection() {
-        // TODO: Implement
-        // - Get count via this.getSelectionCount()
-        // - Return count >= this.minCount && count <= this.maxCount
+        const count = this.getSelectionCount();
+        return count >= this.minCount && count <= this.maxCount;
     }
 
     /**
@@ -330,8 +390,7 @@ export class SelectionManager {
      * }
      */
     canSelectMore() {
-        // TODO: Implement
-        // - Return this.getSelectionCount() < this.maxCount
+        return this.getSelectionCount() < this.maxCount;
     }
 
     /**
@@ -347,8 +406,7 @@ export class SelectionManager {
      * }
      */
     canDeselectMore() {
-        // TODO: Implement
-        // - Return this.getSelectionCount() > this.minCount
+        return this.getSelectionCount() > this.minCount;
     }
 
     // ============================================================================
@@ -383,17 +441,28 @@ export class SelectionManager {
      * visualizeTile(tile, false);  // Hide selection
      */
     visualizeTile(tile, isSelected) {
-        // TODO: Implement
-        // If isSelected:
-        //   - Set tile.sprite.depth = 150
-        //   - If tile.spriteBack exists: set tile.spriteBack.depth = 150
-        //   - Call tile.animate(tile.origX, 575, angle) to raise tile
-        //   - Mark tile._isVisuallySelected = true
-        // Else (not selected):
-        //   - Set tile.sprite.depth = 0
-        //   - If tile.spriteBack exists: set tile.spriteBack.depth = 0
-        //   - Call tile.animate(tile.origX, 600, angle) to lower tile
-        //   - Mark tile._isVisuallySelected = false
+        const playerObject = this.table.players[PLAYER.BOTTOM];
+        const angle = playerObject.playerInfo.angle;
+
+        if (isSelected) {
+            // Raise tile and increase depth
+            tile.sprite.setDepth(150);
+            if (tile.spriteBack) {
+                tile.spriteBack.setDepth(150);
+            }
+            // Animate to elevated position (Y=575)
+            tile.animate(tile.origX, 575, angle);
+            tile._isVisuallySelected = true;
+        } else {
+            // Lower tile and reset depth
+            tile.sprite.setDepth(0);
+            if (tile.spriteBack) {
+                tile.spriteBack.setDepth(0);
+            }
+            // Animate to normal position (Y=600)
+            tile.animate(tile.origX, 600, angle);
+            tile._isVisuallySelected = false;
+        }
     }
 
     /**
@@ -410,9 +479,10 @@ export class SelectionManager {
      * selectionManager.highlightSelectedTiles();
      */
     highlightSelectedTiles() {
-        // TODO: Implement
-        // - Get all selected tiles via this.getSelection()
-        // - For each tile: call visualizeTile(tile, true)
+        const selectedTiles = this.getSelection();
+        for (const tile of selectedTiles) {
+            this.visualizeTile(tile, true);
+        }
     }
 
     /**
@@ -428,9 +498,12 @@ export class SelectionManager {
      * selectionManager.unhighlightTiles();
      */
     unhighlightTiles() {
-        // TODO: Implement
-        // - Get all tiles from this.hand.getTileArray()
-        // - For each tile: call visualizeTile(tile, false)
+        const tiles = this.hand.hiddenTileSet.getTileArray();
+        for (const tile of tiles) {
+            if (tile.selected || tile._isVisuallySelected) {
+                this.visualizeTile(tile, false);
+            }
+        }
     }
 
     // ============================================================================
@@ -450,8 +523,7 @@ export class SelectionManager {
      * }
      */
     isEnabled() {
-        // TODO: Implement
-        // - Return this.isEnabled
+        return this._isEnabled;
     }
 
     /**
@@ -468,8 +540,7 @@ export class SelectionManager {
      * }
      */
     getCurrentMode() {
-        // TODO: Implement
-        // - Return this.mode
+        return this.mode;
     }
 
     // ============================================================================
@@ -483,15 +554,38 @@ export class SelectionManager {
      * @returns {boolean} True if tile passes all mode-specific rules
      */
     _validateTileForMode(tile) {
-        // TODO: Implement based on this.mode:
-        // "charleston": Reject if JOKER or BLANK
-        // "courtesy": Reject if JOKER or BLANK
-        // "play": Accept any tile
-        // "expose": Accept only if:
-        //   - tile.suit === SUIT.JOKER, OR
-        //   - tile matches discardTile (suit and number both match)
-        // null: Reject (not in selection mode)
-        // Return true/false
+        if (!this.mode) {
+            return false; // Not in selection mode
+        }
+
+        switch (this.mode) {
+        case "charleston":
+        case "courtesy":
+            // Cannot select jokers or blanks
+            if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
+                return false;
+            }
+            return true;
+
+        case "play":
+            // Any tile can be discarded
+            return true;
+
+        case "expose":
+            // Must match discard or be a joker
+            if (tile.suit === SUIT.JOKER) {
+                return true;
+            }
+            if (this.discardTile &&
+                    tile.suit === this.discardTile.suit &&
+                    tile.number === this.discardTile.number) {
+                return true;
+            }
+            return false;
+
+        default:
+            return false;
+        }
     }
 
     /**
@@ -500,10 +594,10 @@ export class SelectionManager {
      * @returns {undefined}
      */
     _updateButtonState() {
-        // TODO: Implement
-        // - Get button element: window.document.getElementById("button1")
-        // - If isValidSelection(): set button.disabled = false
-        // - Else: set button.disabled = true
+        const button = window.document.getElementById("button1");
+        if (button) {
+            button.disabled = !this.isValidSelection();
+        }
     }
 
     /**
@@ -512,13 +606,33 @@ export class SelectionManager {
      * @returns {undefined}
      */
     _attachClickHandlers() {
-        // TODO: Implement
-        // - Get all tiles from this.hand.getTileArray()
-        // - For each tile, attach a "pointerup" listener that:
-        //   - Checks if this.isEnabled is true
-        //   - Checks if drag occurred (skip if tile.drag is true)
-        //   - Calls this.toggleTile(tile)
-        // - Use tile.sprite.on("pointerup", callback)
+        const tiles = this.hand.hiddenTileSet.getTileArray();
+
+        for (const tile of tiles) {
+            // Create and store handler for this tile
+            const handler = () => {
+                // Ignore if not enabled
+                if (!this._isEnabled) {
+                    return;
+                }
+
+                // Ignore if this was a drag operation
+                if (tile.drag) {
+                    return;
+                }
+
+                // Toggle tile selection
+                this.toggleTile(tile);
+            };
+
+            // Store handler so we can remove it later
+            this.clickHandlers.set(tile, handler);
+
+            // Attach to sprite
+            if (tile.sprite) {
+                tile.sprite.on("pointerup", handler);
+            }
+        }
     }
 
     /**
@@ -527,9 +641,14 @@ export class SelectionManager {
      * @returns {undefined}
      */
     _removeClickHandlers() {
-        // TODO: Implement
-        // - Get all tiles from this.hand.getTileArray()
-        // - For each tile: tile.sprite.removeAllListeners("pointerup")
-        // - Or: tile.sprite.disableInteractive()
+        // Remove each stored handler
+        for (const [tile, handler] of this.clickHandlers.entries()) {
+            if (tile.sprite) {
+                tile.sprite.off("pointerup", handler);
+            }
+        }
+
+        // Clear the map
+        this.clickHandlers.clear();
     }
 }

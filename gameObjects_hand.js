@@ -4,6 +4,7 @@ import {
     SPRITE_SCALE, WINDOW_WIDTH, WINDOW_HEIGHT, TILE_GAP
 } from "./constants.js";
 import {debugPrint, debugTrace} from "./utils.js";
+import {SelectionManager} from "./SelectionManager.js";
 
 // PRIVATE CONSTANTS
 
@@ -447,6 +448,9 @@ export class Hand {
         // Properties for visual insertion feedback
         this.insertionFeedbackGhost = null;
         this.insertionFeedbackLine = null;
+
+        // SelectionManager for managing tile selection state
+        this.selectionManager = new SelectionManager(this, table);
         this.rackGraphics = null;
         // Track tile selection handlers to avoid removing handlers added elsewhere
         this.tileSelectionHandlers = new Map();
