@@ -228,10 +228,9 @@ export class GameController extends EventEmitter {
 
                 this.emit("TILE_DRAWN", event);
 
-                // Small delay for animation (optional, configurable)
-                if (this.settings.animateDealing) {
-                    await this.sleep(50);
-                }
+                // Small delay for animation to prevent all tiles appearing at once
+                // Each tile needs time to animate to hand before next tile is dealt
+                await this.sleep(100);
             }
         }
 
@@ -253,6 +252,13 @@ export class GameController extends EventEmitter {
      * Charleston tile passing phase
      */
     async charlestonPhase() {
+        // Check if Charleston should be skipped (training mode)
+        if (this.settings.skipCharleston) {
+            // Skip Charleston and Courtesy, go straight to game loop
+            await this.gameLoop();
+            return;
+        }
+
         // Charleston Phase 1 (required)
         this.charlestonState.phase = 1;
         await this.executeCharlestonPasses(1);

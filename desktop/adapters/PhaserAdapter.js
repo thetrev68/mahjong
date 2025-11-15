@@ -767,34 +767,62 @@ export class PhaserAdapter {
         const {direction, requiredCount} = options;
         const player = this.table.players[PLAYER.BOTTOM];
 
-        printInfo(`Choose ${requiredCount} tiles to pass ${direction}`);
+        printInfo(`Select ${requiredCount} tiles to pass ${direction}`);
 
-        this.dialogManager.showCharlestonPassDialog((result) => {
-            const selection = player.hand.hiddenTileSet.getSelection();
+        // Enable tile selection
+        this.selectionManager.enableTileSelection(requiredCount, requiredCount, "charleston");
 
-            if (result === "pass" && selection.length === requiredCount) {
+        // Set up button callback to handle the pass
+        this.buttonManager.registerCallback("button1", () => {
+            const selection = this.selectionManager.getSelection();
+
+            if (selection.length === requiredCount) {
                 // Valid selection: convert and return tiles
                 const tileDatas = selection.map(tile => TileData.fromPhaserTile(tile));
-                player.hand.hiddenTileSet.resetSelection();
+                this.selectionManager.clearSelection();
+                this.selectionManager.disableTileSelection();
                 if (callback) callback(tileDatas);
             } else {
-                // Invalid selection or cancelled: reset and return empty array
-                player.hand.hiddenTileSet.resetSelection();
-                if (callback) callback([]);
+                // Invalid selection
+                printInfo(`Please select exactly ${requiredCount} tiles`);
             }
         });
+
+        // Enable button when selection is valid
+        const checkSelection = () => {
+            if (this.selectionManager.getSelectionCount() === requiredCount) {
+                this.buttonManager.enableButton("button1");
+            } else {
+                this.buttonManager.disableButton("button1");
+            }
+        };
+
+        // Check selection on tile clicks
+        this.selectionManager.onSelectionChanged = checkSelection;
     }
 
     /**
      * Handle Charleston continue query
      */
     handleCharlestonContinuePrompt(callback) {
-        this.dialogManager.showYesNoDialog(
-            "Continue to next Charleston phase?",
-            (result) => {
-                if (callback) callback(result);
-            }
-        );
+        printInfo("Continue to next Charleston phase?");
+
+        // Set up Yes/No buttons
+        this.buttonManager.setText("button1", "No");
+        this.buttonManager.setText("button2", "Yes");
+        this.buttonManager.show(["button1", "button2"]);
+        this.buttonManager.enableButton("button1");
+        this.buttonManager.enableButton("button2");
+
+        this.buttonManager.registerCallback("button1", () => {
+            this.buttonManager.hide(["button1", "button2"]);
+            if (callback) callback(false);
+        });
+
+        this.buttonManager.registerCallback("button2", () => {
+            this.buttonManager.hide(["button1", "button2"]);
+            if (callback) callback(true);
+        });
     }
 
     /**
