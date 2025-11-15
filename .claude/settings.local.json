@@ -12,7 +12,8 @@
       "Bash(mkdir:*)",
       "Bash(sha256sum:*)",
       "WebFetch(domain:code.claude.com)",
-      "Bash(npm run knip:*)"
+      "Bash(npm run knip:*)",
+      "Bash(old_gameObjects_hand.txt)"
     ],
     "deny": [],
     "ask": []
