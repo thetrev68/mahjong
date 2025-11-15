@@ -336,7 +336,6 @@ a:focus-visible {
     font-size: 0.95rem;
     letter-spacing: 0.045em;
     text-transform: uppercase;
-    visibility: hidden;
     line-height: 1.25;
     overflow-y: auto;
     box-shadow: var(--shadow-inset);
@@ -347,7 +346,6 @@ a:focus-visible {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: var(--spacing-sm);
     width: 100%;
-    visibility: hidden;
 }
 
 textarea {

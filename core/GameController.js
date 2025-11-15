@@ -196,85 +196,21 @@ export class GameController extends EventEmitter {
      * Deal tiles to all players (Player 0 gets 14, others get 13)
      * Mimics real NMJL tournament play: 4-4-4-4, 4-4-4-4, 4-4-4-4, 1-1-1-1, then 1 extra for dealer
      * Based on sequentialDealTiles from commit 07c41b9
+     *
+     * Note: Actual dealing is handled entirely by PhaserAdapter to access Phaser timing
      */
     async dealTiles() {
         this.setState(STATE.DEAL);
 
-        // Define the dealing sequence matching 07c41b9: [playerIndex, tileCount]
-        // Round 1-3: 4 tiles each = 48 tiles
-        // Round 4: 1 tile each = 4 tiles
-        // Final: 1 extra for dealer = 1 tile
-        // Total: 53 tiles (Player 0 gets 14, others get 13)
-        const DEAL_SEQUENCE = [
-            // Round 1 - 4 tiles each
-            [PLAYER.BOTTOM, 4],
-            [PLAYER.RIGHT, 4],
-            [PLAYER.TOP, 4],
-            [PLAYER.LEFT, 4],
-            // Round 2 - 4 tiles each
-            [PLAYER.BOTTOM, 4],
-            [PLAYER.RIGHT, 4],
-            [PLAYER.TOP, 4],
-            [PLAYER.LEFT, 4],
-            // Round 3 - 4 tiles each
-            [PLAYER.BOTTOM, 4],
-            [PLAYER.RIGHT, 4],
-            [PLAYER.TOP, 4],
-            [PLAYER.LEFT, 4],
-            // Final tiles - 1 tile each
-            [PLAYER.BOTTOM, 1],
-            [PLAYER.RIGHT, 1],
-            [PLAYER.TOP, 1],
-            [PLAYER.LEFT, 1],
-            // Last tile for dealer (Player 0 gets 14th tile)
-            [PLAYER.BOTTOM, 1]
-        ];
-
-        // Deal tiles according to sequence
-        for (const [playerIndex, tileCount] of DEAL_SEQUENCE) {
-            // Deal all tiles for this player group
-            for (let i = 0; i < tileCount; i++) {
-                const phaserTile = this.wall.remove();
-                if (!phaserTile) {
-                    throw new Error("Wall empty during dealing!");
-                }
-
-                // Convert Phaser Tile to TileData and add to player hand
-                const tileDataObject = TileData.fromPhaserTile(phaserTile);
-                this.players[playerIndex].hand.addTile(tileDataObject);
-
-                // Emit event for each tile (for animation)
-                const tileData = {
-                    suit: phaserTile.suit,
-                    number: phaserTile.number,
-                    index: phaserTile.index
-                };
-
-                const event = GameEvents.createTileDrawnEvent(playerIndex, tileData, {
-                    type: "deal-slide",
-                    duration: 200,
-                    easing: "Quad.easeOut"
-                });
-
-                this.emit("TILE_DRAWN", event);
-            }
-
-            // Small pause between players for visual clarity (matching 07c41b9's 150ms)
-            await this.sleep(150);
-        }
-
-        // Emit deal complete event with animation info
-        const dealtEvent = GameEvents.createTilesDealtEvent(
-            this.players.map(player => ({
-                position: player.position,
-                tileCount: player.hand.getLength()
-            }))
-        );
+        // Emit event to trigger PhaserAdapter to handle dealing
+        // PhaserAdapter will manipulate Phaser wall/hands and sync back to core model
+        const dealtEvent = GameEvents.createTilesDealtEvent();
         this.emit("TILES_DEALT", dealtEvent);
 
-        // Emit message event
-        const msgEvent = GameEvents.createMessageEvent("Tiles dealt to all players", "info");
-        this.emit("MESSAGE", msgEvent);
+        // Wait for dealing to complete (PhaserAdapter will trigger this via callback)
+        return new Promise(resolve => {
+            this.once("DEALING_COMPLETE", resolve);
+        });
     }
 
     /**
