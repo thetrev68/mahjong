@@ -14,10 +14,12 @@ export class ButtonManager {
     /**
      * @param {GameScene} scene - Phaser scene
      * @param {GameController} gameController - Game controller for callbacks
+     * @param {SelectionManager} selectionManager - Selection manager for accessing selected tiles
      */
-    constructor(scene, gameController) {
+    constructor(scene, gameController, selectionManager = null) {
         this.scene = scene;
         this.gameController = gameController;
+        this.selectionManager = selectionManager;
 
         /**
          * Map of button ID → button element
@@ -181,9 +183,13 @@ export class ButtonManager {
         this.setDisabled("button1", true);  // Enabled when 3 tiles selected
 
         this.buttonCallbacks.set("button1", () => {
-            // Pass selected tiles
-            if (this.gameController.onCharlestonPass) {
-                this.gameController.onCharlestonPass();
+            // Pass selected tiles - callback is registered by PhaserAdapter.handleCharlestonPassPrompt
+            // This is just a fallback if no callback was registered
+            if (this.selectionManager && this.gameController.onCharlestonPass) {
+                const selectedTiles = this.selectionManager.getSelection();
+                if (selectedTiles.length === 3) {
+                    this.gameController.onCharlestonPass();
+                }
             }
         });
     }

@@ -49,15 +49,20 @@ export class PhaserAdapter {
 
         // Initialize Phase 2 managers
         this.tileManager = new TileManager(scene, table);
-        this.buttonManager = new ButtonManager(scene, gameController);
         this.dialogManager = new DialogManager(scene);
 
         // Initialize Phase 3 managers and renderers
         this.handRenderer = new HandRenderer(scene, table);
 
-        // Create SelectionManager for human player
+        // Create ButtonManager first (needed by SelectionManager)
+        this.buttonManager = new ButtonManager(scene, gameController);
+
+        // Create SelectionManager for human player with ButtonManager reference
         const humanHand = table.players[PLAYER.BOTTOM].hand;
-        this.selectionManager = new SelectionManager(humanHand, table);
+        this.selectionManager = new SelectionManager(humanHand, table, this.buttonManager);
+
+        // Now set SelectionManager reference on ButtonManager
+        this.buttonManager.selectionManager = this.selectionManager;
 
         this.setupEventListeners();
     }
@@ -251,10 +256,15 @@ export class PhaserAdapter {
             break;
         case "LOOP_CHOOSE_DISCARD":
             humanHand.setValidationMode("play");
+            printInfo("Select one tile to discard or declare Mahjong");
             // Selection will be enabled by discard prompt handler
             break;
         case "LOOP_EXPOSE_TILES":
             humanHand.setValidationMode("expose");
+            printInfo("Form a pung/kong/quint with claimed tile");
+            break;
+        case "LOOP_QUERY_CLAIM_DISCARD":
+            printInfo("Claim discard?");
             break;
         default:
             humanHand.setValidationMode(null);
@@ -739,24 +749,53 @@ export class PhaserAdapter {
 
         printInfo("Select a tile to discard");
 
-        // Enable tile selection with callback
-        player.hand.enableTileSelection((selectedTile) => {
-            if (callback) {
-                // Convert Phaser Tile → TileData
-                const tileData = TileData.fromPhaserTile(selectedTile);
-                callback(tileData);
+        // Set validation mode to "play" (single tile selection)
+        player.hand.setValidationMode("play");
+
+        // Register button callback to get the selected tile when user clicks "Discard"
+        this.buttonManager.registerCallback("button1", () => {
+            const selection = player.hand.hiddenTileSet.getSelection();
+            if (selection.length === 1) {
+                const selectedTile = selection[0];
+                // Clear selection and reset validation mode
+                player.hand.hiddenTileSet.resetSelection();
+                player.hand.setValidationMode(null);
+
+                if (callback) {
+                    // Convert Phaser Tile → TileData
+                    const tileData = TileData.fromPhaserTile(selectedTile);
+                    callback(tileData);
+                }
             }
         });
     }
 
     /**
      * Handle claim discard prompt
+     * Use action panel buttons instead of blocking modal dialog
      */
     handleClaimPrompt(options, callback) {
-        const {options: claimOptions} = options;
+        const {discardedTile} = options;
 
-        this.dialogManager.showClaimDialog(claimOptions, (result) => {
-            if (callback) callback(result);
+        printInfo(`Claim ${discardedTile ? discardedTile.getText() : "this discard"}?`);
+
+        // Register callbacks for each claim button
+        // Buttons are shown by ButtonManager.showClaimButtons() which shows: Claim, Pung, Kong, Pass
+
+        this.buttonManager.registerCallback("button1", () => {
+            if (callback) callback({action: "claim"});
+        });
+
+        this.buttonManager.registerCallback("button2", () => {
+            if (callback) callback({action: "pung"});
+        });
+
+        this.buttonManager.registerCallback("button3", () => {
+            if (callback) callback({action: "kong"});
+        });
+
+        this.buttonManager.registerCallback("button4", () => {
+            if (callback) callback({action: "pass"});
         });
     }
 
@@ -765,7 +804,6 @@ export class PhaserAdapter {
      */
     handleCharlestonPassPrompt(options, callback) {
         const {direction, requiredCount} = options;
-        const player = this.table.players[PLAYER.BOTTOM];
 
         printInfo(`Select ${requiredCount} tiles to pass ${direction}`);
 

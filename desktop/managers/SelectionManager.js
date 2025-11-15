@@ -17,10 +17,12 @@ export class SelectionManager {
      * Create a new SelectionManager
      * @param {Hand} hand - The Hand object containing tiles to manage selection for
      * @param {Object} table - Table object for accessing player info
+     * @param {ButtonManager} buttonManager - Optional ButtonManager for updating button states
      */
-    constructor(hand, table) {
+    constructor(hand, table, buttonManager = null) {
         this.hand = hand;
         this.table = table;
+        this.buttonManager = buttonManager;
 
         // Selection state
         this.selectedTiles = new Set();     // Fast lookup: is tile selected?
@@ -34,6 +36,9 @@ export class SelectionManager {
 
         // Track click handlers for cleanup
         this.clickHandlers = new Map();     // tile -> handler function
+
+        // Optional callback for selection changes
+        this.onSelectionChanged = null;
     }
 
     // ============================================================================
@@ -594,9 +599,24 @@ export class SelectionManager {
      * @returns {undefined}
      */
     _updateButtonState() {
-        const button = window.document.getElementById("button1");
-        if (button) {
-            button.disabled = !this.isValidSelection();
+        // Use ButtonManager if available
+        if (this.buttonManager) {
+            if (this.isValidSelection()) {
+                this.buttonManager.enableButton("button1");
+            } else {
+                this.buttonManager.disableButton("button1");
+            }
+        } else {
+            // Fallback to direct DOM manipulation
+            const button = window.document.getElementById("button1");
+            if (button) {
+                button.disabled = !this.isValidSelection();
+            }
+        }
+
+        // Call optional callback if registered
+        if (this.onSelectionChanged) {
+            this.onSelectionChanged();
         }
     }
 
