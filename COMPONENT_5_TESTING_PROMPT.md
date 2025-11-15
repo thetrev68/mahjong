@@ -67,11 +67,11 @@ Test error conditions, wall game, and winning scenarios.
 
 **Expected Behavior**:
 - ✅ Tiles animate from wall center (640, 360) to player hands
-- ✅ Human player (BOTTOM) receives 13 tiles face-up
+- ✅ Human player (BOTTOM) receives 14 tiles face-up
 - ✅ AI players (RIGHT, TOP, LEFT) receive 13 tiles face-down
 - ✅ All tiles positioned correctly in racks
 - ✅ No console errors
-- ✅ Wall tile counter shows correct count (139 remaining after deal)
+- ✅ Wall tile counter shows correct count (99 remaining after deal)
 
 **Common Issues**:
 - Tiles don't animate → Check `tile.animate()` is called in `onTileDrawn`
@@ -102,7 +102,7 @@ console.log("Wall count:", table.wall.getCount()); // Should decrease during dea
 **Expected Behavior**:
 
 **BOTTOM Player (Human)**:
-- ✅ 13 tiles in horizontal row at bottom
+- ✅ 14 tiles in horizontal row at bottom
 - ✅ Full size (scale = 1.0)
 - ✅ Face-up (can see tile faces)
 - ✅ Angle = 0° (no rotation)
