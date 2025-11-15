@@ -21,6 +21,8 @@ import {printMessage, printInfo} from "../../utils.js";
 import {TileManager} from "../managers/TileManager.js";
 import {ButtonManager} from "../managers/ButtonManager.js";
 import {DialogManager} from "../managers/DialogManager.js";
+import {SelectionManager} from "../managers/SelectionManager.js";
+import {HandRenderer} from "../renderers/HandRenderer.js";
 
 export class PhaserAdapter {
     /**
@@ -49,6 +51,13 @@ export class PhaserAdapter {
         this.tileManager = new TileManager(scene, table);
         this.buttonManager = new ButtonManager(scene, gameController);
         this.dialogManager = new DialogManager(scene);
+
+        // Initialize Phase 3 managers and renderers
+        this.handRenderer = new HandRenderer(scene, table);
+
+        // Create SelectionManager for human player
+        const humanHand = table.players[PLAYER.BOTTOM].hand;
+        this.selectionManager = new SelectionManager(humanHand, table);
 
         this.setupEventListeners();
     }
@@ -79,7 +88,7 @@ export class PhaserAdapter {
         gc.on("GAME_ENDED", (data) => this.onGameEnded(data));
 
         // Wall setup event
-        gc.on("WALL_CREATED", (data) => {
+        gc.on("WALL_CREATED", () => {
             this.initializeTileMap();
         });
 
@@ -234,18 +243,25 @@ export class PhaserAdapter {
         case "CHARLESTON1":
         case "CHARLESTON2":
             humanHand.setValidationMode("charleston");
+            // Selection will be enabled by onCharlestonPhase handler
             break;
         case "COURTESY":
             humanHand.setValidationMode("courtesy");
+            // Selection will be enabled by courtesy prompt handler
             break;
         case "LOOP_CHOOSE_DISCARD":
             humanHand.setValidationMode("play");
+            // Selection will be enabled by discard prompt handler
             break;
         case "LOOP_EXPOSE_TILES":
             humanHand.setValidationMode("expose");
             break;
         default:
             humanHand.setValidationMode(null);
+            // Disable selection when not in a selection state
+            if (this.selectionManager) {
+                this.selectionManager.disableTileSelection();
+            }
         }
     }
 
@@ -381,7 +397,7 @@ export class PhaserAdapter {
         const tileDataObj = TileData.fromJSON(tileData);
 
         // Look up the Phaser Tile object by index
-        let phaserTile = this.tileMap.get(tileDataObj.index);
+        const phaserTile = this.tileMap.get(tileDataObj.index);
 
         if (!phaserTile) {
             console.error(`Could not find Phaser Tile for index ${tileDataObj.index}`);
@@ -544,14 +560,28 @@ export class PhaserAdapter {
     /**
      * Handle hand updated
      */
-    /**
-     * Handle hand updated
-     */
     onHandUpdated(data) {
         const {player: playerIndex, hand: handData} = data;
 
         // For now, just log - full hand sync will happen from tile events
         console.log(`Hand updated for player ${playerIndex}: ${handData.tiles.length} hidden, ${handData.exposures.length} exposed`);
+
+        // Clear invalid selections for human player
+        if (playerIndex === PLAYER.BOTTOM && this.selectionManager) {
+            // Only clear if current selection is no longer valid
+            // (e.g., tiles were removed from hand after passing)
+            const currentSelection = this.selectionManager.getSelection();
+            if (currentSelection.length > 0) {
+                // Check if any selected tiles are no longer in hand
+                const humanHand = this.table.players[PLAYER.BOTTOM].hand;
+                const tilesInHand = humanHand.hiddenTileSet.tileArray || [];
+                const invalidSelection = currentSelection.some(tile => !tilesInHand.includes(tile));
+
+                if (invalidSelection) {
+                    this.selectionManager.clearSelection();
+                }
+            }
+        }
 
         // Update hint if human player
         if (playerIndex === PLAYER.BOTTOM && this.scene.hintAnimationManager) {
@@ -577,6 +607,11 @@ export class PhaserAdapter {
     onCharlestonPhase(data) {
         const {phase, passCount, direction} = data;
         printMessage(`Charleston Phase ${phase}, Pass ${passCount}: Pass ${direction}`);
+
+        // Enable tile selection for human player (3 tiles required for Charleston)
+        if (this.selectionManager) {
+            this.selectionManager.enableTileSelection(3, 3, "charleston");
+        }
     }
 
     /**
