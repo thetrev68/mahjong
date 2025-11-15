@@ -1,10 +1,10 @@
-import {printMessage} from "./utils.js";
+import {printMessage} from "../../utils.js";
 import {
     PLAYER, PLAYER_OPTION, SUIT,
     WINDOW_WIDTH, WINDOW_HEIGHT,
     SPRITE_HEIGHT, SPRITE_SCALE,
     getTotalTileCount
-} from "./constants.js";
+} from "../../constants.js";
 import {Wall, Discards} from "./gameObjects.js";
 import {Player} from "./gameObjects_player.js";
 

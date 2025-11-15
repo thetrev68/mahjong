@@ -1,19 +1,19 @@
 // GameScene.js
 import * as Phaser from "phaser";
-import {Table} from "./gameObjects_table.js";
-import { HomePageTileManager } from "./homePageTileManager.js";
-import AudioManager from "./audioManager.js";
-import {GameController} from "./core/GameController.js";
-import {PhaserAdapter} from "./desktop/adapters/PhaserAdapter.js";
-import { HintAnimationManager } from "./desktop/managers/HintAnimationManager.js";
-// import { debugPrint } from "./utils.js";
-import { WINDOW_WIDTH, getTotalTileCount } from "./constants.js";
-import {AIEngine} from "./core/AIEngine.js";
-import {Card} from "./card/card.js";
+import {Table} from "../gameObjects/gameObjects_table.js";
+import { HomePageTileManager } from "../managers/HomePageTileManager.js";
+import AudioManager from "../../audioManager.js";
+import {GameController} from "../../core/GameController.js";
+import {PhaserAdapter} from "../adapters/PhaserAdapter.js";
+import { HintAnimationManager } from "../managers/HintAnimationManager.js";
+// import { debugPrint } from "../../utils.js";
+import { WINDOW_WIDTH, getTotalTileCount } from "../../constants.js";
+import {AIEngine} from "../../core/AIEngine.js";
+import {Card} from "../../card/card.js";
 
-import tilesPng from "./assets/tiles.png";
-import tilesJson from "./assets/tiles.json";
-import backPng from "./assets/back.png";
+import tilesPng from "../../assets/tiles.png";
+import tilesJson from "../../assets/tiles.json";
+import backPng from "../../assets/back.png";
 
 class GameScene extends Phaser.Scene {
     constructor() {

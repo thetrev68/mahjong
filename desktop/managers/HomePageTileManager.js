@@ -1,7 +1,7 @@
 import * as Phaser from "phaser";
-import { Tile, gTileGroups } from "./gameObjects.js";
-import { SUIT, SPRITE_WIDTH, SPRITE_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT } from "./constants.js";
-import {debugPrint} from "./utils.js";
+import { Tile, gTileGroups } from "../gameObjects/gameObjects.js";
+import { SUIT, SPRITE_WIDTH, SPRITE_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT } from "../../constants.js";
+import {debugPrint} from "../../utils.js";
 
 export class HomePageTileManager {
     constructor(scene, wall) {

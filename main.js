@@ -1,5 +1,5 @@
 import * as Phaser from "phaser";
-import GameScene from "./GameScene.js";
+import GameScene from "./desktop/scenes/GameScene.js";
 import {WINDOW_WIDTH, WINDOW_HEIGHT} from "./constants.js";
 
 // Use Canvas rendering for Playwright tests to avoid GPU stall warnings

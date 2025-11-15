@@ -1,6 +1,6 @@
 import * as Phaser from "phaser";
-import {SUIT, SPRITE_HEIGHT, SPRITE_WIDTH, TILE_GAP, WINDOW_WIDTH, WINDOW_HEIGHT, getTotalTileCount} from "./constants.js";
-import {debugPrint} from "./utils.js";
+import {SUIT, SPRITE_HEIGHT, SPRITE_WIDTH, TILE_GAP, WINDOW_WIDTH, WINDOW_HEIGHT, getTotalTileCount} from "../../constants.js";
+import {debugPrint} from "../../utils.js";
 
 // PRIVATE CONSTANTS
 

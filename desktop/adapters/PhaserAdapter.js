@@ -15,7 +15,7 @@
  */
 
 import {TileData} from "../../core/models/TileData.js";
-import {Tile} from "../../gameObjects.js";
+import {Tile} from "../gameObjects/gameObjects.js";
 import {PLAYER, SUIT} from "../../constants.js";
 import {printMessage, printInfo} from "../../utils.js";
 import {TileManager} from "../managers/TileManager.js";

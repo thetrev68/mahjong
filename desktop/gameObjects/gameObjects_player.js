@@ -1,4 +1,4 @@
-import {PLAYER} from "./constants.js";
+import {PLAYER} from "../../constants.js";
 import {Hand} from "./gameObjects_hand.js";
 
 // PRIVATE CONSTANTS

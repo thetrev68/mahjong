@@ -2,9 +2,9 @@ import * as Phaser from "phaser";
 import {
     PLAYER, SUIT, SPRITE_WIDTH, SPRITE_HEIGHT,
     SPRITE_SCALE, WINDOW_WIDTH, WINDOW_HEIGHT, TILE_GAP
-} from "./constants.js";
-import {debugPrint, debugTrace} from "./utils.js";
-import {SelectionManager} from "./desktop/managers/SelectionManager.js";
+} from "../../constants.js";
+import {debugPrint, debugTrace} from "../../utils.js";
+import {SelectionManager} from "../managers/SelectionManager.js";
 
 // PRIVATE CONSTANTS
 
