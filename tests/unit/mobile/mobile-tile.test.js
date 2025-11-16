@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { JSDOM } from "jsdom";
-import { SUIT } from "../constants.js";
-import { MobileTile } from "../mobile/components/MobileTile.js";
+import { SUIT } from "../../../constants.js";
+import { MobileTile } from "../../../mobile/components/MobileTile.js";
 
 // Set up jsdom environment for DOM globals
 const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
