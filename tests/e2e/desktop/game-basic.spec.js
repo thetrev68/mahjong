@@ -37,6 +37,7 @@ test.describe("Game Start", () => {
 
     // Wait for game to initialize
     await page.waitForSelector("#controldiv", { state: "visible" });
+    await page.waitForFunction(() => window.gameController !== undefined, { timeout: 10000 });
 
     // Verify start button is visible initially
     const startButton = page.locator("#start");
@@ -46,15 +47,17 @@ test.describe("Game Start", () => {
     // Click start button
     await startButton.click();
 
-    // Wait for game to start (game no longer hides start button)
-    await page.waitForTimeout(1000);
+    // Wait for game to actually start by checking GameController state
+    await page.waitForFunction(() => {
+      return window.gameController &&
+             window.gameController.currentState !== "INIT" &&
+             window.gameController.currentState !== "START";
+    }, { timeout: 5000 });
 
-    // Verify game started by checking that action bar becomes visible
-    await expect(page.locator("#uicenterdiv")).toBeVisible();
-
-    // Or verify that info textarea has content
-    const infoText = await page.locator("#info").inputValue();
-    expect(infoText).not.toBe("");
+    // Verify game started - check that we're in a game state
+    const gameState = await page.evaluate(() => window.gameController.currentState);
+    expect(gameState).not.toBe("INIT");
+    expect(gameState).not.toBe("START");
   });
 });
 
@@ -130,6 +133,9 @@ test.describe("Game Logic", () => {
   test("GameController emits events", async ({ page }) => {
     await page.goto("/");
 
+    // Wait for GameController to be initialized
+    await page.waitForFunction(() => window.gameController !== undefined, { timeout: 10000 });
+
     // Set up a listener for GameController events
     await page.evaluate(() => {
       window.capturedEvents = [];
@@ -154,6 +160,9 @@ test.describe("Game Logic", () => {
 
   test("game progresses through states", async ({ page }) => {
     await page.goto("/");
+
+    // Wait for GameController to be initialized
+    await page.waitForFunction(() => window.gameController !== undefined, { timeout: 10000 });
 
     // Set up a listener for state changes
     await page.evaluate(() => {

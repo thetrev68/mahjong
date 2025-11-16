@@ -2,11 +2,27 @@
 
 import { test, expect } from "@playwright/test";
 
+/**
+ * Helper: Wait for mobile app to be ready
+ */
+async function waitForMobileReady(page) {
+    await page.waitForFunction(() => {
+        const status = document.getElementById("game-status");
+        return status && status.textContent.includes("Ready");
+    }, { timeout: 10000 });
+
+    // Also wait for new-game button to be enabled
+    await page.waitForSelector("#new-game-btn:not([disabled])", { timeout: 5000 });
+}
+
 test.describe("Mobile Interface", () => {
     
     test.describe("Test 1: Mobile Page Load", () => {
         test("mobile game loads with correct viewport", async ({ page }) => {
             await page.goto("/mobile/");
+
+            // Wait for mobile renderer to initialize
+            await waitForMobileReady(page);
 
             // Verify mobile-specific elements exist (updated IDs)
             await expect(page.locator("#hand-container")).toBeVisible();
@@ -22,6 +38,9 @@ test.describe("Mobile Interface", () => {
     test.describe("Test 2: Tile Selection via Tap", () => {
         test("tile selection via tap", async ({ page }) => {
             await page.goto("/mobile/");
+
+            // Wait for mobile app to be ready
+            await waitForMobileReady(page);
 
             // Wait for game to start and tiles to be dealt
             await page.click("#new-game-btn");
@@ -47,6 +66,10 @@ test.describe("Mobile Interface", () => {
     test.describe("Test 3: Tile Discard via Double-Tap", () => {
         test("tile discard via double-tap", async ({ page }) => {
             await page.goto("/mobile/");
+
+            // Wait for mobile app to be ready
+            await waitForMobileReady(page);
+
             await page.click("#new-game-btn");
 
             // Wait for player's turn and tiles to be dealt
@@ -75,6 +98,9 @@ test.describe("Mobile Interface", () => {
     test.describe("Test 4: Charleston Pass Flow", () => {
         test("charleston pass flow on mobile", async ({ page }) => {
             await page.goto("/mobile/");
+
+            // Wait for mobile app to be ready
+            await waitForMobileReady(page);
 
             // Enable settings to ensure Charleston happens
             await page.click("#mobile-settings-btn");
@@ -114,8 +140,8 @@ test.describe("Mobile Interface", () => {
         test("settings persist across page reloads", async ({ page }) => {
             await page.goto("/mobile/");
 
-            // Wait for mobile app to load
-            await page.waitForSelector("#mobile-settings-btn");
+            // Wait for mobile app to be ready
+            await waitForMobileReady(page);
 
             // Open settings
             await page.click("#mobile-settings-btn");
@@ -155,6 +181,10 @@ test.describe("Mobile Interface", () => {
     test.describe("Test 6: Opponent Bar Updates", () => {
         test("opponent bars update during game", async ({ page }) => {
             await page.goto("/mobile/");
+
+            // Wait for mobile app to be ready
+            await waitForMobileReady(page);
+
             await page.click("#new-game-btn");
 
             // Wait for game to start
@@ -178,6 +208,10 @@ test.describe("Mobile Interface", () => {
     test.describe("Test 7: Touch Handler Swipe Gesture", () => {
         test("swipe up gesture for exposing tiles", async ({ page }) => {
             await page.goto("/mobile/");
+
+            // Wait for mobile app to be ready
+            await waitForMobileReady(page);
+
             await page.click("#new-game-btn");
 
             // Wait for game loop and player to have matching tiles
@@ -220,6 +254,10 @@ test.describe("Mobile Interface", () => {
     test.describe("Test 8: Mobile Animations", () => {
         test("tile animations play smoothly", async ({ page }) => {
             await page.goto("/mobile/");
+
+            // Wait for mobile app to be ready
+            await waitForMobileReady(page);
+
             await page.click("#new-game-btn");
 
             // Wait for tile draw animation
