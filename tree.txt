@@ -10,73 +10,72 @@ mahjong/
 │   ├── back.png
 │   ├── tiles.json
 │   └── tiles.png
-├── card/
-│   ├── 2017/
-│   │   ├── card2017.js (23 lines)
-│   │   ├── card_test.js (497 lines)
-│   │   ├── hands13579.js (368 lines)
-│   │   ├── hands2017.js (292 lines)
-│   │   ├── hands2468.js (203 lines)
-│   │   ├── hands369.js (295 lines)
-│   │   ├── handsConsecutive.js (266 lines)
-│   │   ├── handsLikeNumbers.js (67 lines)
-│   │   ├── handsLucky13.js (213 lines)
-│   │   ├── handsQuints.js (408 lines)
-│   │   ├── handsSinglesPairs.js (528 lines)
-│   │   └── handsWindsDragons.js (261 lines)
-│   ├── 2018/
-│   │   ├── card2018.js (23 lines)
-│   │   ├── card_test.js (98 lines)
-│   │   ├── hands13579.js (377 lines)
-│   │   ├── hands2018.js (253 lines)
-│   │   ├── hands2468.js (203 lines)
-│   │   ├── hands369.js (300 lines)
-│   │   ├── handsAdditionHands.js (213 lines)
-│   │   ├── handsConsecutive.js (290 lines)
-│   │   ├── handsLikeNumbers.js (101 lines)
-│   │   ├── handsQuints.js (457 lines)
-│   │   ├── handsSinglesPairs.js (474 lines)
-│   │   └── handsWindsDragons.js (242 lines)
-│   ├── 2019/
-│   │   ├── card2019.js (23 lines)
-│   │   ├── card_test.js (98 lines)
-│   │   ├── hands13579.js (504 lines)
-│   │   ├── hands2019.js (248 lines)
-│   │   ├── hands2468.js (203 lines)
-│   │   ├── hands369.js (227 lines)
-│   │   ├── handsAdditionHands.js (213 lines)
-│   │   ├── handsConsecutive.js (295 lines)
-│   │   ├── handsLikeNumbers.js (72 lines)
-│   │   ├── handsQuints.js (187 lines)
-│   │   ├── handsSinglesPairs.js (408 lines)
-│   │   └── handsWindsDragons.js (257 lines)
-│   ├── 2020/
-│   │   ├── card2020.js (21 lines)
-│   │   ├── card_test.js (77 lines)
-│   │   ├── hands13579.js (373 lines)
-│   │   ├── hands2020.js (150 lines)
-│   │   ├── hands2468.js (305 lines)
-│   │   ├── hands369.js (305 lines)
-│   │   ├── handsConsecutive.js (329 lines)
-│   │   ├── handsLikeNumbers.js (101 lines)
-│   │   ├── handsQuints.js (187 lines)
-│   │   ├── handsSinglesPairs.js (377 lines)
-│   │   └── handsWindsDragons.js (286 lines)
-│   ├── 2025/
-│   │   ├── card2025.js (21 lines)
-│   │   ├── card2025.xlsx
-│   │   ├── hands13579.js (583 lines)
-│   │   ├── hands2025.js (204 lines)
-│   │   ├── hands2468.js (339 lines)
-│   │   ├── hands369.js (397 lines)
-│   │   ├── handsConsecutive.js (388 lines)
-│   │   ├── handsLikeNumbers.js (116 lines)
-│   │   ├── handsQuints.js (96 lines)
-│   │   ├── handsSinglesPairs.js (416 lines)
-│   │   └── handsWindsDragons.js (389 lines)
-│   └── card.js (704 lines)
 ├── core/
 │   ├── card/
+│   │   ├── 2017/
+│   │   │   ├── card2017.js (23 lines)
+│   │   │   ├── card_test.js (497 lines)
+│   │   │   ├── hands13579.js (368 lines)
+│   │   │   ├── hands2017.js (292 lines)
+│   │   │   ├── hands2468.js (203 lines)
+│   │   │   ├── hands369.js (295 lines)
+│   │   │   ├── handsConsecutive.js (266 lines)
+│   │   │   ├── handsLikeNumbers.js (67 lines)
+│   │   │   ├── handsLucky13.js (213 lines)
+│   │   │   ├── handsQuints.js (408 lines)
+│   │   │   ├── handsSinglesPairs.js (528 lines)
+│   │   │   └── handsWindsDragons.js (261 lines)
+│   │   ├── 2018/
+│   │   │   ├── card2018.js (23 lines)
+│   │   │   ├── card_test.js (98 lines)
+│   │   │   ├── hands13579.js (377 lines)
+│   │   │   ├── hands2018.js (253 lines)
+│   │   │   ├── hands2468.js (203 lines)
+│   │   │   ├── hands369.js (300 lines)
+│   │   │   ├── handsAdditionHands.js (213 lines)
+│   │   │   ├── handsConsecutive.js (290 lines)
+│   │   │   ├── handsLikeNumbers.js (101 lines)
+│   │   │   ├── handsQuints.js (457 lines)
+│   │   │   ├── handsSinglesPairs.js (474 lines)
+│   │   │   └── handsWindsDragons.js (242 lines)
+│   │   ├── 2019/
+│   │   │   ├── card2019.js (23 lines)
+│   │   │   ├── card_test.js (98 lines)
+│   │   │   ├── hands13579.js (504 lines)
+│   │   │   ├── hands2019.js (248 lines)
+│   │   │   ├── hands2468.js (203 lines)
+│   │   │   ├── hands369.js (227 lines)
+│   │   │   ├── handsAdditionHands.js (213 lines)
+│   │   │   ├── handsConsecutive.js (295 lines)
+│   │   │   ├── handsLikeNumbers.js (72 lines)
+│   │   │   ├── handsQuints.js (187 lines)
+│   │   │   ├── handsSinglesPairs.js (408 lines)
+│   │   │   └── handsWindsDragons.js (257 lines)
+│   │   ├── 2020/
+│   │   │   ├── card2020.js (21 lines)
+│   │   │   ├── card_test.js (77 lines)
+│   │   │   ├── hands13579.js (373 lines)
+│   │   │   ├── hands2020.js (150 lines)
+│   │   │   ├── hands2468.js (305 lines)
+│   │   │   ├── hands369.js (305 lines)
+│   │   │   ├── handsConsecutive.js (329 lines)
+│   │   │   ├── handsLikeNumbers.js (101 lines)
+│   │   │   ├── handsQuints.js (187 lines)
+│   │   │   ├── handsSinglesPairs.js (377 lines)
+│   │   │   └── handsWindsDragons.js (286 lines)
+│   │   ├── 2025/
+│   │   │   ├── card2025.js (21 lines)
+│   │   │   ├── card2025.xlsx
+│   │   │   ├── hands13579.js (583 lines)
+│   │   │   ├── hands2025.js (204 lines)
+│   │   │   ├── hands2468.js (339 lines)
+│   │   │   ├── hands369.js (397 lines)
+│   │   │   ├── handsConsecutive.js (388 lines)
+│   │   │   ├── handsLikeNumbers.js (116 lines)
+│   │   │   ├── handsQuints.js (96 lines)
+│   │   │   ├── handsSinglesPairs.js (416 lines)
+│   │   │   └── handsWindsDragons.js (389 lines)
+│   │   └── card.js (704 lines)
 │   ├── events/
 │   │   ├── EventEmitter.js (76 lines)
 │   │   └── GameEvents.js (320 lines)
@@ -204,7 +203,7 @@ mahjong/
 ==================================================
 DIRECTORY TREE STATISTICS
 ==================================================
-Total directories: 31
+Total directories: 30
 Total files: 170
 Files with line counts: 116
 Total lines of code: 32,799
