@@ -46,11 +46,15 @@ test.describe("Game Start", () => {
     // Click start button
     await startButton.click();
 
-    // Wait for the game to hide the start button (proof that game started)
-    await page.waitForTimeout(500);
+    // Wait for game to start (game no longer hides start button)
+    await page.waitForTimeout(1000);
 
-    // Verify the button is now hidden (game successfully started)
-    await expect(startButton).toBeHidden();
+    // Verify game started by checking that action bar becomes visible
+    await expect(page.locator("#uicenterdiv")).toBeVisible();
+
+    // Or verify that info textarea has content
+    const infoText = await page.locator("#info").inputValue();
+    expect(infoText).not.toBe("");
   });
 });
 

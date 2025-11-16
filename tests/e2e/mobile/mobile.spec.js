@@ -8,11 +8,11 @@ test.describe("Mobile Interface", () => {
         test("mobile game loads with correct viewport", async ({ page }) => {
             await page.goto("/mobile/");
 
-            // Verify mobile-specific elements exist
-            await expect(page.locator("#mobile-hand-container")).toBeVisible();
+            // Verify mobile-specific elements exist (updated IDs)
+            await expect(page.locator("#hand-container")).toBeVisible();
             await expect(page.locator(".opponent-bar")).toHaveCount(3);
-            await expect(page.locator("#mobile-discard-pile")).toBeVisible();
-            await expect(page.locator("#mobile-action-bar")).toBeVisible();
+            await expect(page.locator("#discard-container")).toBeVisible();
+            await expect(page.locator(".bottom-menu")).toBeVisible();
 
             // Verify desktop elements don't exist
             await expect(page.locator("#gamediv")).not.toBeVisible();
@@ -24,7 +24,7 @@ test.describe("Mobile Interface", () => {
             await page.goto("/mobile/");
 
             // Wait for game to start and tiles to be dealt
-            await page.click("#start");
+            await page.click("#new-game-btn");
             await page.waitForSelector(".mobile-tile");
 
             // Tap first tile
@@ -47,7 +47,7 @@ test.describe("Mobile Interface", () => {
     test.describe("Test 3: Tile Discard via Double-Tap", () => {
         test("tile discard via double-tap", async ({ page }) => {
             await page.goto("/mobile/");
-            await page.click("#start");
+            await page.click("#new-game-btn");
 
             // Wait for player's turn and tiles to be dealt
             await page.waitForSelector(".mobile-tile");
@@ -77,13 +77,13 @@ test.describe("Mobile Interface", () => {
             await page.goto("/mobile/");
 
             // Enable settings to ensure Charleston happens
-            await page.click("#settings-button");
+            await page.click("#mobile-settings-btn");
             await page.selectOption("#card-year-select", "2025");
             await page.uncheck("#training-mode"); // Ensure Charleston is not skipped
             await page.click("#save-settings");
 
             // Start game
-            await page.click("#start");
+            await page.click("#new-game-btn");
             await page.waitForSelector(".mobile-tile");
 
             // Wait for Charleston phase
@@ -155,7 +155,7 @@ test.describe("Mobile Interface", () => {
     test.describe("Test 6: Opponent Bar Updates", () => {
         test("opponent bars update during game", async ({ page }) => {
             await page.goto("/mobile/");
-            await page.click("#start");
+            await page.click("#new-game-btn");
 
             // Wait for game to start
             await page.waitForSelector(".opponent-bar");
@@ -178,7 +178,7 @@ test.describe("Mobile Interface", () => {
     test.describe("Test 7: Touch Handler Swipe Gesture", () => {
         test("swipe up gesture for exposing tiles", async ({ page }) => {
             await page.goto("/mobile/");
-            await page.click("#start");
+            await page.click("#new-game-btn");
 
             // Wait for game loop and player to have matching tiles
             await page.waitForSelector(".mobile-tile");
@@ -190,7 +190,7 @@ test.describe("Mobile Interface", () => {
                 localStorage.setItem("mahjong_trainingHand", "B1,B1,B1,C2,C3,C4,D5,D6,D7,W1,W2,W3,Jo");
             });
             await page.reload();
-            await page.click("#start");
+            await page.click("#new-game-btn");
             await page.waitForSelector(".mobile-tile");
 
             // Select tiles for pung
@@ -220,7 +220,7 @@ test.describe("Mobile Interface", () => {
     test.describe("Test 8: Mobile Animations", () => {
         test("tile animations play smoothly", async ({ page }) => {
             await page.goto("/mobile/");
-            await page.click("#start");
+            await page.click("#new-game-btn");
 
             // Wait for tile draw animation
             await page.waitForSelector(".mobile-tile.tile-drawing", { timeout: 5000 });

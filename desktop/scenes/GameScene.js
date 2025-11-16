@@ -100,6 +100,9 @@ class GameScene extends Phaser.Scene {
                 skipCharleston: (window.settingsManager && window.settingsManager.getSetting?.("skipCharleston", false)) || false
             }
         });
+
+        // Expose gameController to window for testing
+        window.gameController = this.gameController;
         this.gameController.on("GAME_STARTED", () => {
             this.prepareActionPanelForNewGame();
         });
