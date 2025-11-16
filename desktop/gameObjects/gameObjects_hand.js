@@ -6,6 +6,8 @@ import {
 import {debugPrint, debugTrace} from "../../utils.js";
 import {SelectionManager} from "../managers/SelectionManager.js";
 
+//TODO: This file is to be phased out and removed.
+
 // PRIVATE CONSTANTS
 
 

@@ -3,7 +3,7 @@ import SettingsSheet from "./components/SettingsSheet.js";
 import {MobileRenderer} from "./MobileRenderer.js";
 import {GameController} from "../core/GameController.js";
 import {AIEngine} from "../core/AIEngine.js";
-import {Card} from "../card/card.js";
+import {Card} from "../core/card/card.js";
 import "./styles/base.css";
 import "./styles/SettingsSheet.css";
 import "./styles/HandRenderer.css";

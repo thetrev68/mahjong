@@ -9,7 +9,7 @@ import { HintAnimationManager } from "../managers/HintAnimationManager.js";
 // import { debugPrint } from "../../utils.js";
 import { WINDOW_WIDTH, WINDOW_HEIGHT, getTotalTileCount } from "../../constants.js";
 import {AIEngine} from "../../core/AIEngine.js";
-import {Card} from "../../card/card.js";
+import {Card} from "../../core/card/card.js";
 
 import tilesPng from "../../assets/tiles.png";
 import tilesJson from "../../assets/tiles.json";

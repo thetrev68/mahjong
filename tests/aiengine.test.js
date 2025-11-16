@@ -8,7 +8,7 @@ import { JSDOM } from "jsdom";
 import { AIEngine } from "../core/AIEngine.js";
 import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
-import { Card } from "../card/card.js";
+import { Card } from "../core/card/card.js";
 import { SUIT, PLAYER_OPTION } from "../constants.js";
 
 // Set up jsdom environment for DOM globals (needed by Card class)
