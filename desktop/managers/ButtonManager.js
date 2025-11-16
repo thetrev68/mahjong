@@ -334,32 +334,32 @@ export class ButtonManager {
         this.show(["button1", "button2", "button3", "button4"]);
         this.hide(["start", "settings", "sort1", "sort2"]);
 
-        this.setText("button1", "Claim");
+        this.setText("button1", "Mahjong");
         this.setText("button2", "Pung");
         this.setText("button3", "Kong");
         this.setText("button4", "Pass");
 
         this.buttonCallbacks.set("button1", () => {
             if (this.gameController.onClaimDiscard) {
-                this.gameController.onClaimDiscard("claim");
+                this.gameController.onClaimDiscard("Mahjong");
             }
         });
 
         this.buttonCallbacks.set("button2", () => {
             if (this.gameController.onClaimDiscard) {
-                this.gameController.onClaimDiscard("pung");
+                this.gameController.onClaimDiscard("Pung");
             }
         });
 
         this.buttonCallbacks.set("button3", () => {
             if (this.gameController.onClaimDiscard) {
-                this.gameController.onClaimDiscard("kong");
+                this.gameController.onClaimDiscard("Kong");
             }
         });
 
         this.buttonCallbacks.set("button4", () => {
             if (this.gameController.onClaimDiscard) {
-                this.gameController.onClaimDiscard("pass");
+                this.gameController.onClaimDiscard("Pass");
             }
         });
     }

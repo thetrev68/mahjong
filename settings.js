@@ -59,6 +59,7 @@ class DesktopSettingsManager {
     }
 
     showSettings() {
+        this.loadSettings();
         this.overlay.style.display = "flex";
         // Store current settings state for cancel functionality
         this.storeCurrentSettingsState();
@@ -132,9 +133,9 @@ class DesktopSettingsManager {
 
     saveAndClose() {
         // Check if card year changed before saving
-        const oldYear = this.getSetting("cardYear", "2025");
-        const newYear = document.getElementById("yearSelect")?.value ?? "2025";
-        const yearChanged = oldYear !== newYear;
+        const oldYear = Number(this.getSetting("cardYear", 2025));
+        const newYearValue = parseInt(document.getElementById("yearSelect")?.value ?? "2025", 10);
+        const yearChanged = oldYear !== newYearValue;
 
         // Save all current settings
         this.saveTrainingSettings();
@@ -154,7 +155,7 @@ class DesktopSettingsManager {
                 }
                 // Reinitialize card with new year
                 scene.gGameLogic.init().then(() => {
-                    debugPrint(`Card year updated to ${newYear}`);
+                    debugPrint(`Card year updated to ${newYearValue}`);
                 });
             }
         }

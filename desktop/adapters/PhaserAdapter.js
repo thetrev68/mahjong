@@ -123,6 +123,7 @@ export class PhaserAdapter {
         // UI events
         gc.on("MESSAGE", (data) => this.onMessage(data));
         gc.on("UI_PROMPT", (data) => this.onUIPrompt(data));
+        gc.on("SORT_HAND_REQUESTED", (data) => this.onSortHandRequested(data));
     }
 
     /**
@@ -330,8 +331,8 @@ export class PhaserAdapter {
         const {reason, winner, mahjong} = data;
 
         if (mahjong) {
-            const winnerPlayer = this.table.players[winner];
-            printMessage(`${winnerPlayer.playerInfo.name} wins with Mahjong!`);
+            const winnerName = this.getPlayerName(winner);
+            printMessage(`${winnerName} wins with Mahjong!`);
 
             // Show fireworks (existing functionality)
             if (this.scene.audioManager) {
@@ -388,7 +389,11 @@ export class PhaserAdapter {
                 this.removeTileFromWallByIndex(tileData.index);
 
                 phaserTile.sprite.setPosition(50, 50);
-                phaserTile.sprite.setAlpha(0);
+                phaserTile.sprite.setAlpha(1);
+                if (phaserTile.spriteBack) {
+                    phaserTile.spriteBack.setAlpha(1);
+                }
+                phaserTile.showTile(true, playerIndex === PLAYER.BOTTOM);
 
                 player.hand.insertHidden(phaserTile);
                 dealtTiles.push(phaserTile);
@@ -605,10 +610,16 @@ export class PhaserAdapter {
      * Handle discard claimed
      */
     onDiscardClaimed(data) {
-        const {player: claimingPlayer, tile: tileData, claimType} = data;
+        const {claimingPlayer, tile: tileData, claimType} = data;
 
         const tileDataObj = TileData.fromJSON(tileData);
-        printMessage(`${this.table.players[claimingPlayer].playerInfo.name} claimed ${tileDataObj.getText()} for ${claimType}`);
+        const player = this.table.players[claimingPlayer];
+        if (!player) {
+            console.error("Invalid claiming player index:", claimingPlayer, data);
+            return;
+        }
+        const playerName = this.getPlayerName(claimingPlayer);
+        printMessage(`${playerName} claimed ${tileDataObj.getText()} for ${claimType}`);
     }
 
     /**
@@ -639,7 +650,8 @@ export class PhaserAdapter {
         // Refresh hand display
         player.showHand(playerIndex === 0);
 
-        printMessage(`${player.playerInfo.name} exposed ${exposureType}: ${phaserTiles.length} tiles`);
+        const playerName = this.getPlayerName(playerIndex);
+        printMessage(`${playerName} exposed ${exposureType}: ${phaserTiles.length} tiles`);
     }
 
     /**
@@ -710,10 +722,11 @@ export class PhaserAdapter {
             tablePlayer.showHand(index === PLAYER.BOTTOM);
         });
 
+        const ownerName = this.getPlayerName(player);
         if (replacementData) {
-            printInfo(`${exposureOwner.playerInfo.name} swapped a joker for ${replacementData.getText()}`);
+            printInfo(`${ownerName} swapped a joker for ${replacementData.getText()}`);
         } else {
-            printInfo(`${exposureOwner.playerInfo.name} joker swap complete`);
+            printInfo(`${ownerName} joker swap complete`);
         }
     }
 
@@ -775,8 +788,8 @@ export class PhaserAdapter {
 
         this.table.switchPlayer(currentPlayer);
 
-        const currentPlayerObj = this.table.players[currentPlayer];
-        printMessage(`${currentPlayerObj.playerInfo.name}'s turn`);
+        const currentPlayerName = this.getPlayerName(currentPlayer);
+        printMessage(`${currentPlayerName}'s turn`);
     }
 
     /**
@@ -806,9 +819,8 @@ export class PhaserAdapter {
      */
     onCourtesyVote(data) {
         const {player: playerIndex, vote} = data;
-        const player = this.table.players[playerIndex];
-
-        printMessage(`${player.playerInfo.name} voted ${vote ? "YES" : "NO"} for courtesy pass`);
+        const playerName = this.getPlayerName(playerIndex);
+        printMessage(`${playerName} voted ${vote ? "YES" : "NO"} for courtesy pass`);
     }
 
     /**
@@ -818,7 +830,9 @@ export class PhaserAdapter {
         const {fromPlayer, toPlayer, tiles} = data;
 
         const tileTexts = tiles.map(tile => TileData.fromJSON(tile).getText()).join(", ");
-        printMessage(`Courtesy pass: ${this.table.players[fromPlayer].playerInfo.name} → ${this.table.players[toPlayer].playerInfo.name} (${tileTexts})`);
+        const fromName = this.getPlayerName(fromPlayer);
+        const toName = this.getPlayerName(toPlayer);
+        printMessage(`Courtesy pass: ${fromName} → ${toName} (${tileTexts})`);
     }
 
     /**
@@ -930,22 +944,20 @@ export class PhaserAdapter {
         printInfo(`Claim ${discardedTile ? discardedTile.getText() : "this discard"}?`);
 
         // Register callbacks for each claim button
-        // Buttons are shown by ButtonManager.showClaimButtons() which shows: Claim, Pung, Kong, Pass
-
         this.buttonManager.registerCallback("button1", () => {
-            if (callback) callback({action: "claim"});
+            if (callback) callback("Mahjong");
         });
 
         this.buttonManager.registerCallback("button2", () => {
-            if (callback) callback({action: "pung"});
+            if (callback) callback("Pung");
         });
 
         this.buttonManager.registerCallback("button3", () => {
-            if (callback) callback({action: "kong"});
+            if (callback) callback("Kong");
         });
 
         this.buttonManager.registerCallback("button4", () => {
-            if (callback) callback({action: "pass"});
+            if (callback) callback("Pass");
         });
     }
 
@@ -1076,11 +1088,17 @@ export class PhaserAdapter {
         if (playerIndex < 0 || playerIndex >= this.table.players.length) {
             return `Player ${playerIndex}`;
         }
-        const player = this.table.players[playerIndex];
-        if (!player || !player.playerInfo) {
-            return `Player ${playerIndex}`;
+        if (this.gameController && Array.isArray(this.gameController.players)) {
+            const gcPlayer = this.gameController.players[playerIndex];
+            if (gcPlayer && gcPlayer.name) {
+                return gcPlayer.name;
+            }
         }
-        return player.playerInfo.name || `Player ${playerIndex}`;
+        const player = this.table.players[playerIndex];
+        if (player && player.playerInfo && player.playerInfo.name) {
+            return player.playerInfo.name;
+        }
+        return `Player ${playerIndex}`;
     }
 
     /**
@@ -1093,5 +1111,27 @@ export class PhaserAdapter {
             this.dialogManager.closeDialog();
         }
         // TODO: delete messy manual cleanup once adapter delegates lifespan to managers.
+    }
+
+    /**
+     * Handle hand sort requests (suit/rank)
+     */
+    onSortHandRequested(data = {}) {
+        const sortType = data.sortType || "suit";
+        const playerIndex = typeof data.player === "number" ? data.player : PLAYER.BOTTOM;
+        const player = this.table.players[playerIndex];
+        if (!player || !player.hand) {
+            return;
+        }
+
+        if (sortType === "rank" && player.hand.sortRankHidden) {
+            player.hand.sortRankHidden();
+        } else if (player.hand.sortSuitHidden) {
+            player.hand.sortSuitHidden();
+        }
+
+        player.showHand(playerIndex === PLAYER.BOTTOM);
+        const playerName = this.getPlayerName(playerIndex);
+        printInfo(`${playerName} sorted hand by ${sortType}`);
     }
 }

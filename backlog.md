@@ -13,11 +13,13 @@ This document provides a high-level analysis of potential new features for the A
 ### 4. Name Players
 
 *   **Description:** Allow users to name players instead of using the default "Player 0, 1, 2, 3."
+    Part 2: Randomly assign names to bot players (AI Bob, AI Charlie, AI Dave, and so on).
 *   **Difficulty:** Low
 *   **Effort:** Low
 *   **Time:** 3-5 hours
 *   **Benefit:** Medium. Adds a nice touch of personalization to the game.
 
+Opening screen tile manual manipulation (single click to flip/flip back, click & drag to move - snap to upgright position / grid).
 
 ### 10. End Game Screen Animation
 

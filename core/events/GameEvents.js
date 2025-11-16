@@ -212,6 +212,19 @@ export function createCourtesyPassEvent(fromPlayer, toPlayer, tiles, animation =
 }
 
 /**
+ * Event: SORT_HAND_REQUESTED
+ * Emitted when UI asks to sort a player's hand
+ */
+export function createSortHandEvent(player, sortType) {
+    return {
+        type: "SORT_HAND_REQUESTED",
+        player,
+        sortType,
+        timestamp: Date.now()
+    };
+}
+
+/**
  * Event: TILES_RECEIVED
  * Emitted when a player receives tiles (courtesy or exposure)
  */

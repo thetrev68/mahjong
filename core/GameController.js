@@ -547,13 +547,15 @@ export class GameController extends EventEmitter {
         this.setState(STATE.LOOP_PICK_FROM_WALL);
 
         while (this.state !== STATE.END && this.wallTiles.length > 0) {
-            // Current player draws a tile
-            await this.pickFromWall();
+            // Draw only when the current player is at the standard 13-tile count
+            if (this.shouldDrawTile()) {
+                await this.pickFromWall();
 
-            // Check for Mahjong after drawing (self-draw win)
-            if (this.checkMahjong()) {
-                this.endGame("mahjong");
-                return;
+                // Check for Mahjong after drawing (self-draw win)
+                if (this.checkMahjong()) {
+                    this.endGame("mahjong");
+                    return;
+                }
             }
 
             // Current player chooses tile to discard
@@ -596,6 +598,61 @@ export class GameController extends EventEmitter {
             throw new Error("Attempted to draw from an empty wall");
         }
         return this.wallTiles.pop();
+    }
+
+    /**
+     * Determine whether current player should draw from wall
+     * @returns {boolean}
+     */
+    shouldDrawTile() {
+        const player = this.players[this.currentPlayer];
+        if (!player || !player.hand) {
+            return false;
+        }
+        return player.hand.getLength() === 13;
+    }
+
+    /**
+     * Determine if player can form an exposure using discarded tile
+     * @param {PlayerData} player
+     * @param {TileData} tile
+     * @returns {boolean}
+     */
+    canPlayerFormExposure(player, tile) {
+        if (!player || !player.hand) {
+            return false;
+        }
+        const hiddenTiles = player.hand.tiles || [];
+        if (hiddenTiles.length === 0) {
+            return false;
+        }
+        const matchingCount = hiddenTiles.filter(t => t.suit === tile.suit && t.number === tile.number).length;
+        const jokerCount = hiddenTiles.filter(t => t.isJoker()).length;
+        return (matchingCount + jokerCount) >= 2;
+    }
+
+    /**
+     * Determine if player could call Mahjong with discarded tile
+     * @param {PlayerData} player
+     * @param {TileData} tile
+     * @returns {boolean}
+     */
+    canPlayerMahjongWithTile(player, tile) {
+        if (!this.cardValidator || !player || !player.hand) {
+            return false;
+        }
+        const tempHand = player.hand.clone();
+        const tileClone = tile.clone ? tile.clone() : new TileData(tile.suit, tile.number, tile.index);
+        tempHand.addTile(tileClone);
+        const tiles = tempHand.tiles;
+        const allHidden = tempHand.exposures.length === 0;
+        try {
+            const result = this.cardValidator.validateHand(tiles, allHidden);
+            return Boolean(result && result.valid);
+        } catch (error) {
+            console.error("Failed to validate hand for Mahjong check:", error);
+            return false;
+        }
     }
 
     /**
@@ -691,6 +748,11 @@ export class GameController extends EventEmitter {
 
             let claimDecision;
             if (player.isHuman) {
+                const canExpose = this.canPlayerFormExposure(player, lastDiscard);
+                const canMahjong = this.canPlayerMahjongWithTile(player, lastDiscard);
+                if (!canExpose && !canMahjong) {
+                    continue;
+                }
                 // Prompt human
                 claimDecision = await this.promptUI("CLAIM_DISCARD", {
                     tile: lastDiscard.toJSON(),
@@ -890,6 +952,15 @@ export class GameController extends EventEmitter {
         // Emit rich state change event
         const stateEvent = GameEvents.createStateChangedEvent(oldState, newState);
         this.emit("STATE_CHANGED", stateEvent);
+    }
+
+    /**
+     * Handle hand sort requests coming from UI
+     * @param {string} sortType - "suit" or "rank"
+     */
+    onSortHandRequest(sortType = "suit") {
+        const sortEvent = GameEvents.createSortHandEvent(PLAYER.BOTTOM, sortType);
+        this.emit("SORT_HAND_REQUESTED", sortEvent);
     }
 
     /**
