@@ -19,7 +19,7 @@ This document provides a high-level analysis of potential new features for the A
 *   **Time:** 3-5 hours
 *   **Benefit:** Medium. Adds a nice touch of personalization to the game.
 
-Opening screen tile manual manipulation (single click to flip/flip back, click & drag to move - snap to upgright position / grid).
+Opening screen tile manual manipulation (single click to flip/flip back, click & drag to move - snap to upright position / grid).
 
 ### 10. End Game Screen Animation
 

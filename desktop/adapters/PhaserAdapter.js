@@ -15,7 +15,6 @@
  */
 
 import {TileData} from "../../core/models/TileData.js";
-import {Tile} from "../gameObjects/gameObjects.js";
 import {PLAYER, SUIT} from "../../constants.js";
 import {printMessage, printInfo} from "../../utils.js";
 import {TileManager} from "../managers/TileManager.js";
@@ -41,9 +40,6 @@ export class PhaserAdapter {
         this.scene = scene;
         this.table = table;
 
-        /** @type {Map<number, Tile>} Map tile index → Phaser Tile object */
-        this.tileMap = new Map();
-
         /** @type {number} Track tiles removed from wall (for counter) */
         this.tilesRemovedFromWall = 0;
 
@@ -68,18 +64,10 @@ export class PhaserAdapter {
     }
 
     /**
-     * Initialize tile map with all tiles from wall
-     * Must be called after wall is created and shuffled
+     * Handle wall creation (register all physical tiles with TileManager)
      */
-    initializeTileMap() {
-        if (this.table && this.table.wall && this.table.wall.tileArray) {
-            for (const tile of this.table.wall.tileArray) {
-                if (tile.index !== undefined && tile.index >= 0) {
-                    this.tileMap.set(tile.index, tile);
-                }
-            }
-        }
-        // TODO: Remove after tile map creation moves into TileManager.
+    onWallCreated() {
+        this.tileManager.initializeFromTable();
     }
 
     /**
@@ -94,9 +82,7 @@ export class PhaserAdapter {
         gc.on("GAME_ENDED", (data) => this.onGameEnded(data));
 
         // Wall setup event
-        gc.on("WALL_CREATED", () => {
-            this.initializeTileMap();
-        });
+        gc.on("WALL_CREATED", (data) => this.onWallCreated(data));
 
         // Tile events
         gc.on("TILES_DEALT", (data) => this.onTilesDealt(data));
@@ -124,126 +110,6 @@ export class PhaserAdapter {
         gc.on("MESSAGE", (data) => this.onMessage(data));
         gc.on("UI_PROMPT", (data) => this.onUIPrompt(data));
         gc.on("SORT_HAND_REQUESTED", (data) => this.onSortHandRequested(data));
-    }
-
-    /**
-     * Convert TileData → Phaser Tile sprite
-     * Uses existing tiles from the Phaser wall instead of creating new ones
-     * @param {TileData} tileData
-     * @returns {Tile}
-     */
-    createPhaserTile(tileData) {
-        // Check if we already have a Phaser tile for this index
-        if (this.tileMap.has(tileData.index)) {
-            return this.tileMap.get(tileData.index);
-        }
-
-        // Find existing tile in Phaser wall by index
-        const existingTile = this.findTileInWall(tileData.index);
-        if (existingTile) {
-            this.tileMap.set(tileData.index, existingTile);
-            return existingTile;
-        }
-
-        // Fallback: Create new Phaser tile (shouldn't happen if wall is properly initialized)
-        console.warn(`Creating new tile for index ${tileData.index} - this shouldn't happen!`);
-        const spriteName = this.getTileSpriteName(tileData);
-        const tile = new Tile(this.scene, tileData.suit, tileData.number, spriteName);
-        tile.index = tileData.index;
-        tile.create();
-
-        // Store in map
-        this.tileMap.set(tileData.index, tile);
-
-        return tile;
-    }
-
-    /**
-     * Find a tile in the Phaser wall by its index
-     * @param {number} index - Unique tile index (0-151 or 0-159 with blanks)
-     * @returns {Tile|null}
-     */
-    findTileInWall(index) {
-        // Search through wall tiles
-        for (const tile of this.table.wall.tileArray) {
-            if (tile.index === index) {
-                return tile;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Find existing Phaser tile by TileData
-     * @param {TileData} tileData
-     * @returns {Tile|null}
-     */
-    findPhaserTile(tileData) {
-        return this.tileMap.get(tileData.index) || null;
-    }
-
-    /**
-     * Get sprite name for tile (matches existing gameObjects.js logic)
-     * @param {TileData} tileData
-     * @returns {string}
-     */
-    getTileSpriteName(tileData) {
-        const {suit, number} = tileData;
-
-        // Match the sprite naming from gameObjects.js Wall.create()
-        // Format: "1C.png", "2B.png", "N.png", "DC.png", "F1.png", "J.png", "BLANK.png"
-
-        if (suit === SUIT.CRACK) {
-            return `${number}C.png`;
-        } else if (suit === SUIT.BAM) {
-            return `${number}B.png`;
-        } else if (suit === SUIT.DOT) {
-            return `${number}D.png`;
-        } else if (suit === SUIT.WIND) {
-            // 0=North, 1=South, 2=West, 3=East
-            const windNames = ["N", "S", "W", "E"];
-            return `${windNames[number]}.png`;
-        } else if (suit === SUIT.DRAGON) {
-            // 0=Red, 1=Green, 2=White
-            const dragonNames = ["DC", "DB", "DD"];
-            return `${dragonNames[number]}.png`;
-        } else if (suit === SUIT.FLOWER) {
-            // Flowers are F1-F4, repeated
-            const flowerNum = (number % 4) + 1;
-            return `F${flowerNum}.png`;
-        } else if (suit === SUIT.JOKER) {
-            return "J.png";
-        } else if (suit === SUIT.BLANK) {
-            return "BLANK.png";
-        }
-
-        // Fallback
-        return `tile_${suit}_${number}.png`;
-    }
-
-    /**
-     * Convert TileData array → Phaser Tile array
-     * @param {TileData[]} tileDatas
-     * @returns {Tile[]}
-     */
-    convertToPhaserTiles(tileDatas) {
-        return tileDatas.map(td => this.createPhaserTile(td));
-    }
-
-    /**
-     * Remove tile from wall array by index (if still present)
-     * @param {number} tileIndex
-     */
-    removeTileFromWallByIndex(tileIndex) {
-        if (!this.table || !this.table.wall || !Array.isArray(this.table.wall.tileArray)) {
-            return;
-        }
-
-        const wallTiles = this.table.wall.tileArray;
-        const idx = wallTiles.findIndex(tile => tile.index === tileIndex);
-        if (idx >= 0) {
-            wallTiles.splice(idx, 1);
-        }
     }
 
     /**
@@ -313,6 +179,7 @@ export class PhaserAdapter {
 
         // Reset Phaser table
         this.table.reset();
+        this.tileManager.initializeFromTable();
 
         // Hide start button
         const startButton = document.getElementById("start");
@@ -373,20 +240,19 @@ export class PhaserAdapter {
 
             const step = sequence[currentStepIndex];
             const playerIndex = typeof step.player === "number" ? step.player : PLAYER.BOTTOM;
-            const player = this.table.players[playerIndex];
             const tilePayloads = Array.isArray(step.tiles) ? step.tiles : [];
             const dealtTiles = [];
 
             tilePayloads.forEach(tileJSON => {
                 const tileData = TileData.fromJSON(tileJSON);
-                const phaserTile = this.tileMap.get(tileData.index) || this.findTileInWall(tileData.index);
+                const phaserTile = this.tileManager.getOrCreateTile(tileData);
 
                 if (!phaserTile) {
                     console.error(`Could not find Phaser Tile for index ${tileData.index} during dealing`);
                     return;
                 }
 
-                this.removeTileFromWallByIndex(tileData.index);
+                this.tileManager.removeTileFromWall(tileData.index);
 
                 phaserTile.sprite.setPosition(50, 50);
                 phaserTile.sprite.setAlpha(1);
@@ -395,11 +261,11 @@ export class PhaserAdapter {
                 }
                 phaserTile.showTile(true, playerIndex === PLAYER.BOTTOM);
 
-                player.hand.insertHidden(phaserTile);
+                this.tileManager.insertTileIntoHand(playerIndex, phaserTile);
                 dealtTiles.push(phaserTile);
             });
 
-            player.showHand(playerIndex === PLAYER.BOTTOM);
+            this.handRenderer.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
 
             this.tilesRemovedFromWall += tilePayloads.length;
             this.updateWallTileCounter();
@@ -472,7 +338,7 @@ export class PhaserAdapter {
                 this.tilesRemovedFromWall++;
             }
 
-            player.showHand(playerIndex === PLAYER.BOTTOM);
+            this.handRenderer.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
             this.updateWallTileCounter();
 
             const hand = player.hand;
@@ -502,16 +368,9 @@ export class PhaserAdapter {
         // Convert TileData to Phaser Tile using the pre-populated tile map
         const tileDataObj = TileData.fromJSON(tileData);
 
-        // Look up the Phaser Tile object by index
-        let phaserTile = this.tileMap.get(tileDataObj.index);
-
+        const phaserTile = this.tileManager.getOrCreateTile(tileDataObj);
         if (!phaserTile) {
-            // Fallback: try to find in wall (shouldn't normally happen if tileMap initialized correctly)
-            phaserTile = this.findTileInWall(tileDataObj.index);
-        }
-
-        if (!phaserTile) {
-            console.error(`Could not find Phaser Tile for index ${tileDataObj.index}. Tile map has ${this.tileMap.size} tiles.`);
+            console.error(`Could not find Phaser Tile for index ${tileDataObj.index}.`);
             return;
         }
 
@@ -521,10 +380,10 @@ export class PhaserAdapter {
         phaserTile.sprite.setPosition(wallX, wallY);
         phaserTile.sprite.setAlpha(0);
 
-        this.removeTileFromWallByIndex(tileDataObj.index);
+        this.tileManager.removeTileFromWall(tileDataObj.index);
 
         // Add to player's hand
-        player.hand.insertHidden(phaserTile);
+        this.tileManager.insertTileIntoHand(playerIndex, phaserTile);
 
         // Animate tile draw (slide from wall to hand)
         const targetPos = player.hand.calculateTilePosition(
@@ -545,7 +404,7 @@ export class PhaserAdapter {
         // Refresh hand after animation completes
         if (tween) {
             tween.on("complete", () => {
-                player.showHand(playerIndex === PLAYER.BOTTOM);
+                this.handRenderer.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
             });
         }
 
@@ -564,13 +423,9 @@ export class PhaserAdapter {
      */
     onTileDiscarded(data) {
         const {player: playerIndex, tile: tileData} = data;
-        const player = this.table.players[playerIndex];
 
-        // Convert TileData to Phaser Tile using the pre-populated tile map
         const tileDataObj = TileData.fromJSON(tileData);
-
-        // Look up the Phaser Tile object by index
-        const phaserTile = this.tileMap.get(tileDataObj.index);
+        const phaserTile = this.tileManager.getOrCreateTile(tileDataObj);
 
         if (!phaserTile) {
             console.error(`Could not find Phaser Tile for index ${tileDataObj.index}`);
@@ -578,7 +433,7 @@ export class PhaserAdapter {
         }
 
         // Remove from hand
-        player.hand.removeHidden(phaserTile);
+        this.tileManager.removeTileFromHand(playerIndex, phaserTile);
 
         // Animate to discard pile center (350, 420 from 07c41b9)
         const discardTween = phaserTile.animate(350, 420, 0);
@@ -591,7 +446,7 @@ export class PhaserAdapter {
         }
 
         // Add to discard pile
-        this.table.discards.insertDiscard(phaserTile);
+        this.tileManager.addTileToDiscardPile(phaserTile);
 
         // Phase 3.5: Set discard tile for exposure validation (human player)
         if (playerIndex === PLAYER.BOTTOM) {
@@ -600,8 +455,6 @@ export class PhaserAdapter {
         }
 
         // Show discards (updates layout)
-        this.table.discards.showDiscards();
-
         const playerName = this.getPlayerName(playerIndex);
         printMessage(`${playerName} discarded ${tileDataObj.getText()}`);
     }
@@ -613,8 +466,8 @@ export class PhaserAdapter {
         const {claimingPlayer, tile: tileData, claimType} = data;
 
         const tileDataObj = TileData.fromJSON(tileData);
-        const player = this.table.players[claimingPlayer];
-        if (!player) {
+        const claimingPlayerData = this.table.players[claimingPlayer];
+        if (!claimingPlayerData) {
             console.error("Invalid claiming player index:", claimingPlayer, data);
             return;
         }
@@ -633,7 +486,9 @@ export class PhaserAdapter {
         const player = this.table.players[playerIndex];
 
         // Convert to Phaser tiles
-        const phaserTiles = tileDatas.map(td => this.findPhaserTile(TileData.fromJSON(td)));
+        const phaserTiles = this.tileManager.convertTileDataArray(
+            tileDatas.map(td => TileData.fromJSON(td))
+        );
 
         // Create exposed tile set and add to player's hand
         const exposedTileSet = new window.TileSet(this.scene, this.table, false);
@@ -648,7 +503,7 @@ export class PhaserAdapter {
         player.hand.exposedTileSetArray.push(exposedTileSet);
 
         // Refresh hand display
-        player.showHand(playerIndex === 0);
+        this.handRenderer.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
 
         const playerName = this.getPlayerName(playerIndex);
         printMessage(`${playerName} exposed ${exposureType}: ${phaserTiles.length} tiles`);
@@ -719,7 +574,7 @@ export class PhaserAdapter {
         }
 
         this.table.players.forEach((tablePlayer, index) => {
-            tablePlayer.showHand(index === PLAYER.BOTTOM);
+            this.handRenderer.showHand(index, index === PLAYER.BOTTOM);
         });
 
         const ownerName = this.getPlayerName(player);
@@ -799,10 +654,6 @@ export class PhaserAdapter {
         const {phase, passCount, direction} = data;
         printMessage(`Charleston Phase ${phase}, Pass ${passCount}: Pass ${direction}`);
 
-        // Enable tile selection for human player (3 tiles required for Charleston)
-        if (this.selectionManager) {
-            this.selectionManager.enableTileSelection(3, 3, "charleston");
-        }
     }
 
     /**
@@ -924,28 +775,27 @@ export class PhaserAdapter {
      * @see desktop/ADAPTER_PATTERNS.md for pattern documentation
      */
     handleDiscardPrompt(callback) {
-        const player = this.table.players[PLAYER.BOTTOM];
+        if (!this.selectionManager) {
+            if (callback) callback(null);
+            return;
+        }
 
         printInfo("Select a tile to discard");
 
-        // Set validation mode to "play" (single tile selection)
-        player.hand.setValidationMode("play");
-
-        // Register button callback to get the selected tile when user clicks "Discard"
-        this.buttonManager.registerCallback("button1", () => {
-            const selection = player.hand.hiddenTileSet.getSelection();
-            if (selection.length === 1) {
-                const selectedTile = selection[0];
-                // Clear selection and reset validation mode
-                player.hand.hiddenTileSet.resetSelection();
-                player.hand.setValidationMode(null);
-
-                if (callback) {
-                    // Convert Phaser Tile → TileData
-                    const tileData = TileData.fromPhaserTile(selectedTile);
-                    callback(tileData);
-                }
+        this.selectionManager.requestSelection({
+            min: 1,
+            max: 1,
+            mode: "play"
+        }).then(selection => {
+            if (!selection || selection.length === 0) {
+                callback?.(null);
+                return;
             }
+            const tileData = TileData.fromPhaserTile(selection[0]);
+            callback?.(tileData);
+        }).catch((error) => {
+            console.warn("Discard selection cancelled:", error);
+            callback?.(null);
         });
     }
 
@@ -1021,36 +871,19 @@ export class PhaserAdapter {
 
         printInfo(`Select ${requiredCount} tiles to pass ${direction}`);
 
-        // Enable tile selection
-        this.selectionManager.enableTileSelection(requiredCount, requiredCount, "charleston");
-
-        // Set up button callback to handle the pass
-        this.buttonManager.registerCallback("button1", () => {
-            const selection = this.selectionManager.getSelection();
-
-            if (selection.length === requiredCount) {
-                // Valid selection: convert and return tiles
-                const tileDatas = selection.map(tile => TileData.fromPhaserTile(tile));
-                this.selectionManager.clearSelection();
-                this.selectionManager.disableTileSelection();
-                if (callback) callback(tileDatas);
-            } else {
-                // Invalid selection
-                printInfo(`Please select exactly ${requiredCount} tiles`);
+        this.selectionManager.requestSelection({
+            min: requiredCount,
+            max: requiredCount,
+            mode: "charleston"
+        }).then(selection => {
+            const tileDatas = selection.map(tile => TileData.fromPhaserTile(tile));
+            if (callback) {
+                callback(tileDatas);
             }
+        }).catch((error) => {
+            console.warn("Charleston selection cancelled:", error);
+            callback?.([]);
         });
-
-        // Enable button when selection is valid
-        const checkSelection = () => {
-            if (this.selectionManager.getSelectionCount() === requiredCount) {
-                this.buttonManager.enableButton("button1");
-            } else {
-                this.buttonManager.disableButton("button1");
-            }
-        };
-
-        // Check selection on tile clicks
-        this.selectionManager.onSelectionChanged = checkSelection;
     }
 
     /**
@@ -1154,29 +987,24 @@ export class PhaserAdapter {
      * @param {Function} callback - Called with array of selected TileData objects
      */
     handleSelectTilesPrompt(options, callback) {
-        const {minTiles = 1, maxTiles = 3} = options || {};
-        const player = this.table.players[PLAYER.BOTTOM];
+        const {minTiles = 1, maxTiles = 3, mode} = options || {};
+
+        if (!this.selectionManager) {
+            callback?.([]);
+            return;
+        }
 
         printInfo(`Select ${minTiles}–${maxTiles} tiles`);
 
-        this.dialogManager.showSelectTilesDialog(minTiles, maxTiles, (result) => {
-            if (result === "select" && callback) {
-                // Get selected tiles from hand
-                const selection = player.hand.hiddenTileSet.getSelection();
-                if (selection.length >= minTiles && selection.length <= maxTiles) {
-                    const tileDatas = selection.map(tile => TileData.fromPhaserTile(tile));
-                    player.hand.hiddenTileSet.resetSelection();
-                    callback(tileDatas);
-                } else {
-                    // Invalid selection, cancel
-                    player.hand.hiddenTileSet.resetSelection();
-                    if (callback) callback([]);
-                }
-            } else {
-                // Cancelled, return empty array
-                player.hand.hiddenTileSet.resetSelection();
-                if (callback) callback([]);
-            }
+        this.selectionManager.requestSelection({
+            min: minTiles,
+            max: maxTiles,
+            mode: mode || (maxTiles === 1 ? "play" : "courtesy")
+        }).then(selection => {
+            const tileDatas = selection.map(tile => TileData.fromPhaserTile(tile));
+            callback?.(tileDatas);
+        }).catch(() => {
+            callback?.([]);
         });
     }
 
@@ -1205,7 +1033,6 @@ export class PhaserAdapter {
      */
     destroy() {
         this.gameController.clear();  // Remove all event listeners
-        this.tileMap.clear();
         if (this.dialogManager) {
             this.dialogManager.closeDialog();
         }
@@ -1229,7 +1056,7 @@ export class PhaserAdapter {
             player.hand.sortSuitHidden();
         }
 
-        player.showHand(playerIndex === PLAYER.BOTTOM);
+        this.handRenderer.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
         const playerName = this.getPlayerName(playerIndex);
         printInfo(`${playerName} sorted hand by ${sortType}`);
     }

@@ -591,7 +591,7 @@ export class SelectionManager {
      *       refactoring with approval.
      */
     requestSelection({min, max, mode, buttonId = "button1"}) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             // Enable selection mode
             this.enableTileSelection(min, max, mode);
 
@@ -607,13 +607,14 @@ export class SelectionManager {
 
                     // Clear pending callback reference
                     this._pendingCallback = null;
+                    this.onSelectionChanged = null;
 
                     // Resolve with selected tiles
                     resolve(selection);
                 } else {
                     // Invalid selection - show warning but don't resolve
                     console.warn(
-                        `SelectionManager: Invalid selection. ` +
+                        "SelectionManager: Invalid selection. " +
                         `Expected ${min}-${max} tiles, got ${selection.length}.`
                     );
                 }
@@ -627,7 +628,7 @@ export class SelectionManager {
                 this.buttonManager.registerCallback(buttonId, confirmHandler);
             } else {
                 console.warn(
-                    `SelectionManager: No ButtonManager available. ` +
+                    "SelectionManager: No ButtonManager available. " +
                     `Button "${buttonId}" will not be wired.`
                 );
             }
