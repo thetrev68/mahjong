@@ -14,7 +14,7 @@ export class DiscardPile {
      * @param {HTMLElement} container - DOM element to render into
      * @param {GameController} gameController - Core game controller instance
      */
-    constructor(container, gameController) {
+    constructor(container, gameController = null) {
         this.container = container;
         this.gameController = gameController;
         this.discards = []; // Array of {tile: TileData, player: number}
@@ -22,7 +22,9 @@ export class DiscardPile {
         this.eventUnsubscribers = [];
 
         this.render();
-        this.setupEventListeners();
+        if (this.gameController) {
+            this.setupEventListeners();
+        }
     }
 
     /**
@@ -38,6 +40,9 @@ export class DiscardPile {
      * Set up GameController event subscriptions
      */
     setupEventListeners() {
+        if (!this.gameController || typeof this.gameController.on !== "function") {
+            return;
+        }
         this.eventUnsubscribers.push(
             this.gameController.on("TILE_DISCARDED", (data) => {
                 const tile = TileData.fromJSON(data.tile);

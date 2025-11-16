@@ -1,14 +1,9 @@
 import InstallPrompt from "./components/InstallPrompt.js";
 import SettingsSheet from "./components/SettingsSheet.js";
-import {HandRenderer} from "./renderers/HandRenderer.js";
-import {OpponentBar} from "./components/OpponentBar.js";
-import {DiscardPile} from "./components/DiscardPile.js";
-import {AnimationController} from "./animations/AnimationController.js";
-import {TouchHandler} from "./gestures/TouchHandler.js";
+import {MobileRenderer} from "./MobileRenderer.js";
 import {GameController} from "../core/GameController.js";
 import {AIEngine} from "../core/AIEngine.js";
 import {Card} from "../card/card.js";
-import {TileData} from "../core/models/TileData.js";
 import "./styles/base.css";
 import "./styles/SettingsSheet.css";
 import "./styles/HandRenderer.css";
@@ -17,8 +12,7 @@ import "./styles/MobileGame.css";
 // Game instances
 let gameController;
 let aiEngine;
-const opponentBars = [];
-let statusDisplay;
+let mobileRenderer;
 let settingsSheet;
 
 /**
@@ -105,230 +99,21 @@ async function initializeGame() {
         }
     });
 
-    // Initialize Animation Controller (for future use)
-    // eslint-disable-next-line no-unused-vars
-    const animationController = new AnimationController();
-
-    // Initialize Hand Renderer (wired via GameController events)
-    // eslint-disable-next-line no-unused-vars
-    const handRenderer = new HandRenderer(handContainer, gameController);
-
-    // Initialize Discard Pile (wired via GameController events)
-    // eslint-disable-next-line no-unused-vars
-    const discardPile = new DiscardPile(discardContainer, gameController);
-
-    // Initialize Opponent Bars (Right, Top, Left positions - index 1, 2, 3)
-    const opponentPositions = [
-        { container: opponentRightContainer, playerIndex: 1, position: "RIGHT" },
-        { container: opponentTopContainer, playerIndex: 2, position: "TOP" },
-        { container: opponentLeftContainer, playerIndex: 3, position: "LEFT" }
-    ];
-
-    for (const {container, playerIndex} of opponentPositions) {
-        const player = gameController.players[playerIndex];
-        const bar = new OpponentBar(container, player);
-        opponentBars.push({bar, playerIndex});
-    }
-
-    // Initialize Touch Handler for hand interactions
-    const touchHandler = new TouchHandler(handContainer, {
-        enableSwipe: true,
-        enableLongPress: true
-    });
-    touchHandler.init();
-
-    // Store status display for global access
-    statusDisplay = statusElement;
-
-    // Subscribe to game events
-    gameController.on("GAME_ENDED", () => {
-        onGameEnd();
-        statusDisplay.textContent = "Game Ended!";
+    mobileRenderer = new MobileRenderer({
+        gameController,
+        handContainer,
+        discardContainer,
+        statusElement,
+        opponentContainers: {
+            left: opponentLeftContainer,
+            top: opponentTopContainer,
+            right: opponentRightContainer
+        },
+        promptRoot: document.body
     });
 
-    // Debug: Log all game events
-    gameController.on("STATE_CHANGED", (data) => {
-        console.log("State changed:", data);
-        statusDisplay.textContent = `State: ${data.newState}`;
-    });
-
-    gameController.on("MESSAGE", (data) => {
-        console.log("Game message:", data.text);
-        statusDisplay.textContent = data.text;
-    });
-
-    gameController.on("HAND_UPDATED", (data) => {
-        const player = gameController.players[data.player];
-        statusDisplay.textContent = `Player ${data.player} (${player.name}):\n${data.hand.tiles.length} hidden tiles\n${data.hand.exposures.length} exposures`;
-
-        // Update opponent bars when their hands change
-        const opponentBar = opponentBars.find(ob => ob.playerIndex === data.player);
-        if (opponentBar) {
-            opponentBar.bar.update(player);
-        }
-    });
-
-    gameController.on("TURN_CHANGED", (data) => {
-        // Update all opponent bars to show current turn
-        const currentPlayerIndex = data.currentPlayer ?? gameController.currentPlayer;
-        opponentBars.forEach(({bar, playerIndex}) => {
-            const player = gameController.players[playerIndex];
-            // Update the player data before rendering
-            player.isCurrentTurn = playerIndex === currentPlayerIndex;
-            bar.update(player);
-        });
-    });
-
-    gameController.on("TILES_EXPOSED", (data) => {
-        // Update the opponent bar for this player when they expose tiles
-        const opponentBar = opponentBars.find(ob => ob.playerIndex === data.player);
-        if (opponentBar) {
-            const player = gameController.players[data.player];
-            opponentBar.bar.update(player);
-        }
-    });
-
-    gameController.on("UI_PROMPT", (data) => {
-        console.log("UI_PROMPT received:", data.promptType, data.options);
-
-        // Handle UI prompts for human player
-        if (data.promptType === "CHOOSE_DISCARD") {
-            // Human player chooses discard from their hand
-            const player = gameController.players[0];
-            const hand = player.hand.tiles;
-            const handText = hand.map((tile, index) => `${index}: ${tile.getText()}`).join("\n");
-            const choice = window.prompt(`Choose a tile to discard:\n${handText}\nEnter tile index (0-${hand.length - 1}):`);
-            const index = parseInt(choice, 10);
-            if (!isNaN(index) && index >= 0 && index < hand.length) {
-                statusDisplay.textContent = `Discarding ${hand[index].getText()}...`;
-                data.callback(hand[index]);
-            } else {
-                // Invalid choice, choose first tile as fallback
-                statusDisplay.textContent = "Invalid choice, discarding first tile...";
-                data.callback(hand[0]);
-            }
-        } else if (data.promptType === "CLAIM_DISCARD") {
-            // Human player decides whether to claim discarded tile
-            const {tile: tileData, options: claimOptions} = data.options;
-            const tileText = TileData.fromJSON(tileData).getText();
-            const optionsText = claimOptions.join(", ");
-            const choice = window.prompt(`Claim ${tileText}? Options: ${optionsText}`);
-            if (claimOptions.includes(choice)) {
-                statusDisplay.textContent = `Claiming: ${choice}`;
-                data.callback(choice);
-            } else {
-                // Default to Pass
-                statusDisplay.textContent = "Passing claim...";
-                data.callback("Pass");
-            }
-        } else if (data.promptType === "SELECT_TILES") {
-            // Human player selects tiles (for Charleston, exposures, etc.)
-            const {minTiles = 1, maxTiles = 3} = data.options || {};
-            const player = gameController.players[0];
-            const hand = player.hand.tiles;
-            const handText = hand.map((tile, index) => `${index}: ${tile.getText()}`).join("\n");
-            const msg = `Select ${minTiles}-${maxTiles} tiles (comma-separated indices):\n${handText}\nExample: 0,2,5`;
-            const choice = window.prompt(msg);
-
-            if (choice) {
-                const indices = choice.split(",").map(x => parseInt(x.trim(), 10)).filter(i => !isNaN(i));
-                const selectedTiles = indices
-                    .filter(i => i >= 0 && i < hand.length)
-                    .map(i => hand[i]);
-
-                if (selectedTiles.length >= minTiles && selectedTiles.length <= maxTiles) {
-                    statusDisplay.textContent = `Selected ${selectedTiles.length} tiles...`;
-                    data.callback(selectedTiles);
-                } else {
-                    statusDisplay.textContent = `Invalid selection (need ${minTiles}-${maxTiles} tiles)`;
-                    // Fallback: first maxTiles tiles
-                    data.callback(hand.slice(0, maxTiles));
-                }
-            } else {
-                // Cancelled, return empty
-                statusDisplay.textContent = "Selection cancelled";
-                data.callback(hand.slice(0, minTiles));
-            }
-        } else if (data.promptType === "EXPOSE_TILES") {
-            // Human player chooses whether to expose tiles
-            const choice = window.prompt("Expose tiles? (yes/no)");
-            if (choice && choice.toLowerCase() === "yes") {
-                statusDisplay.textContent = "Exposing tiles...";
-                data.callback(true);
-            } else {
-                statusDisplay.textContent = "Not exposing tiles...";
-                data.callback(false);
-            }
-        } else if (data.promptType === "YES_NO") {
-            // Generic yes/no prompt
-            const msg = data.options?.message || "Continue?";
-            const choice = window.prompt(`${msg} (yes/no)`);
-            if (choice && (choice.toLowerCase() === "yes" || choice.toLowerCase() === "y")) {
-                data.callback(true);
-            } else {
-                data.callback(false);
-            }
-        } else if (data.promptType === "CHARLESTON_PASS") {
-            // Charleston phase: select 3 tiles to pass
-            const {direction = "?", requiredCount = 3} = data.options || {};
-            const player = gameController.players[0];
-            const hand = player.hand.tiles;
-            const handText = hand.map((tile, index) => `${index}: ${tile.getText()}`).join("\n");
-            const msg = `Charleston Pass [${direction}]:\nSelect ${requiredCount} tiles to pass (comma-separated indices):\n${handText}\nExample: 0,2,5`;
-            const choice = window.prompt(msg);
-
-            if (choice) {
-                const indices = choice.split(",").map(x => parseInt(x.trim(), 10)).filter(i => !isNaN(i));
-                const selectedTiles = indices
-                    .filter(i => i >= 0 && i < hand.length)
-                    .map(i => hand[i]);
-
-                if (selectedTiles.length === requiredCount) {
-                    statusDisplay.textContent = `Passing ${requiredCount} tiles ${direction}...`;
-                    data.callback(selectedTiles);
-                } else {
-                    statusDisplay.textContent = `Invalid selection (need exactly ${requiredCount} tiles)`;
-                    // Fallback: first requiredCount tiles
-                    data.callback(hand.slice(0, requiredCount));
-                }
-            } else {
-                // Cancelled, return first requiredCount tiles
-                statusDisplay.textContent = "Charleston pass cancelled, using first tiles...";
-                data.callback(hand.slice(0, requiredCount));
-            }
-        } else if (data.promptType === "CHARLESTON_CONTINUE") {
-            // Vote on continuing to Charleston phase 2
-            const {question = "Continue to Charleston phase 2?"} = data.options || {};
-            const choice = window.prompt(`${question} (Yes/No)`);
-            if (choice && (choice.toLowerCase() === "yes" || choice.toLowerCase() === "y")) {
-                statusDisplay.textContent = "Voting YES to continue...";
-                data.callback("Yes");
-            } else {
-                statusDisplay.textContent = "Voting NO to end...";
-                data.callback("No");
-            }
-        } else if (data.promptType === "COURTESY_VOTE") {
-            // Vote on courtesy pass tile count (0-3)
-            const {question = "Courtesy Pass: How many tiles to exchange?", options = ["0", "1", "2", "3"]} = data.options || {};
-            const optionText = options.join("/");
-            const choice = window.prompt(`${question}\nOptions: ${optionText}`);
-            const vote = parseInt(choice, 10);
-            if (!isNaN(vote) && vote >= 0 && vote <= 3) {
-                statusDisplay.textContent = `Voted for ${vote} tiles...`;
-                data.callback(String(vote));
-            } else {
-                statusDisplay.textContent = "Invalid vote, defaulting to 0...";
-                data.callback("0");
-            }
-        } else {
-            // For other prompts, auto-pass or handle as needed
-            console.log("Unhandled prompt type:", data.promptType);
-            // For now, call callback with null or appropriate default
-            if (data.callback) {
-                data.callback(null);
-            }
-        }
-    });
+    // Track games played for install prompt
+    gameController.on("GAME_ENDED", () => onGameEnd());
 
     // Wire up New Game button
     const newGameBtn = document.getElementById("new-game-btn");
@@ -337,11 +122,12 @@ async function initializeGame() {
             console.log("NEW GAME button clicked!");
             try {
                 console.log("Starting game...", gameController);
+                mobileRenderer?.updateStatus("Starting game...");
                 await gameController.startGame();
                 console.log("Game started successfully");
             } catch (error) {
                 console.error("Error starting game:", error);
-                statusDisplay.textContent = `Error: ${error.message}`;
+                mobileRenderer?.updateStatus(`Error: ${error.message}`);
             }
         };
     }
@@ -356,7 +142,7 @@ async function initializeGame() {
     }
 
     // Hide loading message
-    statusDisplay.textContent = "Ready to play! Click NEW GAME to start.";
+    mobileRenderer.updateStatus("Ready to play! Click NEW GAME to start.");
 
     console.log("Mobile game initialized successfully");
 }
