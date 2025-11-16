@@ -906,7 +906,22 @@ export class PhaserAdapter {
     }
 
     /**
-     * Handle discard tile selection prompt
+     * Handle discard tile selection prompt - Pattern A (Selection-Based)
+     *
+     * Prompts the human player to select one tile from their hand to discard.
+     * Uses SelectionManager for tile selection state and ButtonManager for confirmation.
+     *
+     * @param {Function} callback - GameController callback to invoke with selected TileData
+     *
+     * @architecture Pattern A (Selection-Based Prompt)
+     * Flow:
+     * 1. Set validation mode to "play" (allows any single tile)
+     * 2. Register button callback to get selection when user clicks "Discard"
+     * 3. Validate selection (must be exactly 1 tile)
+     * 4. Convert Phaser Tile → TileData
+     * 5. Clear selection and invoke GameController callback
+     *
+     * @see desktop/ADAPTER_PATTERNS.md for pattern documentation
      */
     handleDiscardPrompt(callback) {
         const player = this.table.players[PLAYER.BOTTOM];
@@ -935,8 +950,26 @@ export class PhaserAdapter {
     }
 
     /**
-     * Handle claim discard prompt
-     * Use action panel buttons instead of blocking modal dialog
+     * Handle claim discard prompt - Pattern B (Button-Based)
+     *
+     * Prompts the human player to choose how to claim a discarded tile or pass.
+     * Uses ButtonManager for direct button-to-action mapping.
+     *
+     * @param {Object} options - Prompt options
+     * @param {TileData} options.discardedTile - The tile that was discarded
+     * @param {Function} callback - GameController callback with claim type string
+     *
+     * @architecture Pattern B (Button-Based Prompt)
+     * Flow:
+     * 1. ButtonManager shows claim buttons (via updateForState in onStateChanged)
+     * 2. Register callback for each button: "Mahjong", "Pung", "Kong", "Pass"
+     * 3. User clicks button → immediately invoke GameController callback
+     * 4. No selection state needed - just button → callback
+     *
+     * @note This pattern was debugged by Codex and works correctly.
+     *       Do not refactor to DialogManager without extensive testing.
+     *
+     * @see desktop/ADAPTER_PATTERNS.md for pattern documentation
      */
     handleClaimPrompt(options, callback) {
         const {discardedTile} = options;
@@ -962,7 +995,26 @@ export class PhaserAdapter {
     }
 
     /**
-     * Handle Charleston pass tile selection
+     * Handle Charleston pass tile selection - Pattern A (Selection-Based)
+     *
+     * Prompts the human player to select exactly N tiles (usually 3) to pass in the
+     * specified direction during Charleston phase.
+     * Uses SelectionManager for tile selection and ButtonManager for confirmation.
+     *
+     * @param {Object} options - Prompt options
+     * @param {string} options.direction - Pass direction ("LEFT", "RIGHT", "ACROSS")
+     * @param {number} options.requiredCount - Number of tiles to select (usually 3)
+     * @param {Function} callback - GameController callback with TileData[] array
+     *
+     * @architecture Pattern A (Selection-Based Prompt)
+     * Flow:
+     * 1. Enable tile selection in "charleston" mode (rejects jokers/blanks)
+     * 2. Register button callback to validate and get selection
+     * 3. Auto-enable/disable button based on selection count
+     * 4. When user clicks "Pass Tiles", validate count and convert to TileData[]
+     * 5. Clear selection and invoke GameController callback
+     *
+     * @see desktop/ADAPTER_PATTERNS.md for pattern documentation
      */
     handleCharlestonPassPrompt(options, callback) {
         const {direction, requiredCount} = options;
@@ -1002,7 +1054,22 @@ export class PhaserAdapter {
     }
 
     /**
-     * Handle Charleston continue query
+     * Handle Charleston continue query - Pattern B (Button-Based)
+     *
+     * Prompts the human player to decide whether to continue to the next Charleston
+     * phase (Charleston 2 or optional Charleston 3) or skip to courtesy.
+     * Uses ButtonManager for Yes/No buttons.
+     *
+     * @param {Function} callback - GameController callback with boolean (true=continue, false=skip)
+     *
+     * @architecture Pattern B (Button-Based Prompt)
+     * Flow:
+     * 1. Set button text to "No" and "Yes"
+     * 2. Show and enable both buttons
+     * 3. Register callback for each: button1="No", button2="Yes"
+     * 4. User clicks → hide buttons and invoke callback with boolean
+     *
+     * @see desktop/ADAPTER_PATTERNS.md for pattern documentation
      */
     handleCharlestonContinuePrompt(callback) {
         printInfo("Continue to next Charleston phase?");
@@ -1026,7 +1093,24 @@ export class PhaserAdapter {
     }
 
     /**
-     * Handle courtesy vote prompt
+     * Handle courtesy vote prompt - Pattern C (Dialog-Based) ✅ GOOD EXAMPLE
+     *
+     * Prompts the human player to vote on how many tiles (0-3) to exchange during
+     * the optional courtesy pass phase.
+     * Uses DialogManager for modal overlay.
+     *
+     * @param {Function} callback - GameController callback with number (0-3)
+     *
+     * @architecture Pattern C (Dialog-Based Prompt)
+     * Flow:
+     * 1. DialogManager creates modal overlay with 4 buttons (0, 1, 2, 3 tiles)
+     * 2. User clicks button → DialogManager resolves callback
+     * 3. DialogManager removes overlay and re-enables game input
+     *
+     * @note This is the IDEAL pattern for prompt handlers - clean delegation to manager.
+     *       Other handlers should aspire to this simplicity.
+     *
+     * @see desktop/ADAPTER_PATTERNS.md for pattern documentation
      */
     handleCourtesyVotePrompt(callback) {
         this.dialogManager.showCourtesyVoteDialog((result) => {
@@ -1035,7 +1119,22 @@ export class PhaserAdapter {
     }
 
     /**
-     * Handle courtesy pass prompt
+     * Handle courtesy pass prompt - Pattern C (Dialog-Based)
+     *
+     * Prompts the human player to select tiles for the courtesy pass exchange.
+     * Uses DialogManager for modal overlay.
+     *
+     * @param {Object} options - Prompt options
+     * @param {number} options.maxTiles - Maximum tiles to exchange (based on vote result)
+     * @param {Function} callback - GameController callback with user choice
+     *
+     * @architecture Pattern C (Dialog-Based Prompt)
+     * Flow:
+     * 1. DialogManager creates modal with "Cancel" and "Exchange N Tiles" buttons
+     * 2. User clicks button → DialogManager resolves callback
+     * 3. DialogManager removes overlay
+     *
+     * @see desktop/ADAPTER_PATTERNS.md for pattern documentation
      */
     handleCourtesyPassPrompt(options, callback) {
         const {maxTiles} = options;
