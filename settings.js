@@ -12,6 +12,11 @@ class DesktopSettingsManager {
         // Store original settings for cancel functionality
         this.originalSettings = {};
 
+        // Check localStorage availability
+        if (!SettingsManager.isAvailable()) {
+            console.error("[DesktopSettings] localStorage is not available!");
+        }
+
         this.init();
         this.loadSettings();
     }
@@ -76,16 +81,16 @@ class DesktopSettingsManager {
     storeCurrentSettingsState() {
         // Store all current UI values to restore if user cancels
         this.originalSettings = {
-            trainingMode: document.getElementById("trainCheckbox")?.checked ?? false,
-            trainingHand: document.getElementById("handSelect")?.value ?? "",
-            trainingTileCount: document.getElementById("numTileSelect")?.value ?? "9",
-            skipCharleston: document.getElementById("skipCharlestonCheckbox")?.checked ?? false,
-            cardYear: document.getElementById("yearSelect")?.value ?? "2025",
-            useBlankTiles: document.getElementById("useBlankTiles")?.checked ?? false,
-            bgmVolume: document.getElementById("bgmVolume")?.value ?? "70",
-            bgmMuted: document.getElementById("bgmMute")?.checked ?? false,
-            sfxVolume: document.getElementById("sfxVolume")?.value ?? "80",
-            sfxMuted: document.getElementById("sfxMute")?.checked ?? false
+            trainingMode: document.getElementById("trainCheckbox")?.checked ?? SettingsManager.getDefault("trainingMode"),
+            trainingHand: document.getElementById("handSelect")?.value ?? SettingsManager.getDefault("trainingHand"),
+            trainingTileCount: document.getElementById("numTileSelect")?.value ?? SettingsManager.getDefault("trainingTileCount").toString(),
+            skipCharleston: document.getElementById("skipCharlestonCheckbox")?.checked ?? SettingsManager.getDefault("skipCharleston"),
+            cardYear: document.getElementById("yearSelect")?.value ?? SettingsManager.getDefault("cardYear").toString(),
+            useBlankTiles: document.getElementById("useBlankTiles")?.checked ?? SettingsManager.getDefault("useBlankTiles"),
+            bgmVolume: document.getElementById("bgmVolume")?.value ?? SettingsManager.getDefault("bgmVolume").toString(),
+            bgmMuted: document.getElementById("bgmMute")?.checked ?? SettingsManager.getDefault("bgmMuted"),
+            sfxVolume: document.getElementById("sfxVolume")?.value ?? SettingsManager.getDefault("sfxVolume").toString(),
+            sfxMuted: document.getElementById("sfxMute")?.checked ?? SettingsManager.getDefault("sfxMuted")
         };
     }
 
@@ -133,8 +138,8 @@ class DesktopSettingsManager {
 
     saveAndClose() {
         // Check if card year changed before saving
-        const oldYear = Number(this.getSetting("cardYear", 2025));
-        const newYearValue = parseInt(document.getElementById("yearSelect")?.value ?? "2025", 10);
+        const oldYear = Number(this.getSetting("cardYear", SettingsManager.getDefault("cardYear")));
+        const newYearValue = parseInt(document.getElementById("yearSelect")?.value ?? SettingsManager.getDefault("cardYear").toString(), 10);
         const yearChanged = oldYear !== newYearValue;
 
         // Save all current settings
@@ -143,6 +148,13 @@ class DesktopSettingsManager {
         this.saveYearSettings();
         this.saveHouseRuleSettings();
         this.saveAudioSettings();
+
+        // Dispatch settings changed event ONCE after all saves are complete
+        const allSettings = SettingsManager.load();
+        window.dispatchEvent(new window.CustomEvent("settingsChanged", {
+            detail: allSettings,
+            source: "desktop"  // Mark as coming from desktop to prevent reload loop
+        }));
 
         // If year changed, reinitialize the card in game logic
         if (yearChanged && window.game && window.game.scene && window.game.scene.getScene("GameScene")) {
@@ -267,45 +279,45 @@ class DesktopSettingsManager {
 
     saveTrainingSettings() {
         const settings = {};
-        
-        settings.trainingMode = document.getElementById("trainCheckbox")?.checked ?? false;
-        settings.trainingHand = document.getElementById("handSelect")?.value ?? "";
-        settings.trainingTileCount = parseInt(document.getElementById("numTileSelect")?.value ?? "9", 10);
-        settings.skipCharleston = document.getElementById("skipCharlestonCheckbox")?.checked ?? true;
+
+        settings.trainingMode = document.getElementById("trainCheckbox")?.checked ?? SettingsManager.getDefault("trainingMode");
+        settings.trainingHand = document.getElementById("handSelect")?.value ?? SettingsManager.getDefault("trainingHand");
+        settings.trainingTileCount = parseInt(document.getElementById("numTileSelect")?.value ?? SettingsManager.getDefault("trainingTileCount").toString(), 10);
+        settings.skipCharleston = document.getElementById("skipCharlestonCheckbox")?.checked ?? SettingsManager.getDefault("skipCharleston");
 
         // Save settings to SettingsManager
         SettingsManager.save(settings);
-        
-        // Dispatch event so game can react to settings changes
-        window.dispatchEvent(new window.CustomEvent("settingsChanged", { detail: settings }));
+
+        // DON'T dispatch event here - it will be dispatched once at the end of saveAndClose()
+        // to avoid reloading settings before all saves are complete
     }
 
     saveDifficultySettings() {
         const settings = {};
-        settings.difficulty = document.getElementById("difficultySelect")?.value ?? "medium";
+        settings.difficulty = document.getElementById("difficultySelect")?.value ?? SettingsManager.getDefault("difficulty");
         SettingsManager.save(settings);
     }
 
     saveYearSettings() {
         const settings = {};
-        settings.cardYear = parseInt(document.getElementById("yearSelect")?.value ?? "2025", 10);
+        settings.cardYear = parseInt(document.getElementById("yearSelect")?.value ?? SettingsManager.getDefault("cardYear").toString(), 10);
         SettingsManager.save(settings);
     }
 
     saveHouseRuleSettings() {
         const settings = {};
-        settings.useBlankTiles = document.getElementById("useBlankTiles")?.checked ?? false;
+        settings.useBlankTiles = document.getElementById("useBlankTiles")?.checked ?? SettingsManager.getDefault("useBlankTiles");
         SettingsManager.save(settings);
     }
 
     saveAudioSettings() {
         const settings = {};
-        
-        settings.bgmVolume = parseInt(document.getElementById("bgmVolume")?.value ?? "70", 10);
-        settings.bgmMuted = document.getElementById("bgmMute")?.checked ?? false;
-        settings.sfxVolume = parseInt(document.getElementById("sfxVolume")?.value ?? "80", 10);
-        settings.sfxMuted = document.getElementById("sfxMute")?.checked ?? false;
-        
+
+        settings.bgmVolume = parseInt(document.getElementById("bgmVolume")?.value ?? SettingsManager.getDefault("bgmVolume").toString(), 10);
+        settings.bgmMuted = document.getElementById("bgmMute")?.checked ?? SettingsManager.getDefault("bgmMuted");
+        settings.sfxVolume = parseInt(document.getElementById("sfxVolume")?.value ?? SettingsManager.getDefault("sfxVolume").toString(), 10);
+        settings.sfxMuted = document.getElementById("sfxMute")?.checked ?? SettingsManager.getDefault("sfxMuted");
+
         SettingsManager.save(settings);
     }
 
@@ -317,7 +329,7 @@ class DesktopSettingsManager {
     }
     
     applyAudioSettings(settings) {
-        // Apply audio settings to UI with defaults
+        // Apply audio settings to UI with defaults from SettingsManager
         const bgmVolumeSlider = document.getElementById("bgmVolume");
         const bgmVolumeValue = document.getElementById("bgmVolumeValue");
         const bgmMuteCheckbox = document.getElementById("bgmMute");
@@ -326,7 +338,8 @@ class DesktopSettingsManager {
         const sfxMuteCheckbox = document.getElementById("sfxMute");
 
         if (bgmVolumeSlider) {
-            const volume = settings.bgmVolume ?? 70;
+            // Use SettingsManager defaults instead of hardcoded values
+            const volume = settings.bgmVolume ?? SettingsManager.getDefault("bgmVolume");
             bgmVolumeSlider.value = volume;
             if (bgmVolumeValue) {
                 bgmVolumeValue.textContent = `${volume}%`;
@@ -334,11 +347,12 @@ class DesktopSettingsManager {
         }
 
         if (bgmMuteCheckbox) {
-            bgmMuteCheckbox.checked = settings.bgmMuted ?? false;
+            bgmMuteCheckbox.checked = settings.bgmMuted ?? SettingsManager.getDefault("bgmMuted");
         }
 
         if (sfxVolumeSlider) {
-            const volume = settings.sfxVolume ?? 80;
+            // Use SettingsManager defaults instead of hardcoded values
+            const volume = settings.sfxVolume ?? SettingsManager.getDefault("sfxVolume");
             sfxVolumeSlider.value = volume;
             if (sfxVolumeValue) {
                 sfxVolumeValue.textContent = `${volume}%`;
@@ -346,7 +360,7 @@ class DesktopSettingsManager {
         }
 
         if (sfxMuteCheckbox) {
-            sfxMuteCheckbox.checked = settings.sfxMuted ?? false;
+            sfxMuteCheckbox.checked = settings.sfxMuted ?? SettingsManager.getDefault("sfxMuted");
         }
     }
 
@@ -474,9 +488,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Listen for settings changes from mobile
     window.addEventListener("settingsChanged", (event) => {
         const newSettings = event.detail;
-        console.log("Settings changed from mobile:", newSettings);
-        
-        // Update UI if settings panel is open
+
+        // DON'T reload settings if the event came from desktop settings manager itself
+        // (prevents reload loop during save)
+        if (event.source === "desktop") {
+            return;
+        }
+
+        // Update UI if settings panel is open (only for events from mobile/external)
         if (window.settingsManager && window.settingsManager.overlay.style.display !== "none") {
             window.settingsManager.loadSettings();
         }
