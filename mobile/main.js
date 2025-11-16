@@ -142,7 +142,7 @@ async function initializeGame() {
     }
 
     // Hide loading message
-    mobileRenderer.updateStatus("Ready to play! Click NEW GAME to start.");
+    mobileRenderer?.updateStatus("Ready to play! Click NEW GAME to start.");
 
     console.log("Mobile game initialized successfully");
 }

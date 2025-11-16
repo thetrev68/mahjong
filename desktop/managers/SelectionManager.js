@@ -30,6 +30,7 @@ export class SelectionManager {
         this.maxCount = 3;                  // Maximum tiles allowed to be selected
         this.mode = null;                   // Current mode: "charleston", "courtesy", "play", "expose"
         this._isEnabled = false;            // Is selection currently active?
+        this._activeButtonId = "button1";   // Button ID for current selection session
 
         // For expose mode validation
         this.discardTile = null;            // The discarded tile (for expose mode)
@@ -592,6 +593,9 @@ export class SelectionManager {
      */
     requestSelection({min, max, mode, buttonId = "button1"}) {
         return new Promise((resolve) => {
+            // Store active button ID for _updateButtonState()
+            this._activeButtonId = buttonId;
+
             // Enable selection mode
             this.enableTileSelection(min, max, mode);
 
@@ -605,8 +609,7 @@ export class SelectionManager {
                     this.clearSelection();
                     this.disableTileSelection();
 
-                    // Clear pending callback reference
-                    this._pendingCallback = null;
+                    // Clear callback reference
                     this.onSelectionChanged = null;
 
                     // Resolve with selected tiles
@@ -619,9 +622,6 @@ export class SelectionManager {
                     );
                 }
             };
-
-            // Store callback for potential cleanup
-            this._pendingCallback = confirmHandler;
 
             // Register with ButtonManager if available
             if (this.buttonManager) {
@@ -704,16 +704,18 @@ export class SelectionManager {
      * @returns {undefined}
      */
     _updateButtonState() {
+        const buttonId = this._activeButtonId || "button1";
+
         // Use ButtonManager if available
         if (this.buttonManager) {
             if (this.isValidSelection()) {
-                this.buttonManager.enableButton("button1");
+                this.buttonManager.enableButton(buttonId);
             } else {
-                this.buttonManager.disableButton("button1");
+                this.buttonManager.disableButton(buttonId);
             }
         } else {
             // Fallback to direct DOM manipulation
-            const button = window.document.getElementById("button1");
+            const button = window.document.getElementById(buttonId);
             if (button) {
                 button.disabled = !this.isValidSelection();
             }

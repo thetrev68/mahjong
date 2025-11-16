@@ -430,7 +430,7 @@ export class HandRenderer {
         this.unsubscribeFns = [];
 
         this.clearTiles();
-        this.clearSelection();
+        this.clearSelection(true); // Silent cleanup - no notification during teardown
 
         if (this.exposedSection) {
             this.exposedSection.innerHTML = "";

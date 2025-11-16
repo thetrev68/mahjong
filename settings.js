@@ -152,8 +152,10 @@ class DesktopSettingsManager {
         // Dispatch settings changed event ONCE after all saves are complete
         const allSettings = SettingsManager.load();
         window.dispatchEvent(new window.CustomEvent("settingsChanged", {
-            detail: allSettings,
-            source: "desktop"  // Mark as coming from desktop to prevent reload loop
+            detail: {
+                ...allSettings,
+                source: "desktop"  // Mark as coming from desktop to prevent reload loop
+            }
         }));
 
         // If year changed, reinitialize the card in game logic
@@ -491,7 +493,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // DON'T reload settings if the event came from desktop settings manager itself
         // (prevents reload loop during save)
-        if (event.source === "desktop") {
+        if (event.detail.source === "desktop") {
             return;
         }
 
