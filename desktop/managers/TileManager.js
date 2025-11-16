@@ -162,10 +162,26 @@ export class TileManager {
      * @param {Tile} tile
      */
     addTileToDiscardPile(tile) {
-        if (tile && this.table?.discards) {
-            this.table.discards.insertDiscard(tile);
-            this.table.discards.showDiscards();
+        if (!tile || !this.table?.discards) {
+            return null;
         }
+        const discards = this.table.discards;
+        discards.insertDiscard(tile);
+        const lastIndex = discards.tileArray.length - 1;
+        discards.layoutTiles(tile);
+        const {x, y, scale} = discards.getTilePosition(lastIndex);
+        tile.scale = scale;
+        tile.angle = 0;
+        tile.showTile(true, true);
+        tile.sprite.depth = 50;
+        tile.spriteBack.depth = 50;
+        const tween = tile.animate(x, y, 0);
+        if (tween && this.scene?.audioManager) {
+            tween.once("complete", () => {
+                this.scene.audioManager.playSFX("tile_dropping");
+            });
+        }
+        return tween;
     }
 
     /**

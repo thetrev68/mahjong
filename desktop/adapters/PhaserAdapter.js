@@ -49,6 +49,8 @@ export class PhaserAdapter {
 
         // Initialize Phase 3 managers and renderers
         this.handRenderer = new HandRenderer(scene, table);
+        this.pendingHumanGlowTile = null;
+        this.activeHumanGlowTile = null;
 
         // Create ButtonManager first (needed by SelectionManager)
         this.buttonManager = new ButtonManager(scene, gameController);
@@ -176,6 +178,24 @@ export class PhaserAdapter {
      */
     onGameStarted() {
         printMessage("Game started!");
+        this.clearHumanDrawGlow();
+        const settings = this.gameController?.settings || {};
+        const year = settings.year || "2025";
+        const optionParts = [
+            `Difficulty: ${settings.difficulty || "medium"}`,
+            `Charleston: ${settings.skipCharleston ? "skipped" : "full"}`,
+            `Blanks: ${settings.useBlankTiles ? "on" : "off"}`
+        ];
+        printMessage(`Starting card ${year} • ${optionParts.join(" • ")}`);
+        if (this.scene.audioManager) {
+            this.scene.audioManager.playBGM("bgm");
+        }
+        if (this.scene && typeof this.scene.hideWallGameNotice === "function") {
+            this.scene.hideWallGameNotice();
+        }
+        if (this.scene && typeof this.scene.setActionPanelDisabled === "function") {
+            this.scene.setActionPanelDisabled(false);
+        }
 
         // Reset Phaser table
         this.table.reset();
@@ -207,6 +227,14 @@ export class PhaserAdapter {
             }
         } else if (reason === "wall_game") {
             printMessage("Wall game - no winner");
+            printInfo("Wall game reached. No moves available.");
+            this.table.players.forEach(player => player.showHand(true));
+            if (this.scene.audioManager) {
+                this.scene.audioManager.playSFX("wall_fail");
+            }
+            if (this.scene && typeof this.scene.handleWallGameEnd === "function") {
+                this.scene.handleWallGameEnd();
+            }
         }
 
         // Show start button again
@@ -234,6 +262,11 @@ export class PhaserAdapter {
 
         const dealNextGroup = () => {
             if (currentStepIndex >= sequence.length) {
+                this.autoSortHumanHand();
+                this.applyHumanDrawGlow();
+                if (this.scene && typeof this.scene.handleDealAnimationComplete === "function") {
+                    this.scene.handleDealAnimationComplete();
+                }
                 this.gameController.emit("DEALING_COMPLETE");
                 return;
             }
@@ -262,6 +295,9 @@ export class PhaserAdapter {
                 phaserTile.showTile(true, playerIndex === PLAYER.BOTTOM);
 
                 this.tileManager.insertTileIntoHand(playerIndex, phaserTile);
+                if (playerIndex === PLAYER.BOTTOM) {
+                    this.setPendingHumanGlowTile(phaserTile);
+                }
                 dealtTiles.push(phaserTile);
             });
 
@@ -315,6 +351,11 @@ export class PhaserAdapter {
 
         const dealNextGroup = () => {
             if (currentStepIndex >= DEAL_SEQUENCE.length) {
+                this.autoSortHumanHand();
+                this.applyHumanDrawGlow();
+                if (this.scene && typeof this.scene.handleDealAnimationComplete === "function") {
+                    this.scene.handleDealAnimationComplete();
+                }
                 this.gameController.emit("DEALING_COMPLETE");
                 return;
             }
@@ -332,6 +373,9 @@ export class PhaserAdapter {
                 phaserTile.sprite.setAlpha(0);
 
                 player.hand.insertHidden(phaserTile);
+                if (playerIndex === PLAYER.BOTTOM) {
+                    this.setPendingHumanGlowTile(phaserTile);
+                }
 
                 const tileDataObject = TileData.fromPhaserTile(phaserTile);
                 this.gameController.players[playerIndex].hand.addTile(tileDataObject);
@@ -384,6 +428,9 @@ export class PhaserAdapter {
 
         // Add to player's hand
         this.tileManager.insertTileIntoHand(playerIndex, phaserTile);
+        if (playerIndex === PLAYER.BOTTOM) {
+            this.setPendingHumanGlowTile(phaserTile);
+        }
 
         // Animate tile draw (slide from wall to hand)
         const targetPos = player.hand.calculateTilePosition(
@@ -393,6 +440,11 @@ export class PhaserAdapter {
 
         // Animate to hand with tile.animate() method
         const tween = phaserTile.animate(targetPos.x, targetPos.y, player.playerInfo.angle, 200);
+        if (tween && this.scene.audioManager) {
+            tween.once("complete", () => {
+                this.scene.audioManager.playSFX("rack_tile");
+            });
+        }
 
         // Fade in during animation
         this.scene.tweens.add({
@@ -400,12 +452,22 @@ export class PhaserAdapter {
             alpha: 1,
             duration: 200
         });
+        phaserTile.isNewlyInserted = false;
+
+        const finalizeDraw = () => {
+            if (playerIndex === PLAYER.BOTTOM) {
+                this.autoSortHumanHand();
+                this.applyHumanDrawGlow();
+            } else {
+                this.handRenderer.showHand(playerIndex, false);
+            }
+        };
 
         // Refresh hand after animation completes
         if (tween) {
-            tween.on("complete", () => {
-                this.handRenderer.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
-            });
+            tween.on("complete", finalizeDraw);
+        } else {
+            finalizeDraw();
         }
 
         // Track that one tile was removed from the wall
@@ -431,21 +493,14 @@ export class PhaserAdapter {
             console.error(`Could not find Phaser Tile for index ${tileDataObj.index}`);
             return;
         }
+        if (playerIndex === PLAYER.BOTTOM) {
+            this.clearHumanDrawGlow(phaserTile);
+        }
 
         // Remove from hand
         this.tileManager.removeTileFromHand(playerIndex, phaserTile);
 
-        // Animate to discard pile center (350, 420 from 07c41b9)
-        const discardTween = phaserTile.animate(350, 420, 0);
-
-        // Play tile dropping sound when animation completes
-        if (discardTween && this.scene.audioManager) {
-            discardTween.on("complete", () => {
-                this.scene.audioManager.playSFX("tile_dropping");
-            });
-        }
-
-        // Add to discard pile
+        // Add to discard pile (handles animation + audio)
         this.tileManager.addTileToDiscardPile(phaserTile);
 
         // Phase 3.5: Set discard tile for exposure validation (human player)
@@ -471,6 +526,11 @@ export class PhaserAdapter {
             console.error("Invalid claiming player index:", claimingPlayer, data);
             return;
         }
+        const claimedTile = this.tileManager.getOrCreateTile(tileDataObj);
+        if (claimedTile && this.table?.discards) {
+            this.table.discards.removeDiscardTile(claimedTile);
+            this.table.discards.layoutTiles();
+        }
         const playerName = this.getPlayerName(claimingPlayer);
         printMessage(`${playerName} claimed ${tileDataObj.getText()} for ${claimType}`);
     }
@@ -490,17 +550,17 @@ export class PhaserAdapter {
             tileDatas.map(td => TileData.fromJSON(td))
         );
 
-        // Create exposed tile set and add to player's hand
-        const exposedTileSet = new window.TileSet(this.scene, this.table, false);
         phaserTiles.forEach(tile => {
-            // Remove from hidden tiles if present
-            player.hand.hiddenTileSet.remove(tile);
-            // Add to exposed set
-            exposedTileSet.insert(tile);
+            if (typeof player.hand.removeHidden === "function") {
+                player.hand.removeHidden(tile);
+            }
         });
-
-        // Add exposed set to player's hand
-        player.hand.exposedTileSetArray.push(exposedTileSet);
+        if (playerIndex === PLAYER.BOTTOM) {
+            phaserTiles.forEach(tile => this.clearHumanDrawGlow(tile));
+        }
+        if (typeof player.hand.insertExposed === "function") {
+            player.hand.insertExposed(phaserTiles);
+        }
 
         // Refresh hand display
         this.handRenderer.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
@@ -1039,6 +1099,50 @@ export class PhaserAdapter {
         // TODO: delete messy manual cleanup once adapter delegates lifespan to managers.
     }
 
+    autoSortHumanHand() {
+        const humanPlayer = this.table.players[PLAYER.BOTTOM];
+        if (!humanPlayer || !humanPlayer.hand || typeof humanPlayer.hand.sortSuitHidden !== "function") {
+            return;
+        }
+        humanPlayer.hand.sortSuitHidden();
+        this.handRenderer.showHand(PLAYER.BOTTOM, true);
+    }
+
+    setPendingHumanGlowTile(tile) {
+        if (tile) {
+            this.pendingHumanGlowTile = tile;
+        }
+    }
+
+    applyHumanDrawGlow() {
+        if (!this.pendingHumanGlowTile) {
+            return;
+        }
+        if (this.activeHumanGlowTile && this.activeHumanGlowTile !== this.pendingHumanGlowTile) {
+            this.activeHumanGlowTile.removeGlowEffect();
+        }
+        if (typeof this.pendingHumanGlowTile.addGlowEffect === "function") {
+            this.pendingHumanGlowTile.addGlowEffect(this.scene, 0x1e3a8a, 0.5, 10);
+        }
+        this.activeHumanGlowTile = this.pendingHumanGlowTile;
+        this.pendingHumanGlowTile = null;
+    }
+
+    clearHumanDrawGlow(tile = null) {
+        const target = tile ?? this.activeHumanGlowTile;
+        if (target && typeof target.removeGlowEffect === "function") {
+            target.removeGlowEffect();
+        }
+        if (!tile || target === tile) {
+            if (target === this.pendingHumanGlowTile) {
+                this.pendingHumanGlowTile = null;
+            }
+            if (target === this.activeHumanGlowTile) {
+                this.activeHumanGlowTile = null;
+            }
+        }
+    }
+
     /**
      * Handle hand sort requests (suit/rank)
      */
@@ -1058,6 +1162,6 @@ export class PhaserAdapter {
 
         this.handRenderer.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
         const playerName = this.getPlayerName(playerIndex);
-        printInfo(`${playerName} sorted hand by ${sortType}`);
+        printMessage(`${playerName} sorted hand by ${sortType}`);
     }
 }
