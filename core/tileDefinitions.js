@@ -45,22 +45,22 @@ export const gTileGroups = [
     {
         suit: SUIT.FLOWER,
         textArray: ["Flower"],
-        prefix: ["F1", "F2", "F3", "F4"],
+        prefix: ["F1", "F2", "F3", "F4", "F1", "F2", "F3", "F4"],
         maxNum: 1,
-        count: 4
+        count: 1
     },
     {
         suit: SUIT.JOKER,
         textArray: ["Joker"],
-        prefix: ["JK"],
+        prefix: ["J"],
         maxNum: 1,
         count: 8
     },
     {
         suit: SUIT.BLANK,
         textArray: ["Blank"],
-        prefix: ["BL"],
+        prefix: ["BLANK"],
         maxNum: 1,
-        count: 0
+        count: 8
     }
 ];

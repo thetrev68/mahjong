@@ -1,4 +1,5 @@
 import {SUIT, WIND, DRAGON} from "../../constants.js";
+import {TileData} from "../../core/models/TileData.js";
 
 const SUIT_NAMES = {
     [SUIT.CRACK]: "CRACK",
@@ -39,6 +40,12 @@ export class HandRenderer {
         this.tiles = [];
         this.selectedIndices = new Set();
         this.selectionKeyByIndex = new Map();
+        this.selectionBehavior = {
+            mode: "multiple",
+            maxSelectable: Infinity,
+            allowToggle: true
+        };
+        this.selectionListener = null;
         this.unsubscribeFns = [];
         this.interactive = true;
         this.handContainer = null;
@@ -194,6 +201,7 @@ export class HandRenderer {
         tileButton.className = "tile-btn";
         tileButton.dataset.suit = this.getSuitName(tileData?.suit);
         tileButton.dataset.number = this.getDataNumber(tileData);
+        tileButton.dataset.index = String(index);
         tileButton.dataset.selectionKey = selectionKey;
         tileButton.textContent = this.formatTileText(tileData);
         tileButton.disabled = !this.interactive;
@@ -204,7 +212,7 @@ export class HandRenderer {
             if (!this.interactive) {
                 return;
             }
-            this.selectTile(index);
+            this.handleTileClick(index);
         };
 
         tileButton.__handRendererHandler = clickHandler;
@@ -213,21 +221,61 @@ export class HandRenderer {
         return tileButton;
     }
 
-    selectTile(index, options = {}) {
-        const button = this.tiles[index];
-        if (!button) {
-            return;
-        }
+    setSelectionBehavior(behavior = {}) {
+        this.selectionBehavior = {
+            ...this.selectionBehavior,
+            ...behavior
+        };
+    }
 
+    setSelectionListener(listener) {
+        this.selectionListener = typeof listener === "function" ? listener : null;
+    }
+
+    handleTileClick(index) {
         const selectionKey = this.selectionKeyByIndex.get(index);
         if (!selectionKey) {
             return;
         }
 
-        const {state, toggle = true, clearOthers = false} = options;
+        const isSelected = this.selectedIndices.has(selectionKey);
+        const {mode, maxSelectable, allowToggle} = this.selectionBehavior;
+
+        if (mode === "single") {
+            if (isSelected && allowToggle !== false) {
+                this.selectTile(index, {state: "off", toggle: false});
+            } else {
+                this.clearSelection(true);
+                this.selectTile(index, {state: "on", toggle: false});
+            }
+            return;
+        }
+
+        if (!isSelected) {
+            if (this.selectedIndices.size >= maxSelectable) {
+                return;
+            }
+            this.selectTile(index, {state: "on", toggle: false});
+        } else if (allowToggle !== false) {
+            this.selectTile(index, {state: "off", toggle: false});
+        }
+    }
+
+    selectTile(index, options = {}) {
+        const button = this.tiles[index];
+        if (!button) {
+            return false;
+        }
+
+        const selectionKey = this.selectionKeyByIndex.get(index);
+        if (!selectionKey) {
+            return false;
+        }
+
+        const {state, toggle = true, clearOthers = false, silent = false} = options;
 
         if (clearOthers) {
-            this.clearSelection();
+            this.clearSelection(true);
         }
 
         let shouldSelect;
@@ -241,18 +289,87 @@ export class HandRenderer {
             shouldSelect = !this.selectedIndices.has(selectionKey);
         }
 
+        let changed = false;
         if (shouldSelect) {
-            this.selectedIndices.add(selectionKey);
-            button.classList.add("selected");
+            if (!this.selectedIndices.has(selectionKey)) {
+                this.selectedIndices.add(selectionKey);
+                button.classList.add("selected");
+                changed = true;
+            }
         } else {
-            this.selectedIndices.delete(selectionKey);
-            button.classList.remove("selected");
+            if (this.selectedIndices.delete(selectionKey)) {
+                button.classList.remove("selected");
+                changed = true;
+            }
         }
+
+        if (changed && !silent) {
+            this.notifySelectionChange();
+        }
+
+        return changed;
     }
 
-    clearSelection() {
+    clearSelection(silent = false) {
+        if (this.selectedIndices.size === 0) {
+            return false;
+        }
+
         this.selectedIndices.clear();
         this.tiles.forEach(tileButton => tileButton.classList.remove("selected"));
+
+        if (!silent) {
+            this.notifySelectionChange();
+        }
+
+        return true;
+    }
+
+    getSelectedTileIndices() {
+        const indices = [];
+        for (const [index, selectionKey] of this.selectionKeyByIndex.entries()) {
+            if (this.selectedIndices.has(selectionKey)) {
+                indices.push(index);
+            }
+        }
+        return indices;
+    }
+
+    getSelectedTiles() {
+        if (!this.currentHandData || !Array.isArray(this.currentHandData.tiles)) {
+            return [];
+        }
+
+        const tiles = [];
+        for (const [index, selectionKey] of this.selectionKeyByIndex.entries()) {
+            if (!this.selectedIndices.has(selectionKey)) {
+                continue;
+            }
+            const tile = this.currentHandData.tiles[index];
+            if (!tile) {
+                continue;
+            }
+            const normalized = this.toTileData(tile);
+            if (normalized) {
+                tiles.push(normalized);
+            }
+        }
+        return tiles;
+    }
+
+    getSelectionState() {
+        const indices = this.getSelectedTileIndices();
+        return {
+            count: indices.length,
+            indices,
+            tiles: this.getSelectedTiles()
+        };
+    }
+
+    notifySelectionChange() {
+        if (typeof this.selectionListener === "function") {
+            this.selectionListener(this.getSelectionState());
+        }
     }
 
     sortHand(mode = "suit") {
@@ -324,6 +441,7 @@ export class HandRenderer {
         this.handContainer = null;
         this.exposedSection = null;
         this.currentHandData = null;
+        this.selectionListener = null;
     }
 
     getSuitName(suit) {
@@ -403,5 +521,15 @@ export class HandRenderer {
                 }))
                 : []
         };
+    }
+
+    toTileData(tile) {
+        if (!tile) {
+            return null;
+        }
+        if (tile instanceof TileData) {
+            return tile.clone();
+        }
+        return TileData.fromJSON(tile);
     }
 }

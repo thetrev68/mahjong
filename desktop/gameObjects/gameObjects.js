@@ -2,6 +2,8 @@ import * as Phaser from "phaser";
 import {SUIT, SPRITE_HEIGHT, SPRITE_WIDTH, TILE_GAP, WINDOW_WIDTH, WINDOW_HEIGHT, getTotalTileCount} from "../../constants.js";
 import {debugPrint} from "../../utils.js";
 
+//TODO: This file is to be phased out and removed.
+
 // PRIVATE CONSTANTS
 
 
@@ -405,7 +407,11 @@ export class Wall {
             return;
         }
         // Create all tiles (152 base + 8 blanks if enabled)
+        const useBlankTiles = window.settingsManager?.getUseBlankTiles?.() || false;
         for (const group of gTileGroups) {
+            if (group.suit === SUIT.BLANK && !useBlankTiles) {
+                continue;
+            }
             for (const prefix of group.prefix) {
                 for (let num = 1; num <= group.maxNum; num++) {
                     let number = num;
@@ -515,30 +521,10 @@ export class Discards {
     }
 
     showDiscards() {
-      if (this.tileArray.length === 0) return;
-      const centerX = WINDOW_WIDTH / 2;
-      const centerY = WINDOW_HEIGHT / 2 - 100;
-      const DISCARD_SCALE = 0.5;
-      const tilesPerRow = 17; // Increased from 14 to 17 for more tiles per row
-      const tileSpacing = SPRITE_WIDTH * DISCARD_SCALE + TILE_GAP;
-      const totalWidth = Math.min(this.tileArray.length, tilesPerRow) * tileSpacing - TILE_GAP;
-      let currentX = centerX - totalWidth / 2;
-      let currentY = centerY;
-      let rowCount = 0;
-      for (const tile of this.tileArray) {
-        tile.animate(currentX, currentY, 0);
-        tile.scale = DISCARD_SCALE;
-        tile.showTile(true, true);
-        // Set discard pile depth below pending claim tiles (which use depth 200)
-        tile.sprite.depth = 50;
-        tile.spriteBack.depth = 50;
-        currentX += tileSpacing;
-        if (++rowCount >= tilesPerRow) {
-          rowCount = 0;
-          currentX = centerX - totalWidth / 2;
-          currentY += SPRITE_HEIGHT * DISCARD_SCALE + TILE_GAP;
+        if (this.tileArray.length === 0) {
+            return;
         }
-      }
+        this.layoutTiles();
     }
 
     getSelectableDiscards() {
@@ -588,5 +574,40 @@ export class Discards {
         }
         // Note: Sprite is NOT destroyed to allow tile reuse (e.g., blank tile swaps)
         return tile;
+    }
+
+    getTilePosition(index, totalCount = this.tileArray.length) {
+        const DISCARD_SCALE = 0.5;
+        const tilesPerRow = 17;
+        const tileSpacing = SPRITE_WIDTH * DISCARD_SCALE + TILE_GAP;
+        const rowHeight = SPRITE_HEIGHT * DISCARD_SCALE + TILE_GAP;
+        const centerX = WINDOW_WIDTH / 2;
+        const centerY = WINDOW_HEIGHT / 2 - 100;
+        const row = Math.floor(index / tilesPerRow);
+        const col = index % tilesPerRow;
+        const tilesInRow = Math.max(Math.min(totalCount - row * tilesPerRow, tilesPerRow), 1);
+        const totalWidth = tilesInRow * tileSpacing - TILE_GAP;
+        const startX = centerX - (totalWidth / 2);
+        const x = startX + col * tileSpacing;
+        const y = centerY + row * rowHeight;
+        return {x, y, scale: DISCARD_SCALE};
+    }
+
+    layoutTiles(skipTile = null) {
+        const totalCount = this.tileArray.length;
+        for (let i = 0; i < totalCount; i++) {
+            const tile = this.tileArray[i];
+            if (!tile || tile === skipTile) {
+                continue;
+            }
+            const {x, y, scale} = this.getTilePosition(i, totalCount);
+            tile.scale = scale;
+            tile.angle = 0;
+            tile.x = x;
+            tile.y = y;
+            tile.showTile(true, true);
+            tile.sprite.depth = 50;
+            tile.spriteBack.depth = 50;
+        }
     }
 }

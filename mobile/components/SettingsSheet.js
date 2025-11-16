@@ -22,6 +22,9 @@ class SettingsSheet {
      * Create the bottom sheet HTML structure
      */
     createUI() {
+        // Get default values from SettingsManager
+        const defaults = SettingsManager.getDefaults();
+
         // Create overlay backdrop
         const overlay = document.createElement("div");
         overlay.id = "settings-overlay-mobile";
@@ -76,11 +79,11 @@ class SettingsSheet {
                     <div class="settings-item">
                         <label for="mobile-bgm-volume">
                             Music Volume
-                            <span class="volume-value" id="mobile-bgm-value">70</span>
+                            <span class="volume-value" id="mobile-bgm-value">${defaults.bgmVolume}</span>
                         </label>
                         <div class="volume-control">
                             <input type="range" id="mobile-bgm-volume" class="settings-slider"
-                                   min="0" max="100" step="1" value="70">
+                                   min="0" max="100" step="1" value="${defaults.bgmVolume}">
                             <label class="mute-toggle">
                                 <input type="checkbox" id="mobile-bgm-mute">
                                 <span>Mute</span>
@@ -91,11 +94,11 @@ class SettingsSheet {
                     <div class="settings-item">
                         <label for="mobile-sfx-volume">
                             Sound Effects
-                            <span class="volume-value" id="mobile-sfx-value">80</span>
+                            <span class="volume-value" id="mobile-sfx-value">${defaults.sfxVolume}</span>
                         </label>
                         <div class="volume-control">
                             <input type="range" id="mobile-sfx-volume" class="settings-slider"
-                                   min="0" max="100" step="1" value="80">
+                                   min="0" max="100" step="1" value="${defaults.sfxVolume}">
                             <label class="mute-toggle">
                                 <input type="checkbox" id="mobile-sfx-mute">
                                 <span>Mute</span>
@@ -232,19 +235,19 @@ class SettingsSheet {
      */
     saveSettings() {
         const settings = {
-            cardYear: parseInt(document.getElementById("mobile-year").value),
-            difficulty: document.getElementById("mobile-difficulty").value,
-            useBlankTiles: document.getElementById("mobile-blank-tiles").checked,
+            cardYear: parseInt(document.getElementById("mobile-year")?.value ?? SettingsManager.getDefault("cardYear").toString()),
+            difficulty: document.getElementById("mobile-difficulty")?.value ?? SettingsManager.getDefault("difficulty"),
+            useBlankTiles: document.getElementById("mobile-blank-tiles")?.checked ?? SettingsManager.getDefault("useBlankTiles"),
 
-            bgmVolume: parseInt(document.getElementById("mobile-bgm-volume").value),
-            bgmMuted: document.getElementById("mobile-bgm-mute").checked,
-            sfxVolume: parseInt(document.getElementById("mobile-sfx-volume").value),
-            sfxMuted: document.getElementById("mobile-sfx-mute").checked,
+            bgmVolume: parseInt(document.getElementById("mobile-bgm-volume")?.value ?? SettingsManager.getDefault("bgmVolume").toString()),
+            bgmMuted: document.getElementById("mobile-bgm-mute")?.checked ?? SettingsManager.getDefault("bgmMuted"),
+            sfxVolume: parseInt(document.getElementById("mobile-sfx-volume")?.value ?? SettingsManager.getDefault("sfxVolume").toString()),
+            sfxMuted: document.getElementById("mobile-sfx-mute")?.checked ?? SettingsManager.getDefault("sfxMuted"),
 
-            trainingMode: document.getElementById("mobile-training-mode").checked,
-            trainingTileCount: parseInt(document.getElementById("mobile-training-tiles").value),
-            skipCharleston: document.getElementById("mobile-skip-charleston").checked,
-            trainingHand: ""  // Not used on mobile
+            trainingMode: document.getElementById("mobile-training-mode")?.checked ?? SettingsManager.getDefault("trainingMode"),
+            trainingTileCount: parseInt(document.getElementById("mobile-training-tiles")?.value ?? SettingsManager.getDefault("trainingTileCount").toString()),
+            skipCharleston: document.getElementById("mobile-skip-charleston")?.checked ?? SettingsManager.getDefault("skipCharleston"),
+            trainingHand: SettingsManager.getDefault("trainingHand")  // Not used on mobile
         };
 
         SettingsManager.save(settings);

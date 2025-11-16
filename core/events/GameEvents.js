@@ -44,9 +44,10 @@ export function createGameStartedEvent(players) {
  * Signals PhaserAdapter to handle the entire dealing sequence
  * PhaserAdapter will manipulate Phaser wall/hands and sync to core model
  */
-export function createTilesDealtEvent() {
+export function createTilesDealtEvent(sequence = []) {
     return {
         type: "TILES_DEALT",
+        sequence,
         timestamp: Date.now()
     };
 }
@@ -206,6 +207,19 @@ export function createCourtesyPassEvent(fromPlayer, toPlayer, tiles, animation =
             glow: animation.glow || {color: 0x1e90ff, alpha: 0.7},  // Dodge blue
             ...animation
         },
+        timestamp: Date.now()
+    };
+}
+
+/**
+ * Event: SORT_HAND_REQUESTED
+ * Emitted when UI asks to sort a player's hand
+ */
+export function createSortHandEvent(player, sortType) {
+    return {
+        type: "SORT_HAND_REQUESTED",
+        player,
+        sortType,
         timestamp: Date.now()
     };
 }

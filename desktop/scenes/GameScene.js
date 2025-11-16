@@ -7,7 +7,7 @@ import {GameController} from "../../core/GameController.js";
 import {PhaserAdapter} from "../adapters/PhaserAdapter.js";
 import { HintAnimationManager } from "../managers/HintAnimationManager.js";
 // import { debugPrint } from "../../utils.js";
-import { WINDOW_WIDTH, getTotalTileCount } from "../../constants.js";
+import { WINDOW_WIDTH, WINDOW_HEIGHT, getTotalTileCount } from "../../constants.js";
 import {AIEngine} from "../../core/AIEngine.js";
 import {Card} from "../../card/card.js";
 
@@ -21,6 +21,10 @@ class GameScene extends Phaser.Scene {
         this.commandBarManualPosition = false;
         this.commandBarPosition = null;
         this.homePageTileManager = null;
+        this.actionPanelEl = null;
+        this.waitingForCommandBarReveal = false;
+        this.isActionPanelDisabled = false;
+        this.wallGameBanner = null;
     }
 
     preload() {
@@ -45,6 +49,7 @@ class GameScene extends Phaser.Scene {
         this.load.audio("rack_tile", "./assets/audio/rack_tile.mp3");
         this.load.audio("tile_dropping", "./assets/audio/tile_dropping.mp3");
         this.load.audio("fireworks", "./assets/audio/fireworks.mp3");
+        this.load.audio("wall_fail", "./assets/audio/normalflyin.mp3");
 
         // The scale manager stuff will be handled in main.js config, so I'm omitting it here as per the plan.
         // The resizeCallback is also a separate step.
@@ -85,7 +90,7 @@ class GameScene extends Phaser.Scene {
         // Phase 2A: Create GameController + PhaserAdapter
         this.gameController = new GameController();
         await this.gameController.init({
-            sharedTable: this.gTable,  // Share the table with GameController
+            wallGenerator: () => this.captureWallTiles(),
             aiEngine: aiEngine,
             cardValidator: card,
             settings: {
@@ -94,6 +99,9 @@ class GameScene extends Phaser.Scene {
                 useBlankTiles: (window.settingsManager && window.settingsManager.getUseBlankTiles?.()) || false,
                 skipCharleston: (window.settingsManager && window.settingsManager.getSetting?.("skipCharleston", false)) || false
             }
+        });
+        this.gameController.on("GAME_STARTED", () => {
+            this.prepareActionPanelForNewGame();
         });
 
         // Initialize HintAnimationManager with direct dependencies (Phase 3.5: Direct dependencies, no gameLogicStub)
@@ -133,6 +141,16 @@ class GameScene extends Phaser.Scene {
             align: "left"
         });
         this.errorText.visible = false;
+        this.wallGameBanner = this.add.text(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, "Wall Game", {
+            font: "48px 'Trebuchet MS', sans-serif",
+            fill: "#facc15",
+            backgroundColor: "rgba(0,0,0,0.65)",
+            padding: {x: 24, y: 16},
+            align: "center"
+        });
+        this.wallGameBanner.setOrigin(0.5);
+        this.wallGameBanner.setDepth(500);
+        this.wallGameBanner.setVisible(false);
 
         this.gTable.create(true); // Don't create wall tiles yet
         this.homePageTileManager = new HomePageTileManager(this, this.gTable.wall);
@@ -141,6 +159,7 @@ class GameScene extends Phaser.Scene {
         // Set up the UI buttons
         this.enableCommandBarDrag();
         this.resize(this.sys.game.canvas.width, this.sys.game.canvas.height);
+        this.initializeActionPanel();
 
         // Start Game button event listener
         const startButton = document.getElementById("start");
@@ -149,11 +168,7 @@ class GameScene extends Phaser.Scene {
                 // Hide the button after it's clicked
                 startButton.style.display = "none";
 
-                // Show the action panel
-                const uiCenterDiv = document.getElementById("uicenterdiv");
-                if (uiCenterDiv) {
-                    uiCenterDiv.style.display = "flex";
-                }
+                this.prepareActionPanelForNewGame();
 
                 if (this.homePageTileManager) {
                     // First game - animate tiles and transition
@@ -173,6 +188,105 @@ class GameScene extends Phaser.Scene {
                 }
             });
         }
+    }
+
+    initializeActionPanel() {
+        this.actionPanelEl = document.getElementById("uicenterdiv");
+        if (!this.actionPanelEl) {
+            return;
+        }
+        this.actionPanelEl.classList.add("command-bar--hidden");
+        this.actionPanelEl.setAttribute("aria-hidden", "true");
+        this.actionPanelEl.classList.remove("command-bar--disabled");
+        this.waitingForCommandBarReveal = false;
+    }
+
+    prepareActionPanelForNewGame() {
+        if (!this.actionPanelEl) {
+            this.initializeActionPanel();
+        }
+        this.waitingForCommandBarReveal = true;
+        this.hideActionPanel();
+        this.setActionPanelDisabled(false);
+        this.hideWallGameNotice();
+    }
+
+    hideActionPanel() {
+        if (!this.actionPanelEl) {
+            return;
+        }
+        this.actionPanelEl.classList.add("command-bar--hidden");
+        this.actionPanelEl.setAttribute("aria-hidden", "true");
+    }
+
+    showActionPanel() {
+        if (!this.actionPanelEl) {
+            return;
+        }
+        this.actionPanelEl.classList.remove("command-bar--hidden");
+        this.actionPanelEl.removeAttribute("aria-hidden");
+    }
+
+    setActionPanelDisabled(disabled) {
+        if (!this.actionPanelEl) {
+            return;
+        }
+        this.isActionPanelDisabled = disabled;
+        if (disabled) {
+            this.actionPanelEl.classList.add("command-bar--disabled");
+            this.actionPanelEl.setAttribute("aria-disabled", "true");
+        } else {
+            this.actionPanelEl.classList.remove("command-bar--disabled");
+            this.actionPanelEl.removeAttribute("aria-disabled");
+        }
+    }
+
+    handleDealAnimationComplete() {
+        if (!this.waitingForCommandBarReveal) {
+            return;
+        }
+        this.waitingForCommandBarReveal = false;
+        this.showActionPanel();
+    }
+
+    showWallGameNotice(message = "Wall Game - No Winner") {
+        if (!this.wallGameBanner) {
+            return;
+        }
+        this.wallGameBanner.setText(message);
+        this.wallGameBanner.setAlpha(0);
+        this.wallGameBanner.setVisible(true);
+        this.tweens.add({
+            targets: this.wallGameBanner,
+            alpha: 1,
+            duration: 350,
+            ease: "Quad.easeOut"
+        });
+    }
+
+    hideWallGameNotice() {
+        if (!this.wallGameBanner || !this.wallGameBanner.visible) {
+            return;
+        }
+        this.wallGameBanner.setVisible(false);
+    }
+
+    handleWallGameEnd() {
+        this.showWallGameNotice();
+        this.setActionPanelDisabled(true);
+        this.waitingForCommandBarReveal = false;
+    }
+
+    captureWallTiles() {
+        if (!this.gTable || !this.gTable.wall || !Array.isArray(this.gTable.wall.tileArray)) {
+            return [];
+        }
+
+        return this.gTable.wall.tileArray.map((tile, index) => ({
+            suit: tile.suit,
+            number: tile.number,
+            index: typeof tile.index === "number" ? tile.index : index
+        }));
     }
 
     createWallTileCounter() {
@@ -266,8 +380,13 @@ class GameScene extends Phaser.Scene {
     getDefaultCommandBarPosition(bar, canvasBounds, boundsRect) {
         const barWidth = bar.offsetWidth || 0;
         const barHeight = bar.offsetHeight || 0;
-        const fallbackLeft = canvasBounds.right - (barWidth / 2) - 36;
-        const fallbackTop = canvasBounds.bottom - barHeight - 110;
+        const canvas = this.sys.canvas;
+        const scaleX = canvas ? (canvasBounds.width / canvas.width) : 1;
+        const scaleY = canvas ? (canvasBounds.height / canvas.height) : 1;
+        const horizontalMargin = Math.max(36 * scaleX, 24);
+        const verticalMargin = Math.max((140 * scaleY), 120);
+        const fallbackLeft = canvasBounds.right - (barWidth / 2) - horizontalMargin;
+        const fallbackTop = canvasBounds.bottom - barHeight - verticalMargin;
 
         return this.getClampedCommandBarPosition(fallbackLeft, fallbackTop, bar, boundsRect);
     }
@@ -355,12 +474,13 @@ class GameScene extends Phaser.Scene {
 
     // eslint-disable-next-line no-unused-vars
     resize(_gameSize, _baseSize, _displaySize, _resolution) {
-        const uicenterdiv = document.getElementById("uicenterdiv");
+        const uicenterdiv = this.actionPanelEl || document.getElementById("uicenterdiv");
         const canvas = this.sys.canvas;
 
         if (!uicenterdiv || !canvas) {
             return;
         }
+        this.actionPanelEl = uicenterdiv;
 
         const canvasBounds = canvas.getBoundingClientRect();
         const boundsRect = this.getDragBounds();

@@ -320,6 +320,17 @@ a:focus-visible {
     font-size: 0.94rem;
 }
 
+#uicenterdiv.command-bar--hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#uicenterdiv.command-bar--disabled {
+    opacity: 0.7;
+    pointer-events: none;
+    filter: grayscale(0.3);
+}
+
 #uicenterdiv.command-bar--dragging {
     cursor: grabbing;
 }

@@ -1,7 +1,11 @@
 // Print to message window
 export function printMessage(str) {
     const textArea = window.document.getElementById("messages");
-    textArea.value += str;
+    if (!textArea) {
+        return;
+    }
+    const message = str.endsWith("\n") ? str : `${str}\n`;
+    textArea.value += message;
     textArea.scrollTop = textArea.scrollHeight;
 }
 

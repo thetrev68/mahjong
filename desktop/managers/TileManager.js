@@ -10,7 +10,8 @@
  * - Support hand reordering and interactions
  */
 
-import {PLAYER, SPRITE_WIDTH, SPRITE_SCALE, TILE_GAP, WINDOW_WIDTH, WINDOW_HEIGHT} from "../../constants.js";
+import {PLAYER, SUIT, SPRITE_WIDTH, SPRITE_SCALE, TILE_GAP, WINDOW_WIDTH, WINDOW_HEIGHT} from "../../constants.js";
+import {Tile} from "../gameObjects/gameObjects.js";
 import {animateTileSelect, animateTileDeselect} from "../animations/AnimationLibrary.js";
 
 export class TileManager {
@@ -52,6 +53,148 @@ export class TileManager {
          * @type {Set<number>}
          */
         this.dragEnabledPlayers = new Set();
+    }
+
+    /**
+     * Register all existing tiles from the wall and player hands
+     * Should be called once the Phaser table has been initialized/reset
+     */
+    initializeFromTable() {
+        this.tileSprites.clear();
+
+        const registerTile = (tile) => {
+            if (tile && typeof tile.index === "number") {
+                this.tileSprites.set(tile.index, tile);
+            }
+        };
+
+        if (this.table?.wall?.tileArray) {
+            this.table.wall.tileArray.forEach(registerTile);
+        }
+
+        if (Array.isArray(this.table?.players)) {
+            this.table.players.forEach(player => {
+                player?.hand?.hiddenTileSet?.tileArray?.forEach(registerTile);
+                player?.hand?.exposedTileSetArray?.forEach(set => {
+                    set?.tileArray?.forEach(registerTile);
+                });
+            });
+        }
+    }
+
+    /**
+     * Ensure a Phaser tile exists for the provided TileData
+     * @param {TileData|Object} tileData
+     * @returns {Tile|null}
+     */
+    getOrCreateTile(tileData) {
+        if (!tileData || typeof tileData.index !== "number") {
+            return null;
+        }
+
+        if (this.tileSprites.has(tileData.index)) {
+            return this.tileSprites.get(tileData.index);
+        }
+
+        const wallTile = this.findTileInWall(tileData.index);
+        if (wallTile) {
+            this.tileSprites.set(tileData.index, wallTile);
+            return wallTile;
+        }
+
+        // Create a brand new tile (fallback during migration)
+        const spriteName = this.getTileSpriteName(tileData);
+        const tile = new Tile(this.scene, tileData.suit, tileData.number, spriteName);
+        tile.index = tileData.index;
+        tile.create();
+        this.tileSprites.set(tile.index, tile);
+        return tile;
+    }
+
+    /**
+     * Remove tile from wall registry if still present
+     * @param {number} tileIndex
+     */
+    removeTileFromWall(tileIndex) {
+        if (!this.table?.wall?.tileArray) {
+            return;
+        }
+        const wallTiles = this.table.wall.tileArray;
+        const idx = wallTiles.findIndex(tile => tile.index === tileIndex);
+        if (idx >= 0) {
+            wallTiles.splice(idx, 1);
+        }
+    }
+
+    /**
+     * Insert a tile into a player's hidden hand
+     * @param {number} playerIndex
+     * @param {Tile} tile
+     */
+    insertTileIntoHand(playerIndex, tile) {
+        const player = this.table?.players?.[playerIndex];
+        if (!player?.hand || !tile) {
+            return;
+        }
+        player.hand.insertHidden(tile);
+        this.tileSprites.set(tile.index, tile);
+    }
+
+    /**
+     * Remove a tile from a player's hidden hand
+     * @param {number} playerIndex
+     * @param {Tile} tile
+     */
+    removeTileFromHand(playerIndex, tile) {
+        const player = this.table?.players?.[playerIndex];
+        if (!player?.hand || !tile) {
+            return;
+        }
+        if (typeof player.hand.removeHidden === "function") {
+            player.hand.removeHidden(tile);
+        } else if (player.hand.hiddenTileSet?.remove) {
+            player.hand.hiddenTileSet.remove(tile);
+        }
+    }
+
+    /**
+     * Add a tile to the shared discard pile and refresh layout
+     * @param {Tile} tile
+     */
+    addTileToDiscardPile(tile) {
+        if (!tile || !this.table?.discards) {
+            return null;
+        }
+        const discards = this.table.discards;
+        discards.insertDiscard(tile);
+        const lastIndex = discards.tileArray.length - 1;
+        discards.layoutTiles(tile);
+        const {x, y, scale} = discards.getTilePosition(lastIndex);
+        tile.scale = scale;
+        tile.angle = 0;
+        tile.showTile(true, true);
+        tile.sprite.depth = 50;
+        tile.spriteBack.depth = 50;
+        const tween = tile.animate(x, y, 0);
+        if (tween && this.scene?.audioManager) {
+            tween.once("complete", () => {
+                this.scene.audioManager.playSFX("tile_dropping");
+            });
+        }
+        return tween;
+    }
+
+    /**
+     * Get a tile sprite currently tracked by the manager
+     * @param {number|TileData} tileRef
+     * @returns {Tile|null}
+     */
+    getTileSprite(tileRef) {
+        const index = typeof tileRef === "number" ? tileRef : tileRef?.index;
+        if (typeof index !== "number") {
+            return null;
+        }
+        return this.tileSprites.get(index) || null;
     }
 
     /**
@@ -172,30 +315,6 @@ export class TileManager {
     }
 
     /**
-     * Create or get a tile sprite
-     *
-     * @param {TileData} tileData - Tile data object
-     * @returns {Phaser.Physics.Arcade.Sprite} Phaser sprite
-     * @throws {Error} If sprite does not exist and cannot be created
-     */
-    createTileSprite(tileData) {
-        // Check if already exists
-        if (this.tileSprites.has(tileData.index)) {
-            return this.tileSprites.get(tileData.index);
-        }
-
-        // TODO: Implement actual sprite creation from table.wall
-        // Currently, sprites must be pre-registered via registerTileSprite()
-        // See: https://github.com/anthropics/mahjong/issues/XXX
-        throw new Error(
-            `Sprite creation not implemented. Tile index ${tileData.index} ` +
-            `(suit: ${tileData.suit}, number: ${tileData.number}) ` +
-            `not found in sprite registry. Ensure registerTileSprite() ` +
-            `is called during initialization.`
-        );
-    }
-
-    /**
      * Register an existing tile sprite (from table.wall)
      *
      * @param {TileData} tileData - Tile data
@@ -205,6 +324,67 @@ export class TileManager {
         if (sprite) {
             this.tileSprites.set(tileData.index, sprite);
         }
+    }
+
+    /**
+     * Convert TileData objects to Phaser Tile instances
+     * @param {Array<Object>} tileDatas
+     * @returns {Tile[]}
+     */
+    convertTileDataArray(tileDatas = []) {
+        return tileDatas
+            .map(data => this.getOrCreateTile(data))
+            .filter(Boolean);
+    }
+
+    /**
+     * Find a tile still residing in the wall
+     * @param {number} index
+     * @returns {Tile|null}
+     */
+    findTileInWall(index) {
+        if (!this.table?.wall?.tileArray) {
+            return null;
+        }
+        return this.table.wall.tileArray.find(tile => tile.index === index) || null;
+    }
+
+    /**
+     * Determine sprite name based on tile data (matches wall creation logic)
+     * @param {TileData} tileData
+     * @returns {string}
+     */
+    getTileSpriteName(tileData) {
+        const {suit, number} = tileData;
+
+        if (suit === SUIT.CRACK) {
+            return `${number}C.png`;
+        }
+        if (suit === SUIT.BAM) {
+            return `${number}B.png`;
+        }
+        if (suit === SUIT.DOT) {
+            return `${number}D.png`;
+        }
+        if (suit === SUIT.WIND) {
+            const windNames = ["N", "S", "W", "E"];
+            return `${windNames[number] || "N"}.png`;
+        }
+        if (suit === SUIT.DRAGON) {
+            const dragonNames = ["DC", "DB", "DD"];
+            return `${dragonNames[number] || "DC"}.png`;
+        }
+        if (suit === SUIT.FLOWER) {
+            const flowerNum = (number % 4) + 1;
+            return `F${flowerNum}.png`;
+        }
+        if (suit === SUIT.JOKER) {
+            return "J.png";
+        }
+        if (suit === SUIT.BLANK) {
+            return "BLANK.png";
+        }
+        return `tile_${suit}_${number}.png`;
     }
 
     /**
@@ -218,17 +398,6 @@ export class TileManager {
             sprite.destroy();
             this.tileSprites.delete(tileData.index);
         }
-    }
-
-    /**
-     * Get sprite for a tile
-     *
-     * @param {TileData|number} tileData - Tile data or index
-     * @returns {Phaser.Physics.Arcade.Sprite|null}
-     */
-    getTileSprite(tileData) {
-        const index = typeof tileData === "number" ? tileData : tileData.index;
-        return this.tileSprites.get(index) || null;
     }
 
     /**

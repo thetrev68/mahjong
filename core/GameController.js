@@ -30,11 +30,12 @@
  */
 
 import {EventEmitter} from "./events/EventEmitter.js";
-import {STATE, PLAYER, PLAYER_OPTION} from "../constants.js";
+import {STATE, PLAYER, PLAYER_OPTION, SUIT} from "../constants.js";
 import {PlayerData} from "./models/PlayerData.js";
 import {TileData} from "./models/TileData.js";
 import {ExposureData} from "./models/HandData.js";
 import * as GameEvents from "./events/GameEvents.js";
+import {gTileGroups} from "./tileDefinitions.js";
 
 const CHARLESTON_DIRECTION_SEQUENCE = {
     1: ["right", "across", "left"],
@@ -46,6 +47,26 @@ const CHARLESTON_DIRECTION_OFFSETS = {
     across: PLAYER.TOP,
     left: PLAYER.LEFT
 };
+
+const DEAL_SEQUENCE = [
+    [PLAYER.BOTTOM, 4],
+    [PLAYER.RIGHT, 4],
+    [PLAYER.TOP, 4],
+    [PLAYER.LEFT, 4],
+    [PLAYER.BOTTOM, 4],
+    [PLAYER.RIGHT, 4],
+    [PLAYER.TOP, 4],
+    [PLAYER.LEFT, 4],
+    [PLAYER.BOTTOM, 4],
+    [PLAYER.RIGHT, 4],
+    [PLAYER.TOP, 4],
+    [PLAYER.LEFT, 4],
+    [PLAYER.BOTTOM, 1],
+    [PLAYER.RIGHT, 1],
+    [PLAYER.TOP, 1],
+    [PLAYER.LEFT, 1],
+    [PLAYER.BOTTOM, 1]
+];
 
 
 export class GameController extends EventEmitter {
@@ -59,7 +80,7 @@ export class GameController extends EventEmitter {
         this.players = [];
 
         /** @type {TileData[]} Wall of undrawn tiles */
-        this.wall = [];
+        this.wallTiles = [];
 
         /** @type {TileData[]} Discard pile */
         this.discards = [];
@@ -95,6 +116,9 @@ export class GameController extends EventEmitter {
 
         /** @type {Function} Card validation reference (injected) */
         this.cardValidator = null;
+
+        /** @type {Function|null} Optional wall generator (returns tile data array) */
+        this.wallGenerator = null;
     }
 
     /**
@@ -107,7 +131,7 @@ export class GameController extends EventEmitter {
     init(options = {}) {
         this.aiEngine = options.aiEngine;
         this.cardValidator = options.cardValidator;
-        this.sharedTable = options.sharedTable; // Share the Phaser table with GameLogic
+        this.wallGenerator = options.wallGenerator || null;
 
         if (options.settings) {
             this.settings = {...this.settings, ...options.settings};
@@ -169,24 +193,27 @@ export class GameController extends EventEmitter {
      * Works with Phaser Wall from shared table
      */
     createWall() {
-        // GameController expects wall to be from shared Phaser Table
-        if (!this.sharedTable || !this.sharedTable.wall) {
-            throw new Error("GameController requires sharedTable with Phaser Wall");
+        const rawTiles = this.wallGenerator
+            ? this.wallGenerator()
+            : buildDefaultWallTiles(this.settings.useBlankTiles);
+
+        if (!Array.isArray(rawTiles) || rawTiles.length === 0) {
+            throw new Error("Failed to generate wall tiles. Wall generator returned empty set.");
         }
 
-        // Shuffle the existing wall
-        this.sharedTable.wall.shuffle();
+        // Normalize into TileData instances
+        const normalizedTiles = rawTiles.map((tile, idx) => normalizeTileData(tile, idx));
 
-        // Store reference to shared wall - will be used via pop() directly
-        this.wall = this.sharedTable.wall;
+        // Shuffle for randomness
+        this.wallTiles = shuffleTileArray(normalizedTiles);
 
-        // Emit event so PhaserAdapter can initialize its tile map
+        // Emit event so adapters can prepare their own tile maps
         this.emit("WALL_CREATED", {
-            tileCount: this.wall.getCount()
+            tileCount: this.wallTiles.length
         });
 
         this.emit("MESSAGE", {
-            text: `Wall created with ${this.wall.getCount()} tiles`,
+            text: `Wall created with ${this.wallTiles.length} tiles`,
             type: "info"
         });
     }
@@ -199,18 +226,54 @@ export class GameController extends EventEmitter {
      *
      * Note: Actual dealing is handled entirely by PhaserAdapter to access Phaser timing
      */
-    async dealTiles() {
+    dealTiles() {
         this.setState(STATE.DEAL);
 
-        // Emit event to trigger PhaserAdapter to handle dealing
-        // PhaserAdapter will manipulate Phaser wall/hands and sync back to core model
-        const dealtEvent = GameEvents.createTilesDealtEvent();
+        const dealSequence = this.buildInitialDealSequence();
+
+        // Emit event to trigger adapters to animate dealing using provided sequence
+        const dealtEvent = GameEvents.createTilesDealtEvent(dealSequence);
         this.emit("TILES_DEALT", dealtEvent);
+
+        // Emit updated hands for all players so UI layers can sync immediately
+        this.players.forEach((player, index) => {
+            const handEvent = GameEvents.createHandUpdatedEvent(index, player.hand.toJSON());
+            this.emit("HAND_UPDATED", handEvent);
+        });
 
         // Wait for dealing to complete (PhaserAdapter will trigger this via callback)
         return new Promise(resolve => {
             this.once("DEALING_COMPLETE", resolve);
         });
+    }
+
+    /**
+     * Build the initial dealing sequence and mutate player hands accordingly
+     * @returns {Array<{player:number, tiles:Object[]}>}
+     */
+    buildInitialDealSequence() {
+        const sequence = [];
+
+        for (const [playerIndex, tileCount] of DEAL_SEQUENCE) {
+            const tilesForPlayer = [];
+            const player = this.players[playerIndex];
+
+            for (let i = 0; i < tileCount; i++) {
+                const tileData = this.drawTileFromWall();
+                player.hand.addTile(tileData);
+                tilesForPlayer.push(tileData.toJSON());
+            }
+
+            // Keep human hand sorted for readability
+            player.hand.sortBySuit();
+
+            sequence.push({
+                player: playerIndex,
+                tiles: tilesForPlayer
+            });
+        }
+
+        return sequence;
     }
 
     /**
@@ -483,14 +546,16 @@ export class GameController extends EventEmitter {
     async gameLoop() {
         this.setState(STATE.LOOP_PICK_FROM_WALL);
 
-        while (this.state !== STATE.END && this.wall.getCount() > 0) {
-            // Current player draws a tile
-            await this.pickFromWall();
+        while (this.state !== STATE.END && this.wallTiles.length > 0) {
+            // Draw only when the current player is at the standard 13-tile count
+            if (this.shouldDrawTile()) {
+                await this.pickFromWall();
 
-            // Check for Mahjong after drawing (self-draw win)
-            if (this.checkMahjong()) {
-                this.endGame("mahjong");
-                return;
+                // Check for Mahjong after drawing (self-draw win)
+                if (this.checkMahjong()) {
+                    this.endGame("mahjong");
+                    return;
+                }
             }
 
             // Current player chooses tile to discard
@@ -519,8 +584,74 @@ export class GameController extends EventEmitter {
         }
 
         // Wall is empty - wall game
-        if (this.wall.getCount() === 0 && !this.gameResult.mahjong) {
+        if (this.wallTiles.length === 0 && !this.gameResult.mahjong) {
             this.endGame("wall_game");
+        }
+    }
+
+    /**
+     * Remove top tile from wall
+     * @returns {TileData}
+     */
+    drawTileFromWall() {
+        if (this.wallTiles.length === 0) {
+            throw new Error("Attempted to draw from an empty wall");
+        }
+        return this.wallTiles.pop();
+    }
+
+    /**
+     * Determine whether current player should draw from wall
+     * @returns {boolean}
+     */
+    shouldDrawTile() {
+        const player = this.players[this.currentPlayer];
+        if (!player || !player.hand) {
+            return false;
+        }
+        return player.hand.getLength() === 13;
+    }
+
+    /**
+     * Determine if player can form an exposure using discarded tile
+     * @param {PlayerData} player
+     * @param {TileData} tile
+     * @returns {boolean}
+     */
+    canPlayerFormExposure(player, tile) {
+        if (!player || !player.hand) {
+            return false;
+        }
+        const hiddenTiles = player.hand.tiles || [];
+        if (hiddenTiles.length === 0) {
+            return false;
+        }
+        const matchingCount = hiddenTiles.filter(t => t.suit === tile.suit && t.number === tile.number).length;
+        const jokerCount = hiddenTiles.filter(t => t.isJoker()).length;
+        return (matchingCount + jokerCount) >= 2;
+    }
+
+    /**
+     * Determine if player could call Mahjong with discarded tile
+     * @param {PlayerData} player
+     * @param {TileData} tile
+     * @returns {boolean}
+     */
+    canPlayerMahjongWithTile(player, tile) {
+        if (!this.cardValidator || !player || !player.hand) {
+            return false;
+        }
+        const tempHand = player.hand.clone();
+        const tileClone = tile.clone ? tile.clone() : new TileData(tile.suit, tile.number, tile.index);
+        tempHand.addTile(tileClone);
+        const tiles = tempHand.tiles;
+        const allHidden = tempHand.exposures.length === 0;
+        try {
+            const result = this.cardValidator.validateHand(tiles, allHidden);
+            return Boolean(result && result.valid);
+        } catch (error) {
+            console.error("Failed to validate hand for Mahjong check:", error);
+            return false;
         }
     }
 
@@ -530,26 +661,18 @@ export class GameController extends EventEmitter {
     async pickFromWall() {
         this.setState(STATE.LOOP_PICK_FROM_WALL);
 
-        if (this.wall.getCount() === 0) {
+        if (this.wallTiles.length === 0) {
             return;  // Wall game
         }
 
-        // Draw tile from wall (Phaser Tile object)
-        const phaserTile = this.wall.remove();
         const player = this.players[this.currentPlayer];
 
-        // Convert Phaser Tile to TileData
-        const tileDataObject = TileData.fromPhaserTile(phaserTile);
+        const tileDataObject = this.drawTileFromWall();
         player.hand.addTile(tileDataObject);
+        player.hand.sortBySuit();
 
         // Emit rich tile drawn event with animation
-        // Pass complete TileData including index
-        const tileEventData = {
-            suit: phaserTile.suit,
-            number: phaserTile.number,
-            index: phaserTile.index
-        };
-        const drawnEvent = GameEvents.createTileDrawnEvent(this.currentPlayer, tileEventData, {
+        const drawnEvent = GameEvents.createTileDrawnEvent(this.currentPlayer, tileDataObject.toJSON(), {
             type: "wall-draw",
             duration: 300,
             easing: "Quad.easeOut"
@@ -625,6 +748,11 @@ export class GameController extends EventEmitter {
 
             let claimDecision;
             if (player.isHuman) {
+                const canExpose = this.canPlayerFormExposure(player, lastDiscard);
+                const canMahjong = this.canPlayerMahjongWithTile(player, lastDiscard);
+                if (!canExpose && !canMahjong) {
+                    continue;
+                }
                 // Prompt human
                 claimDecision = await this.promptUI("CLAIM_DISCARD", {
                     tile: lastDiscard.toJSON(),
@@ -827,6 +955,15 @@ export class GameController extends EventEmitter {
     }
 
     /**
+     * Handle hand sort requests coming from UI
+     * @param {string} sortType - "suit" or "rank"
+     */
+    onSortHandRequest(sortType = "suit") {
+        const sortEvent = GameEvents.createSortHandEvent(PLAYER.BOTTOM, sortType);
+        this.emit("SORT_HAND_REQUESTED", sortEvent);
+    }
+
+    /**
      * Prompt UI layer for user input (returns a Promise)
      * UI layer must call the provided callback with the result
      * @param {string} promptType
@@ -861,9 +998,79 @@ export class GameController extends EventEmitter {
             state: this.state,
             currentPlayer: this.currentPlayer,
             players: this.players.map(p => p.toJSON()),
-            wallCount: this.wall.getCount ? this.wall.getCount() : this.wall.length,
+            wallCount: this.wallTiles.length,
             discardCount: this.discards.length,
             gameResult: this.gameResult
         };
     }
+}
+
+/**
+ * Normalize tile data into TileData instances
+ * @param {TileData|Object} tile
+ * @param {number} fallbackIndex
+ * @returns {TileData}
+ */
+function normalizeTileData(tile, fallbackIndex = -1) {
+    if (tile instanceof TileData) {
+        return tile.clone();
+    }
+
+    if (tile && typeof tile === "object" && typeof tile.suit === "number") {
+        const index = typeof tile.index === "number" ? tile.index : fallbackIndex;
+        return new TileData(tile.suit, tile.number ?? 0, index);
+    }
+
+    throw new Error("Wall generator produced invalid tile data");
+}
+
+/**
+ * Build default tile set (used for tests or non-visual environments)
+ * @param {boolean} includeBlanks
+ * @returns {TileData[]}
+ */
+function buildDefaultWallTiles(includeBlanks = false) {
+    const tiles = [];
+    let indexCounter = 0;
+
+    for (const group of gTileGroups) {
+        if (group.suit === SUIT.BLANK && !includeBlanks) {
+            continue;
+        }
+
+        const prefixes = Array.isArray(group.prefix) ? group.prefix : [group.prefix];
+
+        for (const prefix of prefixes) {
+            for (let num = 1; num <= group.maxNum; num++) {
+                let tileNumber = num;
+                if (group.maxNum === 1) {
+                    if (group.suit === SUIT.FLOWER) {
+                        tileNumber = 0;
+                    } else {
+                        tileNumber = prefixes.indexOf(prefix);
+                    }
+                }
+
+                for (let dup = 0; dup < group.count; dup++) {
+                    tiles.push(new TileData(group.suit, tileNumber, indexCounter++));
+                }
+            }
+        }
+    }
+
+    return tiles;
+}
+
+/**
+ * Fisher-Yates shuffle producing a new array
+ * @param {TileData[]} tiles
+ * @returns {TileData[]}
+ */
+function shuffleTileArray(tiles) {
+    const shuffled = tiles.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
 }

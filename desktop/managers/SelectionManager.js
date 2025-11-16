@@ -548,6 +548,111 @@ export class SelectionManager {
         return this.mode;
     }
 
+    /**
+     * OPTIONAL: Promise-based tile selection helper (Phase 2+)
+     *
+     * Alternative to manual enableTileSelection() + button wiring.
+     * Use this for NEW prompt handlers or when refactoring existing ones.
+     *
+     * This method combines:
+     * 1. enableTileSelection() - Start selection mode
+     * 2. Button callback registration - Wire confirm button
+     * 3. Validation feedback - Auto enable/disable button
+     * 4. Cleanup - Clear selection and disable when done
+     *
+     * @param {Object} config - Selection configuration
+     * @param {number} config.min - Minimum tiles to select
+     * @param {number} config.max - Maximum tiles to select
+     * @param {string} config.mode - Selection mode ("charleston", "courtesy", "play", "expose")
+     * @param {string} [config.buttonId="button1"] - Button to enable when selection is valid
+     * @returns {Promise<Tile[]>} Resolves with selected tiles when user clicks confirm button
+     *
+     * @example
+     * // New pattern (optional - cleaner for async handlers)
+     * const tiles = await selectionManager.requestSelection({
+     *     min: 3,
+     *     max: 3,
+     *     mode: "charleston"
+     * });
+     * console.log("User selected:", tiles);
+     *
+     * @example
+     * // Old pattern (still supported - used by existing handlers)
+     * selectionManager.enableTileSelection(3, 3, "charleston");
+     * buttonManager.registerCallback("button1", () => {
+     *     const tiles = selectionManager.getSelection();
+     *     if (tiles.length === 3) {
+     *         // Process selection
+     *     }
+     * });
+     *
+     * @note This is an OPTIONAL helper. The old pattern still works and is used
+     *       by existing prompt handlers. Only use this for new code or when
+     *       refactoring with approval.
+     */
+    requestSelection({min, max, mode, buttonId = "button1"}) {
+        return new Promise((resolve) => {
+            // Enable selection mode
+            this.enableTileSelection(min, max, mode);
+
+            // Create confirm handler
+            const confirmHandler = () => {
+                const selection = this.getSelection();
+
+                // Validate selection
+                if (this.isValidSelection()) {
+                    // Clean up
+                    this.clearSelection();
+                    this.disableTileSelection();
+
+                    // Clear pending callback reference
+                    this._pendingCallback = null;
+                    this.onSelectionChanged = null;
+
+                    // Resolve with selected tiles
+                    resolve(selection);
+                } else {
+                    // Invalid selection - show warning but don't resolve
+                    console.warn(
+                        "SelectionManager: Invalid selection. " +
+                        `Expected ${min}-${max} tiles, got ${selection.length}.`
+                    );
+                }
+            };
+
+            // Store callback for potential cleanup
+            this._pendingCallback = confirmHandler;
+
+            // Register with ButtonManager if available
+            if (this.buttonManager) {
+                this.buttonManager.registerCallback(buttonId, confirmHandler);
+            } else {
+                console.warn(
+                    "SelectionManager: No ButtonManager available. " +
+                    `Button "${buttonId}" will not be wired.`
+                );
+            }
+
+            // Auto-update button state on selection changes
+            this.onSelectionChanged = () => {
+                if (this.isValidSelection()) {
+                    this.buttonManager?.enableButton(buttonId);
+                } else {
+                    this.buttonManager?.disableButton(buttonId);
+                }
+            };
+
+            // Initial button state update
+            if (this.buttonManager) {
+                if (this.isValidSelection()) {
+                    this.buttonManager.enableButton(buttonId);
+                } else {
+                    this.buttonManager.disableButton(buttonId);
+                }
+            }
+        });
+    }
+
     // ============================================================================
     // PRIVATE HELPER METHODS (implementation details)
     // ============================================================================

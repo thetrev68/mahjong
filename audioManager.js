@@ -1,6 +1,8 @@
 // audioManager.js - Audio management for American Mahjong
 // Handles background music and sound effects with separate volume controls
 
+import SettingsManager from "./shared/SettingsManager.js";
+
 export default class AudioManager {
     constructor(scene, settingsManager) {
         this.scene = scene;
@@ -11,10 +13,14 @@ export default class AudioManager {
         this.currentBGMKey = null;
 
         // Load settings from localStorage via settingsManager
-        this.bgmVolume = this.settingsManager.getSetting("bgmVolume", 0.25);
-        this.bgmMuted = this.settingsManager.getSetting("bgmMuted", false);
-        this.sfxVolume = this.settingsManager.getSetting("sfxVolume", 0.7);
-        this.sfxMuted = this.settingsManager.getSetting("sfxMuted", false);
+        // SettingsManager stores volume as 0-100 percentage, convert to 0-1 scale for Phaser
+        const bgmVolumePercent = this.settingsManager.getSetting("bgmVolume", SettingsManager.getDefault("bgmVolume"));
+        const sfxVolumePercent = this.settingsManager.getSetting("sfxVolume", SettingsManager.getDefault("sfxVolume"));
+
+        this.bgmVolume = bgmVolumePercent / 100;
+        this.bgmMuted = this.settingsManager.getSetting("bgmMuted", SettingsManager.getDefault("bgmMuted"));
+        this.sfxVolume = sfxVolumePercent / 100;
+        this.sfxMuted = this.settingsManager.getSetting("sfxMuted", SettingsManager.getDefault("sfxMuted"));
     }
 
     // Background Music Methods

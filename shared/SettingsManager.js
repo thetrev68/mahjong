@@ -18,9 +18,9 @@ const DEFAULTS = {
     skipCharleston: false,
 
     // Audio settings
-    bgmVolume: 70,
+    bgmVolume: 20,
     bgmMuted: false,
-    sfxVolume: 80,
+    sfxVolume: 20,
     sfxMuted: false
 };
 
