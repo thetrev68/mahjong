@@ -85,7 +85,7 @@ class GameScene extends Phaser.Scene {
         // Phase 2A: Create GameController + PhaserAdapter
         this.gameController = new GameController();
         await this.gameController.init({
-            sharedTable: this.gTable,  // Share the table with GameController
+            wallGenerator: () => this.captureWallTiles(),
             aiEngine: aiEngine,
             cardValidator: card,
             settings: {
@@ -173,6 +173,18 @@ class GameScene extends Phaser.Scene {
                 }
             });
         }
+    }
+
+    captureWallTiles() {
+        if (!this.gTable || !this.gTable.wall || !Array.isArray(this.gTable.wall.tileArray)) {
+            return [];
+        }
+
+        return this.gTable.wall.tileArray.map((tile, index) => ({
+            suit: tile.suit,
+            number: tile.number,
+            index: typeof tile.index === "number" ? tile.index : index
+        }));
     }
 
     createWallTileCounter() {

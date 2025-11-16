@@ -79,6 +79,7 @@ export class PhaserAdapter {
                 }
             }
         }
+        // TODO: Remove after tile map creation moves into TileManager.
     }
 
     /**
@@ -228,6 +229,34 @@ export class PhaserAdapter {
         return tileDatas.map(td => this.createPhaserTile(td));
     }
 
+    /**
+     * Remove tile from wall array by index (if still present)
+     * @param {number} tileIndex
+     */
+    removeTileFromWallByIndex(tileIndex) {
+        if (!this.table || !this.table.wall || !Array.isArray(this.table.wall.tileArray)) {
+            return;
+        }
+
+        const wallTiles = this.table.wall.tileArray;
+        const idx = wallTiles.findIndex(tile => tile.index === tileIndex);
+        if (idx >= 0) {
+            wallTiles.splice(idx, 1);
+        }
+    }
+
+    /**
+     * Update wall counter UI based on tiles removed
+     */
+    updateWallTileCounter() {
+        if (!this.scene.updateWallTileCounter) {
+            return;
+        }
+        const totalTileCount = this.gameController.settings.useBlankTiles ? 160 : 152;
+        const remainingInWall = totalTileCount - this.tilesRemovedFromWall;
+        this.scene.updateWallTileCounter(Math.max(remainingInWall, 0));
+    }
+
     // ============================================================================
     // EVENT HANDLERS
     // ============================================================================
@@ -323,30 +352,91 @@ export class PhaserAdapter {
      * Handle initial tiles dealt - sequential animation matching 07c41b9
      * This method handles the ENTIRE dealing sequence including wall manipulation
      */
-    onTilesDealt() {
-        // Define the dealing sequence matching 07c41b9: [playerIndex, tileCount]
+    onTilesDealt(data = {}) {
+        const sequence = Array.isArray(data.sequence) ? data.sequence : [];
+
+        if (!sequence.length) {
+            // Fall back to legacy behavior if controller did not supply data
+            // TODO: Remove once GameController always emits tile sequences (post legacy cleanup).
+            this.executeLegacyDealSequence();
+            return;
+        }
+
+        let currentStepIndex = 0;
+
+        const dealNextGroup = () => {
+            if (currentStepIndex >= sequence.length) {
+                this.gameController.emit("DEALING_COMPLETE");
+                return;
+            }
+
+            const step = sequence[currentStepIndex];
+            const playerIndex = typeof step.player === "number" ? step.player : PLAYER.BOTTOM;
+            const player = this.table.players[playerIndex];
+            const tilePayloads = Array.isArray(step.tiles) ? step.tiles : [];
+            const dealtTiles = [];
+
+            tilePayloads.forEach(tileJSON => {
+                const tileData = TileData.fromJSON(tileJSON);
+                const phaserTile = this.tileMap.get(tileData.index) || this.findTileInWall(tileData.index);
+
+                if (!phaserTile) {
+                    console.error(`Could not find Phaser Tile for index ${tileData.index} during dealing`);
+                    return;
+                }
+
+                this.removeTileFromWallByIndex(tileData.index);
+
+                phaserTile.sprite.setPosition(50, 50);
+                phaserTile.sprite.setAlpha(0);
+
+                player.hand.insertHidden(phaserTile);
+                dealtTiles.push(phaserTile);
+            });
+
+            player.showHand(playerIndex === PLAYER.BOTTOM);
+
+            this.tilesRemovedFromWall += tilePayloads.length;
+            this.updateWallTileCounter();
+
+            const lastTile = dealtTiles[dealtTiles.length - 1];
+
+            if (lastTile && lastTile.tween) {
+                lastTile.tween.once("complete", () => {
+                    currentStepIndex++;
+                    this.scene.time.delayedCall(150, dealNextGroup);
+                });
+            } else {
+                currentStepIndex++;
+                this.scene.time.delayedCall(150, dealNextGroup);
+            }
+        };
+
+        dealNextGroup();
+    }
+
+    /**
+     * Legacy dealing path used when GameController does not provide tile data
+     * TODO: delete after mobile/desktop both rely on core-driven sequences.
+     */
+    executeLegacyDealSequence() {
         const DEAL_SEQUENCE = [
-            // Round 1 - 4 tiles each
             [PLAYER.BOTTOM, 4],
             [PLAYER.RIGHT, 4],
             [PLAYER.TOP, 4],
             [PLAYER.LEFT, 4],
-            // Round 2 - 4 tiles each
             [PLAYER.BOTTOM, 4],
             [PLAYER.RIGHT, 4],
             [PLAYER.TOP, 4],
             [PLAYER.LEFT, 4],
-            // Round 3 - 4 tiles each
             [PLAYER.BOTTOM, 4],
             [PLAYER.RIGHT, 4],
             [PLAYER.TOP, 4],
             [PLAYER.LEFT, 4],
-            // Final tiles - 1 tile each
             [PLAYER.BOTTOM, 1],
             [PLAYER.RIGHT, 1],
             [PLAYER.TOP, 1],
             [PLAYER.LEFT, 1],
-            // Last tile for dealer (Player 0 gets 14th tile)
             [PLAYER.BOTTOM, 1]
         ];
 
@@ -354,7 +444,6 @@ export class PhaserAdapter {
 
         const dealNextGroup = () => {
             if (currentStepIndex >= DEAL_SEQUENCE.length) {
-                // All tiles dealt - notify GameController
                 this.gameController.emit("DEALING_COMPLETE");
                 return;
             }
@@ -362,58 +451,39 @@ export class PhaserAdapter {
             const [playerIndex, tileCount] = DEAL_SEQUENCE[currentStepIndex];
             const player = this.table.players[playerIndex];
 
-            // Deal all tiles for this player at once
             for (let i = 0; i < tileCount; i++) {
                 const phaserTile = this.table.wall.remove();
                 if (!phaserTile) {
                     throw new Error("No tiles remaining in wall during dealing sequence");
                 }
 
-                // Position at wall (top-left)
                 phaserTile.sprite.setPosition(50, 50);
                 phaserTile.sprite.setAlpha(0);
 
-                // Add to Phaser hand
                 player.hand.insertHidden(phaserTile);
 
-                // Sync to core GameController player model
                 const tileDataObject = TileData.fromPhaserTile(phaserTile);
                 this.gameController.players[playerIndex].hand.addTile(tileDataObject);
-
-                // Track wall removal
                 this.tilesRemovedFromWall++;
             }
 
-            // Show all tiles at once (triggers animations for all)
-            // Player 0 (human) sees tiles face up
             player.showHand(playerIndex === PLAYER.BOTTOM);
+            this.updateWallTileCounter();
 
-            // Update wall counter
-            if (this.scene.updateWallTileCounter) {
-                const totalTileCount = this.gameController.settings.useBlankTiles ? 160 : 152;
-                const remainingInWall = totalTileCount - this.tilesRemovedFromWall;
-                this.scene.updateWallTileCounter(remainingInWall);
-            }
-
-            // Get the last tile that was inserted to hook into its animation
             const hand = player.hand;
             const lastTile = hand.hiddenTileSet.tileArray[hand.hiddenTileSet.tileArray.length - 1];
 
-            // Wait for the last tile's tween to complete, then deal next group
             if (lastTile && lastTile.tween) {
                 lastTile.tween.once("complete", () => {
                     currentStepIndex++;
-                    // Add a small pause between players for visual clarity (150ms matching 07c41b9)
                     this.scene.time.delayedCall(150, dealNextGroup);
                 });
             } else {
-                // Fallback if no tween exists (shouldn't happen, but safety net)
                 currentStepIndex++;
                 this.scene.time.delayedCall(150, dealNextGroup);
             }
         };
 
-        // Start the dealing sequence
         dealNextGroup();
     }
 
@@ -446,6 +516,8 @@ export class PhaserAdapter {
         phaserTile.sprite.setPosition(wallX, wallY);
         phaserTile.sprite.setAlpha(0);
 
+        this.removeTileFromWallByIndex(tileDataObj.index);
+
         // Add to player's hand
         player.hand.insertHidden(phaserTile);
 
@@ -474,13 +546,7 @@ export class PhaserAdapter {
 
         // Track that one tile was removed from the wall
         this.tilesRemovedFromWall++;
-
-        // Update wall counter (subtract removed tiles from initial count)
-        if (this.scene.updateWallTileCounter) {
-            const initialTileCount = this.gameController.settings.useBlankTiles ? 160 : 152;
-            const remainingTiles = initialTileCount - this.tilesRemovedFromWall;
-            this.scene.updateWallTileCounter(remainingTiles);
-        }
+        this.updateWallTileCounter();
 
         if (playerIndex === PLAYER.BOTTOM) {
             const tileDataObj = TileData.fromPhaserTile(phaserTile);
@@ -1026,5 +1092,6 @@ export class PhaserAdapter {
         if (this.dialogManager) {
             this.dialogManager.closeDialog();
         }
+        // TODO: delete messy manual cleanup once adapter delegates lifespan to managers.
     }
 }

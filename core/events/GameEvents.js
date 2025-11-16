@@ -44,9 +44,10 @@ export function createGameStartedEvent(players) {
  * Signals PhaserAdapter to handle the entire dealing sequence
  * PhaserAdapter will manipulate Phaser wall/hands and sync to core model
  */
-export function createTilesDealtEvent() {
+export function createTilesDealtEvent(sequence = []) {
     return {
         type: "TILES_DEALT",
+        sequence,
         timestamp: Date.now()
     };
 }
