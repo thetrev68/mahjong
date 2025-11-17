@@ -76,6 +76,9 @@ export class PhaserAdapter {
             gameController
         });
 
+        /** @type {Array<{tiles: TileData[], exposures: Array}>|null} Track staged hands during dealing */
+        this.dealAnimationHands = null;
+
         this.setupEventListeners();
     }
 
@@ -261,11 +264,15 @@ export class PhaserAdapter {
         const sequence = Array.isArray(data.sequence) ? data.sequence : [];
 
         if (!sequence.length) {
-            // Fall back to legacy behavior if controller did not supply data
-            // TODO: Remove once GameController always emits tile sequences (post legacy cleanup).
             this.executeLegacyDealSequence();
             return;
         }
+
+        // Build staged HandData objects so we only render tiles that have actually been dealt
+        this.dealAnimationHands = Array.from({length: 4}, () => ({
+            tiles: [],
+            exposures: []
+        }));
 
         let currentStepIndex = 0;
 
@@ -277,93 +284,93 @@ export class PhaserAdapter {
                     this.scene.handleDealAnimationComplete();
                 }
                 this.gameController.emit("DEALING_COMPLETE");
+                this.dealAnimationHands = null;
                 return;
             }
 
             const step = sequence[currentStepIndex];
             const playerIndex = typeof step.player === "number" ? step.player : PLAYER.BOTTOM;
             const tilePayloads = Array.isArray(step.tiles) ? step.tiles : [];
-            const dealtTiles = [];
+            const animationHand = this.dealAnimationHands?.[playerIndex];
 
-            // Get current hand size BEFORE dealing this batch (for position calculation)
-            const playerHand = this.handRenderer.playerHands[playerIndex];
-            const currentHandSize = playerHand.hiddenTiles.length;
+            if (!tilePayloads.length) {
+                currentStepIndex++;
+                this.scene.time.delayedCall(0, dealNextGroup);
+                return;
+            }
+
+            const currentHandSize = animationHand ? animationHand.tiles.length : 0;
+            const targetHandSize = currentHandSize + tilePayloads.length;
+            let animationsCompleted = 0;
 
             tilePayloads.forEach((tileJSON, tileIndexInBatch) => {
-                const tileData = TileData.fromJSON(tileJSON);
-                const phaserTile = this.tileManager.getOrCreateTile(tileData);
+                this.scene.time.delayedCall(tileIndexInBatch * 100, () => {
+                    const tileData = TileData.fromJSON(tileJSON);
+                    const phaserTile = this.tileManager.getOrCreateTile(tileData);
 
-                if (!phaserTile) {
-                    console.error(`Could not find Phaser Tile for index ${tileData.index} during dealing`);
-                    return;
-                }
+                    if (!phaserTile) {
+                        console.error(`Could not find Phaser Tile for index ${tileData.index} during dealing`);
+                        return;
+                    }
 
-                this.tileManager.removeTileFromWall(tileData.index);
+                    this.tileManager.removeTileFromWall(tileData.index);
 
-                // Position tile at wall (top-left)
-                const wallX = 50;
-                const wallY = 50;
-                phaserTile.x = wallX;
-                phaserTile.y = wallY;
-                phaserTile.sprite.setAlpha(0);  // Start invisible
-                if (phaserTile.spriteBack) {
-                    phaserTile.spriteBack.setAlpha(0);
-                }
-                phaserTile.showTile(true, playerIndex === PLAYER.BOTTOM);
+                    const wallX = 50;
+                    const wallY = 50;
+                    phaserTile.x = wallX;
+                    phaserTile.y = wallY;
+                    phaserTile.sprite.setAlpha(0);
+                    if (phaserTile.spriteBack) {
+                        phaserTile.spriteBack.setAlpha(0);
+                    }
+                    phaserTile.showTile(true, playerIndex === PLAYER.BOTTOM);
 
-                // Calculate target position in hand based on CURRENT hand size (before adding new tiles)
-                const targetIndex = currentHandSize + tileIndexInBatch;
-                const targetPos = this.handRenderer.calculateTilePosition(playerIndex, targetIndex);
+                    const targetIndex = currentHandSize + tileIndexInBatch;
+                    const targetPos = this.handRenderer.calculateTilePosition(playerIndex, targetIndex, targetHandSize);
 
-                // Animate tile from wall to hand
-                const tween = phaserTile.animate(targetPos.x, targetPos.y, PLAYER_LAYOUT[playerIndex].angle, 300);
+                    if (animationHand) {
+                        animationHand.tiles.splice(targetIndex, 0, tileData);
+                    }
 
-                // Fade in during animation
-                this.scene.tweens.add({
-                    targets: [phaserTile.sprite, phaserTile.spriteBack],
-                    alpha: 1,
-                    duration: 300
-                });
+                    const tween = phaserTile.animate(targetPos.x, targetPos.y, PLAYER_LAYOUT[playerIndex].angle, 300);
 
-                // Play sound when tile lands
-                if (tween && this.scene.audioManager) {
-                    tween.once("complete", () => {
-                        this.scene.audioManager.playSFX("rack_tile");
+                    this.scene.tweens.add({
+                        targets: [phaserTile.sprite, phaserTile.spriteBack],
+                        alpha: 1,
+                        duration: 300
                     });
-                }
 
-                if (playerIndex === PLAYER.BOTTOM) {
-                    this.setPendingHumanGlowTile(phaserTile);
-                }
-                dealtTiles.push(phaserTile);
+                    if (tween) {
+                        tween.once("complete", () => {
+                            this.scene.audioManager.playSFX("rack_tile");
+                            animationsCompleted++;
+                            if (animationsCompleted === tilePayloads.length) {
+                                recenterAndContinue();
+                            }
+                        });
+                    }
+
+                    if (playerIndex === PLAYER.BOTTOM) {
+                        this.setPendingHumanGlowTile(phaserTile);
+                    }
+                });
             });
 
-            // Wait for last tile animation to complete, then recenter and continue
-            const lastTile = dealtTiles[dealtTiles.length - 1];
-
             const recenterAndContinue = () => {
-                // Update HandRenderer's internal tile arrays after animations complete
-                playerHand.hiddenTiles = this.gameController.players[playerIndex].hand.tiles.map(tileData => {
-                    return this.tileManager.getTileSprite(tileData.index);
-                }).filter(tile => tile !== undefined);
+                const stagedHand = this.dealAnimationHands?.[playerIndex];
 
-                // Recenter all tiles for the new hand size (instant, no animation)
-                this.recenterPlayerHand(playerIndex);
+                if (stagedHand) {
+                    this.handRenderer.syncAndRender(playerIndex, stagedHand);
+                } else if (this.gameController?.players?.[playerIndex]?.hand) {
+                    this.handRenderer.syncAndRender(playerIndex, this.gameController.players[playerIndex].hand);
+                }
 
-                // Continue to next dealing group
                 currentStepIndex++;
                 this.scene.time.delayedCall(150, dealNextGroup);
             };
 
             this.tilesRemovedFromWall += tilePayloads.length;
             this.updateWallTileCounter();
-
-            if (lastTile && lastTile.tween) {
-                lastTile.tween.once("complete", recenterAndContinue);
-            } else {
-                // Fallback if no tween (shouldn't happen)
-                recenterAndContinue();
-            }
         };
 
         dealNextGroup();
