@@ -56,11 +56,6 @@ export class HandRenderer {
             return;
         }
 
-        // Auto-sort Player 0's hand by suit before rendering
-        if (playerIndex === PLAYER.BOTTOM && handData.sortBySuit) {
-            handData.sortBySuit();
-        }
-
         const playerHand = this.playerHands[playerIndex];
 
         // Convert HandData indices to Phaser sprites
@@ -169,7 +164,23 @@ export class HandRenderer {
     }
 
     /**
+     * Prepare a tile for animation by setting its correct scale and angle
+     * This should be called before animating a tile from wall to hand
+     * @param {object} tile - Phaser tile object
+     * @param {number} playerIndex - Player position
+     */
+    prepareTileForAnimation(tile, playerIndex) {
+        const playerInfo = PLAYER_LAYOUT[playerIndex];
+        const tileScale = this.calculateTileScale(playerInfo);
+        tile.scale = tileScale;
+        tile.angle = playerInfo.angle;
+    }
+
+    /**
      * Calculate positions for hidden tiles
+     *
+     * Positions tiles starting from a fixed anchor point (not centered)
+     * to prevent tiles from shifting as the hand size changes.
      */
     calculateHiddenTilePositions(playerInfo, hiddenCount) {
         const rackPos = this.getHandRackPosition(playerInfo);
@@ -178,27 +189,29 @@ export class HandRenderer {
         const tileHeight = SPRITE_HEIGHT * tileScale;
         const gap = TILE_GAP;
 
-        const totalHiddenWidth = hiddenCount * (tileWidth + gap) - gap;
-
         let startX, startY;
 
         switch (playerInfo.id) {
         case PLAYER.BOTTOM:
-            startX = rackPos.x + (rackPos.width / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
+            // Start from left edge of rack + padding
+            startX = rackPos.x + 8 + (tileWidth / 2);
             startY = rackPos.y + rackPos.height - (tileHeight / 2) - 5;
             break;
         case PLAYER.TOP:
-            startX = rackPos.x + (rackPos.width / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
+            // Start from left edge of rack + padding
+            startX = rackPos.x + 8 + (tileWidth / 2);
             startY = rackPos.y + (tileHeight / 2) + 5;
             break;
         case PLAYER.LEFT:
+            // Start from top edge of rack + padding
             startX = rackPos.x + (tileHeight / 2) + 5;
-            startY = rackPos.y + (rackPos.height / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
+            startY = rackPos.y + 8 + (tileWidth / 2);
             break;
         case PLAYER.RIGHT:
         default:
+            // Start from top edge of rack + padding
             startX = rackPos.x + rackPos.width - (tileHeight / 2) - 5;
-            startY = rackPos.y + (rackPos.height / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
+            startY = rackPos.y + 8 + (tileWidth / 2);
             break;
         }
 
@@ -207,6 +220,9 @@ export class HandRenderer {
 
     /**
      * Calculate positions for exposed tile sets
+     *
+     * Positions exposed tiles starting from a fixed anchor point (not centered)
+     * to prevent tiles from shifting as exposures are added.
      */
     calculateExposedTilePositions(playerInfo, exposedCount) {
         const rackPos = this.getHandRackPosition(playerInfo);
@@ -215,27 +231,29 @@ export class HandRenderer {
         const tileHeight = SPRITE_HEIGHT * tileScale;
         const gap = TILE_GAP;
 
-        const totalExposedWidth = exposedCount * (tileWidth + gap) - gap;
-
         let startX, startY;
 
         switch (playerInfo.id) {
         case PLAYER.BOTTOM:
-            startX = rackPos.x + (rackPos.width / 2) - (totalExposedWidth / 2) + (tileWidth / 2);
+            // Start from left edge of rack + padding (top row for exposed)
+            startX = rackPos.x + 8 + (tileWidth / 2);
             startY = rackPos.y + (tileHeight / 2) + 5;
             break;
         case PLAYER.TOP:
-            startX = rackPos.x + (rackPos.width / 2) - (totalExposedWidth / 2) + (tileWidth / 2);
+            // Start from left edge of rack + padding (bottom row for exposed)
+            startX = rackPos.x + 8 + (tileWidth / 2);
             startY = rackPos.y + rackPos.height - (tileHeight / 2) - 5;
             break;
         case PLAYER.LEFT:
+            // Start from top edge of rack + padding (right column for exposed)
             startX = rackPos.x + rackPos.width - (tileHeight / 2) - 5;
-            startY = rackPos.y + (rackPos.height / 2) - (totalExposedWidth / 2) + (tileWidth / 2);
+            startY = rackPos.y + 8 + (tileWidth / 2);
             break;
         case PLAYER.RIGHT:
         default:
+            // Start from top edge of rack + padding (left column for exposed)
             startX = rackPos.x + (tileHeight / 2) + 5;
-            startY = rackPos.y + (rackPos.height / 2) - (totalExposedWidth / 2) + (tileWidth / 2);
+            startY = rackPos.y + 8 + (tileWidth / 2);
             break;
         }
 
@@ -385,52 +403,55 @@ export class HandRenderer {
     /**
      * Calculate tile position for animation target
      * Used when animating tiles from wall to hand
+     *
+     * Uses fixed anchor positioning to ensure consistent tile placement
+     * as hand size changes during animations.
+     *
      * @param {number} playerIndex
      * @param {number} tileIndex - Index in hidden tiles array
+     * @param {number} handSize - Optional hand size override (unused, kept for compatibility)
      * @returns {{x: number, y: number}} Position coordinates
      */
     calculateTilePosition(playerIndex, tileIndex, handSize = -1) {
         const playerInfo = PLAYER_LAYOUT[playerIndex];
-        const hiddenTiles = this.playerHands[playerIndex].hiddenTiles;
-        const hiddenCount = (handSize > -1) ? handSize : hiddenTiles.length;
-
-        // Use the same logic as calculateHiddenTilePositions() for consistency
         const rackPos = this.getHandRackPosition(playerInfo);
         const tileScale = this.calculateTileScale(playerInfo);
         const tileWidth = SPRITE_WIDTH * tileScale;
         const tileHeight = SPRITE_HEIGHT * tileScale;
         const gap = TILE_GAP;
 
-        const totalHiddenWidth = hiddenCount * (tileWidth + gap) - gap;
-
         let startX, startY;
 
         switch (playerInfo.id) {
             case PLAYER.BOTTOM:
-                startX = rackPos.x + (rackPos.width / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
+                // Start from left edge of rack + padding
+                startX = rackPos.x + 8 + (tileWidth / 2);
                 startY = rackPos.y + rackPos.height - (tileHeight / 2) - 5;
                 return {
                     x: startX + (tileIndex * (tileWidth + gap)),
                     y: startY
                 };
             case PLAYER.TOP:
-                startX = rackPos.x + (rackPos.width / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
+                // Start from left edge of rack + padding
+                startX = rackPos.x + 8 + (tileWidth / 2);
                 startY = rackPos.y + (tileHeight / 2) + 5;
                 return {
                     x: startX + (tileIndex * (tileWidth + gap)),
                     y: startY
                 };
             case PLAYER.LEFT:
+                // Start from top edge of rack + padding
                 startX = rackPos.x + (tileHeight / 2) + 5;
-                startY = rackPos.y + (rackPos.height / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
+                startY = rackPos.y + 8 + (tileWidth / 2);
                 return {
                     x: startX,
                     y: startY + (tileIndex * (tileWidth + gap))
                 };
             case PLAYER.RIGHT:
             default:
+                // Start from top edge of rack + padding
                 startX = rackPos.x + rackPos.width - (tileHeight / 2) - 5;
-                startY = rackPos.y + (rackPos.height / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
+                startY = rackPos.y + 8 + (tileWidth / 2);
                 return {
                     x: startX,
                     y: startY + (tileIndex * (tileWidth + gap))

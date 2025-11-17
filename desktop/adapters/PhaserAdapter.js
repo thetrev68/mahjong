@@ -323,6 +323,10 @@ export class PhaserAdapter {
                     if (phaserTile.spriteBack) {
                         phaserTile.spriteBack.setAlpha(0);
                     }
+
+                    // Prepare tile with correct scale/angle BEFORE animation
+                    this.handRenderer.prepareTileForAnimation(phaserTile, playerIndex);
+
                     phaserTile.showTile(true, playerIndex === PLAYER.BOTTOM);
 
                     const targetIndex = currentHandSize + tileIndexInBatch;
@@ -433,6 +437,9 @@ export class PhaserAdapter {
         const wallY = 50;
         phaserTile.sprite.setPosition(wallX, wallY);
         phaserTile.sprite.setAlpha(0);
+
+        // Prepare tile with correct scale/angle BEFORE animation
+        this.handRenderer.prepareTileForAnimation(phaserTile, playerIndex);
 
         this.tileManager.removeTileFromWall(tileDataObj.index);
 
