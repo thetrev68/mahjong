@@ -15,7 +15,7 @@
  */
 
 import {TileData} from "../../core/models/TileData.js";
-import {PLAYER, SUIT, getTotalTileCount} from "../../constants.js";
+import {PLAYER, STATE, SUIT, getTotalTileCount} from "../../constants.js";
 import {printMessage, printInfo} from "../../utils.js";
 import {TileManager} from "../managers/TileManager.js";
 import {ButtonManager} from "../managers/ButtonManager.js";
@@ -719,7 +719,7 @@ export class PhaserAdapter {
         // Skip sync during DEAL state - the TILES_DEALT animation handles it
         // Only sync for Charleston, discards, and other non-animated updates
         const currentState = this.gameController?.state;
-        const isDealState = currentState === 2; // STATE.DEAL = 2 (from constants.js)
+        const isDealState = currentState === STATE.DEAL;
 
         if (!isDealState) {
             // Delegate to HandRenderer: sync Phaser tiles with HandData and render
@@ -728,10 +728,8 @@ export class PhaserAdapter {
 
             // After sync, if selection is enabled for human player, re-attach click handlers
             // This is necessary because syncAndRender rebuilds the tile array with new sprites
-            if (playerIndex === PLAYER.BOTTOM && this.selectionManager && this.selectionManager.isEnabled()) {
-                // Re-attach handlers to the new tile sprites
-                this.selectionManager._removeClickHandlers();
-                this.selectionManager._attachClickHandlers();
+            if (playerIndex === PLAYER.BOTTOM && this.selectionManager) {
+                this.selectionManager.refreshHandlers();
             }
         }
 

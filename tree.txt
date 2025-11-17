@@ -78,17 +78,17 @@ mahjong/
 │   │   └── card.js (704 lines)
 │   ├── events/
 │   │   ├── EventEmitter.js (76 lines)
-│   │   └── GameEvents.js (320 lines)
+│   │   └── GameEvents.js (334 lines)
 │   ├── models/
 │   │   ├── HandData.js (256 lines)
 │   │   ├── PlayerData.js (87 lines)
 │   │   └── TileData.js (160 lines)
 │   ├── AIEngine.js (539 lines)
-│   ├── GameController.js (908 lines)
+│   ├── GameController.js (1017 lines)
 │   └── tileDefinitions.js (64 lines)
 ├── desktop/
 │   ├── adapters/
-│   │   └── PhaserAdapter.js (1008 lines)
+│   │   └── PhaserAdapter.js (1064 lines)
 │   ├── animations/
 │   │   └── AnimationLibrary.js (360 lines)
 │   ├── assets/
@@ -98,16 +98,17 @@ mahjong/
 │   │   ├── gameObjects_player.js (25 lines)
 │   │   └── gameObjects_table.js (421 lines)
 │   ├── managers/
-│   │   ├── ButtonManager.js (428 lines)
+│   │   ├── BlankSwapManager.js (157 lines)
+│   │   ├── ButtonManager.js (450 lines)
 │   │   ├── DialogManager.js (435 lines)
 │   │   ├── HintAnimationManager.js (202 lines)
 │   │   ├── HomePageTileManager.js (233 lines)
-│   │   ├── SelectionManager.js (705 lines)
+│   │   ├── SelectionManager.js (715 lines)
 │   │   └── TileManager.js (644 lines)
 │   ├── renderers/
-│   │   └── HandRenderer.js (348 lines)
+│   │   └── HandRenderer.js (386 lines)
 │   ├── scenes/
-│   │   └── GameScene.js (546 lines)
+│   │   └── GameScene.js (569 lines)
 │   ├── ADAPTER_PATTERNS.md
 │   └── FUTURE_REFACTORS.md
 ├── mobile/
@@ -135,7 +136,7 @@ mahjong/
 │   ├── index.html (46 lines)
 │   ├── main.js (205 lines)
 │   ├── MOBILE_INTERFACES.md
-│   ├── MobileRenderer.js (452 lines)
+│   ├── MobileRenderer.js (464 lines)
 │   ├── mockup.css (466 lines)
 │   └── mockup.html (152 lines)
 ├── pwa/
@@ -156,57 +157,45 @@ mahjong/
 ├── shared/
 │   └── SettingsManager.js (227 lines)
 ├── tests/
-│   ├── aiengine.test.js (224 lines)
-│   ├── game-basic.spec.js (133 lines)
-│   ├── mobile-tile.test.js (343 lines)
-│   ├── mobile.spec.js (191 lines)
-│   └── touch-handler.spec.js (57 lines)
+│   ├── e2e/
+│   │   ├── desktop/
+│   │   │   └── game-basic.spec.js (193 lines)
+│   │   └── mobile/
+│   │       ├── mobile.spec.js (228 lines)
+│   │       └── touch-handler.spec.js (59 lines)
+│   └── unit/
+│       ├── core/
+│       │   └── aiengine.test.js (224 lines)
+│       ├── desktop/
+│       │   └── managers/
+│       └── mobile/
+│           └── mobile-tile.test.js (343 lines)
 ├── audioManager.js (96 lines)
 ├── CLAUDE.md
-├── CODEBASE_AUDIT.md
-├── COMMIT_07C41B9_INVESTIGATION.md
-├── COMPONENT_2_HANDRENDERER_PROMPT.md
-├── COMPONENT_3_PHASERADAPTER_PROMPT.md
-├── COMPONENT_4_BUTTONMANAGER_PROMPT.md
-├── COMPONENT_4A_ANIMATIONS_PROMPT.md
-├── COMPONENT_5_TESTING_PROMPT.md
 ├── constants.js (108 lines)
-├── DEEP_DIVE_FINDINGS.md
-├── DIAGNOSTIC_ISSUES.md
-├── DIALOGMANAGER_DEEP_DIVE.md
 ├── favicon.ico
 ├── favicon.svg
-├── FIXES_SUMMARY.md
-├── HAIKU_TASK_SELECTIONMANAGER_DESIGN.md
-├── HANDRENDERER_API_DESIGN.md
-├── HANDRENDERER_EXTRACTED_LOGIC.md
 ├── IMPLEMENTATION_ROADMAP.md
 ├── index.html (156 lines)
+├── LEGACY_HAND_AUDIT.md
 ├── main.js (28 lines)
-├── MOBILE_RENDERER_INTEGRATION.md
-├── OLD_SYSTEM_GAME_FLOW.md
-├── OPTION_B_ARCHITECTURAL_VISION.md
-├── OPTION_B_COMPLETE_REFACTOR_PLAN.md
 ├── OPTION_B_DESKTOP_RECOVERY_PLAN.md
-├── PHASERADAPTER_CHARLESTON_ANALYSIS.md
-├── PHASERADAPTER_CURRENT_STATE.md
-├── playwright.config.js (52 lines)
+├── playwright.config.js (54 lines)
 ├── README.md
-├── RECOVERY_PLAN.md
-├── SELECTIONMANAGER_API_DESIGN.md
-├── settings.js (437 lines)
+├── settings.js (439 lines)
 ├── styles.css (821 lines)
+├── TEST_AUDIT.md
+├── TEST_BASELINE_STATUS.md
 ├── tileDisplayUtils.js (249 lines)
-├── TILESELECTION_LOGIC_EXTRACTED.md
 └── utils.js (42 lines)
 
 ==================================================
 DIRECTORY TREE STATISTICS
 ==================================================
-Total directories: 30
-Total files: 170
-Files with line counts: 116
-Total lines of code: 32,799
+Total directories: 38
+Total files: 151
+Files with line counts: 117
+Total lines of code: 33,343
 
 Configuration:
   Excluded directories: .archive, .claude, .geminiignore, .git, .github, .gitignore, .idea, .kilocode, .pytest_cache, .ruff_cache, .serena, .vite, .vscode, __pycache__, agents.md, backlog.md, build, claude.md, coverage, dist, docs, eslint.config.js, gemini.md, jules-scratch, knip.json, legacy, logs, node_modules, package-lock.json, package.json, playwright-report, public, test-results, tree.txt, tree_scanner.py, venv, vite.config.js

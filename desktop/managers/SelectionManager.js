@@ -533,6 +533,30 @@ export class SelectionManager {
     }
 
     /**
+     * Refresh click handlers on tiles
+     * @returns {undefined}
+     *
+     * @description
+     * Re-attaches click handlers to tiles if selection is currently enabled.
+     * This should be called after the hand is re-rendered (e.g., after syncAndRender)
+     * to ensure the new tile sprites have proper event handlers.
+     *
+     * This method is safe to call at any time - it only performs work if
+     * selection is currently active.
+     *
+     * @example
+     * // After hand re-render with new sprites
+     * handRenderer.syncAndRender(playerIndex, handData);
+     * selectionManager.refreshHandlers();
+     */
+    refreshHandlers() {
+        if (this._isEnabled) {
+            this._removeClickHandlers();
+            this._attachClickHandlers();
+        }
+    }
+
+    /**
      * Get the current selection mode
      * @returns {string|null} One of: null, "charleston", "courtesy", "play", "expose"
      *
