@@ -611,100 +611,25 @@ export class PhaserAdapter {
     }
 
     /**
-     * Handle joker swapped
+     * Handle joker swapped event
+     * GameController now emits HAND_UPDATED events after joker swaps,
+     * so this handler is minimal - just for logging
      */
     onJokerSwapped(data) {
-        this.handleJokerSwap(data);
-    }
+        const {player, replacementTile} = data;
 
-    /**
-     * Process joker swap logic
-     */
-    handleJokerSwap(data = {}) {
-        const {
-            player,
-            exposureIndex = 0,
-            jokerIndex = null,
-            replacementTile,
-            recipient = PLAYER.BOTTOM
-        } = data;
+        // GameController has already updated HandData and emitted HAND_UPDATED events
+        // HandRenderer.syncAndRender() will handle the visual update
+        // Just log the message for user feedback
 
-        if (typeof player !== "number") {
-            printMessage("JOKER_SWAPPED event missing player index");
-            return;
-        }
-
-        const exposureOwner = this.table.players[player];
-        if (!exposureOwner || !exposureOwner.hand) {
-            printMessage(`JOKER_SWAPPED ignore: player ${player} missing hand`);
-            return;
-        }
-
-        const exposureSets = exposureOwner.hand.exposedTileSetArray || [];
-        const targetExposure = exposureSets[exposureIndex];
-        if (!targetExposure) {
-            printMessage(`JOKER_SWAPPED ignore: exposure ${exposureIndex} missing for player ${player}`);
-            return;
-        }
-
-        const jokerTile = this.findJokerTile(targetExposure, jokerIndex);
-        if (!jokerTile) {
-            printMessage(`JOKER_SWAPPED ignore: joker index ${jokerIndex ?? "auto"} missing for player ${player}`);
-            return;
-        }
-
-        targetExposure.remove(jokerTile);
-
+        const ownerName = this.getPlayerName(player);
         const replacementData = replacementTile instanceof TileData
             ? replacementTile
             : (replacementTile ? TileData.fromJSON(replacementTile) : null);
 
         if (replacementData) {
-            const replacementPhaserTile = this.createPhaserTile(replacementData);
-            if (replacementPhaserTile) {
-                replacementPhaserTile.showTile(true, true);
-                targetExposure.insert(replacementPhaserTile);
-            }
-        }
-
-        // Note: Joker swap is not fully integrated with GameController's HAND_UPDATED system yet
-        // When GameController properly emits HAND_UPDATED for joker swaps, this direct manipulation can be removed
-        const recipientPlayer = this.table.players[recipient] || this.table.players[PLAYER.BOTTOM];
-        if (recipientPlayer && recipientPlayer.hand) {
-            recipientPlayer.hand.insertHidden(jokerTile);
-        } else {
-            this.table.wall.insert(jokerTile);
-        }
-
-        // Manually refresh display since GameController doesn't emit HAND_UPDATED for joker swaps yet
-        this.table.players.forEach((tablePlayer, index) => {
-            this.handRenderer.showHand(index, index === PLAYER.BOTTOM);
-        });
-
-        const ownerName = this.getPlayerName(player);
-        if (replacementData) {
             printInfo(`${ownerName} swapped a joker for ${replacementData.getText()}`);
-        } else {
-            printInfo(`${ownerName} joker swap complete`);
         }
-    }
-
-    /**
-     * Find joker tile in exposure set
-     */
-    findJokerTile(tileSet, jokerIndex) {
-        if (!tileSet || !Array.isArray(tileSet.tileArray)) {
-            return null;
-        }
-
-        if (typeof jokerIndex === "number") {
-            const exactMatch = tileSet.tileArray.find(tile => tile.index === jokerIndex);
-            if (exactMatch) {
-                return exactMatch;
-            }
-        }
-
-        return tileSet.tileArray.find(tile => tile.suit === SUIT.JOKER) || null;
     }
 
     /**

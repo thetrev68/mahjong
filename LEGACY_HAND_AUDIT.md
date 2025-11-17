@@ -79,10 +79,10 @@
 - ✅ `PhaserAdapter.js:554` (onBlankExchanged) - Removed `removeTileFromHand()`, rely on HAND_UPDATED
 - ✅ `TileManager.js:138, 157` - Deprecated `insertTileIntoHand()` and `removeTileFromHand()` with console warnings
 
-**⚠️ Known Limitation:**
-- `PhaserAdapter.js:668-680` (handleJokerSwap) - Joker swap functionality still uses direct manipulation (`insertHidden()`)
-- **Reason:** JOKER_SWAPPED event is not yet fully integrated with GameController's HAND_UPDATED system
-- **Follow-up needed:** Implement proper joker swap flow in GameController that emits HAND_UPDATED events
+**✅ Joker Swap Implemented:**
+- ✅ `GameController.onExchangeJoker()` - Implemented joker swap logic with HAND_UPDATED events
+- ✅ `PhaserAdapter.onJokerSwapped()` - Simplified to logging only, removed all direct manipulation (~70 lines removed)
+- ✅ Tests passing - joker swap now follows event-driven pattern
 
 **Test Results:**
 - ✅ All 10 desktop tests passed
@@ -133,11 +133,12 @@
 ---
 
 ## Estimated Line Reduction
-- `gameObjects_hand.js`: -1500 lines
-- `gameObjects_player.js`: -35 lines
-- `PhaserAdapter.js`: -50 lines (direct hand manipulation)
-- `TileManager.js`: -20 lines
-- **Total: ~1600 lines removed**
+- `gameObjects_hand.js`: -1500 lines (Phase 6)
+- `gameObjects_player.js`: -35 lines (Phase 6)
+- `PhaserAdapter.js`: -120 lines (Phase 2: direct hand manipulation removed)
+- `TileManager.js`: -20 lines (Phase 6: deprecated methods removed)
+- **Phase 2 Complete: ~120 lines removed**
+- **Total Estimated: ~1675 lines to be removed by Phase 6**
 
 ---
 
@@ -160,8 +161,8 @@
 
 1. ~~**Immediate:** Test current Phase 1 implementation (syncAndRender)~~ ✅ Complete
 2. ~~**Next:** Implement Phase 2 (remove direct hand manipulation in PhaserAdapter)~~ ✅ Complete
-3. **Current:** Address joker swap GameController integration (prerequisite for full Phase 2 completion)
-4. **Future:** Implement Phase 3 (move sorting to HandData)
+3. ~~**Follow-up:** Address joker swap GameController integration~~ ✅ Complete
+4. **Current:** Implement Phase 3 (move sorting to HandData)
 5. **Future:** Gradually work through Phases 4-6 with testing between each
 
 ## Implementation Notes
@@ -183,8 +184,16 @@
 - [PhaserAdapter.js:554](desktop/adapters/PhaserAdapter.js#L554) - Blank exchanged handler
 - [TileManager.js:138-168](desktop/managers/TileManager.js#L138-L168) - Deprecated methods
 
-**Outstanding Issue:**
-- Joker swap at [PhaserAdapter.js:668-680](desktop/adapters/PhaserAdapter.js#L668-L680) needs GameController integration
-- Currently no `JOKER_SWAPPED` emission from GameController
-- When GameController properly handles joker swaps and emits `HAND_UPDATED`, remove the direct manipulation
+### Joker Swap Integration (2025-11-17)
+
+**Implementation Complete:**
+- Added `GameController.onExchangeJoker()` method at [GameController.js:1100-1190](core/GameController.js#L1100-L1190)
+  - Finds exposed jokers across all players
+  - Matches human's tiles with joker requirements
+  - Updates HandData for both players (human and exposure owner)
+  - Emits JOKER_SWAPPED and HAND_UPDATED events
+- Simplified `PhaserAdapter.onJokerSwapped()` at [PhaserAdapter.js:618-633](desktop/adapters/PhaserAdapter.js#L618-L633)
+  - Removed ~70 lines of direct hand manipulation
+  - Now only handles logging, rendering driven by HAND_UPDATED
+- Button wiring complete: "Exchange Joker" button → `GameController.onExchangeJoker()`
 

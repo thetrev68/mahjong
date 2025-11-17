@@ -1093,6 +1093,121 @@ export class GameController extends EventEmitter {
     }
 
     /**
+     * Handle joker exchange - human player exchanges a tile for an exposed joker
+     * Called when human clicks "Exchange Joker" button
+     * @returns {Promise<boolean>} - True if exchange occurred
+     */
+    async onExchangeJoker() {
+        const humanPlayer = this.players[PLAYER.BOTTOM];
+
+        // Find all exposed jokers across all players
+        const exposedJokers = [];
+        for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
+            const player = this.players[playerIndex];
+            player.hand.exposures.forEach((exposure, exposureIndex) => {
+                exposure.tiles.forEach((tile, tileIndex) => {
+                    if (tile.suit === SUIT.JOKER) {
+                        exposedJokers.push({
+                            playerIndex,
+                            exposureIndex,
+                            tileIndex,
+                            jokerTile: tile,
+                            // Find what tiles can replace this joker based on the exposure
+                            requiredTiles: this.getRequiredTilesForJoker(exposure)
+                        });
+                    }
+                });
+            });
+        }
+
+        if (exposedJokers.length === 0) {
+            this.emit("MESSAGE", GameEvents.createMessageEvent("No exposed jokers available", "info"));
+            return false;
+        }
+
+        // Check if human has any matching tiles
+        const matchingExchanges = exposedJokers.filter(ej =>
+            ej.requiredTiles.some(reqTile =>
+                humanPlayer.hand.tiles.some(handTile =>
+                    handTile.suit === reqTile.suit && handTile.number === reqTile.number
+                )
+            )
+        );
+
+        if (matchingExchanges.length === 0) {
+            this.emit("MESSAGE", GameEvents.createMessageEvent("No matching tiles to exchange", "info"));
+            return false;
+        }
+
+        // For now, auto-select the first available exchange
+        // TODO: Let user choose if multiple options available
+        const exchange = matchingExchanges[0];
+        const requiredTile = exchange.requiredTiles[0];
+
+        // Find the tile in human's hand
+        const tileIndex = humanPlayer.hand.tiles.findIndex(t =>
+            t.suit === requiredTile.suit && t.number === requiredTile.number
+        );
+
+        if (tileIndex === -1) {
+            return false;
+        }
+
+        // Perform the exchange
+        const humanTile = humanPlayer.hand.tiles[tileIndex];
+        const jokerTile = exchange.jokerTile;
+
+        // Remove tile from human's hand, add joker
+        humanPlayer.hand.tiles.splice(tileIndex, 1);
+        humanPlayer.hand.tiles.push(jokerTile);
+
+        // Update the exposure - replace joker with human's tile
+        const ownerPlayer = this.players[exchange.playerIndex];
+        ownerPlayer.hand.exposures[exchange.exposureIndex].tiles[exchange.tileIndex] = humanTile;
+
+        // Emit joker swapped event (for backward compatibility with PhaserAdapter)
+        this.emit("JOKER_SWAPPED", {
+            player: exchange.playerIndex,
+            exposureIndex: exchange.exposureIndex,
+            jokerIndex: jokerTile.index,
+            replacementTile: humanTile,
+            recipient: PLAYER.BOTTOM
+        });
+
+        // Emit hand updated events
+        const humanHandEvent = GameEvents.createHandUpdatedEvent(PLAYER.BOTTOM, humanPlayer.hand.toJSON());
+        this.emit("HAND_UPDATED", humanHandEvent);
+
+        const ownerHandEvent = GameEvents.createHandUpdatedEvent(exchange.playerIndex, ownerPlayer.hand.toJSON());
+        this.emit("HAND_UPDATED", ownerHandEvent);
+
+        this.emit("MESSAGE", GameEvents.createMessageEvent(
+            `Exchanged ${humanTile.getText()} for joker`,
+            "info"
+        ));
+
+        return true;
+    }
+
+    /**
+     * Determine what tiles can replace a joker in an exposure
+     * @param {ExposureData} exposure
+     * @returns {TileData[]} - Array of tiles that can replace this joker
+     */
+    getRequiredTilesForJoker(exposure) {
+        // If exposure has other non-joker tiles, use those as template
+        const nonJokerTiles = exposure.tiles.filter(t => t.suit !== SUIT.JOKER);
+
+        if (nonJokerTiles.length > 0) {
+            // Return tiles matching the non-joker tiles (same suit/number)
+            return [nonJokerTiles[0]];
+        }
+
+        // If all jokers (shouldn't happen in valid game), return empty
+        return [];
+    }
+
+    /**
      * Prompt UI layer for user input (returns a Promise)
      * UI layer must call the provided callback with the result
      * @param {string} promptType
