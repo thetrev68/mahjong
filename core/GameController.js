@@ -350,6 +350,13 @@ export class GameController extends EventEmitter {
 
                 charlestonPassArray[playerIndex] = tilesToPass;
 
+                // Emit hand updated for sending player (tiles removed)
+                const senderHandEvent = GameEvents.createHandUpdatedEvent(
+                    playerIndex,
+                    this.players[playerIndex].hand.toJSON()
+                );
+                this.emit("HAND_UPDATED", senderHandEvent);
+
                 // Emit rich Charleston pass event
                 const toPlayer = (playerIndex + direction) % 4;
                 const passEvent = GameEvents.createCharlestonPassEvent(

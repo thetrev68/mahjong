@@ -176,8 +176,8 @@ export class ButtonManager {
      * Show buttons during Charleston pass phase
      */
     showCharlestonPassButtons() {
-        this.show(["button1"]);
-        this.hide(["button2", "button3", "button4", "start", "settings", "sort1", "sort2"]);
+        this.show(["button1", "sort1", "sort2"]);
+        this.hide(["button2", "button3", "button4", "start", "settings"]);
 
         this.setText("button1", "Pass Tiles");
         this.setDisabled("button1", true);  // Enabled when 3 tiles selected
@@ -190,6 +190,19 @@ export class ButtonManager {
                 if (selectedTiles.length === 3) {
                     this.gameController.onCharlestonPass();
                 }
+            }
+        });
+
+        // Add sort button callbacks
+        this.buttonCallbacks.set("sort1", () => {
+            if (this.gameController.onSortHandRequest) {
+                this.gameController.onSortHandRequest("suit");
+            }
+        });
+
+        this.buttonCallbacks.set("sort2", () => {
+            if (this.gameController.onSortHandRequest) {
+                this.gameController.onSortHandRequest("rank");
             }
         });
     }

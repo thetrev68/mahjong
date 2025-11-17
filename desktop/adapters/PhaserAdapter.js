@@ -48,7 +48,8 @@ export class PhaserAdapter {
         this.dialogManager = new DialogManager(scene);
 
         // Initialize Phase 3 managers and renderers
-        this.handRenderer = new HandRenderer(scene, table);
+        // HandRenderer needs TileManager to look up sprites by index
+        this.handRenderer = new HandRenderer(scene, table, this.tileManager);
         this.pendingHumanGlowTile = null;
         this.activeHumanGlowTile = null;
 
@@ -669,8 +670,26 @@ export class PhaserAdapter {
     onHandUpdated(data) {
         const {player: playerIndex, hand: handData} = data;
 
-        // For now, just log - full hand sync will happen from tile events
         console.log(`Hand updated for player ${playerIndex}: ${handData.tiles.length} hidden, ${handData.exposures.length} exposed`);
+
+        // Skip sync during DEAL state - the TILES_DEALT animation handles it
+        // Only sync for Charleston, discards, and other non-animated updates
+        const currentState = this.gameController?.state;
+        const isDealState = currentState === 2; // STATE.DEAL = 2 (from constants.js)
+
+        if (!isDealState) {
+            // Delegate to HandRenderer: sync Phaser tiles with HandData and render
+            // This is the authoritative update - HandData is source of truth
+            this.handRenderer.syncAndRender(playerIndex, handData);
+
+            // After sync, if selection is enabled for human player, re-attach click handlers
+            // This is necessary because syncAndRender rebuilds the tile array with new sprites
+            if (playerIndex === PLAYER.BOTTOM && this.selectionManager && this.selectionManager.isEnabled()) {
+                // Re-attach handlers to the new tile sprites
+                this.selectionManager._removeClickHandlers();
+                this.selectionManager._attachClickHandlers();
+            }
+        }
 
         // Clear invalid selections for human player
         if (playerIndex === PLAYER.BOTTOM && this.selectionManager) {
@@ -720,7 +739,7 @@ export class PhaserAdapter {
      * Handle Charleston pass executed
      */
     onCharlestonPass(data) {
-        const {player: playerIndex, direction} = data;
+        const {fromPlayer: playerIndex, direction} = data;
         const playerName = this.getPlayerName(playerIndex);
         printMessage(`${playerName} passed 3 tiles ${direction}`);
     }

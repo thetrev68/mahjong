@@ -134,6 +134,26 @@ class GameScene extends Phaser.Scene {
         // Expose for testing
         window.gameController = this.gameController;
 
+        // Listen for settings changes and update GameController
+        window.addEventListener("settingsChanged", (event) => {
+            const newSettings = event.detail;
+            if (this.gameController && this.gameController.settings) {
+                // Update GameController settings
+                if (newSettings.difficulty !== undefined) {
+                    this.gameController.settings.difficulty = newSettings.difficulty;
+                }
+                if (newSettings.cardYear !== undefined) {
+                    this.gameController.settings.year = newSettings.cardYear;
+                }
+                if (newSettings.useBlankTiles !== undefined) {
+                    this.gameController.settings.useBlankTiles = newSettings.useBlankTiles;
+                }
+                if (newSettings.skipCharleston !== undefined) {
+                    this.gameController.settings.skipCharleston = newSettings.skipCharleston;
+                }
+            }
+        });
+
         // Create wall counter and error text
         this.wallCounter = this.createWallTileCounter();
 
