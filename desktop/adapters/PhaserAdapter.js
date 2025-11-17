@@ -306,7 +306,8 @@ export class PhaserAdapter {
                 }
                 phaserTile.showTile(true, playerIndex === PLAYER.BOTTOM);
 
-                this.tileManager.insertTileIntoHand(playerIndex, phaserTile);
+                // GameController emits HAND_UPDATED after dealing, which triggers syncAndRender()
+                // No need to call insertTileIntoHand - HandData is source of truth
                 if (playerIndex === PLAYER.BOTTOM) {
                     this.setPendingHumanGlowTile(phaserTile);
                 }
@@ -384,7 +385,8 @@ export class PhaserAdapter {
                 phaserTile.sprite.setPosition(50, 50);
                 phaserTile.sprite.setAlpha(0);
 
-                player.hand.insertHidden(phaserTile);
+                // GameController will emit HAND_UPDATED, which triggers syncAndRender()
+                // No need to call player.hand.insertHidden() - HandData is source of truth
                 if (playerIndex === PLAYER.BOTTOM) {
                     this.setPendingHumanGlowTile(phaserTile);
                 }
@@ -438,8 +440,8 @@ export class PhaserAdapter {
 
         this.tileManager.removeTileFromWall(tileDataObj.index);
 
-        // Add to player's hand
-        this.tileManager.insertTileIntoHand(playerIndex, phaserTile);
+        // GameController emits HAND_UPDATED after drawing, which triggers syncAndRender()
+        // No need to call insertTileIntoHand - HandData is source of truth
         if (playerIndex === PLAYER.BOTTOM) {
             this.setPendingHumanGlowTile(phaserTile);
         }
@@ -509,8 +511,8 @@ export class PhaserAdapter {
             this.clearHumanDrawGlow(phaserTile);
         }
 
-        // Remove from hand
-        this.tileManager.removeTileFromHand(playerIndex, phaserTile);
+        // GameController emits HAND_UPDATED after discarding, which triggers syncAndRender()
+        // No need to call removeTileFromHand - HandData is source of truth
 
         // Add to discard pile (handles animation + audio)
         this.tileManager.addTileToDiscardPile(phaserTile);
@@ -549,7 +551,8 @@ export class PhaserAdapter {
         }
 
         if (blankPhaserTile) {
-            this.tileManager.removeTileFromHand(player, blankPhaserTile);
+            // GameController emits HAND_UPDATED after blank exchange, which triggers syncAndRender()
+            // No need to call removeTileFromHand - HandData is source of truth
             this.table.discards.insertDiscard(blankPhaserTile);
         } else {
             console.warn("Blank exchange: Could not find blank tile sprite", blankTileData);
@@ -590,25 +593,18 @@ export class PhaserAdapter {
         const {player: playerIndex, exposureType, tiles: tileDatas} = data;
         const player = this.table.players[playerIndex];
 
-        // Convert to Phaser tiles
+        // Convert to Phaser tiles for glow clearing
         const phaserTiles = this.tileManager.convertTileDataArray(
             tileDatas.map(td => TileData.fromJSON(td))
         );
 
-        phaserTiles.forEach(tile => {
-            if (typeof player.hand.removeHidden === "function") {
-                player.hand.removeHidden(tile);
-            }
-        });
+        // Clear visual effects for exposed tiles
         if (playerIndex === PLAYER.BOTTOM) {
             phaserTiles.forEach(tile => this.clearHumanDrawGlow(tile));
         }
-        if (typeof player.hand.insertExposed === "function") {
-            player.hand.insertExposed(phaserTiles);
-        }
 
-        // Refresh hand display
-        this.handRenderer.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
+        // GameController already emitted HAND_UPDATED event, which will trigger syncAndRender()
+        // No need to manually call removeHidden() or insertExposed() - HandData is source of truth
 
         const playerName = this.getPlayerName(playerIndex);
         printMessage(`${playerName} exposed ${exposureType}: ${phaserTiles.length} tiles`);
@@ -671,6 +667,8 @@ export class PhaserAdapter {
             }
         }
 
+        // Note: Joker swap is not fully integrated with GameController's HAND_UPDATED system yet
+        // When GameController properly emits HAND_UPDATED for joker swaps, this direct manipulation can be removed
         const recipientPlayer = this.table.players[recipient] || this.table.players[PLAYER.BOTTOM];
         if (recipientPlayer && recipientPlayer.hand) {
             recipientPlayer.hand.insertHidden(jokerTile);
@@ -678,6 +676,7 @@ export class PhaserAdapter {
             this.table.wall.insert(jokerTile);
         }
 
+        // Manually refresh display since GameController doesn't emit HAND_UPDATED for joker swaps yet
         this.table.players.forEach((tablePlayer, index) => {
             this.handRenderer.showHand(index, index === PLAYER.BOTTOM);
         });

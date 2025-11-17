@@ -127,11 +127,16 @@ export class TileManager {
     }
 
     /**
+     * @deprecated Phase 2 of legacy Hand elimination - No longer needed
+     * GameController emits HAND_UPDATED events which trigger HandRenderer.syncAndRender()
+     * HandData is the source of truth, not legacy Hand objects
+     *
      * Insert a tile into a player's hidden hand
      * @param {number} playerIndex
      * @param {Tile} tile
      */
     insertTileIntoHand(playerIndex, tile) {
+        console.warn("TileManager.insertTileIntoHand is deprecated - use GameController HAND_UPDATED events");
         const player = this.table?.players?.[playerIndex];
         if (!player?.hand || !tile) {
             return;
@@ -141,11 +146,16 @@ export class TileManager {
     }
 
     /**
+     * @deprecated Phase 2 of legacy Hand elimination - No longer needed
+     * GameController emits HAND_UPDATED events which trigger HandRenderer.syncAndRender()
+     * HandData is the source of truth, not legacy Hand objects
+     *
      * Remove a tile from a player's hidden hand
      * @param {number} playerIndex
      * @param {Tile} tile
      */
     removeTileFromHand(playerIndex, tile) {
+        console.warn("TileManager.removeTileFromHand is deprecated - use GameController HAND_UPDATED events");
         const player = this.table?.players?.[playerIndex];
         if (!player?.hand || !tile) {
             return;

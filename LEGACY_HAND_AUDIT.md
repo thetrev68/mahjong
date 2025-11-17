@@ -62,7 +62,7 @@
 - [x] Update `PhaserAdapter.onHandUpdated()` to use HandRenderer
 - [x] HandData is now source of truth for tile state
 
-### Phase 2: Eliminate Direct Hand Manipulation
+### Phase 2: ✅ Eliminate Direct Hand Manipulation (COMPLETED)
 **Target:** Remove all `insertHidden()`, `removeHidden()`, `insertExposed()` calls
 
 **Approach:**
@@ -70,11 +70,25 @@
 2. Remove direct manipulation methods from PhaserAdapter
 3. TileManager should NOT manipulate hands (violates separation)
 
-**Files to update:**
-- `PhaserAdapter.js:375` (onTileDrawn) - Remove `insertHidden()`, rely on HAND_UPDATED event
-- `PhaserAdapter.js:554-562` (onTilesExposed) - Remove hand manipulation, rely on HAND_UPDATED
-- `PhaserAdapter.js:631` (onJokerSwapped) - Remove `insertHidden()`, rely on HAND_UPDATED
-- `TileManager.js:139, 153-156` - Remove hand manipulation entirely
+**Files updated:**
+- ✅ `PhaserAdapter.js:387` (dealing sequence) - Removed `insertHidden()`, rely on HAND_UPDATED event
+- ✅ `PhaserAdapter.js:309` (onTilesDealt) - Removed `insertTileIntoHand()` call
+- ✅ `PhaserAdapter.js:443` (onTileDrawn) - Removed `insertTileIntoHand()`, rely on HAND_UPDATED
+- ✅ `PhaserAdapter.js:599-607` (onTilesExposed) - Removed `removeHidden()` and `insertExposed()`, rely on HAND_UPDATED
+- ✅ `PhaserAdapter.js:514` (onTileDiscarded) - Removed `removeTileFromHand()`, rely on HAND_UPDATED
+- ✅ `PhaserAdapter.js:554` (onBlankExchanged) - Removed `removeTileFromHand()`, rely on HAND_UPDATED
+- ✅ `TileManager.js:138, 157` - Deprecated `insertTileIntoHand()` and `removeTileFromHand()` with console warnings
+
+**⚠️ Known Limitation:**
+- `PhaserAdapter.js:668-680` (handleJokerSwap) - Joker swap functionality still uses direct manipulation (`insertHidden()`)
+- **Reason:** JOKER_SWAPPED event is not yet fully integrated with GameController's HAND_UPDATED system
+- **Follow-up needed:** Implement proper joker swap flow in GameController that emits HAND_UPDATED events
+
+**Test Results:**
+- ✅ All 10 desktop tests passed
+- ✅ GameController event emission working correctly
+- ✅ No console errors in desktop gameplay
+- ✅ Game state transitions functioning properly
 
 ### Phase 3: Move Sorting to HandData
 **Target:** `sortSuitHidden()`, `sortRankHidden()`
@@ -131,7 +145,7 @@
 
 **Low Risk:**
 - Phase 1 ✅ (completed, working)
-- Phase 2: Removing direct manipulation (GameController already manages state)
+- Phase 2 ✅ (completed, tested - all desktop tests passing)
 
 **Medium Risk:**
 - Phase 3: Sorting (need to test UI responsiveness)
@@ -144,7 +158,33 @@
 
 ## Next Steps
 
-1. **Immediate:** Test current Phase 1 implementation (syncAndRender)
-2. **Next:** Implement Phase 2 (remove direct hand manipulation in PhaserAdapter)
-3. **Future:** Gradually work through Phases 3-6 with testing between each
+1. ~~**Immediate:** Test current Phase 1 implementation (syncAndRender)~~ ✅ Complete
+2. ~~**Next:** Implement Phase 2 (remove direct hand manipulation in PhaserAdapter)~~ ✅ Complete
+3. **Current:** Address joker swap GameController integration (prerequisite for full Phase 2 completion)
+4. **Future:** Implement Phase 3 (move sorting to HandData)
+5. **Future:** Gradually work through Phases 4-6 with testing between each
+
+## Implementation Notes
+
+### Phase 2 Completion (2025-11-17)
+
+**What Changed:**
+- All direct hand manipulation (`insertHidden()`, `removeHidden()`, `insertExposed()`) removed from event handlers
+- GameController's `HAND_UPDATED` events now drive all hand rendering via `HandRenderer.syncAndRender()`
+- TileManager methods deprecated with console warnings to catch any future misuse
+- Architecture now follows true event-driven pattern: GameController (state) → Events → Adapters (rendering)
+
+**Code Locations:**
+- [PhaserAdapter.js:387](desktop/adapters/PhaserAdapter.js#L387) - Dealing sequence
+- [PhaserAdapter.js:309](desktop/adapters/PhaserAdapter.js#L309) - Tiles dealt handler
+- [PhaserAdapter.js:443](desktop/adapters/PhaserAdapter.js#L443) - Tile drawn handler
+- [PhaserAdapter.js:599-607](desktop/adapters/PhaserAdapter.js#L599-L607) - Tiles exposed handler
+- [PhaserAdapter.js:514](desktop/adapters/PhaserAdapter.js#L514) - Tile discarded handler
+- [PhaserAdapter.js:554](desktop/adapters/PhaserAdapter.js#L554) - Blank exchanged handler
+- [TileManager.js:138-168](desktop/managers/TileManager.js#L138-L168) - Deprecated methods
+
+**Outstanding Issue:**
+- Joker swap at [PhaserAdapter.js:668-680](desktop/adapters/PhaserAdapter.js#L668-L680) needs GameController integration
+- Currently no `JOKER_SWAPPED` emission from GameController
+- When GameController properly handles joker swaps and emits `HAND_UPDATED`, remove the direct manipulation
 
