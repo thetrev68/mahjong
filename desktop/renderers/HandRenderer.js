@@ -389,10 +389,10 @@ export class HandRenderer {
      * @param {number} tileIndex - Index in hidden tiles array
      * @returns {{x: number, y: number}} Position coordinates
      */
-    calculateTilePosition(playerIndex, tileIndex) {
+    calculateTilePosition(playerIndex, tileIndex, handSize = -1) {
         const playerInfo = PLAYER_LAYOUT[playerIndex];
         const hiddenTiles = this.playerHands[playerIndex].hiddenTiles;
-        const hiddenCount = hiddenTiles.length;
+        const hiddenCount = (handSize > -1) ? handSize : hiddenTiles.length;
 
         // Use the same logic as calculateHiddenTilePositions() for consistency
         const rackPos = this.getHandRackPosition(playerInfo);
