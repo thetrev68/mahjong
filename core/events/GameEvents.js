@@ -96,6 +96,21 @@ export function createTileDiscardedEvent(player, tile, animation = {}) {
 }
 
 /**
+ * Event: BLANK_EXCHANGED
+ * Emitted when a blank tile swaps with a discard tile
+ */
+export function createBlankExchangeEvent(player, blankTile, retrievedTile, discardIndex) {
+    return {
+        type: "BLANK_EXCHANGED",
+        player,
+        blankTile,
+        retrievedTile,
+        discardIndex,
+        timestamp: Date.now()
+    };
+}
+
+/**
  * Event: HAND_UPDATED
  * Emitted when a player's hand changes (tiles added/removed)
  */

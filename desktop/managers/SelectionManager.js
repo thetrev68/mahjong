@@ -736,6 +736,16 @@ export class SelectionManager {
         const tiles = this.hand.hiddenTileSet.getTileArray();
 
         for (const tile of tiles) {
+            // Ensure Phaser knows this tile should fire pointer events.
+            // Tiles passed in from AI players arrive with interaction disabled,
+            // so re-enable it every time we enter a selection phase.
+            if (tile?.sprite) {
+                tile.sprite.setInteractive({useHandCursor: true});
+                if (tile.sprite.input) {
+                    tile.sprite.input.enabled = true;
+                }
+            }
+
             // Create and store handler for this tile
             const handler = () => {
                 // Ignore if not enabled

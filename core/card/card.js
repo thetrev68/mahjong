@@ -1,7 +1,7 @@
 import {debugPrint, debugTrace, gdebug} from "../../utils.js";
 import {TileData} from "../models/TileData.js";
 import {Hand} from "../../desktop/gameObjects/gameObjects_hand.js";
-import {SUIT, VNUMBER} from "../../../constants.js";
+import {SUIT, VNUMBER} from "../../constants.js";
 
 // PRIVATE CONSTANTS
 

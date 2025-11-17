@@ -21,6 +21,7 @@ import {TileManager} from "../managers/TileManager.js";
 import {ButtonManager} from "../managers/ButtonManager.js";
 import {DialogManager} from "../managers/DialogManager.js";
 import {SelectionManager} from "../managers/SelectionManager.js";
+import {BlankSwapManager} from "../managers/BlankSwapManager.js";
 import {HandRenderer} from "../renderers/HandRenderer.js";
 
 export class PhaserAdapter {
@@ -48,7 +49,8 @@ export class PhaserAdapter {
         this.dialogManager = new DialogManager(scene);
 
         // Initialize Phase 3 managers and renderers
-        this.handRenderer = new HandRenderer(scene, table);
+        // HandRenderer needs TileManager to look up sprites by index
+        this.handRenderer = new HandRenderer(scene, table, this.tileManager);
         this.pendingHumanGlowTile = null;
         this.activeHumanGlowTile = null;
 
@@ -61,6 +63,13 @@ export class PhaserAdapter {
 
         // Now set SelectionManager reference on ButtonManager
         this.buttonManager.selectionManager = this.selectionManager;
+
+        this.blankSwapManager = new BlankSwapManager({
+            table,
+            selectionManager: this.selectionManager,
+            buttonManager: this.buttonManager,
+            gameController
+        });
 
         this.setupEventListeners();
     }
@@ -90,6 +99,7 @@ export class PhaserAdapter {
         gc.on("TILES_DEALT", (data) => this.onTilesDealt(data));
         gc.on("TILE_DRAWN", (data) => this.onTileDrawn(data));
         gc.on("TILE_DISCARDED", (data) => this.onTileDiscarded(data));
+        gc.on("BLANK_EXCHANGED", (data) => this.onBlankExchanged(data));
         gc.on("DISCARD_CLAIMED", (data) => this.onDiscardClaimed(data));
         gc.on("TILES_EXPOSED", (data) => this.onTilesExposed(data));
         gc.on("JOKER_SWAPPED", (data) => this.onJokerSwapped(data));
@@ -209,6 +219,8 @@ export class PhaserAdapter {
 
         // Reset tile counter
         this.tilesRemovedFromWall = 0;
+
+        this.buttonManager?.pinSortButtons?.();
     }
 
     /**
@@ -512,6 +524,39 @@ export class PhaserAdapter {
         // Show discards (updates layout)
         const playerName = this.getPlayerName(playerIndex);
         printMessage(`${playerName} discarded ${tileDataObj.getText()}`);
+
+        this.blankSwapManager?.handleDiscardPileChanged();
+    }
+
+    /**
+     * Handle blank exchange (human swaps blank with discard pile)
+     */
+    onBlankExchanged(data) {
+        const {player, blankTile, retrievedTile} = data;
+        if (player !== PLAYER.BOTTOM) {
+            return;
+        }
+
+        const blankTileData = TileData.fromJSON(blankTile);
+        const retrievedTileData = TileData.fromJSON(retrievedTile);
+        const blankPhaserTile = this.tileManager.getTileSprite(blankTileData);
+        const retrievedPhaserTile = this.tileManager.getTileSprite(retrievedTileData);
+
+        if (retrievedPhaserTile) {
+            this.table.discards.removeDiscardTile(retrievedPhaserTile);
+            retrievedPhaserTile.sprite.visible = false;
+            retrievedPhaserTile.spriteBack.visible = false;
+        }
+
+        if (blankPhaserTile) {
+            this.tileManager.removeTileFromHand(player, blankPhaserTile);
+            this.table.discards.insertDiscard(blankPhaserTile);
+        } else {
+            console.warn("Blank exchange: Could not find blank tile sprite", blankTileData);
+        }
+
+        this.table.discards.layoutTiles();
+        this.blankSwapManager?.handleBlankExchangeEvent();
     }
 
     /**
@@ -669,8 +714,26 @@ export class PhaserAdapter {
     onHandUpdated(data) {
         const {player: playerIndex, hand: handData} = data;
 
-        // For now, just log - full hand sync will happen from tile events
         console.log(`Hand updated for player ${playerIndex}: ${handData.tiles.length} hidden, ${handData.exposures.length} exposed`);
+
+        // Skip sync during DEAL state - the TILES_DEALT animation handles it
+        // Only sync for Charleston, discards, and other non-animated updates
+        const currentState = this.gameController?.state;
+        const isDealState = currentState === 2; // STATE.DEAL = 2 (from constants.js)
+
+        if (!isDealState) {
+            // Delegate to HandRenderer: sync Phaser tiles with HandData and render
+            // This is the authoritative update - HandData is source of truth
+            this.handRenderer.syncAndRender(playerIndex, handData);
+
+            // After sync, if selection is enabled for human player, re-attach click handlers
+            // This is necessary because syncAndRender rebuilds the tile array with new sprites
+            if (playerIndex === PLAYER.BOTTOM && this.selectionManager && this.selectionManager.isEnabled()) {
+                // Re-attach handlers to the new tile sprites
+                this.selectionManager._removeClickHandlers();
+                this.selectionManager._attachClickHandlers();
+            }
+        }
 
         // Clear invalid selections for human player
         if (playerIndex === PLAYER.BOTTOM && this.selectionManager) {
@@ -693,6 +756,8 @@ export class PhaserAdapter {
         if (playerIndex === PLAYER.BOTTOM && this.scene.hintAnimationManager) {
             this.scene.hintAnimationManager.updateHintsForNewTiles();
         }
+
+        this.blankSwapManager?.handleHandUpdated(playerIndex);
     }
 
     /**
@@ -720,7 +785,7 @@ export class PhaserAdapter {
      * Handle Charleston pass executed
      */
     onCharlestonPass(data) {
-        const {player: playerIndex, direction} = data;
+        const {fromPlayer: playerIndex, direction} = data;
         const playerName = this.getPlayerName(playerIndex);
         printMessage(`${playerName} passed 3 tiles ${direction}`);
     }
@@ -841,6 +906,7 @@ export class PhaserAdapter {
         }
 
         printInfo("Select a tile to discard");
+        this.blankSwapManager?.handleDiscardPromptStart();
 
         this.selectionManager.requestSelection({
             min: 1,
@@ -856,6 +922,8 @@ export class PhaserAdapter {
         }).catch((error) => {
             console.warn("Discard selection cancelled:", error);
             callback?.(null);
+        }).finally(() => {
+            this.blankSwapManager?.handleDiscardPromptEnd();
         });
     }
 

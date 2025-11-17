@@ -24,10 +24,53 @@ export class HandRenderer {
      * Create a new HandRenderer
      * @param {Phaser.Scene} scene - The Phaser scene containing the game
      * @param {Table} table - The game table object containing all players
+     * @param {TileManager} tileManager - The tile manager for sprite lookup
      */
-    constructor(scene, table) {
+    constructor(scene, table, tileManager) {
         this.scene = scene;
         this.table = table;
+        this.tileManager = tileManager;
+    }
+
+    /**
+     * Sync Phaser tiles with HandData model, then render
+     *
+     * This is the authoritative method for updating a player's hand after
+     * data changes (Charleston, draw, discard, etc.). It rebuilds the
+     * Phaser tile array from the HandData model to ensure visual consistency.
+     *
+     * @param {number} playerIndex - Player position (0=BOTTOM, 1=RIGHT, 2=TOP, 3=LEFT)
+     * @param {HandData} handData - Hand data model from GameController
+     * @returns {undefined}
+     *
+     * @example
+     * // Update hand after Charleston pass
+     * handRenderer.syncAndRender(PLAYER.BOTTOM, handData);
+     */
+    syncAndRender(playerIndex, handData) {
+        if (playerIndex < 0 || playerIndex > 3) {
+            console.error(`HandRenderer.syncAndRender: Invalid playerIndex ${playerIndex}`);
+            return;
+        }
+
+        const player = this.table.players[playerIndex];
+        const hand = player.hand;
+
+        // Sync hidden tiles: rebuild Phaser tileArray from HandData
+        hand.hiddenTileSet.tileArray = handData.tiles.map(tileData => {
+            // Get Phaser sprite by tile index (stable identifier)
+            const phaserTile = this.tileManager.getTileSprite(tileData.index);
+            if (!phaserTile) {
+                console.error(`HandRenderer.syncAndRender: Could not find Phaser tile for index ${tileData.index}`);
+            }
+            return phaserTile;
+        }).filter(tile => tile !== undefined);
+
+        // Sync exposed tiles (if HandData includes exposures)
+        // For now, exposures are managed separately - this is a future enhancement
+
+        // Render the synced hand
+        this.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
     }
 
     /**
