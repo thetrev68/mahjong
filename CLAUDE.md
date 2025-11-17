@@ -61,6 +61,9 @@ npm run knip         # Find unused files/exports/dependencies
 ```
 c:\Repos\mahjong\
 ├── core/                    # Platform-agnostic game logic
+│   ├── card/                # Hand validation engine
+│   │   ├── card.js          # Pattern matching & ranking
+│   │   └── [2017-2025]/     # Year-specific rule definitions
 │   ├── GameController.js    # State machine & orchestration (737 lines)
 │   ├── AIEngine.js          # AI decision making (511 lines)
 │   ├── events/
@@ -104,10 +107,6 @@ c:\Repos\mahjong\
 │   │   └── TouchHandler.js
 │   └── animations/
 │       └── AnimationController.js
-│
-├── card/                    # Hand validation engine
-│   ├── card.js              # Pattern matching & ranking
-│   └── [2017-2025]/         # Year-specific rule definitions
 │
 ├── shared/                  # Cross-platform utilities
 │   └── SettingsManager.js   # localStorage persistence
@@ -262,14 +261,14 @@ Pattern validation and hand ranking engine:
 - `matchComponents(tiles, pattern)` - Breaks hand into valid component groups
 
 **Year-Specific Patterns**:
-- [card/2017/](card/2017/) through [card/2025/](card/2025/)
+- [core/card/2017/](core/card/2017/) through [core/card/2025/](core/card/2025/)
 - Each year has category-specific files: handsSinglesPairs.js, handsConsecutive.js, handsLikeNumbers.js, hands2468.js, hands13579.js, handsWindsDragons.js, handsQuints.js
 - Patterns define valid 14-tile combinations using components (Pair, Pung, Kong, Quint, Run)
 
 **Adding New Years**:
-1. Create new directory under `card/YYYY/`
-2. Import pattern categories in `card/cardYYYY.js`
-3. Update `card/card.js` init() to load the new year
+1. Create new directory under `core/card/YYYY/`
+2. Import pattern categories in `core/card/cardYYYY.js`
+3. Update `core/card/card.js` init() to load the new year
 
 ## Desktop Architecture
 
