@@ -10,121 +10,132 @@ mahjong/
 │   ├── back.png
 │   ├── tiles.json
 │   └── tiles.png
-├── card/
-│   ├── 2017/
-│   │   ├── card2017.js (23 lines)
-│   │   ├── card_test.js (497 lines)
-│   │   ├── hands13579.js (368 lines)
-│   │   ├── hands2017.js (292 lines)
-│   │   ├── hands2468.js (203 lines)
-│   │   ├── hands369.js (295 lines)
-│   │   ├── handsConsecutive.js (266 lines)
-│   │   ├── handsLikeNumbers.js (67 lines)
-│   │   ├── handsLucky13.js (213 lines)
-│   │   ├── handsQuints.js (408 lines)
-│   │   ├── handsSinglesPairs.js (528 lines)
-│   │   └── handsWindsDragons.js (261 lines)
-│   ├── 2018/
-│   │   ├── card2018.js (23 lines)
-│   │   ├── card_test.js (98 lines)
-│   │   ├── hands13579.js (377 lines)
-│   │   ├── hands2018.js (253 lines)
-│   │   ├── hands2468.js (203 lines)
-│   │   ├── hands369.js (300 lines)
-│   │   ├── handsAdditionHands.js (213 lines)
-│   │   ├── handsConsecutive.js (290 lines)
-│   │   ├── handsLikeNumbers.js (101 lines)
-│   │   ├── handsQuints.js (457 lines)
-│   │   ├── handsSinglesPairs.js (474 lines)
-│   │   └── handsWindsDragons.js (242 lines)
-│   ├── 2019/
-│   │   ├── card2019.js (23 lines)
-│   │   ├── card_test.js (98 lines)
-│   │   ├── hands13579.js (504 lines)
-│   │   ├── hands2019.js (248 lines)
-│   │   ├── hands2468.js (203 lines)
-│   │   ├── hands369.js (227 lines)
-│   │   ├── handsAdditionHands.js (213 lines)
-│   │   ├── handsConsecutive.js (295 lines)
-│   │   ├── handsLikeNumbers.js (72 lines)
-│   │   ├── handsQuints.js (187 lines)
-│   │   ├── handsSinglesPairs.js (408 lines)
-│   │   └── handsWindsDragons.js (257 lines)
-│   ├── 2020/
-│   │   ├── card2020.js (21 lines)
-│   │   ├── card_test.js (77 lines)
-│   │   ├── hands13579.js (373 lines)
-│   │   ├── hands2020.js (150 lines)
-│   │   ├── hands2468.js (305 lines)
-│   │   ├── hands369.js (305 lines)
-│   │   ├── handsConsecutive.js (329 lines)
-│   │   ├── handsLikeNumbers.js (101 lines)
-│   │   ├── handsQuints.js (187 lines)
-│   │   ├── handsSinglesPairs.js (377 lines)
-│   │   └── handsWindsDragons.js (286 lines)
-│   ├── 2025/
-│   │   ├── card2025.js (21 lines)
-│   │   ├── card2025.xlsx
-│   │   ├── hands13579.js (583 lines)
-│   │   ├── hands2025.js (204 lines)
-│   │   ├── hands2468.js (339 lines)
-│   │   ├── hands369.js (397 lines)
-│   │   ├── handsConsecutive.js (388 lines)
-│   │   ├── handsLikeNumbers.js (116 lines)
-│   │   ├── handsQuints.js (96 lines)
-│   │   ├── handsSinglesPairs.js (416 lines)
-│   │   └── handsWindsDragons.js (389 lines)
-│   └── card.js (704 lines)
 ├── core/
 │   ├── card/
+│   │   ├── 2017/
+│   │   │   ├── card2017.js (23 lines)
+│   │   │   ├── card_test.js (497 lines)
+│   │   │   ├── hands13579.js (368 lines)
+│   │   │   ├── hands2017.js (292 lines)
+│   │   │   ├── hands2468.js (203 lines)
+│   │   │   ├── hands369.js (295 lines)
+│   │   │   ├── handsConsecutive.js (266 lines)
+│   │   │   ├── handsLikeNumbers.js (67 lines)
+│   │   │   ├── handsLucky13.js (213 lines)
+│   │   │   ├── handsQuints.js (408 lines)
+│   │   │   ├── handsSinglesPairs.js (528 lines)
+│   │   │   └── handsWindsDragons.js (261 lines)
+│   │   ├── 2018/
+│   │   │   ├── card2018.js (23 lines)
+│   │   │   ├── card_test.js (98 lines)
+│   │   │   ├── hands13579.js (377 lines)
+│   │   │   ├── hands2018.js (253 lines)
+│   │   │   ├── hands2468.js (203 lines)
+│   │   │   ├── hands369.js (300 lines)
+│   │   │   ├── handsAdditionHands.js (213 lines)
+│   │   │   ├── handsConsecutive.js (290 lines)
+│   │   │   ├── handsLikeNumbers.js (101 lines)
+│   │   │   ├── handsQuints.js (457 lines)
+│   │   │   ├── handsSinglesPairs.js (474 lines)
+│   │   │   └── handsWindsDragons.js (242 lines)
+│   │   ├── 2019/
+│   │   │   ├── card2019.js (23 lines)
+│   │   │   ├── card_test.js (98 lines)
+│   │   │   ├── hands13579.js (504 lines)
+│   │   │   ├── hands2019.js (248 lines)
+│   │   │   ├── hands2468.js (203 lines)
+│   │   │   ├── hands369.js (227 lines)
+│   │   │   ├── handsAdditionHands.js (213 lines)
+│   │   │   ├── handsConsecutive.js (295 lines)
+│   │   │   ├── handsLikeNumbers.js (72 lines)
+│   │   │   ├── handsQuints.js (187 lines)
+│   │   │   ├── handsSinglesPairs.js (408 lines)
+│   │   │   └── handsWindsDragons.js (257 lines)
+│   │   ├── 2020/
+│   │   │   ├── card2020.js (21 lines)
+│   │   │   ├── card_test.js (77 lines)
+│   │   │   ├── hands13579.js (373 lines)
+│   │   │   ├── hands2020.js (150 lines)
+│   │   │   ├── hands2468.js (305 lines)
+│   │   │   ├── hands369.js (305 lines)
+│   │   │   ├── handsConsecutive.js (329 lines)
+│   │   │   ├── handsLikeNumbers.js (101 lines)
+│   │   │   ├── handsQuints.js (187 lines)
+│   │   │   ├── handsSinglesPairs.js (377 lines)
+│   │   │   └── handsWindsDragons.js (286 lines)
+│   │   ├── 2025/
+│   │   │   ├── card2025.js (21 lines)
+│   │   │   ├── card2025.xlsx
+│   │   │   ├── hands13579.js (583 lines)
+│   │   │   ├── hands2025.js (204 lines)
+│   │   │   ├── hands2468.js (339 lines)
+│   │   │   ├── hands369.js (397 lines)
+│   │   │   ├── handsConsecutive.js (388 lines)
+│   │   │   ├── handsLikeNumbers.js (116 lines)
+│   │   │   ├── handsQuints.js (96 lines)
+│   │   │   ├── handsSinglesPairs.js (416 lines)
+│   │   │   └── handsWindsDragons.js (389 lines)
+│   │   └── card.js (704 lines)
 │   ├── events/
 │   │   ├── EventEmitter.js (76 lines)
-│   │   └── GameEvents.js (307 lines)
+│   │   └── GameEvents.js (320 lines)
 │   ├── models/
 │   │   ├── HandData.js (256 lines)
 │   │   ├── PlayerData.js (87 lines)
-│   │   ├── test-data-models.js (162 lines)
 │   │   └── TileData.js (160 lines)
-│   ├── AIEngine.js (511 lines)
-│   ├── GameController.js (737 lines)
+│   ├── AIEngine.js (539 lines)
+│   ├── GameController.js (908 lines)
 │   └── tileDefinitions.js (64 lines)
 ├── desktop/
 │   ├── adapters/
-│   │   └── PhaserAdapter.js (618 lines)
+│   │   └── PhaserAdapter.js (1008 lines)
 │   ├── animations/
 │   │   └── AnimationLibrary.js (360 lines)
 │   ├── assets/
-│   └── managers/
-│       ├── ButtonManager.js (422 lines)
-│       ├── DialogManager.js (409 lines)
-│       ├── HintAnimationManager.js (202 lines)
-│       └── TileManager.js (482 lines)
+│   ├── gameObjects/
+│   │   ├── gameObjects.js (529 lines)
+│   │   ├── gameObjects_hand.js (1278 lines)
+│   │   ├── gameObjects_player.js (25 lines)
+│   │   └── gameObjects_table.js (421 lines)
+│   ├── managers/
+│   │   ├── ButtonManager.js (428 lines)
+│   │   ├── DialogManager.js (435 lines)
+│   │   ├── HintAnimationManager.js (202 lines)
+│   │   ├── HomePageTileManager.js (233 lines)
+│   │   ├── SelectionManager.js (705 lines)
+│   │   └── TileManager.js (644 lines)
+│   ├── renderers/
+│   │   └── HandRenderer.js (348 lines)
+│   ├── scenes/
+│   │   └── GameScene.js (546 lines)
+│   ├── ADAPTER_PATTERNS.md
+│   └── FUTURE_REFACTORS.md
 ├── mobile/
 │   ├── animations/
 │   │   └── AnimationController.js (381 lines)
 │   ├── assets/
 │   ├── components/
-│   │   ├── DiscardPile.js (169 lines)
+│   │   ├── DiscardPile.js (174 lines)
 │   │   ├── InstallPrompt.js (307 lines)
 │   │   ├── MobileTile.css (160 lines)
 │   │   ├── MobileTile.js (253 lines)
 │   │   ├── OpponentBar.js (128 lines)
-│   │   └── SettingsSheet.js (249 lines)
+│   │   └── SettingsSheet.js (251 lines)
 │   ├── gestures/
-│   │   ├── TouchHandler.js (239 lines)
-│   │   └── TouchHandler.test.js (155 lines)
+│   │   └── TouchHandler.js (239 lines)
 │   ├── renderers/
-│   │   └── HandRenderer.js (347 lines)
+│   │   └── HandRenderer.js (458 lines)
 │   ├── styles/
 │   │   ├── animations.css (178 lines)
 │   │   ├── base.css (30 lines)
 │   │   ├── HandRenderer.css (107 lines)
-│   │   ├── MobileGame.css (73 lines)
+│   │   ├── MobileGame.css (131 lines)
 │   │   ├── OpponentBar.css (86 lines)
 │   │   └── SettingsSheet.css (236 lines)
 │   ├── index.html (46 lines)
-│   ├── main.js (401 lines)
+│   ├── main.js (205 lines)
 │   ├── MOBILE_INTERFACES.md
+│   ├── MobileRenderer.js (452 lines)
 │   ├── mockup.css (466 lines)
 │   └── mockup.html (152 lines)
 ├── pwa/
@@ -147,54 +158,55 @@ mahjong/
 ├── tests/
 │   ├── aiengine.test.js (224 lines)
 │   ├── game-basic.spec.js (133 lines)
-│   ├── mobile-helpers.js (75 lines)
 │   ├── mobile-tile.test.js (343 lines)
 │   ├── mobile.spec.js (191 lines)
 │   └── touch-handler.spec.js (57 lines)
-├── AIENGINE_REFACTOR_NOTE.md
-├── audioManager.js (92 lines)
+├── audioManager.js (96 lines)
 ├── CLAUDE.md
+├── CODEBASE_AUDIT.md
+├── COMMIT_07C41B9_INVESTIGATION.md
+├── COMPONENT_2_HANDRENDERER_PROMPT.md
+├── COMPONENT_3_PHASERADAPTER_PROMPT.md
+├── COMPONENT_4_BUTTONMANAGER_PROMPT.md
+├── COMPONENT_4A_ANIMATIONS_PROMPT.md
+├── COMPONENT_5_TESTING_PROMPT.md
 ├── constants.js (108 lines)
+├── DEEP_DIVE_FINDINGS.md
+├── DIAGNOSTIC_ISSUES.md
+├── DIALOGMANAGER_DEEP_DIVE.md
 ├── favicon.ico
 ├── favicon.svg
-├── gameObjects.js (511 lines)
-├── gameObjects_hand.js (1271 lines)
-├── gameObjects_player.js (24 lines)
-├── gameObjects_table.js (420 lines)
-├── GameScene.js (380 lines)
-├── homePageTileManager.js (233 lines)
+├── FIXES_SUMMARY.md
+├── HAIKU_TASK_SELECTIONMANAGER_DESIGN.md
+├── HANDRENDERER_API_DESIGN.md
+├── HANDRENDERER_EXTRACTED_LOGIC.md
+├── IMPLEMENTATION_ROADMAP.md
 ├── index.html (156 lines)
 ├── main.js (28 lines)
 ├── MOBILE_RENDERER_INTEGRATION.md
-├── PHASE1_AIENGINE_COMPATIBILITY.md
-├── PHASE1_COMPLETION_SUMMARY.md
-├── PHASE2_HANDOFF.md
-├── PHASE2_IMPLEMENTATION_SUMMARY.md
+├── OLD_SYSTEM_GAME_FLOW.md
+├── OPTION_B_ARCHITECTURAL_VISION.md
+├── OPTION_B_COMPLETE_REFACTOR_PLAN.md
+├── OPTION_B_DESKTOP_RECOVERY_PLAN.md
+├── PHASERADAPTER_CHARLESTON_ANALYSIS.md
+├── PHASERADAPTER_CURRENT_STATE.md
 ├── playwright.config.js (52 lines)
 ├── README.md
-├── REFACTOR.md
-├── REFACTOR_CHECKLIST.md
-├── REFACTOR_INDEX.md
-├── REFACTOR_PHASE1.md
-├── REFACTOR_PHASE1_ANALYSIS.md
-├── REFACTOR_PHASE2.md
-├── REFACTOR_PHASE3.5.md
-├── REFACTOR_PHASE3.md
-├── REFACTOR_PHASE4.md
-├── REFACTOR_SUMMARY.md
-├── settings.js (418 lines)
-├── START_HERE.md
-├── styles.css (793 lines)
+├── RECOVERY_PLAN.md
+├── SELECTIONMANAGER_API_DESIGN.md
+├── settings.js (437 lines)
+├── styles.css (821 lines)
 ├── tileDisplayUtils.js (249 lines)
-└── utils.js (38 lines)
+├── TILESELECTION_LOGIC_EXTRACTED.md
+└── utils.js (42 lines)
 
 ==================================================
 DIRECTORY TREE STATISTICS
 ==================================================
-Total directories: 28
-Total files: 160
+Total directories: 30
+Total files: 170
 Files with line counts: 116
-Total lines of code: 30,662
+Total lines of code: 32,799
 
 Configuration:
   Excluded directories: .archive, .claude, .geminiignore, .git, .github, .gitignore, .idea, .kilocode, .pytest_cache, .ruff_cache, .serena, .vite, .vscode, __pycache__, agents.md, backlog.md, build, claude.md, coverage, dist, docs, eslint.config.js, gemini.md, jules-scratch, knip.json, legacy, logs, node_modules, package-lock.json, package.json, playwright-report, public, test-results, tree.txt, tree_scanner.py, venv, vite.config.js

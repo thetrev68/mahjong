@@ -1,6 +1,8 @@
 import {PLAYER} from "../../constants.js";
 import {Hand} from "./gameObjects_hand.js";
 
+//TODO: This file is to be phased out and removed.
+
 // PRIVATE CONSTANTS
 
 

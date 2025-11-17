@@ -1,7 +1,7 @@
 import {HandRenderer} from "./renderers/HandRenderer.js";
 import {DiscardPile} from "./components/DiscardPile.js";
 import {OpponentBar} from "./components/OpponentBar.js";
-import {AnimationController} from "./animations/AnimationController.js";
+import {AnimationController} from "./animations/AnimationController.js"; // TODO: Lazy-initialize when animations are implemented
 import {PLAYER} from "../constants.js";
 import {TileData} from "../core/models/TileData.js";
 
@@ -35,9 +35,11 @@ export class MobileRenderer {
         this.statusElement = options.statusElement || null;
         this.subscriptions = [];
 
-        this.handRenderer = new HandRenderer(options.handContainer);
+        // Pass null as gameController to prevent HandRenderer from subscribing to events
+        // MobileRenderer handles all event subscriptions and calls handRenderer.render() directly
+        this.handRenderer = new HandRenderer(options.handContainer, null);
         this.discardPile = new DiscardPile(options.discardContainer);
-        this.animationController = new AnimationController();
+        // this.animationController = new AnimationController(); // TODO: Lazy-initialize when tile animations are needed
         this.handRenderer.setSelectionBehavior({
             mode: "multiple",
             maxSelectable: Infinity,
@@ -230,6 +232,17 @@ export class MobileRenderer {
     handleUIPrompt(data) {
         if (!data) {
             return;
+        }
+
+        // If there's a pending prompt, auto-cancel it with fallback to prevent deadlock
+        if (this.pendingPrompt) {
+            console.warn("MobileRenderer: New prompt received while previous prompt pending. Auto-canceling previous prompt.");
+            if (this.pendingPrompt.type === "tile-selection") {
+                this.cancelTileSelectionPrompt();
+            } else if (this.pendingPrompt.callback) {
+                // For choice prompts, invoke callback with null
+                this.pendingPrompt.callback(null);
+            }
         }
 
         this.hidePrompt();

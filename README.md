@@ -1,294 +1,102 @@
-# American Mahjong Game
+# Mahjong
 
-![American Mahjong](https://img.shields.io/badge/Game-American%20Mahjong-green)
-![JavaScript](https://img.shields.io/badge/Language-JavaScript-yellow)
-![Phaser](https://img.shields.io/badge/Engine-Phaser.IO-blue)
-![ES6 Modules](https://img.shields.io/badge/Modules-ES6-brightgreen)
+![Language](https://img.shields.io/badge/language-JavaScript-yellow.svg)
+![Vite](https://img.shields.io/badge/bundler-Vite-blueviolet.svg)
+![Testing](https://img.shields.io/badge/testing-Playwright-green.svg)
 
-A fully-featured American Mahjong game implementation in JavaScript using the Phaser.IO game engine. Play against intelligent AI opponents with authentic mahjong rules and mechanics.
+This repository contains a modern implementation of an American Mahjong game, built with JavaScript and Vite. It features separate implementations for desktop and mobile, a core game logic engine, and a comprehensive test suite using Playwright.
 
-## 🎮 Game Overview
+## 🚀 Getting Started
 
-This American Mahjong game features:
-
-- **4-Player Game**: Human player vs 3 AI opponents
-- **Authentic Rules**: Complete American Mahjong gameplay including Charleston, courtesy passes, and exposures
-- **Smart AI**: Intelligent computer opponents with advanced decision-making algorithms
-- **Training Mode**: Practice with predefined hands and tile counts
-- **Multiple Card Years**: Support for 2017-2020 mahjong card variations
-- **Interactive UI**: Mouse-based controls with drag-and-drop tile management
-
-## 🚀 Quick Start
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 ### Prerequisites
 
-- A modern web browser (Chrome, Firefox, or Edge recommended)
-- [Node.js](https://nodejs.org/) and npm
+You need to have [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/) installed on your machine.
 
-### Running the Game
+### Installation
 
-1. **Install dependencies:**
-   ```bash
+1. Clone the repository:
+   ```sh
+   git clone <repository-url>
+   ```
+2. Navigate to the project directory:
+   ```sh
+   cd mahjong
+   ```
+3. Install the dependencies:
+   ```sh
    npm install
    ```
 
-2. **Start the development server:**
-   ```bash
-   npm run dev
-   ```
+### Running the Development Server
 
-3. **Open your browser and navigate to the URL provided by Vite (usually `http://localhost:5173`).**
+To start the Vite development server, run:
 
-4. **Click "Start Game" to begin playing!**
-
-### Browser Requirements
-
-- **Chrome**: Latest version (recommended)
-- **Firefox**: With ES6 module support enabled
-- **Microsoft Edge**: Latest version
-
-## 🎯 How to Play
-
-### Basic Game Flow
-
-1. **Start**: Click "Start Game" to initialize a new match
-2. **Charleston**: Pass 3 tiles to each opponent (mandatory)
-3. **Courtesy Pass**: Optional tile exchange with opposite player
-4. **Game Loop**: 
-   - Pick tile from wall
-   - Discard or claim opponent's discards
-   - Form sets (Pung/Kong/Quint) through exposures
-   - Declare Mahjong when you have a winning hand
-
-### Player Controls
-
-#### Mouse Interactions
-- **Click**: Select/deselect tiles
-- **Drag & Drop**: Reorder tiles in your hand
-- **Button Clicks**: Perform game actions
-
-#### Game Buttons
-- **Start Game**: Begin a new game
-- **Discard**: Discard selected tile
-- **Exchange Joker**: Swap selected tile for exposed joker
-- **Mahjong!**: Declare victory when you have a winning hand
-- **Sort by suit/rank**: Organize your tiles
-- **Hint**: Get AI suggestions for best moves
-
-### Training Mode
-
-Enable training mode to:
-- Select specific starting hands for practice
-- Choose tile count (1-14 tiles)
-- Skip Charleston for faster gameplay
-- Focus on specific mahjong strategies
-
-## 🏗️ Technical Architecture
-
-### Core Components
-
-```
-main.js                 # Main entry point and Phaser initialization
-gameLogic.js           # Game state management and flow control
-gameAI.js              # AI decision making and strategy
-gameObjects/           # Game object classes
-├── gameObjects.js     # Tile, Wall, Discard classes
-├── gameObjects_table.js # Table and player coordination
-├── gameObjects_hand.js # Hand management and interactions
-└── gameObjects_player.js # Player class
-constants.js           # Game constants and enumerations
-card/                  # Mahjong hand validation system
-├── card.js           # Main validation logic
-├── 2017/, 2018/, 2019/, 2020/, 2025/ # Different card years
+```sh
+npm run dev
 ```
 
-### Key Features
+Open your browser and navigate to the URL provided by Vite (usually `http://localhost:5173`).
 
-#### AI System (`gameAI.js`)
-- **Tile Ranking**: Evaluates tile importance for discarding
-- **Hand Analysis**: Ranks possible winning hands
-- **Strategic Decisions**: 
-  - Charleston pass selection
-  - Courtesy voting
-  - Discard claiming
-  - Joker exchanges
+## 🧪 Testing
 
-#### Hand Validation (`card/`)
-- **Multi-Year Support**: Handles different mahjong card rules
-- **Pattern Matching**: Validates hands against official patterns
-- **Component Analysis**: Breaks down hands into winning components
-- **Rank Calculation**: Scores hands for AI decision making
+This project uses [Playwright](https://playwright.dev/) for end-to-end testing.
 
-#### Game State Management
-- **Turn Order**: Proper clockwise player progression
-- **State Machine**: Handles all game phases seamlessly
-- **Event System**: Manages player interactions and AI responses
-- **Error Handling**: Robust validation and user feedback
+- **Run all tests:**
+  ```sh
+  npm test
+  ```
 
-## 📁 Project Structure
+- **Run tests in UI mode:**
+  ```sh
+  npm run test:ui
+  ```
 
-```
-├── index.html                 # Main game interface
-├── main.js                   # Phaser game initialization
-├── constants.js              # Game constants
-├── assets/                   # Game assets
-│   ├── tiles.png            # Tile sprite sheet
-│   ├── tiles.json           # Tile sprite atlas
-│   └── back.png             # Tile back texture
-├── card/                     # Hand validation system
-│   ├── card.js              # Main validation engine
-│   ├── 2017/                # 2017 mahjong card rules
-│   ├── 2018/                # 2018 mahjong card rules
-│   ├── 2019/                # 2019 mahjong card rules
-│   ├── 2020/                # 2020 mahjong card rules
-│   └── 2025/                # 2025 mahjong card rules
-└── game*.js                  # Core game logic files
-```
+- **Run tests in headed mode:**
+  ```sh
+  npm run test:headed
+  ```
 
-## 🎲 Mahjong Rules Implementation
+- **Run tests specifically for the mobile version:**
+  ```sh
+  npm run test:mobile
+  ```
 
-### American Mahjong Features
+- **Generate a test report:**
+  ```sh
+  npm run test:report
+  ```
 
-- **152 Tiles**: Complete American Mahjong tile set
-- **Charleston**: Mandatory 3-tile passes (can repeat twice)
-- **Courtesy Pass**: Optional tile exchange with opposite player
-- **Exposures**: Form Pung (3), Kong (4), Quint (5) sets
-- **Jokers**: Special tiles that can substitute for any tile
-- **Seats**: Fixed positions (Bottom/Right/Top/Left)
-- **Wall**: 144 tiles in wall, 8 in dead wall
+## 📂 Project Structure
 
-### Hand Categories
+The project is organized into the following main directories:
 
-The game supports multiple hand categories:
-- Singles and Pairs
-- Consecutive Numbers
-- Like Numbers (same number, different suits)
-- 2468 and 13579 patterns
-- Winds and Dragons
-- Lucky 13 combinations
-- Quints (5-of-a-kind)
+-   `assets/`: Contains all game assets like images and audio files.
+-   `core/`: Holds the core game logic, including the AI engine and game controller, shared between platforms.
+-   `desktop/`: Contains the implementation specific to the desktop version of the game.
+-   `mobile/`: Contains the implementation specific to the mobile version of the game.
+-   `pwa/`: Progressive Web App configuration files.
+-   `tests/`: Contains all the end-to-end tests written with Playwright.
+-   `shared/`: Contains code shared across different parts of the application.
 
-### Winning Conditions
+## ✨ Linting and Code Quality
 
-- **Mahjong**: Complete valid 14-tile hand
-- **Concealed vs Exposed**: Different requirements based on hand type
-- **Dead Wall**: Last 8 tiles are not drawn from
+This project uses ESLint for code linting and Knip for detecting unused files and exports.
 
-## 🔧 Development
-
-### Code Organization
-
-- **ES6 Modules**: Modern JavaScript module system
-- **Class-based Architecture**: Clean object-oriented design
-- **Separation of Concerns**: Logic, AI, and presentation layers
-- **Constants**: Centralized game configuration
-
-### Debugging
-
-To control the verbosity of the console logs, you can use the `gdebug` flag in `utils.js`.
-
--   **`gdebug = 0`**: Disables debug messages.
--   **`gdebug = 1`**: Enables debug messages.
-
-The relevant code is in `c:\Repos\mahjong\utils.js`:
-
-```javascript
-export const gdebug = 0; // Set to 0 to disable debug messages
-
-// ...
-
-let debugPrint = function() {};
-
-// ...
-
-if (gdebug) {
-    debugPrint = function(str) {
-        console.log(str);
-    };
-    // ...
-}
-
-export { debugPrint, debugTrace };
-```
-
-You can also use your browser's developer tools to filter console messages.
-
-### Key Classes
-
-- **`GameLogic`**: Main game controller and state manager
-- **`GameAI`**: Computer player decision making
-- **`Table`**: Game table and player coordination
-- **`Hand`**: Player hand management and validation
-- **`Tile`**: Individual tile representation and behavior
-- **`Card`**: Mahjong hand validation engine
-
-### AI Algorithm Details
-
-The AI system uses sophisticated algorithms:
-
-1. **Hand Ranking**: Evaluates all possible winning hands
-2. **Tile Valuation**: Ranks tiles by importance to winning
-3. **Pattern Recognition**: Identifies optimal component formation
-4. **Risk Assessment**: Considers opponent actions and wall state
-5. **Strategic Exchange**: Optimizes joker and exposure decisions
-
-## 🎨 Customization
-
-### Adding New Hand Patterns
-
-1. Create new hand definition files in `card/[year]/`
-2. Update the hand categories and validation logic
-3. Add corresponding tests to ensure accuracy
-
-### Modifying AI Behavior
-
-- Adjust tile ranking weights in `gameAI.js`
-- Modify hand analysis algorithms
-- Customize decision-making thresholds
-
-### Visual Customization
-
-- Replace tile sprites in `assets/`
-- Modify UI styling in `index.html`
-- Adjust game dimensions in `constants.js`
-
-## 📄 License
-
-This American Mahjong implementation is provided as-is for educational and entertainment purposes.
+-   **Run ESLint:**
+    ```sh
+    npm run lint
+    ```
+-   **Run Knip:**
+    ```sh
+    npm run knip
+    ```
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit issues and enhancement requests.
+Contributions are welcome! Please feel free to submit issues and pull requests.
 
-### Development Guidelines
+## 📄 License
 
-- Follow ES6 module patterns
-- Maintain separation between game logic and presentation
-- Add comprehensive comments for complex algorithms
-- Test new features across different mahjong card years
-
-## 📞 Support
-
-For questions or issues:
-- Check browser console for error messages
-- Ensure ES6 module support is enabled
-- Verify local web server is running
-- Test with latest Chrome or Firefox
-
----
-
-## Credits
-
-### Audio
-
-- みんなの創作支援サイトＴスタ (discard_tile.mp3).
-
-### Sprites, AI Logic, and Game Core
-
-- https://github.com/pauls-gh/mahjong
-
----
-
-**American Mahjong v1.00** - Built with Phaser.IO and modern JavaScript
-
-*Enjoy playing authentic American Mahjong against intelligent AI opponents!*
+This project is unlicensed.

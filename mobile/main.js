@@ -3,7 +3,7 @@ import SettingsSheet from "./components/SettingsSheet.js";
 import {MobileRenderer} from "./MobileRenderer.js";
 import {GameController} from "../core/GameController.js";
 import {AIEngine} from "../core/AIEngine.js";
-import {Card} from "../card/card.js";
+import {Card} from "../core/card/card.js";
 import "./styles/base.css";
 import "./styles/SettingsSheet.css";
 import "./styles/HandRenderer.css";
@@ -142,7 +142,7 @@ async function initializeGame() {
     }
 
     // Hide loading message
-    mobileRenderer.updateStatus("Ready to play! Click NEW GAME to start.");
+    mobileRenderer?.updateStatus("Ready to play! Click NEW GAME to start.");
 
     console.log("Mobile game initialized successfully");
 }

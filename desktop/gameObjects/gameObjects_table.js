@@ -8,6 +8,8 @@ import {
 import {Wall, Discards} from "./gameObjects.js";
 import {Player} from "./gameObjects_player.js";
 
+//TODO: This file is to be phased out and removed.
+
 // PRIVATE CONSTANTS
 
 

@@ -15,7 +15,7 @@
  */
 
 import {TileData} from "../../core/models/TileData.js";
-import {PLAYER, SUIT} from "../../constants.js";
+import {PLAYER, SUIT, getTotalTileCount} from "../../constants.js";
 import {printMessage, printInfo} from "../../utils.js";
 import {TileManager} from "../managers/TileManager.js";
 import {ButtonManager} from "../managers/ButtonManager.js";
@@ -121,7 +121,7 @@ export class PhaserAdapter {
         if (!this.scene.updateWallTileCounter) {
             return;
         }
-        const totalTileCount = this.gameController.settings.useBlankTiles ? 160 : 152;
+        const totalTileCount = getTotalTileCount();
         const remainingInWall = totalTileCount - this.tilesRemovedFromWall;
         this.scene.updateWallTileCounter(Math.max(remainingInWall, 0));
     }
