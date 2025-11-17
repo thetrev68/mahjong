@@ -235,15 +235,20 @@ export class GameController extends EventEmitter {
         const dealtEvent = GameEvents.createTilesDealtEvent(dealSequence);
         this.emit("TILES_DEALT", dealtEvent);
 
-        // Emit updated hands for all players so UI layers can sync immediately
-        this.players.forEach((player, index) => {
-            const handEvent = GameEvents.createHandUpdatedEvent(index, player.hand.toJSON());
-            this.emit("HAND_UPDATED", handEvent);
-        });
+        // DO NOT emit HAND_UPDATED here - it would show all tiles instantly
+        // Wait for dealing animation to complete, then emit HAND_UPDATED
+        // PhaserAdapter will emit DEALING_COMPLETE when animation finishes
 
         // Wait for dealing to complete (PhaserAdapter will trigger this via callback)
         return new Promise(resolve => {
-            this.once("DEALING_COMPLETE", resolve);
+            this.once("DEALING_COMPLETE", () => {
+                // NOW emit HAND_UPDATED after dealing animation completes
+                this.players.forEach((player, index) => {
+                    const handEvent = GameEvents.createHandUpdatedEvent(index, player.hand.toJSON());
+                    this.emit("HAND_UPDATED", handEvent);
+                });
+                resolve();
+            });
         });
     }
 
