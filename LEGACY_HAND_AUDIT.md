@@ -112,18 +112,29 @@
 - HandData is authoritative source of truth for rendering in ALL game states
 - Event-driven architecture now complete for dealing sequence
 
-### Phase 3: Move Sorting to HandData
+### Phase 3: ✅ Move Sorting to HandData (COMPLETED)
 **Target:** `sortSuitHidden()`, `sortRankHidden()`
 
 **Approach:**
-1. Add sorting methods to HandData:
-   - `HandData.sortBySuit()`
-   - `HandData.sortByRank()`
-2. GameController emits HAND_UPDATED after sort
-3. HandRenderer syncs and renders
+1. ✅ HandData already has `sortBySuit()` and `sortByRank()` methods
+2. ✅ HandRenderer auto-sorts Player 0's hand before rendering in `syncAndRender()`
+3. ✅ GameController's `onSortHandRequest()` now sorts HandData and emits HAND_UPDATED
+4. ✅ Removed legacy `SORT_HAND_REQUESTED` event system
+5. ✅ Deleted `onSortHandRequested()` method from PhaserAdapter
 
-**Files to update:**
-- `PhaserAdapter.js:1107-1110, 1160-1163` - Call GameController sort methods instead
+**Files updated:**
+- ✅ [HandData.js:122-141](core/models/HandData.js#L122-L141) - sortBySuit() and sortByRank() methods (already existed)
+- ✅ [HandRenderer.js:59-63](desktop/renderers/HandRenderer.js#L59-L63) - Auto-sort Player 0 in syncAndRender()
+- ✅ [HandRenderer.js:119-123](mobile/renderers/HandRenderer.js#L119-L123) - Auto-sort in mobile render()
+- ✅ [GameController.js:1096-1112](core/GameController.js#L1096-L1112) - Updated onSortHandRequest() to use HandData sorting
+- ✅ [PhaserAdapter.js:124](desktop/adapters/PhaserAdapter.js#L124) - Removed SORT_HAND_REQUESTED event listener
+- ✅ [PhaserAdapter.js:1054-1071](desktop/adapters/PhaserAdapter.js) - Deleted onSortHandRequested() method (~18 lines removed)
+
+**Result:**
+- Player 0's hand auto-sorts by suit after ANY hand change (deal, draw, claim, swap)
+- Manual sort buttons (Sort by Suit/Rank) work via HandData methods + HAND_UPDATED event
+- No more legacy `SORT_HAND_REQUESTED` event or direct manipulation of Phaser hand objects
+- Sorting is now presentation logic in HandRenderer, not game logic
 
 ### Phase 4: Replace dupHand() with HandData Clone
 **Target:** HintAnimationManager
@@ -157,10 +168,11 @@
 ## Estimated Line Reduction
 - `gameObjects_hand.js`: -1500 lines (Phase 6)
 - `gameObjects_player.js`: -35 lines (Phase 6)
-- `PhaserAdapter.js`: -120 lines (Phase 2: direct hand manipulation removed)
+- `PhaserAdapter.js`: -138 lines (Phase 2: -120 lines, Phase 3: -18 lines)
 - `TileManager.js`: -20 lines (Phase 6: deprecated methods removed)
 - **Phase 2 Complete: ~120 lines removed**
-- **Total Estimated: ~1675 lines to be removed by Phase 6**
+- **Phase 3 Complete: ~18 lines removed**
+- **Total Estimated: ~1693 lines to be removed by Phase 6**
 
 ---
 
@@ -169,9 +181,9 @@
 **Low Risk:**
 - Phase 1 ✅ (completed, working)
 - Phase 2 ✅ (completed, tested - all desktop tests passing)
+- Phase 3 ✅ (completed, tested - auto-sort working)
 
 **Medium Risk:**
-- Phase 3: Sorting (need to test UI responsiveness)
 - Phase 4: HintAnimationManager (need to verify AI still works)
 
 **High Risk:**
@@ -184,8 +196,9 @@
 1. ~~**Immediate:** Test current Phase 1 implementation (syncAndRender)~~ ✅ Complete
 2. ~~**Next:** Implement Phase 2 (remove direct hand manipulation in PhaserAdapter)~~ ✅ Complete
 3. ~~**Follow-up:** Address joker swap GameController integration~~ ✅ Complete
-4. **Current:** Implement Phase 3 (move sorting to HandData)
-5. **Future:** Gradually work through Phases 4-6 with testing between each
+4. ~~**Current:** Implement Phase 3 (move sorting to HandData)~~ ✅ Complete
+5. **Next:** Implement Phase 4 (replace dupHand() with HandData.clone() in HintAnimationManager)
+6. **Future:** Gradually work through Phases 5-6 with testing between each
 
 ## Implementation Notes
 
@@ -218,4 +231,25 @@
   - Removed ~70 lines of direct hand manipulation
   - Now only handles logging, rendering driven by HAND_UPDATED
 - Button wiring complete: "Exchange Joker" button → `GameController.onExchangeJoker()`
+
+### Phase 3 Completion (2025-11-17)
+
+**What Changed:**
+- Auto-sorting now happens automatically for Player 0 whenever hand changes
+- Sorting logic moved from GameController/PhaserAdapter to HandRenderer (presentation layer)
+- HandRenderer calls `handData.sortBySuit()` before rendering Player 0's hand
+- Manual sort buttons now work via `GameController.onSortHandRequest()` → sorts HandData → emits HAND_UPDATED
+- Removed legacy `SORT_HAND_REQUESTED` event system entirely
+
+**Architecture Improvement:**
+- Sorting is now presentation logic (HandRenderer), not game logic (GameController)
+- Keeps GameController lean - no sorting methods added
+- Both desktop and mobile platforms auto-sort consistently
+- No more direct manipulation of Phaser hand objects for sorting
+
+**Code Locations:**
+- [HandRenderer.js:59-63](desktop/renderers/HandRenderer.js#L59-L63) - Desktop auto-sort
+- [HandRenderer.js:119-123](mobile/renderers/HandRenderer.js#L119-L123) - Mobile auto-sort
+- [GameController.js:1096-1112](core/GameController.js#L1096-L1112) - Manual sort handler
+- [PhaserAdapter.js:124](desktop/adapters/PhaserAdapter.js#L124) - Removed event listener (~18 lines)
 

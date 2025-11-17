@@ -116,6 +116,12 @@ export class HandRenderer {
             return;
         }
 
+        // Auto-sort hand by suit before rendering
+        // This ensures consistent sorting after any hand change (draw, claim, swap, etc.)
+        if (handData.sortBySuit) {
+            handData.sortBySuit();
+        }
+
         this.currentHandData = handData;
         this.renderExposures(Array.isArray(handData.exposures) ? handData.exposures : []);
         this.clearTiles();

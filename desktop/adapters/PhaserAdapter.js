@@ -121,7 +121,6 @@ export class PhaserAdapter {
         // UI events
         gc.on("MESSAGE", (data) => this.onMessage(data));
         gc.on("UI_PROMPT", (data) => this.onUIPrompt(data));
-        gc.on("SORT_HAND_REQUESTED", (data) => this.onSortHandRequested(data));
     }
 
     /**
@@ -1048,25 +1047,4 @@ export class PhaserAdapter {
         }
     }
 
-    /**
-     * Handle hand sort requests (suit/rank)
-     */
-    onSortHandRequested(data = {}) {
-        const sortType = data.sortType || "suit";
-        const playerIndex = typeof data.player === "number" ? data.player : PLAYER.BOTTOM;
-        const player = this.table.players[playerIndex];
-        if (!player || !player.hand) {
-            return;
-        }
-
-        if (sortType === "rank" && player.hand.sortRankHidden) {
-            player.hand.sortRankHidden();
-        } else if (player.hand.sortSuitHidden) {
-            player.hand.sortSuitHidden();
-        }
-
-        this.handRenderer.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
-        const playerName = this.getPlayerName(playerIndex);
-        printMessage(`${playerName} sorted hand by ${sortType}`);
-    }
 }

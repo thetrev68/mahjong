@@ -1090,11 +1090,25 @@ export class GameController extends EventEmitter {
 
     /**
      * Handle hand sort requests coming from UI
+     * Sorts Player 0's HandData and emits HAND_UPDATED to trigger rendering
      * @param {string} sortType - "suit" or "rank"
      */
     onSortHandRequest(sortType = "suit") {
-        const sortEvent = GameEvents.createSortHandEvent(PLAYER.BOTTOM, sortType);
-        this.emit("SORT_HAND_REQUESTED", sortEvent);
+        const player0 = this.players[PLAYER.BOTTOM];
+        if (!player0 || !player0.hand) {
+            return;
+        }
+
+        // Sort the hand data
+        if (sortType === "rank") {
+            player0.hand.sortByRank();
+        } else {
+            player0.hand.sortBySuit();
+        }
+
+        // Emit HAND_UPDATED to trigger rendering
+        const handEvent = GameEvents.createHandUpdatedEvent(PLAYER.BOTTOM, player0.hand.toJSON());
+        this.emit("HAND_UPDATED", handEvent);
     }
 
     /**

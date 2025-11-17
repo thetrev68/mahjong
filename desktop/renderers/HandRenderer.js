@@ -56,6 +56,12 @@ export class HandRenderer {
         const player = this.table.players[playerIndex];
         const hand = player.hand;
 
+        // Auto-sort Player 0's hand by suit before rendering
+        // This ensures consistent sorting after any hand change (draw, claim, swap, etc.)
+        if (playerIndex === PLAYER.BOTTOM && handData.sortBySuit) {
+            handData.sortBySuit();
+        }
+
         // Sync hidden tiles: rebuild Phaser tileArray from HandData
         hand.hiddenTileSet.tileArray = handData.tiles.map(tileData => {
             // Get Phaser sprite by tile index (stable identifier)
