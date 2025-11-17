@@ -200,6 +200,10 @@ class GameScene extends Phaser.Scene {
                         this.homePageTileManager.cleanup();
                         this.homePageTileManager = null; // Release reference
 
+                        // Phase 6 FIX: Reinitialize TileManager after wall receives Phaser sprites
+                        // This registers all 152 tile sprites so HandRenderer can find them
+                        this.adapter.tileManager.initializeFromWall();
+
                         // Phase 2B: GameController now handles complete game flow
                         await this.gameController.startGame();
                     };

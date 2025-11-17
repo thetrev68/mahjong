@@ -285,7 +285,11 @@ export class PhaserAdapter {
             const tilePayloads = Array.isArray(step.tiles) ? step.tiles : [];
             const dealtTiles = [];
 
-            tilePayloads.forEach(tileJSON => {
+            // Get current hand size BEFORE dealing this batch (for position calculation)
+            const playerHand = this.handRenderer.playerHands[playerIndex];
+            const currentHandSize = playerHand.hiddenTiles.length;
+
+            tilePayloads.forEach((tileJSON, tileIndexInBatch) => {
                 const tileData = TileData.fromJSON(tileJSON);
                 const phaserTile = this.tileManager.getOrCreateTile(tileData);
 
@@ -296,42 +300,110 @@ export class PhaserAdapter {
 
                 this.tileManager.removeTileFromWall(tileData.index);
 
-                phaserTile.sprite.setPosition(50, 50);
-                phaserTile.sprite.setAlpha(1);
+                // Position tile at wall (top-left)
+                const wallX = 50;
+                const wallY = 50;
+                phaserTile.x = wallX;
+                phaserTile.y = wallY;
+                phaserTile.sprite.setAlpha(0);  // Start invisible
                 if (phaserTile.spriteBack) {
-                    phaserTile.spriteBack.setAlpha(1);
+                    phaserTile.spriteBack.setAlpha(0);
                 }
                 phaserTile.showTile(true, playerIndex === PLAYER.BOTTOM);
 
-                // HandData already has the tiles (added by GameController.buildInitialDealSequence)
-                // We'll sync from HandData after this step completes
+                // Calculate target position in hand based on CURRENT hand size (before adding new tiles)
+                const targetIndex = currentHandSize + tileIndexInBatch;
+                const targetPos = this.handRenderer.calculateTilePosition(playerIndex, targetIndex);
+
+                // Animate tile from wall to hand
+                const tween = phaserTile.animate(targetPos.x, targetPos.y, PLAYER_LAYOUT[playerIndex].angle, 300);
+
+                // Fade in during animation
+                this.scene.tweens.add({
+                    targets: [phaserTile.sprite, phaserTile.spriteBack],
+                    alpha: 1,
+                    duration: 300
+                });
+
+                // Play sound when tile lands
+                if (tween && this.scene.audioManager) {
+                    tween.once("complete", () => {
+                        this.scene.audioManager.playSFX("rack_tile");
+                    });
+                }
+
                 if (playerIndex === PLAYER.BOTTOM) {
                     this.setPendingHumanGlowTile(phaserTile);
                 }
                 dealtTiles.push(phaserTile);
             });
 
-            // Sync and render from HandData for this player (progressive dealing)
-            const playerHandData = this.gameController.players[playerIndex].hand.toJSON();
-            this.handRenderer.syncAndRender(playerIndex, playerHandData);
+            // Wait for last tile animation to complete, then recenter and continue
+            const lastTile = dealtTiles[dealtTiles.length - 1];
+
+            const recenterAndContinue = () => {
+                // Update HandRenderer's internal tile arrays after animations complete
+                playerHand.hiddenTiles = this.gameController.players[playerIndex].hand.tiles.map(tileData => {
+                    return this.tileManager.getTileSprite(tileData.index);
+                }).filter(tile => tile !== undefined);
+
+                // Recenter all tiles for the new hand size (instant, no animation)
+                this.recenterPlayerHand(playerIndex);
+
+                // Continue to next dealing group
+                currentStepIndex++;
+                this.scene.time.delayedCall(150, dealNextGroup);
+            };
 
             this.tilesRemovedFromWall += tilePayloads.length;
             this.updateWallTileCounter();
 
-            const lastTile = dealtTiles[dealtTiles.length - 1];
-
             if (lastTile && lastTile.tween) {
-                lastTile.tween.once("complete", () => {
-                    currentStepIndex++;
-                    this.scene.time.delayedCall(150, dealNextGroup);
-                });
+                lastTile.tween.once("complete", recenterAndContinue);
             } else {
-                currentStepIndex++;
-                this.scene.time.delayedCall(150, dealNextGroup);
+                // Fallback if no tween (shouldn't happen)
+                recenterAndContinue();
             }
         };
 
         dealNextGroup();
+    }
+
+    /**
+     * Recenter all tiles in a player's hand based on current hand size
+     * Used during dealing to progressively center tiles as hand grows
+     * @param {number} playerIndex
+     */
+    recenterPlayerHand(playerIndex) {
+        const playerInfo = PLAYER_LAYOUT[playerIndex];
+        const playerHand = this.handRenderer.playerHands[playerIndex];
+        const hiddenTiles = playerHand.hiddenTiles;
+
+        if (hiddenTiles.length === 0) {
+            return;
+        }
+
+        // Calculate positions using HandRenderer's logic
+        const pos = this.handRenderer.calculateHiddenTilePositions(playerInfo, hiddenTiles.length);
+
+        // Reposition each tile instantly (no animation) maintaining proper rotation
+        hiddenTiles.forEach((tile, index) => {
+            if (playerInfo.id === PLAYER.BOTTOM || playerInfo.id === PLAYER.TOP) {
+                // Horizontal layout
+                const x = pos.startX + index * (pos.tileWidth + pos.gap);
+                const y = pos.startY;
+                tile.x = x;
+                tile.y = y;
+                tile.angle = playerInfo.angle;
+            } else {
+                // Vertical layout
+                const x = pos.startX;
+                const y = pos.startY + index * (pos.tileWidth + pos.gap);
+                tile.x = x;
+                tile.y = y;
+                tile.angle = playerInfo.angle;
+            }
+        });
     }
 
     /**

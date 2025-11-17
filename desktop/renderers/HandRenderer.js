@@ -303,19 +303,16 @@ export class HandRenderer {
             const x = startX + index * (tileWidth + gap);
             const y = startY;
 
-            tile.sprite.x = x;
-            tile.sprite.y = y;
-            tile.sprite.setScale(tileScale);
-            tile.sprite.setAngle(playerInfo.angle);
+            // Position both sprite and spriteBack
+            tile.x = x;
+            tile.y = y;
+            tile.scale = tileScale;
+            tile.angle = playerInfo.angle;
             tile.sprite.setDepth(10 + index);
-            tile.sprite.setVisible(true);
+            tile.spriteBack.setDepth(10 + index);
 
-            // Set frame (face-up or face-down)
-            if (exposed) {
-                tile.sprite.setFrame(tile.frame);
-            } else {
-                tile.sprite.setFrame("back");
-            }
+            // Show tile face-up or face-down using Tile's showTile method
+            tile.showTile(true, exposed);
         });
     }
 
@@ -329,19 +326,16 @@ export class HandRenderer {
             const x = startX;
             const y = startY + index * (tileWidth + gap);
 
-            tile.sprite.x = x;
-            tile.sprite.y = y;
-            tile.sprite.setScale(tileScale);
-            tile.sprite.setAngle(playerInfo.angle);
+            // Position both sprite and spriteBack
+            tile.x = x;
+            tile.y = y;
+            tile.scale = tileScale;
+            tile.angle = playerInfo.angle;
             tile.sprite.setDepth(10 + index);
-            tile.sprite.setVisible(true);
+            tile.spriteBack.setDepth(10 + index);
 
-            // Set frame (face-up or face-down)
-            if (exposed) {
-                tile.sprite.setFrame(tile.frame);
-            } else {
-                tile.sprite.setFrame("back");
-            }
+            // Show tile face-up or face-down using Tile's showTile method
+            tile.showTile(true, exposed);
         });
     }
 
@@ -398,40 +392,48 @@ export class HandRenderer {
     calculateTilePosition(playerIndex, tileIndex) {
         const playerInfo = PLAYER_LAYOUT[playerIndex];
         const hiddenTiles = this.playerHands[playerIndex].hiddenTiles;
+        const hiddenCount = hiddenTiles.length;
+
+        // Use the same logic as calculateHiddenTilePositions() for consistency
+        const rackPos = this.getHandRackPosition(playerInfo);
         const tileScale = this.calculateTileScale(playerInfo);
         const tileWidth = SPRITE_WIDTH * tileScale;
+        const tileHeight = SPRITE_HEIGHT * tileScale;
         const gap = TILE_GAP;
 
-        const handWidth = hiddenTiles.length * (tileWidth + gap) - gap;
+        const totalHiddenWidth = hiddenCount * (tileWidth + gap) - gap;
 
-        let startX = 0;
-        let startY = 0;
+        let startX, startY;
 
         switch (playerInfo.id) {
             case PLAYER.BOTTOM:
-                startX = (WINDOW_WIDTH / 2) - (handWidth / 2) + (tileWidth / 2);
+                startX = rackPos.x + (rackPos.width / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
+                startY = rackPos.y + rackPos.height - (tileHeight / 2) - 5;
                 return {
                     x: startX + (tileIndex * (tileWidth + gap)),
-                    y: playerInfo.y
+                    y: startY
                 };
             case PLAYER.TOP:
-                startX = (WINDOW_WIDTH / 2) + (handWidth / 2) - (tileWidth / 2);
+                startX = rackPos.x + (rackPos.width / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
+                startY = rackPos.y + (tileHeight / 2) + 5;
                 return {
-                    x: startX - (tileIndex * (tileWidth + gap)),
-                    y: playerInfo.y
+                    x: startX + (tileIndex * (tileWidth + gap)),
+                    y: startY
                 };
             case PLAYER.LEFT:
-                startY = (WINDOW_HEIGHT / 2) - (handWidth / 2) + (tileWidth / 2);
+                startX = rackPos.x + (tileHeight / 2) + 5;
+                startY = rackPos.y + (rackPos.height / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
                 return {
-                    x: playerInfo.x,
+                    x: startX,
                     y: startY + (tileIndex * (tileWidth + gap))
                 };
             case PLAYER.RIGHT:
             default:
-                startY = (WINDOW_HEIGHT / 2) + (handWidth / 2) - (tileWidth / 2);
+                startX = rackPos.x + rackPos.width - (tileHeight / 2) - 5;
+                startY = rackPos.y + (rackPos.height / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
                 return {
-                    x: playerInfo.x,
-                    y: startY - (tileIndex * (tileWidth + gap))
+                    x: startX,
+                    y: startY + (tileIndex * (tileWidth + gap))
                 };
         }
     }
