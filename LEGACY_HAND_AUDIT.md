@@ -71,8 +71,7 @@
 3. TileManager should NOT manipulate hands (violates separation)
 
 **Files updated:**
-- ✅ `PhaserAdapter.js:387` (dealing sequence) - Removed `insertHidden()`, rely on HAND_UPDATED event
-- ✅ `PhaserAdapter.js:309` (onTilesDealt) - Removed `insertTileIntoHand()` call
+- ✅ `PhaserAdapter.js:387, 309` (dealing sequences) - **RESOLVED in Phase 2.5**
 - ✅ `PhaserAdapter.js:443` (onTileDrawn) - Removed `insertTileIntoHand()`, rely on HAND_UPDATED
 - ✅ `PhaserAdapter.js:599-607` (onTilesExposed) - Removed `removeHidden()` and `insertExposed()`, rely on HAND_UPDATED
 - ✅ `PhaserAdapter.js:514` (onTileDiscarded) - Removed `removeTileFromHand()`, rely on HAND_UPDATED
@@ -89,6 +88,29 @@
 - ✅ GameController event emission working correctly
 - ✅ No console errors in desktop gameplay
 - ✅ Game state transitions functioning properly
+- ✅ Phase 2.5 completed dealing animation blocker
+
+### Phase 2.5: ✅ Eliminate Legacy Dealing Animation (COMPLETED)
+**Target:** Replace legacy dealing animation system with HandData-driven rendering
+
+**Problem:**
+- `onTilesDealt()` calls `handRenderer.showHand()` which requires legacy Hand objects to have tiles
+- Previously called `insertTileIntoHand()` during dealing, breaking event-driven architecture
+- `onHandUpdated()` was skipping DEAL state, so HAND_UPDATED events didn't render during dealing
+
+**Solution:**
+1. ✅ Removed the DEAL state skip in `onHandUpdated()` (line 643-646)
+2. ✅ GameController already emits HAND_UPDATED after TILES_DEALT (GameController.js:240-241)
+3. ✅ syncAndRender() now handles ALL states including DEAL
+
+**Files updated:**
+- ✅ `PhaserAdapter.js:643-646` - Removed isDealState skip, always call syncAndRender()
+- ✅ `GameController.js:240-241` - Already emits HAND_UPDATED for all players after dealing
+
+**Result:**
+- No more direct hand manipulation during dealing
+- HandData is authoritative source of truth for rendering in ALL game states
+- Event-driven architecture now complete for dealing sequence
 
 ### Phase 3: Move Sorting to HandData
 **Target:** `sortSuitHidden()`, `sortRankHidden()`

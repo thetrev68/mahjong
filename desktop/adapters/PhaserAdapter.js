@@ -640,21 +640,15 @@ export class PhaserAdapter {
 
         console.log(`Hand updated for player ${playerIndex}: ${handData.tiles.length} hidden, ${handData.exposures.length} exposed`);
 
-        // Skip sync during DEAL state - the TILES_DEALT animation handles it
-        // Only sync for Charleston, discards, and other non-animated updates
-        const currentState = this.gameController?.state;
-        const isDealState = currentState === STATE.DEAL;
+        // Phase 2.5: Always sync, including during DEAL state
+        // HandData is the authoritative source of truth for ALL game states
+        // HandRenderer.syncAndRender() will handle the rendering
+        this.handRenderer.syncAndRender(playerIndex, handData);
 
-        if (!isDealState) {
-            // Delegate to HandRenderer: sync Phaser tiles with HandData and render
-            // This is the authoritative update - HandData is source of truth
-            this.handRenderer.syncAndRender(playerIndex, handData);
-
-            // After sync, if selection is enabled for human player, re-attach click handlers
-            // This is necessary because syncAndRender rebuilds the tile array with new sprites
-            if (playerIndex === PLAYER.BOTTOM && this.selectionManager) {
-                this.selectionManager.refreshHandlers();
-            }
+        // After sync, if selection is enabled for human player, re-attach click handlers
+        // This is necessary because syncAndRender rebuilds the tile array with new sprites
+        if (playerIndex === PLAYER.BOTTOM && this.selectionManager) {
+            this.selectionManager.refreshHandlers();
         }
 
         // Clear invalid selections for human player
