@@ -5,7 +5,7 @@
     "settings.js",
     "mobile/index.html",
     "mobile/main.js",
-    "card/**/card*.js"
+    "core/card/**/card*.js"
   ],
   "project": [
     "**/*.js",

@@ -14,7 +14,9 @@
       "WebFetch(domain:code.claude.com)",
       "Bash(npm run knip:*)",
       "Bash(old_gameObjects_hand.txt)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run test:report:*)"
     ],
     "deny": [],
     "ask": []
