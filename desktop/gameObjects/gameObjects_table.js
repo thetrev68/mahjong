@@ -1,66 +1,13 @@
 import {printMessage} from "../../utils.js";
 import {
     PLAYER, PLAYER_OPTION, SUIT,
-    WINDOW_WIDTH, WINDOW_HEIGHT,
-    SPRITE_HEIGHT, SPRITE_SCALE,
     getTotalTileCount
 } from "../../constants.js";
 import {Wall, Discards} from "./gameObjects.js";
-import {Player} from "./gameObjects_player.js";
 
-//TODO: This file is to be phased out and removed.
+//TODO: Phase 6 - Legacy Player/Hand classes deleted. This file only maintains Wall/Discards for now.
 
-// PRIVATE CONSTANTS
-
-
-// PRIVATE GLOBALS
-
-const gPlayerInfo = [
-    // Player 0  (human, bottom of screen)
-    {
-        id: PLAYER.BOTTOM,
-        x: 200,
-        y: 600,
-        angle: 0,
-        rectX: 0,
-        rectY: 600 - (SPRITE_HEIGHT / 2),
-        rectWidth: WINDOW_WIDTH,
-        rectHeight: SPRITE_HEIGHT
-    },
-    // Player 1  (computer, right)
-    {
-        id: PLAYER.RIGHT,
-        x: 1000,
-        y: 520,
-        angle: 270,
-        rectX: 1000 - (SPRITE_HEIGHT * SPRITE_SCALE / 2),
-        rectY: 0,
-        rectWidth: SPRITE_HEIGHT * SPRITE_SCALE,
-        rectHeight: WINDOW_HEIGHT
-    },
-    // Player 2  (computer, top)
-    {
-        id: PLAYER.TOP,
-        x: 750,
-        y: 50,
-        angle: 180,
-        rectX: 0,
-        rectY: 50 - (SPRITE_HEIGHT * SPRITE_SCALE / 2),
-        rectWidth: WINDOW_WIDTH,
-        rectHeight: SPRITE_HEIGHT * SPRITE_SCALE
-    },
-    // Player 3  (computer, left)
-    {
-        id: PLAYER.LEFT,
-        x: 50,
-        y: 50,
-        angle: 90,
-        rectX: 50 - (SPRITE_HEIGHT * SPRITE_SCALE / 2),
-        rectY: 0,
-        rectWidth: SPRITE_HEIGHT * SPRITE_SCALE,
-        rectHeight: WINDOW_HEIGHT
-    }
-];
+// Phase 6: gPlayerInfo moved to desktop/config/playerLayout.js (PLAYER_LAYOUT)
 
 
 export class Table {
@@ -75,12 +22,8 @@ export class Table {
             this.boxes[i] = null;
         }
 
-        // Create players
-        this.players = [];
-        for (let i = 0; i < 4; i++) {
-            this.players[i] = new Player(scene, gPlayerInfo[i], this);
-        }
-
+        // Phase 6: Player objects removed - hand rendering now in HandRenderer
+        // Boxes kept for visual turn indicator
         this.player02CourtesyVote = 0;
         this.player13CourtesyVote = 0;
     }
@@ -99,10 +42,8 @@ export class Table {
     }
 
     reset() {
-        // Reset table - remove tiles from players hands/ discard pile and put back into wall
-        for (let i = 0; i < 4; i++) {
-            this.players[i].hand.reset(this.wall);
-        }
+        // Phase 6: Hand reset now handled by GameController (HandData)
+        // Just reset discards back to wall
 
         while (this.discards.tileArray.length) {
             this.wall.insert(this.discards.tileArray.pop());

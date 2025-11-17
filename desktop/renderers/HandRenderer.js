@@ -1,51 +1,54 @@
 import { PLAYER, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_SCALE, TILE_GAP, WINDOW_WIDTH, WINDOW_HEIGHT } from "../../constants.js";
 import { debugPrint } from "../../utils.js";
+import { PLAYER_LAYOUT } from "../config/playerLayout.js";
 
 /**
- * HandRenderer - Renders player hands for all 4 positions
+ * HandRenderer - Pure rendering layer for player hands
  *
- * Separates rendering concerns from game logic by providing a clean API
- * for positioning and displaying tiles across different player perspectives.
+ * ARCHITECTURE:
+ * - Owns Phaser sprite arrays for rendering (view state)
+ * - Receives HandData from GameController (game state)
+ * - Uses TileManager for sprite lookup (sprite registry)
+ * - NO dependencies on legacy Player/Hand/Table objects
  *
- * Handles tile positioning, rotation, and layout for:
- * - PLAYER.BOTTOM (human): Horizontal row at bottom, face-up, full size
- * - PLAYER.RIGHT (AI): Vertical column on right, face-down, scaled 0.75
- * - PLAYER.TOP (AI): Horizontal row at top, face-down, scaled 0.75
- * - PLAYER.LEFT (AI): Vertical column on left, face-down, scaled 0.75
+ * Responsibilities:
+ * - Convert HandData → Phaser sprites
+ * - Position tiles based on player layout
+ * - Handle rotation and scaling per player
+ * - Manage rack graphics
  *
  * Does NOT handle:
- * - Tile selection (handled by SelectionManager)
- * - Click events (handled by Hand/SelectionManager)
- * - Game logic (handled by GameLogic)
- * - Tile creation/destruction (handled by Hand/Wall)
+ * - Game logic (GameController)
+ * - Tile selection (SelectionManager)
+ * - Sprite creation (TileManager)
  */
 export class HandRenderer {
     /**
      * Create a new HandRenderer
-     * @param {Phaser.Scene} scene - The Phaser scene containing the game
-     * @param {Table} table - The game table object containing all players
-     * @param {TileManager} tileManager - The tile manager for sprite lookup
+     * @param {Phaser.Scene} scene - The Phaser scene
+     * @param {TileManager} tileManager - Sprite registry
      */
-    constructor(scene, table, tileManager) {
+    constructor(scene, tileManager) {
         this.scene = scene;
-        this.table = table;
         this.tileManager = tileManager;
+
+        // HandRenderer owns rendering state for each player
+        this.playerHands = [
+            { hiddenTiles: [], exposedSets: [], rackGraphics: null },
+            { hiddenTiles: [], exposedSets: [], rackGraphics: null },
+            { hiddenTiles: [], exposedSets: [], rackGraphics: null },
+            { hiddenTiles: [], exposedSets: [], rackGraphics: null }
+        ];
     }
 
     /**
      * Sync Phaser tiles with HandData model, then render
      *
-     * This is the authoritative method for updating a player's hand after
-     * data changes (Charleston, draw, discard, etc.). It rebuilds the
-     * Phaser tile array from the HandData model to ensure visual consistency.
+     * This is the authoritative method for updating a player's hand.
+     * Converts HandData (game state) into Phaser sprites (view state).
      *
      * @param {number} playerIndex - Player position (0=BOTTOM, 1=RIGHT, 2=TOP, 3=LEFT)
      * @param {HandData} handData - Hand data model from GameController
-     * @returns {undefined}
-     *
-     * @example
-     * // Update hand after Charleston pass
-     * handRenderer.syncAndRender(PLAYER.BOTTOM, handData);
      */
     syncAndRender(playerIndex, handData) {
         if (playerIndex < 0 || playerIndex > 3) {
@@ -53,18 +56,15 @@ export class HandRenderer {
             return;
         }
 
-        const player = this.table.players[playerIndex];
-        const hand = player.hand;
-
         // Auto-sort Player 0's hand by suit before rendering
-        // This ensures consistent sorting after any hand change (draw, claim, swap, etc.)
         if (playerIndex === PLAYER.BOTTOM && handData.sortBySuit) {
             handData.sortBySuit();
         }
 
-        // Sync hidden tiles: rebuild Phaser tileArray from HandData
-        hand.hiddenTileSet.tileArray = handData.tiles.map(tileData => {
-            // Get Phaser sprite by tile index (stable identifier)
+        const playerHand = this.playerHands[playerIndex];
+
+        // Convert HandData indices to Phaser sprites
+        playerHand.hiddenTiles = handData.tiles.map(tileData => {
             const phaserTile = this.tileManager.getTileSprite(tileData.index);
             if (!phaserTile) {
                 console.error(`HandRenderer.syncAndRender: Could not find Phaser tile for index ${tileData.index}`);
@@ -72,102 +72,78 @@ export class HandRenderer {
             return phaserTile;
         }).filter(tile => tile !== undefined);
 
-        // Sync exposed tiles (if HandData includes exposures)
-        // For now, exposures are managed separately - this is a future enhancement
+        // Sync exposed tiles from HandData.exposures
+        playerHand.exposedSets = handData.exposures.map(exposure => {
+            return exposure.tiles.map(tileData => {
+                const phaserTile = this.tileManager.getTileSprite(tileData.index);
+                if (!phaserTile) {
+                    console.error(`HandRenderer.syncAndRender: Could not find Phaser tile for exposure index ${tileData.index}`);
+                }
+                return phaserTile;
+            }).filter(tile => tile !== undefined);
+        });
 
         // Render the synced hand
         this.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
     }
 
     /**
-     * Main entry point to render a player's complete hand (hidden + exposed tiles)
+     * Main entry point to render a player's complete hand
      *
      * @param {number} playerIndex - Player position (0=BOTTOM, 1=RIGHT, 2=TOP, 3=LEFT)
      * @param {boolean} forceFaceup - Override face-up/down logic (default: false)
-     *                                 false = BOTTOM face-up, AI face-down
-     *                                 true = All players face-up
-     * @returns {undefined}
-     *
-     * @example
-     * // Render human player's hand (face-up)
-     * handRenderer.showHand(PLAYER.BOTTOM);
-     *
-     * // Render AI player's hand (face-down)
-     * handRenderer.showHand(PLAYER.TOP);
-     *
-     * // Force all tiles face-up for debugging
-     * handRenderer.showHand(PLAYER.RIGHT, true);
      */
     showHand(playerIndex, forceFaceup = false) {
-        // Validate playerIndex
         if (playerIndex < 0 || playerIndex > 3) {
             console.error(`HandRenderer.showHand: Invalid playerIndex ${playerIndex}`);
             return;
         }
 
-        // Get player and playerInfo
-        const player = this.table.players[playerIndex];
-        const playerInfo = player.playerInfo;
-        const hand = player.hand;
+        const playerInfo = PLAYER_LAYOUT[playerIndex];
+        const playerHand = this.playerHands[playerIndex];
 
-        debugPrint("HandRenderer.showHand called. playerInfo:", playerInfo, "forceFaceup:", forceFaceup);
+        debugPrint("HandRenderer.showHand called. playerIndex:", playerIndex, "forceFaceup:", forceFaceup);
 
         // Update rack graphics
-        this.updateRackGraphics(playerInfo, hand);
+        this.updateRackGraphics(playerIndex, playerInfo);
 
         // Determine face-up state
-        // Bottom player always face-up, AI players face-down unless forceFaceup
         const exposed = forceFaceup || (playerInfo.id === PLAYER.BOTTOM);
 
         // Render hidden tiles
-        this.renderHiddenTiles(playerInfo, hand, exposed);
+        this.renderHiddenTiles(playerIndex, playerInfo, playerHand, exposed);
 
         // Render exposed tiles (always face-up)
-        this.renderExposedTiles(playerInfo, hand);
+        this.renderExposedTiles(playerIndex, playerInfo, playerHand);
     }
 
     /**
      * Calculate the rectangular bounds of the player's tile rack
-     *
-     * The rack is the background area that holds both hidden and exposed tiles.
-     * Sized to fit 14 tiles (13 hand + 1 potential pickup) with padding.
-     *
-     * @param {object} playerInfo - Player information object with id property
-     * @returns {{ x: number, y: number, width: number, height: number }}
-     *          Rectangle bounds in pixels
-     *
-     * @example
-     * const rackPos = handRenderer.getHandRackPosition(player.playerInfo);
-     * // BOTTOM: { x: 126, y: 480, width: 800, height: 158 }
      */
     getHandRackPosition(playerInfo) {
-        // Use the correct scale for each player
         const tileScale = this.calculateTileScale(playerInfo);
         const TILE_W = SPRITE_WIDTH * tileScale;
         const TILE_H = SPRITE_HEIGHT * tileScale;
         const GAP = TILE_GAP;
-        const PADDING = 8; // Padding around tiles within rack
-        const maxTiles = 14; // Max tiles to fit (13 hand + 1 pickup)
+        const PADDING = 8;
+        const maxTiles = 14;
 
         let width, height, x, y;
 
         switch (playerInfo.id) {
         case PLAYER.BOTTOM:
-            // Bottom rack: two rows (top: exposed, bottom: hidden)
             width = maxTiles * (TILE_W + GAP) - GAP + (2 * PADDING);
-            height = 2 * TILE_H + GAP + (2 * PADDING); // Two rows with gap
+            height = 2 * TILE_H + GAP + (2 * PADDING);
             x = (WINDOW_WIDTH / 2) - (width / 2);
             y = WINDOW_HEIGHT - height - 10;
             break;
         case PLAYER.TOP:
-            // Top rack: two rows (top: hidden, bottom: exposed)
             width = maxTiles * (TILE_W + GAP) - GAP + (2 * PADDING);
             height = 2 * TILE_H + GAP + (2 * PADDING);
             x = (WINDOW_WIDTH / 2) - (width / 2);
             y = 10;
             break;
         case PLAYER.LEFT:
-            // Left rack: two columns (left: hidden, right: exposed)
             height = maxTiles * (TILE_W + GAP) - GAP + (2 * PADDING);
             width = 2 * TILE_H + GAP + (2 * PADDING);
             x = 10;
@@ -175,7 +151,6 @@ export class HandRenderer {
             break;
         case PLAYER.RIGHT:
         default:
-            // Right rack: two columns (right: hidden, left: exposed)
             height = maxTiles * (TILE_W + GAP) - GAP + (2 * PADDING);
             width = 2 * TILE_H + GAP + (2 * PADDING);
             x = WINDOW_WIDTH - width - 10;
@@ -188,64 +163,41 @@ export class HandRenderer {
 
     /**
      * Get the scale factor for tiles based on player position
-     *
-     * @param {object} playerInfo - Player information object with id property
-     * @returns {number} Scale factor (1.0 for BOTTOM, 0.75 for AI players)
-     *
-     * @example
-     * const scale = handRenderer.calculateTileScale(playerInfo);
-     * // 1.0 for BOTTOM, 0.75 for RIGHT/TOP/LEFT
      */
     calculateTileScale(playerInfo) {
         return (playerInfo.id === PLAYER.BOTTOM) ? 1.0 : SPRITE_SCALE;
     }
 
     /**
-     * Calculate X/Y coordinates for hidden tiles in the hand
-     *
-     * Returns the starting position for the first tile, plus dimensions
-     * needed to position subsequent tiles.
-     *
-     * @param {object} playerInfo - Player information
-     * @param {Hand} hand - Hand object containing tiles
-     * @returns {{ startX: number, startY: number, tileWidth: number, tileHeight: number, gap: number }}
-     *
-     * @example
-     * const pos = handRenderer.calculateHiddenTilePositions(playerInfo, hand);
-     * // BOTTOM: { startX: 164, startY: 598.5, tileWidth: 52, tileHeight: 69, gap: 4 }
+     * Calculate positions for hidden tiles
      */
-    calculateHiddenTilePositions(playerInfo, hand) {
+    calculateHiddenTilePositions(playerInfo, hiddenCount) {
         const rackPos = this.getHandRackPosition(playerInfo);
         const tileScale = this.calculateTileScale(playerInfo);
         const tileWidth = SPRITE_WIDTH * tileScale;
         const tileHeight = SPRITE_HEIGHT * tileScale;
         const gap = TILE_GAP;
 
-        const hiddenCount = hand.hiddenTileSet.getLength();
         const totalHiddenWidth = hiddenCount * (tileWidth + gap) - gap;
 
         let startX, startY;
 
         switch (playerInfo.id) {
         case PLAYER.BOTTOM:
-            // Bottom player: horizontal row at bottom of rack
             startX = rackPos.x + (rackPos.width / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
-            startY = rackPos.y + rackPos.height - (tileHeight / 2) - 5; // Small margin from bottom
+            startY = rackPos.y + rackPos.height - (tileHeight / 2) - 5;
             break;
         case PLAYER.TOP:
-            // Top player: horizontal row at top of rack
             startX = rackPos.x + (rackPos.width / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
-            startY = rackPos.y + (tileHeight / 2) + 5; // Small margin from top
+            startY = rackPos.y + (tileHeight / 2) + 5;
             break;
         case PLAYER.LEFT:
-            // Left player: vertical column at left of rack
-            startX = rackPos.x + (tileHeight / 2) + 5; // Small margin from left
+            startX = rackPos.x + (tileHeight / 2) + 5;
             startY = rackPos.y + (rackPos.height / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
             break;
         case PLAYER.RIGHT:
         default:
-            // Right player: vertical column at right of rack
-            startX = rackPos.x + rackPos.width - (tileHeight / 2) - 5; // Small margin from right
+            startX = rackPos.x + rackPos.width - (tileHeight / 2) - 5;
             startY = rackPos.y + (rackPos.height / 2) - (totalHiddenWidth / 2) + (tileWidth / 2);
             break;
         }
@@ -254,53 +206,35 @@ export class HandRenderer {
     }
 
     /**
-     * Calculate starting X/Y coordinates for exposed tile sets
-     *
-     * Returns position for the exposed area (opposite row/column from hidden tiles).
-     *
-     * @param {object} playerInfo - Player information
-     * @param {Hand} hand - Hand object with exposedTileSetArray
-     * @returns {{ startX: number, startY: number, tileWidth: number, tileHeight: number, gap: number }}
-     *
-     * @example
-     * const pos = handRenderer.calculateExposedTilePositions(playerInfo, hand);
-     * // BOTTOM: { startX: 460, startY: 519.5, tileWidth: 52, tileHeight: 69, gap: 4 }
+     * Calculate positions for exposed tile sets
      */
-    calculateExposedTilePositions(playerInfo, hand) {
+    calculateExposedTilePositions(playerInfo, exposedCount) {
         const rackPos = this.getHandRackPosition(playerInfo);
         const tileScale = this.calculateTileScale(playerInfo);
         const tileWidth = SPRITE_WIDTH * tileScale;
         const tileHeight = SPRITE_HEIGHT * tileScale;
         const gap = TILE_GAP;
 
-        // Calculate total width of all exposed tiles
-        const exposedCount = hand.exposedTileSetArray.reduce(
-            (sum, set) => sum + set.getLength(), 0
-        );
         const totalExposedWidth = exposedCount * (tileWidth + gap) - gap;
 
         let startX, startY;
 
         switch (playerInfo.id) {
         case PLAYER.BOTTOM:
-            // Bottom player: exposed on top row
             startX = rackPos.x + (rackPos.width / 2) - (totalExposedWidth / 2) + (tileWidth / 2);
-            startY = rackPos.y + (tileHeight / 2) + 5; // Small margin from top
+            startY = rackPos.y + (tileHeight / 2) + 5;
             break;
         case PLAYER.TOP:
-            // Top player: exposed on bottom row
             startX = rackPos.x + (rackPos.width / 2) - (totalExposedWidth / 2) + (tileWidth / 2);
-            startY = rackPos.y + rackPos.height - (tileHeight / 2) - 5; // Small margin from bottom
+            startY = rackPos.y + rackPos.height - (tileHeight / 2) - 5;
             break;
         case PLAYER.LEFT:
-            // Left player: exposed on right column
-            startX = rackPos.x + rackPos.width - (tileHeight / 2) - 5; // Small margin from right
+            startX = rackPos.x + rackPos.width - (tileHeight / 2) - 5;
             startY = rackPos.y + (rackPos.height / 2) - (totalExposedWidth / 2) + (tileWidth / 2);
             break;
         case PLAYER.RIGHT:
         default:
-            // Right player: exposed on left column
-            startX = rackPos.x + (tileHeight / 2) + 5; // Small margin from left
+            startX = rackPos.x + (tileHeight / 2) + 5;
             startY = rackPos.y + (rackPos.height / 2) - (totalExposedWidth / 2) + (tileWidth / 2);
             break;
         }
@@ -310,118 +244,195 @@ export class HandRenderer {
 
     /**
      * Render all hidden (in-hand) tiles for a player
-     *
-     * Positions tiles in the hidden area of the rack and sets face-up/down state.
-     *
-     * @param {object} playerInfo - Player information (id, angle)
-     * @param {Hand} hand - Hand object with hiddenTileSet
-     * @param {boolean} exposed - Whether to show tiles face-up (true) or face-down (false)
-     * @returns {undefined}
-     *
-     * @example
-     * // Render human player's hidden tiles (face-up)
-     * handRenderer.renderHiddenTiles(playerInfo, hand, true);
-     *
-     * // Render AI player's hidden tiles (face-down)
-     * handRenderer.renderHiddenTiles(playerInfo, hand, false);
      */
-    renderHiddenTiles(playerInfo, hand, exposed) {
-        const pos = this.calculateHiddenTilePositions(playerInfo, hand);
+    renderHiddenTiles(playerIndex, playerInfo, playerHand, exposed) {
+        const hiddenTiles = playerHand.hiddenTiles;
+        if (hiddenTiles.length === 0) {
+            return;
+        }
 
-        // Use horizontal or vertical layout based on player position
+        const pos = this.calculateHiddenTilePositions(playerInfo, hiddenTiles.length);
+
+        // Position tiles horizontally or vertically based on player
         if (playerInfo.id === PLAYER.BOTTOM || playerInfo.id === PLAYER.TOP) {
             // Horizontal layout
-            hand.hiddenTileSet.showTileSetInRack(
-                playerInfo,
-                pos.startX,
-                pos.startY,
-                exposed,
-                pos.tileWidth,
-                pos.gap
-            );
+            this.positionTilesHorizontal(hiddenTiles, playerInfo, pos.startX, pos.startY, exposed, pos.tileWidth, pos.gap);
         } else {
             // Vertical layout (LEFT, RIGHT)
-            hand.hiddenTileSet.showTileSetInRackVertical(
-                playerInfo,
-                pos.startX,
-                pos.startY,
-                exposed,
-                pos.tileWidth,
-                pos.gap
-            );
+            this.positionTilesVertical(hiddenTiles, playerInfo, pos.startX, pos.startY, exposed, pos.tileWidth, pos.gap);
         }
     }
 
     /**
      * Render all exposed tile sets (pung/kong/quint) for a player
-     *
-     * Positions each exposed set in sequence in the exposed area.
-     * Exposed tiles are always face-up for all players.
-     *
-     * @param {object} playerInfo - Player information (id, angle)
-     * @param {Hand} hand - Hand object with exposedTileSetArray
-     * @returns {undefined}
-     *
-     * @example
-     * // Render exposed sets (always face-up)
-     * handRenderer.renderExposedTiles(playerInfo, hand);
      */
-    renderExposedTiles(playerInfo, hand) {
-        // Skip if no exposed tiles
-        if (hand.exposedTileSetArray.length === 0) {
+    renderExposedTiles(playerIndex, playerInfo, playerHand) {
+        const exposedSets = playerHand.exposedSets;
+        if (exposedSets.length === 0) {
             return;
         }
 
-        const pos = this.calculateExposedTilePositions(playerInfo, hand);
+        // Calculate total exposed tiles count
+        const exposedCount = exposedSets.reduce((sum, set) => sum + set.length, 0);
+        const pos = this.calculateExposedTilePositions(playerInfo, exposedCount);
 
-        // Track current position as we place each set
         let currentX = pos.startX;
         let currentY = pos.startY;
 
-        // Render each exposed tileset in sequence
-        for (const tileset of hand.exposedTileSetArray) {
+        // Render each exposed set in sequence
+        for (const tileSet of exposedSets) {
             if (playerInfo.id === PLAYER.BOTTOM || playerInfo.id === PLAYER.TOP) {
                 // Horizontal layout
-                tileset.showTileSetInRack(
-                    playerInfo,
-                    currentX,
-                    currentY,
-                    true, // Always face-up for exposed tiles
-                    pos.tileWidth,
-                    pos.gap
-                );
-                // Advance X position for next set
-                currentX += tileset.getLength() * (pos.tileWidth + pos.gap);
+                this.positionTilesHorizontal(tileSet, playerInfo, currentX, currentY, true, pos.tileWidth, pos.gap);
+                currentX += tileSet.length * (pos.tileWidth + pos.gap);
             } else {
-                // Vertical layout (LEFT, RIGHT)
-                tileset.showTileSetInRackVertical(
-                    playerInfo,
-                    currentX,
-                    currentY,
-                    true, // Always face-up for exposed tiles
-                    pos.tileWidth,
-                    pos.gap
-                );
-                // Advance Y position for next set
-                currentY += tileset.getLength() * (pos.tileWidth + pos.gap);
+                // Vertical layout
+                this.positionTilesVertical(tileSet, playerInfo, currentX, currentY, true, pos.tileWidth, pos.gap);
+                currentY += tileSet.length * (pos.tileWidth, pos.gap);
             }
         }
     }
 
     /**
-     * Update the visual background/border graphics for the tile rack
-     *
-     * Passthrough to Hand.updateRack() method.
-     * Kept in HandRenderer for completeness (all rendering goes through HandRenderer).
-     *
-     * @param {object} playerInfo - Player information
-     * @param {Hand} hand - Hand object
-     * @returns {undefined}
-     *
-     * @example
-     * handRenderer.updateRackGraphics(playerInfo, hand);
+     * Position tiles in horizontal layout (BOTTOM, TOP)
      */
-    updateRackGraphics(playerInfo, hand) {
-        hand.updateRack(playerInfo);
+    positionTilesHorizontal(tiles, playerInfo, startX, startY, exposed, tileWidth, gap) {
+        const tileScale = this.calculateTileScale(playerInfo);
+
+        tiles.forEach((tile, index) => {
+            const x = startX + index * (tileWidth + gap);
+            const y = startY;
+
+            tile.sprite.x = x;
+            tile.sprite.y = y;
+            tile.sprite.setScale(tileScale);
+            tile.sprite.setAngle(playerInfo.angle);
+            tile.sprite.setDepth(10 + index);
+            tile.sprite.setVisible(true);
+
+            // Set frame (face-up or face-down)
+            if (exposed) {
+                tile.sprite.setFrame(tile.frame);
+            } else {
+                tile.sprite.setFrame("back");
+            }
+        });
+    }
+
+    /**
+     * Position tiles in vertical layout (LEFT, RIGHT)
+     */
+    positionTilesVertical(tiles, playerInfo, startX, startY, exposed, tileWidth, gap) {
+        const tileScale = this.calculateTileScale(playerInfo);
+
+        tiles.forEach((tile, index) => {
+            const x = startX;
+            const y = startY + index * (tileWidth + gap);
+
+            tile.sprite.x = x;
+            tile.sprite.y = y;
+            tile.sprite.setScale(tileScale);
+            tile.sprite.setAngle(playerInfo.angle);
+            tile.sprite.setDepth(10 + index);
+            tile.sprite.setVisible(true);
+
+            // Set frame (face-up or face-down)
+            if (exposed) {
+                tile.sprite.setFrame(tile.frame);
+            } else {
+                tile.sprite.setFrame("back");
+            }
+        });
+    }
+
+    /**
+     * Update the visual background/border graphics for the tile rack
+     */
+    updateRackGraphics(playerIndex, playerInfo) {
+        const playerHand = this.playerHands[playerIndex];
+        const rackPos = this.getHandRackPosition(playerInfo);
+
+        // Destroy old rack graphics if exists
+        if (playerHand.rackGraphics) {
+            playerHand.rackGraphics.destroy();
+        }
+
+        // Create new rack graphics
+        playerHand.rackGraphics = this.scene.add.graphics();
+        playerHand.rackGraphics.fillStyle(0x000000, 0.15);
+        playerHand.rackGraphics.fillRoundedRect(
+            rackPos.x,
+            rackPos.y,
+            rackPos.width,
+            rackPos.height,
+            8
+        );
+        playerHand.rackGraphics.setDepth(0);
+    }
+
+    /**
+     * Get Phaser tiles for a player (for selection/interaction)
+     * @param {number} playerIndex
+     * @returns {Array} Array of Phaser tile sprites
+     */
+    getHiddenTiles(playerIndex) {
+        return this.playerHands[playerIndex].hiddenTiles;
+    }
+
+    /**
+     * Get exposed tile sets for a player
+     * @param {number} playerIndex
+     * @returns {Array<Array>} Array of tile arrays (each sub-array is a set)
+     */
+    getExposedSets(playerIndex) {
+        return this.playerHands[playerIndex].exposedSets;
+    }
+
+    /**
+     * Calculate tile position for animation target
+     * Used when animating tiles from wall to hand
+     * @param {number} playerIndex
+     * @param {number} tileIndex - Index in hidden tiles array
+     * @returns {{x: number, y: number}} Position coordinates
+     */
+    calculateTilePosition(playerIndex, tileIndex) {
+        const playerInfo = PLAYER_LAYOUT[playerIndex];
+        const hiddenTiles = this.playerHands[playerIndex].hiddenTiles;
+        const tileScale = this.calculateTileScale(playerInfo);
+        const tileWidth = SPRITE_WIDTH * tileScale;
+        const gap = TILE_GAP;
+
+        const handWidth = hiddenTiles.length * (tileWidth + gap) - gap;
+
+        let startX = 0;
+        let startY = 0;
+
+        switch (playerInfo.id) {
+            case PLAYER.BOTTOM:
+                startX = (WINDOW_WIDTH / 2) - (handWidth / 2) + (tileWidth / 2);
+                return {
+                    x: startX + (tileIndex * (tileWidth + gap)),
+                    y: playerInfo.y
+                };
+            case PLAYER.TOP:
+                startX = (WINDOW_WIDTH / 2) + (handWidth / 2) - (tileWidth / 2);
+                return {
+                    x: startX - (tileIndex * (tileWidth + gap)),
+                    y: playerInfo.y
+                };
+            case PLAYER.LEFT:
+                startY = (WINDOW_HEIGHT / 2) - (handWidth / 2) + (tileWidth / 2);
+                return {
+                    x: playerInfo.x,
+                    y: startY + (tileIndex * (tileWidth + gap))
+                };
+            case PLAYER.RIGHT:
+            default:
+                startY = (WINDOW_HEIGHT / 2) + (handWidth / 2) - (tileWidth / 2);
+                return {
+                    x: playerInfo.x,
+                    y: startY - (tileIndex * (tileWidth + gap))
+                };
+        }
     }
 }

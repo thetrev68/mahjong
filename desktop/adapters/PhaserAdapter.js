@@ -15,8 +15,9 @@
  */
 
 import {TileData} from "../../core/models/TileData.js";
-import {PLAYER, STATE, SUIT, getTotalTileCount} from "../../constants.js";
+import {PLAYER, getTotalTileCount} from "../../constants.js";
 import {printMessage, printInfo} from "../../utils.js";
+import {PLAYER_LAYOUT} from "../config/playerLayout.js";
 import {TileManager} from "../managers/TileManager.js";
 import {ButtonManager} from "../managers/ButtonManager.js";
 import {DialogManager} from "../managers/DialogManager.js";
@@ -49,9 +50,9 @@ export class PhaserAdapter {
         this.tileManager = new TileManager(scene, table.wall, table.discards);
         this.dialogManager = new DialogManager(scene);
 
-        // Initialize Phase 3 managers and renderers
+        // Phase 6: HandRenderer owns rendering state (no table dependency)
         // HandRenderer needs TileManager to look up sprites by index
-        this.handRenderer = new HandRenderer(scene, table, this.tileManager);
+        this.handRenderer = new HandRenderer(scene, this.tileManager);
         this.pendingHumanGlowTile = null;
         this.activeHumanGlowTile = null;
 
@@ -59,17 +60,16 @@ export class PhaserAdapter {
         this.buttonManager = new ButtonManager(scene, gameController);
 
         // Create SelectionManager for human player with ButtonManager reference
-        // Phase 5: Pass playerAngle directly instead of entire table
-        const humanHand = table.players[PLAYER.BOTTOM].hand;
-        const playerAngle = table.players[PLAYER.BOTTOM].playerInfo.angle;
-        this.selectionManager = new SelectionManager(humanHand, playerAngle, this.buttonManager);
+        // Phase 6: Pass handRenderer instead of legacy hand object
+        const playerAngle = PLAYER_LAYOUT[PLAYER.BOTTOM].angle;
+        this.selectionManager = new SelectionManager(this.handRenderer, playerAngle, this.buttonManager);
 
         // Now set SelectionManager reference on ButtonManager
         this.buttonManager.selectionManager = this.selectionManager;
 
-        // Phase 5: Pass direct dependencies instead of table
+        // Phase 6: BlankSwapManager - check if hand reference is actually used
         this.blankSwapManager = new BlankSwapManager({
-            hand: humanHand,
+            hand: this.handRenderer,  // Phase 6: Pass handRenderer instead of legacy hand
             discardPile: table.discards,
             selectionManager: this.selectionManager,
             buttonManager: this.buttonManager,
@@ -155,36 +155,24 @@ export class PhaserAdapter {
         // Update button visibility and state based on new game state
         this.buttonManager.updateForState(newState);
 
-        // Phase 3.5: Set validation mode on player hands based on state
-        const humanHand = this.table.players[0].hand; // PLAYER.BOTTOM
+        // Phase 6: Validation mode now handled by SelectionManager when enableTileSelection() is called
+        // No need for separate setValidationMode() - mode is passed to enableTileSelection(min, max, mode)
         switch (newState) {
-        case "CHARLESTON1":
-        case "CHARLESTON2":
-            humanHand.setValidationMode("charleston");
-            // Selection will be enabled by onCharlestonPhase handler
-            break;
-        case "COURTESY":
-            humanHand.setValidationMode("courtesy");
-            // Selection will be enabled by courtesy prompt handler
-            break;
         case "LOOP_CHOOSE_DISCARD":
-            humanHand.setValidationMode("play");
             printInfo("Select one tile to discard or declare Mahjong");
-            // Selection will be enabled by discard prompt handler
             break;
         case "LOOP_EXPOSE_TILES":
-            humanHand.setValidationMode("expose");
             printInfo("Form a pung/kong/quint with claimed tile");
             break;
         case "LOOP_QUERY_CLAIM_DISCARD":
             printInfo("Claim discard?");
             break;
         default:
-            humanHand.setValidationMode(null);
             // Disable selection when not in a selection state
             if (this.selectionManager) {
                 this.selectionManager.disableTileSelection();
             }
+            break;
         }
     }
 
@@ -246,7 +234,10 @@ export class PhaserAdapter {
         } else if (reason === "wall_game") {
             printMessage("Wall game - no winner");
             printInfo("Wall game reached. No moves available.");
-            this.table.players.forEach(player => player.showHand(true));
+            // Phase 6: Show all hands face-up using HandRenderer
+            for (let i = 0; i < 4; i++) {
+                this.handRenderer.showHand(i, true);  // Force all face-up
+            }
             if (this.scene.audioManager) {
                 this.scene.audioManager.playSFX("wall_fail");
             }
@@ -348,7 +339,6 @@ export class PhaserAdapter {
      */
     onTileDrawn(data) {
         const {player: playerIndex, tile: tileData} = data;
-        const player = this.table.players[playerIndex];
 
         // Convert TileData to Phaser Tile using the pre-populated tile map
         const tileDataObj = TileData.fromJSON(tileData);
@@ -374,13 +364,14 @@ export class PhaserAdapter {
         }
 
         // Animate tile draw (slide from wall to hand)
-        const targetPos = player.hand.calculateTilePosition(
-            player.playerInfo,
-            player.hand.hiddenTileSet.getLength() - 1
+        const hiddenTiles = this.handRenderer.getHiddenTiles(playerIndex);
+        const targetPos = this.handRenderer.calculateTilePosition(
+            playerIndex,
+            hiddenTiles.length - 1
         );
 
         // Animate to hand with tile.animate() method
-        const tween = phaserTile.animate(targetPos.x, targetPos.y, player.playerInfo.angle, 200);
+        const tween = phaserTile.animate(targetPos.x, targetPos.y, PLAYER_LAYOUT[playerIndex].angle, 200);
         if (tween && this.scene.audioManager) {
             tween.once("complete", () => {
                 this.scene.audioManager.playSFX("rack_tile");
@@ -444,11 +435,8 @@ export class PhaserAdapter {
         // Add to discard pile (handles animation + audio)
         this.tileManager.addTileToDiscardPile(phaserTile);
 
-        // Phase 3.5: Set discard tile for exposure validation (human player)
-        if (playerIndex === PLAYER.BOTTOM) {
-            const humanHand = this.table.players[PLAYER.BOTTOM].hand;
-            humanHand.setDiscardTile(phaserTile);
-        }
+        // Phase 6: Discard tile tracking moved to SelectionManager if needed
+        // TODO: Verify exposure validation works without setDiscardTile
 
         // Show discards (updates layout)
         const playerName = this.getPlayerName(playerIndex);
@@ -496,8 +484,8 @@ export class PhaserAdapter {
         const {claimingPlayer, tile: tileData, claimType} = data;
 
         const tileDataObj = TileData.fromJSON(tileData);
-        const claimingPlayerData = this.table.players[claimingPlayer];
-        if (!claimingPlayerData) {
+        // Validate player index
+        if (claimingPlayer < 0 || claimingPlayer >= 4) {
             console.error("Invalid claiming player index:", claimingPlayer, data);
             return;
         }
@@ -518,8 +506,6 @@ export class PhaserAdapter {
      */
     onTilesExposed(data) {
         const {player: playerIndex, exposureType, tiles: tileDatas} = data;
-        const player = this.table.players[playerIndex];
-
         // Convert to Phaser tiles for glow clearing
         const phaserTiles = this.tileManager.convertTileDataArray(
             tileDatas.map(td => TileData.fromJSON(td))
@@ -585,8 +571,7 @@ export class PhaserAdapter {
             const currentSelection = this.selectionManager.getSelection();
             if (currentSelection.length > 0) {
                 // Check if any selected tiles are no longer in hand
-                const humanHand = this.table.players[PLAYER.BOTTOM].hand;
-                const tilesInHand = humanHand.hiddenTileSet.tileArray || [];
+                const tilesInHand = this.handRenderer.getHiddenTiles(PLAYER.BOTTOM);
                 const invalidSelection = currentSelection.some(tile => !tilesInHand.includes(tile));
 
                 if (invalidSelection) {
@@ -983,7 +968,7 @@ export class PhaserAdapter {
      * Safely get player name, handling undefined playerInfo
      */
     getPlayerName(playerIndex) {
-        if (playerIndex < 0 || playerIndex >= this.table.players.length) {
+        if (playerIndex < 0 || playerIndex >= 4) {
             return `Player ${playerIndex}`;
         }
         if (this.gameController && Array.isArray(this.gameController.players)) {
@@ -992,11 +977,9 @@ export class PhaserAdapter {
                 return gcPlayer.name;
             }
         }
-        const player = this.table.players[playerIndex];
-        if (player && player.playerInfo && player.playerInfo.name) {
-            return player.playerInfo.name;
-        }
-        return `Player ${playerIndex}`;
+        // Fallback to default names
+        const defaultNames = ["You", "Opponent 1", "Opponent 2", "Opponent 3"];
+        return defaultNames[playerIndex] || `Player ${playerIndex}`;
     }
 
     /**
@@ -1011,12 +994,12 @@ export class PhaserAdapter {
     }
 
     autoSortHumanHand() {
-        const humanPlayer = this.table.players[PLAYER.BOTTOM];
-        if (!humanPlayer || !humanPlayer.hand || typeof humanPlayer.hand.sortSuitHidden !== "function") {
-            return;
-        }
-        humanPlayer.hand.sortSuitHidden();
-        this.handRenderer.showHand(PLAYER.BOTTOM, true);
+        // Phase 6: Sorting now happens in HandRenderer.syncAndRender()
+        // Auto-sort is enabled for Player 0, so just trigger re-render
+        // Or get HandData and sort it
+        const handData = this.gameController.players[PLAYER.BOTTOM].hand;
+        handData.sortBySuit();
+        this.handRenderer.syncAndRender(PLAYER.BOTTOM, handData);
     }
 
     setPendingHumanGlowTile(tile) {

@@ -1,6 +1,6 @@
 import {debugPrint, debugTrace, gdebug} from "../../utils.js";
 import {TileData} from "../models/TileData.js";
-import {Hand} from "../../desktop/gameObjects/gameObjects_hand.js";
+import {CardHand} from "./CardHand.js";
 import {SUIT, VNUMBER} from "../../constants.js";
 
 // PRIVATE CONSTANTS
@@ -46,7 +46,7 @@ export class Card {
     generateHand(handDescription, numTiles) {
         let currentNumTiles = numTiles;
         const vsuitArray = [SUIT.CRACK, SUIT.BAM, SUIT.DOT];
-        const hand = new Hand(false);
+        const hand = new CardHand();
         let foundHand = null;
 
         if (!currentNumTiles) {

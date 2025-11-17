@@ -1,4 +1,4 @@
-import { SUIT, PLAYER } from "../../constants.js";
+import { SUIT } from "../../constants.js";
 
 /**
  * SelectionManager - Manages tile selection state and visual feedback
@@ -15,12 +15,13 @@ import { SUIT, PLAYER } from "../../constants.js";
 export class SelectionManager {
     /**
      * Create a new SelectionManager
-     * @param {Hand} hand - The Hand object containing tiles to manage selection for
+     * @param {HandRenderer} handRenderer - HandRenderer for accessing player tiles
      * @param {number} playerAngle - The angle for tile animations (from playerInfo.angle)
      * @param {ButtonManager} buttonManager - Optional ButtonManager for updating button states
      */
-    constructor(hand, playerAngle, buttonManager = null) {
-        this.hand = hand;
+    constructor(handRenderer, playerAngle, buttonManager = null) {
+        this.handRenderer = handRenderer;
+        this.playerIndex = 0;  // SelectionManager only used for PLAYER.BOTTOM
         this.playerAngle = playerAngle;  // Phase 5: Direct dependency instead of table coupling
         this.buttonManager = buttonManager;
 
@@ -308,7 +309,7 @@ export class SelectionManager {
     getSelection() {
         // Return array of selected tiles from the hand's hidden tileset
         const temp = [];
-        const tiles = this.hand.hiddenTileSet.getTileArray();
+        const tiles = this.handRenderer.getHiddenTiles(this.playerIndex);
 
         for (const tile of tiles) {
             if (tile.selected) {
@@ -351,7 +352,7 @@ export class SelectionManager {
      */
     getSelectedTileIndices() {
         const indices = [];
-        const tiles = this.hand.hiddenTileSet.getTileArray();
+        const tiles = this.handRenderer.getHiddenTiles(this.playerIndex);
 
         for (let i = 0; i < tiles.length; i++) {
             if (tiles[i].selected) {
@@ -504,7 +505,7 @@ export class SelectionManager {
      * selectionManager.unhighlightTiles();
      */
     unhighlightTiles() {
-        const tiles = this.hand.hiddenTileSet.getTileArray();
+        const tiles = this.handRenderer.getHiddenTiles(this.playerIndex);
         for (const tile of tiles) {
             if (tile.selected || tile._isVisuallySelected) {
                 this.visualizeTile(tile, false);
@@ -757,7 +758,7 @@ export class SelectionManager {
      * @returns {undefined}
      */
     _attachClickHandlers() {
-        const tiles = this.hand.hiddenTileSet.getTileArray();
+        const tiles = this.handRenderer.getHiddenTiles(this.playerIndex);
 
         for (const tile of tiles) {
             // Ensure Phaser knows this tile should fire pointer events.

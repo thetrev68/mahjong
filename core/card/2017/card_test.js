@@ -1,6 +1,6 @@
 import {debugPrint} from "../../../utils.js";
 import {Tile} from "../../../desktop/gameObjects/gameObjects.js";
-import {Hand} from "../../../desktop/gameObjects/gameObjects_hand.js";
+import {CardHand as Hand} from "../CardHand.js";
 
 import {SUIT, DRAGON, WIND} from "../../../constants.js";
 
