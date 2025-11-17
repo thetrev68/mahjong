@@ -306,101 +306,22 @@ export class PhaserAdapter {
                 }
                 phaserTile.showTile(true, playerIndex === PLAYER.BOTTOM);
 
-                // GameController emits HAND_UPDATED after dealing, which triggers syncAndRender()
-                // No need to call insertTileIntoHand - HandData is source of truth
+                // HandData already has the tiles (added by GameController.buildInitialDealSequence)
+                // We'll sync from HandData after this step completes
                 if (playerIndex === PLAYER.BOTTOM) {
                     this.setPendingHumanGlowTile(phaserTile);
                 }
                 dealtTiles.push(phaserTile);
             });
 
-            this.handRenderer.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
+            // Sync and render from HandData for this player (progressive dealing)
+            const playerHandData = this.gameController.players[playerIndex].hand.toJSON();
+            this.handRenderer.syncAndRender(playerIndex, playerHandData);
 
             this.tilesRemovedFromWall += tilePayloads.length;
             this.updateWallTileCounter();
 
             const lastTile = dealtTiles[dealtTiles.length - 1];
-
-            if (lastTile && lastTile.tween) {
-                lastTile.tween.once("complete", () => {
-                    currentStepIndex++;
-                    this.scene.time.delayedCall(150, dealNextGroup);
-                });
-            } else {
-                currentStepIndex++;
-                this.scene.time.delayedCall(150, dealNextGroup);
-            }
-        };
-
-        dealNextGroup();
-    }
-
-    /**
-     * Legacy dealing path used when GameController does not provide tile data
-     * TODO: delete after mobile/desktop both rely on core-driven sequences.
-     */
-    executeLegacyDealSequence() {
-        const DEAL_SEQUENCE = [
-            [PLAYER.BOTTOM, 4],
-            [PLAYER.RIGHT, 4],
-            [PLAYER.TOP, 4],
-            [PLAYER.LEFT, 4],
-            [PLAYER.BOTTOM, 4],
-            [PLAYER.RIGHT, 4],
-            [PLAYER.TOP, 4],
-            [PLAYER.LEFT, 4],
-            [PLAYER.BOTTOM, 4],
-            [PLAYER.RIGHT, 4],
-            [PLAYER.TOP, 4],
-            [PLAYER.LEFT, 4],
-            [PLAYER.BOTTOM, 1],
-            [PLAYER.RIGHT, 1],
-            [PLAYER.TOP, 1],
-            [PLAYER.LEFT, 1],
-            [PLAYER.BOTTOM, 1]
-        ];
-
-        let currentStepIndex = 0;
-
-        const dealNextGroup = () => {
-            if (currentStepIndex >= DEAL_SEQUENCE.length) {
-                this.autoSortHumanHand();
-                this.applyHumanDrawGlow();
-                if (this.scene && typeof this.scene.handleDealAnimationComplete === "function") {
-                    this.scene.handleDealAnimationComplete();
-                }
-                this.gameController.emit("DEALING_COMPLETE");
-                return;
-            }
-
-            const [playerIndex, tileCount] = DEAL_SEQUENCE[currentStepIndex];
-            const player = this.table.players[playerIndex];
-
-            for (let i = 0; i < tileCount; i++) {
-                const phaserTile = this.table.wall.remove();
-                if (!phaserTile) {
-                    throw new Error("No tiles remaining in wall during dealing sequence");
-                }
-
-                phaserTile.sprite.setPosition(50, 50);
-                phaserTile.sprite.setAlpha(0);
-
-                // GameController will emit HAND_UPDATED, which triggers syncAndRender()
-                // No need to call player.hand.insertHidden() - HandData is source of truth
-                if (playerIndex === PLAYER.BOTTOM) {
-                    this.setPendingHumanGlowTile(phaserTile);
-                }
-
-                const tileDataObject = TileData.fromPhaserTile(phaserTile);
-                this.gameController.players[playerIndex].hand.addTile(tileDataObject);
-                this.tilesRemovedFromWall++;
-            }
-
-            this.handRenderer.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
-            this.updateWallTileCounter();
-
-            const hand = player.hand;
-            const lastTile = hand.hiddenTileSet.tileArray[hand.hiddenTileSet.tileArray.length - 1];
 
             if (lastTile && lastTile.tween) {
                 lastTile.tween.once("complete", () => {

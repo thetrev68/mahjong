@@ -105,7 +105,7 @@
 
 **Files updated:**
 - ✅ `PhaserAdapter.js:643-646` - Removed isDealState skip, always call syncAndRender()
-- ✅ `GameController.js:240-241` - Already emits HAND_UPDATED for all players after dealing
+- ✅ `GameController.js:238-250` - Emit HAND_UPDATED AFTER dealing animation completes (not before)
 
 **Result:**
 - No more direct hand manipulation during dealing
