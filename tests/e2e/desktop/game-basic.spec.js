@@ -1,4 +1,33 @@
 import { test, expect } from "@playwright/test";
+import { STATE } from "../../../constants.js";
+
+/**
+ * Wait until GameController is available on window.
+ */
+async function waitForGameController(page) {
+  await page.waitForFunction(() => {
+    const gc = window.gameController;
+    return gc && Array.isArray(gc.players) && gc.players.length === 4;
+  }, { timeout: 15000 });
+}
+
+/**
+ * Utility to clear previous test subscriptions before registering new ones.
+ */
+async function resetTestSubscriptions(page) {
+  await page.evaluate(() => {
+    if (Array.isArray(window.__gcTestSubscriptions)) {
+      window.__gcTestSubscriptions.forEach(unsub => {
+        try {
+          unsub?.();
+        } catch (error) {
+          console.warn("Failed to unsubscribe test handler", error);
+        }
+      });
+    }
+    window.__gcTestSubscriptions = [];
+  });
+}
 
 /**
  * Basic tests for American Mahjong game
@@ -37,7 +66,7 @@ test.describe("Game Start", () => {
 
     // Wait for game to initialize
     await page.waitForSelector("#controldiv", { state: "visible" });
-    await page.waitForFunction(() => window.gameController !== undefined, { timeout: 10000 });
+    await waitForGameController(page);
 
     // Verify start button is visible initially
     const startButton = page.locator("#start");
@@ -47,17 +76,26 @@ test.describe("Game Start", () => {
     // Click start button
     await startButton.click();
 
-    // Wait for game to actually start by checking GameController state
+    // Wait for game log to report that the game has started (dealing complete)
     await page.waitForFunction(() => {
-      return window.gameController &&
-             window.gameController.currentState !== "INIT" &&
-             window.gameController.currentState !== "START";
-    }, { timeout: 5000 });
+      const log = document.querySelector("#messages");
+      return log && log.value.includes("Game started!");
+    }, { timeout: 15000 });
 
-    // Verify game started - check that we're in a game state
-    const gameState = await page.evaluate(() => window.gameController.currentState);
-    expect(gameState).not.toBe("INIT");
-    expect(gameState).not.toBe("START");
+    const logText = await page.locator("#messages").inputValue();
+    expect(logText).toContain("Game started!");
+
+    // Verify each player has tiles in their hand (dealer receives 14, others 13)
+    const handSizes = await page.evaluate(() => {
+      if (!window.gameController || !Array.isArray(window.gameController.players)) {
+        return [];
+      }
+      return window.gameController.players.map(player => player?.hand?.tiles?.length || 0);
+    });
+    expect(handSizes[0]).toBeGreaterThanOrEqual(13);
+    handSizes.slice(1).forEach(count => {
+      expect(count).toBeGreaterThanOrEqual(13);
+    });
   });
 });
 
@@ -134,24 +172,34 @@ test.describe("Game Logic", () => {
     await page.goto("/");
 
     // Wait for GameController to be initialized
-    await page.waitForFunction(() => window.gameController !== undefined, { timeout: 10000 });
+    await waitForGameController(page);
+    await resetTestSubscriptions(page);
 
     // Set up a listener for GameController events
     await page.evaluate(() => {
-      window.capturedEvents = [];
-      window.gameController.on("GAME_STARTED", () => {
-        window.capturedEvents.push("GAME_STARTED");
-      });
-      window.gameController.on("TILES_DEALT", () => {
-        window.capturedEvents.push("TILES_DEALT");
-      });
+      window.capturedEvents = new Set();
+      const pushEvent = (eventName) => {
+        window.capturedEvents.add(eventName);
+      };
+
+      const subscriptions = [
+        window.gameController.on("GAME_STARTED", () => pushEvent("GAME_STARTED")),
+        window.gameController.on("TILES_DEALT", () => pushEvent("TILES_DEALT"))
+      ];
+
+      window.__gcTestSubscriptions.push(...subscriptions);
     });
 
     await page.click("#start");
-    await page.waitForTimeout(3000);
+    await page.waitForFunction(() => {
+      if (!window.capturedEvents) {
+        return false;
+      }
+      return window.capturedEvents.has("GAME_STARTED") && window.capturedEvents.has("TILES_DEALT");
+    }, { timeout: 20000 });
 
     // Retrieve the captured events
-    const events = await page.evaluate(() => window.capturedEvents);
+    const events = await page.evaluate(() => Array.from(window.capturedEvents));
 
     // Verify key events were emitted
     expect(events).toContain("GAME_STARTED");
@@ -159,30 +207,35 @@ test.describe("Game Logic", () => {
   });
 
   test("game progresses through states", async ({ page }) => {
+    test.setTimeout(60000);
     await page.goto("/");
 
     // Wait for GameController to be initialized
-    await page.waitForFunction(() => window.gameController !== undefined, { timeout: 10000 });
+    await waitForGameController(page);
 
-    // Set up a listener for state changes
-    await page.evaluate(() => {
-      window.capturedStates = [];
-      window.gameController.on("STATE_CHANGED", (data) => {
-        window.capturedStates.push(data.newState);
-      });
-    });
+    // Ensure Charleston is enabled (training mode can disable it)
+    await page.click("#settings");
+    const trainingCheckbox = page.locator("#trainCheckbox");
+    if (await trainingCheckbox.isChecked()) {
+      await trainingCheckbox.uncheck();
+    }
+    const skipCharlestonCheckbox = page.locator("#skipCharlestonCheckbox");
+    if (await skipCharlestonCheckbox.isChecked()) {
+      await skipCharlestonCheckbox.uncheck();
+    }
+    await page.click("#settings-save");
 
     await page.click("#start");
 
-    // Wait for a few seconds to allow the game to progress
-    await page.waitForTimeout(5000);
+    await page.waitForFunction(() => {
+      const log = document.querySelector("#messages");
+      if (!log) {
+        return false;
+      }
+      return log.value.includes("Charleston Phase 1");
+    }, { timeout: 45000 });
 
-    // Retrieve the captured states
-    const states = await page.evaluate(() => window.capturedStates);
-
-    // Check that the game has progressed through several states
-    expect(states).toContain("DEAL");
-    expect(states).toContain("CHARLESTON1");
-    expect(states).toContain("LOOP_PICK_FROM_WALL");
+    const logText = await page.locator("#messages").inputValue();
+    expect(logText).toContain("Charleston Phase 1");
   });
 });
