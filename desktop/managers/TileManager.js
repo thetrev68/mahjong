@@ -17,11 +17,14 @@ import {animateTileSelect, animateTileDeselect} from "../animations/AnimationLib
 export class TileManager {
     /**
      * @param {GameScene} scene - Phaser scene
-     * @param {Table} table - Game table with players and tiles
+     * @param {Object} wall - Wall object with tileArray
+     * @param {Object} discards - Discard pile object
      */
-    constructor(scene, table) {
+    constructor(scene, wall, discards) {
         this.scene = scene;
-        this.table = table;
+        // Phase 5: Store direct dependencies instead of entire table
+        this.wall = wall;
+        this.discards = discards;
 
         /**
          * Map of tile index → Phaser sprite
@@ -56,10 +59,10 @@ export class TileManager {
     }
 
     /**
-     * Register all existing tiles from the wall and player hands
-     * Should be called once the Phaser table has been initialized/reset
+     * Register all existing tiles from the wall
+     * Phase 5: Simplified to only register wall tiles - hands are managed via HandRenderer
      */
-    initializeFromTable() {
+    initializeFromWall() {
         this.tileSprites.clear();
 
         const registerTile = (tile) => {
@@ -68,17 +71,8 @@ export class TileManager {
             }
         };
 
-        if (this.table?.wall?.tileArray) {
-            this.table.wall.tileArray.forEach(registerTile);
-        }
-
-        if (Array.isArray(this.table?.players)) {
-            this.table.players.forEach(player => {
-                player?.hand?.hiddenTileSet?.tileArray?.forEach(registerTile);
-                player?.hand?.exposedTileSetArray?.forEach(set => {
-                    set?.tileArray?.forEach(registerTile);
-                });
-            });
+        if (this.wall?.tileArray) {
+            this.wall.tileArray.forEach(registerTile);
         }
     }
 
@@ -116,10 +110,10 @@ export class TileManager {
      * @param {number} tileIndex
      */
     removeTileFromWall(tileIndex) {
-        if (!this.table?.wall?.tileArray) {
+        if (!this.wall?.tileArray) {
             return;
         }
-        const wallTiles = this.table.wall.tileArray;
+        const wallTiles = this.wall.tileArray;
         const idx = wallTiles.findIndex(tile => tile.index === tileIndex);
         if (idx >= 0) {
             wallTiles.splice(idx, 1);
@@ -127,44 +121,19 @@ export class TileManager {
     }
 
     /**
-     * @deprecated Phase 2 of legacy Hand elimination - No longer needed
-     * GameController emits HAND_UPDATED events which trigger HandRenderer.syncAndRender()
-     * HandData is the source of truth, not legacy Hand objects
-     *
-     * Insert a tile into a player's hidden hand
-     * @param {number} playerIndex
-     * @param {Tile} tile
+     * @deprecated Phase 2 of legacy Hand elimination - Removed in Phase 5
+     * Use GameController HAND_UPDATED events with HandRenderer.syncAndRender()
      */
     insertTileIntoHand(playerIndex, tile) {
-        console.warn("TileManager.insertTileIntoHand is deprecated - use GameController HAND_UPDATED events");
-        const player = this.table?.players?.[playerIndex];
-        if (!player?.hand || !tile) {
-            return;
-        }
-        player.hand.insertHidden(tile);
-        this.tileSprites.set(tile.index, tile);
+        console.error("TileManager.insertTileIntoHand has been removed - use GameController HAND_UPDATED events");
     }
 
     /**
-     * @deprecated Phase 2 of legacy Hand elimination - No longer needed
-     * GameController emits HAND_UPDATED events which trigger HandRenderer.syncAndRender()
-     * HandData is the source of truth, not legacy Hand objects
-     *
-     * Remove a tile from a player's hidden hand
-     * @param {number} playerIndex
-     * @param {Tile} tile
+     * @deprecated Phase 2 of legacy Hand elimination - Removed in Phase 5
+     * Use GameController HAND_UPDATED events with HandRenderer.syncAndRender()
      */
     removeTileFromHand(playerIndex, tile) {
-        console.warn("TileManager.removeTileFromHand is deprecated - use GameController HAND_UPDATED events");
-        const player = this.table?.players?.[playerIndex];
-        if (!player?.hand || !tile) {
-            return;
-        }
-        if (typeof player.hand.removeHidden === "function") {
-            player.hand.removeHidden(tile);
-        } else if (player.hand.hiddenTileSet?.remove) {
-            player.hand.hiddenTileSet.remove(tile);
-        }
+        console.error("TileManager.removeTileFromHand has been removed - use GameController HAND_UPDATED events");
     }
 
     /**
@@ -172,14 +141,13 @@ export class TileManager {
      * @param {Tile} tile
      */
     addTileToDiscardPile(tile) {
-        if (!tile || !this.table?.discards) {
+        if (!tile || !this.discards) {
             return null;
         }
-        const discards = this.table.discards;
-        discards.insertDiscard(tile);
-        const lastIndex = discards.tileArray.length - 1;
-        discards.layoutTiles(tile);
-        const {x, y, scale} = discards.getTilePosition(lastIndex);
+        this.discards.insertDiscard(tile);
+        const lastIndex = this.discards.tileArray.length - 1;
+        this.discards.layoutTiles(tile);
+        const {x, y, scale} = this.discards.getTilePosition(lastIndex);
         tile.scale = scale;
         tile.angle = 0;
         tile.showTile(true, true);
@@ -353,10 +321,10 @@ export class TileManager {
      * @returns {Tile|null}
      */
     findTileInWall(index) {
-        if (!this.table?.wall?.tileArray) {
+        if (!this.wall?.tileArray) {
             return null;
         }
-        return this.table.wall.tileArray.find(tile => tile.index === index) || null;
+        return this.wall.tileArray.find(tile => tile.index === index) || null;
     }
 
     /**
@@ -695,20 +663,12 @@ export class TileManager {
     }
 
     /**
-     * Get tile at specific hand position for a player
-     *
-     * @param {number} playerIndex - Player position
-     * @param {number} handIndex - Index in hand (0-13)
-     * @returns {Phaser.Physics.Arcade.Sprite|null}
+     * @deprecated Phase 5 - Removed table dependency
+     * Use HandRenderer to access tiles by playerIndex and handData
      */
     getTileAtHandPosition(playerIndex, handIndex) {
-        if (!this.table || !this.table.players) return null;
-
-        const player = this.table.players[playerIndex];
-        if (!player || !player.hand || !player.hand.tiles) return null;
-
-        const tile = player.hand.tiles[handIndex];
-        return tile ? this.getTileSprite(tile) : null;
+        console.error("TileManager.getTileAtHandPosition has been removed - use HandRenderer with HandData");
+        return null;
     }
 
     /**

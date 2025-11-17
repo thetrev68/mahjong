@@ -16,12 +16,12 @@ export class SelectionManager {
     /**
      * Create a new SelectionManager
      * @param {Hand} hand - The Hand object containing tiles to manage selection for
-     * @param {Object} table - Table object for accessing player info
+     * @param {number} playerAngle - The angle for tile animations (from playerInfo.angle)
      * @param {ButtonManager} buttonManager - Optional ButtonManager for updating button states
      */
-    constructor(hand, table, buttonManager = null) {
+    constructor(hand, playerAngle, buttonManager = null) {
         this.hand = hand;
-        this.table = table;
+        this.playerAngle = playerAngle;  // Phase 5: Direct dependency instead of table coupling
         this.buttonManager = buttonManager;
 
         // Selection state
@@ -447,8 +447,8 @@ export class SelectionManager {
      * visualizeTile(tile, false);  // Hide selection
      */
     visualizeTile(tile, isSelected) {
-        const playerObject = this.table.players[PLAYER.BOTTOM];
-        const angle = playerObject.playerInfo.angle;
+        // Phase 5: Use playerAngle directly instead of accessing via table
+        const angle = this.playerAngle;
 
         if (isSelected) {
             // Raise tile and increase depth

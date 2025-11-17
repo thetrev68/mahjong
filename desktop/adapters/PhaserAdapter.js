@@ -45,7 +45,8 @@ export class PhaserAdapter {
         this.tilesRemovedFromWall = 0;
 
         // Initialize Phase 2 managers
-        this.tileManager = new TileManager(scene, table);
+        // Phase 5: Pass direct dependencies instead of entire table
+        this.tileManager = new TileManager(scene, table.wall, table.discards);
         this.dialogManager = new DialogManager(scene);
 
         // Initialize Phase 3 managers and renderers
@@ -58,14 +59,18 @@ export class PhaserAdapter {
         this.buttonManager = new ButtonManager(scene, gameController);
 
         // Create SelectionManager for human player with ButtonManager reference
+        // Phase 5: Pass playerAngle directly instead of entire table
         const humanHand = table.players[PLAYER.BOTTOM].hand;
-        this.selectionManager = new SelectionManager(humanHand, table, this.buttonManager);
+        const playerAngle = table.players[PLAYER.BOTTOM].playerInfo.angle;
+        this.selectionManager = new SelectionManager(humanHand, playerAngle, this.buttonManager);
 
         // Now set SelectionManager reference on ButtonManager
         this.buttonManager.selectionManager = this.selectionManager;
 
+        // Phase 5: Pass direct dependencies instead of table
         this.blankSwapManager = new BlankSwapManager({
-            table,
+            hand: humanHand,
+            discardPile: table.discards,
             selectionManager: this.selectionManager,
             buttonManager: this.buttonManager,
             gameController
@@ -78,7 +83,8 @@ export class PhaserAdapter {
      * Handle wall creation (register all physical tiles with TileManager)
      */
     onWallCreated() {
-        this.tileManager.initializeFromTable();
+        // Phase 5: Renamed method - now only initializes wall tiles
+        this.tileManager.initializeFromWall();
     }
 
     /**
@@ -208,7 +214,8 @@ export class PhaserAdapter {
 
         // Reset Phaser table
         this.table.reset();
-        this.tileManager.initializeFromTable();
+        // Phase 5: Renamed method - now only initializes wall tiles
+        this.tileManager.initializeFromWall();
 
         // Hide start button
         const startButton = document.getElementById("start");

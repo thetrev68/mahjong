@@ -9,8 +9,10 @@ import {printInfo, printMessage} from "../../utils.js";
  * discard pile selection, prompts) related to the house-rule blank swap.
  */
 export class BlankSwapManager {
-    constructor({table, selectionManager, buttonManager, gameController}) {
-        this.table = table;
+    constructor({hand, discardPile, selectionManager, buttonManager, gameController}) {
+        // Phase 5: Direct dependencies instead of table coupling
+        this.hand = hand;  // Legacy Phaser Hand object for human player
+        this.discardPile = discardPile;  // Discard pile object
         this.selectionManager = selectionManager;
         this.buttonManager = buttonManager;
         this.gameController = gameController;
@@ -60,7 +62,7 @@ export class BlankSwapManager {
      */
     handleBlankExchangeEvent() {
         this.isSelectingDiscard = false;
-        this.table?.discards?.disableDiscardSelection?.();
+        this.discardPile?.disableDiscardSelection?.();
         this.selectionManager?.clearSelection?.();
         this.printDefaultPrompt();
         this.refreshButton();
@@ -101,10 +103,9 @@ export class BlankSwapManager {
             return false;
         }
 
-        const humanHand = this.table?.players?.[PLAYER.BOTTOM]?.hand;
-        const tiles = humanHand?.hiddenTileSet?.tileArray || [];
+        const tiles = this.hand?.hiddenTileSet?.tileArray || [];
         const hasBlank = tiles.some(tile => tile.suit === SUIT.BLANK);
-        const selectableDiscards = this.table?.discards?.getSelectableDiscards?.() || [];
+        const selectableDiscards = this.discardPile?.getSelectableDiscards?.() || [];
 
         return hasBlank && selectableDiscards.length > 0;
     }
@@ -123,8 +124,7 @@ export class BlankSwapManager {
             return;
         }
 
-        const discardPile = this.table?.discards;
-        if (!discardPile || (discardPile.getSelectableDiscards?.() || []).length === 0) {
+        if (!this.discardPile || (this.discardPile.getSelectableDiscards?.() || []).length === 0) {
             printInfo("No discard tiles are available to retrieve.");
             return;
         }
@@ -133,8 +133,8 @@ export class BlankSwapManager {
         this.buttonManager?.disableButton("button4");
         printInfo("Select a discard tile to retrieve with your blank.");
 
-        discardPile.enableDiscardSelection((targetTile) => {
-            discardPile.disableDiscardSelection();
+        this.discardPile.enableDiscardSelection((targetTile) => {
+            this.discardPile.disableDiscardSelection();
             this.isSelectingDiscard = false;
             this.commitSwap(selection[0], targetTile);
         });
@@ -145,7 +145,7 @@ export class BlankSwapManager {
      */
     cancelSwapFlow(printPrompt = true) {
         if (this.isSelectingDiscard) {
-            this.table?.discards?.disableDiscardSelection?.();
+            this.discardPile?.disableDiscardSelection?.();
             this.isSelectingDiscard = false;
         }
         if (printPrompt) {

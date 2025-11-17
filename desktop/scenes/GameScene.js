@@ -107,29 +107,28 @@ class GameScene extends Phaser.Scene {
             this.prepareActionPanelForNewGame();
         });
 
-        // Initialize HintAnimationManager with direct dependencies
-        // Phase 4: Pass gameController instead of gTable to access HandData
-        this.hintAnimationManager = new HintAnimationManager(
-            this,
-            this.gameController,
-            this.gameController.aiEngine,
-            this.gameController.cardValidator
-        );
+        // Phase 5: HintAnimationManager will receive TileManager from PhaserAdapter after creation
+        // This avoids circular dependency (HintAnimationManager needs TileManager, which is created in PhaserAdapter)
+        this.hintAnimationManager = null;
 
-        // Set table references for Hand/TileSet (Phase 3.5 refactoring)
-        for (let i = 0; i < this.gTable.players.length; i++) {
-            this.gTable.players[i].hand.table = this.gTable;
-            this.gTable.players[i].hand.hiddenTileSet.table = this.gTable;
-            for (const tileSet of this.gTable.players[i].hand.exposedTileSetArray) {
-                tileSet.table = this.gTable;
-            }
-        }
+        // Phase 5: Removed legacy table coupling
+        // Managers now receive direct dependencies instead of accessing via table
+        // HandData (from GameController) is the authoritative source of truth
 
         // Create PhaserAdapter to bridge GameController events to Phaser
         this.adapter = new PhaserAdapter(
             this.gameController,
             this,  // scene
             this.gTable
+        );
+
+        // Phase 5: Initialize HintAnimationManager after PhaserAdapter (needs TileManager)
+        this.hintAnimationManager = new HintAnimationManager(
+            this,
+            this.gameController,
+            this.gameController.aiEngine,
+            this.gameController.cardValidator,
+            this.adapter.tileManager  // Pass TileManager for sprite access
         );
 
         // Expose for testing

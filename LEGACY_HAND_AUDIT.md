@@ -158,13 +158,52 @@
 - ✅ No `dupHand()` references in active code (only in .archive/)
 - ✅ AI hint system works with HandData instead of legacy Hand objects
 
-### Phase 5: Eliminate Table Reference Coupling
-**Target:** `hand.table` setter in GameScene
+### Phase 5: ✅ Eliminate Table Reference Coupling (COMPLETED)
+**Target:** Remove `hand.table` setter in GameScene and decouple managers from legacy table structure
 
-**Approach:**
-1. Managers should not need table references in Hand objects
-2. Pass table as parameter to methods that need it
-3. Remove `hand.table` assignment
+**What Changed:**
+- Managers now receive **direct dependencies** instead of accessing via `this.table`
+- HintAnimationManager receives TileManager for sprite access (not legacy table)
+- SelectionManager receives playerAngle directly (not table.players)
+- BlankSwapManager receives hand and discardPile directly
+- TileManager receives wall and discards directly (not entire table)
+- Removed `hand.table` setter from GameScene entirely
+
+**Architecture Improvement:**
+- **Managers access Phaser sprites via TileManager**, not legacy Hand objects
+- **HandData from GameController** is authoritative source of truth
+- **No table coupling** - managers cannot access legacy table structure
+- Direct dependencies make requirements explicit (better testability + clarity)
+
+**Files Updated:**
+- ✅ [HintAnimationManager.js:17](desktop/managers/HintAnimationManager.js#L17) - Constructor receives tileManager
+- ✅ [HintAnimationManager.js:38-86](desktop/managers/HintAnimationManager.js#L38-L86) - Uses HandData + TileManager for glow effects
+- ✅ [HintAnimationManager.js:153-192](desktop/managers/HintAnimationManager.js#L153-L192) - getAllPlayerTiles/getHiddenPlayerTiles use TileManager
+- ✅ [SelectionManager.js:22-25](desktop/managers/SelectionManager.js#L22-L25) - Constructor receives playerAngle
+- ✅ [SelectionManager.js:449-472](desktop/managers/SelectionManager.js#L449-L472) - visualizeTile() uses playerAngle directly
+- ✅ [BlankSwapManager.js:12-18](desktop/managers/BlankSwapManager.js#L12-L18) - Constructor receives hand and discardPile
+- ✅ [BlankSwapManager.js:63-153](desktop/managers/BlankSwapManager.js#L63-L153) - All methods use direct dependencies
+- ✅ [TileManager.js:23-27](desktop/managers/TileManager.js#L23-L27) - Constructor receives wall and discards
+- ✅ [TileManager.js:65-77](desktop/managers/TileManager.js#L65-L77) - initializeFromWall() (renamed, simplified)
+- ✅ [TileManager.js:127-137](desktop/managers/TileManager.js#L127-L137) - Deprecated methods error instead of warn
+- ✅ [PhaserAdapter.js:49](desktop/adapters/PhaserAdapter.js#L49) - TileManager construction with wall/discards
+- ✅ [PhaserAdapter.js:63-64](desktop/adapters/PhaserAdapter.js#L63-L64) - SelectionManager with playerAngle
+- ✅ [PhaserAdapter.js:70-76](desktop/adapters/PhaserAdapter.js#L70-L76) - BlankSwapManager with direct dependencies
+- ✅ [GameScene.js:114-116](desktop/scenes/GameScene.js#L114-L116) - Removed hand.table setter entirely
+- ✅ [GameScene.js:132-138](desktop/scenes/GameScene.js#L132-L138) - HintAnimationManager receives tileManager
+
+**Test Results:**
+- ✅ All 20 desktop tests passed (10 tests x 2 browsers)
+- ✅ No console errors in gameplay
+- ✅ Tile selection, glow effects, and UI interactions working correctly
+- ✅ Zero `this.table` references in manager constructors
+
+**Architecture Achievement:**
+Phase 5 completes the **pure event-driven architecture**:
+- GameController emits events with HandData (state)
+- Managers receive explicit dependencies (no hidden coupling)
+- TileManager provides sprite access (Phaser layer)
+- No managers access legacy table structure
 
 ### Phase 6: Final Cleanup
 **Target:** Delete legacy files
@@ -196,9 +235,10 @@
 - Phase 2 ✅ (completed, tested - all desktop tests passing)
 - Phase 3 ✅ (completed, tested - auto-sort working)
 - Phase 4 ✅ (completed, tested - AI hints working with HandData)
+- Phase 5 ✅ (completed, tested - all desktop tests passing, zero table coupling)
 
 **High Risk:**
-- Phase 5-6: Complete elimination (requires thorough testing)
+- Phase 6: Complete elimination of legacy files (requires thorough testing)
 
 ---
 
@@ -209,7 +249,7 @@
 3. ~~**Follow-up:** Address joker swap GameController integration~~ ✅ Complete
 4. ~~**Current:** Implement Phase 3 (move sorting to HandData)~~ ✅ Complete
 5. ~~**Next:** Implement Phase 4 (replace dupHand() with HandData.clone() in HintAnimationManager)~~ ✅ Complete
-6. **Next:** Implement Phase 5 (eliminate table reference coupling)
+6. ~~**Next:** Implement Phase 5 (eliminate table reference coupling)~~ ✅ Complete
 7. **Future:** Implement Phase 6 (delete legacy Hand/Player/Table gameObjects)
 
 ## Implementation Notes
@@ -291,4 +331,54 @@
 - Zero `dupHand()` references in active codebase (only in .archive/ docs)
 - AI Engine successfully analyzes HandData without legacy Hand objects
 - All desktop tests passing (10/10)
+
+### Phase 5 Completion (2025-11-17)
+
+**What Changed:**
+- Eliminated ALL `this.table` references from manager constructors
+- Managers now receive explicit dependencies instead of accessing via table
+- HintAnimationManager uses TileManager to get Phaser sprites from HandData
+- SelectionManager receives playerAngle directly (not table.players)
+- BlankSwapManager receives hand and discardPile directly
+- TileManager receives wall and discards directly
+- Removed `hand.table` setter from GameScene (lines 114-126 deleted)
+
+**Architecture Improvement:**
+- **Pure event-driven architecture** - managers don't access game state directly
+- **Explicit dependencies** - constructor signatures show exactly what each manager needs
+- **Sprite access pattern**: HandData (state) → TileManager.getTileSprite() → Phaser sprite
+- **No hidden coupling** - cannot accidentally access table internals
+- **Better testability** - dependencies can be mocked easily
+
+**Key Pattern Established:**
+```javascript
+// OLD (Phase 4 and earlier):
+const hand = this.table.players[PLAYER.BOTTOM].hand;
+const tiles = hand.getHiddenTileArray();  // Get Phaser sprites via legacy Hand
+
+// NEW (Phase 5):
+const handData = this.gameController.players[PLAYER.BOTTOM].hand;  // Get HandData
+for (const tileData of handData.tiles) {
+    const phaserTile = this.tileManager.getTileSprite(tileData.index);  // Get Phaser sprite
+}
+```
+
+**Code Locations:**
+- [HintAnimationManager.js:17](desktop/managers/HintAnimationManager.js#L17) - Receives tileManager in constructor
+- [HintAnimationManager.js:68-86](desktop/managers/HintAnimationManager.js#L68-L86) - findNextUnhighlightedTileInHand() uses HandData + TileManager
+- [HintAnimationManager.js:153-192](desktop/managers/HintAnimationManager.js#L153-L192) - getAllPlayerTiles/getHiddenPlayerTiles use TileManager
+- [SelectionManager.js:22-25](desktop/managers/SelectionManager.js#L22-L25) - Receives playerAngle
+- [SelectionManager.js:449-472](desktop/managers/SelectionManager.js#L449-L472) - visualizeTile() uses playerAngle directly
+- [BlankSwapManager.js:12-18](desktop/managers/BlankSwapManager.js#L12-L18) - Receives hand and discardPile
+- [TileManager.js:23-27](desktop/managers/TileManager.js#L23-L27) - Receives wall and discards
+- [TileManager.js:65-77](desktop/managers/TileManager.js#L65-77) - initializeFromWall() (renamed from initializeFromTable)
+- [GameScene.js:114-116](desktop/scenes/GameScene.js#L114-L116) - Removed hand.table setter entirely
+- [PhaserAdapter.js:49,63-64,70-76](desktop/adapters/PhaserAdapter.js#L49) - All manager constructions updated
+
+**Impact:**
+- Zero `this.table` references in any manager
+- All 20 desktop tests passing (10 tests × 2 browsers)
+- No console errors during gameplay
+- Tile selection, glow effects, and AI hints work correctly
+- Architecture now ready for Phase 6 (legacy file deletion)
 
