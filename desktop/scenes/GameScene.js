@@ -102,7 +102,7 @@ class GameScene extends Phaser.Scene {
         });
 
         // Expose gameController to window for testing
-        window.gameController = this.gameController;
+        // window.gameController = this.gameController; // duplicate (see line 135)
         this.gameController.on("GAME_STARTED", () => {
             this.prepareActionPanelForNewGame();
         });
