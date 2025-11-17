@@ -107,10 +107,11 @@ class GameScene extends Phaser.Scene {
             this.prepareActionPanelForNewGame();
         });
 
-        // Initialize HintAnimationManager with direct dependencies (Phase 3.5: Direct dependencies, no gameLogicStub)
+        // Initialize HintAnimationManager with direct dependencies
+        // Phase 4: Pass gameController instead of gTable to access HandData
         this.hintAnimationManager = new HintAnimationManager(
             this,
-            this.gTable,
+            this.gameController,
             this.gameController.aiEngine,
             this.gameController.cardValidator
         );

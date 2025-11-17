@@ -14,15 +14,18 @@ import {TileData} from "../../core/models/TileData.js";
 import { renderPatternVariation } from "../../tileDisplayUtils.js";
 
 export class HintAnimationManager {
-    constructor(scene, table, aiEngine, card) {
+    constructor(scene, gameController, aiEngine, card) {
         this.scene = scene;
-        this.table = table;
+        this.gameController = gameController;  // Phase 4: Access HandData from gameController.players
         this.aiEngine = aiEngine;  // Modern name, not legacy gameAI
         this.card = card;
         this.savedGlowData = null;
         this.currentHintData = null;
         this.isPanelExpanded = false;
         this.glowedTiles = [];
+        // Still need table reference for legacy Phaser tile access during Phase 4
+        // This will be removed in Phase 6 when legacy Hand objects are eliminated
+        this.table = scene.gTable;
     }
 
     // Apply glow effects to discard suggestion tiles
@@ -126,15 +129,16 @@ export class HintAnimationManager {
 
     // Centralized method to get recommendations from the AI engine
     getRecommendations() {
-        const hand = this.table.players[PLAYER.BOTTOM].hand.dupHand();
+        // Phase 4: Use HandData from GameController (authoritative source)
+        const handData = this.gameController.players[PLAYER.BOTTOM].hand.clone();
 
         // Add invalid tile if hand has 13 tiles, as the engine expects 14
-        if (hand.getLength() === 13) {
+        if (handData.getLength() === 13) {
             const invalidTile = new TileData(SUIT.INVALID, VNUMBER.INVALID);
-            hand.insertHidden(invalidTile);
+            handData.addTile(invalidTile);  // Modern method, not insertHidden()
         }
 
-        const result = this.aiEngine.getTileRecommendations(hand);
+        const result = this.aiEngine.getTileRecommendations(handData);
 
         // Reverse recommendations for display: DISCARD, PASS, KEEP
         return {
@@ -172,11 +176,13 @@ export class HintAnimationManager {
 
         // Panel is expanded, proceed with full update including glow effects
         const result = this.getRecommendations();
-        const hand = this.table.players[PLAYER.BOTTOM].hand.dupHand();
-        if (hand.getLength() === 13) {
-            hand.insertHidden(new TileData(SUIT.INVALID, VNUMBER.INVALID));
+
+        // Phase 4: Use HandData from GameController
+        const handData = this.gameController.players[PLAYER.BOTTOM].hand.clone();
+        if (handData.getLength() === 13) {
+            handData.addTile(new TileData(SUIT.INVALID, VNUMBER.INVALID));
         }
-        const rankCardHands = this.card.rankHandArray14(hand);
+        const rankCardHands = this.card.rankHandArray14(handData);
         this.card.sortHandRankArray(rankCardHands);
 
         // Update visual glow effects (only if panel is expanded)
@@ -189,11 +195,13 @@ export class HintAnimationManager {
     // New method for updating hint text without glow effects
     updateHintDisplayOnly() {
         const result = this.getRecommendations();
-        const hand = this.table.players[PLAYER.BOTTOM].hand.dupHand();
-        if (hand.getLength() === 13) {
-            hand.insertHidden(new TileData(SUIT.INVALID, VNUMBER.INVALID));
+
+        // Phase 4: Use HandData from GameController
+        const handData = this.gameController.players[PLAYER.BOTTOM].hand.clone();
+        if (handData.getLength() === 13) {
+            handData.addTile(new TileData(SUIT.INVALID, VNUMBER.INVALID));
         }
-        const rankCardHands = this.card.rankHandArray14(hand);
+        const rankCardHands = this.card.rankHandArray14(handData);
         this.card.sortHandRankArray(rankCardHands);
 
         // Update hint text content only (no glow effects)

@@ -136,16 +136,27 @@
 - No more legacy `SORT_HAND_REQUESTED` event or direct manipulation of Phaser hand objects
 - Sorting is now presentation logic in HandRenderer, not game logic
 
-### Phase 4: Replace dupHand() with HandData Clone
+### Phase 4: ✅ Replace dupHand() with HandData Clone (COMPLETED)
 **Target:** HintAnimationManager
 
-**Approach:**
-1. Create `HandData.clone()` method
-2. Pass cloned HandData to AI engine instead of legacy Hand object
-3. Card validator already works with TileData arrays
+**What Changed:**
+- HintAnimationManager now receives `gameController` instead of `table`
+- Access HandData directly from `gameController.players[PLAYER.BOTTOM].hand`
+- All 3 `dupHand()` calls replaced with `HandData.clone()`
+- All `insertHidden()` calls replaced with `addTile()` (modern method)
+- No legacy compatibility methods added - pure HandData usage
 
-**Files to update:**
-- `HintAnimationManager.js:129, 175, 192` - Use `handData.clone()`
+**Files updated:**
+- ✅ [GameScene.js:110-117](desktop/scenes/GameScene.js#L110-L117) - Pass gameController to HintAnimationManager
+- ✅ [HintAnimationManager.js:17-28](desktop/managers/HintAnimationManager.js#L17-L28) - Updated constructor
+- ✅ [HintAnimationManager.js:131-148](desktop/managers/HintAnimationManager.js#L131-L148) - getRecommendations() uses HandData.clone()
+- ✅ [HintAnimationManager.js:169-193](desktop/managers/HintAnimationManager.js#L169-L193) - updateHintsForNewTiles() uses HandData.clone()
+- ✅ [HintAnimationManager.js:196-209](desktop/managers/HintAnimationManager.js#L196-L209) - updateHintDisplayOnly() uses HandData.clone()
+
+**Test Results:**
+- ✅ All 10 desktop tests passed
+- ✅ No `dupHand()` references in active code (only in .archive/)
+- ✅ AI hint system works with HandData instead of legacy Hand objects
 
 ### Phase 5: Eliminate Table Reference Coupling
 **Target:** `hand.table` setter in GameScene
@@ -170,8 +181,10 @@
 - `gameObjects_player.js`: -35 lines (Phase 6)
 - `PhaserAdapter.js`: -138 lines (Phase 2: -120 lines, Phase 3: -18 lines)
 - `TileManager.js`: -20 lines (Phase 6: deprecated methods removed)
+- `HintAnimationManager.js`: +0 lines (Phase 4: refactored existing code, no lines removed yet)
 - **Phase 2 Complete: ~120 lines removed**
 - **Phase 3 Complete: ~18 lines removed**
+- **Phase 4 Complete: 0 lines removed (refactor only, enables Phase 6)**
 - **Total Estimated: ~1693 lines to be removed by Phase 6**
 
 ---
@@ -182,9 +195,7 @@
 - Phase 1 ✅ (completed, working)
 - Phase 2 ✅ (completed, tested - all desktop tests passing)
 - Phase 3 ✅ (completed, tested - auto-sort working)
-
-**Medium Risk:**
-- Phase 4: HintAnimationManager (need to verify AI still works)
+- Phase 4 ✅ (completed, tested - AI hints working with HandData)
 
 **High Risk:**
 - Phase 5-6: Complete elimination (requires thorough testing)
@@ -197,8 +208,9 @@
 2. ~~**Next:** Implement Phase 2 (remove direct hand manipulation in PhaserAdapter)~~ ✅ Complete
 3. ~~**Follow-up:** Address joker swap GameController integration~~ ✅ Complete
 4. ~~**Current:** Implement Phase 3 (move sorting to HandData)~~ ✅ Complete
-5. **Next:** Implement Phase 4 (replace dupHand() with HandData.clone() in HintAnimationManager)
-6. **Future:** Gradually work through Phases 5-6 with testing between each
+5. ~~**Next:** Implement Phase 4 (replace dupHand() with HandData.clone() in HintAnimationManager)~~ ✅ Complete
+6. **Next:** Implement Phase 5 (eliminate table reference coupling)
+7. **Future:** Implement Phase 6 (delete legacy Hand/Player/Table gameObjects)
 
 ## Implementation Notes
 
@@ -252,4 +264,31 @@
 - [HandRenderer.js:119-123](mobile/renderers/HandRenderer.js#L119-L123) - Mobile auto-sort
 - [GameController.js:1096-1112](core/GameController.js#L1096-L1112) - Manual sort handler
 - [PhaserAdapter.js:124](desktop/adapters/PhaserAdapter.js#L124) - Removed event listener (~18 lines)
+
+### Phase 4 Completion (2025-11-17)
+
+**What Changed:**
+- HintAnimationManager now receives `gameController` instead of legacy `table`
+- Accesses authoritative HandData from `gameController.players[PLAYER.BOTTOM].hand`
+- All 3 `dupHand()` calls replaced with `HandData.clone()`
+- Uses modern `addTile()` method instead of legacy `insertHidden()`
+- AI hint system now fully decoupled from legacy Phaser Hand objects
+
+**Architecture Improvement:**
+- HintAnimationManager uses GameController as source of truth (not legacy table.players)
+- No legacy compatibility methods added - pure HandData usage throughout
+- AI analysis works on HandData clones, maintaining clean separation
+- Card validator receives HandData directly (already supported TileData arrays)
+
+**Code Locations:**
+- [GameScene.js:110-117](desktop/scenes/GameScene.js#L110-L117) - Pass gameController to HintAnimationManager
+- [HintAnimationManager.js:17-28](desktop/managers/HintAnimationManager.js#L17-L28) - Updated constructor to accept gameController
+- [HintAnimationManager.js:131-148](desktop/managers/HintAnimationManager.js#L131-L148) - getRecommendations() refactored
+- [HintAnimationManager.js:169-193](desktop/managers/HintAnimationManager.js#L169-L193) - updateHintsForNewTiles() refactored
+- [HintAnimationManager.js:196-209](desktop/managers/HintAnimationManager.js#L196-L209) - updateHintDisplayOnly() refactored
+
+**Impact:**
+- Zero `dupHand()` references in active codebase (only in .archive/ docs)
+- AI Engine successfully analyzes HandData without legacy Hand objects
+- All desktop tests passing (10/10)
 
