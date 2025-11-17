@@ -228,6 +228,8 @@ class GameScene extends Phaser.Scene {
         }
         this.actionPanelEl.classList.remove("command-bar--hidden");
         this.actionPanelEl.removeAttribute("aria-hidden");
+        // Remove inline display style that was set by settings.js to hide the panel on home page
+        this.actionPanelEl.style.display = "";
     }
 
     setActionPanelDisabled(disabled) {
