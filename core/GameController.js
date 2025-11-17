@@ -712,8 +712,24 @@ export class GameController extends EventEmitter {
             tileToDiscard = await this.aiEngine.chooseDiscard(player.hand);
         }
 
+        if (!tileToDiscard) {
+            console.error("chooseDiscard: No tile returned, falling back to first tile", {
+                playerIndex: this.currentPlayer
+            });
+            tileToDiscard = player.hand.tiles[0];
+            if (!tileToDiscard) {
+                throw new Error("chooseDiscard: Player hand is empty, cannot discard");
+            }
+        }
+
         // Remove from hand
-        player.hand.removeTile(tileToDiscard);
+        const removed = player.hand.removeTile(tileToDiscard);
+        if (!removed) {
+            console.error("chooseDiscard: Failed to remove tile from hand", {
+                playerIndex: this.currentPlayer,
+                tile: tileToDiscard
+            });
+        }
 
         // Add to discard pile
         this.discards.push(tileToDiscard);
@@ -747,6 +763,11 @@ export class GameController extends EventEmitter {
         this.setState(STATE.LOOP_QUERY_CLAIM_DISCARD);
 
         const lastDiscard = this.discards[this.discards.length - 1];
+
+        // Jokers and blanks are dead when discarded - cannot be claimed
+        if (!lastDiscard || lastDiscard.isJoker() || lastDiscard.isBlank()) {
+            return {claimed: false};
+        }
 
         // Query each other player
         for (let i = 1; i <= 3; i++) {
@@ -802,6 +823,78 @@ export class GameController extends EventEmitter {
     }
 
     /**
+     * Exchange a blank tile from the human player's hand with a tile in the discard pile
+     * @param {TileData|Object} blankTileInput
+     * @param {TileData|Object} discardTileInput
+     * @returns {boolean} True if exchange succeeded
+     */
+    exchangeBlankWithDiscard(blankTileInput, discardTileInput) {
+        if (!this.settings.useBlankTiles) {
+            throw new Error("Blank exchange is disabled (house rule off)");
+        }
+        if (this.state !== STATE.LOOP_CHOOSE_DISCARD) {
+            throw new Error("Blank exchange only allowed during discard selection");
+        }
+
+        const player = this.players[PLAYER.BOTTOM];
+        if (!player || !player.isHuman) {
+            throw new Error("Blank exchange only available to human player");
+        }
+
+        const blankTile = normalizeTileData(blankTileInput);
+        const targetDiscardTile = normalizeTileData(discardTileInput);
+
+        if (!blankTile.isBlank()) {
+            throw new Error("Selected tile is not a blank");
+        }
+
+        const removed = player.hand.removeTile(blankTile);
+        if (!removed) {
+            throw new Error("Blank tile not found in hand");
+        }
+
+        const discardIndex = this.discards.findIndex(tile => tile.isSameTile(targetDiscardTile));
+        if (discardIndex === -1) {
+            throw new Error("Selected discard tile no longer available");
+        }
+
+        const candidateTile = this.discards[discardIndex];
+        if (candidateTile.isJoker()) {
+            throw new Error("Cannot exchange blank for a joker");
+        }
+
+        // Remove selected tile from discard pile and push blank to the top
+        const [tileToTake] = this.discards.splice(discardIndex, 1);
+        this.discards.push(blankTile);
+
+        // Add retrieved tile to hand
+        player.hand.addTile(tileToTake);
+        player.hand.sortBySuit();
+
+        // Emit blank exchange event for renderers
+        const exchangeEvent = GameEvents.createBlankExchangeEvent(
+            PLAYER.BOTTOM,
+            blankTile.toJSON(),
+            tileToTake.toJSON(),
+            this.discards.length - 1
+        );
+        this.emit("BLANK_EXCHANGED", exchangeEvent);
+
+        // Notify UI of updated hand state
+        const handEvent = GameEvents.createHandUpdatedEvent(PLAYER.BOTTOM, player.hand.toJSON());
+        this.emit("HAND_UPDATED", handEvent);
+
+        // Inform player via message log
+        const messageEvent = GameEvents.createMessageEvent(
+            `Blank exchanged for ${tileToTake.getText()} from discards.`,
+            "info"
+        );
+        this.emit("MESSAGE", messageEvent);
+
+        return true;
+    }
+
+    /**
      * Handle a claimed discard
      * @param {Object} claimResult
      */
@@ -846,36 +939,65 @@ export class GameController extends EventEmitter {
     exposeTiles(playerIndex, exposureType, claimedTile) {
         const player = this.players[playerIndex];
 
-        // Find matching tiles in hand
-        const matchingTiles = player.hand.tiles.filter(t => t.equals(claimedTile));
+        // Find matching tiles and jokers in hand (excluding the claimed tile itself)
+        const matchingTiles = player.hand.tiles.filter(
+            (t) => t.equals(claimedTile) && !t.isSameTile(claimedTile)
+        );
+        const jokerTiles = player.hand.tiles.filter(t => t.isJoker());
 
         const requiredCount = exposureType === "Pung" ? 2 : exposureType === "Kong" ? 3 : 4;
+        const totalAvailable = matchingTiles.length + jokerTiles.length;
 
-        if (matchingTiles.length >= requiredCount) {
-            // Remove from hidden hand
-            const tilesToExpose = [claimedTile, ...matchingTiles.slice(0, requiredCount)];
-            tilesToExpose.forEach(t => player.hand.removeTile(t));
-
-            // Add to exposures
-            const exposure = new ExposureData({
-                type: exposureType.toUpperCase(),
-                tiles: tilesToExpose
-            });
-            player.hand.addExposure(exposure);
-
-            // Emit rich tiles exposed event
-            const exposedEvent = GameEvents.createTilesExposedEvent(
+        if (totalAvailable < requiredCount) {
+            console.warn("Exposure attempted without enough tiles", {
                 playerIndex,
                 exposureType,
-                tilesToExpose.map(t => ({suit: t.suit, number: t.number, index: t.index})),
-                {duration: 300}
-            );
-            this.emit("TILES_EXPOSED", exposedEvent);
-
-            // Emit hand updated event
-            const handEvent = GameEvents.createHandUpdatedEvent(playerIndex, player.hand.toJSON());
-            this.emit("HAND_UPDATED", handEvent);
+                claimedTile
+            });
+            this.setState(STATE.LOOP_EXPOSE_TILES_COMPLETE);
+            return;
         }
+
+        const claimedRemoved = player.hand.removeTile(claimedTile);
+        if (!claimedRemoved) {
+            console.warn("Failed to remove claimed tile from hand during exposure", {
+                playerIndex,
+                claimedTile
+            });
+        }
+
+        const naturalTiles = matchingTiles.slice(0, Math.min(requiredCount, matchingTiles.length));
+        const remainingNeeded = requiredCount - naturalTiles.length;
+        const jokersUsed = jokerTiles.slice(0, Math.max(0, remainingNeeded));
+
+        const tilesToExpose = [claimedTile, ...naturalTiles, ...jokersUsed];
+
+        // Remove from hidden hand (jokers + naturals)
+        [...naturalTiles, ...jokersUsed].forEach(t => {
+            if (!player.hand.removeTile(t)) {
+                console.warn("Failed to remove tile during exposure", {playerIndex, tile: t});
+            }
+        });
+
+        // Add to exposures
+        const exposure = new ExposureData({
+            type: exposureType.toUpperCase(),
+            tiles: tilesToExpose
+        });
+        player.hand.addExposure(exposure);
+
+        // Emit rich tiles exposed event
+        const exposedEvent = GameEvents.createTilesExposedEvent(
+            playerIndex,
+            exposureType,
+            tilesToExpose.map(t => ({suit: t.suit, number: t.number, index: t.index})),
+            {duration: 300}
+        );
+        this.emit("TILES_EXPOSED", exposedEvent);
+
+        // Emit hand updated event
+        const handEvent = GameEvents.createHandUpdatedEvent(playerIndex, player.hand.toJSON());
+        this.emit("HAND_UPDATED", handEvent);
 
         this.setState(STATE.LOOP_EXPOSE_TILES_COMPLETE);
     }

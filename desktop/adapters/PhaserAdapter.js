@@ -21,6 +21,7 @@ import {TileManager} from "../managers/TileManager.js";
 import {ButtonManager} from "../managers/ButtonManager.js";
 import {DialogManager} from "../managers/DialogManager.js";
 import {SelectionManager} from "../managers/SelectionManager.js";
+import {BlankSwapManager} from "../managers/BlankSwapManager.js";
 import {HandRenderer} from "../renderers/HandRenderer.js";
 
 export class PhaserAdapter {
@@ -63,6 +64,13 @@ export class PhaserAdapter {
         // Now set SelectionManager reference on ButtonManager
         this.buttonManager.selectionManager = this.selectionManager;
 
+        this.blankSwapManager = new BlankSwapManager({
+            table,
+            selectionManager: this.selectionManager,
+            buttonManager: this.buttonManager,
+            gameController
+        });
+
         this.setupEventListeners();
     }
 
@@ -91,6 +99,7 @@ export class PhaserAdapter {
         gc.on("TILES_DEALT", (data) => this.onTilesDealt(data));
         gc.on("TILE_DRAWN", (data) => this.onTileDrawn(data));
         gc.on("TILE_DISCARDED", (data) => this.onTileDiscarded(data));
+        gc.on("BLANK_EXCHANGED", (data) => this.onBlankExchanged(data));
         gc.on("DISCARD_CLAIMED", (data) => this.onDiscardClaimed(data));
         gc.on("TILES_EXPOSED", (data) => this.onTilesExposed(data));
         gc.on("JOKER_SWAPPED", (data) => this.onJokerSwapped(data));
@@ -210,6 +219,8 @@ export class PhaserAdapter {
 
         // Reset tile counter
         this.tilesRemovedFromWall = 0;
+
+        this.buttonManager?.pinSortButtons?.();
     }
 
     /**
@@ -513,6 +524,39 @@ export class PhaserAdapter {
         // Show discards (updates layout)
         const playerName = this.getPlayerName(playerIndex);
         printMessage(`${playerName} discarded ${tileDataObj.getText()}`);
+
+        this.blankSwapManager?.handleDiscardPileChanged();
+    }
+
+    /**
+     * Handle blank exchange (human swaps blank with discard pile)
+     */
+    onBlankExchanged(data) {
+        const {player, blankTile, retrievedTile} = data;
+        if (player !== PLAYER.BOTTOM) {
+            return;
+        }
+
+        const blankTileData = TileData.fromJSON(blankTile);
+        const retrievedTileData = TileData.fromJSON(retrievedTile);
+        const blankPhaserTile = this.tileManager.getTileSprite(blankTileData);
+        const retrievedPhaserTile = this.tileManager.getTileSprite(retrievedTileData);
+
+        if (retrievedPhaserTile) {
+            this.table.discards.removeDiscardTile(retrievedPhaserTile);
+            retrievedPhaserTile.sprite.visible = false;
+            retrievedPhaserTile.spriteBack.visible = false;
+        }
+
+        if (blankPhaserTile) {
+            this.tileManager.removeTileFromHand(player, blankPhaserTile);
+            this.table.discards.insertDiscard(blankPhaserTile);
+        } else {
+            console.warn("Blank exchange: Could not find blank tile sprite", blankTileData);
+        }
+
+        this.table.discards.layoutTiles();
+        this.blankSwapManager?.handleBlankExchangeEvent();
     }
 
     /**
@@ -712,6 +756,8 @@ export class PhaserAdapter {
         if (playerIndex === PLAYER.BOTTOM && this.scene.hintAnimationManager) {
             this.scene.hintAnimationManager.updateHintsForNewTiles();
         }
+
+        this.blankSwapManager?.handleHandUpdated(playerIndex);
     }
 
     /**
@@ -860,6 +906,7 @@ export class PhaserAdapter {
         }
 
         printInfo("Select a tile to discard");
+        this.blankSwapManager?.handleDiscardPromptStart();
 
         this.selectionManager.requestSelection({
             min: 1,
@@ -875,6 +922,8 @@ export class PhaserAdapter {
         }).catch((error) => {
             console.warn("Discard selection cancelled:", error);
             callback?.(null);
+        }).finally(() => {
+            this.blankSwapManager?.handleDiscardPromptEnd();
         });
     }
 

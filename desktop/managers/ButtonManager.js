@@ -46,6 +46,8 @@ export class ButtonManager {
          */
         this.currentState = STATE.INIT;
 
+        this.sortButtonsPinned = false;
+
         this.setupButtonListeners();
     }
 
@@ -440,6 +442,9 @@ export class ButtonManager {
      */
     hide(buttonIds) {
         buttonIds.forEach((id) => {
+            if (this.sortButtonsPinned && (id === "sort1" || id === "sort2")) {
+                return;
+            }
             if (this.buttons[id]) {
                 this.buttons[id].style.display = "none";
             }
@@ -513,5 +518,13 @@ export class ButtonManager {
      */
     disableButton(buttonId) {
         this.setDisabled(buttonId, true);
+    }
+
+    /**
+     * Keep sort buttons visible for the remainder of the game
+     */
+    pinSortButtons() {
+        this.sortButtonsPinned = true;
+        this.show(["sort1", "sort2"]);
     }
 }
