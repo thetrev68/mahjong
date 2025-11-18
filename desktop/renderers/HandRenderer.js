@@ -182,7 +182,7 @@ export class HandRenderer {
      * Positions tiles starting from a fixed anchor point (not centered)
      * to prevent tiles from shifting as the hand size changes.
      */
-    calculateHiddenTilePositions(playerInfo, hiddenCount) {
+    calculateHiddenTilePositions(playerInfo, _hiddenCount) {
         const rackPos = this.getHandRackPosition(playerInfo);
         const tileScale = this.calculateTileScale(playerInfo);
         const tileWidth = SPRITE_WIDTH * tileScale;
@@ -224,7 +224,7 @@ export class HandRenderer {
      * Positions exposed tiles starting from a fixed anchor point (not centered)
      * to prevent tiles from shifting as exposures are added.
      */
-    calculateExposedTilePositions(playerInfo, exposedCount) {
+    calculateExposedTilePositions(playerInfo, _exposedCount) {
         const rackPos = this.getHandRackPosition(playerInfo);
         const tileScale = this.calculateTileScale(playerInfo);
         const tileWidth = SPRITE_WIDTH * tileScale;
@@ -409,10 +409,10 @@ export class HandRenderer {
      *
      * @param {number} playerIndex
      * @param {number} tileIndex - Index in hidden tiles array
-     * @param {number} handSize - Optional hand size override (unused, kept for compatibility)
+     * @param {number} _handSize - Optional hand size override (unused, kept for compatibility)
      * @returns {{x: number, y: number}} Position coordinates
      */
-    calculateTilePosition(playerIndex, tileIndex, handSize = -1) {
+    calculateTilePosition(playerIndex, tileIndex, _handSize = -1) {
         const playerInfo = PLAYER_LAYOUT[playerIndex];
         const rackPos = this.getHandRackPosition(playerInfo);
         const tileScale = this.calculateTileScale(playerInfo);

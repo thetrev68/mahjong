@@ -1135,9 +1135,9 @@ export class GameController extends EventEmitter {
     /**
      * Handle joker exchange - human player exchanges a tile for an exposed joker
      * Called when human clicks "Exchange Joker" button
-     * @returns {Promise<boolean>} - True if exchange occurred
+     * @returns {boolean} - True if exchange occurred
      */
-    async onExchangeJoker() {
+    onExchangeJoker() {
         const humanPlayer = this.players[PLAYER.BOTTOM];
 
         // Safety guards

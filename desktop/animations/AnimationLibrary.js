@@ -235,7 +235,6 @@ export function flashTile(sprite, color = 0xffffff, duration = 150, onComplete =
     sprite.setTint(color);
 
     return new Promise((resolve) => {
-        const scene = sprite.scene;
         setTimeout(() => {
             sprite.clearTint();
             if (onComplete) onComplete();

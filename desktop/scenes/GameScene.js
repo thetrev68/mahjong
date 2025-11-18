@@ -501,7 +501,7 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    // eslint-disable-next-line no-unused-vars
+     
     resize(_gameSize, _baseSize, _displaySize, _resolution) {
         const uicenterdiv = this.actionPanelEl || document.getElementById("uicenterdiv");
         const canvas = this.sys.canvas;
