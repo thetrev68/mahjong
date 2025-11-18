@@ -239,16 +239,37 @@ export class GameController extends EventEmitter {
         // Wait for dealing animation to complete, then emit HAND_UPDATED
         // PhaserAdapter will emit DEALING_COMPLETE when animation finishes
 
-        // Wait for dealing to complete (PhaserAdapter will trigger this via callback)
+        // Wait for dealing to complete with fallback for headless/mobile environments
         return new Promise(resolve => {
-            this.once("DEALING_COMPLETE", () => {
-                // NOW emit HAND_UPDATED after dealing animation completes
+            let timeoutId = null;
+            let resolved = false;
+
+            // Shared completion logic - emits HAND_UPDATED and resolves promise
+            const completeDealing = () => {
+                if (resolved) return; // Prevent double execution
+                resolved = true;
+
+                if (timeoutId !== null) {
+                    clearTimeout(timeoutId);
+                }
+
+                // Emit HAND_UPDATED after dealing animation completes (or timeout)
                 this.players.forEach((player, index) => {
                     const handEvent = GameEvents.createHandUpdatedEvent(index, player.hand.toJSON());
                     this.emit("HAND_UPDATED", handEvent);
                 });
                 resolve();
-            });
+            };
+
+            // Listen for DEALING_COMPLETE from PhaserAdapter
+            this.once("DEALING_COMPLETE", completeDealing);
+
+            // Fallback timeout for mobile/headless (no animation adapter present)
+            // If DEALING_COMPLETE doesn't arrive within 3 seconds, proceed anyway
+            timeoutId = setTimeout(() => {
+                this.off("DEALING_COMPLETE", completeDealing); // Remove event listener
+                completeDealing();
+            }, 3000);
         });
     }
 

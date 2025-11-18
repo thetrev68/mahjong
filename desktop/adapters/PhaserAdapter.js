@@ -67,9 +67,8 @@ export class PhaserAdapter {
         // Now set SelectionManager reference on ButtonManager
         this.buttonManager.selectionManager = this.selectionManager;
 
-        // Phase 6: BlankSwapManager - check if hand reference is actually used
+        // Phase 6: BlankSwapManager accesses hand via gameController.players[PLAYER.BOTTOM].hand
         this.blankSwapManager = new BlankSwapManager({
-            hand: this.handRenderer,  // Phase 6: Pass handRenderer instead of legacy hand
             discardPile: table.discards,
             selectionManager: this.selectionManager,
             buttonManager: this.buttonManager,

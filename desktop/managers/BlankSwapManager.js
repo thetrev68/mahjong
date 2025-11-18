@@ -9,9 +9,9 @@ import {printInfo, printMessage} from "../../utils.js";
  * discard pile selection, prompts) related to the house-rule blank swap.
  */
 export class BlankSwapManager {
-    constructor({hand, discardPile, selectionManager, buttonManager, gameController}) {
+    constructor({discardPile, selectionManager, buttonManager, gameController}) {
         // Phase 5: Direct dependencies instead of table coupling
-        this.hand = hand;  // Legacy Phaser Hand object for human player
+        // Gets hand data via gameController.players[PLAYER.BOTTOM].hand
         this.discardPile = discardPile;  // Discard pile object
         this.selectionManager = selectionManager;
         this.buttonManager = buttonManager;
@@ -103,7 +103,9 @@ export class BlankSwapManager {
             return false;
         }
 
-        const tiles = this.hand?.hiddenTileSet?.tileArray || [];
+        // Get human player's hand from game model
+        const humanHand = this.gameController?.players?.[PLAYER.BOTTOM]?.hand;
+        const tiles = humanHand?.tiles || [];
         const hasBlank = tiles.some(tile => tile.suit === SUIT.BLANK);
         const selectableDiscards = this.discardPile?.getSelectableDiscards?.() || [];
 
