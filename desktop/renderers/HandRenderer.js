@@ -306,7 +306,7 @@ export class HandRenderer {
             } else {
                 // Vertical layout
                 this.positionTilesVertical(tileSet, playerInfo, currentX, currentY, true, pos.tileWidth, pos.gap);
-                currentY += tileSet.length * (pos.tileWidth, pos.gap);
+                currentY += tileSet.length * (pos.tileWidth + pos.gap);
             }
         }
     }
