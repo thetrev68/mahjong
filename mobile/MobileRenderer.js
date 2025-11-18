@@ -1,7 +1,6 @@
 import {HandRenderer} from "./renderers/HandRenderer.js";
 import {DiscardPile} from "./components/DiscardPile.js";
 import {OpponentBar} from "./components/OpponentBar.js";
-import {AnimationController} from "./animations/AnimationController.js"; // TODO: Lazy-initialize when animations are implemented
 import {PLAYER} from "../constants.js";
 import {TileData} from "../core/models/TileData.js";
 

@@ -124,7 +124,7 @@ export class TileManager {
      * @deprecated Phase 2 of legacy Hand elimination - Removed in Phase 5
      * Use GameController HAND_UPDATED events with HandRenderer.syncAndRender()
      */
-    insertTileIntoHand(playerIndex, tile) {
+    insertTileIntoHand(_playerIndex, _tile) {
         console.error("TileManager.insertTileIntoHand has been removed - use GameController HAND_UPDATED events");
     }
 
@@ -132,7 +132,7 @@ export class TileManager {
      * @deprecated Phase 2 of legacy Hand elimination - Removed in Phase 5
      * Use GameController HAND_UPDATED events with HandRenderer.syncAndRender()
      */
-    removeTileFromHand(playerIndex, tile) {
+    removeTileFromHand(_playerIndex, _tile) {
         console.error("TileManager.removeTileFromHand has been removed - use GameController HAND_UPDATED events");
     }
 
@@ -666,7 +666,7 @@ export class TileManager {
      * @deprecated Phase 5 - Removed table dependency
      * Use HandRenderer to access tiles by playerIndex and handData
      */
-    getTileAtHandPosition(playerIndex, handIndex) {
+    getTileAtHandPosition(_playerIndex, _handIndex) {
         console.error("TileManager.getTileAtHandPosition has been removed - use HandRenderer with HandData");
         return null;
     }

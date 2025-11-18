@@ -1111,7 +1111,7 @@ export class Hand {
             debugPrint("insertHidden() called for tile:", tile.suit, tile.number, "sprite:", tile.sprite);
             tile.sprite.setInteractive();
             this.scene.input.setDraggable(tile.sprite);
-            // eslint-disable-next-line no-unused-vars
+             
             tile.sprite.on("dragstart", (_pointer, _dragX, _dragY) => {
                 debugPrint("=== DRAGSTART ===");
                 
@@ -1151,7 +1151,7 @@ export class Hand {
                 const insertionIndex = this.getInsertionIndex(dragX, tileSet.tileArray, tile);
                 this.showInsertionFeedback(insertionIndex, tileSet.tileArray, tile, dragX);
             });
-            // eslint-disable-next-line no-unused-vars
+             
 tile.sprite.on("dragend", (_pointer, dragX, _dragY, _dropped) => {
                 debugPrint("=== DRAGEND START ===");
                 debugPrint("Dragged Tile:", tile.getText());
