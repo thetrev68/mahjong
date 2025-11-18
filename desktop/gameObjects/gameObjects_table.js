@@ -5,7 +5,28 @@ import {
 } from "../../constants.js";
 import {Wall, Discards} from "./gameObjects.js";
 
-//TODO: Phase 6 - Legacy Player/Hand classes deleted. This file only maintains Wall/Discards for now.
+/**
+ * Table - Legacy class from Phase 5
+ *
+ * CURRENT ARCHITECTURE (Phase 6):
+ * - GameController manages all game state (players, hands, turn flow)
+ * - HandRenderer handles all visual rendering
+ * - This Table class now ONLY manages:
+ *   1. Wall (tile pool)
+ *   2. Discards (discard pile)
+ *   3. Visual turn indicator boxes
+ *
+ * LEGACY CODE WARNING:
+ * Methods below (deal, charlestonPass, courtesyPass, exchangeJoker, etc.)
+ * reference this.players[] which is NEVER INITIALIZED.
+ * These methods are DEAD CODE - not called anywhere in current codebase.
+ * They remain for reference during migration but will be deleted in cleanup.
+ *
+ * TODO Phase 6 Cleanup:
+ * - Delete all methods that reference this.players
+ * - Keep only: wall, discards, boxes, reset(), switchPlayer()
+ * - Consider moving Wall/Discards to TileManager
+ */
 
 // Phase 6: gPlayerInfo moved to desktop/config/playerLayout.js (PLAYER_LAYOUT)
 
@@ -22,8 +43,7 @@ export class Table {
             this.boxes[i] = null;
         }
 
-        // Phase 6: Player objects removed - hand rendering now in HandRenderer
-        // Boxes kept for visual turn indicator
+        // Visual turn indicator boxes (graphics objects)
         this.player02CourtesyVote = 0;
         this.player13CourtesyVote = 0;
     }
@@ -64,6 +84,15 @@ export class Table {
 
         this.boxes[player].visible = true;
     }
+
+    // ============================================================================
+    // DEAD CODE - NOT CALLED IN CURRENT ARCHITECTURE
+    // ============================================================================
+    // All methods below reference this.players[] which is NEVER initialized.
+    // These are legacy methods from Phase 5 when Table managed Player objects.
+    // They are NOT called anywhere in the current codebase (grep confirmed).
+    // Kept temporarily for reference during migration, will be deleted in cleanup.
+    // ============================================================================
 
     // Apply training hands and exposed sets before animated dealing
     applyTrainingHands(initPlayerHandArray) {
