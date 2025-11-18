@@ -8,6 +8,7 @@ import "./styles/base.css";
 import "./styles/SettingsSheet.css";
 import "./styles/HandRenderer.css";
 import "./styles/MobileGame.css";
+import "./styles.css";
 
 // Game instances
 let gameController;
