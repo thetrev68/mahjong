@@ -3,7 +3,7 @@
 **Summary:** This sequence defines the animation and visual state changes when a player discards a tile, including how the tile is highlighted as the "focus tile" and how it behaves if it is subsequently claimed.
 
 **Triggering Event:** `playerDidDiscardTile`
-**Initial State:** A player has selected a tile from their hand to discard.
+**Initial State:** A player has a tile in the "selected" state (raised from the hand), as described in `Description_Animation_Select.md`.
 
 ---
 
@@ -15,11 +15,12 @@ The most recently discarded tile is always considered the "Focus Tile." Only one
 
 #### **Scenario 1: Standard Discard**
 
-1.  **Animation:** The discarded tile animates from the player's hand to its correct position in the central discard pile. Upon arrival, `tile_dropping.mp3` is played.
+1.  **Animation:** The discarded tile animates from its raised "selected" position to its correct position in the central discard pile. Upon arrival, `tile_dropping.mp3` is played.
 2.  **Visual State:**
     *   **Effect:** The tile gains the blue glow, becoming the new "Focus Tile."
     *   **Size:** It remains at its full, original size (scale: 1.0).
 3.  **Previous Tile:** The previously discarded tile (which was the old "Focus Tile") simultaneously loses its blue glow and shrinks to the standard small size for the discard pile.
+4.  **Player Hand:** The tiles remaining the in player rack should reassemble to close the gap left by the discarded tile.
 
 *Note: If a claim dialog opens for the Focus Tile, its glowing, full-size state is maintained throughout.*
 
@@ -35,6 +36,7 @@ If a player claims the current Focus Tile from the discard pile:
 2.  **Visual State:**
     *   The claimed tile **maintains its blue glow and full size** in the exposed meld.
     *   Accompanying tiles from the player's hand that form the meld are placed next to it *without* a glow.
+    *   Remaining tiles in the hand reassemble to close any gaps left by moving the tiles to the exposed area.
 3.  **Losing Focus:** The claimed tile's blue glow is removed as soon as the *next* tile is discarded by any player.
 
 **Case 2b: Claimed by another Player (Remote Player)**
