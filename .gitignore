@@ -4,6 +4,7 @@ node_modules/
 
 # Playwright test results
 test-results/
+playwright-report/
 
 # Logs
 logs
@@ -83,6 +84,3 @@ web_modules/
 .serena/cache/
 jules-scratch/
 playwright-report/
-
-
-
