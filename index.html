@@ -2,14 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="American Mahjong game">
     <meta name="keywords" content="Mahjong, free, game, javascript">
     <title>American Mahjong</title>
     <link rel="icon" type="image/svg+xml" href="/mahjong/assets/favicon-B3WZd-3b.svg?v=4">
 
-  <script type="module" crossorigin src="/mahjong/assets/desktop-512zEKZb.js"></script>
-  <link rel="modulepreload" crossorigin href="/mahjong/assets/card-Bat6kED0.js">
-  <link rel="modulepreload" crossorigin href="/mahjong/assets/gameObjects-DDhPsY30.js">
+    <script>
+        // Redirect to mobile version if screen width is appropriate
+        if (window.innerWidth <= 768) {
+            window.location.href = '/mobile/index.html';
+        }
+    </script>
+  <script type="module" crossorigin src="/mahjong/assets/desktop-Cov6_Agm.js"></script>
+  <link rel="modulepreload" crossorigin href="/mahjong/assets/card-C0AlUkbf.js">
+  <link rel="modulepreload" crossorigin href="/mahjong/assets/gameObjects-C--_G6Xg.js">
   <link rel="stylesheet" crossorigin href="/mahjong/assets/desktop-ebrU3_w6.css">
 </head>
 <body>
