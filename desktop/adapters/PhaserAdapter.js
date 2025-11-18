@@ -351,6 +351,12 @@ export class PhaserAdapter {
                                 recenterAndContinue();
                             }
                         });
+                    } else {
+                        // Null tween - treat as immediate completion to prevent hanging
+                        animationsCompleted++;
+                        if (animationsCompleted === tilePayloads.length) {
+                            recenterAndContinue();
+                        }
                     }
 
                     if (playerIndex === PLAYER.BOTTOM) {
@@ -382,11 +388,23 @@ export class PhaserAdapter {
     /**
      * Recenter all tiles in a player's hand based on current hand size
      * Used during dealing to progressively center tiles as hand grows
-     * @param {number} playerIndex
+     * INTERNAL: Only safe for playerIndex 0-3 after HandRenderer initialization
+     * @param {number} playerIndex - Must be 0-3
      */
     recenterPlayerHand(playerIndex) {
+        // Validate playerIndex to prevent out-of-bounds access
+        if (playerIndex < 0 || playerIndex > 3) {
+            return;
+        }
+
         const playerInfo = PLAYER_LAYOUT[playerIndex];
         const playerHand = this.handRenderer.playerHands[playerIndex];
+
+        // Safety check for uninitialized playerHands
+        if (!playerHand) {
+            return;
+        }
+
         const hiddenTiles = playerHand.hiddenTiles;
 
         if (hiddenTiles.length === 0) {
@@ -1078,10 +1096,13 @@ export class PhaserAdapter {
         // TODO: delete messy manual cleanup once adapter delegates lifespan to managers.
     }
 
+    /**
+     * Auto-sort human player's hand by suit
+     * NOTE: Sorting is driven from PhaserAdapter, not HandRenderer
+     * HandRenderer.syncAndRender() does NOT auto-sort (unlike legacy behavior)
+     * This gives explicit control over when sorting happens
+     */
     autoSortHumanHand() {
-        // Phase 6: Sorting now happens in HandRenderer.syncAndRender()
-        // Auto-sort is enabled for Player 0, so just trigger re-render
-        // Or get HandData and sort it
         const handData = this.gameController.players[PLAYER.BOTTOM].hand;
         handData.sortBySuit();
         this.handRenderer.syncAndRender(PLAYER.BOTTOM, handData);
