@@ -7,10 +7,18 @@ import {printInfo, printMessage} from "../../utils.js";
  *
  * Keeps PhaserAdapter slim by encapsulating all UI wiring (button state,
  * discard pile selection, prompts) related to the house-rule blank swap.
+ *
+ * ARCHITECTURE NOTE (Phase 6):
+ * - NO legacy Hand dependency - uses HandData model exclusively
+ * - Accesses hand via gameController.players[PLAYER.BOTTOM].hand.tiles
+ * - This is the current HandData model (core/models/HandData.js)
+ * - Safe for future HandData refactoring (no legacy coupling)
  */
 export class BlankSwapManager {
-    constructor({table, selectionManager, buttonManager, gameController}) {
-        this.table = table;
+    constructor({discardPile, selectionManager, buttonManager, gameController}) {
+        // Phase 6: Direct dependencies instead of table coupling
+        // Gets hand data via gameController.players[PLAYER.BOTTOM].hand (HandData model)
+        this.discardPile = discardPile;  // Discard pile object
         this.selectionManager = selectionManager;
         this.buttonManager = buttonManager;
         this.gameController = gameController;
@@ -60,7 +68,7 @@ export class BlankSwapManager {
      */
     handleBlankExchangeEvent() {
         this.isSelectingDiscard = false;
-        this.table?.discards?.disableDiscardSelection?.();
+        this.discardPile?.disableDiscardSelection?.();
         this.selectionManager?.clearSelection?.();
         this.printDefaultPrompt();
         this.refreshButton();
@@ -101,10 +109,13 @@ export class BlankSwapManager {
             return false;
         }
 
-        const humanHand = this.table?.players?.[PLAYER.BOTTOM]?.hand;
-        const tiles = humanHand?.hiddenTileSet?.tileArray || [];
+        // Get human player's hand from game model (HandData, not legacy Hand)
+        // NOTE: This accesses gameController.players[PLAYER.BOTTOM].hand.tiles
+        // which is the current HandData model. No legacy hand dependency.
+        const humanHand = this.gameController?.players?.[PLAYER.BOTTOM]?.hand;
+        const tiles = humanHand?.tiles || [];
         const hasBlank = tiles.some(tile => tile.suit === SUIT.BLANK);
-        const selectableDiscards = this.table?.discards?.getSelectableDiscards?.() || [];
+        const selectableDiscards = this.discardPile?.getSelectableDiscards?.() || [];
 
         return hasBlank && selectableDiscards.length > 0;
     }
@@ -123,8 +134,7 @@ export class BlankSwapManager {
             return;
         }
 
-        const discardPile = this.table?.discards;
-        if (!discardPile || (discardPile.getSelectableDiscards?.() || []).length === 0) {
+        if (!this.discardPile || (this.discardPile.getSelectableDiscards?.() || []).length === 0) {
             printInfo("No discard tiles are available to retrieve.");
             return;
         }
@@ -133,8 +143,8 @@ export class BlankSwapManager {
         this.buttonManager?.disableButton("button4");
         printInfo("Select a discard tile to retrieve with your blank.");
 
-        discardPile.enableDiscardSelection((targetTile) => {
-            discardPile.disableDiscardSelection();
+        this.discardPile.enableDiscardSelection((targetTile) => {
+            this.discardPile.disableDiscardSelection();
             this.isSelectingDiscard = false;
             this.commitSwap(selection[0], targetTile);
         });
@@ -145,7 +155,7 @@ export class BlankSwapManager {
      */
     cancelSwapFlow(printPrompt = true) {
         if (this.isSelectingDiscard) {
-            this.table?.discards?.disableDiscardSelection?.();
+            this.discardPile?.disableDiscardSelection?.();
             this.isSelectingDiscard = false;
         }
         if (printPrompt) {

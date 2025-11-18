@@ -14,11 +14,12 @@ import {TileData} from "../../core/models/TileData.js";
 import { renderPatternVariation } from "../../tileDisplayUtils.js";
 
 export class HintAnimationManager {
-    constructor(scene, table, aiEngine, card) {
+    constructor(scene, gameController, aiEngine, card, tileManager) {
         this.scene = scene;
-        this.table = table;
-        this.aiEngine = aiEngine;  // Modern name, not legacy gameAI
+        this.gameController = gameController;
+        this.aiEngine = aiEngine;
         this.card = card;
+        this.tileManager = tileManager;  // Phase 5: Use TileManager for sprite access instead of table
         this.savedGlowData = null;
         this.currentHintData = null;
         this.isPanelExpanded = false;
@@ -34,29 +35,29 @@ export class HintAnimationManager {
             rec.tile.suit !== SUIT.INVALID && rec.recommendation === "DISCARD"
         );
 
-        // Highlight ALL discard recommendations (not limited to 3)
-        // This ensures we show all available discards, even if only 1 or 2
-        const hand = this.table.players[PLAYER.BOTTOM].hand;
+        // Phase 5: Get HandData from GameController (authoritative source)
+        const handData = this.gameController.players[PLAYER.BOTTOM].hand;
 
         // Track which tiles we've already highlighted to handle duplicates
         const highlightedTiles = new Set();
 
         discardRecs.forEach((rec, index) => {
-            debugPrint(`Processing tile ${index + 1}: ${rec.tile.getText()} with recommendation ${rec.recommendation}`); // Debug log
+            debugPrint(`Processing tile ${index + 1}: ${rec.tile.getText()} with recommendation ${rec.recommendation}`);
 
-            const targetTile = this.findNextUnhighlightedTileInHand(hand, rec.tile, highlightedTiles);
+            const targetTile = this.findNextUnhighlightedTileInHand(handData, rec.tile, highlightedTiles);
             if (targetTile) {
-                debugPrint(`Applying red glow to tile: ${targetTile.getText()}`); // Debug log
+                // Use TileData's getText() for debug logging (safer than sprite's getText())
+                debugPrint(`Applying red glow to tile: ${rec.tile.getText()}`);
                 targetTile.addGlowEffect(this.scene, 0xff0000, 0.6);
                 this.glowedTiles.push(targetTile);
                 // Mark this specific tile instance as highlighted
                 highlightedTiles.add(targetTile);
             } else {
-                debugPrint(`Could not find tile for: ${rec.tile.getText()}`); // Debug log
+                debugPrint(`Could not find tile for: ${rec.tile.getText()}`);
             }
         });
 
-        debugPrint(`Applied glow to ${this.glowedTiles.length} tiles out of ${discardRecs.length} discard tiles requested`); // Debug log
+        debugPrint(`Applied glow to ${this.glowedTiles.length} tiles out of ${discardRecs.length} discard tiles requested`);
 
         // Store current hint data for state management
         this.currentHintData = {recommendations: [...recommendations]};
@@ -64,16 +65,20 @@ export class HintAnimationManager {
     }
 
     // Find the next unhighlighted tile in hand that matches the target tile
-    // Handles duplicates by finding available instances that haven't been highlighted yet
-    findNextUnhighlightedTileInHand(hand, targetTile, highlightedTiles) {
-        const hiddenTiles = hand.getHiddenTileArray();
+    // Phase 5: Works with HandData + TileManager instead of legacy Hand object
+    findNextUnhighlightedTileInHand(handData, targetTile, highlightedTiles) {
+        // Get TileData array from HandData (hidden tiles only)
+        const hiddenTileDataArray = handData.tiles;
 
-        for (const tile of hiddenTiles) {
+        for (const tileData of hiddenTileDataArray) {
             // Check if this tile matches the target
-            if (tile.suit === targetTile.suit && tile.number === targetTile.number) {
+            if (tileData.suit === targetTile.suit && tileData.number === targetTile.number) {
+                // Get the Phaser sprite for this tile via TileManager
+                const phaserTile = this.tileManager.getTileSprite(tileData.index);
+
                 // Check if this specific tile instance hasn't been highlighted yet
-                if (!highlightedTiles.has(tile)) {
-                    return tile;
+                if (phaserTile && !highlightedTiles.has(phaserTile)) {
+                    return phaserTile;
                 }
             }
         }
@@ -124,17 +129,25 @@ export class HintAnimationManager {
         return hintContent && !hintContent.classList.contains("hidden");
     }
 
-    // Centralized method to get recommendations from the AI engine
-    getRecommendations() {
-        const hand = this.table.players[PLAYER.BOTTOM].hand.dupHand();
+    /**
+     * Build a 14-tile HandData for hint engine
+     * Clones the current hand and pads to 14 tiles if needed (AI expects 14)
+     */
+    buildHandDataForHintEngine() {
+        const handData = this.gameController.players[PLAYER.BOTTOM].hand.clone();
 
         // Add invalid tile if hand has 13 tiles, as the engine expects 14
-        if (hand.getLength() === 13) {
-            const invalidTile = new TileData(SUIT.INVALID, VNUMBER.INVALID);
-            hand.insertHidden(invalidTile);
+        if (handData.getLength() === 13) {
+            handData.addTile(new TileData(SUIT.INVALID, VNUMBER.INVALID));
         }
 
-        const result = this.aiEngine.getTileRecommendations(hand);
+        return handData;
+    }
+
+    // Centralized method to get recommendations from the AI engine
+    getRecommendations() {
+        const handData = this.buildHandDataForHintEngine();
+        const result = this.aiEngine.getTileRecommendations(handData);
 
         // Reverse recommendations for display: DISCARD, PASS, KEEP
         return {
@@ -144,21 +157,46 @@ export class HintAnimationManager {
     }
 
     // Get all tiles in player's hand (hidden + exposed)
+    // Phase 5: Returns Phaser sprites via TileManager from HandData
     getAllPlayerTiles() {
-        const hand = this.table.players[PLAYER.BOTTOM].hand;
-        const allTiles = [...hand.getHiddenTileArray()];
+        const handData = this.gameController.players[PLAYER.BOTTOM].hand;
+        const allPhaserTiles = [];
 
-        hand.exposedTileSetArray.forEach(set => {
-            allTiles.push(...set.tileArray);
-        });
+        // Get hidden tiles
+        for (const tileData of handData.tiles) {
+            const phaserTile = this.tileManager.getTileSprite(tileData.index);
+            if (phaserTile) {
+                allPhaserTiles.push(phaserTile);
+            }
+        }
 
-        return allTiles;
+        // Get exposed tiles
+        for (const exposure of handData.exposures) {
+            for (const tileData of exposure.tiles) {
+                const phaserTile = this.tileManager.getTileSprite(tileData.index);
+                if (phaserTile) {
+                    allPhaserTiles.push(phaserTile);
+                }
+            }
+        }
+
+        return allPhaserTiles;
     }
 
     // Get only hidden tiles in player's hand
+    // Phase 5: Returns Phaser sprites via TileManager from HandData
     getHiddenPlayerTiles() {
-        const hand = this.table.players[PLAYER.BOTTOM].hand;
-        return hand.getHiddenTileArray();
+        const handData = this.gameController.players[PLAYER.BOTTOM].hand;
+        const hiddenPhaserTiles = [];
+
+        for (const tileData of handData.tiles) {
+            const phaserTile = this.tileManager.getTileSprite(tileData.index);
+            if (phaserTile) {
+                hiddenPhaserTiles.push(phaserTile);
+            }
+        }
+
+        return hiddenPhaserTiles;
     }
 
     // Update hint with new hand state
@@ -172,11 +210,10 @@ export class HintAnimationManager {
 
         // Panel is expanded, proceed with full update including glow effects
         const result = this.getRecommendations();
-        const hand = this.table.players[PLAYER.BOTTOM].hand.dupHand();
-        if (hand.getLength() === 13) {
-            hand.insertHidden(new TileData(SUIT.INVALID, VNUMBER.INVALID));
-        }
-        const rankCardHands = this.card.rankHandArray14(hand);
+
+        // Use helper to get 14-tile hand for ranking
+        const handData = this.buildHandDataForHintEngine();
+        const rankCardHands = this.card.rankHandArray14(handData);
         this.card.sortHandRankArray(rankCardHands);
 
         // Update visual glow effects (only if panel is expanded)
@@ -189,11 +226,10 @@ export class HintAnimationManager {
     // New method for updating hint text without glow effects
     updateHintDisplayOnly() {
         const result = this.getRecommendations();
-        const hand = this.table.players[PLAYER.BOTTOM].hand.dupHand();
-        if (hand.getLength() === 13) {
-            hand.insertHidden(new TileData(SUIT.INVALID, VNUMBER.INVALID));
-        }
-        const rankCardHands = this.card.rankHandArray14(hand);
+
+        // Use helper to get 14-tile hand for ranking
+        const handData = this.buildHandDataForHintEngine();
+        const rankCardHands = this.card.rankHandArray14(handData);
         this.card.sortHandRankArray(rankCardHands);
 
         // Update hint text content only (no glow effects)

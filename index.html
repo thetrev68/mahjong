@@ -2,12 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="American Mahjong game">
     <meta name="keywords" content="Mahjong, free, game, javascript">
     <title>American Mahjong</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=4">
     <link rel="stylesheet" href="styles.css">
 
+    <script>
+        // Redirect to mobile version if screen width is appropriate
+        if (window.innerWidth <= 768) {
+            window.location.href = '/mobile/index.html';
+        }
+    </script>
 </head>
 <body>
     <div id="parentdiv">
