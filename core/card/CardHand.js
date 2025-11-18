@@ -61,4 +61,10 @@ export class CardHand {
         }
         return allTiles;
     }
+
+    isAllHidden() {
+        // Returns true if all tiles are hidden (no exposures)
+        // Safe for empty hands (returns true)
+        return this.exposedTileSetArray.length === 0;
+    }
 }
