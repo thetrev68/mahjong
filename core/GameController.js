@@ -1140,6 +1140,22 @@ export class GameController extends EventEmitter {
     async onExchangeJoker() {
         const humanPlayer = this.players[PLAYER.BOTTOM];
 
+        // Safety guards
+        if (!humanPlayer || !humanPlayer.hand) {
+            return false;
+        }
+
+        // Prevent joker exchange during invalid game states
+        const invalidStates = [STATE.INIT, STATE.DEAL, STATE.CHARLESTON1, STATE.CHARLESTON2,
+                               STATE.CHARLESTON_QUERY, STATE.COURTESY_QUERY, STATE.COURTESY];
+        if (invalidStates.includes(this.state)) {
+            this.emit("MESSAGE", GameEvents.createMessageEvent(
+                "Cannot exchange jokers during this phase",
+                "warning"
+            ));
+            return false;
+        }
+
         // Find all exposed jokers across all players
         const exposedJokers = [];
         for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
@@ -1180,7 +1196,8 @@ export class GameController extends EventEmitter {
         }
 
         // For now, auto-select the first available exchange
-        // TODO: Let user choose if multiple options available
+        // TODO: Future enhancement - let user choose among multiple exchanges
+        // Could use promptUI to present matchingExchanges array for selection
         const exchange = matchingExchanges[0];
         const requiredTile = exchange.requiredTiles[0];
 
@@ -1197,9 +1214,9 @@ export class GameController extends EventEmitter {
         const humanTile = humanPlayer.hand.tiles[tileIndex];
         const jokerTile = exchange.jokerTile;
 
-        // Remove tile from human's hand, add joker
-        humanPlayer.hand.tiles.splice(tileIndex, 1);
-        humanPlayer.hand.tiles.push(jokerTile);
+        // Remove tile from human's hand, add joker (use HandData API)
+        humanPlayer.hand.removeTile(humanTile);
+        humanPlayer.hand.addTile(jokerTile);
 
         // Update the exposure - replace joker with human's tile
         const ownerPlayer = this.players[exchange.playerIndex];
