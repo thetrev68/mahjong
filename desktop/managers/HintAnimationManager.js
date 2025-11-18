@@ -46,7 +46,8 @@ export class HintAnimationManager {
 
             const targetTile = this.findNextUnhighlightedTileInHand(handData, rec.tile, highlightedTiles);
             if (targetTile) {
-                debugPrint(`Applying red glow to tile: ${targetTile.getText()}`);
+                // Use TileData's getText() for debug logging (safer than sprite's getText())
+                debugPrint(`Applying red glow to tile: ${rec.tile.getText()}`);
                 targetTile.addGlowEffect(this.scene, 0xff0000, 0.6);
                 this.glowedTiles.push(targetTile);
                 // Mark this specific tile instance as highlighted
@@ -128,17 +129,24 @@ export class HintAnimationManager {
         return hintContent && !hintContent.classList.contains("hidden");
     }
 
-    // Centralized method to get recommendations from the AI engine
-    getRecommendations() {
-        // Phase 4: Use HandData from GameController (authoritative source)
+    /**
+     * Build a 14-tile HandData for hint engine
+     * Clones the current hand and pads to 14 tiles if needed (AI expects 14)
+     */
+    buildHandDataForHintEngine() {
         const handData = this.gameController.players[PLAYER.BOTTOM].hand.clone();
 
         // Add invalid tile if hand has 13 tiles, as the engine expects 14
         if (handData.getLength() === 13) {
-            const invalidTile = new TileData(SUIT.INVALID, VNUMBER.INVALID);
-            handData.addTile(invalidTile);  // Modern method, not insertHidden()
+            handData.addTile(new TileData(SUIT.INVALID, VNUMBER.INVALID));
         }
 
+        return handData;
+    }
+
+    // Centralized method to get recommendations from the AI engine
+    getRecommendations() {
+        const handData = this.buildHandDataForHintEngine();
         const result = this.aiEngine.getTileRecommendations(handData);
 
         // Reverse recommendations for display: DISCARD, PASS, KEEP
@@ -203,11 +211,8 @@ export class HintAnimationManager {
         // Panel is expanded, proceed with full update including glow effects
         const result = this.getRecommendations();
 
-        // Phase 4: Use HandData from GameController
-        const handData = this.gameController.players[PLAYER.BOTTOM].hand.clone();
-        if (handData.getLength() === 13) {
-            handData.addTile(new TileData(SUIT.INVALID, VNUMBER.INVALID));
-        }
+        // Use helper to get 14-tile hand for ranking
+        const handData = this.buildHandDataForHintEngine();
         const rankCardHands = this.card.rankHandArray14(handData);
         this.card.sortHandRankArray(rankCardHands);
 
@@ -222,11 +227,8 @@ export class HintAnimationManager {
     updateHintDisplayOnly() {
         const result = this.getRecommendations();
 
-        // Phase 4: Use HandData from GameController
-        const handData = this.gameController.players[PLAYER.BOTTOM].hand.clone();
-        if (handData.getLength() === 13) {
-            handData.addTile(new TileData(SUIT.INVALID, VNUMBER.INVALID));
-        }
+        // Use helper to get 14-tile hand for ranking
+        const handData = this.buildHandDataForHintEngine();
         const rankCardHands = this.card.rankHandArray14(handData);
         this.card.sortHandRankArray(rankCardHands);
 
