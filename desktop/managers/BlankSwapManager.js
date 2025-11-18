@@ -7,11 +7,17 @@ import {printInfo, printMessage} from "../../utils.js";
  *
  * Keeps PhaserAdapter slim by encapsulating all UI wiring (button state,
  * discard pile selection, prompts) related to the house-rule blank swap.
+ *
+ * ARCHITECTURE NOTE (Phase 6):
+ * - NO legacy Hand dependency - uses HandData model exclusively
+ * - Accesses hand via gameController.players[PLAYER.BOTTOM].hand.tiles
+ * - This is the current HandData model (core/models/HandData.js)
+ * - Safe for future HandData refactoring (no legacy coupling)
  */
 export class BlankSwapManager {
     constructor({discardPile, selectionManager, buttonManager, gameController}) {
-        // Phase 5: Direct dependencies instead of table coupling
-        // Gets hand data via gameController.players[PLAYER.BOTTOM].hand
+        // Phase 6: Direct dependencies instead of table coupling
+        // Gets hand data via gameController.players[PLAYER.BOTTOM].hand (HandData model)
         this.discardPile = discardPile;  // Discard pile object
         this.selectionManager = selectionManager;
         this.buttonManager = buttonManager;
@@ -103,7 +109,9 @@ export class BlankSwapManager {
             return false;
         }
 
-        // Get human player's hand from game model
+        // Get human player's hand from game model (HandData, not legacy Hand)
+        // NOTE: This accesses gameController.players[PLAYER.BOTTOM].hand.tiles
+        // which is the current HandData model. No legacy hand dependency.
         const humanHand = this.gameController?.players?.[PLAYER.BOTTOM]?.hand;
         const tiles = humanHand?.tiles || [];
         const hasBlank = tiles.some(tile => tile.suit === SUIT.BLANK);
