@@ -13,6 +13,12 @@ We've made excellent progress! HandRenderer is now clean, and most references ar
 7. ✅ Added calculateTilePosition() to HandRenderer
 8. ✅ Fixed 2 table.players references (onTileDrawn, onHandUpdated)
 9. ✅ Added PLAYER_LAYOUT import
+10. ✅ Fixed BlankSwapManager to use game model hand (gameController.players[PLAYER.BOTTOM].hand)
+11. ✅ Added CardHand.isAllHidden() method for card validator
+12. ✅ Fixed GameController.dealTiles() hanging with 3-second timeout fallback for mobile/headless
+13. ✅ Fixed vertical exposed tile spacing bug (comma operator → addition)
+14. ✅ Added viewport meta tag to index.html for proper mobile redirect detection
+15. ✅ Fixed mobile HandRenderer rank sorting (added currentSortMode tracker to prevent auto-sort override)
 
 ## Remaining Work (6-8 hours estimated)
 
@@ -145,9 +151,11 @@ humanPlayer.hand.sortSuitHidden();
 - Replace with direct `printMessage()` call
 - DELETE table.switchPlayer() method
 
-### Update BlankSwapManager (if needed)
+### ✅ Update BlankSwapManager (COMPLETED)
 
-BlankSwapManager might access hand - check constructor and methods.
+~~BlankSwapManager might access hand - check constructor and methods.~~
+
+**COMPLETED**: BlankSwapManager now accesses hand via `gameController.players[PLAYER.BOTTOM].hand` instead of receiving legacy hand object. Constructor signature updated to remove `hand` parameter.
 
 ### Final Cleanup
 
@@ -187,10 +195,19 @@ npm run knip                # Should report hand/player as unused
 
 ## Context Window Safety
 
-Current: ~121K / 200K (60.5% used)
-Remaining: ~79K (39.5%)
+Current: ~82K / 200K (41% used)
+Remaining: ~118K (59%)
 
 **Status**: SAFE to continue. Plenty of headroom for completion.
+
+## Recent Bug Fixes (This Session)
+
+1. **CardHand.isAllHidden()** - Added missing method for card validator (lines ~135, 192, 512 in card.js)
+2. **GameController.dealTiles() hanging** - Added 3-second timeout fallback for mobile/headless environments
+3. **BlankSwapManager model access** - Changed to use gameController.players[PLAYER.BOTTOM].hand instead of HandRenderer
+4. **Vertical exposed tile spacing** - Fixed comma operator bug causing tiles to overlap (RIGHT/LEFT players)
+5. **Mobile viewport detection** - Added viewport meta tag to index.html for proper mobile redirect
+6. **Mobile rank sorting broken** - Fixed auto-sort overriding user-requested rank sort (added currentSortMode tracker)
 
 ## Decision Point
 
