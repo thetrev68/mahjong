@@ -144,6 +144,13 @@ async function initializeGame() {
     // Hide loading message
     mobileRenderer?.updateStatus("Ready to play! Click NEW GAME to start.");
 
+    // Expose to window for testing
+    if (window.location.search.includes("playwright=true")) {
+        window.gameController = gameController;
+        window.aiEngine = aiEngine;
+        window.mobileRenderer = mobileRenderer;
+    }
+
     console.log("Mobile game initialized successfully");
 }
 
