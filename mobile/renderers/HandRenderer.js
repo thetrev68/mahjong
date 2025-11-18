@@ -51,6 +51,7 @@ export class HandRenderer {
         this.handContainer = null;
         this.exposedSection = null;
         this.currentHandData = null;
+        this.currentSortMode = null; // Track explicit sort mode ('suit', 'rank', or null for auto)
 
         this.setupDOM();
         this.setupEventListeners();
@@ -76,6 +77,9 @@ export class HandRenderer {
 
         const handleHandUpdated = (data = {}) => {
             if (data.player === 0) {
+                // Reset sort mode when hand updated from game (not user sort)
+                // This allows auto-sort to resume after hand changes (draw, discard, etc.)
+                this.currentSortMode = null;
                 this.render(data.hand);
             }
         };
@@ -116,9 +120,9 @@ export class HandRenderer {
             return;
         }
 
-        // Auto-sort hand by suit before rendering
-        // This ensures consistent sorting after any hand change (draw, claim, swap, etc.)
-        if (handData.sortBySuit) {
+        // Only auto-sort by suit if no explicit sort mode is active
+        // This prevents overriding user-requested rank sorting
+        if (this.currentSortMode === null && handData.sortBySuit) {
             handData.sortBySuit();
         }
 
@@ -387,6 +391,9 @@ export class HandRenderer {
             this.gameController.sortHand(0, mode);
             return;
         }
+
+        // Set the current sort mode to prevent auto-sorting from overriding
+        this.currentSortMode = mode;
 
         const handCopy = this.cloneHandData(this.currentHandData);
         if (!handCopy) {
