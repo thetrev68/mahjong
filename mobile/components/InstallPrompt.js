@@ -221,14 +221,14 @@ class InstallPrompt {
                 font-size: 16px;
                 font-weight: 600;
                 color: #f5fbf7;
-                font-family: 'Courier New', monospace;
+                font-family: var(--font-stack, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif);
             }
 
             .install-banner__message {
                 margin: 4px 0 0;
                 font-size: 13px;
                 color: rgba(245, 251, 247, 0.8);
-                font-family: 'Courier New', monospace;
+                font-family: var(--font-stack, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif);
             }
 
             .install-banner__actions {
@@ -244,7 +244,7 @@ class InstallPrompt {
                 border-radius: 6px;
                 font-size: 14px;
                 font-weight: 600;
-                font-family: 'Courier New', monospace;
+                font-family: var(--font-stack, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif);
                 cursor: pointer;
                 transition: all 0.2s;
                 min-width: 100px;

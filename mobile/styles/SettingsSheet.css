@@ -54,7 +54,7 @@
     font-size: 22px;
     font-weight: 600;
     color: #f5fbf7;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-stack);
 }
 
 .settings-sheet__close {
@@ -97,7 +97,7 @@
     color: #ffd166;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-stack);
 }
 
 /* Settings Items */
@@ -110,7 +110,7 @@
     margin-bottom: 8px;
     font-size: 14px;
     color: #f5fbf7;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-stack);
 }
 
 .volume-value {
@@ -124,7 +124,7 @@
     width: 100%;
     padding: 12px;
     font-size: 16px;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-stack);
     background: rgba(255, 255, 255, 0.95);
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
@@ -241,7 +241,7 @@
     padding: 14px 24px;
     font-size: 16px;
     font-weight: 600;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-stack);
     border: none;
     border-radius: 8px;
     cursor: pointer;

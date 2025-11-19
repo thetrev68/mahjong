@@ -30,7 +30,7 @@
     padding: 12px 24px;
     font-size: 16px;
     font-weight: bold;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-stack);
     border-radius: 8px;
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
@@ -63,7 +63,7 @@
     padding: 10px 20px;
     font-size: 14px;
     font-weight: bold;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-stack);
     border-radius: 6px;
     cursor: pointer;
 }
@@ -75,7 +75,7 @@
 
 #loading {
     color: #ffd166;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-stack);
     font-size: 18px;
     text-align: center;
     padding: 40px 20px;
@@ -91,7 +91,7 @@
     border-radius: 12px;
     padding: 16px;
     color: #ffd166;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-stack);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
     z-index: 1100;
     transition: opacity 0.2s ease, transform 0.2s ease;

@@ -2,7 +2,7 @@
 
 **Created**: 2025-11-19
 **Status**: Planning Phase
-**Branch**: Mobile-Refactor
+**Branch**: mobile-ux-improvements
 
 This document outlines the implementation plan for mobile UX improvements based on user testing feedback.
 

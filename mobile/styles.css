@@ -5,13 +5,15 @@
     --color-table-dark: #044328;
     --color-table-highlight: #178c4e;
     --gradient-table: radial-gradient(circle at 35% 18%, var(--color-table-highlight) 0%, var(--color-table-base) 45%, var(--color-table-dark) 98%), radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.15) 0%, transparent 60%), radial-gradient(circle at 20% 60%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.08) 0%, transparent 45%);
+    --font-stack: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "Consolas", "SFMono-Regular", "Menlo", monospace;
 }
 
 /* Base layout */
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-stack);
     background: var(--gradient-table);
     color: #333;
     height: 100vh;
@@ -87,7 +89,7 @@ body {
     height: 42px;
     font-size: 12px;
     font-weight: bold;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-stack);
     padding: 2px;
     border: 1px solid #666;
     background-color: rgba(255, 255, 255, 0.95);
@@ -132,7 +134,7 @@ body {
     color: #ffd166;
     font-size: 16px;
     font-weight: bold;
-    font-family: 'Courier New', monospace;
+    font-family: var(--font-stack);
     transition: color 0.3s ease;
 }
 

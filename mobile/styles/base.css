@@ -1,5 +1,10 @@
 /* Base Mobile Styles - Reset and defaults */
 
+:root {
+    --font-stack: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "Consolas", "SFMono-Regular", "Menlo", monospace;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -12,7 +17,7 @@ html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: var(--font-stack);
     background-color: #0c6d3a;
 }
 
@@ -25,7 +30,7 @@ html, body {
 }
 
 button {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: var(--font-stack);
     cursor: pointer;
 }
 
