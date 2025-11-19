@@ -17,7 +17,8 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Prevent scrolling */
+    overflow: hidden;
+    /* Prevent scrolling */
 }
 
 /* Opponent bars section */
@@ -91,7 +92,8 @@ body {
 
 /* Apply suit colors to opponent tiles */
 .exposure-icon {
-    color: #ff0000; /* Default crack color for example */
+    color: #ff0000;
+    /* Default crack color for example */
 }
 
 /* Wall Counter */
@@ -127,13 +129,15 @@ body {
 
 /* Discard pile section */
 .game-center {
-    flex: 1; /* Take remaining space */
+    flex: 1;
+    /* Take remaining space */
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
     padding: 8px;
-    overflow-y: auto; /* Allow scrolling for 100+ tiles */
+    overflow-y: auto;
+    /* Allow scrolling for 100+ tiles */
     position: relative;
 }
 
@@ -142,97 +146,15 @@ body {
     margin-bottom: 10px;
     font-size: 14px;
     text-align: center;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     padding: 4px 12px;
     border-radius: 12px;
 }
 
-.discard-pile {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr); /* 9 columns × 12 rows = 108 tiles */
-    gap: 2px;
-    max-width: 100%;
-    width: 100%;
-    align-content: start;
-}
-
-.discard-tile {
-    aspect-ratio: 3/4; /* Tile proportions */
-    background: white;
-    border: 1px solid #333;
-    border-radius: 2px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 10px;
-    font-weight: bold;
-    height: 32px; /* Fixed size - 9 cols × 32px = ~300px width fits on 390px screen */
-    width: auto;
-}
-
-.discard-tile.latest {
-    border: 3px solid #ffeb3b;
-    animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(255, 235, 59, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0); }
-}
-
-/* Hand section */
-.hand-area {
-    flex: 0 0 auto; /* Auto height based on content */
-    display: flex;
-    flex-direction: column;
-    padding: 8px;
-    gap: 8px;
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.hand-container {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 7 tiles per row */
-    gap: 3px;
-    justify-items: center;
-    max-width: 100%;
-}
-
-/* Tile buttons - larger for better touch */
-.tile {
-    width: 45px;
-    height: 60px;
-    font-size: 16px;
-    font-weight: bold;
-    font-family: 'Courier New', monospace;
-    padding: 4px;
-    border: 2px solid #333;
-    background: white;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.2s;
-}
-
-.tile.selected {
-    background: #ffeb3b;
-    border: 2px solid #f57c00;
-}
-
-.tile:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* AI Hints Panel */
-.hints-panel {
-    flex: 0 0 auto;
-    background: rgba(4, 24, 14, 0.95);
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(4px);
+/* Auto height based on content */
+display: flex;
+flex-direction: column;
+backdrop-filter: blur(4px);
 }
 
 .hints-toggle {
@@ -342,7 +264,8 @@ body {
 /* Mobile viewport adjustments */
 @media (max-width: 375px) {
     .tile {
-        width: 42px; /* Slightly smaller on very small screens */
+        width: 42px;
+        /* Slightly smaller on very small screens */
         height: 56px;
         font-size: 15px;
     }
@@ -362,7 +285,8 @@ body {
 /* Larger screens (tablets in portrait) */
 @media (min-width: 768px) {
     .tile {
-        width: 60px; /* Larger tiles on bigger screens */
+        width: 60px;
+        /* Larger tiles on bigger screens */
         height: 80px;
         font-size: 20px;
     }
@@ -374,7 +298,8 @@ body {
     }
 
     .discard-pile {
-        grid-template-columns: repeat(12, 1fr); /* More columns on larger screens */
+        grid-template-columns: repeat(12, 1fr);
+        /* More columns on larger screens */
     }
 
     .discard-tile {

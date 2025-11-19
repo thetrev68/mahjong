@@ -1,0 +1,113 @@
+/* Tile Sprite Styles */
+
+/* Base tile styles - sprite-based rendering */
+.tile {
+    background-image: url('/mahjong/pwa/assets/tiles.png');
+    background-repeat: no-repeat;
+    image-rendering: crisp-edges; /* Prevent blur on scaling */
+    border-radius: 6px;
+    border: 2px solid #1f3c2a;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+/* Normal size tiles (45px × 60px) - player hand */
+.tile--normal {
+    width: 45px;
+    height: 60px;
+    /* Scale the 1300px wide sprite sheet to fit */
+    /* Original sprite: 1300px wide (39 tiles × ~33.33px each)
+       Target: 45px wide tiles
+       Scale factor: 45 / 33.33 ≈ 1.35
+       Sheet width: 1300 × 1.35 = 1755px */
+    background-size: 1755px auto;
+}
+
+/* Small size tiles (32px × 42px) - exposed tiles */
+.tile--small {
+    width: 32px;
+    height: 42px;
+    /* Scale for 32px tiles: 32 / 33.33 ≈ 0.96
+       Sheet width: 1300 × 0.96 = 1248px */
+    background-size: 1248px auto;
+}
+
+/* Discard pile tiles (30px × 40px) */
+.tile--discard {
+    width: 30px;
+    height: 40px;
+    /* Scale for 30px tiles: 30 / 33.33 ≈ 0.9
+       Sheet width: 1300 × 0.9 = 1170px */
+    background-size: 1170px auto;
+}
+
+/* Selected state */
+.tile.selected {
+    background-color: #ffeb3b;
+    border-color: #f57c00;
+    transform: translateY(-4px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Disabled state */
+.tile:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Interactive tiles (buttons) */
+button.tile {
+    cursor: pointer;
+    padding: 0;
+}
+
+button.tile:focus-visible {
+    outline: 3px solid #0c6d3a;
+    outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 374px) {
+    .tile--normal {
+        width: 42px;
+        height: 56px;
+        background-size: 1638px auto; /* 42 / 33.33 × 1300 */
+    }
+
+    .tile--small {
+        width: 30px;
+        height: 40px;
+        background-size: 1170px auto;
+    }
+
+    .tile--discard {
+        width: 28px;
+        height: 37px;
+        background-size: 1092px auto;
+    }
+}
+
+@media (min-width: 768px) {
+    .tile--normal {
+        width: 60px;
+        height: 80px;
+        background-size: 2340px auto; /* 60 / 33.33 × 1300 */
+    }
+
+    .tile--small {
+        width: 40px;
+        height: 54px;
+        background-size: 1560px auto;
+    }
+
+    .tile--discard {
+        width: 38px;
+        height: 51px;
+        background-size: 1482px auto;
+    }
+}

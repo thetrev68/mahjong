@@ -5,7 +5,7 @@ import { MobileTile } from "../../../mobile/components/MobileTile.js";
 
 // Set up jsdom environment for DOM globals
 const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
-  url: "http://localhost"
+    url: "http://localhost"
 });
 
 globalThis.window = dom.window;
@@ -13,14 +13,14 @@ globalThis.document = dom.window.document;
 
 // Mock Image constructor
 globalThis.Image = class MockImage {
-  constructor() {
-    this.onload = null;
-    this.onerror = null;
-    this.src = "";
-    setTimeout(() => {
-      if (this.onload) this.onload();
-    }, 0);
-  }
+    constructor() {
+        this.onload = null;
+        this.onerror = null;
+        this.src = "";
+        setTimeout(() => {
+            if (this.onload) this.onload();
+        }, 0);
+    }
 };
 
 // Mock data for testing
@@ -73,10 +73,10 @@ test.describe("MobileTile", () => {
 
     test.describe("Static Methods", () => {
         test("should load sprite data correctly", async () => {
-            await MobileTile.loadSprites("../assets/tiles.png", mockSpriteData);
-            
+            await MobileTile.loadSprites("../pwa/assets/tiles.png", mockSpriteData);
+
             expect(MobileTile.isLoaded).toBe(true);
-            expect(MobileTile.spritePath).toBe("../assets/tiles.png");
+            expect(MobileTile.spritePath).toBe("../pwa/assets/tiles.png");
             expect(MobileTile.spriteData).toBeDefined();
             expect(MobileTile.spriteData.frames["5C.png"]).toBeDefined();
             expect(MobileTile.spriteData.frames["5C.png"].frame.x).toBe(676);
@@ -110,7 +110,7 @@ test.describe("MobileTile", () => {
     test.describe("Constructor", () => {
         test("should create tile with default options", () => {
             const tile = new MobileTile(mockTileData.CRACK_5);
-            
+
             expect(tile.tileData).toEqual(mockTileData.CRACK_5);
             expect(tile.options.width).toBe(45);
             expect(tile.options.height).toBe(60);
@@ -126,7 +126,7 @@ test.describe("MobileTile", () => {
                 state: "selected",
                 useSprites: false
             });
-            
+
             expect(tile.options.width).toBe(32);
             expect(tile.options.height).toBe(42);
             expect(tile.options.state).toBe("selected");
@@ -138,7 +138,7 @@ test.describe("MobileTile", () => {
         test("should create tile element with correct attributes", () => {
             const tile = MobileTile.createHandTile(mockTileData.CRACK_5);
             const element = tile.createElement();
-            
+
             expect(element.tagName).toBe("BUTTON");
             expect(element.className).toBe("mobile-tile");
             expect(element.dataset.suit).toBe(String(SUIT.CRACK));
@@ -149,10 +149,10 @@ test.describe("MobileTile", () => {
         });
 
         test("should use sprites when loaded", async () => {
-            await MobileTile.loadSprites("../assets/tiles.png", mockSpriteData);
+            await MobileTile.loadSprites("../pwa/assets/tiles.png", mockSpriteData);
             const tile = MobileTile.createHandTile(mockTileData.CRACK_5);
             const element = tile.createElement();
-            
+
             expect(element.style.backgroundImage).toContain("tiles.png");
             expect(element.style.backgroundPosition).toBe("-676px 0px");
             expect(element.style.backgroundSize).toContain("2028px");
@@ -162,7 +162,7 @@ test.describe("MobileTile", () => {
             MobileTile.isLoaded = false;
             const tile = new MobileTile(mockTileData.CRACK_5, { useSprites: true });
             const element = tile.createElement();
-            
+
             expect(element.textContent).toBe("5C");
             expect(element.style.backgroundImage).toBe("");
         });
@@ -171,7 +171,7 @@ test.describe("MobileTile", () => {
             MobileTile.isLoaded = true;
             const tile = new MobileTile(mockTileData.BAM_3, { useSprites: false });
             const element = tile.createElement();
-            
+
             expect(element.textContent).toBe("3B");
             expect(element.style.backgroundImage).toBe("");
         });
@@ -181,30 +181,30 @@ test.describe("MobileTile", () => {
         test("should apply state classes correctly", () => {
             const tile = MobileTile.createHandTile(mockTileData.DOT_7);
             const element = tile.createElement();
-            
+
             // Initial state should be 'normal'
             expect(element.classList.contains("mobile-tile--selected")).toBe(false);
             expect(element.classList.contains("mobile-tile--disabled")).toBe(false);
             expect(element.classList.contains("mobile-tile--highlighted")).toBe(false);
-            
+
             // Test selected state
             tile.setState("selected");
             expect(element.classList.contains("mobile-tile--selected")).toBe(true);
             expect(element.classList.contains("mobile-tile--disabled")).toBe(false);
             expect(element.classList.contains("mobile-tile--highlighted")).toBe(false);
-            
+
             // Test disabled state
             tile.setState("disabled");
             expect(element.classList.contains("mobile-tile--selected")).toBe(false);
             expect(element.classList.contains("mobile-tile--disabled")).toBe(true);
             expect(element.classList.contains("mobile-tile--highlighted")).toBe(false);
-            
+
             // Test highlighted state
             tile.setState("highlighted");
             expect(element.classList.contains("mobile-tile--selected")).toBe(false);
             expect(element.classList.contains("mobile-tile--disabled")).toBe(false);
             expect(element.classList.contains("mobile-tile--highlighted")).toBe(true);
-            
+
             // Test normal state
             tile.setState("normal");
             expect(element.classList.contains("mobile-tile--selected")).toBe(false);
@@ -214,11 +214,11 @@ test.describe("MobileTile", () => {
 
         test("should handle setState before element creation", () => {
             const tile = new MobileTile(mockTileData.JOKER);
-            
+
             // Should not throw error
             expect(() => tile.setState("selected")).not.toThrow();
             expect(tile.currentState).toBe("selected");
-            
+
             // State should be applied when element is created
             const element = tile.createElement();
             expect(element.classList.contains("mobile-tile--selected")).toBe(true);
@@ -229,13 +229,13 @@ test.describe("MobileTile", () => {
         test("should generate correct sprite frame names for all suits", () => {
             const tile = new MobileTile(mockTileData.CRACK_5);
             expect(tile.getSpriteFrameName()).toBe("5C.png");
-            
+
             const tile2 = new MobileTile(mockTileData.BAM_3);
             expect(tile2.getSpriteFrameName()).toBe("3B.png");
-            
+
             const tile3 = new MobileTile(mockTileData.DOT_7);
             expect(tile3.getSpriteFrameName()).toBe("7D.png");
-            
+
             const tile4 = new MobileTile(mockTileData.JOKER);
             expect(tile4.getSpriteFrameName()).toBe("J.png");
         });
@@ -243,13 +243,13 @@ test.describe("MobileTile", () => {
         test("should generate correct sprite frame names for winds", () => {
             const tile = new MobileTile(mockTileData.WIND_NORTH);
             expect(tile.getSpriteFrameName()).toBe("N.png");
-            
+
             const tile2 = new MobileTile(mockTileData.WIND_SOUTH);
             expect(tile2.getSpriteFrameName()).toBe("S.png");
-            
+
             const tile3 = new MobileTile(mockTileData.WIND_WEST);
             expect(tile3.getSpriteFrameName()).toBe("W.png");
-            
+
             const tile4 = new MobileTile(mockTileData.WIND_EAST);
             expect(tile4.getSpriteFrameName()).toBe("E.png");
         });
@@ -257,10 +257,10 @@ test.describe("MobileTile", () => {
         test("should generate correct sprite frame names for dragons", () => {
             const tile = new MobileTile(mockTileData.DRAGON_RED);
             expect(tile.getSpriteFrameName()).toBe("DB.png");
-            
+
             const tile2 = new MobileTile(mockTileData.DRAGON_GREEN);
             expect(tile2.getSpriteFrameName()).toBe("DC.png");
-            
+
             const tile3 = new MobileTile(mockTileData.DRAGON_WHITE);
             expect(tile3.getSpriteFrameName()).toBe("DD.png");
         });
@@ -268,7 +268,7 @@ test.describe("MobileTile", () => {
         test("should generate correct sprite frame names for flowers", () => {
             const tile = new MobileTile(mockTileData.FLOWER_1);
             expect(tile.getSpriteFrameName()).toBe("F1.png");
-            
+
             const tile2 = new MobileTile(mockTileData.FLOWER_4);
             expect(tile2.getSpriteFrameName()).toBe("F4.png");
         });
@@ -277,7 +277,7 @@ test.describe("MobileTile", () => {
             const unknownTile = { suit: 999, number: 0, index: 0 };
             const tile = new MobileTile(unknownTile);
             const frameName = tile.getSpriteFrameName();
-            
+
             expect(frameName).toBe("blank.png");
         });
     });
@@ -338,7 +338,7 @@ test.describe("MobileTile", () => {
         });
 
         test("should enable sprites after loading", async () => {
-            await MobileTile.loadSprites("../assets/tiles.png", mockSpriteData);
+            await MobileTile.loadSprites("../pwa/assets/tiles.png", mockSpriteData);
             const tile = MobileTile.createHandTile(mockTileData.JOKER);
             expect(tile.options.useSprites).toBe(true);
         });
@@ -348,7 +348,7 @@ test.describe("MobileTile", () => {
         test("should calculate scale correctly", () => {
             const tile = new MobileTile(mockTileData.CRACK_5, { width: 45 });
             expect(tile.getScale()).toBeCloseTo(45 / 52, 2); // ~0.865
-            
+
             const tile2 = new MobileTile(mockTileData.BAM_3, { width: 32 });
             expect(tile2.getScale()).toBeCloseTo(32 / 52, 2); // ~0.615
         });
@@ -396,7 +396,7 @@ test.describe("MobileTile", () => {
             await MobileTile.loadSprites("../assets/tiles.png", { frames: {}, meta: { size: { w: 0, h: 0 } } });
             const tile = new MobileTile(mockTileData.CRACK_5);
             const element = tile.createElement();
-            
+
             // Should fallback to text and log warning
             expect(element.textContent).toBe("5C");
         });
@@ -404,7 +404,7 @@ test.describe("MobileTile", () => {
         test("should handle invalid tile data", () => {
             const invalidTile = { suit: null, number: NaN, index: undefined };
             const tile = new MobileTile(invalidTile);
-            
+
             expect(() => tile.getSpriteFrameName()).not.toThrow();
             expect(() => tile.getTileText()).not.toThrow();
         });

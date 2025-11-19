@@ -31,7 +31,7 @@ test.describe("Phase 0: Testing Framework Setup", () => {
         // Verify GameController is available
         const hasGameController = await page.evaluate(() => {
             return window.gameController !== undefined &&
-                   window.gameController !== null;
+                window.gameController !== null;
         });
 
         expect(hasGameController).toBe(true);
@@ -53,7 +53,7 @@ test.describe("Phase 0: Testing Framework Setup", () => {
                 const img = new Image();
                 img.onload = () => resolve(true);
                 img.onerror = () => resolve(false);
-                img.src = "/mahjong/assets/tiles.png";
+                img.src = "/mahjong/pwa/assets/tiles.png";
             });
         });
 
@@ -62,7 +62,7 @@ test.describe("Phase 0: Testing Framework Setup", () => {
         // Verify tiles.json is accessible
         const tilesJsonLoaded = await page.evaluate(async () => {
             try {
-                const response = await fetch("/mahjong/assets/tiles.json");
+                const response = await fetch("/mahjong/pwa/assets/tiles.json");
                 return response.ok;
             } catch (error) {
                 return false;
@@ -96,7 +96,7 @@ test.describe("Phase 0: Testing Framework Setup", () => {
         // Verify MobileRenderer is initialized
         const hasMobileRenderer = await page.evaluate(() => {
             return window.mobileRenderer !== undefined &&
-                   window.mobileRenderer !== null;
+                window.mobileRenderer !== null;
         });
 
         expect(hasMobileRenderer).toBe(true);
@@ -109,7 +109,7 @@ test.describe("Phase 0: Testing Framework Setup", () => {
         // Verify AIEngine is available
         const hasAIEngine = await page.evaluate(() => {
             return window.aiEngine !== undefined &&
-                   window.aiEngine !== null;
+                window.aiEngine !== null;
         });
 
         expect(hasAIEngine).toBe(true);

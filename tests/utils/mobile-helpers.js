@@ -35,7 +35,7 @@ export class MobileTestHelpers {
                 const img = new Image();
                 img.onload = () => resolve(true);
                 img.onerror = () => resolve(false);
-                img.src = "/mahjong/assets/tiles.png";
+                img.src = "/mahjong/pwa/assets/tiles.png";
             });
         }, { timeout: 10000 });
     }
@@ -102,7 +102,7 @@ export class MobileTestHelpers {
             const body = window.getComputedStyle(document.body);
             // Check if background has been styled (not default white)
             return body.backgroundColor !== "rgba(0, 0, 0, 0)" &&
-                   body.backgroundColor !== "rgb(255, 255, 255)";
+                body.backgroundColor !== "rgb(255, 255, 255)";
         });
     }
 
