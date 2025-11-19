@@ -110,7 +110,6 @@ export class TileSprites {
 
         // Handle BLANK tiles specially - show the back of the tile
         if (index === -1) {
-            div.classList.add("tile--blank");
             div.style.backgroundImage = "url('/mahjong/pwa/assets/back.png')";
             div.style.backgroundPosition = "center";
             div.style.backgroundSize = "contain";

@@ -355,305 +355,6 @@ body {
     padding: 2px 0;
 }
 
-.tile-char {
-    min-width: 16px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: bold;
-    border-radius: 3px;
-    padding: 0 1px;
-    border: 1px solid;
-    box-sizing: border-box;
-}
-
-.component-spacer {
-    width: 8px;
-}
-
-.bg-white {
-    background-color: #ffffff !important;
-    opacity: 1;
-}
-
-/* Tailwind-style color utilities for pattern visualization */
-.bg-red-600 {
-    background-color: #dc2626;
-}
-
-.bg-green-600 {
-    background-color: #16a34a;
-}
-
-.bg-blue-600 {
-    background-color: #2563eb;
-}
-
-.bg-black {
-    background-color: #000000;
-}
-
-.bg-gray-600 {
-    background-color: #4b5563;
-}
-
-.text-red-600 {
-    color: #dc2626;
-}
-
-.text-green-600 {
-    color: #16a34a;
-}
-
-.text-blue-600 {
-    color: #2563eb;
-}
-
-.text-black {
-    color: #000000;
-}
-
-.text-gray-600 {
-    color: #4b5563;
-}
-
-.text-white {
-    color: #ffffff;
-}
-
-.border-red-700 {
-    border-color: #b91c1c;
-}
-
-.border-green-700 {
-    border-color: #15803d;
-}
-
-.border-blue-700 {
-    border-color: #1d4ed8;
-}
-
-.border-black {
-    border-color: #000000;
-}
-
-.border-gray-700 {
-    border-color: #374151;
-}
-
-.border-red-200 {
-    border-color: #fecaca;
-}
-
-.border-green-200 {
-    border-color: #bbf7d0;
-}
-
-.border-blue-200 {
-    border-color: #bfdbfe;
-}
-
-.border-gray-200 {
-    border-color: #e5e7eb;
-}
-
-/* Bottom menu */
-.bottom-menu {
-    flex: 0 0 auto;
-    display: flex;
-    justify-content: stretch;
-    align-items: stretch;
-    padding: 0;
-    background: rgba(4, 24, 14, 0.95);
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.menu-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 14px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
-    color: rgba(237, 244, 239, 0.85);
-    font-size: 14px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: all 0.2s;
-    min-height: 54px;
-}
-
-.menu-btn:last-child {
-    border-right: none;
-}
-
-.menu-btn--primary:active {
-    background: rgba(76, 175, 80, 0.25);
-}
-
-/* Base tile style */
-.tile {
-    width: 48px;
-    height: 64px;
-    position: relative;
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
-    cursor: pointer;
-    background-color: #f0f0f0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Mobile viewport adjustments */
-@media (max-width: 375px) {
-    .tile {
-        width: 42px;
-        /* Slightly smaller on very small screens */
-        height: 56px;
-        font-size: 15px;
-    }
-
-    .exposure-icon {
-        width: 30px;
-        height: 40px;
-        font-size: 11px;
-    }
-
-    .discard-tile {
-        height: 30px;
-        font-size: 9px;
-    }
-}
-
-/* Larger screens (tablets in portrait) */
-@media (min-width: 768px) {
-    .tile {
-        width: 60px;
-        /* Larger tiles on bigger screens */
-        height: 80px;
-        font-size: 20px;
-    }
-
-    .exposure-icon {
-        width: 40px;
-        height: 54px;
-        font-size: 14px;
-    }
-
-}
-
-.tile-char {
-    min-width: 16px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: bold;
-    border-radius: 3px;
-    padding: 0 1px;
-    border: 1px solid;
-    box-sizing: border-box;
-}
-
-.component-spacer {
-    width: 8px;
-}
-
-.bg-white {
-    background-color: #ffffff !important;
-    opacity: 1;
-}
-
-/* Tailwind-style color utilities for pattern visualization */
-.bg-red-600 {
-    background-color: #dc2626;
-}
-
-.bg-green-600 {
-    background-color: #16a34a;
-}
-
-.bg-blue-600 {
-    background-color: #2563eb;
-}
-
-.bg-black {
-    background-color: #000000;
-}
-
-.bg-gray-600 {
-    background-color: #4b5563;
-}
-
-.text-red-600 {
-    color: #dc2626;
-}
-
-.text-green-600 {
-    color: #16a34a;
-}
-
-.text-blue-600 {
-    color: #2563eb;
-}
-
-.text-black {
-    color: #000000;
-}
-
-.text-gray-600 {
-    color: #4b5563;
-}
-
-.text-white {
-    color: #ffffff;
-}
-
-.border-red-700 {
-    border-color: #b91c1c;
-}
-
-.border-green-700 {
-    border-color: #15803d;
-}
-
-.border-blue-700 {
-    border-color: #1d4ed8;
-}
-
-.border-black {
-    border-color: #000000;
-}
-
-.border-gray-700 {
-    border-color: #374151;
-}
-
-.border-red-200 {
-    border-color: #fecaca;
-}
-
-.border-green-200 {
-    border-color: #bbf7d0;
-}
-
-.border-blue-200 {
-    border-color: #bfdbfe;
-}
-
-.border-gray-200 {
-    border-color: #e5e7eb;
-}
-
 /* Bottom menu */
 .bottom-menu {
     flex: 0 0 auto;
@@ -751,4 +452,109 @@ body {
     .discard-tile {
         height: 38px;
     }
+
+}
+
+.tile-char {
+    min-width: 16px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 0 1px;
+    border: 1px solid;
+    box-sizing: border-box;
+}
+
+.component-spacer {
+    width: 8px;
+}
+
+.bg-white {
+    background-color: #ffffff !important;
+    opacity: 1;
+}
+
+/* Tailwind-style color utilities for pattern visualization */
+.bg-red-600 {
+    background-color: #dc2626;
+}
+
+.bg-green-600 {
+    background-color: #16a34a;
+}
+
+.bg-blue-600 {
+    background-color: #2563eb;
+}
+
+.bg-black {
+    background-color: #000000;
+}
+
+.bg-gray-600 {
+    background-color: #4b5563;
+}
+
+.text-red-600 {
+    color: #dc2626;
+}
+
+.text-green-600 {
+    color: #16a34a;
+}
+
+.text-blue-600 {
+    color: #2563eb;
+}
+
+.text-black {
+    color: #000000;
+}
+
+.text-gray-600 {
+    color: #4b5563;
+}
+
+.text-white {
+    color: #ffffff;
+}
+
+.border-red-700 {
+    border-color: #b91c1c;
+}
+
+.border-green-700 {
+    border-color: #15803d;
+}
+
+.border-blue-700 {
+    border-color: #1d4ed8;
+}
+
+.border-black {
+    border-color: #000000;
+}
+
+.border-gray-700 {
+    border-color: #374151;
+}
+
+.border-red-200 {
+    border-color: #fecaca;
+}
+
+.border-green-200 {
+    border-color: #bbf7d0;
+}
+
+.border-blue-200 {
+    border-color: #bfdbfe;
+}
+
+.border-gray-200 {
+    border-color: #e5e7eb;
 }

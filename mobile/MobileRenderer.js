@@ -160,56 +160,35 @@ export class MobileRenderer {
     }
 
     onSortClicked() {
-        if (!this.latestHandSnapshot || !this.latestHandSnapshot.tiles) return;
+        if (!this.latestHandSnapshot || !Array.isArray(this.latestHandSnapshot.tiles)) {
+            return;
+        }
 
-        // Sort hand tiles by suit/rank with improved logic
-        const sorted = [...this.latestHandSnapshot.tiles].sort((a, b) => {
-            // Primary: suit order (BAM, Characters, Dots, Winds, Dragons)
-            const suitOrder = { "BAM": 1, "CHR": 2, "DOT": 3, "WIND": 4, "DRAGON": 5 };
+        // Clone the current hand and use HandData's own sort helper for consistency
+        const sortedHand = typeof this.latestHandSnapshot.clone === "function"
+            ? this.latestHandSnapshot.clone()
+            : HandData.fromJSON(this.latestHandSnapshot);
 
-            // Helper to get type/suit safely
-            const getSuit = (tile) => {
-                if (tile.type === "Number") return tile.suit;
-                if (tile.type === "Wind") return "WIND";
-                if (tile.type === "Dragon") return "DRAGON";
-                return "UNKNOWN";
-            };
+        if (typeof sortedHand.sortBySuit === "function") {
+            sortedHand.sortBySuit();
+        } else {
+            sortedHand.tiles.sort((a, b) => {
+                if (a.suit !== b.suit) {
+                    return a.suit - b.suit;
+                }
+                return a.number - b.number;
+            });
+        }
 
-            const aSuit = suitOrder[getSuit(a)] || 99;
-            const bSuit = suitOrder[getSuit(b)] || 99;
-
-            if (aSuit !== bSuit) return aSuit - bSuit;
-
-            // Secondary: rank (1-9 for numbers, then winds, then dragons)
-            if (a.type === "Number" && b.type === "Number") {
-                return a.rank - b.rank;
-            }
-            // For winds: East, South, West, North
-            if (a.type === "Wind" && b.type === "Wind") {
-                const winds = ["East", "South", "West", "North"];
-                return winds.indexOf(a.wind) - winds.indexOf(b.wind);
-            }
-            // For dragons: Red, Green, White
-            if (a.type === "Dragon" && b.type === "Dragon") {
-                const dragons = ["Red", "Green", "White"];
-                return dragons.indexOf(a.color) - dragons.indexOf(b.color);
-            }
-
-            return 0;
-        });
-
-        // Create a new HandData with sorted tiles but same other properties
-        const sortedHand = new HandData(sorted);
-        // Preserve other properties if needed, but HandRenderer mainly cares about tiles
+        this.latestHandSnapshot = sortedHand;
         this.handRenderer.render(sortedHand);
-
-        // Animate the sort
         this.animationController.animateHandSort(this.handRenderer.container);
     }
 
     canDrawTile() {
+        const state = this.gameController?.gameState;
         return this.gameController.currentPlayer === HUMAN_PLAYER &&
-            this.gameController.gameState === "LOOP_PICK_FROM_WALL";
+            (state === STATE.LOOP_PICK_FROM_WALL || state === "LOOP_PICK_FROM_WALL");
     }
 
     onGameStarted() {
@@ -244,9 +223,9 @@ export class MobileRenderer {
 
         // Show DRAW button only during player's turn to pick
         if (drawBtn) {
-            drawBtn.style.display =
-                (data.newState === STATE.LOOP_PICK_FROM_WALL && this.gameController.currentPlayer === HUMAN_PLAYER)
-                    ? "flex" : "none";
+            const canDraw = this.canDrawTile();
+            drawBtn.style.display = canDraw ? "flex" : "none";
+            drawBtn.disabled = !canDraw;
         }
 
         // SORT always visible during main game loop states
