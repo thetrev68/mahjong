@@ -164,17 +164,30 @@ export class MobileTestHelpers {
     }
 
     /**
-     * Check console for errors
+     * Check console for errors during a test action
      * @param {import('@playwright/test').Page} page - Playwright page object
-     * @returns {Promise<Array>} - Array of console errors
+     * @param {Function} callback - Async function to run while collecting errors
+     * @returns {Promise<Array>} - Array of console errors collected during callback
      */
-    static async getConsoleErrors(page) {
+    static async getConsoleErrors(page, callback) {
         const errors = [];
-        page.on("console", (msg) => {
+        const listener = (msg) => {
             if (msg.type() === "error") {
                 errors.push(msg.text());
             }
-        });
+        };
+
+        // Register listener
+        page.on("console", listener);
+
+        try {
+            // Run the callback
+            await callback();
+        } finally {
+            // Always remove listener, even if callback throws
+            page.off("console", listener);
+        }
+
         return errors;
     }
 
