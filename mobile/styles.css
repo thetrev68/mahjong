@@ -166,10 +166,33 @@ body {
     border-radius: 12px;
 }
 
-/* Auto height based on content */
-display: flex;
-flex-direction: column;
-backdrop-filter: blur(4px);
+/* Discard pile grid */
+.discard-pile {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr); /* 9 columns for mobile */
+    gap: 2px;
+    max-width: 100%;
+    width: 100%;
+    align-content: start;
+    padding: 4px;
+}
+
+.discard-tile {
+    aspect-ratio: 3/4; /* Tile proportions */
+    height: 32px; /* Fixed size - 9 cols × 32px = ~300px width fits on 390px screen */
+    width: auto;
+    cursor: pointer;
+}
+
+.discard-tile.latest {
+    border: 3px solid #ffeb3b !important;
+    animation: pulse-discard 1s infinite;
+}
+
+@keyframes pulse-discard {
+    0% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 235, 59, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0); }
 }
 
 .hints-toggle {
@@ -313,12 +336,10 @@ backdrop-filter: blur(4px);
     }
 
     .discard-pile {
-        grid-template-columns: repeat(12, 1fr);
-        /* More columns on larger screens */
+        grid-template-columns: repeat(12, 1fr); /* More columns on larger screens */
     }
 
     .discard-tile {
         height: 38px;
-        font-size: 11px;
     }
 }
