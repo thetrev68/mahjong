@@ -1,3 +1,4 @@
+/* global URLSearchParams */
 import InstallPrompt from "./components/InstallPrompt.js";
 import SettingsSheet from "./components/SettingsSheet.js";
 import SettingsManager from "../shared/SettingsManager.js";
@@ -18,8 +19,8 @@ let gameController;
 let aiEngine;
 let mobileRenderer;
 let settingsSheet;
-let wallCounter;
-let hintsPanel;
+let _wallCounter; // Initialized for side effects (event listener registration)
+let _hintsPanel; // Initialized for side effects (event listener registration)
 
 /**
  * Hook to call when a game ends
@@ -169,14 +170,14 @@ async function initializeGame() {
     // Initialize WallCounter component
     const wallCounterContainer = document.getElementById("wall-counter");
     if (wallCounterContainer) {
-        wallCounter = new WallCounter(wallCounterContainer, gameController);
+        _wallCounter = new WallCounter(wallCounterContainer, gameController);
         console.log("WallCounter initialized");
     }
 
     // Initialize HintsPanel component
     const hintsPanelContainer = document.getElementById("hints-panel");
     if (hintsPanelContainer) {
-        hintsPanel = new HintsPanel(hintsPanelContainer, gameController, aiEngine);
+        _hintsPanel = new HintsPanel(hintsPanelContainer, gameController, aiEngine);
         console.log("HintsPanel initialized");
     }
 

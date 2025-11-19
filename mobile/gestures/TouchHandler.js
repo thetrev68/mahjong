@@ -230,8 +230,6 @@ export class TouchHandler {
             }
         } else if (deltaY > this.options.swipeMinDistance && deltaY > deltaX) {
             // Vertical swipe
-            const direction = touch.clientY < this.state.startX ? "up" : "down"; // Note: startY vs clientY
-            // Actually let's use startY
             const dir = touch.clientY < this.state.startY ? "up" : "down";
 
             if (dir === "up" && this.state.element && this.state.element.closest(".tile")) {
@@ -272,7 +270,7 @@ export class TouchHandler {
         this.emit("tile-touched", { tileId, element: tileElement });
     }
 
-    handleTileDrag(tileElement, delta) {
+    handleTileDrag(tileElement, _delta) {
         // Swipe to discard
         // Only if swipe up
         this.emit("tile-swiped", {
