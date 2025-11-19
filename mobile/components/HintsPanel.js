@@ -4,6 +4,9 @@
  * Displays AI-powered tile discard recommendations to help the player.
  * Panel can be toggled open/closed via the HINTS button.
  */
+import { HandData } from "../../core/models/HandData.js";
+import { renderPatternVariation } from "../../tileDisplayUtils.js";
+
 export class HintsPanel {
     /**
      * @param {HTMLElement} container - DOM element containing the hints panel
@@ -64,7 +67,9 @@ export class HintsPanel {
         // Update hints when player's hand changes
         const handleHandUpdated = (data) => {
             if (data.player === 0) { // Human player only
-                this.updateHints(data.hand);
+                // Convert plain JSON object to HandData instance
+                const handData = HandData.fromJSON(data.hand);
+                this.updateHints(handData);
             }
         };
         this.unsubscribeFns.push(
@@ -96,35 +101,52 @@ export class HintsPanel {
         }
 
         try {
-            // Get AI recommendations for which tiles to keep/discard
-            const recommendations = this.aiEngine.getTileRecommendations(handData);
+            // Rank the hand to get top patterns
+            const rankCardHands = this.aiEngine.card.rankHandArray14(handData);
+            console.log("HintsPanel: rankCardHands:", rankCardHands);
 
-            if (!recommendations || recommendations.length === 0) {
+            if (!rankCardHands || rankCardHands.length === 0) {
+                console.log("HintsPanel: No patterns available");
                 this.contentEl.innerHTML = `
                     <div class="hint-item">
-                        <span class="hint-label">No recommendations available</span>
+                        <span class="hint-label">No patterns available</span>
                     </div>
                 `;
                 return;
             }
 
-            // Show top 3 discard recommendations
-            const top3 = recommendations.slice(0, 3);
+            // Get top 3 patterns sorted by rank
+            const sortedPatterns = [...rankCardHands].sort((a, b) => b.rank - a.rank);
+            const top3Patterns = sortedPatterns.slice(0, 3);
+            console.log("HintsPanel: top3Patterns:", top3Patterns);
 
-            this.contentEl.innerHTML = `
-                <div class="hint-item">
-                    <span class="hint-label">Best Discards:</span>
-                    <div class="hint-patterns">
-                        ${top3.map(rec => `
-                            <div class="hint-pattern">
-                                ${this.formatTile(rec.tile)} - Keep Value: ${rec.keepValue?.toFixed(2) || "N/A"}
-                            </div>
-                        `).join("")}
+            // Get all player tiles (including exposed tiles)
+            const playerTiles = handData.getTileArray();
+            const hiddenTiles = handData.tiles;
+
+            // Render pattern visualizations with group and line info
+            let html = "<div class=\"hint-item\">";
+            top3Patterns.forEach((rankHand, index) => {
+                const patternHtml = renderPatternVariation(rankHand, playerTiles, hiddenTiles);
+                const groupDesc = rankHand.group?.groupDescription || "Unknown";
+                const handDesc = rankHand.hand?.description || "";
+                const rank = rankHand.rank?.toFixed(2) || "0.00";
+
+                html += `
+                    <div class="hint-pattern">
+                        <div class="hint-pattern-header">
+                            <strong>${index + 1}. ${groupDesc}</strong> - ${handDesc}
+                            <span class="hint-rank">(Rank: ${rank})</span>
+                        </div>
+                        ${patternHtml}
                     </div>
-                </div>
-            `;
+                `;
+            });
+            html += "</div>";
+
+            this.contentEl.innerHTML = html;
         } catch (error) {
-            console.error("HintsPanel: Error getting tile recommendations:", error);
+            console.error("HintsPanel: Error generating hints:", error);
             this.contentEl.innerHTML = `
                 <div class="hint-item">
                     <span class="hint-label">Unable to generate hints</span>
@@ -188,10 +210,12 @@ export class HintsPanel {
     toggle() {
         // Early return if component is disabled or DOM is missing
         if (this._disabled || !this.contentEl || !this.toggleBtn) {
+            console.log("HintsPanel: toggle blocked - disabled or missing DOM");
             return;
         }
 
         this.isExpanded = !this.isExpanded;
+        console.log("HintsPanel: toggled to", this.isExpanded ? "expanded" : "collapsed");
         this.contentEl.style.display = this.isExpanded ? "block" : "none";
         this.toggleBtn.setAttribute("aria-expanded", String(this.isExpanded));
     }
