@@ -408,6 +408,13 @@ export class HandRenderer {
         };
     }
 
+    getLastTileElement() {
+        if (this.tiles && this.tiles.length > 0) {
+            return this.tiles[this.tiles.length - 1];
+        }
+        return null;
+    }
+
     notifySelectionChange() {
         if (typeof this.selectionListener === "function") {
             this.selectionListener(this.getSelectionState());

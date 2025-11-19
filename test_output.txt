@@ -1,0 +1,186 @@
+
+Running 8 tests using 8 workers
+
+[1A[2K[1/8] [desktop] ΓÇ║ tests\e2e\mobile\interactions.spec.js:12:5 ΓÇ║ Core Interactions ΓÇ║ DRAW button appears during player turn
+[1A[2K[2/8] [desktop] ΓÇ║ tests\e2e\mobile\interactions.spec.js:34:5 ΓÇ║ Core Interactions ΓÇ║ tile tap selects for discard
+[1A[2K[3/8] [desktop] ΓÇ║ tests\e2e\mobile\interactions.spec.js:98:5 ΓÇ║ Core Interactions ΓÇ║ error handling for missing assets
+[1A[2K[4/8] [desktop] ΓÇ║ tests\e2e\mobile\interactions.spec.js:57:5 ΓÇ║ Core Interactions ΓÇ║ SORT button rearranges hand
+[1A[2K[5/8] [mobile] ΓÇ║ tests\e2e\mobile\interactions.spec.js:57:5 ΓÇ║ Core Interactions ΓÇ║ SORT button rearranges hand
+[1A[2K[6/8] [mobile] ΓÇ║ tests\e2e\mobile\interactions.spec.js:98:5 ΓÇ║ Core Interactions ΓÇ║ error handling for missing assets
+[1A[2K[7/8] [mobile] ΓÇ║ tests\e2e\mobile\interactions.spec.js:34:5 ΓÇ║ Core Interactions ΓÇ║ tile tap selects for discard
+[1A[2K[8/8] [mobile] ΓÇ║ tests\e2e\mobile\interactions.spec.js:12:5 ΓÇ║ Core Interactions ΓÇ║ DRAW button appears during player turn
+[1A[2K[WebServer] Files in the public directory are served at the root path.
+
+[WebServer] Instead of /pwa/assets/tiles.png, use /assets/tiles.png.
+
+[1A[2K[WebServer] Files in the public directory are served at the root path.
+[WebServer] Instead of /pwa/assets/tiles.png, use /assets/tiles.png.
+
+[1A[2K[WebServer] Files in the public directory are served at the root path.
+[WebServer] Instead of /pwa/assets/tiles.png, use /assets/tiles.png.
+
+[1A[2K[WebServer] Files in the public directory are served at the root path.
+[WebServer] Instead of /pwa/assets/tiles.png, use /assets/tiles.png.
+[1A[2K  1) [desktop] ΓÇ║ tests\e2e\mobile\interactions.spec.js:12:5 ΓÇ║ Core Interactions ΓÇ║ DRAW button appears during player turn 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('.hand-container .tile').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('.hand-container .tile').first()[22m
+
+
+      20 |
+      21 |         // Wait for hand to be dealt (tiles appear)
+    > 22 |         await expect(page.locator(".hand-container .tile").first()).toBeVisible({ timeout: 5000 });
+         |                                                                     ^
+      23 |
+      24 |         // DRAW button should exist in the DOM
+      25 |         const drawBtn = page.locator("#draw-btn");
+        at C:\Repos\mahjong\tests\e2e\mobile\interactions.spec.js:22:69
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-mobile-interactions-Co-2834f--appears-during-player-turn-desktop\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-mobile-interactions-Co-2834f--appears-during-player-turn-desktop\error-context.md
+
+
+[1A[2K  2) [desktop] ΓÇ║ tests\e2e\mobile\interactions.spec.js:98:5 ΓÇ║ Core Interactions ΓÇ║ error handling for missing assets 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('.hand-container .tile').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('.hand-container .tile').first()[22m
+
+
+      108 |
+      109 |         // Wait for tiles to be dealt even with missing sprites
+    > 110 |         await expect(page.locator(".hand-container .tile").first()).toBeVisible({ timeout: 5000 });
+          |                                                                     ^
+      111 |         await page.waitForTimeout(1000);
+      112 |
+      113 |         // Tiles should still be rendered (they'll have broken background images, but the structure should exist)
+        at C:\Repos\mahjong\tests\e2e\mobile\interactions.spec.js:110:69
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-mobile-interactions-Co-38306-handling-for-missing-assets-desktop\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-mobile-interactions-Co-38306-handling-for-missing-assets-desktop\error-context.md
+
+
+[1A[2K  3) [desktop] ΓÇ║ tests\e2e\mobile\interactions.spec.js:57:5 ΓÇ║ Core Interactions ΓÇ║ SORT button rearranges hand 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('.hand-container .tile').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('.hand-container .tile').first()[22m
+
+
+      62 |
+      63 |         // Wait for tiles to be dealt
+    > 64 |         await expect(page.locator(".hand-container .tile").first()).toBeVisible({ timeout: 5000 });
+         |                                                                     ^
+      65 |         await page.waitForTimeout(1000);
+      66 |
+      67 |         // Ensure settings overlay is not open (close it if it is)
+        at C:\Repos\mahjong\tests\e2e\mobile\interactions.spec.js:64:69
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-mobile-interactions-Co-f6c1f-SORT-button-rearranges-hand-desktop\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-mobile-interactions-Co-f6c1f-SORT-button-rearranges-hand-desktop\error-context.md
+
+
+[1A[2K  4) [mobile] ΓÇ║ tests\e2e\mobile\interactions.spec.js:57:5 ΓÇ║ Core Interactions ΓÇ║ SORT button rearranges hand 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator:  locator('#sort-btn')
+    Expected: visible
+    Received: hidden
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('#sort-btn')[22m
+    [2m    9 ├ù locator resolved to <button id="sort-btn" class="menu-btn">SORT</button>[22m
+    [2m      - unexpected value "hidden"[22m
+
+
+      79 |
+      80 |         // Wait for SORT button to be visible
+    > 81 |         await expect(page.locator("#sort-btn")).toBeVisible();
+         |                                                 ^
+      82 |
+      83 |         // Click sort with force to bypass any overlay issues
+      84 |         await page.click("#sort-btn", { force: true });
+        at C:\Repos\mahjong\tests\e2e\mobile\interactions.spec.js:81:49
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-mobile-interactions-Co-f6c1f-SORT-button-rearranges-hand-mobile\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-mobile-interactions-Co-f6c1f-SORT-button-rearranges-hand-mobile\error-context.md
+
+
+[1A[2K  5) [mobile] ΓÇ║ tests\e2e\mobile\interactions.spec.js:98:5 ΓÇ║ Core Interactions ΓÇ║ error handling for missing assets 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator:  locator('#sort-btn')
+    Expected: visible
+    Received: hidden
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('#sort-btn')[22m
+    [2m    9 ├ù locator resolved to <button id="sort-btn" class="menu-btn">SORT</button>[22m
+    [2m      - unexpected value "hidden"[22m
+
+
+      116 |
+      117 |         // Game should still be functional despite missing sprites
+    > 118 |         await expect(page.locator("#sort-btn")).toBeVisible();
+          |                                                 ^
+      119 |     });
+      120 | });
+      121 |
+        at C:\Repos\mahjong\tests\e2e\mobile\interactions.spec.js:118:49
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\e2e-mobile-interactions-Co-38306-handling-for-missing-assets-mobile\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error Context: test-results\e2e-mobile-interactions-Co-38306-handling-for-missing-assets-mobile\error-context.md
+
+
+[1A[2K  5 failed
+    [desktop] ΓÇ║ tests\e2e\mobile\interactions.spec.js:12:5 ΓÇ║ Core Interactions ΓÇ║ DRAW button appears during player turn 
+    [desktop] ΓÇ║ tests\e2e\mobile\interactions.spec.js:57:5 ΓÇ║ Core Interactions ΓÇ║ SORT button rearranges hand 
+    [desktop] ΓÇ║ tests\e2e\mobile\interactions.spec.js:98:5 ΓÇ║ Core Interactions ΓÇ║ error handling for missing assets 
+    [mobile] ΓÇ║ tests\e2e\mobile\interactions.spec.js:57:5 ΓÇ║ Core Interactions ΓÇ║ SORT button rearranges hand 
+    [mobile] ΓÇ║ tests\e2e\mobile\interactions.spec.js:98:5 ΓÇ║ Core Interactions ΓÇ║ error handling for missing assets 
+  3 passed (14.5s)
+
+[36m  Serving HTML report at http://localhost:24006. Press Ctrl+C to quit.[39m

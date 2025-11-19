@@ -1,6 +1,7 @@
 import { HandRenderer } from "./renderers/HandRenderer.js";
 import { DiscardPile } from "./components/DiscardPile.js";
 import { OpponentBar } from "./components/OpponentBar.js";
+import { AnimationController } from "./animations/AnimationController.js";
 import { PLAYER, STATE } from "../constants.js";
 import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
@@ -39,7 +40,7 @@ export class MobileRenderer {
         // MobileRenderer handles all event subscriptions and calls handRenderer.render() directly
         this.handRenderer = new HandRenderer(options.handContainer, null);
         this.discardPile = new DiscardPile(options.discardContainer);
-        // this.animationController = new AnimationController(); // TODO: Lazy-initialize when tile animations are needed
+        this.animationController = new AnimationController();
         this.handRenderer.setSelectionBehavior({
             mode: "multiple",
             maxSelectable: Infinity,
@@ -201,6 +202,9 @@ export class MobileRenderer {
         const sortedHand = new HandData(sorted);
         // Preserve other properties if needed, but HandRenderer mainly cares about tiles
         this.handRenderer.render(sortedHand);
+
+        // Animate the sort
+        this.animationController.animateHandSort(this.handRenderer.container);
     }
 
     canDrawTile() {
@@ -267,6 +271,16 @@ export class MobileRenderer {
             const handData = HandData.fromJSON(data.hand);
             this.latestHandSnapshot = handData;
             this.handRenderer.render(handData);
+
+            // If we just drew a tile (hand size increased to 14), animate it
+            // This is a heuristic since we don't get explicit "DRAWN" event with tile data here
+            // Ideally GameController would pass the drawn tile or we'd diff the hand
+            if (handData.tiles.length % 3 === 2) { // 14 tiles (or 2, 5, 8, 11) means we have a draw
+                const lastTile = this.handRenderer.getLastTileElement();
+                if (lastTile) {
+                    this.animationController.animateTileDraw(lastTile);
+                }
+            }
         } else {
             const bar = this.opponentBars.find(ob => ob.playerIndex === data.player);
             if (bar) {
@@ -283,6 +297,15 @@ export class MobileRenderer {
         this.refreshOpponentBars();
         if (currentPlayer === HUMAN_PLAYER) {
             this.updateStatus("Your turn");
+            // Animate turn start for human player (visual cue on hand or screen edge)
+            // For now, we can animate the hand container slightly
+            this.animationController.animateTurnStart(this.handRenderer.container);
+        } else {
+            // Animate opponent turn start
+            const bar = this.opponentBars.find(ob => ob.playerIndex === currentPlayer);
+            if (bar && bar.bar.container) {
+                this.animationController.animateTurnStart(bar.bar.container);
+            }
         }
     }
 
@@ -292,6 +315,16 @@ export class MobileRenderer {
         }
         const tile = TileData.fromJSON(data.tile);
         this.discardPile.addDiscard(tile, data.player);
+
+        // Animate discard from hand if it's the human player
+        if (data.player === HUMAN_PLAYER) {
+            // We can't easily animate the specific tile element because it's already removed from DOM by HandRenderer
+            // But we can animate the "flight" to the discard pile using a clone or the discard pile element itself
+            const latestDiscard = this.discardPile.getLatestDiscardElement();
+            if (latestDiscard) {
+                this.animationController.animateTileDiscard(latestDiscard);
+            }
+        }
     }
 
     onMessage(data) {
