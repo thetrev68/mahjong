@@ -221,6 +221,24 @@ body {
     background: rgba(0, 0, 0, 0.05);
 }
 
+/* Exposed tiles section */
+.exposed-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px 0;
+    min-height: 24px;
+}
+
+.exposure-set {
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .hand-container {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -229,6 +247,8 @@ body {
     max-width: 100%;
     min-height: 120px;
     padding: 8px;
+    grid-auto-rows: minmax(60px, auto); /* Allow rows to grow if needed */
+    align-items: start; /* Align tiles to top of cell */
 }
 
 /* Hints panel */
