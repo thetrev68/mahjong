@@ -125,6 +125,21 @@ body {
     font-size: 16px;
     font-weight: bold;
     font-family: 'Courier New', monospace;
+    transition: color 0.3s ease;
+}
+
+.wall-tiles.low-count {
+    color: #ff5252;
+    animation: pulse-warning 1s ease-in-out infinite;
+}
+
+@keyframes pulse-warning {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
 }
 
 /* Discard pile section */

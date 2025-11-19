@@ -1,5 +1,7 @@
 import InstallPrompt from "./components/InstallPrompt.js";
 import SettingsSheet from "./components/SettingsSheet.js";
+import {WallCounter} from "./components/WallCounter.js";
+import {HintsPanel} from "./components/HintsPanel.js";
 import {MobileRenderer} from "./MobileRenderer.js";
 import {GameController} from "../core/GameController.js";
 import {AIEngine} from "../core/AIEngine.js";
@@ -16,6 +18,8 @@ let gameController;
 let aiEngine;
 let mobileRenderer;
 let settingsSheet;
+let wallCounter;
+let hintsPanel;
 
 /**
  * Hook to call when a game ends
@@ -113,6 +117,20 @@ async function initializeGame() {
         },
         promptRoot: document.body
     });
+
+    // Initialize WallCounter component
+    const wallCounterContainer = document.getElementById("wall-counter");
+    if (wallCounterContainer) {
+        wallCounter = new WallCounter(wallCounterContainer, gameController);
+        console.log("WallCounter initialized");
+    }
+
+    // Initialize HintsPanel component
+    const hintsPanelContainer = document.getElementById("hints-panel");
+    if (hintsPanelContainer) {
+        hintsPanel = new HintsPanel(hintsPanelContainer, gameController, aiEngine);
+        console.log("HintsPanel initialized");
+    }
 
     // Track games played for install prompt
     gameController.on("GAME_ENDED", () => onGameEnd());
