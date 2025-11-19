@@ -173,7 +173,7 @@ export class TouchHandler {
                             coordinates: { x: this.state.startX, y: this.state.startY },
                             timestamp: Date.now()
                         });
-                         this.resetState(); // Reset after long press to avoid conflicts
+                        this.resetState(); // Reset after long press to avoid conflicts
                     }
                 }
             }, this.options.longPressDuration);
@@ -208,7 +208,13 @@ export class TouchHandler {
 
         clearTimeout(this.state.longPressTimer);
 
+        // Determine if this is a tap (selection) or drag/swipe
         if (this.state.current === TOUCH_STATE.TOUCHING && duration < this.options.tapMaxDuration && movement < this.options.tapMaxMovement) {
+            // It's a tap
+            if (this.state.element && this.state.element.closest(".tile")) {
+                this.handleTileTap(this.state.element.closest(".tile"));
+            }
+
             this.emit("tap", {
                 type: "tap",
                 element: this.state.element,
@@ -220,14 +226,58 @@ export class TouchHandler {
             if (this.options.enableDoubleTap) {
                 this.checkDoubleTap(touch.clientX, touch.clientY);
             } else {
-                 this.resetState();
+                this.resetState();
             }
-        } else if (this.state.current === TOUCH_STATE.MOVED) {
-            // Swipe detection can be added here if enabled
+        } else if (deltaY > this.options.swipeMinDistance && deltaY > deltaX) {
+            // Vertical swipe
+            const dir = touch.clientY < this.state.startY ? "up" : "down";
+
+            if (dir === "up" && this.state.element && this.state.element.closest(".tile")) {
+                this.handleTileDrag(this.state.element.closest(".tile"), deltaY);
+            }
+
+            this.emit(`swipe${dir}`, {
+                type: `swipe${dir}`,
+                element: this.state.element,
+                distance: deltaY,
+                timestamp: Date.now()
+            });
+            this.resetState();
+        } else if (deltaX > this.options.swipeMinDistance && deltaX > deltaY) {
+            // Horizontal swipe
+            const dir = touch.clientX < this.state.startX ? "left" : "right";
+            this.emit(`swipe${dir}`, {
+                type: `swipe${dir}`,
+                element: this.state.element,
+                distance: deltaX,
+                timestamp: Date.now()
+            });
             this.resetState();
         } else {
             this.resetState();
         }
+
+        // Clean up visual feedback
+        document.querySelectorAll(".tile--selected").forEach(tile => {
+            tile.classList.remove("tile--selected");
+        });
+    }
+
+    handleTileTap(tileElement) {
+        // Don't add any classes here - HandRenderer handles selection state
+        // Just emit the event for main.js to wire to HandRenderer
+        const tileId = tileElement.dataset.tileId;
+        this.emit("tile-touched", { tileId, element: tileElement });
+    }
+
+    handleTileDrag(tileElement, _delta) {
+        // Swipe to discard
+        // Only if swipe up
+        this.emit("tile-swiped", {
+            tileId: tileElement.dataset.tileId,
+            direction: "up",
+            element: tileElement
+        });
     }
 
     handleTouchCancel(event) {

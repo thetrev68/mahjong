@@ -156,6 +156,10 @@ export class DiscardPile {
         }
     }
 
+    getLatestDiscardElement() {
+        return this.element.querySelector(".discard-tile:last-child");
+    }
+
     /**
      * Show info about a discarded tile
      * @param {TileData} tile - The tile

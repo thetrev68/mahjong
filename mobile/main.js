@@ -1,25 +1,26 @@
+/* global URLSearchParams */
 import InstallPrompt from "./components/InstallPrompt.js";
 import SettingsSheet from "./components/SettingsSheet.js";
-import {WallCounter} from "./components/WallCounter.js";
-import {HintsPanel} from "./components/HintsPanel.js";
-import {MobileRenderer} from "./MobileRenderer.js";
-import {GameController} from "../core/GameController.js";
-import {AIEngine} from "../core/AIEngine.js";
-import {Card} from "../core/card/card.js";
+import SettingsManager from "../shared/SettingsManager.js";
+import { WallCounter } from "./components/WallCounter.js";
+import { HintsPanel } from "./components/HintsPanel.js";
+import { MobileRenderer } from "./MobileRenderer.js";
+import { GameController } from "../core/GameController.js";
+import { AIEngine } from "../core/AIEngine.js";
+import { Card } from "../core/card/card.js";
+import { TouchHandler } from "./gestures/TouchHandler.js";
 import "./styles/base.css";
 import "./styles/tiles.css";
-import "./styles/SettingsSheet.css";
-import "./styles/HandRenderer.css";
-import "./styles/MobileGame.css";
 import "./styles.css";
+import "./styles/SettingsSheet.css";
 
 // Game instances
 let gameController;
 let aiEngine;
 let mobileRenderer;
 let settingsSheet;
-let wallCounter;
-let hintsPanel;
+let _wallCounter; // Initialized for side effects (event listener registration)
+let _hintsPanel; // Initialized for side effects (event listener registration)
 
 /**
  * Hook to call when a game ends
@@ -54,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initialize settings sheet
     // settingsSheet = new SettingsSheet();
-    
+
     // Add settings button to bottom menu if it doesn't exist yet
     if (!document.getElementById("mobile-settings-btn")) {
         const bottomMenu = document.querySelector(".bottom-menu") || createBottomMenu();
@@ -86,12 +87,21 @@ async function initializeGame() {
     const opponentTopContainer = document.getElementById("opponent-top");
     const opponentRightContainer = document.getElementById("opponent-right");
 
-    // Initialize Card validator
-    const card = new Card(2025);
+    // Load settings from SettingsManager
+    const settings = SettingsManager.load();
+    console.log("Loaded settings:", settings);
+
+    // Initialize Card validator with year from settings
+    const card = new Card(settings.cardYear);
     await card.init();
 
-    // Initialize AI Engine with card validator
-    aiEngine = new AIEngine(card, null, "medium");
+    // Initialize AI Engine with card validator and difficulty from settings
+    aiEngine = new AIEngine(card, null, settings.difficulty);
+
+    // Parse URL parameters for configuration (can override settings)
+    const urlParams = new URLSearchParams(window.location.search);
+    const skipCharlestonParam = urlParams.get("skipCharleston");
+    const skipCharleston = skipCharlestonParam !== null ? skipCharlestonParam === "true" : settings.skipCharleston;
 
     // Initialize Game Controller
     gameController = new GameController();
@@ -99,9 +109,12 @@ async function initializeGame() {
         aiEngine: aiEngine,
         cardValidator: card,
         settings: {
-            year: 2025,
-            difficulty: "medium",
-            skipCharleston: false  // Enable Charleston phase for full gameplay
+            year: settings.cardYear,
+            difficulty: settings.difficulty,
+            skipCharleston: skipCharleston,
+            trainingMode: settings.trainingMode,
+            trainingTileCount: settings.trainingTileCount,
+            useBlankTiles: settings.useBlankTiles
         }
     });
 
@@ -118,17 +131,53 @@ async function initializeGame() {
         promptRoot: document.body
     });
 
+    // Initialize TouchHandler
+    const touchHandler = new TouchHandler(document.body, {
+        enableSwipe: true,
+        swipeMinDistance: 30
+    });
+    touchHandler.init();
+
+    // Wire TouchHandler to GameController/Renderer
+    touchHandler.on("tap", (data) => {
+        // If tapped on a tile button in the hand
+        if (data.element && data.element.classList.contains("tile")) {
+            const tileIndex = parseInt(data.element.dataset.index, 10);
+
+            // Trigger HandRenderer's tile selection logic
+            if (!isNaN(tileIndex) && mobileRenderer.handRenderer) {
+                mobileRenderer.handRenderer.handleTileClick(tileIndex);
+            }
+        }
+    });
+
+    touchHandler.on("swipeup", (data) => {
+        // Swipe up on a tile to quickly discard it
+        if (data.element && data.element.classList.contains("tile")) {
+            const tileIndex = parseInt(data.element.dataset.index, 10);
+
+            // Select the tile and trigger discard prompt if possible
+            if (!isNaN(tileIndex) && mobileRenderer.handRenderer) {
+                // Select the tile first
+                mobileRenderer.handRenderer.handleTileClick(tileIndex);
+
+                // If in discard phase, could potentially auto-trigger discard
+                // For now, just select it - user can use DISCARD button
+            }
+        }
+    });
+
     // Initialize WallCounter component
     const wallCounterContainer = document.getElementById("wall-counter");
     if (wallCounterContainer) {
-        wallCounter = new WallCounter(wallCounterContainer, gameController);
+        _wallCounter = new WallCounter(wallCounterContainer, gameController);
         console.log("WallCounter initialized");
     }
 
     // Initialize HintsPanel component
     const hintsPanelContainer = document.getElementById("hints-panel");
     if (hintsPanelContainer) {
-        hintsPanel = new HintsPanel(hintsPanelContainer, gameController, aiEngine);
+        _hintsPanel = new HintsPanel(hintsPanelContainer, gameController, aiEngine);
         console.log("HintsPanel initialized");
     }
 
@@ -160,6 +209,20 @@ async function initializeGame() {
             settingsSheet.open();
         };
     }
+
+    // Listen for settings changes
+    window.addEventListener("settingsChanged", (event) => {
+        console.log("Settings changed, will take effect on next game:", event.detail);
+
+        // Show message to user
+        mobileRenderer?.updateStatus("Settings saved! Start a new game for changes to take effect.");
+
+        // Update AI difficulty if changed (can be done immediately)
+        if (event.detail.difficulty && aiEngine) {
+            aiEngine.difficulty = event.detail.difficulty;
+            console.log("AI difficulty updated to:", event.detail.difficulty);
+        }
+    });
 
     // Hide loading message
     mobileRenderer?.updateStatus("Ready to play! Click NEW GAME to start.");

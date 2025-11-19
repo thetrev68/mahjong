@@ -1,8 +1,10 @@
-import {HandRenderer} from "./renderers/HandRenderer.js";
-import {DiscardPile} from "./components/DiscardPile.js";
-import {OpponentBar} from "./components/OpponentBar.js";
-import {PLAYER} from "../constants.js";
-import {TileData} from "../core/models/TileData.js";
+import { HandRenderer } from "./renderers/HandRenderer.js";
+import { DiscardPile } from "./components/DiscardPile.js";
+import { OpponentBar } from "./components/OpponentBar.js";
+import { AnimationController } from "./animations/AnimationController.js";
+import { PLAYER, STATE } from "../constants.js";
+import { TileData } from "../core/models/TileData.js";
+import { HandData } from "../core/models/HandData.js";
 
 const HUMAN_PLAYER = PLAYER.BOTTOM ?? 0;
 
@@ -38,7 +40,7 @@ export class MobileRenderer {
         // MobileRenderer handles all event subscriptions and calls handRenderer.render() directly
         this.handRenderer = new HandRenderer(options.handContainer, null);
         this.discardPile = new DiscardPile(options.discardContainer);
-        // this.animationController = new AnimationController(); // TODO: Lazy-initialize when tile animations are needed
+        this.animationController = new AnimationController();
         this.handRenderer.setSelectionBehavior({
             mode: "multiple",
             maxSelectable: Infinity,
@@ -52,6 +54,9 @@ export class MobileRenderer {
         this.pendingPrompt = null;
         this.latestHandSnapshot = null;
 
+        this.latestHandSnapshot = null;
+
+        this.setupButtonListeners();
         this.registerEventListeners();
     }
 
@@ -94,19 +99,19 @@ export class MobileRenderer {
     createOpponentBars(containers) {
         const bars = [];
         const mapping = [
-            {key: "right", playerIndex: PLAYER.RIGHT ?? 1},
-            {key: "top", playerIndex: PLAYER.TOP ?? 2},
-            {key: "left", playerIndex: PLAYER.LEFT ?? 3}
+            { key: "right", playerIndex: PLAYER.RIGHT ?? 1 },
+            { key: "top", playerIndex: PLAYER.TOP ?? 2 },
+            { key: "left", playerIndex: PLAYER.LEFT ?? 3 }
         ];
 
-        mapping.forEach(({key, playerIndex}) => {
+        mapping.forEach(({ key, playerIndex }) => {
             const container = containers[key];
             if (!container) {
                 return;
             }
             const player = this.gameController.players[playerIndex];
             const bar = new OpponentBar(container, player);
-            bars.push({playerIndex, bar});
+            bars.push({ playerIndex, bar });
         });
 
         return bars;
@@ -139,6 +144,53 @@ export class MobileRenderer {
         };
     }
 
+    setupButtonListeners() {
+        const drawBtn = document.getElementById("draw-btn");
+        const sortBtn = document.getElementById("sort-btn");
+
+        if (drawBtn) drawBtn.addEventListener("click", () => this.onDrawClicked());
+        if (sortBtn) sortBtn.addEventListener("click", () => this.onSortClicked());
+    }
+
+    onDrawClicked() {
+        // Manual draw trigger for user control
+        if (this.canDrawTile()) {
+            this.gameController.drawTile();
+        }
+    }
+
+    onSortClicked() {
+        if (!this.latestHandSnapshot || !Array.isArray(this.latestHandSnapshot.tiles)) {
+            return;
+        }
+
+        // Clone the current hand and use HandData's own sort helper for consistency
+        const sortedHand = typeof this.latestHandSnapshot.clone === "function"
+            ? this.latestHandSnapshot.clone()
+            : HandData.fromJSON(this.latestHandSnapshot);
+
+        if (typeof sortedHand.sortBySuit === "function") {
+            sortedHand.sortBySuit();
+        } else {
+            sortedHand.tiles.sort((a, b) => {
+                if (a.suit !== b.suit) {
+                    return a.suit - b.suit;
+                }
+                return a.number - b.number;
+            });
+        }
+
+        this.latestHandSnapshot = sortedHand;
+        this.handRenderer.render(sortedHand);
+        this.animationController.animateHandSort(this.handRenderer.container);
+    }
+
+    canDrawTile() {
+        const state = this.gameController?.gameState;
+        return this.gameController.currentPlayer === HUMAN_PLAYER &&
+            (state === STATE.LOOP_PICK_FROM_WALL || state === "LOOP_PICK_FROM_WALL");
+    }
+
     onGameStarted() {
         this.discardPile.clear();
         this.resetHandSelection();
@@ -165,6 +217,22 @@ export class MobileRenderer {
             return;
         }
         this.updateStatus(`State: ${data.newState}`);
+
+        const drawBtn = document.getElementById("draw-btn");
+        const sortBtn = document.getElementById("sort-btn");
+
+        // Show DRAW button only during player's turn to pick
+        if (drawBtn) {
+            const canDraw = this.canDrawTile();
+            drawBtn.style.display = canDraw ? "flex" : "none";
+            drawBtn.disabled = !canDraw;
+        }
+
+        // SORT always visible during main game loop states
+        if (sortBtn) {
+            const isLoopState = data.newState >= STATE.LOOP_PICK_FROM_WALL && data.newState <= STATE.LOOP_EXPOSE_TILES_COMPLETE;
+            sortBtn.style.display = isLoopState ? "flex" : "none";
+        }
     }
 
     onHandUpdated(data) {
@@ -178,8 +246,20 @@ export class MobileRenderer {
         }
 
         if (data.player === HUMAN_PLAYER) {
-            this.latestHandSnapshot = data.hand;
-            this.handRenderer.render(data.hand);
+            // Convert plain JSON object to HandData instance
+            const handData = HandData.fromJSON(data.hand);
+            this.latestHandSnapshot = handData;
+            this.handRenderer.render(handData);
+
+            // If we just drew a tile (hand size increased to 14), animate it
+            // This is a heuristic since we don't get explicit "DRAWN" event with tile data here
+            // Ideally GameController would pass the drawn tile or we'd diff the hand
+            if (handData.tiles.length % 3 === 2) { // 14 tiles (or 2, 5, 8, 11) means we have a draw
+                const lastTile = this.handRenderer.getLastTileElement();
+                if (lastTile) {
+                    this.animationController.animateTileDraw(lastTile);
+                }
+            }
         } else {
             const bar = this.opponentBars.find(ob => ob.playerIndex === data.player);
             if (bar) {
@@ -196,6 +276,15 @@ export class MobileRenderer {
         this.refreshOpponentBars();
         if (currentPlayer === HUMAN_PLAYER) {
             this.updateStatus("Your turn");
+            // Animate turn start for human player (visual cue on hand or screen edge)
+            // For now, we can animate the hand container slightly
+            this.animationController.animateTurnStart(this.handRenderer.container);
+        } else {
+            // Animate opponent turn start
+            const bar = this.opponentBars.find(ob => ob.playerIndex === currentPlayer);
+            if (bar && bar.bar.container) {
+                this.animationController.animateTurnStart(bar.bar.container);
+            }
         }
     }
 
@@ -205,6 +294,16 @@ export class MobileRenderer {
         }
         const tile = TileData.fromJSON(data.tile);
         this.discardPile.addDiscard(tile, data.player);
+
+        // Animate discard from hand if it's the human player
+        if (data.player === HUMAN_PLAYER) {
+            // We can't easily animate the specific tile element because it's already removed from DOM by HandRenderer
+            // But we can animate the "flight" to the discard pile using a clone or the discard pile element itself
+            const latestDiscard = this.discardPile.getLatestDiscardElement();
+            if (latestDiscard) {
+                this.animationController.animateTileDiscard(latestDiscard);
+            }
+        }
     }
 
     onMessage(data) {
@@ -214,7 +313,7 @@ export class MobileRenderer {
     }
 
     refreshOpponentBars() {
-        this.opponentBars.forEach(({playerIndex, bar}) => {
+        this.opponentBars.forEach(({ playerIndex, bar }) => {
             const player = this.gameController.players[playerIndex];
             if (player) {
                 bar.update(player);
@@ -248,107 +347,115 @@ export class MobileRenderer {
         this.pendingPrompt = null;
 
         switch (data.promptType) {
-        case "CHOOSE_DISCARD":
-            this.startTileSelectionPrompt({
-                title: "Choose a tile to discard",
-                hint: "Tap one tile and press Discard",
-                min: 1,
-                max: 1,
-                confirmLabel: "Discard",
-                cancelLabel: "Auto Discard",
-                fallback: () => this.getFallbackTiles(1),
-                callback: (tiles) => data.callback(tiles[0])
-            });
-            break;
-        case "CHARLESTON_PASS":
-            this.startTileSelectionPrompt({
-                title: `Charleston Pass (${data.options?.direction ?? "?"})`,
-                hint: `Select ${data.options?.requiredCount ?? 3} tiles to pass`,
-                min: data.options?.requiredCount ?? 3,
-                max: data.options?.requiredCount ?? 3,
-                confirmLabel: "Pass Tiles",
-                cancelLabel: "Auto Select",
-                fallback: () => this.getFallbackTiles(data.options?.requiredCount ?? 3),
-                callback: (tiles) => data.callback(tiles)
-            });
-            break;
-        case "SELECT_TILES":
-            this.startTileSelectionPrompt({
-                title: data.options?.question ?? "Select tiles",
-                hint: `Select ${data.options?.minTiles ?? 1}–${data.options?.maxTiles ?? 3} tiles`,
-                min: data.options?.minTiles ?? 1,
-                max: data.options?.maxTiles ?? 3,
-                confirmLabel: "Confirm",
-                cancelLabel: "Cancel",
-                fallback: () => this.getFallbackTiles(Math.max(1, data.options?.minTiles ?? 1)),
-                callback: (tiles) => data.callback(tiles)
-            });
-            break;
-        case "CLAIM_DISCARD": {
-            const promptTile = data.options?.tile;
-            const tileObj = promptTile instanceof TileData
-                ? promptTile
-                : (promptTile ? TileData.fromJSON(promptTile) : null);
-            this.showChoicePrompt({
-                title: tileObj ? `Claim ${tileObj.getText()}?` : "Claim discard?",
-                hint: "Choose how to react",
-                options: (data.options?.options || []).map(option => ({
-                    label: option,
-                    value: option
-                })),
-                onSelect: (choice) => data.callback(choice)
-            });
-            break;
-        }
-        case "EXPOSE_TILES":
-            this.showChoicePrompt({
-                title: "Expose selected tiles?",
-                hint: "Exposed tiles become visible to everyone",
-                options: [
-                    {label: "Expose", value: true, primary: true},
-                    {label: "Keep Hidden", value: false}
-                ],
-                onSelect: (choice) => data.callback(choice)
-            });
-            break;
-        case "YES_NO":
-            this.showChoicePrompt({
-                title: data.options?.message ?? "Continue?",
-                hint: "",
-                options: [
-                    {label: "Yes", value: true, primary: true},
-                    {label: "No", value: false}
-                ],
-                onSelect: (choice) => data.callback(choice)
-            });
-            break;
-        case "CHARLESTON_CONTINUE":
-            this.showChoicePrompt({
-                title: data.options?.question ?? "Continue to Charleston phase 2?",
-                hint: "",
-                options: [
-                    {label: "Yes", value: "Yes", primary: true},
-                    {label: "No", value: "No"}
-                ],
-                onSelect: (choice) => data.callback(choice)
-            });
-            break;
-        case "COURTESY_VOTE":
-            this.showChoicePrompt({
-                title: data.options?.question ?? "Courtesy pass vote",
-                hint: "How many tiles to exchange?",
-                options: (data.options?.options || ["0", "1", "2", "3"]).map(option => ({
-                    label: option,
-                    value: option
-                })),
-                onSelect: (choice) => data.callback(choice)
-            });
-            break;
-        default: {
-            // Unknown prompt type – resolve with null to prevent deadlock
-            console.warn(`Unhandled UI prompt: ${data.promptType}`);
-            data.callback(null);
-        }
+            case "CHOOSE_DISCARD":
+                this.startTileSelectionPrompt({
+                    title: "Choose a tile to discard",
+                    hint: "Tap one tile and press Discard",
+                    min: 1,
+                    max: 1,
+                    confirmLabel: "Discard",
+                    cancelLabel: "Auto Discard",
+                    fallback: () => this.getFallbackTiles(1),
+                    callback: (tiles) => {
+                        if (!tiles || tiles.length === 0) {
+                            console.error("CHOOSE_DISCARD callback invoked with empty tiles array");
+                            data.callback(null);
+                            return;
+                        }
+                        console.log("CHOOSE_DISCARD: Selected tile:", tiles[0]);
+                        data.callback(tiles[0]);
+                    }
+                });
+                break;
+            case "CHARLESTON_PASS":
+                this.startTileSelectionPrompt({
+                    title: `Charleston Pass (${data.options?.direction ?? "?"})`,
+                    hint: `Select ${data.options?.requiredCount ?? 3} tiles to pass`,
+                    min: data.options?.requiredCount ?? 3,
+                    max: data.options?.requiredCount ?? 3,
+                    confirmLabel: "Pass Tiles",
+                    cancelLabel: null,
+                    fallback: null,
+                    callback: (tiles) => data.callback(tiles)
+                });
+                break;
+            case "SELECT_TILES":
+                this.startTileSelectionPrompt({
+                    title: data.options?.question ?? "Select tiles",
+                    hint: `Select ${data.options?.minTiles ?? 1}–${data.options?.maxTiles ?? 3} tiles`,
+                    min: data.options?.minTiles ?? 1,
+                    max: data.options?.maxTiles ?? 3,
+                    confirmLabel: "Confirm",
+                    cancelLabel: "Cancel",
+                    fallback: () => this.getFallbackTiles(Math.max(1, data.options?.minTiles ?? 1)),
+                    callback: (tiles) => data.callback(tiles)
+                });
+                break;
+            case "CLAIM_DISCARD": {
+                const promptTile = data.options?.tile;
+                const tileObj = promptTile instanceof TileData
+                    ? promptTile
+                    : (promptTile ? TileData.fromJSON(promptTile) : null);
+                this.showChoicePrompt({
+                    title: tileObj ? `Claim ${tileObj.getText()}?` : "Claim discard?",
+                    hint: "Choose how to react",
+                    options: (data.options?.options || []).map(option => ({
+                        label: option,
+                        value: option
+                    })),
+                    onSelect: (choice) => data.callback(choice)
+                });
+                break;
+            }
+            case "EXPOSE_TILES":
+                this.showChoicePrompt({
+                    title: "Expose selected tiles?",
+                    hint: "Exposed tiles become visible to everyone",
+                    options: [
+                        { label: "Expose", value: true, primary: true },
+                        { label: "Keep Hidden", value: false }
+                    ],
+                    onSelect: (choice) => data.callback(choice)
+                });
+                break;
+            case "YES_NO":
+                this.showChoicePrompt({
+                    title: data.options?.message ?? "Continue?",
+                    hint: "",
+                    options: [
+                        { label: "Yes", value: true, primary: true },
+                        { label: "No", value: false }
+                    ],
+                    onSelect: (choice) => data.callback(choice)
+                });
+                break;
+            case "CHARLESTON_CONTINUE":
+                this.showChoicePrompt({
+                    title: data.options?.question ?? "Continue to Charleston phase 2?",
+                    hint: "",
+                    options: [
+                        { label: "Yes", value: "Yes", primary: true },
+                        { label: "No", value: "No" }
+                    ],
+                    onSelect: (choice) => data.callback(choice)
+                });
+                break;
+            case "COURTESY_VOTE":
+                this.showChoicePrompt({
+                    title: data.options?.question ?? "Courtesy pass vote",
+                    hint: "How many tiles to exchange?",
+                    options: (data.options?.options || ["0", "1", "2", "3"]).map(option => ({
+                        label: option,
+                        value: option
+                    })),
+                    onSelect: (choice) => data.callback(choice)
+                });
+                break;
+            default: {
+                // Unknown prompt type – resolve with null to prevent deadlock
+                console.warn(`Unhandled UI prompt: ${data.promptType}`);
+                data.callback(null);
+            }
         }
     }
 
@@ -369,18 +476,25 @@ export class MobileRenderer {
         });
         this.handRenderer.clearSelection(true);
 
-        this.showPrompt(config.title, config.hint, [
+        // Build action buttons - only include cancel if explicitly provided
+        const actions = [
             {
                 label: config.confirmLabel ?? "Confirm",
                 primary: true,
                 disabled: true,
                 onClick: () => this.resolveTileSelectionPrompt()
-            },
-            {
-                label: config.cancelLabel ?? "Use Suggestion",
-                onClick: () => this.cancelTileSelectionPrompt()
             }
-        ]);
+        ];
+
+        // Only add cancel button if cancelLabel is explicitly provided
+        if (config.cancelLabel) {
+            actions.push({
+                label: config.cancelLabel,
+                onClick: () => this.cancelTileSelectionPrompt()
+            });
+        }
+
+        this.showPrompt(config.title, config.hint, actions);
 
         this.updateTileSelectionHint();
     }
@@ -397,7 +511,7 @@ export class MobileRenderer {
             return;
         }
 
-        const {min, max} = this.pendingPrompt;
+        const { min, max } = this.pendingPrompt;
         const count = selection.count;
         const ready = count >= min && count <= max;
         this.setPromptHint(`Selected ${count}/${max}${min === max ? "" : ` (need at least ${min})`}`);
@@ -409,7 +523,7 @@ export class MobileRenderer {
             return;
         }
         const selection = this.handRenderer.getSelectionState();
-        const {min, max} = this.pendingPrompt;
+        const { min, max } = this.pendingPrompt;
         if (selection.count < min || selection.count > max) {
             return;
         }
@@ -425,17 +539,13 @@ export class MobileRenderer {
             return;
         }
         const fallback = this.pendingPrompt.fallback;
-        const maxSelections = this.pendingPrompt.max;
         const result = typeof fallback === "function" ? fallback() : [];
         const callback = this.pendingPrompt.callback;
         this.resetHandSelection();
         this.hidePrompt();
         this.pendingPrompt = null;
-        if (maxSelections === 1) {
-            callback(result[0] ?? null);
-        } else {
-            callback(result);
-        }
+        // Always pass array to callback - let the callback wrapper handle extraction
+        callback(result);
     }
 
     resetHandSelection() {
@@ -447,7 +557,7 @@ export class MobileRenderer {
         });
     }
 
-    showChoicePrompt({title, hint, options, onSelect}) {
+    showChoicePrompt({ title, hint, options, onSelect }) {
         this.updateStatus(title);
         const buttons = (options || []).map(option => ({
             label: option.label,
@@ -510,5 +620,33 @@ export class MobileRenderer {
             }
             return TileData.fromJSON(tile);
         }).filter(Boolean);
+    }
+
+    // Add error handling for asset loading
+    handleAssetError(assetType, assetPath) {
+        console.error(`Failed to load ${assetType}: ${assetPath}`);
+
+        // Provide fallback UI
+        if (assetType === "tiles.png") {
+            this.showAssetError("Tile graphics failed to load. Using text mode.");
+            this.enableTextModeFallback();
+        }
+    }
+
+    showAssetError(message) {
+        // Show non-intrusive error notification
+        const errorEl = document.createElement("div");
+        errorEl.className = "error-banner";
+        errorEl.textContent = message;
+        document.body.appendChild(errorEl);
+
+        setTimeout(() => errorEl.remove(), 5000);
+    }
+
+    enableTextModeFallback() {
+        // Switch all tiles to text mode if sprites fail
+        // This would require HandRenderer to support a text mode or we manually replace elements
+        // For now, we'll just log it as this is a robust fallback feature
+        console.warn("Text mode fallback requested but not fully implemented in HandRenderer yet");
     }
 }

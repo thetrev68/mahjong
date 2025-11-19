@@ -1,5 +1,6 @@
 import { SUIT, WIND, DRAGON } from "../../constants.js";
 import { TileData } from "../../core/models/TileData.js";
+import { HandData } from "../../core/models/HandData.js";
 import { tileSprites } from "../utils/tileSprites.js";
 
 const SUIT_NAMES = {
@@ -81,7 +82,9 @@ export class HandRenderer {
                 // Reset sort mode when hand updated from game (not user sort)
                 // This allows auto-sort to resume after hand changes (draw, discard, etc.)
                 this.currentSortMode = null;
-                this.render(data.hand);
+                // Convert plain JSON object to HandData instance
+                const handData = HandData.fromJSON(data.hand);
+                this.render(handData);
             }
         };
         this.unsubscribeFns.push(this.gameController.on("HAND_UPDATED", handleHandUpdated));
@@ -403,6 +406,13 @@ export class HandRenderer {
             indices,
             tiles: this.getSelectedTiles()
         };
+    }
+
+    getLastTileElement() {
+        if (this.tiles && this.tiles.length > 0) {
+            return this.tiles[this.tiles.length - 1];
+        }
+        return null;
     }
 
     notifySelectionChange() {

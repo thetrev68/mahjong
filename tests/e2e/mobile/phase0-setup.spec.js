@@ -46,7 +46,7 @@ test.describe("Phase 0: Testing Framework Setup", () => {
         await MobileTestHelpers.gotoMobileApp(page);
 
         // Verify tiles.png is accessible
-        const tilesImageLoaded = await page.evaluate(async () => {
+        const tilesImageLoaded = await page.evaluate(() => {
             return new Promise((resolve) => {
                 const img = new Image();
                 img.onload = () => resolve(true);

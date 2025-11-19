@@ -97,7 +97,7 @@ export class MobileTestHelpers {
      * @param {import('@playwright/test').Page} page - Playwright page object
      * @returns {Promise<boolean>} - True if CSS is loaded
      */
-    static async isCSSLoaded(page) {
+    static isCSSLoaded(page) {
         return page.evaluate(() => {
             const body = window.getComputedStyle(document.body);
             // Check if background has been styled (not default white)
@@ -113,7 +113,7 @@ export class MobileTestHelpers {
      * @param {string} property - CSS property name
      * @returns {Promise<string>} - Computed style value
      */
-    static async getComputedStyle(page, selector, property) {
+    static getComputedStyle(page, selector, property) {
         return page.evaluate(([sel, prop]) => {
             const element = document.querySelector(sel);
             if (!element) return null;
@@ -126,7 +126,7 @@ export class MobileTestHelpers {
      * @param {import('@playwright/test').Page} page - Playwright page object
      * @returns {Promise<boolean>} - True if sprites are used
      */
-    static async areSpritesUsed(page) {
+    static areSpritesUsed(page) {
         return page.evaluate(() => {
             const tiles = document.querySelectorAll(".tile, .mobile-tile");
             if (tiles.length === 0) return false;
@@ -150,7 +150,7 @@ export class MobileTestHelpers {
      * @param {string} selector - CSS selector
      * @returns {Promise<number>} - Element count
      */
-    static async countElements(page, selector) {
+    static countElements(page, selector) {
         return page.locator(selector).count();
     }
 
@@ -207,13 +207,15 @@ export class MobileTestHelpers {
         };
 
         const results = {};
+        /* eslint-disable no-await-in-loop */
         for (const [key, selector] of Object.entries(containers)) {
             try {
                 results[key] = await page.locator(selector).isVisible();
-            } catch (error) {
+            } catch {
                 results[key] = false;
             }
         }
+        /* eslint-enable no-await-in-loop */
 
         return results;
     }
