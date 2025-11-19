@@ -133,7 +133,7 @@ export class HintsPanel {
                 const rank = rankHand.rank?.toFixed(2) || "0.00";
                 const year = rankHand.card?.year || this.gameController.settings?.year || "";
                 const concealed = rankHand.hand?.concealed === true;
-                const badge = concealed ? `<span class="concealed-badge" title="Concealed">C</span>` : "";
+                const badge = concealed ? "<span class=\"concealed-badge\" title=\"Concealed\">C</span>" : "";
                 const headerParts = [year, groupDesc, handDesc].filter(Boolean);
 
                 html += `
