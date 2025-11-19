@@ -344,7 +344,15 @@ export class MobileRenderer {
                     confirmLabel: "Discard",
                     cancelLabel: "Auto Discard",
                     fallback: () => this.getFallbackTiles(1),
-                    callback: (tiles) => data.callback(tiles[0])
+                    callback: (tiles) => {
+                        if (!tiles || tiles.length === 0) {
+                            console.error("CHOOSE_DISCARD callback invoked with empty tiles array");
+                            data.callback(null);
+                            return;
+                        }
+                        console.log("CHOOSE_DISCARD: Selected tile:", tiles[0]);
+                        data.callback(tiles[0]);
+                    }
                 });
                 break;
             case "CHARLESTON_PASS":
@@ -519,17 +527,13 @@ export class MobileRenderer {
             return;
         }
         const fallback = this.pendingPrompt.fallback;
-        const maxSelections = this.pendingPrompt.max;
         const result = typeof fallback === "function" ? fallback() : [];
         const callback = this.pendingPrompt.callback;
         this.resetHandSelection();
         this.hidePrompt();
         this.pendingPrompt = null;
-        if (maxSelections === 1) {
-            callback(result[0] ?? null);
-        } else {
-            callback(result);
-        }
+        // Always pass array to callback - let the callback wrapper handle extraction
+        callback(result);
     }
 
     resetHandSelection() {

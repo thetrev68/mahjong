@@ -56,6 +56,13 @@ export class TileSprites {
         this.tileIndices.set("WIND-0", 36); // North
         this.tileIndices.set("WIND-1", 37); // South
         this.tileIndices.set("WIND-2", 38); // West
+
+        // BLANK tiles (house rule - swap with discard pile)
+        // These should display the back of the tile
+        // Map all BLANK tiles to a special marker
+        for (let i = 0; i < 8; i++) {
+            this.tileIndices.set(`BLANK-${i}`, -1); // Special marker for back tile
+        }
     }
 
     getSpritePosition(tile) {
@@ -89,6 +96,7 @@ export class TileSprites {
         if (suit === 4 || suit === "DRAGON") suit = "DRAGON";
         if (suit === 5 || suit === "FLOWER") suit = "FLOWER";
         if (suit === 6 || suit === "JOKER") suit = "JOKER";
+        if (suit === 7 || suit === "BLANK") suit = "BLANK";
 
         return `${suit}-${number}`;
     }
@@ -97,16 +105,23 @@ export class TileSprites {
         const div = document.createElement("div");
         div.className = `tile tile--${size}`;
 
-        const pos = this.getSpritePosition(tile);
+        const key = this.getTileKey(tile);
+        const index = this.tileIndices.get(key);
 
-        // Use CSS class for background image to avoid 404s with absolute paths
-        // Only set position here
-        div.style.backgroundPosition = `${pos.xPct}% ${pos.yPct}%`;
+        // Handle BLANK tiles specially - show the back of the tile
+        if (index === -1) {
+            div.classList.add("tile--blank");
+            div.style.backgroundImage = "url('/mahjong/pwa/assets/back.png')";
+            div.style.backgroundPosition = "center";
+            div.style.backgroundSize = "contain";
+        } else {
+            const pos = this.getSpritePosition(tile);
+            // Use CSS class for background image to avoid 404s with absolute paths
+            // Only set position here
+            div.style.backgroundPosition = `${pos.xPct}% ${pos.yPct}%`;
+        }
 
-        // Fallback: explicitly set image if class doesn't load it (though class should win)
-        // div.style.backgroundImage = "url('/mahjong/pwa/assets/tiles.png')";
-
-        div.dataset.tileId = this.getTileKey(tile);
+        div.dataset.tileId = key;
         return div;
     }
 }

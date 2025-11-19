@@ -5,6 +5,7 @@ node_modules/
 # Playwright test results
 test-results/
 playwright-report/
+test-output.txt
 
 # Logs
 logs
@@ -83,4 +84,3 @@ web_modules/
 .kilocode/
 .serena/cache/
 jules-scratch/
-playwright-report/
