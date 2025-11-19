@@ -99,9 +99,9 @@ export class MobileRenderer {
     createOpponentBars(containers) {
         const bars = [];
         const mapping = [
-            { key: "right", playerIndex: PLAYER.RIGHT ?? 1 },
-            { key: "top", playerIndex: PLAYER.TOP ?? 2 },
-            { key: "left", playerIndex: PLAYER.LEFT ?? 3 }
+            { key: "top", playerIndex: PLAYER.RIGHT ?? 1 },   // North
+            { key: "left", playerIndex: PLAYER.TOP ?? 2 },    // West
+            { key: "right", playerIndex: PLAYER.LEFT ?? 3 }   // South
         ];
 
         mapping.forEach(({ key, playerIndex }) => {

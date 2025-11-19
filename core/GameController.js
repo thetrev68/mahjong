@@ -30,7 +30,7 @@
  */
 
 import {EventEmitter} from "./events/EventEmitter.js";
-import {STATE, PLAYER, PLAYER_OPTION, SUIT} from "../constants.js";
+import {STATE, PLAYER, PLAYER_OPTION, SUIT, WIND} from "../constants.js";
 import {PlayerData} from "./models/PlayerData.js";
 import {TileData} from "./models/TileData.js";
 import {ExposureData} from "./models/HandData.js";
@@ -145,12 +145,33 @@ export class GameController extends EventEmitter {
             new PlayerData(PLAYER.LEFT, "Opponent 3")
         ];
 
+        this.assignPlayerWinds();
+
         // Emit initialization message
         const msgEvent = GameEvents.createMessageEvent(
             `Game initialized with ${this.settings.year} card`,
             "info"
         );
         this.emit("MESSAGE", msgEvent);
+    }
+
+    /**
+     * Assign fixed winds to seats following NMJL orientation.
+     * Player 0 (human) is always East; opponents map clockwise North/West/South.
+     */
+    assignPlayerWinds() {
+        const winds = {
+            [PLAYER.BOTTOM]: WIND.EAST,
+            [PLAYER.RIGHT]: WIND.NORTH,
+            [PLAYER.TOP]: WIND.WEST,
+            [PLAYER.LEFT]: WIND.SOUTH
+        };
+
+        Object.entries(winds).forEach(([position, wind]) => {
+            const player = this.players[position];
+            if (!player) return;
+            player.wind = wind;
+        });
     }
 
     /**
