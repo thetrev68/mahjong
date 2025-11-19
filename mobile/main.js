@@ -188,7 +188,7 @@ async function initializeGame() {
     const newGameBtn = document.getElementById("new-game-btn");
     if (newGameBtn) {
         newGameBtn.onclick = async () => {
-            console.log("NEW GAME button clicked!");
+            console.log("Start button clicked!");
             try {
                 console.log("Starting game...", gameController);
                 mobileRenderer?.updateStatus("Starting game...");
@@ -225,7 +225,7 @@ async function initializeGame() {
     });
 
     // Hide loading message
-    mobileRenderer?.updateStatus("Ready to play! Click NEW GAME to start.");
+    mobileRenderer?.updateStatus("Ready to play! Click Start to begin.");
 
     // Expose to window for testing
     if (window.location.search.includes("playwright=true")) {

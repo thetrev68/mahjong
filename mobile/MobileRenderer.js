@@ -50,6 +50,10 @@ export class MobileRenderer {
 
         this.opponentBars = this.createOpponentBars(options.opponentContainers || {});
 
+        this.actionButton = document.getElementById("new-game-btn");
+        this.drawButton = document.getElementById("draw-btn");
+        this.sortButton = document.getElementById("sort-btn");
+
         this.promptUI = this.createPromptUI(options.promptRoot || document.body);
         this.pendingPrompt = null;
         this.latestHandSnapshot = null;
@@ -58,6 +62,14 @@ export class MobileRenderer {
 
         this.setupButtonListeners();
         this.registerEventListeners();
+
+        if (this.sortButton) {
+            this.sortButton.style.display = "none";
+        }
+        if (this.drawButton) {
+            this.drawButton.style.display = "none";
+        }
+        this.updateActionButton({ label: "Start", onClick: () => this.startGame() });
     }
 
     destroy() {
@@ -145,11 +157,14 @@ export class MobileRenderer {
     }
 
     setupButtonListeners() {
-        const drawBtn = document.getElementById("draw-btn");
-        const sortBtn = document.getElementById("sort-btn");
+        const drawBtn = this.drawButton;
+        const sortBtn = this.sortButton;
 
         if (drawBtn) drawBtn.addEventListener("click", () => this.onDrawClicked());
         if (sortBtn) sortBtn.addEventListener("click", () => this.onSortClicked());
+        if (this.actionButton) {
+            this.actionButton.addEventListener("click", () => this.startGame());
+        }
     }
 
     onDrawClicked() {
@@ -186,7 +201,7 @@ export class MobileRenderer {
     }
 
     canDrawTile() {
-        const state = this.gameController?.gameState;
+        const state = this.gameController?.state ?? this.gameController?.gameState;
         return this.gameController.currentPlayer === HUMAN_PLAYER &&
             (state === STATE.LOOP_PICK_FROM_WALL || state === "LOOP_PICK_FROM_WALL");
     }
@@ -194,8 +209,9 @@ export class MobileRenderer {
     onGameStarted() {
         this.discardPile.clear();
         this.resetHandSelection();
-        this.updateStatus("Game started – dealing tiles...");
+        this.updateStatus("Game started - dealing tiles...");
         this.refreshOpponentBars();
+        this.updateActionButton({ label: "Start", onClick: () => this.startGame(), disabled: true, visible: true });
     }
 
     onGameEnded(data) {
@@ -204,12 +220,13 @@ export class MobileRenderer {
             const winner = this.gameController.players?.[data.winner];
             this.updateStatus(winner ? `${winner.name} wins!` : "Mahjong!");
         } else if (reason === "wall_game") {
-            this.updateStatus("Wall game – no winner");
+            this.updateStatus("Wall game - no winner");
         } else {
             this.updateStatus("Game ended");
         }
         this.hidePrompt();
         this.resetHandSelection();
+        this.updateActionButton({ label: "Start", onClick: () => this.startGame(), disabled: false, visible: true });
     }
 
     onStateChanged(data) {
@@ -218,21 +235,21 @@ export class MobileRenderer {
         }
         this.updateStatus(`State: ${data.newState}`);
 
-        const drawBtn = document.getElementById("draw-btn");
-        const sortBtn = document.getElementById("sort-btn");
+        const drawBtn = this.drawButton;
+        const sortBtn = this.sortButton;
 
-        // Show DRAW button only during player's turn to pick
         if (drawBtn) {
             const canDraw = this.canDrawTile();
             drawBtn.style.display = canDraw ? "flex" : "none";
             drawBtn.disabled = !canDraw;
         }
 
-        // SORT always visible during main game loop states
         if (sortBtn) {
             const isLoopState = data.newState >= STATE.LOOP_PICK_FROM_WALL && data.newState <= STATE.LOOP_EXPOSE_TILES_COMPLETE;
             sortBtn.style.display = isLoopState ? "flex" : "none";
         }
+
+        this.updateActionButtonStateForGame(data.newState);
     }
 
     onHandUpdated(data) {
@@ -286,6 +303,7 @@ export class MobileRenderer {
                 this.animationController.animateTurnStart(bar.bar.container);
             }
         }
+        this.updateActionButtonStateForGame(this.gameController.state);
     }
 
     onTileDiscarded(data) {
@@ -354,8 +372,9 @@ export class MobileRenderer {
                     min: 1,
                     max: 1,
                     confirmLabel: "Discard",
-                    cancelLabel: "Auto Discard",
-                    fallback: () => this.getFallbackTiles(1),
+                    cancelLabel: null,
+                    fallback: null,
+                    useActionButton: true,
                     callback: (tiles) => {
                         if (!tiles || tiles.length === 0) {
                             console.error("CHOOSE_DISCARD callback invoked with empty tiles array");
@@ -365,6 +384,12 @@ export class MobileRenderer {
                         console.log("CHOOSE_DISCARD: Selected tile:", tiles[0]);
                         data.callback(tiles[0]);
                     }
+                });
+                this.updateActionButton({
+                    label: "Discard",
+                    onClick: () => this.confirmPendingSelection(),
+                    disabled: true,
+                    visible: true
                 });
                 break;
             case "CHARLESTON_PASS":
@@ -466,7 +491,8 @@ export class MobileRenderer {
             min: config.min,
             max: config.max,
             callback: config.callback,
-            fallback: config.fallback
+            fallback: config.fallback,
+            confirmUsesActionButton: !!config.useActionButton
         };
 
         this.handRenderer.setSelectionBehavior({
@@ -477,7 +503,7 @@ export class MobileRenderer {
         this.handRenderer.clearSelection(true);
 
         // Build action buttons - only include cancel if explicitly provided
-        const actions = [
+        const actions = config.useActionButton ? [] : [
             {
                 label: config.confirmLabel ?? "Confirm",
                 primary: true,
@@ -491,6 +517,15 @@ export class MobileRenderer {
             actions.push({
                 label: config.cancelLabel,
                 onClick: () => this.cancelTileSelectionPrompt()
+            });
+        }
+
+        if (config.useActionButton) {
+            this.updateActionButton({
+                label: config.confirmLabel ?? "Confirm",
+                onClick: () => this.confirmPendingSelection(),
+                disabled: true,
+                visible: true
             });
         }
 
@@ -516,6 +551,9 @@ export class MobileRenderer {
         const ready = count >= min && count <= max;
         this.setPromptHint(`Selected ${count}/${max}${min === max ? "" : ` (need at least ${min})`}`);
         this.setPrimaryEnabled(ready);
+        if (this.actionButton && this.pendingPrompt.confirmUsesActionButton) {
+            this.actionButton.disabled = !ready;
+        }
     }
 
     resolveTileSelectionPrompt() {
@@ -620,6 +658,55 @@ export class MobileRenderer {
             }
             return TileData.fromJSON(tile);
         }).filter(Boolean);
+    }
+
+    updateActionButton({ label, onClick, disabled = false, visible = true } = {}) {
+        if (!this.actionButton) return;
+        if (label) {
+            this.actionButton.textContent = label;
+        }
+        this.actionButton.onclick = onClick || null;
+        this.actionButton.disabled = !!disabled;
+        this.actionButton.style.display = visible ? "flex" : "none";
+    }
+
+    updateActionButtonStateForGame(newState) {
+        if (!this.actionButton) return;
+
+        const isHumanTurn = this.gameController.currentPlayer === HUMAN_PLAYER;
+        const isDiscardState = newState === STATE.LOOP_CHOOSE_DISCARD && isHumanTurn;
+
+        if (isDiscardState && this.pendingPrompt?.type === "tile-selection") {
+            this.pendingPrompt.confirmUsesActionButton = true;
+            const selection = this.handRenderer.getSelectionState();
+            const ready = selection.count >= (this.pendingPrompt.min || 1) && selection.count <= (this.pendingPrompt.max || 1);
+            this.updateActionButton({
+                label: "Discard",
+                onClick: () => this.confirmPendingSelection(),
+                disabled: !ready,
+                visible: true
+            });
+            return;
+        }
+
+        const preGameState = newState === STATE.INIT || newState === STATE.START || newState === STATE.DEAL;
+        this.updateActionButton({
+            label: "Start",
+            onClick: () => this.startGame(),
+            disabled: false,
+            visible: preGameState
+        });
+    }
+
+    confirmPendingSelection() {
+        if (this.pendingPrompt?.type !== "tile-selection") return;
+        this.resolveTileSelectionPrompt();
+    }
+
+    startGame() {
+        if (typeof this.gameController.startGame === "function") {
+            this.gameController.startGame();
+        }
     }
 
     // Add error handling for asset loading

@@ -124,18 +124,22 @@ export class HintsPanel {
             const playerTiles = handData.getTileArray();
             const hiddenTiles = handData.tiles;
 
-            // Render pattern visualizations with group and line info
+            // Render pattern visualizations with compact summaries
             let html = "<div class=\"hint-item\">";
             top3Patterns.forEach((rankHand, index) => {
                 const patternHtml = renderPatternVariation(rankHand, playerTiles, hiddenTiles);
-                const groupDesc = rankHand.group?.groupDescription || "Unknown";
-                const handDesc = rankHand.hand?.description || "";
+                const groupDesc = this.compactText(rankHand.group?.groupDescription);
+                const handDesc = this.compactText(rankHand.hand?.description);
                 const rank = rankHand.rank?.toFixed(2) || "0.00";
+                const year = rankHand.card?.year || this.gameController.settings?.year || "";
+                const concealed = rankHand.hand?.concealed === true;
+                const badge = concealed ? `<span class="concealed-badge" title="Concealed">C</span>` : "";
+                const headerParts = [year, groupDesc, handDesc].filter(Boolean);
 
                 html += `
-                    <div class="hint-pattern">
+                    <div class="hint-pattern" title="${groupDesc}${handDesc ? " - " + handDesc : ""}">
                         <div class="hint-pattern-header">
-                            <strong>${index + 1}. ${groupDesc}</strong> - ${handDesc}
+                            ${badge}<strong>${index + 1}. ${headerParts.join(" - ")}</strong>
                             <span class="hint-rank">(Rank: ${rank})</span>
                         </div>
                         ${patternHtml}
@@ -186,6 +190,15 @@ export class HintsPanel {
         if (suit === 6 || suit === "JOKER") return "J";
 
         return `${suit}-${number}`;
+    }
+
+    /**
+     * Compact long text by removing parentheticals and trimming whitespace
+     * @param {string} text
+     * @returns {string}
+     */
+    compactText(text = "") {
+        return text.replace(/\s*\(.*?\)/g, "").trim();
     }
 
     /**
