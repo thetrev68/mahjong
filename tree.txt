@@ -1,15 +1,4 @@
 mahjong/
-├── assets/
-│   ├── audio/
-│   │   ├── 2404ba_bgm_loop.mp3
-│   │   ├── 2406haidao_bgm_loop.mp3
-│   │   ├── fireworks.mp3
-│   │   ├── normalflyin.mp3
-│   │   ├── rack_tile.mp3
-│   │   └── tile_dropping.mp3
-│   ├── back.png
-│   ├── tiles.json
-│   └── tiles.png
 ├── core/
 │   ├── card/
 │   │   ├── 2017/
@@ -75,7 +64,8 @@ mahjong/
 │   │   │   ├── handsQuints.js (96 lines)
 │   │   │   ├── handsSinglesPairs.js (416 lines)
 │   │   │   └── handsWindsDragons.js (389 lines)
-│   │   └── card.js (704 lines)
+│   │   ├── card.js (704 lines)
+│   │   └── CardHand.js (60 lines)
 │   ├── events/
 │   │   ├── EventEmitter.js (76 lines)
 │   │   └── GameEvents.js (334 lines)
@@ -84,31 +74,34 @@ mahjong/
 │   │   ├── PlayerData.js (87 lines)
 │   │   └── TileData.js (160 lines)
 │   ├── AIEngine.js (539 lines)
-│   ├── GameController.js (1017 lines)
+│   ├── GameController.js (1161 lines)
 │   └── tileDefinitions.js (64 lines)
 ├── desktop/
 │   ├── adapters/
-│   │   └── PhaserAdapter.js (1064 lines)
+│   │   └── PhaserAdapter.js (983 lines)
 │   ├── animations/
-│   │   └── AnimationLibrary.js (360 lines)
+│   │   └── AnimationLibrary.js (359 lines)
 │   ├── assets/
+│   ├── config/
+│   │   └── playerLayout.js (61 lines)
 │   ├── gameObjects/
 │   │   ├── gameObjects.js (529 lines)
-│   │   ├── gameObjects_hand.js (1278 lines)
-│   │   ├── gameObjects_player.js (25 lines)
-│   │   └── gameObjects_table.js (421 lines)
+│   │   ├── gameObjects_hand.DELETED.js (1276 lines)
+│   │   ├── gameObjects_player.DELETED.js (25 lines)
+│   │   └── gameObjects_table.js (394 lines)
 │   ├── managers/
-│   │   ├── BlankSwapManager.js (157 lines)
+│   │   ├── BlankSwapManager.js (167 lines)
 │   │   ├── ButtonManager.js (450 lines)
 │   │   ├── DialogManager.js (435 lines)
-│   │   ├── HintAnimationManager.js (202 lines)
+│   │   ├── HintAnimationManager.js (231 lines)
 │   │   ├── HomePageTileManager.js (233 lines)
-│   │   ├── SelectionManager.js (715 lines)
-│   │   └── TileManager.js (644 lines)
+│   │   ├── SelectionManager.js (739 lines)
+│   │   └── TileManager.js (617 lines)
 │   ├── renderers/
-│   │   └── HandRenderer.js (386 lines)
+│   │   ├── HandRenderer.js (410 lines)
+│   │   └── HandRenderer.old.js (391 lines)
 │   ├── scenes/
-│   │   └── GameScene.js (569 lines)
+│   │   └── GameScene.js (578 lines)
 │   ├── ADAPTER_PATTERNS.md
 │   └── FUTURE_REFACTORS.md
 ├── mobile/
@@ -116,30 +109,47 @@ mahjong/
 │   │   └── AnimationController.js (381 lines)
 │   ├── assets/
 │   ├── components/
-│   │   ├── DiscardPile.js (174 lines)
+│   │   ├── DiscardPile.js (175 lines)
+│   │   ├── HintsPanel.js (219 lines)
 │   │   ├── InstallPrompt.js (307 lines)
 │   │   ├── MobileTile.css (160 lines)
-│   │   ├── MobileTile.js (253 lines)
-│   │   ├── OpponentBar.js (128 lines)
-│   │   └── SettingsSheet.js (251 lines)
+│   │   ├── MobileTile.js (154 lines)
+│   │   ├── OpponentBar.js (130 lines)
+│   │   ├── SettingsSheet.js (251 lines)
+│   │   └── WallCounter.js (94 lines)
 │   ├── gestures/
-│   │   └── TouchHandler.js (239 lines)
+│   │   └── TouchHandler.js (283 lines)
 │   ├── renderers/
-│   │   └── HandRenderer.js (458 lines)
+│   │   └── HandRenderer.js (499 lines)
 │   ├── styles/
 │   │   ├── animations.css (178 lines)
 │   │   ├── base.css (30 lines)
 │   │   ├── HandRenderer.css (107 lines)
 │   │   ├── MobileGame.css (131 lines)
 │   │   ├── OpponentBar.css (86 lines)
-│   │   └── SettingsSheet.css (236 lines)
-│   ├── index.html (46 lines)
-│   ├── main.js (205 lines)
+│   │   ├── SettingsSheet.css (236 lines)
+│   │   └── tiles.css (99 lines)
+│   ├── utils/
+│   │   └── tileSprites.js (108 lines)
+│   ├── index.html (62 lines)
+│   ├── main.js (281 lines)
 │   ├── MOBILE_INTERFACES.md
-│   ├── MobileRenderer.js (464 lines)
+│   ├── MobileRenderer.js (596 lines)
 │   ├── mockup.css (466 lines)
-│   └── mockup.html (152 lines)
+│   ├── mockup.html (152 lines)
+│   └── styles.css (642 lines)
 ├── pwa/
+│   ├── assets/
+│   │   ├── audio/
+│   │   │   ├── 2404ba_bgm_loop.mp3
+│   │   │   ├── 2406haidao_bgm_loop.mp3
+│   │   │   ├── fireworks.mp3
+│   │   │   ├── normalflyin.mp3
+│   │   │   ├── rack_tile.mp3
+│   │   │   └── tile_dropping.mp3
+│   │   ├── back.png
+│   │   ├── tiles.json
+│   │   └── tiles.png
 │   ├── icons/
 │   │   ├── icon-128.png
 │   │   ├── icon-144.png
@@ -161,41 +171,54 @@ mahjong/
 │   │   ├── desktop/
 │   │   │   └── game-basic.spec.js (193 lines)
 │   │   └── mobile/
+│   │       ├── interactions.spec.js (91 lines)
+│   │       ├── layout.spec.js (21 lines)
 │   │       ├── mobile.spec.js (228 lines)
+│   │       ├── phase0-setup.spec.js (126 lines)
+│   │       ├── responsive.spec.js (216 lines)
+│   │       ├── sprites.spec.js (54 lines)
 │   │       └── touch-handler.spec.js (59 lines)
-│   └── unit/
-│       ├── core/
-│       │   └── aiengine.test.js (224 lines)
-│       ├── desktop/
-│       │   └── managers/
-│       └── mobile/
-│           └── mobile-tile.test.js (343 lines)
+│   ├── unit/
+│   │   ├── core/
+│   │   │   └── aiengine.test.js (224 lines)
+│   │   ├── desktop/
+│   │   │   └── managers/
+│   │   └── mobile/
+│   │       └── mobile-tile.test.js (343 lines)
+│   └── utils/
+│       └── mobile-helpers.js (197 lines)
 ├── audioManager.js (96 lines)
 ├── CLAUDE.md
 ├── constants.js (108 lines)
+├── Description_Animation_Deal.md
+├── Description_Animation_Discard.md
+├── Description_Animation_Draw_Tile.md
+├── Description_Animation_Joker_Swap.md
+├── Description_Animation_Select.md
 ├── favicon.ico
 ├── favicon.svg
-├── IMPLEMENTATION_ROADMAP.md
-├── index.html (156 lines)
+├── index.html (163 lines)
 ├── LEGACY_HAND_AUDIT.md
 ├── main.js (28 lines)
-├── OPTION_B_DESKTOP_RECOVERY_PLAN.md
+├── MOBILE_IMPLEMENTATION_PLAN.md
+├── PHASE_6_COMPLETION_REPORT.md
+├── PHASE_6_IMPLEMENTATION_PLAN.md
+├── PHASE_6_NEXT_STEPS.md
 ├── playwright.config.js (54 lines)
 ├── README.md
 ├── settings.js (439 lines)
 ├── styles.css (821 lines)
-├── TEST_AUDIT.md
-├── TEST_BASELINE_STATUS.md
+├── test_output.txt
 ├── tileDisplayUtils.js (249 lines)
 └── utils.js (42 lines)
 
 ==================================================
 DIRECTORY TREE STATISTICS
 ==================================================
-Total directories: 38
-Total files: 151
-Files with line counts: 117
-Total lines of code: 33,343
+Total directories: 41
+Total files: 171
+Files with line counts: 131
+Total lines of code: 36,044
 
 Configuration:
   Excluded directories: .archive, .claude, .geminiignore, .git, .github, .gitignore, .idea, .kilocode, .pytest_cache, .ruff_cache, .serena, .vite, .vscode, __pycache__, agents.md, backlog.md, build, claude.md, coverage, dist, docs, eslint.config.js, gemini.md, jules-scratch, knip.json, legacy, logs, node_modules, package-lock.json, package.json, playwright-report, public, test-results, tree.txt, tree_scanner.py, venv, vite.config.js
