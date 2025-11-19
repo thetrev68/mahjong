@@ -179,6 +179,7 @@ export class HandRenderer {
                 // Use tileSprites for exposed tiles too
                 const exposedTile = document.createElement("div");
                 exposedTile.className = "tile tile--small";
+                exposedTile.setAttribute("role", "img");
 
                 if (tile) {
                     const pos = tileSprites.getSpritePosition(tile);
@@ -188,7 +189,13 @@ export class HandRenderer {
 
                 exposedTile.dataset.suit = this.getSuitName(tile?.suit);
                 exposedTile.dataset.number = this.getDataNumber(tile);
-                // No text content
+
+                const textLabel = this.formatTileText(tile);
+                if (textLabel) {
+                    exposedTile.setAttribute("aria-label", textLabel);
+                }
+
+                // No text content; accessibility handled via aria-label above
                 exposureSet.appendChild(exposedTile);
             });
 
@@ -229,7 +236,13 @@ export class HandRenderer {
         tileButton.dataset.number = this.getDataNumber(tileData);
         tileButton.dataset.index = String(index);
         tileButton.dataset.selectionKey = selectionKey;
-        // Remove text content as we use sprites now
+
+        const textLabel = this.formatTileText(tileData);
+        if (textLabel) {
+            tileButton.setAttribute("aria-label", textLabel);
+        }
+
+        // No text content; accessibility handled via aria-label above
         tileButton.disabled = !this.interactive;
 
         const clickHandler = (event) => {

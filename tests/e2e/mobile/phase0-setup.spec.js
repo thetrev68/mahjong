@@ -3,6 +3,8 @@
  * Verifies that the mobile testing infrastructure is properly configured
  */
 
+/* global fetch */
+
 import { test, expect } from "@playwright/test";
 import { MobileTestHelpers } from "../../utils/mobile-helpers.js";
 
@@ -64,7 +66,7 @@ test.describe("Phase 0: Testing Framework Setup", () => {
             try {
                 const response = await fetch("/mahjong/pwa/assets/tiles.json");
                 return response.ok;
-            } catch (error) {
+            } catch {
                 return false;
             }
         });

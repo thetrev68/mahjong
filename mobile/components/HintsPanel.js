@@ -26,6 +26,10 @@ export class HintsPanel {
         this.aiEngine = aiEngine;
         this.isExpanded = false;
         this.unsubscribeFns = [];
+        this._disabled = false;
+
+        // Bind toggle handler so we can properly remove it later
+        this._onToggle = this.toggle.bind(this);
 
         this.render();
         this.setupListeners();
@@ -40,11 +44,14 @@ export class HintsPanel {
 
         if (!this.toggleBtn || !this.contentEl) {
             console.error("HintsPanel: Missing required DOM elements");
+            this._disabled = true;
+            // Clean up any subscriptions that were already set up
+            this.destroy();
             return;
         }
 
-        // Setup toggle button
-        this.toggleBtn.addEventListener("click", () => this.toggle());
+        // Setup toggle button with bound handler
+        this.toggleBtn.addEventListener("click", this._onToggle);
 
         // Set initial state (collapsed)
         this.contentEl.style.display = "none";
@@ -78,6 +85,11 @@ export class HintsPanel {
      * @param {HandData} handData - Player's hand data
      */
     updateHints(handData) {
+        // Early return if component is disabled or DOM is missing
+        if (this._disabled || !this.contentEl) {
+            return;
+        }
+
         if (!handData || !handData.tiles || handData.tiles.length === 0) {
             this.clearHints();
             return;
@@ -158,35 +170,37 @@ export class HintsPanel {
      * Clear all hints
      */
     clearHints() {
-        if (this.contentEl) {
-            this.contentEl.innerHTML = `
-                <div class="hint-item">
-                    <span class="hint-label">Play to see recommendations</span>
-                </div>
-            `;
+        // Early return if component is disabled or DOM is missing
+        if (this._disabled || !this.contentEl) {
+            return;
         }
+
+        this.contentEl.innerHTML = `
+            <div class="hint-item">
+                <span class="hint-label">Play to see recommendations</span>
+            </div>
+        `;
     }
 
     /**
      * Toggle panel open/closed
      */
     toggle() {
+        // Early return if component is disabled or DOM is missing
+        if (this._disabled || !this.contentEl || !this.toggleBtn) {
+            return;
+        }
+
         this.isExpanded = !this.isExpanded;
-
-        if (this.contentEl) {
-            this.contentEl.style.display = this.isExpanded ? "block" : "none";
-        }
-
-        // Update button text/aria
-        if (this.toggleBtn) {
-            this.toggleBtn.setAttribute("aria-expanded", String(this.isExpanded));
-        }
+        this.contentEl.style.display = this.isExpanded ? "block" : "none";
+        this.toggleBtn.setAttribute("aria-expanded", String(this.isExpanded));
     }
 
     /**
      * Clean up event listeners
      */
     destroy() {
+        // Unsubscribe from all game events
         this.unsubscribeFns.forEach(unsub => {
             if (typeof unsub === "function") {
                 unsub();
@@ -194,14 +208,20 @@ export class HintsPanel {
         });
         this.unsubscribeFns = [];
 
-        if (this.toggleBtn) {
-            this.toggleBtn.removeEventListener("click", this.toggle);
+        // Remove toggle button listener using the bound handler
+        if (this.toggleBtn && this._onToggle) {
+            this.toggleBtn.removeEventListener("click", this._onToggle);
         }
 
+        // Mark as disabled
+        this._disabled = true;
+
+        // Clear references
         this.container = null;
         this.gameController = null;
         this.aiEngine = null;
         this.toggleBtn = null;
         this.contentEl = null;
+        this._onToggle = null;
     }
 }

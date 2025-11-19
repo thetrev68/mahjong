@@ -98,7 +98,7 @@ export class MobileTestHelpers {
      * @returns {Promise<boolean>} - True if CSS is loaded
      */
     static async isCSSLoaded(page) {
-        return await page.evaluate(() => {
+        return page.evaluate(() => {
             const body = window.getComputedStyle(document.body);
             // Check if background has been styled (not default white)
             return body.backgroundColor !== "rgba(0, 0, 0, 0)" &&
@@ -114,7 +114,7 @@ export class MobileTestHelpers {
      * @returns {Promise<string>} - Computed style value
      */
     static async getComputedStyle(page, selector, property) {
-        return await page.evaluate(([sel, prop]) => {
+        return page.evaluate(([sel, prop]) => {
             const element = document.querySelector(sel);
             if (!element) return null;
             return window.getComputedStyle(element)[prop];
@@ -127,7 +127,7 @@ export class MobileTestHelpers {
      * @returns {Promise<boolean>} - True if sprites are used
      */
     static async areSpritesUsed(page) {
-        return await page.evaluate(() => {
+        return page.evaluate(() => {
             const tiles = document.querySelectorAll(".tile, .mobile-tile");
             if (tiles.length === 0) return false;
 
@@ -151,7 +151,7 @@ export class MobileTestHelpers {
      * @returns {Promise<number>} - Element count
      */
     static async countElements(page, selector) {
-        return await page.locator(selector).count();
+        return page.locator(selector).count();
     }
 
     /**

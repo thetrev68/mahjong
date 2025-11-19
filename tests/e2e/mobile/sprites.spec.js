@@ -1,12 +1,13 @@
 import { test, expect } from "@playwright/test";
+import { MobileTestHelpers } from "../../utils/mobile-helpers.js";
 
 test.describe("Mobile Sprite Rendering", () => {
     test.beforeEach(async ({ page }) => {
         // Go to mobile page
-        await page.goto("/mobile/index.html");
+        await MobileTestHelpers.gotoMobileApp(page);
 
-        // Wait for game to initialize
-        await page.waitForSelector("#game-container");
+        // Wait for game controller to be initialized and ready
+        await MobileTestHelpers.waitForMobileReady(page);
     });
 
     test("should render hand tiles with sprite background", async ({ page }) => {

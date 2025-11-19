@@ -183,33 +183,33 @@ test.describe("MobileTile", () => {
             const element = tile.createElement();
 
             // Initial state should be 'normal'
-            expect(element.classList.contains("mobile-tile--selected")).toBe(false);
-            expect(element.classList.contains("mobile-tile--disabled")).toBe(false);
-            expect(element.classList.contains("mobile-tile--highlighted")).toBe(false);
+            expect(element.classList.contains("selected")).toBe(false);
+            expect(element.classList.contains("disabled")).toBe(false);
+            expect(element.classList.contains("highlighted")).toBe(false);
 
             // Test selected state
             tile.setState("selected");
-            expect(element.classList.contains("mobile-tile--selected")).toBe(true);
-            expect(element.classList.contains("mobile-tile--disabled")).toBe(false);
-            expect(element.classList.contains("mobile-tile--highlighted")).toBe(false);
+            expect(element.classList.contains("selected")).toBe(true);
+            expect(element.classList.contains("disabled")).toBe(false);
+            expect(element.classList.contains("highlighted")).toBe(false);
 
             // Test disabled state
             tile.setState("disabled");
-            expect(element.classList.contains("mobile-tile--selected")).toBe(false);
-            expect(element.classList.contains("mobile-tile--disabled")).toBe(true);
-            expect(element.classList.contains("mobile-tile--highlighted")).toBe(false);
+            expect(element.classList.contains("selected")).toBe(false);
+            expect(element.classList.contains("disabled")).toBe(true);
+            expect(element.classList.contains("highlighted")).toBe(false);
 
             // Test highlighted state
             tile.setState("highlighted");
-            expect(element.classList.contains("mobile-tile--selected")).toBe(false);
-            expect(element.classList.contains("mobile-tile--disabled")).toBe(false);
-            expect(element.classList.contains("mobile-tile--highlighted")).toBe(true);
+            expect(element.classList.contains("selected")).toBe(false);
+            expect(element.classList.contains("disabled")).toBe(false);
+            expect(element.classList.contains("highlighted")).toBe(true);
 
             // Test normal state
             tile.setState("normal");
-            expect(element.classList.contains("mobile-tile--selected")).toBe(false);
-            expect(element.classList.contains("mobile-tile--disabled")).toBe(false);
-            expect(element.classList.contains("mobile-tile--highlighted")).toBe(false);
+            expect(element.classList.contains("selected")).toBe(false);
+            expect(element.classList.contains("disabled")).toBe(false);
+            expect(element.classList.contains("highlighted")).toBe(false);
         });
 
         test("should handle setState before element creation", () => {
@@ -221,7 +221,7 @@ test.describe("MobileTile", () => {
 
             // State should be applied when element is created
             const element = tile.createElement();
-            expect(element.classList.contains("mobile-tile--selected")).toBe(true);
+            expect(element.classList.contains("selected")).toBe(true);
         });
     });
 
