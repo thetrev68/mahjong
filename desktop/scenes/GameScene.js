@@ -1,23 +1,23 @@
 // GameScene.js
 import * as Phaser from "phaser";
-import {Table} from "../gameObjects/gameObjects_table.js";
+import { Table } from "../gameObjects/gameObjects_table.js";
 import { HomePageTileManager } from "../managers/HomePageTileManager.js";
 import AudioManager from "../../audioManager.js";
-import {GameController} from "../../core/GameController.js";
-import {PhaserAdapter} from "../adapters/PhaserAdapter.js";
+import { GameController } from "../../core/GameController.js";
+import { PhaserAdapter } from "../adapters/PhaserAdapter.js";
 import { HintAnimationManager } from "../managers/HintAnimationManager.js";
 // import { debugPrint } from "../../utils.js";
 import { WINDOW_WIDTH, WINDOW_HEIGHT, getTotalTileCount } from "../../constants.js";
-import {AIEngine} from "../../core/AIEngine.js";
-import {Card} from "../../core/card/card.js";
+import { AIEngine } from "../../core/AIEngine.js";
+import { Card } from "../../core/card/card.js";
 
-import tilesPng from "../../assets/tiles.png";
-import tilesJson from "../../assets/tiles.json";
-import backPng from "../../assets/back.png";
+import tilesPng from "../../pwa/assets/tiles.png";
+import tilesJson from "../../pwa/assets/tiles.json";
+import backPng from "../../pwa/assets/back.png";
 
 class GameScene extends Phaser.Scene {
     constructor() {
-        super({key: "GameScene"});
+        super({ key: "GameScene" });
         this.commandBarManualPosition = false;
         this.commandBarPosition = null;
         this.homePageTileManager = null;
@@ -168,7 +168,7 @@ class GameScene extends Phaser.Scene {
             font: "48px 'Trebuchet MS', sans-serif",
             fill: "#facc15",
             backgroundColor: "rgba(0,0,0,0.65)",
-            padding: {x: 24, y: 16},
+            padding: { x: 24, y: 16 },
             align: "center"
         });
         this.wallGameBanner.setOrigin(0.5);
@@ -319,49 +319,49 @@ class GameScene extends Phaser.Scene {
     }
 
     createWallTileCounter() {
-      const container = this.add.container(WINDOW_WIDTH / 2 - 150, 160);
-      const bar = this.add.graphics();
-      bar.fillStyle(0x2a2a2a, 1); // Darker background
-      bar.fillRoundedRect(0, 0, 300, 20, 5); // Background - wider
-      const fill = this.add.graphics();
-      
-      // Add text overlay with crisp rendering
-      // Dynamic max tiles based on settings (152 or 160 with blanks)
-      const maxTiles = getTotalTileCount();
-      const text = this.add.text(150, 10, "Wall Tiles Remaining: " + maxTiles, {
-        fontFamily: "Arial, sans-serif",
-        fontSize: "16px",
-        fontStyle: "bold",
-        color: "#ffffff",
-        stroke: "#000000",
-        strokeThickness: 4
-      });
-      text.setOrigin(0.5, 0.5); // Center the text
-      text.setResolution(2); // Higher resolution for crisp text when scaled
+        const container = this.add.container(WINDOW_WIDTH / 2 - 150, 160);
+        const bar = this.add.graphics();
+        bar.fillStyle(0x2a2a2a, 1); // Darker background
+        bar.fillRoundedRect(0, 0, 300, 20, 5); // Background - wider
+        const fill = this.add.graphics();
 
-      container.add([bar, fill, text]);
-      // The container is hidden by default and is made visible by the first call to updateWallTileCounter.
-      container.setVisible(false);
-      container.setDepth(100); // High depth to appear above hands
-      return { bar: container, fill, text, maxTiles };
+        // Add text overlay with crisp rendering
+        // Dynamic max tiles based on settings (152 or 160 with blanks)
+        const maxTiles = getTotalTileCount();
+        const text = this.add.text(150, 10, "Wall Tiles Remaining: " + maxTiles, {
+            fontFamily: "Arial, sans-serif",
+            fontSize: "16px",
+            fontStyle: "bold",
+            color: "#ffffff",
+            stroke: "#000000",
+            strokeThickness: 4
+        });
+        text.setOrigin(0.5, 0.5); // Center the text
+        text.setResolution(2); // Higher resolution for crisp text when scaled
+
+        container.add([bar, fill, text]);
+        // The container is hidden by default and is made visible by the first call to updateWallTileCounter.
+        container.setVisible(false);
+        container.setDepth(100); // High depth to appear above hands
+        return { bar: container, fill, text, maxTiles };
     }
 
     updateWallTileCounter(count) {
-      if (!this.wallCounter) return;
-      const { bar, fill, text, maxTiles } = this.wallCounter;
-      fill.clear();
-      if (count < 0 || count > maxTiles) {
-        console.error("Invalid wall count:", count);
-        count = Math.max(0, Math.min(count, maxTiles));
-      }
-      fill.fillStyle(0x4a90e2, 1); // Better blue color
-      const width = (count / maxTiles) * 300; // Updated width
-      fill.fillRoundedRect(0, 0, width, 20, 5);
-      
-      // Update text with current count
-      text.setText(`Wall Tiles Remaining: ${count}`);
-      
-      bar.setVisible(true);
+        if (!this.wallCounter) return;
+        const { bar, fill, text, maxTiles } = this.wallCounter;
+        fill.clear();
+        if (count < 0 || count > maxTiles) {
+            console.error("Invalid wall count:", count);
+            count = Math.max(0, Math.min(count, maxTiles));
+        }
+        fill.fillStyle(0x4a90e2, 1); // Better blue color
+        const width = (count / maxTiles) * 300; // Updated width
+        fill.fillRoundedRect(0, 0, width, 20, 5);
+
+        // Update text with current count
+        text.setText(`Wall Tiles Remaining: ${count}`);
+
+        bar.setVisible(true);
     }
 
     update() {
@@ -402,8 +402,10 @@ class GameScene extends Phaser.Scene {
         const clampedLeft = Math.min(Math.max(left, minLeft), maxLeft);
         const clampedTop = Math.min(Math.max(top, minTop), maxTop);
 
-        return {left: clampedLeft,
-            top: clampedTop};
+        return {
+            left: clampedLeft,
+            top: clampedTop
+        };
     }
 
     getDefaultCommandBarPosition(bar, canvasBounds, boundsRect) {
@@ -440,12 +442,14 @@ class GameScene extends Phaser.Scene {
             const rect = bar.getBoundingClientRect();
             const tentativeLeft = event.clientX - pointerOffsetX + ((rect.width || bar.offsetWidth || 0) / 2);
             const tentativeTop = event.clientY - pointerOffsetY;
-            const {left, top} = this.getClampedCommandBarPosition(tentativeLeft, tentativeTop, bar, boundsRect);
+            const { left, top } = this.getClampedCommandBarPosition(tentativeLeft, tentativeTop, bar, boundsRect);
 
             rootStyle.setProperty("--command-bar-left", `${left}px`);
             rootStyle.setProperty("--command-bar-top", `${top}px`);
-            this.commandBarPosition = {left,
-                top};
+            this.commandBarPosition = {
+                left,
+                top
+            };
             this.commandBarManualPosition = true;
         };
 
@@ -501,7 +505,7 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-     
+
     resize(_gameSize, _baseSize, _displaySize, _resolution) {
         const uicenterdiv = this.actionPanelEl || document.getElementById("uicenterdiv");
         const canvas = this.sys.canvas;
@@ -516,24 +520,28 @@ class GameScene extends Phaser.Scene {
         const rootStyle = document.documentElement.style;
 
         if (this.commandBarManualPosition && this.commandBarPosition) {
-            const {left, top} = this.getClampedCommandBarPosition(
+            const { left, top } = this.getClampedCommandBarPosition(
                 this.commandBarPosition.left,
                 this.commandBarPosition.top,
                 uicenterdiv,
                 boundsRect
             );
-            this.commandBarPosition = {left,
-                top};
+            this.commandBarPosition = {
+                left,
+                top
+            };
             rootStyle.setProperty("--command-bar-left", `${left}px`);
             rootStyle.setProperty("--command-bar-top", `${top}px`);
 
             return;
         }
 
-        const {left, top} = this.getDefaultCommandBarPosition(uicenterdiv, canvasBounds, boundsRect);
+        const { left, top } = this.getDefaultCommandBarPosition(uicenterdiv, canvasBounds, boundsRect);
 
-        this.commandBarPosition = {left,
-            top};
+        this.commandBarPosition = {
+            left,
+            top
+        };
         rootStyle.setProperty("--command-bar-left", `${left}px`);
         rootStyle.setProperty("--command-bar-top", `${top}px`);
     }

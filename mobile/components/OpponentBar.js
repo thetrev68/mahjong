@@ -1,3 +1,5 @@
+import { MobileTile } from "./MobileTile.js";
+
 /**
  * OpponentBar - Displays opponent info compactly
  *
@@ -88,11 +90,12 @@ export class OpponentBar {
         }
 
         exposures.forEach(exposure => {
-            const icon = document.createElement("span");
-            icon.className = `exposure-icon ${exposure.type.toLowerCase()}`;
-            icon.textContent = this.getExposureLabel(exposure.type);
-            icon.title = this.getExposureTooltip(exposure);
-            exposuresContainer.appendChild(icon);
+            exposure.tiles.forEach(tile => {
+                const tileEl = MobileTile.createExposedTile(tile).createElement();
+                tileEl.classList.add("exposure-icon"); // Maintain class for layout
+                tileEl.title = this.getExposureTooltip(exposure);
+                exposuresContainer.appendChild(tileEl);
+            });
         });
     }
 

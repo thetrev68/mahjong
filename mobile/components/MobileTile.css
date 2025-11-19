@@ -32,25 +32,25 @@
 }
 
 /* States */
-.mobile-tile--selected {
+.mobile-tile.selected {
     background-color: #ffeb3b;
     border-color: #f57c00;
     transform: translateY(-4px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.mobile-tile--disabled {
+.mobile-tile.disabled {
     opacity: 0.5;
     cursor: not-allowed;
     filter: grayscale(50%);
     pointer-events: none;
 }
 
-.mobile-tile--disabled:active {
+.mobile-tile.disabled:active {
     transform: none;
 }
 
-.mobile-tile--highlighted {
+.mobile-tile.highlighted {
     border-color: #4caf50;
     box-shadow: 0 0 12px rgba(76, 175, 80, 0.6);
     animation: glow 1s infinite alternate;
@@ -119,12 +119,12 @@
 
 /* Hover effects for desktop */
 @media (hover: hover) {
-    .mobile-tile:hover:not(.mobile-tile--disabled) {
+    .mobile-tile:hover:not(.disabled) {
         border-color: #666;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    
-    .mobile-tile--selected:hover:not(.mobile-tile--disabled) {
+
+    .mobile-tile.selected:hover:not(.disabled) {
         transform: translateY(-6px);
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
     }
@@ -136,13 +136,13 @@
         border-width: 3px;
         border-color: #000;
     }
-    
-    .mobile-tile--selected {
+
+    .mobile-tile.selected {
         background-color: #ffff00;
         border-color: #000;
     }
-    
-    .mobile-tile--highlighted {
+
+    .mobile-tile.highlighted {
         border-color: #008000;
         box-shadow: none;
     }
@@ -153,8 +153,8 @@
     .mobile-tile {
         transition: none;
     }
-    
-    .mobile-tile--highlighted {
+
+    .mobile-tile.highlighted {
         animation: none;
     }
 }
@@ -181,9 +181,9 @@
         background-color: white !important;
         color: black !important;
     }
-    
-    .mobile-tile--selected,
-    .mobile-tile--highlighted {
+
+    .mobile-tile.selected,
+    .mobile-tile.highlighted {
         background-color: #f0f0f0 !important;
         border-color: #000 !important;
     }

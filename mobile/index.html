@@ -25,6 +25,12 @@
 </head>
 <body>
     <div id="mobile-app">
+        <!-- Wall Counter (absolute positioned, top-right) -->
+        <div id="wall-counter" class="wall-counter">
+            <span class="wall-label">Wall</span>
+            <span class="wall-tiles">--</span>
+        </div>
+
         <!-- Top: Opponent information bars -->
         <div id="opponents-container" class="opponents-container">
             <div id="opponent-left" class="opponent-bar"></div>
@@ -38,11 +44,21 @@
             <div id="discard-container" class="discard-container"></div>
         </div>
 
+        <!-- Hints Panel (above bottom menu) -->
+        <div id="hints-panel" class="hints-panel">
+            <button id="hints-toggle" class="hints-toggle">HINTS</button>
+            <div id="hints-content" class="hints-content" style="display: none;">
+                <!-- Populated by HintsPanel component -->
+            </div>
+        </div>
+
         <!-- Bottom: Player hand and action buttons -->
         <div id="hand-area" class="hand-area">
             <div id="hand-container" class="hand-container"></div>
             <div class="bottom-menu">
-                <button id="new-game-btn" class="menu-btn primary">NEW GAME</button>
+                <button id="draw-btn" class="menu-btn menu-btn--primary" style="display: none;">DRAW</button>
+                <button id="sort-btn" class="menu-btn">SORT</button>
+                <button id="new-game-btn" class="menu-btn">NEW</button>
                 <button id="mobile-settings-btn" class="menu-btn">⚙️</button>
             </div>
         </div>

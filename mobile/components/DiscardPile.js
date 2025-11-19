@@ -1,4 +1,5 @@
-import {TileData} from "../../core/models/TileData.js";
+import { TileData } from "../../core/models/TileData.js";
+import { MobileTile } from "./MobileTile.js";
 
 /**
  * DiscardPile - Displays discarded tiles in center area
@@ -90,17 +91,15 @@ export class DiscardPile {
      * @returns {HTMLElement} Tile element
      */
     createDiscardTile(tile, player) {
-        const tileElement = document.createElement("div");
-        tileElement.className = "discard-tile";
+        // Use MobileTile to create the element
+        const tileElement = MobileTile.createDiscardTile(tile).createElement();
+
+        // Add discard-tile class for existing styles/logic if needed, 
+        // though MobileTile adds 'tile tile--discard'
+        tileElement.classList.add("discard-tile");
+
         tileElement.dataset.player = player;
         tileElement.title = `Discarded by ${this.getPlayerName(player)}`;
-
-        // Use text-in-box approach (like tileDisplayUtils.js)
-        tileElement.innerHTML = `
-            <div class="discard-tile-face">
-                <span class="tile-text">${this.getTileText(tile)}</span>
-            </div>
-        `;
 
         // Click to show discard info
         tileElement.addEventListener("click", () => {

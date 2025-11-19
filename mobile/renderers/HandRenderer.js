@@ -1,5 +1,6 @@
-import {SUIT, WIND, DRAGON} from "../../constants.js";
-import {TileData} from "../../core/models/TileData.js";
+import { SUIT, WIND, DRAGON } from "../../constants.js";
+import { TileData } from "../../core/models/TileData.js";
+import { tileSprites } from "../utils/tileSprites.js";
 
 const SUIT_NAMES = {
     [SUIT.CRACK]: "CRACK",
@@ -101,7 +102,7 @@ export class HandRenderer {
                 }
                 data.indices.forEach(index => {
                     if (typeof index === "number") {
-                        this.selectTile(index, {state: data.state ?? "on", toggle: false});
+                        this.selectTile(index, { state: data.state ?? "on", toggle: false });
                     }
                 });
             }
@@ -175,12 +176,26 @@ export class HandRenderer {
             }
 
             exposure.tiles.forEach(tile => {
-                const exposedTile = document.createElement("button");
-                exposedTile.type = "button";
-                exposedTile.className = "exposed-tile";
+                // Use tileSprites for exposed tiles too
+                const exposedTile = document.createElement("div");
+                exposedTile.className = "tile tile--small";
+                exposedTile.setAttribute("role", "img");
+
+                if (tile) {
+                    const pos = tileSprites.getSpritePosition(tile);
+                    // Use CSS class for image, only set position
+                    exposedTile.style.backgroundPosition = `${pos.xPct}% ${pos.yPct}%`;
+                }
+
                 exposedTile.dataset.suit = this.getSuitName(tile?.suit);
                 exposedTile.dataset.number = this.getDataNumber(tile);
-                exposedTile.textContent = this.formatTileText(tile);
+
+                const textLabel = this.formatTileText(tile);
+                if (textLabel) {
+                    exposedTile.setAttribute("aria-label", textLabel);
+                }
+
+                // No text content; accessibility handled via aria-label above
                 exposureSet.appendChild(exposedTile);
             });
 
@@ -208,12 +223,26 @@ export class HandRenderer {
     createTileButton(tileData, index, selectionKey) {
         const tileButton = document.createElement("button");
         tileButton.type = "button";
-        tileButton.className = "tile-btn";
+        // Use .tile class for sprite styling
+        tileButton.className = "tile tile--normal";
+
+        // Apply sprite background position
+        if (tileData) {
+            const pos = tileSprites.getSpritePosition(tileData);
+            tileButton.style.backgroundPosition = `${pos.xPct}% ${pos.yPct}%`;
+        }
+
         tileButton.dataset.suit = this.getSuitName(tileData?.suit);
         tileButton.dataset.number = this.getDataNumber(tileData);
         tileButton.dataset.index = String(index);
         tileButton.dataset.selectionKey = selectionKey;
-        tileButton.textContent = this.formatTileText(tileData);
+
+        const textLabel = this.formatTileText(tileData);
+        if (textLabel) {
+            tileButton.setAttribute("aria-label", textLabel);
+        }
+
+        // No text content; accessibility handled via aria-label above
         tileButton.disabled = !this.interactive;
 
         const clickHandler = (event) => {
@@ -249,14 +278,14 @@ export class HandRenderer {
         }
 
         const isSelected = this.selectedIndices.has(selectionKey);
-        const {mode, maxSelectable, allowToggle} = this.selectionBehavior;
+        const { mode, maxSelectable, allowToggle } = this.selectionBehavior;
 
         if (mode === "single") {
             if (isSelected && allowToggle !== false) {
-                this.selectTile(index, {state: "off", toggle: false});
+                this.selectTile(index, { state: "off", toggle: false });
             } else {
                 this.clearSelection(true);
-                this.selectTile(index, {state: "on", toggle: false});
+                this.selectTile(index, { state: "on", toggle: false });
             }
             return;
         }
@@ -265,9 +294,9 @@ export class HandRenderer {
             if (this.selectedIndices.size >= maxSelectable) {
                 return;
             }
-            this.selectTile(index, {state: "on", toggle: false});
+            this.selectTile(index, { state: "on", toggle: false });
         } else if (allowToggle !== false) {
-            this.selectTile(index, {state: "off", toggle: false});
+            this.selectTile(index, { state: "off", toggle: false });
         }
     }
 
@@ -282,7 +311,7 @@ export class HandRenderer {
             return false;
         }
 
-        const {state, toggle = true, clearOthers = false, silent = false} = options;
+        const { state, toggle = true, clearOthers = false, silent = false } = options;
 
         if (clearOthers) {
             this.clearSelection(true);
@@ -473,7 +502,7 @@ export class HandRenderer {
             return "";
         }
 
-        const {suit, number} = tile;
+        const { suit, number } = tile;
 
         if (suit === SUIT.CRACK) {
             return `${number}C`;
@@ -523,13 +552,13 @@ export class HandRenderer {
 
         return {
             tiles: Array.isArray(handData.tiles)
-                ? handData.tiles.map(tile => ({...tile}))
+                ? handData.tiles.map(tile => ({ ...tile }))
                 : [],
             exposures: Array.isArray(handData.exposures)
                 ? handData.exposures.map(exposure => ({
                     type: exposure?.type,
                     tiles: Array.isArray(exposure?.tiles)
-                        ? exposure.tiles.map(tile => ({...tile}))
+                        ? exposure.tiles.map(tile => ({ ...tile }))
                         : []
                 }))
                 : []

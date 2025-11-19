@@ -1,19 +1,25 @@
 import InstallPrompt from "./components/InstallPrompt.js";
 import SettingsSheet from "./components/SettingsSheet.js";
+import {WallCounter} from "./components/WallCounter.js";
+import {HintsPanel} from "./components/HintsPanel.js";
 import {MobileRenderer} from "./MobileRenderer.js";
 import {GameController} from "../core/GameController.js";
 import {AIEngine} from "../core/AIEngine.js";
 import {Card} from "../core/card/card.js";
 import "./styles/base.css";
+import "./styles/tiles.css";
 import "./styles/SettingsSheet.css";
 import "./styles/HandRenderer.css";
 import "./styles/MobileGame.css";
+import "./styles.css";
 
 // Game instances
 let gameController;
 let aiEngine;
 let mobileRenderer;
 let settingsSheet;
+let wallCounter;
+let hintsPanel;
 
 /**
  * Hook to call when a game ends
@@ -112,6 +118,20 @@ async function initializeGame() {
         promptRoot: document.body
     });
 
+    // Initialize WallCounter component
+    const wallCounterContainer = document.getElementById("wall-counter");
+    if (wallCounterContainer) {
+        wallCounter = new WallCounter(wallCounterContainer, gameController);
+        console.log("WallCounter initialized");
+    }
+
+    // Initialize HintsPanel component
+    const hintsPanelContainer = document.getElementById("hints-panel");
+    if (hintsPanelContainer) {
+        hintsPanel = new HintsPanel(hintsPanelContainer, gameController, aiEngine);
+        console.log("HintsPanel initialized");
+    }
+
     // Track games played for install prompt
     gameController.on("GAME_ENDED", () => onGameEnd());
 
@@ -143,6 +163,13 @@ async function initializeGame() {
 
     // Hide loading message
     mobileRenderer?.updateStatus("Ready to play! Click NEW GAME to start.");
+
+    // Expose to window for testing
+    if (window.location.search.includes("playwright=true")) {
+        window.gameController = gameController;
+        window.aiEngine = aiEngine;
+        window.mobileRenderer = mobileRenderer;
+    }
 
     console.log("Mobile game initialized successfully");
 }
