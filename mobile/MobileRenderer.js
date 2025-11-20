@@ -69,6 +69,13 @@ export class MobileRenderer {
         if (this.drawButton) {
             this.drawButton.style.display = "none";
         }
+
+        // Hide hints panel pre-game
+        this.hintsPanel = document.getElementById("hints-panel");
+        if (this.hintsPanel) {
+            this.hintsPanel.style.display = "none";
+        }
+
         this.updateActionButton({ label: "Start", onClick: () => this.startGame() });
     }
 
@@ -216,6 +223,11 @@ export class MobileRenderer {
         this.updateStatus("Game started - dealing tiles...");
         this.refreshOpponentBars();
         this.updateActionButton({ label: "Start", onClick: () => this.startGame(), disabled: true, visible: true });
+
+        // Show hints panel when game starts
+        if (this.hintsPanel) {
+            this.hintsPanel.style.display = "block";
+        }
     }
 
     onGameEnded(data) {

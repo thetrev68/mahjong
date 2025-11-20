@@ -51,7 +51,8 @@ The plan modifies existing mobile components while adding missing ones (HomePage
 3. ✅ **1B. Remove "## Tiles" Message** - Quick UX win **[COMPLETED]**
 4. ✅ **2A. Remove Pre-Game Message** - User guidance improvement **[COMPLETED]**
 5. ✅ **1C. Make Opponent Bar Solid** - Visual consistency **[COMPLETED]**
-6. **1B. Center Player Rack and Hand** - Visual alignment
+6. ✅ **2C. Hide Hints Panel Pre-Game** - Visual cleanup **[COMPLETED]**
+7. **1B. Center Player Rack and Hand** - Visual alignment
 6. **1D. Adjust Discard Pile Tile Size** - Functionality fix
 7. **4. Blank Swap Functionality** - Core game feature
 8. **5. Joker Swap Functionality** - Core game feature
@@ -291,19 +292,19 @@ onGameStarted() {
 ---
 
 ### 2C. Hide Hints Panel Pre-Game
-**Status**: ✅ CSS/Style Fix | **Priority**: P2 | **Complexity**: Low
+**Status**: ✅ **COMPLETED** | **Priority**: P2 | **Complexity**: Low
 
 **Current Analysis**: **VERIFIED**: Hints panel exists in `mobile/index.html` at line 57-62 with id "hints-panel".
 
-**Implementation**:
+**Implementation**: ✅ **DONE**
 ```javascript
-// In mobile/MobileRenderer.js constructor, modify around line 60:
+// In mobile/MobileRenderer.js constructor, added lines 73-77:
 this.hintsPanel = document.getElementById("hints-panel");
 if (this.hintsPanel) {
     this.hintsPanel.style.display = "none";
 }
 
-// Modify onGameStarted() to show it:
+// In onGameStarted(), added lines 227-230:
 onGameStarted() {
     // ... existing code
     if (this.hintsPanel) {
@@ -313,8 +314,8 @@ onGameStarted() {
 ```
 
 **Testing**:
-- Hints panel invisible on page load
-- Hints panel appears when game starts
+- ✅ Hints panel invisible on page load
+- ✅ Hints panel appears when game starts
 
 ---
 
