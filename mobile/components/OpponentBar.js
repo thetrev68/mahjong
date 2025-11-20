@@ -57,12 +57,10 @@ export class OpponentBar {
         const windLabel = this.getWindLabel(playerData);
         nameElement.textContent = windLabel ? `${playerData.name} (${windLabel})` : playerData.name;
 
-        // Update tile count
+        // Update tile count - HIDDEN per UX improvements (will show exposures only)
         const countElement = this.element.querySelector(".tile-count");
-        const count = this.getTileCount(playerData);
-        countElement.textContent = Number.isFinite(count)
-            ? `${count} tile${count !== 1 ? "s" : ""}`
-            : "";
+        // const count = this.getTileCount(playerData);
+        countElement.textContent = ""; // Hide tile count - exposures are visible instead
 
         // Update exposures
         this.updateExposures(this.getExposures(playerData));

@@ -224,8 +224,8 @@ async function initializeGame() {
         }
     });
 
-    // Hide loading message
-    mobileRenderer?.updateStatus("Ready to play! Click Start to begin.");
+    // Clear status - board will be blank pre-game (until tile animation is added)
+    mobileRenderer?.updateStatus("");
 
     // Expose to window for testing
     if (window.location.search.includes("playwright=true")) {

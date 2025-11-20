@@ -23,6 +23,8 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    background: transparent; /* Ensure no background - solid bar appearance */
+    border: none; /* Ensure no border - solid bar appearance */
 }
 
 .opponent-name {
@@ -45,6 +47,8 @@
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
+    background: transparent; /* Ensure no background - solid bar appearance */
+    border: none; /* Ensure no border - solid bar appearance */
 }
 
 .exposure-icon {

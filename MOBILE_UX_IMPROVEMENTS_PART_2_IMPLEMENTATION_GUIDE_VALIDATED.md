@@ -48,9 +48,10 @@ The plan modifies existing mobile components while adding missing ones (HomePage
 2. **2B. Enhance Tile Interaction** - Core usability improvement
 
 ### Phase 2: High Priority Features (P1)
-3. **1B. Remove "Undefined Tiles" Message** - Quick UX win
-4. **2A. Update "Start" Message** - User guidance improvement
-5. **1B. Center Player Rack and Hand** - Visual alignment
+3. ✅ **1B. Remove "## Tiles" Message** - Quick UX win **[COMPLETED]**
+4. ✅ **2A. Remove Pre-Game Message** - User guidance improvement **[COMPLETED]**
+5. ✅ **1C. Make Opponent Bar Solid** - Visual consistency **[COMPLETED]**
+6. **1B. Center Player Rack and Hand** - Visual alignment
 6. **1D. Adjust Discard Pile Tile Size** - Functionality fix
 7. **4. Blank Swap Functionality** - Core game feature
 8. **5. Joker Swap Functionality** - Core game feature
@@ -65,20 +66,20 @@ The plan modifies existing mobile components while adding missing ones (HomePage
 ## Pre-Game Improvements
 
 ### 1B. Remove "Undefined Tiles" Message
-**Status**: ✅ Easy Fix | **Priority**: P1 | **Complexity**: Low
+**Status**: ✅ **COMPLETED** | **Priority**: P1 | **Complexity**: Low
 
 **Current Analysis**: The OpponentBar component shows tile counts via `getTileCount()` method on lines 98-110. The message appears when `countElement.textContent` is set.
 
-**Implementation**:
+**Implementation**: ✅ **DONE**
 ```javascript
-// In mobile/components/OpponentBar.js, modify lines 63-65:
+// In mobile/components/OpponentBar.js, modified lines 60-63:
 // OLD:
 countElement.textContent = Number.isFinite(count)
     ? `${count} tile${count !== 1 ? "s" : ""}`
     : "";
 
 // NEW:
-countElement.textContent = ""; // Completely hide tile count
+countElement.textContent = ""; // Hide tile count - exposures are visible instead
 ```
 
 **Testing**:
@@ -88,66 +89,70 @@ countElement.textContent = ""; // Completely hide tile count
 ---
 
 ### 1C. Make Opponent Bar a Solid Bar
-**Status**: ✅ CSS Fix | **Priority**: P2 | **Complexity**: Low
+**Status**: ✅ **COMPLETED** | **Priority**: P2 | **Complexity**: Low
 
-**Current Analysis**: OpponentBar renders with inner HTML structure on lines 35-41. **VERIFIED**: `mobile/styles/OpponentBar.css` exists with current styling that includes borders and backgrounds for inner sections.
+**Current Analysis**: The issue was nested `.opponent-bar` elements - the HTML containers had class `opponent-bar`, and OpponentBar.js created another `.opponent-bar` inside them, causing double styling and visual inner boxes.
 
-**Implementation**:
+**Implementation**: ✅ **DONE**
+
+**Primary Fix - Remove nested class from HTML:**
+```html
+<!-- In mobile/index.html, modified lines 40-42: -->
+<!-- OLD: -->
+<div id="opponent-top" class="opponent-bar"></div>
+<div id="opponent-left" class="opponent-bar"></div>
+<div id="opponent-right" class="opponent-bar"></div>
+
+<!-- NEW: -->
+<div id="opponent-top"></div>
+<div id="opponent-left"></div>
+<div id="opponent-right"></div>
+```
+
+**Supporting CSS - Ensure transparency:**
 ```css
-/* Update mobile/styles/OpponentBar.css */
-/* Remove inner section borders/backgrounds for unified appearance */
-.opponent-bar .opponent-info {
-    background: transparent;
-    border: none;
+/* Updated mobile/styles/OpponentBar.css and mobile/styles.css */
+.opponent-info {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
-.opponent-bar .exposures {
-    background: transparent;
-    border: none;
+.exposures {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 ```
 
-**Note**: The outer `.opponent-bar` already has proper styling (rgba(4, 36, 21, 0.88) background). We're just making the inner sections transparent.
+**Note**: The root cause was nested `.opponent-bar` elements applying styles twice. Removing the class from container divs allows OpponentBar.js to create the styled bar without nesting issues.
 
 **Testing**:
-- Visual inspection of opponent bars should show single continuous elements
-- Verify no visual separation between info and exposures sections
+- ✅ Visual inspection shows single continuous bars for all opponents
+- ✅ No visual separation or inner boxes
+- ✅ All three opponent bars render identically
 
 ---
 
-### 2A. Update "Start" Message
-**Status**: ✅ String Change | **Priority**: P1 | **Complexity**: Low
+### 2A. Remove Pre-Game "Ready to Play" Message
+**Status**: ✅ **COMPLETED** | **Priority**: P1 | **Complexity**: Low
 
-**Current Analysis**: MobileRenderer shows initial status message on lines 213-218.
+**Current Analysis**: After initialization, `mobile/main.js` line 228 displays "Ready to play! Click Start to begin." The user wants NO message shown pre-game - the board should be blank until the scattered tile animation is implemented.
 
-**Implementation**:
+**Implementation**: ✅ **DONE**
 ```javascript
-// In mobile/MobileRenderer.js, modify line 216:
+// In mobile/main.js, modified line 227-228:
 // OLD:
-this.updateStatus("Game started - dealing tiles...");
+mobileRenderer?.updateStatus("Ready to play! Click Start to begin.");
 
 // NEW:
-this.updateStatus("Check Settings and click Start when ready.");
-```
-
-**Also update line 61**:
-```javascript
-// OLD:
-const msgEvent = GameEvents.createMessageEvent(
-    `Game initialized with ${this.settings.year} card`,
-    "info"
-);
-
-// NEW:
-const msgEvent = GameEvents.createMessageEvent(
-    "Check Settings and click Start when ready.",
-    "info"
-);
+mobileRenderer?.updateStatus(""); // Clear status - board will be blank pre-game
 ```
 
 **Testing**:
-- Verify new message displays on page load
-- Confirm message changes appropriately during game flow
+- Verify no message displays on home page after load
+- Game status area should be empty/blank before clicking Start
+- After clicking Start, game proceeds normally with status updates
 
 ---
 
