@@ -146,3 +146,15 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* Discard Pile - 9 columns grid */
+.discard-pile {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 4px;
+    padding: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+}

@@ -90,6 +90,10 @@ export class MobileRenderer {
         this.subscriptions.push(gc.on("GAME_STARTED", (data) => this.onGameStarted(data)));
         this.subscriptions.push(gc.on("GAME_ENDED", (data) => this.onGameEnded(data)));
         this.subscriptions.push(gc.on("STATE_CHANGED", (data) => this.onStateChanged(data)));
+        this.subscriptions.push(gc.on("TILES_DEALT", () => {
+            // Mobile doesn't animate dealing, so immediately signal completion
+            gc.emit("DEALING_COMPLETE");
+        }));
         this.subscriptions.push(gc.on("HAND_UPDATED", (data) => this.onHandUpdated(data)));
         this.subscriptions.push(gc.on("TURN_CHANGED", (data) => this.onTurnChanged(data)));
         this.subscriptions.push(gc.on("TILE_DISCARDED", (data) => this.onTileDiscarded(data)));
@@ -350,19 +354,14 @@ export class MobileRenderer {
             return;
         }
 
-        // If there's a pending prompt, auto-cancel it with fallback to prevent deadlock
+        // If there's a pending prompt, auto-cancel it WITHOUT invoking callback
+        // (new prompt will handle the callback)
         if (this.pendingPrompt) {
-            console.warn("MobileRenderer: New prompt received while previous prompt pending. Auto-canceling previous prompt.");
-            if (this.pendingPrompt.type === "tile-selection") {
-                this.cancelTileSelectionPrompt();
-            } else if (this.pendingPrompt.callback) {
-                // For choice prompts, invoke callback with null
-                this.pendingPrompt.callback(null);
-            }
+            console.warn("MobileRenderer: New prompt received while previous prompt pending. Clearing previous prompt state.");
+            this.resetHandSelection();
+            this.hidePrompt();
+            this.pendingPrompt = null;
         }
-
-        this.hidePrompt();
-        this.pendingPrompt = null;
 
         switch (data.promptType) {
             case "CHOOSE_DISCARD":
@@ -377,11 +376,9 @@ export class MobileRenderer {
                     useActionButton: true,
                     callback: (tiles) => {
                         if (!tiles || tiles.length === 0) {
-                            console.error("CHOOSE_DISCARD callback invoked with empty tiles array");
                             data.callback(null);
                             return;
                         }
-                        console.log("CHOOSE_DISCARD: Selected tile:", tiles[0]);
                         data.callback(tiles[0]);
                     }
                 });

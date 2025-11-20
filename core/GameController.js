@@ -181,6 +181,12 @@ export class GameController extends EventEmitter {
      * GameController now handles entire game flow.
      */
     async startGame() {
+        // Prevent multiple simultaneous game starts
+        if (this.state !== STATE.INIT && this.state !== STATE.END) {
+            console.warn("GameController: startGame called while game in progress, ignoring");
+            return;
+        }
+
         this.setState(STATE.START);
 
         // Reset game state
@@ -188,6 +194,9 @@ export class GameController extends EventEmitter {
         this.charlestonState = {phase: 0, passCount: 0, continueToPhase2: false, courtesyVotes: []};
         this.discards = [];
         this.currentPlayer = PLAYER.BOTTOM;
+
+        // Clear all player hands before dealing
+        this.players.forEach(player => player.hand.clear());
 
         // Create wall
         this.createWall();

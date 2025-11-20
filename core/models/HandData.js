@@ -141,6 +141,14 @@ export class HandData {
     }
 
     /**
+     * Clear all tiles and exposures from hand
+     */
+    clear() {
+        this.tiles = [];
+        this.exposures = [];
+    }
+
+    /**
      * Create a deep copy of this hand
      * @returns {HandData}
      */
