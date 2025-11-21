@@ -300,13 +300,14 @@ export class MobileRenderer {
             if (handData.tiles.length % 3 === 2) { // 14 tiles (or 2, 5, 8, 11) means we have a draw
                 const lastTile = this.handRenderer.getLastTileElement();
                 if (lastTile) {
-                    // Calculate draw animation from wall position to hand position
+                    // Calculate draw animation from wall position (top-left) to hand position
+                    // Wall "funnel point" is at -20vw, -20vh (matching HomePageTiles animation)
                     const startPos = {
-                        x: window.innerWidth / 2, // Start from screen center (wall area)
-                        y: -50 // Start from above the screen
+                        x: window.innerWidth * -0.20, // -20vw: off-screen top-left
+                        y: window.innerHeight * -0.20 // -20vh: off-screen top-left
                     };
                     const endPos = getElementCenterPosition(lastTile);
-                    
+
                     this.animationController.animateTileDraw(lastTile, startPos, endPos);
                 }
             }
