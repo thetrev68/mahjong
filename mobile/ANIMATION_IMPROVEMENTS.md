@@ -9,7 +9,7 @@ This document describes the recent improvements made to the mobile animation sys
 - **Solution**: Implemented `getElementPosition()` function to calculate real element positions using `getBoundingClientRect()`
 
 ### 2. **No Coordinate Tracking**
-- **Problem**: System couldn't track actual element positions for animation起点/终点
+- **Problem**: System couldn't track actual element positions for animation start/end points
 - **Solution**: Added `calculateMovement()` function to compute movement vectors and distances
 
 ### 3. **Static Direction Offsets**
