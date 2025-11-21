@@ -5,19 +5,19 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 6px;
+    padding: 4px 6px 2px;
 }
 
 .opponent-bar {
     background: rgba(4, 36, 21, 0.88);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
-    padding: 6px 10px;
+    padding: 4px 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 8px;
-    min-height: 48px;
+    min-height: 42px;
     backdrop-filter: blur(4px);
 }
 
@@ -41,7 +41,7 @@
 
 .opponent-name {
     font-weight: 600;
-    color: #f5fbf7;
+    color: #ffd166;
     font-size: 13px;
     letter-spacing: 0.02em;
 }
