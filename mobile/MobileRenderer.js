@@ -1,12 +1,12 @@
 import { HandRenderer } from "./renderers/HandRenderer.js";
 import { DiscardPile } from "./components/DiscardPile.js";
 import { OpponentBar } from "./components/OpponentBar.js";
-import { PlayerRack } from "./components/PlayerRack.js";
 import { AnimationController } from "./animations/AnimationController.js";
 import { HomePageTiles } from "./components/HomePageTiles.js";
 import { PLAYER, STATE } from "../constants.js";
 import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
+import { getElementCenterPosition } from "./utils/positionUtils.js";
 
 const HUMAN_PLAYER = PLAYER.BOTTOM ?? 0;
 
@@ -39,11 +39,10 @@ export class MobileRenderer {
         this.statusElement = options.statusElement || null;
         this.subscriptions = [];
 
-        // Pass null as gameController to prevent HandRenderer from subscribing to events
-        // MobileRenderer handles all event subscriptions and calls handRenderer.render() directly
-        this.handRenderer = new HandRenderer(options.handContainer, null);
+        // Pass gameController to HandRenderer so it can subscribe to hint events
+        // HandRenderer needs to listen for HINT_DISCARD_RECOMMENDATIONS to apply red glow
+        this.handRenderer = new HandRenderer(options.handContainer, options.gameController);
         this.discardPile = new DiscardPile(options.discardContainer);
-        this.playerRack = options.playerRackContainer ? new PlayerRack(options.playerRackContainer) : null;
         const homePageTilesContainer = document.getElementById("home-page-tiles");
         if (!homePageTilesContainer) {
             console.warn("MobileRenderer: home-page-tiles container not found");
@@ -54,8 +53,8 @@ export class MobileRenderer {
         }
         this.animationController = new AnimationController();
         this.handRenderer.setSelectionBehavior({
-            mode: "multiple",
-            maxSelectable: Infinity,
+            mode: "single",
+            maxSelectable: 1,
             allowToggle: true
         });
         this.handRenderer.setSelectionListener((selection) => this.onHandSelectionChange(selection));
@@ -82,11 +81,7 @@ export class MobileRenderer {
             this.drawButton.style.display = "none";
         }
 
-        // Hide hints panel pre-game
-        this.hintsPanel = document.getElementById("hints-panel");
-        if (this.hintsPanel) {
-            this.hintsPanel.style.display = "none";
-        }
+
 
         this.updateActionButton({ label: "Start", onClick: () => this.startGame() });
     }
@@ -117,7 +112,7 @@ export class MobileRenderer {
         this.subscriptions.push(gc.on("HAND_UPDATED", (data) => this.onHandUpdated(data)));
         this.subscriptions.push(gc.on("TURN_CHANGED", (data) => this.onTurnChanged(data)));
         this.subscriptions.push(gc.on("TILE_DISCARDED", (data) => this.onTileDiscarded(data)));
-        this.subscriptions.push(gc.on("DISCARD_CLAIMED", () => this.discardPile.removeLatestDiscard()));
+        this.subscriptions.push(gc.on("DISCARD_CLAIMED", (data) => this.onTileClaimed(data)));
         this.subscriptions.push(gc.on("TILES_EXPOSED", () => this.refreshOpponentBars()));
         this.subscriptions.push(gc.on("MESSAGE", (data) => this.onMessage(data)));
         this.subscriptions.push(gc.on("CHARLESTON_PHASE", (data) => {
@@ -240,15 +235,9 @@ export class MobileRenderer {
         this.resetHandSelection();
         this.updateStatus("Game started - dealing tiles...");
         this.refreshOpponentBars();
-        if (this.playerRack) {
-            this.playerRack.update(new HandData());
-        }
         this.updateActionButton({ label: "Start", onClick: () => this.startGame(), disabled: true, visible: true });
 
-        // Show hints panel when game starts
-        if (this.hintsPanel) {
-            this.hintsPanel.style.display = "block";
-        }
+
     }
 
     onGameEnded(data) {
@@ -270,7 +259,7 @@ export class MobileRenderer {
         if (!data) {
             return;
         }
-        this.updateStatus(`State: ${data.newState}`);
+        // Debug state changes removed - status bar now only shows user-relevant messages
 
         const drawBtn = this.drawButton;
         const sortBtn = this.sortButton;
@@ -304,9 +293,6 @@ export class MobileRenderer {
             const handData = HandData.fromJSON(data.hand);
             this.latestHandSnapshot = handData;
             this.handRenderer.render(handData);
-            if (this.playerRack) {
-                this.playerRack.update(handData);
-            }
 
             // If we just drew a tile (hand size increased to 14), animate it
             // This is a heuristic since we don't get explicit "DRAWN" event with tile data here
@@ -314,7 +300,15 @@ export class MobileRenderer {
             if (handData.tiles.length % 3 === 2) { // 14 tiles (or 2, 5, 8, 11) means we have a draw
                 const lastTile = this.handRenderer.getLastTileElement();
                 if (lastTile) {
-                    this.animationController.animateTileDraw(lastTile);
+                    // Calculate draw animation from wall position (top-left) to hand position
+                    // Wall "funnel point" is at -20vw, -20vh (matching HomePageTiles animation)
+                    const startPos = {
+                        x: window.innerWidth * -0.20, // -20vw: off-screen top-left
+                        y: window.innerHeight * -0.20 // -20vh: off-screen top-left
+                    };
+                    const endPos = getElementCenterPosition(lastTile);
+
+                    this.animationController.animateTileDraw(lastTile, startPos, endPos);
                 }
             }
         } else {
@@ -355,12 +349,140 @@ export class MobileRenderer {
 
         // Animate discard from hand if it's the human player
         if (data.player === HUMAN_PLAYER) {
-            // We can't easily animate the specific tile element because it's already removed from DOM by HandRenderer
-            // But we can animate the "flight" to the discard pile using a clone or the discard pile element itself
+            // Find the hand container for better positioning context
+            const discardContainer = this.discardPile?.element;
+            
+            // Animate from the hand to discard pile with container context
             const latestDiscard = this.discardPile.getLatestDiscardElement();
-            if (latestDiscard) {
+            if (latestDiscard && discardContainer) {
+                // Get target position from discard container center
+                const targetPos = getElementCenterPosition(discardContainer);
+                this.animationController.animateTileDiscard(latestDiscard, targetPos);
+            } else if (latestDiscard) {
+                // Fallback to automatic positioning
                 this.animationController.animateTileDiscard(latestDiscard);
             }
+        }
+    }
+
+    /**
+     * Handle tile claiming animation
+     * @param {Object} data - Claim event data with {claimingPlayer, tile, claimType}
+     */
+    async onTileClaimed(data) {
+        // Only animate for human player claims
+        if (data?.claimingPlayer !== HUMAN_PLAYER) {
+            // For non-human players, just remove from discard pile
+            this.discardPile.removeLatestDiscard();
+            return;
+        }
+
+        // Validate required components
+        if (!this.handRenderer || !this.animationController || !data?.tile) {
+            console.warn("MobileRenderer: Missing required components for claim animation");
+            this.discardPile.removeLatestDiscard();
+            return;
+        }
+
+        // Track whether discard has been removed to prevent double-removal
+        let removedDiscard = false;
+        let floatingTile = null;
+
+        try {
+            // Get the last discard element before removing it
+            const lastDiscardElement = this.discardPile.getLatestDiscardElement();
+            if (!lastDiscardElement) {
+                console.warn("MobileRenderer: No discard element found for claim animation");
+                this.discardPile.removeLatestDiscard();
+                removedDiscard = true;
+                return;
+            }
+
+            // Get the position of the discard tile before it's removed
+            const startPos = getElementCenterPosition(lastDiscardElement);
+
+            // Create a floating tile element for animation
+            floatingTile = await this._createFloatingTile(data.tile, startPos);
+            if (!floatingTile) {
+                this.discardPile.removeLatestDiscard();
+                removedDiscard = true;
+                return;
+            }
+
+            // Remove the tile from discard pile now that we have the floating element
+            this.discardPile.removeLatestDiscard();
+            removedDiscard = true;
+
+            // Get target position (hand container center)
+            const handContainer = this.handRenderer.container;
+            const targetPos = handContainer ? getElementCenterPosition(handContainer) : null;
+
+            if (!targetPos) {
+                // Cleanup and exit if no target
+                floatingTile.remove();
+                floatingTile = null;
+                return;
+            }
+
+            // Animate the floating tile to the hand
+            await this.animationController.animateTileClaim(
+                floatingTile,
+                data.claimingPlayer,
+                targetPos,
+                handContainer
+            );
+
+            // Remove the floating tile after animation completes
+            floatingTile.remove();
+            floatingTile = null;
+
+        } catch (error) {
+            console.error("MobileRenderer: Error during claim animation:", error);
+
+            // Clean up floating tile if it exists
+            if (floatingTile && floatingTile.parentNode) {
+                floatingTile.remove();
+            }
+
+            // Only remove discard if it wasn't already removed
+            if (!removedDiscard) {
+                this.discardPile.removeLatestDiscard();
+            }
+        }
+    }
+
+    /**
+     * Create a floating tile element for claim animation
+     * @param {Object} tileData - Tile data with suit, number, index
+     * @param {{x: number, y: number}} position - Initial position
+     * @returns {Promise<HTMLElement|null>} Floating tile element
+     * @private
+     */
+    async _createFloatingTile(tileData, position) {
+        try {
+            // Dynamically import MobileTile to avoid circular dependencies
+            const { MobileTile } = await import("./components/MobileTile.js");
+
+            // Create a normal-sized tile for the animation
+            const mobileTile = MobileTile.createHandTile(tileData, "normal");
+            const tileElement = mobileTile.createElement();
+
+            // Style the floating tile
+            tileElement.style.position = "fixed";
+            tileElement.style.left = `${position.x}px`;
+            tileElement.style.top = `${position.y}px`;
+            tileElement.style.transform = "translate(-50%, -50%)"; // Center on position
+            tileElement.style.zIndex = "9999"; // Above everything
+            tileElement.style.pointerEvents = "none"; // Don't interfere with clicks
+            tileElement.classList.add("floating-claim-tile");
+
+            // Append to body so it can move freely across the viewport
+            document.body.appendChild(tileElement);
+
+            return tileElement;
+        } catch (error) {
+            console.error("MobileRenderer: Error creating floating tile:", error);
+            return null;
         }
     }
 
@@ -401,29 +523,7 @@ export class MobileRenderer {
 
         switch (data.promptType) {
             case "CHOOSE_DISCARD":
-                this.startTileSelectionPrompt({
-                    title: "Choose a tile to discard",
-                    hint: "Tap one tile and press Discard",
-                    min: 1,
-                    max: 1,
-                    confirmLabel: "Discard",
-                    cancelLabel: null,
-                    fallback: null,
-                    useActionButton: true,
-                    callback: (tiles) => {
-                        if (!tiles || tiles.length === 0) {
-                            data.callback(null);
-                            return;
-                        }
-                        data.callback(tiles[0]);
-                    }
-                });
-                this.updateActionButton({
-                    label: "Discard",
-                    onClick: () => this.confirmPendingSelection(),
-                    disabled: true,
-                    visible: true
-                });
+                this.startDiscardSelection(data.callback);
                 break;
             case "CHARLESTON_PASS":
                 this.startTileSelectionPrompt({
@@ -567,6 +667,42 @@ export class MobileRenderer {
         this.updateTileSelectionHint();
     }
 
+    /**
+     * Discard prompt without overlay UI.
+     * Keeps button-driven confirmation but hides the floating prompt box.
+     */
+    startDiscardSelection(callback) {
+        this.pendingPrompt = {
+            type: "tile-selection",
+            min: 1,
+            max: 1,
+            callback: (tiles) => {
+                const tile = Array.isArray(tiles) && tiles.length > 0 ? tiles[0] : null;
+                callback(tile);
+            },
+            fallback: null,
+            confirmUsesActionButton: true
+        };
+
+        this.handRenderer.setSelectionBehavior({
+            mode: "single",
+            maxSelectable: 1,
+            allowToggle: true
+        });
+        this.handRenderer.clearSelection(true);
+        this.hidePrompt();
+
+        this.updateActionButton({
+            label: "Discard",
+            onClick: () => this.confirmPendingSelection(),
+            disabled: true,
+            visible: true
+        });
+
+        // Ensure CTA state matches current selection (likely 0/1 on entry)
+        this.updateTileSelectionHint(this.handRenderer.getSelectionState());
+    }
+
     onHandSelectionChange(selection) {
         if (!this.pendingPrompt || this.pendingPrompt.type !== "tile-selection") {
             return;
@@ -622,8 +758,8 @@ export class MobileRenderer {
     resetHandSelection() {
         this.handRenderer.clearSelection(true);
         this.handRenderer.setSelectionBehavior({
-            mode: "multiple",
-            maxSelectable: Infinity,
+            mode: "single",
+            maxSelectable: 1,
             allowToggle: true
         });
     }
@@ -693,7 +829,7 @@ export class MobileRenderer {
         }).filter(Boolean);
     }
 
-    updateActionButton({ label, onClick, disabled = false, visible = true } = {}) {
+    updateActionButton({ label, onClick, disabled = false, visible = true, glowPlayerTurn = false } = {}) {
         if (!this.actionButton) return;
         if (label) {
             this.actionButton.textContent = label;
@@ -701,6 +837,13 @@ export class MobileRenderer {
         this.actionButton.onclick = onClick || null;
         this.actionButton.disabled = !!disabled;
         this.actionButton.style.display = visible ? "flex" : "none";
+
+        // Add or remove player-turn glow class
+        if (glowPlayerTurn) {
+            this.actionButton.classList.add("player-turn");
+        } else {
+            this.actionButton.classList.remove("player-turn");
+        }
     }
 
     updateActionButtonStateForGame(newState) {
@@ -717,7 +860,8 @@ export class MobileRenderer {
                 label: "Discard",
                 onClick: () => this.confirmPendingSelection(),
                 disabled: !ready,
-                visible: true
+                visible: true,
+                glowPlayerTurn: true
             });
             return;
         }
@@ -727,7 +871,8 @@ export class MobileRenderer {
             label: "Start",
             onClick: () => this.startGame(),
             disabled: false,
-            visible: preGameState
+            visible: preGameState,
+            glowPlayerTurn: false
         });
     }
 

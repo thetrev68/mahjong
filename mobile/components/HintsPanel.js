@@ -27,9 +27,10 @@ export class HintsPanel {
         this.container = container;
         this.gameController = gameController;
         this.aiEngine = aiEngine;
-        this.isExpanded = false;
+        this.isExpanded = true;
         this.unsubscribeFns = [];
         this._disabled = false;
+        this.latestHandData = null;
 
         // Bind toggle handler so we can properly remove it later
         this._onToggle = this.toggle.bind(this);
@@ -56,8 +57,9 @@ export class HintsPanel {
         // Setup toggle button with bound handler
         this.toggleBtn.addEventListener("click", this._onToggle);
 
-        // Set initial state (collapsed)
-        this.contentEl.style.display = "none";
+        // Set initial state (expanded so it's visible by default)
+        this.toggleBtn.setAttribute("aria-expanded", "true");
+        this.contentEl.style.display = "block";
     }
 
     /**
@@ -95,6 +97,8 @@ export class HintsPanel {
             return;
         }
 
+        this.latestHandData = handData;
+
         if (!handData || !handData.tiles || handData.tiles.length === 0) {
             this.clearHints();
             return;
@@ -103,7 +107,7 @@ export class HintsPanel {
         try {
             // Rank the hand to get top patterns
             const rankCardHands = this.aiEngine.card.rankHandArray14(handData);
-            console.log("HintsPanel: rankCardHands:", rankCardHands);
+            // console.log("HintsPanel: rankCardHands:", rankCardHands);
 
             if (!rankCardHands || rankCardHands.length === 0) {
                 console.log("HintsPanel: No patterns available");
@@ -119,6 +123,11 @@ export class HintsPanel {
             const sortedPatterns = [...rankCardHands].sort((a, b) => b.rank - a.rank);
             const top3Patterns = sortedPatterns.slice(0, 3);
             console.log("HintsPanel: top3Patterns:", top3Patterns);
+
+            const discardRecommendations = this.getDiscardRecommendations(handData);
+            if (this.isExpanded) {
+                this.emitDiscardRecommendations(discardRecommendations, true);
+            }
 
             // Get all player tiles (including exposed tiles)
             const playerTiles = handData.getTileArray();
@@ -139,8 +148,9 @@ export class HintsPanel {
                 html += `
                     <div class="hint-pattern" title="${groupDesc}${handDesc ? " - " + handDesc : ""}">
                         <div class="hint-pattern-header">
-                            ${badge}<strong>${index + 1}. ${headerParts.join(" - ")}</strong>
+                            <strong>${headerParts.join(" - ")}</strong>
                             <span class="hint-rank">(Rank: ${rank})</span>
+                            ${badge}
                         </div>
                         ${patternHtml}
                     </div>
@@ -215,6 +225,10 @@ export class HintsPanel {
                 <span class="hint-label">Play to see recommendations</span>
             </div>
         `;
+
+        if (this.isExpanded) {
+            this.emitDiscardRecommendations([], false);
+        }
     }
 
     /**
@@ -228,9 +242,15 @@ export class HintsPanel {
         }
 
         this.isExpanded = !this.isExpanded;
-        console.log("HintsPanel: toggled to", this.isExpanded ? "expanded" : "collapsed");
         this.contentEl.style.display = this.isExpanded ? "block" : "none";
         this.toggleBtn.setAttribute("aria-expanded", String(this.isExpanded));
+
+        if (this.isExpanded && this.latestHandData) {
+            const recs = this.getDiscardRecommendations(this.latestHandData);
+            this.emitDiscardRecommendations(recs, true);
+        } else {
+            this.emitDiscardRecommendations([], false);
+        }
     }
 
     /**
@@ -260,5 +280,40 @@ export class HintsPanel {
         this.toggleBtn = null;
         this.contentEl = null;
         this._onToggle = null;
+    }
+
+    /**
+     * Compute discard recommendations using AI engine
+     * @param {HandData} handData
+     * @returns {Array} recommended discard tiles
+     */
+    getDiscardRecommendations(handData) {
+        if (!handData || !this.aiEngine || typeof this.aiEngine.getTileRecommendations !== "function") {
+            return [];
+        }
+        try {
+            const result = this.aiEngine.getTileRecommendations(handData);
+            if (!result || !Array.isArray(result.recommendations)) {
+                return [];
+            }
+            return result.recommendations
+                .filter((r) => r.recommendation === "DISCARD" && r.tile)
+                .map((r) => r.tile);
+        } catch (err) {
+            console.warn("HintsPanel: getDiscardRecommendations failed:", err);
+            return [];
+        }
+    }
+
+    /**
+     * Emit discard recommendation tiles so the hand renderer can highlight them
+     * @param {Array} tiles
+     * @param {boolean} active
+     */
+    emitDiscardRecommendations(tiles = [], active = true) {
+        if (!this.gameController || typeof this.gameController.emit !== "function") {
+            return;
+        }
+        this.gameController.emit("HINT_DISCARD_RECOMMENDATIONS", { tiles, active });
     }
 }

@@ -9,10 +9,7 @@ import { GameController } from "../core/GameController.js";
 import { AIEngine } from "../core/AIEngine.js";
 import { Card } from "../core/card/card.js";
 import { TouchHandler } from "./gestures/TouchHandler.js";
-import "./styles/base.css";
-import "./styles/tiles.css";
-import "./styles.css";
-import "./styles/SettingsSheet.css";
+// CSS files loaded via HTML link tags in index.html
 
 // Game instances
 let gameController;
@@ -45,7 +42,7 @@ function createBottomMenu() {
 
 // Placeholder for mobile app initialization
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("Mobile Mahjong app initializing...");
+    // console.log("Mobile Mahjong app initializing...");
 
     // Hide loading message
     const loading = document.getElementById("loading");
@@ -141,17 +138,7 @@ async function initializeGame() {
     touchHandler.init();
 
     // Wire TouchHandler to GameController/Renderer
-    touchHandler.on("tap", (data) => {
-        // If tapped on a tile button in the hand
-        if (data.element && data.element.classList.contains("tile")) {
-            const tileIndex = parseInt(data.element.dataset.index, 10);
-
-            // Trigger HandRenderer's tile selection logic
-            if (!isNaN(tileIndex) && mobileRenderer.handRenderer) {
-                mobileRenderer.handRenderer.handleTileClick(tileIndex);
-            }
-        }
-    });
+    // Let the built-in click handler on each tile manage selection; avoid double-triggering via tap.
 
     touchHandler.on("swipeup", (data) => {
         // Swipe up on a tile to quickly discard it
@@ -186,7 +173,19 @@ async function initializeGame() {
     // Track games played for install prompt
     gameController.on("GAME_ENDED", () => onGameEnd());
 
-    // Wire up New Game button
+    // Show hints panel and player rack when game starts
+    gameController.on("GAME_STARTED", () => {
+        const hintsPanel = document.getElementById("hints-panel");
+        const playerRackEl = document.getElementById("player-rack-container");
+        if (hintsPanel) {
+            hintsPanel.classList.remove("hide-on-home");
+        }
+        if (playerRackEl) {
+            playerRackEl.classList.remove("hide-on-home");
+        }
+    });
+
+    // Wire up Start Game button
     const newGameBtn = document.getElementById("new-game-btn");
     if (newGameBtn) {
         newGameBtn.onclick = async () => {

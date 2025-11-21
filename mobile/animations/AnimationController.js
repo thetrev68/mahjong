@@ -1,3 +1,5 @@
+import { getElementCenterPosition } from "../utils/positionUtils.js";
+
 const TILE_ANIMATION_CLASSES = [
     "tile-drawing",
     "tile-discarding",
@@ -9,13 +11,6 @@ const TILE_ANIMATION_CLASSES = [
 const TURN_ANIMATION_CLASSES = ["turn-starting", "turn-ending"];
 const HAND_SORT_CLASS = "hand-sorting";
 const INVALID_ACTION_CLASS = "invalid-action";
-
-const CLAIM_DIRECTION_OFFSETS = [
-    { x: 0, y: 0 },    // Player 0 (self)
-    { x: 90, y: -60 }, // Player to the right
-    { x: 0, y: -140 }, // Across the table
-    { x: -90, y: -60 } // Player to the left
-];
 
 const DEFAULT_PULSE_DURATION = 500;
 const HAND_SORT_DURATION = 400;
@@ -42,6 +37,19 @@ const toElementArray = elements => {
 };
 
 /**
+ * Calculate distance and direction between two points
+ * @param {{x: number, y: number}} start
+ * @param {{x: number, y: number}} end
+ * @returns {{dx: number, dy: number, distance: number}}
+ */
+const calculateMovement = (start, end) => {
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    return { dx, dy, distance };
+};
+
+/**
  * AnimationController - Manages CSS-based animations for mobile
  *
  * Responsibilities:
@@ -58,8 +66,8 @@ export class AnimationController {
      * @param {string} options.easing - Default easing function
      */
     constructor(options = {}) {
-        this.duration = typeof options.duration === "number" ? options.duration : 300;
-        this.easing = options.easing || "ease-out";
+        this.duration = typeof options.duration === "number" ? options.duration : 350; // Slightly longer for smoothness
+        this.easing = options.easing || "var(--ease-smooth)"; // Use custom smooth easing
         this.prefersReducedMotion = typeof window !== "undefined" && typeof window.matchMedia === "function"
             ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
             : false;
@@ -70,11 +78,11 @@ export class AnimationController {
     /**
      * Animate a tile being drawn from wall to hand
      * @param {HTMLElement} tileElement - The tile DOM element
-     * @param {Object} startPos - {x, y} start position
-     * @param {Object} endPos - {x, y} end position
+     * @param {Object} startPos - {x, y} start position (optional, will be calculated if not provided)
+     * @param {Object} endPos - {x, y} end position (optional, will be calculated if not provided)
      * @returns {Promise} Resolves when animation completes
      */
-    animateTileDraw(tileElement, startPos = {}, endPos = {}) {
+    animateTileDraw(tileElement, startPos = null, endPos = null) {
         return new Promise(resolve => {
             if (!tileElement) {
                 resolve();
@@ -83,11 +91,23 @@ export class AnimationController {
 
             this._resetElementAnimation(tileElement, TILE_ANIMATION_CLASSES);
 
+            // Calculate positions if not provided
+            const actualEndPos = endPos || getElementCenterPosition(tileElement);
+            const actualStartPos = startPos || {
+                x: actualEndPos.x,
+                y: actualEndPos.y - 200 // Start from above
+            };
+
+            // Calculate movement for smooth animation
+            const movement = calculateMovement(actualStartPos, actualEndPos);
+            
             const cssVars = {
-                "--start-x": toPx(startPos.x, 0),
-                "--start-y": toPx(startPos.y, -200),
-                "--end-x": toPx(endPos.x, 0),
-                "--end-y": toPx(endPos.y, 0),
+                "--start-x": toPx(actualStartPos.x),
+                "--start-y": toPx(actualStartPos.y),
+                "--end-x": toPx(actualEndPos.x),
+                "--end-y": toPx(actualEndPos.y),
+                "--movement-dx": toPx(movement.dx),
+                "--movement-dy": toPx(movement.dy),
                 "--tile-draw-duration": `${this.duration}ms`,
                 "--tile-draw-easing": this.easing
             };
@@ -106,10 +126,10 @@ export class AnimationController {
     /**
      * Animate a tile being discarded from hand to discard pile
      * @param {HTMLElement} tileElement - The tile DOM element
-     * @param {Object} targetPos - {x, y} target position in discard pile
+     * @param {Object} targetPos - {x, y} target position in discard pile (optional, will use current position)
      * @returns {Promise} Resolves when animation completes
      */
-    animateTileDiscard(tileElement, targetPos = {}) {
+    animateTileDiscard(tileElement, targetPos = null) {
         return new Promise(resolve => {
             if (!tileElement) {
                 resolve();
@@ -118,12 +138,24 @@ export class AnimationController {
 
             this._resetElementAnimation(tileElement, TILE_ANIMATION_CLASSES);
 
+            // Calculate positions
+            const actualStartPos = getElementCenterPosition(tileElement);
+            const actualTargetPos = targetPos || {
+                x: actualStartPos.x + 50, // Move slightly to the right by default
+                y: actualStartPos.y + 100 // Move down towards discard area
+            };
+
+            // Calculate movement for smooth animation
+            const movement = calculateMovement(actualStartPos, actualTargetPos);
+            
             const discardDuration = this.duration + 100;
             const cssVars = {
-                "--start-x": toPx(0),
-                "--start-y": toPx(0),
-                "--target-x": toPx(targetPos.x, 0),
-                "--target-y": toPx(targetPos.y, 100),
+                "--start-x": toPx(actualStartPos.x),
+                "--start-y": toPx(actualStartPos.y),
+                "--target-x": toPx(actualTargetPos.x),
+                "--target-y": toPx(actualTargetPos.y),
+                "--movement-dx": toPx(movement.dx),
+                "--movement-dy": toPx(movement.dy),
                 "--tile-discard-duration": `${discardDuration}ms`,
                 "--tile-discard-easing": "ease-in"
             };
@@ -142,11 +174,12 @@ export class AnimationController {
     /**
      * Animate a tile being claimed from discard pile to hand
      * @param {HTMLElement} tileElement - The tile DOM element
-     * @param {number} sourcePlayer - Player who discarded (0-3)
-     * @param {Object} targetPos - {x, y} target position in hand
+     * @param {number} _sourcePlayer - Player who discarded (0-3)
+     * @param {Object} targetPos - {x, y} target position in hand (optional, will calculate from container)
+     * @param {HTMLElement} targetContainer - The container element for target position calculation
      * @returns {Promise} Resolves when animation completes
      */
-    animateTileClaim(tileElement, sourcePlayer = 0, targetPos = {}) {
+    animateTileClaim(tileElement, _sourcePlayer = 0, targetPos = null, targetContainer = null) {
         return new Promise(resolve => {
             if (!tileElement) {
                 resolve();
@@ -155,12 +188,23 @@ export class AnimationController {
 
             this._resetElementAnimation(tileElement, TILE_ANIMATION_CLASSES);
 
-            const direction = CLAIM_DIRECTION_OFFSETS[sourcePlayer] || { x: 0, y: -200 };
+            // Calculate positions
+            const currentPos = getElementCenterPosition(tileElement);
+            const actualTargetPos = targetPos || (targetContainer ? getElementCenterPosition(targetContainer) : {
+                x: currentPos.x,
+                y: currentPos.y - 150 // Default move up
+            });
+
+            // Calculate movement for smooth animation
+            const movement = calculateMovement(currentPos, actualTargetPos);
+            
             const cssVars = {
-                "--claim-offset-x": toPx(direction.x, 0),
-                "--claim-offset-y": toPx(direction.y, -200),
-                "--target-x": toPx(targetPos.x, 0),
-                "--target-y": toPx(targetPos.y, 0),
+                "--start-x": toPx(currentPos.x),
+                "--start-y": toPx(currentPos.y),
+                "--target-x": toPx(actualTargetPos.x),
+                "--target-y": toPx(actualTargetPos.y),
+                "--movement-dx": toPx(movement.dx),
+                "--movement-dy": toPx(movement.dy),
                 "--tile-claim-duration": `${this.duration}ms`
             };
 

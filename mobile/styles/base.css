@@ -1,10 +1,5 @@
 /* Base Mobile Styles - Reset and defaults */
 
-:root {
-    --font-stack: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-    --font-mono: "Consolas", "SFMono-Regular", "Menlo", monospace;
-}
-
 * {
     margin: 0;
     padding: 0;
@@ -18,7 +13,11 @@ html, body {
     padding: 0;
     overflow: hidden;
     font-family: var(--font-stack);
-    background-color: #0c6d3a;
+    background: var(--gradient-table);
+    color: #333;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 #mobile-app {
@@ -27,6 +26,8 @@ html, body {
     display: flex;
     flex-direction: column;
     background-color: #0c6d3a;
+    overflow: hidden;
+    gap: 6px;
 }
 
 button {
@@ -37,4 +38,47 @@ button {
 button:focus {
     outline: 2px solid #ffd166;
     outline-offset: 2px;
+}
+
+/* Mobile viewport adjustments */
+@media (max-width: 375px) {
+    .tile {
+        width: 42px;
+        height: 56px;
+        font-size: 15px;
+    }
+
+    .exposure-icon {
+        width: 30px;
+        height: 40px;
+        font-size: 11px;
+    }
+
+    .discard-tile {
+        height: 30px;
+        font-size: 9px;
+    }
+}
+
+/* Larger screens (tablets in portrait) */
+@media (min-width: 768px) {
+    .tile {
+        width: 60px;
+        height: 80px;
+        font-size: 20px;
+    }
+
+    .exposure-icon {
+        width: 40px;
+        height: 54px;
+        font-size: 14px;
+    }
+
+    .discard-pile {
+        grid-template-columns: repeat(12, 1fr);
+    }
+
+    .discard-tile {
+        height: 38px;
+    }
 }

@@ -17,11 +17,13 @@ export class MobileTile {
      */
     constructor(tileData, options = {}) {
         this.tileData = tileData;
+        const size = options.size || "normal";
+        const defaults = this._getSizeDefaults(size);
         this.options = {
-            width: 45,
-            height: 60,
+            width: defaults.width,
+            height: defaults.height,
             state: "normal",
-            size: "normal",
+            size,
             ...options
         };
         this.element = null;
@@ -76,9 +78,9 @@ export class MobileTile {
      */
     _getSizeDefaults(size) {
         const defaults = {
-            normal: { width: 45, height: 60 },
-            small: { width: 32, height: 42 },
-            discard: { width: 30, height: 40 }
+            normal: { width: 52, height: 69 },
+            small: { width: 40, height: 54 },
+            discard: { width: 26, height: 34 }
         };
         return defaults[size] || defaults.normal;
     }

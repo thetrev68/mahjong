@@ -47,6 +47,7 @@ export class HandRenderer {
             maxSelectable: Infinity,
             allowToggle: true
         };
+        this.hintRecommendationKeys = new Set();
         this.selectionListener = null;
         this.unsubscribeFns = [];
         this.interactive = true;
@@ -135,6 +136,23 @@ export class HandRenderer {
             }
         };
         this.unsubscribeFns.push(this.gameController.on("TILE_DISCARDED", handleTileDiscarded));
+
+        // Highlight discard recommendations from hints panel
+        const handleHintRecommendations = (data = {}) => {
+            const tiles = Array.isArray(data.tiles) ? data.tiles : [];
+            const active = data.active !== false;
+
+            if (!active || tiles.length === 0) {
+                this.hintRecommendationKeys.clear();
+                this.applyHintRecommendations();
+                return;
+            }
+
+            const keys = tiles.map((tile, idx) => this.getTileSelectionKey(tile, idx)).filter(Boolean);
+            this.hintRecommendationKeys = new Set(keys);
+            this.applyHintRecommendations();
+        };
+        this.unsubscribeFns.push(this.gameController.on("HINT_DISCARD_RECOMMENDATIONS", handleHintRecommendations));
     }
 
     /**
@@ -175,6 +193,10 @@ export class HandRenderer {
             // Apply blue glow to newly drawn tile
             if (this.newlyDrawnTileIndex !== null && tileData.index === this.newlyDrawnTileIndex) {
                 tileButton.classList.add("tile--newly-drawn");
+            }
+
+            if (this.hintRecommendationKeys.has(selectionKey)) {
+                tileButton.classList.add("tile--hint-discard");
             }
 
             this.tiles.push(tileButton);
@@ -379,6 +401,21 @@ export class HandRenderer {
         }
 
         return changed;
+    }
+
+    applyHintRecommendations() {
+        this.tiles.forEach((button, index) => {
+            const key = this.selectionKeyByIndex.get(index);
+            if (!key) {
+                button.classList.remove("tile--hint-discard");
+                return;
+            }
+            if (this.hintRecommendationKeys.has(key)) {
+                button.classList.add("tile--hint-discard");
+            } else {
+                button.classList.remove("tile--hint-discard");
+            }
+        });
     }
 
     clearSelection(silent = false) {
