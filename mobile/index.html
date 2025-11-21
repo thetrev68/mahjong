@@ -22,11 +22,10 @@
     <!-- Viewport for mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <!-- Mobile styles will be loaded by main.js, but we load animations explicitly -->
-    <!-- Mobile styles will be loaded by main.js -->
-  <script type="module" crossorigin src="/mahjong/assets/mobile-DcUiffJ7.js"></script>
-  <link rel="modulepreload" crossorigin href="/mahjong/assets/card-COOX9W03.js">
-  <link rel="stylesheet" crossorigin href="/mahjong/assets/mobile-D6I9uVuK.css">
+    <!-- Mobile styles -->
+  <script type="module" crossorigin src="/mahjong/assets/mobile--R8v_EXL.js"></script>
+  <link rel="modulepreload" crossorigin href="/mahjong/assets/card-Bgh-EM5r.js">
+  <link rel="stylesheet" crossorigin href="/mahjong/assets/mobile-CVSILXJA.css">
 </head>
 
 <body>
@@ -46,23 +45,23 @@
             <div id="opponent-right"></div>
         </div>
 
-        <!-- Center: Discard pile and game status -->
+        <!-- Center: Discard pile -->
         <div id="game-center" class="game-center">
             <div id="home-page-tiles" class="home-page-tiles-container" style="display: none;">
                 <!-- Populated by HomePageTiles component -->
             </div>
-            <div id="game-status" class="game-status">Loading American Mahjong...</div>
             <div id="discard-container" class="discard-container"></div>
         </div>
 
         <!-- Player hand -->
         <div id="hand-area" class="hand-area">
-            <div id="player-rack-container" class="player-rack-container"></div>
-            <div id="hand-container" class="hand-container"></div>
+            <div id="player-rack-container" class="player-rack-container hide-on-home">
+                <div id="hand-container" class="hand-container"></div>
+            </div>
         </div>
 
         <!-- Hints Panel (above bottom menu) -->
-        <div id="hints-panel" class="hints-panel">
+        <div id="hints-panel" class="hints-panel hide-on-home">
             <button id="hints-toggle" class="hints-toggle">HINTS</button>
             <div id="hints-content" class="hints-content" style="display: none;">
                 <!-- Populated by HintsPanel component -->
@@ -74,7 +73,7 @@
             <button id="draw-btn" class="menu-btn menu-btn--primary" style="display: none;">DRAW</button>
             <button id="sort-btn" class="menu-btn">SORT</button>
             <button id="new-game-btn" class="menu-btn">Start</button>
-            <button id="mobile-settings-btn" class="menu-btn">??</button>
+            <button id="mobile-settings-btn" class="menu-btn">⚙️</button>
         </div>
     </div>
 
