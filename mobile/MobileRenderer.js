@@ -258,7 +258,7 @@ export class MobileRenderer {
         if (!data) {
             return;
         }
-        this.updateStatus(`State: ${data.newState}`);
+        // Debug state changes removed - status bar now only shows user-relevant messages
 
         const drawBtn = this.drawButton;
         const sortBtn = this.sortButton;
@@ -760,7 +760,7 @@ export class MobileRenderer {
         }).filter(Boolean);
     }
 
-    updateActionButton({ label, onClick, disabled = false, visible = true } = {}) {
+    updateActionButton({ label, onClick, disabled = false, visible = true, glowPlayerTurn = false } = {}) {
         if (!this.actionButton) return;
         if (label) {
             this.actionButton.textContent = label;
@@ -768,6 +768,13 @@ export class MobileRenderer {
         this.actionButton.onclick = onClick || null;
         this.actionButton.disabled = !!disabled;
         this.actionButton.style.display = visible ? "flex" : "none";
+
+        // Add or remove player-turn glow class
+        if (glowPlayerTurn) {
+            this.actionButton.classList.add("player-turn");
+        } else {
+            this.actionButton.classList.remove("player-turn");
+        }
     }
 
     updateActionButtonStateForGame(newState) {
@@ -784,7 +791,8 @@ export class MobileRenderer {
                 label: "Discard",
                 onClick: () => this.confirmPendingSelection(),
                 disabled: !ready,
-                visible: true
+                visible: true,
+                glowPlayerTurn: true
             });
             return;
         }
@@ -794,7 +802,8 @@ export class MobileRenderer {
             label: "Start",
             onClick: () => this.startGame(),
             disabled: false,
-            visible: preGameState
+            visible: preGameState,
+            glowPlayerTurn: false
         });
     }
 

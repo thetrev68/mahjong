@@ -49,18 +49,22 @@ button.tile {
     box-shadow: none;
 }
 
-/* Newly drawn tile - subtle blue pulsing glow */
+/* Newly drawn tile - prominent blue pulsing glow */
 @keyframes pulse-blue {
     0%, 100% {
-        box-shadow: 0 0 8px rgba(0, 150, 255, 0.6);
+        box-shadow: 0 0 10px rgba(37, 99, 235, 0.8), inset 0 0 6px rgba(37, 99, 235, 0.6);
+        border-color: #2563eb;
     }
     50% {
-        box-shadow: 0 0 20px rgba(0, 150, 255, 1);
+        box-shadow: 0 0 20px rgba(37, 99, 235, 1), inset 0 0 10px rgba(37, 99, 235, 0.8);
+        border-color: #1d4ed8;
     }
 }
 
 .tile--newly-drawn {
-    animation: pulse-blue 2s infinite;
+    animation: pulse-blue 1.5s infinite ease-in-out;
+    border-color: #2563eb !important;
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.9);
 }
 
 /* Latest discard highlight */
@@ -106,6 +110,44 @@ button.tile {
     50% {
         box-shadow: 0 0 20px rgba(220, 38, 38, 1), inset 0 0 10px rgba(220, 38, 38, 0.8);
         border-color: #b91c1c;
+    }
+}
+
+/* Alternating red/blue glow for tiles that are both newly drawn AND recommended for discard */
+.tile--newly-drawn.tile--hint-discard {
+    animation: pulse-red-blue-alternate 2.4s infinite ease-in-out !important;
+}
+
+@keyframes pulse-red-blue-alternate {
+    /* Red cycle: 0% (start) → 40% (peak at 80% of red cycle) → back down */
+    0% {
+        box-shadow: 0 0 4px rgba(220, 38, 38, 0.3), inset 0 0 2px rgba(220, 38, 38, 0.2);
+        border-color: #dc2626;
+    }
+    20% {
+        box-shadow: 0 0 20px rgba(220, 38, 38, 1), inset 0 0 10px rgba(220, 38, 38, 0.8);
+        border-color: #b91c1c;
+    }
+    40% {
+        box-shadow: 0 0 4px rgba(220, 38, 38, 0.3), inset 0 0 2px rgba(220, 38, 38, 0.2);
+        border-color: #dc2626;
+    }
+    /* Blue cycle: 50% (start) → 70% (peak at 80% of blue cycle) → back down */
+    50% {
+        box-shadow: 0 0 4px rgba(37, 99, 235, 0.3), inset 0 0 2px rgba(37, 99, 235, 0.2);
+        border-color: #2563eb;
+    }
+    70% {
+        box-shadow: 0 0 20px rgba(37, 99, 235, 1), inset 0 0 10px rgba(37, 99, 235, 0.8);
+        border-color: #1d4ed8;
+    }
+    90% {
+        box-shadow: 0 0 4px rgba(37, 99, 235, 0.3), inset 0 0 2px rgba(37, 99, 235, 0.2);
+        border-color: #2563eb;
+    }
+    100% {
+        box-shadow: 0 0 4px rgba(220, 38, 38, 0.3), inset 0 0 2px rgba(220, 38, 38, 0.2);
+        border-color: #dc2626;
     }
 }
 

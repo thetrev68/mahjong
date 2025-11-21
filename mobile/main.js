@@ -185,7 +185,7 @@ async function initializeGame() {
         }
     });
 
-    // Wire up New Game button
+    // Wire up Start Game button
     const newGameBtn = document.getElementById("new-game-btn");
     if (newGameBtn) {
         newGameBtn.onclick = async () => {

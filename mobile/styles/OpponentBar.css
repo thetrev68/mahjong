@@ -89,9 +89,9 @@
     position: absolute;
     top: 149px;
     right: 6px;
-    background: rgba(4, 24, 14, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
+    background: rgba(4, 36, 21, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
     padding: 4px 10px;
     display: flex;
     gap: 6px;
@@ -101,8 +101,8 @@
 }
 
 .wall-label {
-    color: rgba(237, 244, 239, 0.7);
-    font-size: 11px;
+    color: rgba(237, 244, 239, 0.65);
+    font-size: 16px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
