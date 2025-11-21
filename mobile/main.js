@@ -66,8 +66,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize mobile game components
     initializeGame();
 
-    // Register Service Worker (disabled during development)
-    // registerServiceWorker();
+    // Register Service Worker
+    registerServiceWorker();
 });
 
 /**
@@ -242,8 +242,7 @@ async function initializeGame() {
 /**
  * Register Service Worker
  */
-/*
-// async function registerServiceWorker() {
+async function registerServiceWorker() {
     // Check if service workers are supported
     if (!("serviceWorker" in navigator)) {
         console.log("Service workers not supported");
@@ -280,12 +279,10 @@ async function initializeGame() {
         console.error("Service worker registration failed:", error);
     }
 }
-*/
 
 /**
  * Show notification when update is available
  */
-/*
 function showUpdateNotification(registration) {
     // Create update banner
     const banner = document.createElement("div");
@@ -324,4 +321,3 @@ function showUpdateNotification(registration) {
         registration.waiting.postMessage({ type: "SKIP_WAITING" });
     }
 }
-*/

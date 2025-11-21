@@ -15,7 +15,9 @@
     align-items: stretch;
     padding: 4px 6px;
     overflow-y: auto;
+    overflow-x: hidden;
     position: relative;
+    min-height: 0; /* Allow flex child to shrink below content size */
 }
 
 
@@ -39,8 +41,9 @@
     display: flex;
     flex-direction: column;
     margin-top: 4px;
-    margin-bottom: 48px; /* keep it above the bottom menu */
+    margin-bottom: 56px; /* Space above bottom menu (48px menu + 8px gap) */
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.35);
+    max-height: 40vh; /* Limit hint panel to 40% of viewport height */
 }
 
 .hints-toggle {
@@ -65,7 +68,8 @@
 
 .hints-content {
     padding: 6px 8px 8px;
-    overflow: visible;
+    overflow-y: auto; /* Allow scrolling within hints if content is too tall */
+    overflow-x: hidden;
 }
 
 .hint-item {

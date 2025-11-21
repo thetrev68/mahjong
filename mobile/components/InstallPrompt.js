@@ -17,7 +17,7 @@ class InstallPrompt {
     }
 
     init() {
-        // Listen for the beforeinstallprompt event
+        // Listen for the beforeinstallprompt event (Android/Chrome)
         window.addEventListener("beforeinstallprompt", (e) => {
             // Prevent the default browser prompt
             e.preventDefault();
@@ -40,6 +40,26 @@ class InstallPrompt {
 
         // Create the install banner UI
         this.createBannerUI();
+
+        // For iOS, check if we should show manual instructions
+        if (this.isIOS() && !this.isInStandaloneMode()) {
+            this.checkShouldShowPrompt();
+        }
+    }
+
+    /**
+     * Check if device is iOS
+     */
+    isIOS() {
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
+
+    /**
+     * Check if running in standalone mode (PWA installed)
+     */
+    isInStandaloneMode() {
+        return window.matchMedia("(display-mode: standalone)").matches ||
+               window.navigator.standalone === true;
     }
 
     /**
@@ -132,6 +152,9 @@ class InstallPrompt {
         this.installBanner.className = "install-banner";
         this.installBanner.style.display = "none";
 
+        // Different content for iOS vs Android/Chrome
+        const isIOS = this.isIOS();
+
         this.installBanner.innerHTML = `
             <div class="install-banner__content">
                 <div class="install-banner__icon">
@@ -143,14 +166,20 @@ class InstallPrompt {
                 </div>
                 <div class="install-banner__text">
                     <h3 class="install-banner__title">Install Mahjong</h3>
-                    <p class="install-banner__message">Add to home screen for quick access</p>
+                    <p class="install-banner__message">${
+                        isIOS
+                            ? 'Tap <strong style="font-size: 20px;">⎙</strong> then "Add to Home Screen"'
+                            : 'Add to home screen for quick access'
+                    }</p>
                 </div>
                 <div class="install-banner__actions">
-                    <button class="install-banner__btn install-banner__btn--install" id="install-btn">
-                        Install
-                    </button>
+                    ${!isIOS ? `
+                        <button class="install-banner__btn install-banner__btn--install" id="install-btn">
+                            Install
+                        </button>
+                    ` : ''}
                     <button class="install-banner__btn install-banner__btn--dismiss" id="dismiss-btn">
-                        Not Now
+                        ${isIOS ? 'Got It' : 'Not Now'}
                     </button>
                 </div>
             </div>
@@ -163,8 +192,12 @@ class InstallPrompt {
         const installBtn = this.installBanner.querySelector("#install-btn");
         const dismissBtn = this.installBanner.querySelector("#dismiss-btn");
 
-        installBtn.addEventListener("click", () => this.handleInstall());
-        dismissBtn.addEventListener("click", () => this.handleDismiss());
+        if (installBtn) {
+            installBtn.addEventListener("click", () => this.handleInstall());
+        }
+        if (dismissBtn) {
+            dismissBtn.addEventListener("click", () => this.handleDismiss());
+        }
 
         // Add CSS
         this.injectStyles();
@@ -295,6 +328,14 @@ class InstallPrompt {
      * Show the install prompt
      */
     showPrompt() {
+        // For iOS, always show the banner with manual instructions
+        if (this.isIOS()) {
+            this.installBanner.style.display = "block";
+            console.log("Install banner shown (iOS manual instructions)");
+            return;
+        }
+
+        // For other platforms, require deferred prompt
         if (!this.deferredPrompt) {
             console.log("No deferred prompt available");
             return;

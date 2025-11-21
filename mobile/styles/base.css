@@ -15,14 +15,14 @@ html, body {
     font-family: var(--font-stack);
     background: var(--gradient-table);
     color: #333;
-    height: 100vh;
+    height: 100dvh; /* Use dynamic viewport height for mobile */
     display: flex;
     flex-direction: column;
 }
 
 #mobile-app {
     width: 100vw;
-    height: 100vh;
+    height: 100dvh; /* Use dynamic viewport height for mobile */
     display: flex;
     flex-direction: column;
     background-color: #0c6d3a;
