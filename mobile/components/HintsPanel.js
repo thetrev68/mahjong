@@ -27,7 +27,7 @@ export class HintsPanel {
         this.container = container;
         this.gameController = gameController;
         this.aiEngine = aiEngine;
-        this.isExpanded = false;
+        this.isExpanded = true;
         this.unsubscribeFns = [];
         this._disabled = false;
 
@@ -56,8 +56,9 @@ export class HintsPanel {
         // Setup toggle button with bound handler
         this.toggleBtn.addEventListener("click", this._onToggle);
 
-        // Set initial state (collapsed)
-        this.contentEl.style.display = "none";
+        // Set initial state (expanded so it's visible by default)
+        this.toggleBtn.setAttribute("aria-expanded", "true");
+        this.contentEl.style.display = "block";
     }
 
     /**
@@ -228,7 +229,6 @@ export class HintsPanel {
         }
 
         this.isExpanded = !this.isExpanded;
-        console.log("HintsPanel: toggled to", this.isExpanded ? "expanded" : "collapsed");
         this.contentEl.style.display = this.isExpanded ? "block" : "none";
         this.toggleBtn.setAttribute("aria-expanded", String(this.isExpanded));
     }

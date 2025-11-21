@@ -22,6 +22,7 @@ export class DiscardPile {
         this.element = null;
         this.eventUnsubscribers = [];
         this._onResize = this.updateTileSizing.bind(this);
+        this.lastDiscard = null;
 
         this.render();
         if (this.gameController) {
@@ -74,17 +75,38 @@ export class DiscardPile {
      */
     addDiscard(tile, player) {
         // Add to discards array
-        this.discards.push({ tile, player });
+        const newDiscard = { tile, player };
+        this.discards.push(newDiscard);
+        this.lastDiscard = newDiscard;
 
-        // Create tile element
-        const tileElement = this.createDiscardTile(tile, player);
-        this.element.appendChild(tileElement);
+        // Sort the discards
+        this.discards.sort((a, b) => {
+            if (a.tile.suit !== b.tile.suit) {
+                return a.tile.suit - b.tile.suit;
+            }
+            return a.tile.number - b.tile.number;
+        });
 
-        // Mark as latest discard
-        this.highlightLatest(tileElement);
+        // Re-render the discard pile, highlighting the new tile
+        this.rerender(newDiscard);
 
         // Scroll to latest if needed
         this.scrollToLatest();
+    }
+
+    /**
+     * Re-render the discard pile from the discards array
+     * @param {Object} latestDiscard - The most recently discarded tile object to highlight
+     */
+    rerender(latestDiscard = null) {
+        this.element.innerHTML = '';
+        this.discards.forEach(({ tile, player }) => {
+            const tileElement = this.createDiscardTile(tile, player);
+            if (latestDiscard && tile === latestDiscard.tile && player === latestDiscard.player) {
+                tileElement.classList.add("latest");
+            }
+            this.element.appendChild(tileElement);
+        });
     }
 
     /**
@@ -132,31 +154,30 @@ export class DiscardPile {
         return names[player] || "Unknown";
     }
 
-    /**
-     * Highlight the latest discard
-     * @param {HTMLElement} tileElement - The latest tile element
-     */
-    highlightLatest(tileElement) {
-        // Remove highlight from all tiles
-        this.element.querySelectorAll(".discard-tile").forEach(tile => {
-            tile.classList.remove("latest");
-        });
 
-        // Add highlight to latest tile
-        tileElement.classList.add("latest");
-    }
 
     /**
      * Remove the latest discard (when claimed by another player)
      */
     removeLatestDiscard() {
-        if (this.discards.length > 0) {
-            this.discards.pop();
-            const lastTile = this.element.querySelector(".discard-tile:last-child");
-            if (lastTile) {
-                lastTile.remove();
-            }
+        if (this.discards.length === 0) {
+            return;
         }
+
+        if (this.lastDiscard) {
+            const idx = this.discards.indexOf(this.lastDiscard);
+            if (idx !== -1) {
+                this.discards.splice(idx, 1);
+            } else {
+                // Fallback: remove newest entry
+                this.discards.pop();
+            }
+        } else {
+            this.discards.pop();
+        }
+
+        this.lastDiscard = null;
+        this.rerender();
     }
 
     getLatestDiscardElement() {
@@ -205,6 +226,7 @@ export class DiscardPile {
     clear() {
         this.discards = [];
         this.element.innerHTML = "";
+        this.lastDiscard = null;
     }
 
     /**

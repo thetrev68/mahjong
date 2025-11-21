@@ -33,9 +33,9 @@
 
 /* States */
 .mobile-tile.selected {
-    background-color: #ffeb3b;
-    border-color: #f57c00;
-    transform: translateY(-4px);
+    background-color: #aadaff;
+    border-color: #007bff;
+    transform: translateY(-25px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -112,9 +112,9 @@
 }
 
 .mobile-tile[data-size="discard"] {
-    width: 32px;
-    height: 42px;
-    font-size: 12px;
+    width: 28px;
+    height: 38px;
+    font-size: 10px;
 }
 
 /* Hover effects for desktop */

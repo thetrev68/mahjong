@@ -1,16 +1,31 @@
-/* Tile Sprite Styles */
+/* Tile sprite styles */
+
+:root {
+    --tile-micro-width: 16px;
+    --tile-micro-height: 21px;
+    /* Sprite sheet is 2028px wide; micro tiles are ~30.8% scale */
+    --tile-micro-sprite-size: 624px;
+}
 
 /* Base tile styles - sprite-based rendering */
 .tile {
-    background-image: url('/mahjong/pwa/assets/tiles.png');
+    width: 52px;
+    height: 69px;
+    background-image: url("/mahjong/pwa/assets/tiles.png");
     background-repeat: no-repeat;
+    background-size: 2028px auto;
     image-rendering: crisp-edges;
-    /* Prevent blur on scaling */
     border-radius: 6px;
     border: 2px solid #1f3c2a;
     background-color: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.1s, box-shadow 0.1s;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    position: relative;
+}
+
+button.tile {
+    cursor: pointer;
+    padding: 0;
 }
 
 .tile:active {
@@ -18,14 +33,27 @@
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
 
-/* Newly drawn tile - blue pulsing glow */
-@keyframes pulse-blue {
+/* Selected tiles in the player's hand */
+.tile.selected {
+    transform: translateY(-25px);
+    border-color: #2b8cff !important;
+    background-color: #d9ecff !important;
+    box-shadow: 0 10px 18px rgba(43, 140, 255, 0.35);
+    z-index: 2;
+}
 
-    0%,
-    100% {
+/* Disabled state */
+.tile:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Newly drawn tile - subtle blue pulsing glow */
+@keyframes pulse-blue {
+    0%, 100% {
         box-shadow: 0 0 8px rgba(0, 150, 255, 0.6);
     }
-
     50% {
         box-shadow: 0 0 20px rgba(0, 150, 255, 1);
     }
@@ -35,20 +63,15 @@
     animation: pulse-blue 2s infinite;
 }
 
-/* Disabled state */
-.tile:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    box-shadow: none;
+/* Latest discard highlight */
+.latest,
+.discard-tile.latest {
+    outline: 2px solid #5ab6ff;
+    box-shadow: 0 0 14px rgba(90, 182, 255, 0.8);
+    animation: pulse-glow-blue 1.5s infinite ease-in-out;
 }
 
-/* Interactive tiles (buttons) */
-button.tile {
-    cursor: pointer;
-    padding: 0;
-}
-
-/* Default tile size (e.g., in hand) */
+/* Size variants */
 .tile--default {
     width: 52px;
     height: 69px;
@@ -58,46 +81,29 @@ button.tile {
 .tile--small {
     width: 40px;
     height: 54px;
-    /* Scale for 40px tiles: 40 / 52 ≈ 0.76923
-    Sheet width: 2028 * 0.76923 ≈ 1560 */
+    /* Scale ≈ 40 / 52 = 0.769; sprite width ≈ 1560px */
     background-size: 1560px auto;
 }
 
-/* Micro size tiles (16px × 21px) - home page scattered tiles */
-:root {
-    --tile-micro-width: 16px;
-    --tile-micro-height: 21px;
-    --tile-micro-sprite-size: 624px;
+.tile--discard {
+    width: 26px;
+    height: 34px;
+    /* Scale ≈ 26 / 52 = 0.5; sprite width ≈ 1014px */
+    background-size: 1014px auto;
 }
 
+/* Micro size tiles (16px x 21px) - home page scattered tiles */
 .home-page-tiles-container .tile--micro {
     width: var(--tile-micro-width);
     height: var(--tile-micro-height);
     border: none;
     border-radius: 1px;
-    /* Exact fit calculation:
-       Sprite sheet is 2028px wide.
-       Tile width in sprite is 52px.
-       Scale factor: 16 / 52 ≈ 0.3077
-       Background size: 2028 * 0.3077 ≈ 624px
-       No extra scaling to ensure "glued" look.
-    */
     background-size: var(--tile-micro-sprite-size) auto;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     position: absolute;
-    /* Fix scrolling by removing from flow */
 }
 
-/* Discard pile tiles (30px × 40px) */
-.tile--discard {
-    width: 30px;
-    height: 40px;
-    /* Scale for 30px tiles: 30 / 52 ≈ 0.577
-       Sheet width: 2028 * 0.577 ≈ 1170px */
-    background-size: 1170px auto;
-}
-
-/* Tile character styling */
+/* Tile character styling (text fallback) */
 .tile-char {
     min-width: 16px;
     height: 20px;
@@ -114,18 +120,4 @@ button.tile {
 
 .component-spacer {
     width: 8px;
-}
-
-/* Base tile style */
-.tile {
-    width: 48px;
-    height: 64px;
-    position: relative;
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
-    cursor: pointer;
-    background-color: #f0f0f0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }

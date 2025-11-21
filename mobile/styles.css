@@ -1,4 +1,11 @@
 /* Mobile Mahjong Styles - Main CSS File */
+@import "./styles/base.css";
+@import "./styles/animations.css";
+@import "./styles/tiles.css";
+@import "./styles/MobileGame.css";
+@import "./styles/HandRenderer.css";
+@import "./styles/OpponentBar.css";
+@import "./styles/SettingsSheet.css";
 
 /* CSS Custom Properties / Variables */
 :root {

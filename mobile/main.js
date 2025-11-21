@@ -138,17 +138,7 @@ async function initializeGame() {
     touchHandler.init();
 
     // Wire TouchHandler to GameController/Renderer
-    touchHandler.on("tap", (data) => {
-        // If tapped on a tile button in the hand
-        if (data.element && data.element.classList.contains("tile")) {
-            const tileIndex = parseInt(data.element.dataset.index, 10);
-
-            // Trigger HandRenderer's tile selection logic
-            if (!isNaN(tileIndex) && mobileRenderer.handRenderer) {
-                mobileRenderer.handRenderer.handleTileClick(tileIndex);
-            }
-        }
-    });
+    // Let the built-in click handler on each tile manage selection; avoid double-triggering via tap.
 
     touchHandler.on("swipeup", (data) => {
         // Swipe up on a tile to quickly discard it

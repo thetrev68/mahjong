@@ -1,7 +1,6 @@
 import { HandRenderer } from "./renderers/HandRenderer.js";
 import { DiscardPile } from "./components/DiscardPile.js";
 import { OpponentBar } from "./components/OpponentBar.js";
-import { PlayerRack } from "./components/PlayerRack.js";
 import { AnimationController } from "./animations/AnimationController.js";
 import { HomePageTiles } from "./components/HomePageTiles.js";
 import { PLAYER, STATE } from "../constants.js";
@@ -43,7 +42,6 @@ export class MobileRenderer {
         // MobileRenderer handles all event subscriptions and calls handRenderer.render() directly
         this.handRenderer = new HandRenderer(options.handContainer, null);
         this.discardPile = new DiscardPile(options.discardContainer);
-        this.playerRack = options.playerRackContainer ? new PlayerRack(options.playerRackContainer) : null;
         const homePageTilesContainer = document.getElementById("home-page-tiles");
         if (!homePageTilesContainer) {
             console.warn("MobileRenderer: home-page-tiles container not found");
@@ -54,8 +52,8 @@ export class MobileRenderer {
         }
         this.animationController = new AnimationController();
         this.handRenderer.setSelectionBehavior({
-            mode: "multiple",
-            maxSelectable: Infinity,
+            mode: "single",
+            maxSelectable: 1,
             allowToggle: true
         });
         this.handRenderer.setSelectionListener((selection) => this.onHandSelectionChange(selection));
@@ -82,11 +80,7 @@ export class MobileRenderer {
             this.drawButton.style.display = "none";
         }
 
-        // Hide hints panel pre-game
-        this.hintsPanel = document.getElementById("hints-panel");
-        if (this.hintsPanel) {
-            this.hintsPanel.style.display = "none";
-        }
+
 
         this.updateActionButton({ label: "Start", onClick: () => this.startGame() });
     }
@@ -240,15 +234,9 @@ export class MobileRenderer {
         this.resetHandSelection();
         this.updateStatus("Game started - dealing tiles...");
         this.refreshOpponentBars();
-        if (this.playerRack) {
-            this.playerRack.update(new HandData());
-        }
         this.updateActionButton({ label: "Start", onClick: () => this.startGame(), disabled: true, visible: true });
 
-        // Show hints panel when game starts
-        if (this.hintsPanel) {
-            this.hintsPanel.style.display = "block";
-        }
+
     }
 
     onGameEnded(data) {
@@ -304,9 +292,6 @@ export class MobileRenderer {
             const handData = HandData.fromJSON(data.hand);
             this.latestHandSnapshot = handData;
             this.handRenderer.render(handData);
-            if (this.playerRack) {
-                this.playerRack.update(handData);
-            }
 
             // If we just drew a tile (hand size increased to 14), animate it
             // This is a heuristic since we don't get explicit "DRAWN" event with tile data here
@@ -469,29 +454,7 @@ export class MobileRenderer {
 
         switch (data.promptType) {
             case "CHOOSE_DISCARD":
-                this.startTileSelectionPrompt({
-                    title: "Choose a tile to discard",
-                    hint: "Tap one tile and press Discard",
-                    min: 1,
-                    max: 1,
-                    confirmLabel: "Discard",
-                    cancelLabel: null,
-                    fallback: null,
-                    useActionButton: true,
-                    callback: (tiles) => {
-                        if (!tiles || tiles.length === 0) {
-                            data.callback(null);
-                            return;
-                        }
-                        data.callback(tiles[0]);
-                    }
-                });
-                this.updateActionButton({
-                    label: "Discard",
-                    onClick: () => this.confirmPendingSelection(),
-                    disabled: true,
-                    visible: true
-                });
+                this.startDiscardSelection(data.callback);
                 break;
             case "CHARLESTON_PASS":
                 this.startTileSelectionPrompt({
@@ -635,6 +598,42 @@ export class MobileRenderer {
         this.updateTileSelectionHint();
     }
 
+    /**
+     * Discard prompt without overlay UI.
+     * Keeps button-driven confirmation but hides the floating prompt box.
+     */
+    startDiscardSelection(callback) {
+        this.pendingPrompt = {
+            type: "tile-selection",
+            min: 1,
+            max: 1,
+            callback: (tiles) => {
+                const tile = Array.isArray(tiles) && tiles.length > 0 ? tiles[0] : null;
+                callback(tile);
+            },
+            fallback: null,
+            confirmUsesActionButton: true
+        };
+
+        this.handRenderer.setSelectionBehavior({
+            mode: "single",
+            maxSelectable: 1,
+            allowToggle: true
+        });
+        this.handRenderer.clearSelection(true);
+        this.hidePrompt();
+
+        this.updateActionButton({
+            label: "Discard",
+            onClick: () => this.confirmPendingSelection(),
+            disabled: true,
+            visible: true
+        });
+
+        // Ensure CTA state matches current selection (likely 0/1 on entry)
+        this.updateTileSelectionHint(this.handRenderer.getSelectionState());
+    }
+
     onHandSelectionChange(selection) {
         if (!this.pendingPrompt || this.pendingPrompt.type !== "tile-selection") {
             return;
@@ -690,8 +689,8 @@ export class MobileRenderer {
     resetHandSelection() {
         this.handRenderer.clearSelection(true);
         this.handRenderer.setSelectionBehavior({
-            mode: "multiple",
-            maxSelectable: Infinity,
+            mode: "single",
+            maxSelectable: 1,
             allowToggle: true
         });
     }
