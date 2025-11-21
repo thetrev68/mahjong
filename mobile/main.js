@@ -249,10 +249,16 @@ async function registerServiceWorker() {
         return;
     }
 
+    // Skip service worker in development mode
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+        console.log("Skipping service worker registration in development mode");
+        return;
+    }
+
     try {
         // Register the service worker (must be at root or higher than scope)
         const registration = await navigator.serviceWorker.register(
-            "/mahjong/pwa/service-worker.js",
+            "/mahjong/service-worker.js",
             { scope: "/mahjong/" }
         );
 

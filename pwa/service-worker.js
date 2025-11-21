@@ -17,10 +17,10 @@ const CACHE_NAME = `mahjong-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
     "/mahjong/mobile/",
     "/mahjong/mobile/index.html",
-    "/mahjong/pwa/manifest.json",
+    "/mahjong/manifest.json",
     "/mahjong/favicon.svg",
-    "/mahjong/pwa/icons/icon-192.png",
-    "/mahjong/pwa/icons/icon-512.png"
+    "/mahjong/icons/icon-192.png",
+    "/mahjong/icons/icon-512.png"
 ];
 
 // Note: Vite bundles will have hashed names, so we'll cache them dynamically
