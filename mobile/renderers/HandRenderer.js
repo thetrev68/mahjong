@@ -256,7 +256,7 @@ export class HandRenderer {
         const tileButton = document.createElement("button");
         tileButton.type = "button";
         // Use .tile class for sprite styling
-        tileButton.className = "tile tile--normal";
+        tileButton.className = "tile tile--default";
 
         // Apply sprite background position
         if (tileData) {

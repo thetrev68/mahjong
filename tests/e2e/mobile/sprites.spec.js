@@ -22,7 +22,7 @@ test.describe("Mobile Sprite Rendering", () => {
 
         // Verify sprite classes
         await expect(tile).toHaveClass(/tile/);
-        await expect(tile).toHaveClass(/tile--normal/);
+        await expect(tile).toHaveClass(/tile--default/);
 
         // Verify background image is set (computed style)
         const bgImage = await tile.evaluate((el) => {
