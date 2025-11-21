@@ -180,7 +180,18 @@ export class DiscardPile {
         this.rerender();
     }
 
+    /**
+     * Get the latest discarded tile element
+     * @returns {HTMLElement|null} The latest discard element or null
+     */
     getLatestDiscardElement() {
+        // First try to find the element with "latest" class (most reliable after sorting)
+        const latestElement = this.element.querySelector(".discard-tile.latest");
+        if (latestElement) {
+            return latestElement;
+        }
+
+        // Fallback to last child if no "latest" class is present
         return this.element.querySelector(".discard-tile:last-child");
     }
 
