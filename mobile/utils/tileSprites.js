@@ -110,13 +110,13 @@ export class TileSprites {
 
         // Handle BLANK tiles specially - show the back of the tile
         if (index === -1) {
-            div.style.backgroundImage = "url('/mahjong/pwa/assets/back.png')";
+            div.style.backgroundImage = "url('/mahjong/assets/back.png')";
             div.style.backgroundPosition = "center";
             div.style.backgroundSize = "contain";
         } else if (index === undefined) {
             console.error("createTileElement: No sprite index for tile", tile, "key:", key);
             // Show tile back as fallback
-            div.style.backgroundImage = "url('/mahjong/pwa/assets/back.png')";
+            div.style.backgroundImage = "url('/mahjong/assets/back.png')";
             div.style.backgroundPosition = "center";
             div.style.backgroundSize = "contain";
         } else {
