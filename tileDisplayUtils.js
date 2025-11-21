@@ -178,9 +178,23 @@ export function getTileCharClasses(displayChar, invert = true) {
   const color = displayChar.color;
 
   if (shouldInvert) {
-    return `${base} bg-${color}-600 text-white border border-${color}-700`;
+    // Handle special colors for matched tiles (inverted)
+    if (color === "black") {
+      return `${base} bg-black text-white border border-gray-800`;
+    } else if (color === "gray") {
+      return `${base} bg-gray-600 text-white border border-gray-700`;
+    } else {
+      return `${base} bg-${color}-600 text-white border border-${color}-700`;
+    }
   } else {
-    return `${base} bg-white text-${color}-600 border border-${color}-200`;
+    // Handle special colors for unmatched tiles (not inverted)
+    if (color === "black") {
+      return `${base} bg-white text-black border border-gray-300`;
+    } else if (color === "gray") {
+      return `${base} bg-white text-gray-700 border border-gray-300`;
+    } else {
+      return `${base} bg-white text-${color}-600 border border-${color}-200`;
+    }
   }
 }
 
