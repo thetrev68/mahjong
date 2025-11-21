@@ -39,7 +39,7 @@ export class HomePageTiles {
         // 30% chance to be face down
         if (Math.random() < 0.3) {
             tile.classList.add("tile--back");
-            tile.style.backgroundImage = "url('/mahjong/pwa/assets/back.png')";
+            tile.style.backgroundImage = "url('/mahjong/assets/back.png')";
             tile.style.backgroundSize = "cover";
             tile.style.backgroundRepeat = "no-repeat";
         } else {
@@ -52,7 +52,7 @@ export class HomePageTiles {
                 console.error("Failed to get sprite position:", err);
                 // Fallback to back tile
                 tile.classList.add("tile--back");
-                tile.style.backgroundImage = "url('/mahjong/pwa/assets/back.png')";
+                tile.style.backgroundImage = "url('/mahjong/assets/back.png')";
                 tile.style.backgroundSize = "cover";
             }
         }

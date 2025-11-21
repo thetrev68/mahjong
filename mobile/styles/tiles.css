@@ -11,7 +11,7 @@
 .tile {
     width: 52px;
     height: 69px;
-    background-image: url("/mahjong/pwa/assets/tiles.png");
+    background-image: url("/mahjong/assets/tiles.png");
     background-repeat: no-repeat;
     background-size: 2028px auto;
     image-rendering: crisp-edges;
