@@ -158,9 +158,9 @@ mobileRenderer?.updateStatus(""); // Clear status - board will be blank pre-game
 ---
 
 ### 2B. Add Scattered Tile Deck on Home Page
-**Status**: 🔨 New Component | **Priority**: P2 | **Complexity**: Medium
+**Status**:  ✅ **COMPLETED** | **Priority**: P2 | **Complexity**: Medium
 
-**Implementation Plan**:
+**Implementation**: ✅ **DONE**
 1. Create `mobile/components/HomePageTiles.js`
 2. Modify `mobile/MobileRenderer.js` to include animation trigger
 3. Update `mobile/index.html` to include home page container
