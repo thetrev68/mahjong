@@ -172,30 +172,38 @@ export function getPatternDisplayChars(patternTiles, playerTiles, componentCount
 
 // Get CSS classes for tile display (with inversion for matches)
 /* knip-ignore */
+// Explicit color class mappings to avoid Tailwind JIT purging
+const COLOR_CLASS_MAP = {
+  // Inverted (matched tiles): colored backgrounds with white text
+  inverted: {
+    red: "bg-red-600 text-white border border-red-700",
+    green: "bg-green-600 text-white border border-green-700",
+    blue: "bg-blue-600 text-white border border-blue-700",
+    black: "bg-black text-white border border-gray-800",
+    gray: "bg-gray-600 text-white border border-gray-700"
+  },
+  // Non-inverted (unmatched tiles): white background with colored text
+  normal: {
+    red: "bg-white text-red-600 border border-red-200",
+    green: "bg-white text-green-600 border border-green-200",
+    blue: "bg-white text-blue-600 border border-blue-200",
+    black: "bg-white text-black border border-gray-300",
+    gray: "bg-white text-gray-700 border border-gray-300"
+  }
+};
+
 export function getTileCharClasses(displayChar, invert = true) {
   const base = "tile-char"; // Use the class for consistent styling
   const shouldInvert = invert && displayChar.isMatched;
   const color = displayChar.color;
 
-  if (shouldInvert) {
-    // Handle special colors for matched tiles (inverted)
-    if (color === "black") {
-      return `${base} bg-black text-white border border-gray-800`;
-    } else if (color === "gray") {
-      return `${base} bg-gray-600 text-white border border-gray-700`;
-    } else {
-      return `${base} bg-${color}-600 text-white border border-${color}-700`;
-    }
-  } else {
-    // Handle special colors for unmatched tiles (not inverted)
-    if (color === "black") {
-      return `${base} bg-white text-black border border-gray-300`;
-    } else if (color === "gray") {
-      return `${base} bg-white text-gray-700 border border-gray-300`;
-    } else {
-      return `${base} bg-white text-${color}-600 border border-${color}-200`;
-    }
-  }
+  // Select the appropriate color map
+  const colorMap = shouldInvert ? COLOR_CLASS_MAP.inverted : COLOR_CLASS_MAP.normal;
+
+  // Get the color classes from the map, with gray as fallback
+  const colorClasses = colorMap[color] || colorMap.gray;
+
+  return `${base} ${colorClasses}`;
 }
 
 // Render the pattern with spacing per component
