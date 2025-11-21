@@ -24,9 +24,9 @@
 
     <!-- Mobile styles will be loaded by main.js, but we load animations explicitly -->
     <!-- Mobile styles will be loaded by main.js -->
-  <script type="module" crossorigin src="/mahjong/assets/mobile-DAU5qYnn.js"></script>
+  <script type="module" crossorigin src="/mahjong/assets/mobile-DcUiffJ7.js"></script>
   <link rel="modulepreload" crossorigin href="/mahjong/assets/card-COOX9W03.js">
-  <link rel="stylesheet" crossorigin href="/mahjong/assets/mobile-DNwCwgYt.css">
+  <link rel="stylesheet" crossorigin href="/mahjong/assets/mobile-D6I9uVuK.css">
 </head>
 
 <body>
@@ -37,6 +37,8 @@
             <span class="wall-tiles">--</span>
         </div>
 
+
+
         <!-- Top: Opponent information bars -->
         <div id="opponents-container" class="opponents-container">
             <div id="opponent-top"></div>
@@ -46,6 +48,9 @@
 
         <!-- Center: Discard pile and game status -->
         <div id="game-center" class="game-center">
+            <div id="home-page-tiles" class="home-page-tiles-container" style="display: none;">
+                <!-- Populated by HomePageTiles component -->
+            </div>
             <div id="game-status" class="game-status">Loading American Mahjong...</div>
             <div id="discard-container" class="discard-container"></div>
         </div>
