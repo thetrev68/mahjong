@@ -109,7 +109,7 @@ export class AnimationController {
      * @param {Object} targetPos - {x, y} target position in discard pile
      * @returns {Promise} Resolves when animation completes
      */
-    animateTileDiscard(tileElement, targetPos = {}) {
+    animateTileDiscard(tileElement, startPos = {}, targetPos = {}) {
         return new Promise(resolve => {
             if (!tileElement) {
                 resolve();
@@ -120,8 +120,8 @@ export class AnimationController {
 
             const discardDuration = this.duration + 100;
             const cssVars = {
-                "--start-x": toPx(0),
-                "--start-y": toPx(0),
+                "--start-x": toPx(startPos.x, 0),
+                "--start-y": toPx(startPos.y, 0),
                 "--target-x": toPx(targetPos.x, 0),
                 "--target-y": toPx(targetPos.y, 100),
                 "--tile-discard-duration": `${discardDuration}ms`,

@@ -6,6 +6,111 @@
     z-index: 100;
 }
 
+/* Game center section */
+.game-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 8px;
+    overflow-y: auto;
+    position: relative;
+}
+
+.game-status {
+    color: white;
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 4px 12px;
+    border-radius: 12px;
+}
+
+/* Hints panel */
+.hints-panel {
+    flex: 0 0 auto;
+    background: rgba(4, 24, 14, 0.95);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+}
+
+.hints-toggle {
+    width: 100%;
+    padding: 8px;
+    background: rgba(4, 36, 21, 0.88);
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: #ffd166;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.hints-toggle:active {
+    background: rgba(4, 36, 21, 0.95);
+}
+
+.hints-content {
+    padding: 10px;
+    overflow: visible;
+}
+
+.hint-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.hint-label {
+    color: rgba(237, 244, 239, 0.7);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.hint-pattern-header {
+    color: #f5fbf7;
+    font-size: 11px;
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+.hint-rank {
+    color: rgba(237, 244, 239, 0.6);
+    font-size: 10px;
+    font-weight: normal;
+}
+
+.hint-patterns {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.hint-pattern {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    padding: 6px 8px;
+    color: #f5fbf7;
+    font-size: 12px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 .primary-btn {
     background-color: #ffd166;
     color: #1f1400;

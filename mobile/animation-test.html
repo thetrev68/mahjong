@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animation Controller Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles/animations.css">
+    <link rel="stylesheet" href="styles/tiles.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #0c6d3a;
+            color: white;
+            padding: 20px;
+        }
+        #animation-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border: 2px dashed #fff;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #test-tile {
+            position: absolute;
+            top: 150px;
+            left: calc(50% - 26px);
+            /* Start in the middle */
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Animation Controller Test</h1>
+    <p>Click the buttons to test the different animations. If the animations here look correct, the problem is likely in how the start and end positions are calculated in the main game logic, not in the animation system itself.</p>
+
+    <div class="controls">
+        <button id="btn-draw">Animate Draw</button>
+        <button id="btn-discard">Animate Discard</button>
+        <button id="btn-claim">Animate Claim</button>
+        <button id="btn-expose">Animate Expose</button>
+        <button id="btn-shake">Animate Invalid</button>
+        <button id="btn-glow">Toggle Newly Drawn Glow</button>
+        <button id="btn-reset">Reset Tile</button>
+    </div>
+
+    <div id="animation-container">
+        <div id="test-tile" class="tile tile--default"></div>
+    </div>
+
+    <script type="module">
+        import { AnimationController } from './animations/AnimationController.js';
+
+        const animationController = new AnimationController();
+        const tile = document.getElementById('test-tile');
+        const container = document.getElementById('animation-container');
+
+        // --- Button Event Listeners ---
+
+        document.getElementById('btn-draw').addEventListener('click', () => {
+            console.log('Testing: Animate Draw');
+            resetTileState();
+            // Animate from top-center to the middle
+            const startPos = { x: 0, y: -200 };
+            const endPos = { x: 0, y: 0 };
+            tile.style.opacity = 0; // Hide it first
+            animationController.animateTileDraw(tile, startPos, endPos).then(() => {
+                console.log('Draw animation complete.');
+                tile.style.opacity = 1;
+            });
+        });
+
+        document.getElementById('btn-discard').addEventListener('click', () => {
+            console.log('Testing: Animate Discard');
+            resetTileState();
+            // Animate from middle to top right
+            const startRect = tile.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const startPos = { x: 0, y: 0 };
+            const targetPos = { 
+                x: (container.offsetWidth / 2) - (tile.offsetWidth / 2) - 20, 
+                y: -150
+            };
+            
+            animationController.animateTileDiscard(tile, startPos, targetPos).then(() => {
+                console.log('Discard animation complete.');
+                tile.style.opacity = 0; // It's "gone"
+            });
+        });
+
+        document.getElementById('btn-claim').addEventListener('click', () => {
+            console.log('Testing: Animate Claim');
+            resetTileState();
+            tile.style.opacity = 0; // Start as if it's coming from somewhere else
+            // Animate from "across the table" to the middle
+            const sourcePlayer = 2; // 2 = across
+            const targetPos = { x: 0, y: 0 };
+            animationController.animateTileClaim(tile, sourcePlayer, targetPos).then(() => {
+                console.log('Claim animation complete.');
+                tile.style.opacity = 1;
+            });
+        });
+
+        document.getElementById('btn-expose').addEventListener('click', () => {
+            console.log('Testing: Animate Expose');
+            resetTileState();
+            // Animate from middle to top left
+            const targetPos = { x: -150, y: -150 };
+            animationController.animateExposure([tile], targetPos).then(() => {
+                console.log('Expose animation complete.');
+            });
+        });
+        
+        document.getElementById('btn-shake').addEventListener('click', () => {
+            console.log('Testing: Animate Invalid Action');
+            animationController.animateInvalidAction(tile);
+        });
+
+        document.getElementById('btn-glow').addEventListener('click', () => {
+            console.log('Testing: Toggle Glow');
+            tile.classList.toggle('tile--newly-drawn');
+        });
+
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            console.log('Resetting tile');
+            resetTileState();
+        });
+
+        function resetTileState() {
+            // Remove all animation-specific classes
+            const animationClasses = [
+                'tile-drawing', 'tile-discarding', 'tile-claiming-pulse', 
+                'tile-claiming-move', 'tile-exposing', 'invalid-action',
+                'tile--newly-drawn'
+            ];
+            animationClasses.forEach(c => tile.classList.remove(c));
+            
+            // Reset transform and opacity
+            tile.style.transform = '';
+            tile.style.opacity = 1;
+
+            // Reset position to center
+            tile.style.top = '150px';
+            tile.style.left = `calc(50% - 26px)`;
+        }
+
+    </script>
+
+</body>
+</html>

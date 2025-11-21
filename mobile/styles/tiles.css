@@ -14,7 +14,7 @@
 }
 
 .tile:active {
-    transform: translateY(-4px);
+    transform: translateY(-12px);
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
 
@@ -50,15 +50,16 @@ button.tile {
 
 /* Default tile size (e.g., in hand) */
 .tile--default {
-    width: 60px;
-    height: 80px;
-    background-size: 2340px auto;
-    /* 60 / 33.33 × 1300 */
+    width: 52px;
+    height: 69px;
+    background-size: 2028px auto;
 }
 
 .tile--small {
     width: 40px;
     height: 54px;
+    /* Scale for 40px tiles: 40 / 52 ≈ 0.76923
+    Sheet width: 2028 * 0.76923 ≈ 1560 */
     background-size: 1560px auto;
 }
 
@@ -75,10 +76,10 @@ button.tile {
     border: none;
     border-radius: 1px;
     /* Exact fit calculation:
-       Sprite sheet is 1300px wide.
-       Tile width in sprite is ~33.33px.
-       Scale factor: 16 / 33.33 ≈ 0.48
-       Background size: 1300 * 0.48 = 624px
+       Sprite sheet is 2028px wide.
+       Tile width in sprite is 52px.
+       Scale factor: 16 / 52 ≈ 0.3077
+       Background size: 2028 * 0.3077 ≈ 624px
        No extra scaling to ensure "glued" look.
     */
     background-size: var(--tile-micro-sprite-size) auto;
@@ -91,7 +92,40 @@ button.tile {
 .tile--discard {
     width: 30px;
     height: 40px;
-    /* Scale for 30px tiles: 30 / 33.33 ≈ 0.9
-       Sheet width: 1300 × 0.9 = 1170px */
+    /* Scale for 30px tiles: 30 / 52 ≈ 0.577
+       Sheet width: 2028 * 0.577 ≈ 1170px */
     background-size: 1170px auto;
+}
+
+/* Tile character styling */
+.tile-char {
+    min-width: 16px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 0 1px;
+    border: 1px solid;
+    box-sizing: border-box;
+}
+
+.component-spacer {
+    width: 8px;
+}
+
+/* Base tile style */
+.tile {
+    width: 48px;
+    height: 64px;
+    position: relative;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

@@ -953,3 +953,21 @@ select:focus {
   background-color: #ffffff !important;
   opacity: 1;
 }
+
+/* === Tile Glow Effect === */
+.tile--newly-drawn {
+    /* Using filter: drop-shadow for better performance on mobile */
+    animation: pulse-glow 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+    0% {
+        filter: drop-shadow(0 0 8px rgba(255, 255, 100, 0.7));
+    }
+    50% {
+        filter: drop-shadow(0 0 16px rgba(255, 255, 100, 1));
+    }
+    100% {
+        filter: drop-shadow(0 0 8px rgba(255, 255, 100, 0.7));
+    }
+}

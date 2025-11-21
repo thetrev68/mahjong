@@ -1,3 +1,13 @@
+/* Opponent Bar Styles */
+
+.opponents-container {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px;
+}
+
 .opponent-bar {
     background: rgba(4, 36, 21, 0.88);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -11,93 +21,107 @@
     backdrop-filter: blur(4px);
 }
 
-/* Current turn indicator - yellow/gold glowing border */
 .opponent-bar.current-turn {
     border: 2px solid #ffd166;
     box-shadow: 0 0 12px rgba(255, 209, 102, 0.4);
     background: rgba(4, 36, 21, 0.95);
 }
 
-/* Opponent info section */
 .opponent-info {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    background: transparent; /* Ensure no background - solid bar appearance */
-    border: none; /* Ensure no border - solid bar appearance */
+    gap: 2px;
+    min-width: 140px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0;
+    margin: 0;
 }
 
 .opponent-name {
-    font-weight: bold;
-    font-size: 16px;
-    color: #333;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px; /* Prevent overly long names */
+    font-weight: 600;
+    color: #f5fbf7;
+    font-size: 13px;
+    letter-spacing: 0.02em;
 }
 
 .tile-count {
-    font-size: 14px;
-    color: #666;
+    color: rgba(237, 244, 239, 0.65);
+    font-size: 11px;
 }
 
-/* Exposures section */
 .exposures {
     display: flex;
-    gap: 6px;
+    gap: 2px;
     flex-wrap: wrap;
-    background: transparent; /* Ensure no background - solid bar appearance */
-    border: none; /* Ensure no border - solid bar appearance */
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0;
+    margin: 0;
 }
 
 .exposure-icon {
-    display: inline-block;
-    width: 28px;
-    height: 28px;
-    line-height: 28px;
-    text-align: center;
+    width: 32px;
+    height: 42px;
+    font-size: 12px;
     font-weight: bold;
-    font-size: 14px;
-    border-radius: 4px;
-    background: #e0e0e0;
-    color: #333;
+    font-family: var(--font-stack);
+    padding: 2px;
+    border: 1px solid #666;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* Type-specific colors */
-.exposure-icon.pung {
-    background: #90caf9; /* Light blue */
-    color: #0d47a1;
+/* Apply suit colors to opponent tiles */
+.exposure-icon {
+    color: #ff0000;
+    /* Default crack color for example */
 }
 
-.exposure-icon.kong {
-    background: #ffab91; /* Light orange */
-    color: #bf360c;
+/* Wall Counter */
+.wall-counter {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(4, 24, 14, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    padding: 4px 10px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    backdrop-filter: blur(4px);
+    z-index: 100;
 }
 
-.exposure-icon.quint {
-    background: #ce93d8; /* Light purple */
-    color: #4a148c;
+.wall-label {
+    color: rgba(237, 244, 239, 0.7);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-/* Responsive adjustments */
-@media (max-width: 360px) {
-    .opponent-bar {
-        padding: 8px 12px;
-    }
+.wall-tiles {
+    color: #ffd166;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: var(--font-stack);
+    transition: color 0.3s ease;
+}
 
-    .opponent-name {
-        font-size: 14px;
-    }
+.wall-tiles.low-count {
+    color: #ff5252;
+    animation: pulse-warning 1s ease-in-out infinite;
+}
 
-    .tile-count {
-        font-size: 12px;
-    }
-
-    .exposure-icon {
-        width: 24px;
-        height: 24px;
-        line-height: 24px;
-        font-size: 12px;
-    }
+@keyframes pulse-warning {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
 }

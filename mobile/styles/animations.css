@@ -39,23 +39,35 @@
     animation: tile-discard var(--tile-discard-duration, 400ms) var(--tile-discard-easing, ease-in) forwards;
 }
 
-/* ===== Tile Claim Animations ===== */
-@keyframes claim-pulse {
+/* ===== Tile Claim Animations (Performant) ===== */
+@keyframes claim-pulse-scale {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); } /* Keeps the original scaling effect */
+}
 
-    0%,
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
-    }
-
-    50% {
-        transform: scale(1.2);
-        box-shadow: 0 0 20px rgba(255, 215, 0, 1);
-    }
+@keyframes claim-pulse-glow {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
 }
 
 .tile-claiming-pulse {
-    animation: claim-pulse 500ms ease-in-out;
+    position: relative; /* Required for pseudo-element */
+    animation: claim-pulse-scale 500ms ease-in-out;
+}
+
+.tile-claiming-pulse::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: inherit; /* Match tile's border-radius */
+    box-shadow: 0 0 20px rgba(255, 215, 0, 1), 0 0 8px rgba(255, 255, 255, 0.5); /* A richer glow */
+    opacity: 0; /* Animation controls visibility */
+    animation: claim-pulse-glow 500ms ease-in-out;
+    z-index: -1; /* Behind the tile */
+    will-change: opacity;
 }
 
 @keyframes claim-move {
