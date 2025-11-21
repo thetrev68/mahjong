@@ -384,12 +384,17 @@ export class MobileRenderer {
             return;
         }
 
+        // Track whether discard has been removed to prevent double-removal
+        let removedDiscard = false;
+        let floatingTile = null;
+
         try {
             // Get the last discard element before removing it
             const lastDiscardElement = this.discardPile.getLatestDiscardElement();
             if (!lastDiscardElement) {
                 console.warn("MobileRenderer: No discard element found for claim animation");
                 this.discardPile.removeLatestDiscard();
+                removedDiscard = true;
                 return;
             }
 
@@ -397,14 +402,16 @@ export class MobileRenderer {
             const startPos = getElementCenterPosition(lastDiscardElement);
 
             // Create a floating tile element for animation
-            const floatingTile = await this._createFloatingTile(data.tile, startPos);
+            floatingTile = await this._createFloatingTile(data.tile, startPos);
             if (!floatingTile) {
                 this.discardPile.removeLatestDiscard();
+                removedDiscard = true;
                 return;
             }
 
             // Remove the tile from discard pile now that we have the floating element
             this.discardPile.removeLatestDiscard();
+            removedDiscard = true;
 
             // Get target position (hand container center)
             const handContainer = this.handRenderer.container;
@@ -413,6 +420,7 @@ export class MobileRenderer {
             if (!targetPos) {
                 // Cleanup and exit if no target
                 floatingTile.remove();
+                floatingTile = null;
                 return;
             }
 
@@ -426,11 +434,20 @@ export class MobileRenderer {
 
             // Remove the floating tile after animation completes
             floatingTile.remove();
+            floatingTile = null;
 
         } catch (error) {
             console.error("MobileRenderer: Error during claim animation:", error);
-            // Ensure discard is removed even if animation fails
-            this.discardPile.removeLatestDiscard();
+
+            // Clean up floating tile if it exists
+            if (floatingTile && floatingTile.parentNode) {
+                floatingTile.remove();
+            }
+
+            // Only remove discard if it wasn't already removed
+            if (!removedDiscard) {
+                this.discardPile.removeLatestDiscard();
+            }
         }
     }
 
