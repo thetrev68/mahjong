@@ -31,16 +31,51 @@ export class PlayerRack {
     }
 
     renderExposures(exposures, container) {
+        // Defensive null/shape checks for container
+        if (!container || !container.innerHTML) {
+            console.warn("PlayerRack.renderExposures: Invalid container provided");
+            return;
+        }
+
+        // Clear container
         container.innerHTML = "";
-        exposures.forEach(exposure => {
+
+        // Defensive null/shape checks for exposures
+        if (!exposures || !Array.isArray(exposures)) {
+            console.warn("PlayerRack.renderExposures: Invalid exposures array provided");
+            return;
+        }
+
+        // Process each exposure with defensive checks
+        exposures.forEach((exposure, index) => {
+            // Skip null/undefined exposures
+            if (!exposure) {
+                console.warn(`PlayerRack.renderExposures: Skipping null/undefined exposure at index ${index}`);
+                return;
+            }
+
+            // Ensure exposure.tiles is an array
+            const tiles = Array.isArray(exposure.tiles) ? exposure.tiles : [];
+            if (tiles.length === 0) {
+                console.warn(`PlayerRack.renderExposures: Empty or invalid tiles array for exposure at index ${index}`);
+            }
+
             const set = document.createElement("div");
             set.className = "exposure-set";
-            exposure.tiles.forEach(tile => {
-                const tileEl = tileSprites.createTileElement(tile, "small");
-                tileEl.classList.add("exposed-tile");
-                set.appendChild(tileEl);
+
+            // Process tiles with defensive check
+            tiles.forEach(tile => {
+                if (tile) {
+                    const tileEl = tileSprites.createTileElement(tile, "small");
+                    tileEl.classList.add("exposed-tile");
+                    set.appendChild(tileEl);
+                }
             });
-            container.appendChild(set);
+
+            // Only append if set has children or tiles were processed
+            if (set.children.length > 0) {
+                container.appendChild(set);
+            }
         });
     }
 }
