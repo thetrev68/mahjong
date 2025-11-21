@@ -44,50 +44,44 @@ button.tile {
     padding: 0;
 }
 
-button.tile:focus-visible {
-    outline: 3px solid #0c6d3a;
-    outline-offset: 2px;
+/* Default tile size (e.g., in hand) */
+.tile--default {
+    width: 60px;
+    height: 80px;
+    background-size: 2340px auto;
+    /* 60 / 33.33 × 1300 */
 }
 
-/* Responsive adjustments */
-@media (max-width: 374px) {
-    .tile--normal {
-        width: 42px;
-        height: 56px;
-        background-size: 1638px auto;
-        /* 42 / 33.33 × 1300 */
-    }
-
-    .tile--small {
-        width: 30px;
-        height: 40px;
-        background-size: 1170px auto;
-    }
-
-    .tile--discard {
-        width: 28px;
-        height: 37px;
-        background-size: 1092px auto;
-    }
+.tile--small {
+    width: 40px;
+    height: 54px;
+    background-size: 1560px auto;
 }
 
-@media (min-width: 768px) {
-    .tile--normal {
-        width: 60px;
-        height: 80px;
-        background-size: 2340px auto;
-        /* 60 / 33.33 × 1300 */
-    }
+/* Micro size tiles (16px × 21px) - home page scattered tiles */
+.tile--micro {
+    width: 16px !important;
+    height: 21px !important;
+    border: none !important;
+    border-radius: 1px !important;
+    /* Exact fit calculation:
+       Sprite sheet is 1300px wide.
+       Tile width in sprite is ~33.33px.
+       Scale factor: 16 / 33.33 ≈ 0.48
+       Background size: 1300 * 0.48 = 624px
+       No extra scaling to ensure "glued" look.
+    */
+    background-size: 624px auto !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    position: absolute !important;
+    /* Fix scrolling by removing from flow */
+}
 
-    .tile--small {
-        width: 40px;
-        height: 54px;
-        background-size: 1560px auto;
-    }
-
-    .tile--discard {
-        width: 38px;
-        height: 51px;
-        background-size: 1482px auto;
-    }
+/* Discard pile tiles (30px × 40px) */
+.tile--discard {
+    width: 30px;
+    height: 40px;
+    /* Scale for 30px tiles: 30 / 33.33 ≈ 0.9
+       Sheet width: 1300 × 0.9 = 1170px */
+    background-size: 1170px auto;
 }
