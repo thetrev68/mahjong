@@ -28,6 +28,12 @@
     border-radius: 8px;
 }
 
+/* Hide game status background when empty */
+.game-status:empty {
+    background: transparent;
+    padding: 0;
+}
+
 .hand-area {
     display: flex;
     justify-content: center;
@@ -171,11 +177,20 @@
     font-family: var(--font-stack);
     border-radius: 5px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .menu-btn:active {
     background-color: #ffd166;
     color: #044328;
+}
+
+#mobile-settings-btn {
+    font-size: 20px;
+    line-height: 1;
+    padding: 6px 12px;
 }
 
 #loading {
@@ -260,7 +275,6 @@
     padding: 8px;
     max-height: 200px;
     overflow-y: auto;
-    background-color: rgba(0, 0, 0, 0.15);
     border-radius: 4px;
     justify-items: center;
     align-items: center;
@@ -290,4 +304,9 @@
     100% {
         box-shadow: 0 0 8px rgba(100, 180, 255, 0.7);
     }
+}
+
+/* Hide elements on home page */
+.hide-on-home {
+    display: none !important;
 }

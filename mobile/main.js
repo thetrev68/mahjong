@@ -173,6 +173,18 @@ async function initializeGame() {
     // Track games played for install prompt
     gameController.on("GAME_ENDED", () => onGameEnd());
 
+    // Show hints panel and player rack when game starts
+    gameController.on("GAME_STARTED", () => {
+        const hintsPanel = document.getElementById("hints-panel");
+        const playerRackEl = document.getElementById("player-rack-container");
+        if (hintsPanel) {
+            hintsPanel.classList.remove("hide-on-home");
+        }
+        if (playerRackEl) {
+            playerRackEl.classList.remove("hide-on-home");
+        }
+    });
+
     // Wire up New Game button
     const newGameBtn = document.getElementById("new-game-btn");
     if (newGameBtn) {

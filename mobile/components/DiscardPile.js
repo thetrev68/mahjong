@@ -99,7 +99,7 @@ export class DiscardPile {
      * @param {Object} latestDiscard - The most recently discarded tile object to highlight
      */
     rerender(latestDiscard = null) {
-        this.element.innerHTML = '';
+        this.element.innerHTML = "";
         this.discards.forEach(({ tile, player }) => {
             const tileElement = this.createDiscardTile(tile, player);
             if (latestDiscard && tile === latestDiscard.tile && player === latestDiscard.player) {

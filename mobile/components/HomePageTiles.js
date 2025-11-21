@@ -63,15 +63,20 @@ export class HomePageTiles {
         if (this.isAnimating || this.tiles.length === 0) return;
         this.isAnimating = true;
 
-        // Animate all tiles flying off to top-left
+        // Funnel point: top-left corner (-20vw, -20vh)
+        const exitX = -20;
+        const exitY = -20;
+
+        // Animate all tiles flying off to the same funnel point
         const animations = this.tiles.map((tile) =>
             new Promise(resolve => {
-                const duration = 800 + Math.random() * 800; // Variable speed
-                const delay = Math.random() * 200;
+                const duration = 1200 + Math.random() * 600; // Slower: 1200-1800ms
+                const delay = Math.random() * 300;
 
                 window.requestAnimationFrame(() => {
                     tile.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`;
-                    tile.style.transform = `translate(-150vw, -150vh) rotate(${Math.random() * 360}deg)`;
+                    // All tiles converge to the same exit point
+                    tile.style.transform = `translate(${exitX}vw, ${exitY}vh) rotate(${Math.random() * 360}deg)`;
                     tile.style.opacity = "0";
                 });
 
