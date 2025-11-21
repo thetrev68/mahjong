@@ -44,7 +44,14 @@ export class MobileRenderer {
         this.handRenderer = new HandRenderer(options.handContainer, null);
         this.discardPile = new DiscardPile(options.discardContainer);
         this.playerRack = options.playerRackContainer ? new PlayerRack(options.playerRackContainer) : null;
-        this.homePageTiles = new HomePageTiles(document.getElementById("home-page-tiles"));
+        const homePageTilesContainer = document.getElementById("home-page-tiles");
+        if (!homePageTilesContainer) {
+            console.warn("MobileRenderer: home-page-tiles container not found");
+        }
+        this.homePageTiles = new HomePageTiles(homePageTilesContainer);
+        if (this.homePageTiles) {
+            this.homePageTiles.render();
+        }
         this.animationController = new AnimationController();
         this.handRenderer.setSelectionBehavior({
             mode: "multiple",
@@ -93,6 +100,7 @@ export class MobileRenderer {
         this.subscriptions = [];
         this.handRenderer?.destroy();
         this.discardPile?.destroy();
+        this.homePageTiles?.destroy();
         this.promptUI?.container?.remove();
         this.pendingPrompt = null;
     }
@@ -224,7 +232,9 @@ export class MobileRenderer {
     onGameStarted() {
         // Trigger home page animation
         if (this.homePageTiles) {
-            this.homePageTiles.animateStart();
+            this.homePageTiles.animateStart().catch(err => {
+                console.error("HomePageTiles animation error:", err);
+            });
         }
         this.discardPile.clear();
         this.resetHandSelection();

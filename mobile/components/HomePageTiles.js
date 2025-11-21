@@ -7,7 +7,7 @@ export class HomePageTiles {
         this.tiles = [];
         this.isAnimating = false;
         if (container) {
-            this.render();
+            // render() must be called explicitly
         }
     }
 
@@ -45,9 +45,16 @@ export class HomePageTiles {
         } else {
             const suit = Math.floor(Math.random() * 3); // 0=CRACK, 1=BAM, 2=DOT
             const number = Math.floor(Math.random() * 9) + 1;
-            const pos = tileSprites.getSpritePosition({ suit, number });
-            // console.log("Created tile:", { suit, number, pos });
-            tile.style.backgroundPosition = `${pos.xPct}% ${pos.yPct}%`;
+            try {
+                const pos = tileSprites.getSpritePosition({ suit, number });
+                tile.style.backgroundPosition = `${pos.xPct}% ${pos.yPct}%`;
+            } catch (err) {
+                console.error("Failed to get sprite position:", err);
+                // Fallback to back tile
+                tile.classList.add("tile--back");
+                tile.style.backgroundImage = "url('/mahjong/pwa/assets/back.png')";
+                tile.style.backgroundSize = "cover";
+            }
         }
         return tile;
     }
@@ -62,9 +69,11 @@ export class HomePageTiles {
                 const duration = 800 + Math.random() * 800; // Variable speed
                 const delay = Math.random() * 200;
 
-                tile.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`;
-                tile.style.transform = `translate(-150vw, -150vh) rotate(${Math.random() * 360}deg)`;
-                tile.style.opacity = "0";
+                window.requestAnimationFrame(() => {
+                    tile.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`;
+                    tile.style.transform = `translate(-150vw, -150vh) rotate(${Math.random() * 360}deg)`;
+                    tile.style.opacity = "0";
+                });
 
                 setTimeout(() => {
                     tile.remove();
@@ -78,6 +87,21 @@ export class HomePageTiles {
         this.isAnimating = false;
         // Hide container after animation
         if (this.container) {
+            this.container.style.display = "none";
+        }
+    }
+
+    destroy() {
+        if (this.isAnimating) {
+            // Cancel ongoing animations
+            this.tiles.forEach(tile => {
+                tile.remove();
+            });
+        }
+        this.tiles = [];
+        this.isAnimating = false;
+        if (this.container) {
+            this.container.innerHTML = "";
             this.container.style.display = "none";
         }
     }

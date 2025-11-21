@@ -63,11 +63,17 @@ button.tile {
 }
 
 /* Micro size tiles (16px × 21px) - home page scattered tiles */
-.tile--micro {
-    width: 16px !important;
-    height: 21px !important;
-    border: none !important;
-    border-radius: 1px !important;
+:root {
+    --tile-micro-width: 16px;
+    --tile-micro-height: 21px;
+    --tile-micro-sprite-size: 624px;
+}
+
+.home-page-tiles-container .tile--micro {
+    width: var(--tile-micro-width);
+    height: var(--tile-micro-height);
+    border: none;
+    border-radius: 1px;
     /* Exact fit calculation:
        Sprite sheet is 1300px wide.
        Tile width in sprite is ~33.33px.
@@ -75,9 +81,9 @@ button.tile {
        Background size: 1300 * 0.48 = 624px
        No extra scaling to ensure "glued" look.
     */
-    background-size: 624px auto !important;
+    background-size: var(--tile-micro-sprite-size) auto;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    position: absolute !important;
+    position: absolute;
     /* Fix scrolling by removing from flow */
 }
 
