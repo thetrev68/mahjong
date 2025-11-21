@@ -3,6 +3,7 @@ import { DiscardPile } from "./components/DiscardPile.js";
 import { OpponentBar } from "./components/OpponentBar.js";
 import { PlayerRack } from "./components/PlayerRack.js";
 import { AnimationController } from "./animations/AnimationController.js";
+import { HomePageTiles } from "./components/HomePageTiles.js";
 import { PLAYER, STATE } from "../constants.js";
 import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
@@ -43,6 +44,7 @@ export class MobileRenderer {
         this.handRenderer = new HandRenderer(options.handContainer, null);
         this.discardPile = new DiscardPile(options.discardContainer);
         this.playerRack = options.playerRackContainer ? new PlayerRack(options.playerRackContainer) : null;
+        this.homePageTiles = new HomePageTiles(document.getElementById("home-page-tiles"));
         this.animationController = new AnimationController();
         this.handRenderer.setSelectionBehavior({
             mode: "multiple",
@@ -220,6 +222,10 @@ export class MobileRenderer {
     }
 
     onGameStarted() {
+        // Trigger home page animation
+        if (this.homePageTiles) {
+            this.homePageTiles.animateStart();
+        }
         this.discardPile.clear();
         this.resetHandSelection();
         this.updateStatus("Game started - dealing tiles...");
