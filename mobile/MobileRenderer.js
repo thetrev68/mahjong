@@ -38,9 +38,9 @@ export class MobileRenderer {
         this.statusElement = options.statusElement || null;
         this.subscriptions = [];
 
-        // Pass null as gameController to prevent HandRenderer from subscribing to events
-        // MobileRenderer handles all event subscriptions and calls handRenderer.render() directly
-        this.handRenderer = new HandRenderer(options.handContainer, null);
+        // Pass gameController to HandRenderer so it can subscribe to hint events
+        // HandRenderer needs to listen for HINT_DISCARD_RECOMMENDATIONS to apply red glow
+        this.handRenderer = new HandRenderer(options.handContainer, options.gameController);
         this.discardPile = new DiscardPile(options.discardContainer);
         const homePageTilesContainer = document.getElementById("home-page-tiles");
         if (!homePageTilesContainer) {

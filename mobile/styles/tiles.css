@@ -94,15 +94,18 @@ button.tile {
 
 .tile--hint-discard {
     animation: pulse-red 1.2s infinite ease-in-out;
-    box-shadow: 0 0 10px rgba(255, 82, 82, 0.8);
+    border-color: #dc2626 !important; /* Darker red border for prominence */
+    box-shadow: 0 0 12px rgba(220, 38, 38, 0.9);
 }
 
 @keyframes pulse-red {
     0%, 100% {
-        box-shadow: 0 0 8px rgba(255, 82, 82, 0.6);
+        box-shadow: 0 0 10px rgba(220, 38, 38, 0.8), inset 0 0 6px rgba(220, 38, 38, 0.6);
+        border-color: #dc2626;
     }
     50% {
-        box-shadow: 0 0 16px rgba(255, 40, 40, 0.95);
+        box-shadow: 0 0 20px rgba(220, 38, 38, 1), inset 0 0 10px rgba(220, 38, 38, 0.8);
+        border-color: #b91c1c;
     }
 }
 
