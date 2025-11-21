@@ -96,6 +96,9 @@
     font-size: 11px;
     line-height: 1.4;
     margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .hint-rank {

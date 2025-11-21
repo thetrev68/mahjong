@@ -92,6 +92,20 @@ button.tile {
     background-size: 1014px auto;
 }
 
+.tile--hint-discard {
+    animation: pulse-red 1.2s infinite ease-in-out;
+    box-shadow: 0 0 10px rgba(255, 82, 82, 0.8);
+}
+
+@keyframes pulse-red {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(255, 82, 82, 0.6);
+    }
+    50% {
+        box-shadow: 0 0 16px rgba(255, 40, 40, 0.95);
+    }
+}
+
 /* Micro size tiles (16px x 21px) - home page scattered tiles */
 .home-page-tiles-container .tile--micro {
     width: var(--tile-micro-width);
