@@ -47,9 +47,9 @@ export class MobileRenderer {
         const homePageTilesContainer = document.getElementById("home-page-tiles");
         if (!homePageTilesContainer) {
             console.warn("MobileRenderer: home-page-tiles container not found");
-        }
-        this.homePageTiles = new HomePageTiles(homePageTilesContainer);
-        if (this.homePageTiles) {
+            this.homePageTiles = null;
+        } else {
+            this.homePageTiles = new HomePageTiles(homePageTilesContainer);
             this.homePageTiles.render();
         }
         this.animationController = new AnimationController();
