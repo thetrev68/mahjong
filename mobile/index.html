@@ -7,14 +7,22 @@
     <meta name="keywords" content="Mahjong, free, game, javascript, mobile">
     <title>American Mahjong - Mobile</title>
 
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/mahjong/pwa/manifest.json">
+    <!-- PWA Manifest (only for production) -->
+    <script>
+        // Only load manifest in production (not localhost)
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = '/mahjong/manifest.json';
+            document.head.appendChild(link);
+        }
+    </script>
 
     <!-- iOS-specific meta tags -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Mahjong">
-    <link rel="apple-touch-icon" href="/mahjong/pwa/icons/icon-180.png">
+    <link rel="apple-touch-icon" href="/mahjong/icons/icon-180.png">
 
     <!-- Theme color for browsers -->
     <meta name="theme-color" content="#0c6d3a">
@@ -23,7 +31,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <!-- Mobile styles -->
-  <script type="module" crossorigin src="/mahjong/assets/mobile-C_oU-M6L.js"></script>
+  <script type="module" crossorigin src="/mahjong/assets/mobile-8M4c9436.js"></script>
   <link rel="modulepreload" crossorigin href="/mahjong/assets/card-Bgh-EM5r.js">
   <link rel="stylesheet" crossorigin href="/mahjong/assets/mobile-CopbS8v4.css">
 </head>
