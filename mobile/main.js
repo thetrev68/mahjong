@@ -81,6 +81,7 @@ async function initializeGame() {
 
     // Get DOM containers
     const handContainer = document.getElementById("hand-container");
+    const playerRackContainer = document.getElementById("player-rack-container");
     const discardContainer = document.getElementById("discard-container");
     const statusElement = document.getElementById("game-status");
     const opponentLeftContainer = document.getElementById("opponent-left");
@@ -128,6 +129,7 @@ async function initializeGame() {
             top: opponentTopContainer,
             right: opponentRightContainer
         },
+        playerRackContainer,
         promptRoot: document.body
     });
 

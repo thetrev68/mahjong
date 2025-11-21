@@ -1,6 +1,7 @@
 import { HandRenderer } from "./renderers/HandRenderer.js";
 import { DiscardPile } from "./components/DiscardPile.js";
 import { OpponentBar } from "./components/OpponentBar.js";
+import { PlayerRack } from "./components/PlayerRack.js";
 import { AnimationController } from "./animations/AnimationController.js";
 import { PLAYER, STATE } from "../constants.js";
 import { TileData } from "../core/models/TileData.js";
@@ -26,6 +27,7 @@ export class MobileRenderer {
      * @param {HTMLElement} options.opponentContainers.top
      * @param {HTMLElement} options.opponentContainers.right
      * @param {HTMLElement} [options.promptRoot]
+     * @param {HTMLElement} [options.playerRackContainer]
      */
     constructor(options = {}) {
         if (!options.gameController) {
@@ -40,6 +42,7 @@ export class MobileRenderer {
         // MobileRenderer handles all event subscriptions and calls handRenderer.render() directly
         this.handRenderer = new HandRenderer(options.handContainer, null);
         this.discardPile = new DiscardPile(options.discardContainer);
+        this.playerRack = options.playerRackContainer ? new PlayerRack(options.playerRackContainer) : null;
         this.animationController = new AnimationController();
         this.handRenderer.setSelectionBehavior({
             mode: "multiple",
@@ -222,6 +225,9 @@ export class MobileRenderer {
         this.resetHandSelection();
         this.updateStatus("Game started - dealing tiles...");
         this.refreshOpponentBars();
+        if (this.playerRack) {
+            this.playerRack.update(new HandData());
+        }
         this.updateActionButton({ label: "Start", onClick: () => this.startGame(), disabled: true, visible: true });
 
         // Show hints panel when game starts
@@ -283,6 +289,9 @@ export class MobileRenderer {
             const handData = HandData.fromJSON(data.hand);
             this.latestHandSnapshot = handData;
             this.handRenderer.render(handData);
+            if (this.playerRack) {
+                this.playerRack.update(handData);
+            }
 
             // If we just drew a tile (hand size increased to 14), animate it
             // This is a heuristic since we don't get explicit "DRAWN" event with tile data here
