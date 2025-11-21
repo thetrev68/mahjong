@@ -53,6 +53,20 @@
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
 
+/* Newly drawn tile - blue pulsing glow */
+@keyframes pulse-blue {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(0, 150, 255, 0.6);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(0, 150, 255, 1);
+    }
+}
+
+.tile--newly-drawn {
+    animation: pulse-blue 2s infinite;
+}
+
 /* Disabled state */
 .tile:disabled {
     opacity: 0.5;

@@ -21,6 +21,7 @@ export class DiscardPile {
         this.discards = []; // Array of {tile: TileData, player: number}
         this.element = null;
         this.eventUnsubscribers = [];
+        this._onResize = this.updateTileSizing.bind(this);
 
         this.render();
         if (this.gameController) {
@@ -35,6 +36,8 @@ export class DiscardPile {
         this.element = document.createElement("div");
         this.element.className = "discard-pile";
         this.container.appendChild(this.element);
+        this.updateTileSizing();
+        window.addEventListener("resize", this._onResize, { passive: true });
     }
 
     /**
@@ -80,8 +83,8 @@ export class DiscardPile {
         // Mark as latest discard
         this.highlightLatest(tileElement);
 
-        // Scroll to bottom if needed
-        this.scrollToBottom();
+        // Scroll to latest if needed
+        this.scrollToLatest();
     }
 
     /**
@@ -174,8 +177,26 @@ export class DiscardPile {
     /**
      * Scroll to bottom of discard pile
      */
-    scrollToBottom() {
-        this.element.scrollTop = this.element.scrollHeight;
+    scrollToLatest() {
+        this.element.scrollTo({
+            top: this.element.scrollHeight,
+            left: this.element.scrollWidth,
+            behavior: "smooth"
+        });
+    }
+
+    updateTileSizing() {
+        if (!this.container || !this.element) return;
+        const containerWidth = this.container.clientWidth || window.innerWidth;
+        const gap = 4;
+        const padding = 8;
+        const tileWidth = Math.max(
+            26,
+            Math.floor((containerWidth - (8 * gap) - (2 * padding)) / 9)
+        );
+        this.element.style.setProperty("--discard-tile-width", `${tileWidth}px`);
+        this.element.style.setProperty("--discard-gap", `${gap}px`);
+        this.element.style.setProperty("--discard-padding", `${padding}px`);
     }
 
     /**
@@ -192,6 +213,7 @@ export class DiscardPile {
     destroy() {
         this.eventUnsubscribers.forEach(unsub => unsub());
         this.eventUnsubscribers = [];
+        window.removeEventListener("resize", this._onResize);
         if (this.element && this.element.parentNode) {
             this.element.parentNode.removeChild(this.element);
         }

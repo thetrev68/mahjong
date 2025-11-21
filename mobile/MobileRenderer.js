@@ -1,6 +1,7 @@
 import { HandRenderer } from "./renderers/HandRenderer.js";
 import { DiscardPile } from "./components/DiscardPile.js";
 import { OpponentBar } from "./components/OpponentBar.js";
+import { PlayerRack } from "./components/PlayerRack.js";
 import { AnimationController } from "./animations/AnimationController.js";
 import { PLAYER, STATE } from "../constants.js";
 import { TileData } from "../core/models/TileData.js";
@@ -26,6 +27,7 @@ export class MobileRenderer {
      * @param {HTMLElement} options.opponentContainers.top
      * @param {HTMLElement} options.opponentContainers.right
      * @param {HTMLElement} [options.promptRoot]
+     * @param {HTMLElement} [options.playerRackContainer]
      */
     constructor(options = {}) {
         if (!options.gameController) {
@@ -40,6 +42,7 @@ export class MobileRenderer {
         // MobileRenderer handles all event subscriptions and calls handRenderer.render() directly
         this.handRenderer = new HandRenderer(options.handContainer, null);
         this.discardPile = new DiscardPile(options.discardContainer);
+        this.playerRack = options.playerRackContainer ? new PlayerRack(options.playerRackContainer) : null;
         this.animationController = new AnimationController();
         this.handRenderer.setSelectionBehavior({
             mode: "multiple",
@@ -50,6 +53,10 @@ export class MobileRenderer {
 
         this.opponentBars = this.createOpponentBars(options.opponentContainers || {});
 
+        this.actionButton = document.getElementById("new-game-btn");
+        this.drawButton = document.getElementById("draw-btn");
+        this.sortButton = document.getElementById("sort-btn");
+
         this.promptUI = this.createPromptUI(options.promptRoot || document.body);
         this.pendingPrompt = null;
         this.latestHandSnapshot = null;
@@ -58,6 +65,21 @@ export class MobileRenderer {
 
         this.setupButtonListeners();
         this.registerEventListeners();
+
+        if (this.sortButton) {
+            this.sortButton.style.display = "none";
+        }
+        if (this.drawButton) {
+            this.drawButton.style.display = "none";
+        }
+
+        // Hide hints panel pre-game
+        this.hintsPanel = document.getElementById("hints-panel");
+        if (this.hintsPanel) {
+            this.hintsPanel.style.display = "none";
+        }
+
+        this.updateActionButton({ label: "Start", onClick: () => this.startGame() });
     }
 
     destroy() {
@@ -78,6 +100,10 @@ export class MobileRenderer {
         this.subscriptions.push(gc.on("GAME_STARTED", (data) => this.onGameStarted(data)));
         this.subscriptions.push(gc.on("GAME_ENDED", (data) => this.onGameEnded(data)));
         this.subscriptions.push(gc.on("STATE_CHANGED", (data) => this.onStateChanged(data)));
+        this.subscriptions.push(gc.on("TILES_DEALT", () => {
+            // Mobile doesn't animate dealing, so immediately signal completion
+            gc.emit("DEALING_COMPLETE");
+        }));
         this.subscriptions.push(gc.on("HAND_UPDATED", (data) => this.onHandUpdated(data)));
         this.subscriptions.push(gc.on("TURN_CHANGED", (data) => this.onTurnChanged(data)));
         this.subscriptions.push(gc.on("TILE_DISCARDED", (data) => this.onTileDiscarded(data)));
@@ -99,9 +125,9 @@ export class MobileRenderer {
     createOpponentBars(containers) {
         const bars = [];
         const mapping = [
-            { key: "right", playerIndex: PLAYER.RIGHT ?? 1 },
-            { key: "top", playerIndex: PLAYER.TOP ?? 2 },
-            { key: "left", playerIndex: PLAYER.LEFT ?? 3 }
+            { key: "top", playerIndex: PLAYER.RIGHT ?? 1 },   // North
+            { key: "left", playerIndex: PLAYER.TOP ?? 2 },    // West
+            { key: "right", playerIndex: PLAYER.LEFT ?? 3 }   // South
         ];
 
         mapping.forEach(({ key, playerIndex }) => {
@@ -145,11 +171,13 @@ export class MobileRenderer {
     }
 
     setupButtonListeners() {
-        const drawBtn = document.getElementById("draw-btn");
-        const sortBtn = document.getElementById("sort-btn");
+        const drawBtn = this.drawButton;
+        const sortBtn = this.sortButton;
 
         if (drawBtn) drawBtn.addEventListener("click", () => this.onDrawClicked());
         if (sortBtn) sortBtn.addEventListener("click", () => this.onSortClicked());
+        // Note: actionButton is controlled exclusively by updateActionButton method
+        // to avoid double-binding with onclick assignments
     }
 
     onDrawClicked() {
@@ -186,7 +214,7 @@ export class MobileRenderer {
     }
 
     canDrawTile() {
-        const state = this.gameController?.gameState;
+        const state = this.gameController?.state ?? this.gameController?.gameState;
         return this.gameController.currentPlayer === HUMAN_PLAYER &&
             (state === STATE.LOOP_PICK_FROM_WALL || state === "LOOP_PICK_FROM_WALL");
     }
@@ -194,8 +222,17 @@ export class MobileRenderer {
     onGameStarted() {
         this.discardPile.clear();
         this.resetHandSelection();
-        this.updateStatus("Game started – dealing tiles...");
+        this.updateStatus("Game started - dealing tiles...");
         this.refreshOpponentBars();
+        if (this.playerRack) {
+            this.playerRack.update(new HandData());
+        }
+        this.updateActionButton({ label: "Start", onClick: () => this.startGame(), disabled: true, visible: true });
+
+        // Show hints panel when game starts
+        if (this.hintsPanel) {
+            this.hintsPanel.style.display = "block";
+        }
     }
 
     onGameEnded(data) {
@@ -204,12 +241,13 @@ export class MobileRenderer {
             const winner = this.gameController.players?.[data.winner];
             this.updateStatus(winner ? `${winner.name} wins!` : "Mahjong!");
         } else if (reason === "wall_game") {
-            this.updateStatus("Wall game – no winner");
+            this.updateStatus("Wall game - no winner");
         } else {
             this.updateStatus("Game ended");
         }
         this.hidePrompt();
         this.resetHandSelection();
+        this.updateActionButton({ label: "Start", onClick: () => this.startGame(), disabled: false, visible: true });
     }
 
     onStateChanged(data) {
@@ -218,21 +256,21 @@ export class MobileRenderer {
         }
         this.updateStatus(`State: ${data.newState}`);
 
-        const drawBtn = document.getElementById("draw-btn");
-        const sortBtn = document.getElementById("sort-btn");
+        const drawBtn = this.drawButton;
+        const sortBtn = this.sortButton;
 
-        // Show DRAW button only during player's turn to pick
         if (drawBtn) {
             const canDraw = this.canDrawTile();
             drawBtn.style.display = canDraw ? "flex" : "none";
             drawBtn.disabled = !canDraw;
         }
 
-        // SORT always visible during main game loop states
         if (sortBtn) {
             const isLoopState = data.newState >= STATE.LOOP_PICK_FROM_WALL && data.newState <= STATE.LOOP_EXPOSE_TILES_COMPLETE;
             sortBtn.style.display = isLoopState ? "flex" : "none";
         }
+
+        this.updateActionButtonStateForGame(data.newState);
     }
 
     onHandUpdated(data) {
@@ -250,6 +288,9 @@ export class MobileRenderer {
             const handData = HandData.fromJSON(data.hand);
             this.latestHandSnapshot = handData;
             this.handRenderer.render(handData);
+            if (this.playerRack) {
+                this.playerRack.update(handData);
+            }
 
             // If we just drew a tile (hand size increased to 14), animate it
             // This is a heuristic since we don't get explicit "DRAWN" event with tile data here
@@ -286,6 +327,7 @@ export class MobileRenderer {
                 this.animationController.animateTurnStart(bar.bar.container);
             }
         }
+        this.updateActionButtonStateForGame(this.gameController.state);
     }
 
     onTileDiscarded(data) {
@@ -332,19 +374,14 @@ export class MobileRenderer {
             return;
         }
 
-        // If there's a pending prompt, auto-cancel it with fallback to prevent deadlock
+        // If there's a pending prompt, auto-cancel it WITHOUT invoking callback
+        // (new prompt will handle the callback)
         if (this.pendingPrompt) {
-            console.warn("MobileRenderer: New prompt received while previous prompt pending. Auto-canceling previous prompt.");
-            if (this.pendingPrompt.type === "tile-selection") {
-                this.cancelTileSelectionPrompt();
-            } else if (this.pendingPrompt.callback) {
-                // For choice prompts, invoke callback with null
-                this.pendingPrompt.callback(null);
-            }
+            console.warn("MobileRenderer: New prompt received while previous prompt pending. Clearing previous prompt state.");
+            this.resetHandSelection();
+            this.hidePrompt();
+            this.pendingPrompt = null;
         }
-
-        this.hidePrompt();
-        this.pendingPrompt = null;
 
         switch (data.promptType) {
             case "CHOOSE_DISCARD":
@@ -354,17 +391,22 @@ export class MobileRenderer {
                     min: 1,
                     max: 1,
                     confirmLabel: "Discard",
-                    cancelLabel: "Auto Discard",
-                    fallback: () => this.getFallbackTiles(1),
+                    cancelLabel: null,
+                    fallback: null,
+                    useActionButton: true,
                     callback: (tiles) => {
                         if (!tiles || tiles.length === 0) {
-                            console.error("CHOOSE_DISCARD callback invoked with empty tiles array");
                             data.callback(null);
                             return;
                         }
-                        console.log("CHOOSE_DISCARD: Selected tile:", tiles[0]);
                         data.callback(tiles[0]);
                     }
+                });
+                this.updateActionButton({
+                    label: "Discard",
+                    onClick: () => this.confirmPendingSelection(),
+                    disabled: true,
+                    visible: true
                 });
                 break;
             case "CHARLESTON_PASS":
@@ -466,7 +508,8 @@ export class MobileRenderer {
             min: config.min,
             max: config.max,
             callback: config.callback,
-            fallback: config.fallback
+            fallback: config.fallback,
+            confirmUsesActionButton: !!config.useActionButton
         };
 
         this.handRenderer.setSelectionBehavior({
@@ -477,7 +520,7 @@ export class MobileRenderer {
         this.handRenderer.clearSelection(true);
 
         // Build action buttons - only include cancel if explicitly provided
-        const actions = [
+        const actions = config.useActionButton ? [] : [
             {
                 label: config.confirmLabel ?? "Confirm",
                 primary: true,
@@ -491,6 +534,15 @@ export class MobileRenderer {
             actions.push({
                 label: config.cancelLabel,
                 onClick: () => this.cancelTileSelectionPrompt()
+            });
+        }
+
+        if (config.useActionButton) {
+            this.updateActionButton({
+                label: config.confirmLabel ?? "Confirm",
+                onClick: () => this.confirmPendingSelection(),
+                disabled: true,
+                visible: true
             });
         }
 
@@ -516,6 +568,9 @@ export class MobileRenderer {
         const ready = count >= min && count <= max;
         this.setPromptHint(`Selected ${count}/${max}${min === max ? "" : ` (need at least ${min})`}`);
         this.setPrimaryEnabled(ready);
+        if (this.actionButton && this.pendingPrompt.confirmUsesActionButton) {
+            this.actionButton.disabled = !ready;
+        }
     }
 
     resolveTileSelectionPrompt() {
@@ -620,6 +675,55 @@ export class MobileRenderer {
             }
             return TileData.fromJSON(tile);
         }).filter(Boolean);
+    }
+
+    updateActionButton({ label, onClick, disabled = false, visible = true } = {}) {
+        if (!this.actionButton) return;
+        if (label) {
+            this.actionButton.textContent = label;
+        }
+        this.actionButton.onclick = onClick || null;
+        this.actionButton.disabled = !!disabled;
+        this.actionButton.style.display = visible ? "flex" : "none";
+    }
+
+    updateActionButtonStateForGame(newState) {
+        if (!this.actionButton) return;
+
+        const isHumanTurn = this.gameController.currentPlayer === HUMAN_PLAYER;
+        const isDiscardState = newState === STATE.LOOP_CHOOSE_DISCARD && isHumanTurn;
+
+        if (isDiscardState && this.pendingPrompt?.type === "tile-selection") {
+            this.pendingPrompt.confirmUsesActionButton = true;
+            const selection = this.handRenderer.getSelectionState();
+            const ready = selection.count >= (this.pendingPrompt.min || 1) && selection.count <= (this.pendingPrompt.max || 1);
+            this.updateActionButton({
+                label: "Discard",
+                onClick: () => this.confirmPendingSelection(),
+                disabled: !ready,
+                visible: true
+            });
+            return;
+        }
+
+        const preGameState = newState === STATE.INIT || newState === STATE.START || newState === STATE.DEAL;
+        this.updateActionButton({
+            label: "Start",
+            onClick: () => this.startGame(),
+            disabled: false,
+            visible: preGameState
+        });
+    }
+
+    confirmPendingSelection() {
+        if (this.pendingPrompt?.type !== "tile-selection") return;
+        this.resolveTileSelectionPrompt();
+    }
+
+    startGame() {
+        if (typeof this.gameController.startGame === "function") {
+            this.gameController.startGame();
+        }
     }
 
     // Add error handling for asset loading

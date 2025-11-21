@@ -1,10 +1,17 @@
 # Mobile UX Improvements - Implementation Plan
 
 **Created**: 2025-11-19
-**Status**: Planning Phase
-**Branch**: Mobile-Refactor
+**Status**: In Progress
+**Branch**: mobile-ux-improvements
 
 This document outlines the implementation plan for mobile UX improvements based on user testing feedback.
+
+**Recent updates (mobile-ux-improvements branch):**
+- Desktop font stack applied across mobile styles.
+- Opponent winds fixed (East/North/West/South), bars ordered top-left-right, tile counts no longer show undefined.
+- Layout reordered: opponents → discard → hand → hints → bottom menu; hand centered.
+- Start button text updated; becomes Discard during human turn; auto-discard removed.
+- Hints compacted to 2 lines with concealed badge; discard pile now fits 9 tiles with smooth auto-scroll.
 
 ---
 

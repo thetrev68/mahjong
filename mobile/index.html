@@ -37,15 +37,21 @@
 
         <!-- Top: Opponent information bars -->
         <div id="opponents-container" class="opponents-container">
-            <div id="opponent-left" class="opponent-bar"></div>
-            <div id="opponent-top" class="opponent-bar"></div>
-            <div id="opponent-right" class="opponent-bar"></div>
+            <div id="opponent-top"></div>
+            <div id="opponent-left"></div>
+            <div id="opponent-right"></div>
         </div>
 
         <!-- Center: Discard pile and game status -->
         <div id="game-center" class="game-center">
             <div id="game-status" class="game-status">Loading American Mahjong...</div>
             <div id="discard-container" class="discard-container"></div>
+        </div>
+
+        <!-- Player hand -->
+        <div id="hand-area" class="hand-area">
+            <div id="player-rack-container" class="player-rack-container"></div>
+            <div id="hand-container" class="hand-container"></div>
         </div>
 
         <!-- Hints Panel (above bottom menu) -->
@@ -56,15 +62,12 @@
             </div>
         </div>
 
-        <!-- Bottom: Player hand and action buttons -->
-        <div id="hand-area" class="hand-area">
-            <div id="hand-container" class="hand-container"></div>
-            <div class="bottom-menu">
-                <button id="draw-btn" class="menu-btn menu-btn--primary" style="display: none;">DRAW</button>
-                <button id="sort-btn" class="menu-btn">SORT</button>
-                <button id="new-game-btn" class="menu-btn">NEW</button>
-                <button id="mobile-settings-btn" class="menu-btn">⚙️</button>
-            </div>
+        <!-- Bottom action menu -->
+        <div class="bottom-menu">
+            <button id="draw-btn" class="menu-btn menu-btn--primary" style="display: none;">DRAW</button>
+            <button id="sort-btn" class="menu-btn">SORT</button>
+            <button id="new-game-btn" class="menu-btn">Start</button>
+            <button id="mobile-settings-btn" class="menu-btn">??</button>
         </div>
     </div>
 
@@ -72,3 +75,4 @@
     <script src="main.js" type="module"></script>
 </body>
 
+</html>

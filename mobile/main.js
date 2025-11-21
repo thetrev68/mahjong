@@ -81,6 +81,7 @@ async function initializeGame() {
 
     // Get DOM containers
     const handContainer = document.getElementById("hand-container");
+    const playerRackContainer = document.getElementById("player-rack-container");
     const discardContainer = document.getElementById("discard-container");
     const statusElement = document.getElementById("game-status");
     const opponentLeftContainer = document.getElementById("opponent-left");
@@ -128,6 +129,7 @@ async function initializeGame() {
             top: opponentTopContainer,
             right: opponentRightContainer
         },
+        playerRackContainer,
         promptRoot: document.body
     });
 
@@ -188,7 +190,7 @@ async function initializeGame() {
     const newGameBtn = document.getElementById("new-game-btn");
     if (newGameBtn) {
         newGameBtn.onclick = async () => {
-            console.log("NEW GAME button clicked!");
+            console.log("Start button clicked!");
             try {
                 console.log("Starting game...", gameController);
                 mobileRenderer?.updateStatus("Starting game...");
@@ -224,8 +226,8 @@ async function initializeGame() {
         }
     });
 
-    // Hide loading message
-    mobileRenderer?.updateStatus("Ready to play! Click NEW GAME to start.");
+    // Clear status - board will be blank pre-game (until tile animation is added)
+    mobileRenderer?.updateStatus("");
 
     // Expose to window for testing
     if (window.location.search.includes("playwright=true")) {
@@ -299,7 +301,7 @@ function showUpdateNotification(registration) {
             color: #1f1400;
             padding: 12px;
             text-align: center;
-            font-family: 'Courier New', monospace;
+            font-family: var(--font-stack, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif);
             z-index: 10001;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         ">
@@ -312,7 +314,7 @@ function showUpdateNotification(registration) {
                 border: none;
                 border-radius: 4px;
                 cursor: pointer;
-                font-family: 'Courier New', monospace;
+                font-family: var(--font-stack, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif);
             ">Reload to Update</button>
         </div>
     `;

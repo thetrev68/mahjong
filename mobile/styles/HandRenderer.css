@@ -37,7 +37,7 @@
     height: 60px;
     font-size: 16px;
     font-weight: 700;
-    font-family: "Courier New", monospace;
+    font-family: var(--font-stack);
     border-radius: 6px;
     border: 2px solid #1f3c2a;
     background: #fff;

@@ -54,6 +54,7 @@ export class HandRenderer {
         this.exposedSection = null;
         this.currentHandData = null;
         this.currentSortMode = null; // Track explicit sort mode ('suit', 'rank', or null for auto)
+        this.newlyDrawnTileIndex = null; // Track newly drawn tile for blue glow effect
 
         this.setupDOM();
         this.setupEventListeners();
@@ -111,6 +112,29 @@ export class HandRenderer {
             }
         };
         this.unsubscribeFns.push(this.gameController.on("TILE_SELECTED", handleTileSelected));
+
+        // Track newly drawn tiles for blue glow effect
+        const handleTileDrawn = (data = {}) => {
+            if (data.player === 0 && data.tile) {
+                // Store the drawn tile's index to highlight it after next render
+                this.newlyDrawnTileIndex = data.tile.index;
+            }
+        };
+        this.unsubscribeFns.push(this.gameController.on("TILE_DRAWN", handleTileDrawn));
+
+        // Clear newly drawn glow when a tile is discarded
+        const handleTileDiscarded = (data = {}) => {
+            if (data.player === 0) {
+                this.newlyDrawnTileIndex = null;
+                // Remove glow from all tiles
+                this.tiles.forEach(tileEl => {
+                    if (tileEl) {
+                        tileEl.classList.remove("tile--newly-drawn");
+                    }
+                });
+            }
+        };
+        this.unsubscribeFns.push(this.gameController.on("TILE_DISCARDED", handleTileDiscarded));
     }
 
     /**
@@ -146,6 +170,11 @@ export class HandRenderer {
             if (this.selectedIndices.has(selectionKey)) {
                 tileButton.classList.add("selected");
                 preservedSelections.add(selectionKey);
+            }
+
+            // Apply blue glow to newly drawn tile
+            if (this.newlyDrawnTileIndex !== null && tileData.index === this.newlyDrawnTileIndex) {
+                tileButton.classList.add("tile--newly-drawn");
             }
 
             this.tiles.push(tileButton);

@@ -1,4 +1,5 @@
 import { MobileTile } from "./MobileTile.js";
+import { WIND, PLAYER } from "../../constants.js";
 
 /**
  * OpponentBar - Displays opponent info compactly
@@ -53,28 +54,67 @@ export class OpponentBar {
 
         // Update name and position
         const nameElement = this.element.querySelector(".opponent-name");
-        nameElement.textContent = `${playerData.name} (${this.getPositionName(playerData.position)})`;
+        const windLabel = this.getWindLabel(playerData);
+        nameElement.textContent = windLabel ? `${playerData.name} (${windLabel})` : playerData.name;
 
-        // Update tile count
+        // Update tile count - HIDDEN per UX improvements (will show exposures only)
         const countElement = this.element.querySelector(".tile-count");
-        const count = playerData.tileCount;
-        countElement.textContent = `${count} tile${count !== 1 ? "s" : ""}`;
+        // const count = this.getTileCount(playerData);
+        countElement.textContent = ""; // Hide tile count - exposures are visible instead
 
         // Update exposures
-        this.updateExposures(playerData.exposures);
+        this.updateExposures(this.getExposures(playerData));
 
         // Update turn indicator
         this.setCurrentTurn(playerData.isCurrentTurn);
     }
 
-    /**
-     * Get human-readable position name
-     * @param {number} position - Player position (1=Right, 2=Top, 3=Left)
-     * @returns {string} Position name
-     */
-    getPositionName(position) {
-        const positions = ["Bottom", "East", "North", "West"];
-        return positions[position] || "Unknown";
+    getWindLabel(playerData = {}) {
+        if (typeof playerData.wind === "string" && playerData.wind) {
+            return playerData.wind;
+        }
+        const windValue = playerData.wind;
+        const labels = {
+            [WIND.NORTH]: "North",
+            [WIND.SOUTH]: "South",
+            [WIND.WEST]: "West",
+            [WIND.EAST]: "East"
+        };
+        if (windValue in labels) {
+            return labels[windValue];
+        }
+        // Fallbacks based on table seat if wind is missing
+        const fallback = {
+            [PLAYER.RIGHT]: "North",
+            [PLAYER.TOP]: "West",
+            [PLAYER.LEFT]: "South",
+            [PLAYER.BOTTOM]: "East"
+        };
+        return fallback[playerData.position] || "";
+    }
+
+    getTileCount(playerData = {}) {
+        if (typeof playerData.tileCount === "number") {
+            return playerData.tileCount;
+        }
+        const hand = playerData.hand;
+        if (!hand) return null;
+        const hiddenCount = Array.isArray(hand.tiles) ? hand.tiles.length : 0;
+        const exposureCount = Array.isArray(hand.exposures)
+            ? hand.exposures.reduce((sum, exp) => sum + (Array.isArray(exp.tiles) ? exp.tiles.length : 0), 0)
+            : 0;
+        const total = hiddenCount + exposureCount;
+        return total > 0 ? total : 0;
+    }
+
+    getExposures(playerData = {}) {
+        if (Array.isArray(playerData.exposures)) {
+            return playerData.exposures;
+        }
+        if (playerData.hand && Array.isArray(playerData.hand.exposures)) {
+            return playerData.hand.exposures;
+        }
+        return [];
     }
 
     /**
