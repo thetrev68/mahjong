@@ -9,10 +9,7 @@ import { GameController } from "../core/GameController.js";
 import { AIEngine } from "../core/AIEngine.js";
 import { Card } from "../core/card/card.js";
 import { TouchHandler } from "./gestures/TouchHandler.js";
-import "./styles/base.css";
-import "./styles/tiles.css";
-import "./styles.css";
-import "./styles/SettingsSheet.css";
+// CSS files loaded via HTML link tags in index.html
 
 // Game instances
 let gameController;

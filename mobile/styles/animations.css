@@ -1,42 +1,73 @@
-/* ===== Tile Draw Animation ===== */
+/* ===== Tile Draw Animation (Movement-Based) ===== */
 @keyframes tile-draw {
     0% {
-        transform: translate3d(var(--start-x, 0px), var(--start-y, -200px), 0) scale(0.5);
+        transform: translate3d(var(--start-x, 0px), var(--start-y, 0px), 0) scale(0.3);
         opacity: 0;
+        filter: blur(2px);
+    }
+
+    60% {
+        transform: translate3d(
+            calc(var(--start-x, 0px) + var(--movement-dx, 0px) * 0.7),
+            calc(var(--start-y, 0px) + var(--movement-dy, 0px) * 0.7),
+            0
+        ) scale(1.1);
+        opacity: 0.8;
+        filter: blur(0px);
     }
 
     100% {
         transform: translate3d(var(--end-x, 0px), var(--end-y, 0px), 0) scale(1);
         opacity: 1;
+        filter: blur(0px);
     }
 }
 
 .tile-drawing {
     animation: tile-draw var(--tile-draw-duration, 300ms) var(--tile-draw-easing, ease-out) forwards;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
 }
 
-/* ===== Tile Discard Animation ===== */
+/* ===== Tile Discard Animation (Movement-Based) ===== */
 @keyframes tile-discard {
     0% {
         transform: translate3d(var(--start-x, 0px), var(--start-y, 0px), 0) scale(1);
         opacity: 1;
+        filter: brightness(1);
     }
 
-    50% {
-        transform: translate3d(calc((var(--start-x, 0px) + var(--target-x, 0px)) / 2),
-                calc((var(--start-y, 0px) + var(--target-y, 100px)) / 2 - 30px),
-                0) scale(1.1);
-        opacity: 0.85;
+    30% {
+        transform: translate3d(
+            calc(var(--start-x, 0px) + var(--movement-dx, 0px) * 0.3),
+            calc(var(--start-y, 0px) + var(--movement-dy, 0px) * 0.3),
+            0
+        ) scale(1.05);
+        opacity: 0.9;
+        filter: brightness(1.1);
+    }
+
+    70% {
+        transform: translate3d(
+            calc(var(--start-x, 0px) + var(--movement-dx, 0px) * 0.85),
+            calc(var(--start-y, 0px) + var(--movement-dy, 0px) * 0.85),
+            0
+        ) scale(0.95);
+        opacity: 0.6;
+        filter: brightness(0.9);
     }
 
     100% {
-        transform: translate3d(var(--target-x, 0px), var(--target-y, 100px), 0) scale(0.85);
+        transform: translate3d(var(--target-x, 0px), var(--target-y, 0px), 0) scale(0.8);
         opacity: 0;
+        filter: brightness(0.8);
     }
 }
 
 .tile-discarding {
     animation: tile-discard var(--tile-discard-duration, 400ms) var(--tile-discard-easing, ease-in) forwards;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
 }
 
 /* ===== Tile Claim Animations (Performant) ===== */
@@ -72,13 +103,25 @@
 
 @keyframes claim-move {
     0% {
-        transform: translate3d(var(--claim-offset-x, 0px), var(--claim-offset-y, -200px), 0);
+        transform: translate3d(var(--start-x, 0px), var(--start-y, 0px), 0) scale(1);
         opacity: 1;
+        filter: brightness(1);
+    }
+
+    50% {
+        transform: translate3d(
+            calc(var(--start-x, 0px) + var(--movement-dx, 0px) * 0.5),
+            calc(var(--start-y, 0px) + var(--movement-dy, 0px) * 0.5),
+            0
+        ) scale(1.1);
+        opacity: 0.8;
+        filter: brightness(1.2);
     }
 
     100% {
-        transform: translate3d(var(--target-x, 0px), var(--target-y, 0px), 0);
-        opacity: 0.3;
+        transform: translate3d(var(--target-x, 0px), var(--target-y, 0px), 0) scale(0.9);
+        opacity: 0.6;
+        filter: brightness(0.9);
     }
 }
 
@@ -192,19 +235,29 @@
     border-color: #f44336 !important;
 }
 
+/* ===== Custom Easing Functions ===== */
+:root {
+    --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --ease-gentle: cubic-bezier(0.4, 0.0, 0.2, 1);
+    --ease-snappy: cubic-bezier(0.4, 0.0, 1, 1);
+}
+
 /* ===== Performance Optimization ===== */
 .tile-drawing,
 .tile-discarding,
 .tile-claiming-pulse,
 .tile-claiming-move,
 .tile-exposing {
-    will-change: transform, opacity;
+    will-change: transform, opacity, filter;
     transform: translateZ(0);
+    contain: layout style paint;
 }
 
 .turn-starting,
 .turn-ending {
     will-change: border-left-width, box-shadow;
+    contain: layout style paint;
 }
 
 @media (prefers-reduced-motion: reduce) {

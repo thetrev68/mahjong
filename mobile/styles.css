@@ -1,4 +1,4 @@
-/* Mobile Mahjong Styles - Main Import File */
+/* Mobile Mahjong Styles - Main CSS File */
 
 /* CSS Custom Properties / Variables */
 :root {
@@ -9,15 +9,6 @@
     --font-stack: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
     --font-mono: "Consolas", "SFMono-Regular", "Menlo", monospace;
 }
-
-/* Import component styles */
-@import url('./styles/base.css');
-@import url('./styles/animations.css');
-@import url('./styles/HandRenderer.css');
-@import url('./styles/MobileGame.css');
-@import url('./styles/OpponentBar.css');
-@import url('./styles/SettingsSheet.css');
-@import url('./styles/tiles.css');
 
 /* Global utility classes */
 .concealed-badge {

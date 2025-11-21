@@ -117,7 +117,7 @@ export class MobileRenderer {
         this.subscriptions.push(gc.on("HAND_UPDATED", (data) => this.onHandUpdated(data)));
         this.subscriptions.push(gc.on("TURN_CHANGED", (data) => this.onTurnChanged(data)));
         this.subscriptions.push(gc.on("TILE_DISCARDED", (data) => this.onTileDiscarded(data)));
-        this.subscriptions.push(gc.on("DISCARD_CLAIMED", () => this.discardPile.removeLatestDiscard()));
+        this.subscriptions.push(gc.on("DISCARD_CLAIMED", (data) => this.onTileClaimed(data)));
         this.subscriptions.push(gc.on("TILES_EXPOSED", () => this.refreshOpponentBars()));
         this.subscriptions.push(gc.on("MESSAGE", (data) => this.onMessage(data)));
         this.subscriptions.push(gc.on("CHARLESTON_PHASE", (data) => {
@@ -314,7 +314,14 @@ export class MobileRenderer {
             if (handData.tiles.length % 3 === 2) { // 14 tiles (or 2, 5, 8, 11) means we have a draw
                 const lastTile = this.handRenderer.getLastTileElement();
                 if (lastTile) {
-                    this.animationController.animateTileDraw(lastTile);
+                    // Calculate draw animation from wall position to hand position
+                    const startPos = {
+                        x: window.innerWidth / 2, // Start from screen center (wall area)
+                        y: -50 // Start from above the screen
+                    };
+                    const endPos = this._getElementPosition(lastTile);
+                    
+                    this.animationController.animateTileDraw(lastTile, startPos, endPos);
                 }
             }
         } else {
@@ -355,11 +362,73 @@ export class MobileRenderer {
 
         // Animate discard from hand if it's the human player
         if (data.player === HUMAN_PLAYER) {
-            // We can't easily animate the specific tile element because it's already removed from DOM by HandRenderer
-            // But we can animate the "flight" to the discard pile using a clone or the discard pile element itself
+            // Find the hand container for better positioning context
+            const handContainer = this.handRenderer?.container;
+            const discardContainer = this.discardPile?.element;
+            
+            // Animate from the hand to discard pile with container context
             const latestDiscard = this.discardPile.getLatestDiscardElement();
-            if (latestDiscard) {
+            if (latestDiscard && discardContainer) {
+                // Get target position from discard container center
+                const targetPos = this._getContainerCenterPosition(discardContainer);
+                this.animationController.animateTileDiscard(latestDiscard, targetPos);
+            } else if (latestDiscard) {
+                // Fallback to automatic positioning
                 this.animationController.animateTileDiscard(latestDiscard);
+            }
+        }
+    }
+
+    /**
+     * Get the center position of a container element
+     * @param {HTMLElement} container 
+     * @returns {{x: number, y: number}} Center coordinates
+     * @private
+     */
+    _getContainerCenterPosition(container) {
+        if (!container || !container.getBoundingClientRect) {
+            return { x: 0, y: 0 };
+        }
+        const rect = container.getBoundingClientRect();
+        return {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2
+        };
+    }
+
+    /**
+     * Get the center position of any element
+     * @param {HTMLElement} element 
+     * @returns {{x: number, y: number}} Center coordinates
+     * @private
+     */
+    _getElementPosition(element) {
+        if (!element || !element.getBoundingClientRect) {
+            return { x: 0, y: 0 };
+        }
+        const rect = element.getBoundingClientRect();
+        return {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2
+        };
+    }
+
+    /**
+     * Handle tile claiming animation
+     * @param {Object} data - Claim event data
+     */
+    onTileClaimed(data) {
+        // Remove the claimed tile from discard pile
+        this.discardPile.removeLatestDiscard();
+        
+        // If it's the human player claiming, animate the tile moving to hand
+        if (data?.player === HUMAN_PLAYER) {
+            // The tile is already removed, so we need to create a visual effect
+            // This could be enhanced by creating a floating tile element that animates to the hand
+            const handContainer = this.handRenderer?.container;
+            if (handContainer) {
+                // Create a visual feedback for claiming
+                this.animationController.animateTurnStart(handContainer);
             }
         }
     }
