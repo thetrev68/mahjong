@@ -54,6 +54,7 @@ export class HandRenderer {
         this.exposedSection = null;
         this.currentHandData = null;
         this.currentSortMode = null; // Track explicit sort mode ('suit', 'rank', or null for auto)
+        this.newlyDrawnTileIndex = null; // Track newly drawn tile for blue glow effect
 
         this.setupDOM();
         this.setupEventListeners();
