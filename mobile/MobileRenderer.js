@@ -3,6 +3,7 @@ import { DiscardPile } from "./components/DiscardPile.js";
 import { OpponentBar } from "./components/OpponentBar.js";
 import { PlayerRack } from "./components/PlayerRack.js";
 import { AnimationController } from "./animations/AnimationController.js";
+import { HomePageTiles } from "./components/HomePageTiles.js";
 import { PLAYER, STATE } from "../constants.js";
 import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
@@ -43,6 +44,14 @@ export class MobileRenderer {
         this.handRenderer = new HandRenderer(options.handContainer, null);
         this.discardPile = new DiscardPile(options.discardContainer);
         this.playerRack = options.playerRackContainer ? new PlayerRack(options.playerRackContainer) : null;
+        const homePageTilesContainer = document.getElementById("home-page-tiles");
+        if (!homePageTilesContainer) {
+            console.warn("MobileRenderer: home-page-tiles container not found");
+            this.homePageTiles = null;
+        } else {
+            this.homePageTiles = new HomePageTiles(homePageTilesContainer);
+            this.homePageTiles.render();
+        }
         this.animationController = new AnimationController();
         this.handRenderer.setSelectionBehavior({
             mode: "multiple",
@@ -91,6 +100,7 @@ export class MobileRenderer {
         this.subscriptions = [];
         this.handRenderer?.destroy();
         this.discardPile?.destroy();
+        this.homePageTiles?.destroy();
         this.promptUI?.container?.remove();
         this.pendingPrompt = null;
     }
@@ -220,6 +230,12 @@ export class MobileRenderer {
     }
 
     onGameStarted() {
+        // Trigger home page animation
+        if (this.homePageTiles) {
+            this.homePageTiles.animateStart().catch(err => {
+                console.error("HomePageTiles animation error:", err);
+            });
+        }
         this.discardPile.clear();
         this.resetHandSelection();
         this.updateStatus("Game started - dealing tiles...");

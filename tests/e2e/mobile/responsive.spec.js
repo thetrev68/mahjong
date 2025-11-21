@@ -56,7 +56,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
 
             // Check hand tile size
             const handTileSize = await page.evaluate(() => {
-                const tile = document.querySelector(".hand-container .tile--normal");
+                const tile = document.querySelector(".hand-container .tile--default");
                 if (!tile) return null;
                 const rect = tile.getBoundingClientRect();
                 return { width: rect.width, height: rect.height };
@@ -145,7 +145,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
             const hasSpriteBg = await exposedTile.evaluate(el => {
                 const style = window.getComputedStyle(el);
                 return style.backgroundImage !== "none" &&
-                       style.backgroundImage.includes("tiles.png");
+                    style.backgroundImage.includes("tiles.png");
             });
 
             expect(hasSpriteBg).toBeTruthy();
@@ -193,7 +193,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
         // Check if tile has selected class or visual change
         const isSelected = await firstTile.evaluate(el => {
             return el.classList.contains("selected") ||
-                   el.classList.contains("tile--selected");
+                el.classList.contains("tile--selected");
         });
 
         expect(isSelected).toBeTruthy();
@@ -217,7 +217,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
 
             // Check actual tile width
             const tileWidth = await page.evaluate(() => {
-                const tile = document.querySelector(".hand-container .tile--normal");
+                const tile = document.querySelector(".hand-container .tile--default");
                 return tile ? tile.getBoundingClientRect().width : 0;
             });
 
