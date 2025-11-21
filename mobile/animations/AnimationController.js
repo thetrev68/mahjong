@@ -10,13 +10,6 @@ const TURN_ANIMATION_CLASSES = ["turn-starting", "turn-ending"];
 const HAND_SORT_CLASS = "hand-sorting";
 const INVALID_ACTION_CLASS = "invalid-action";
 
-const CLAIM_DIRECTION_OFFSETS = [
-    { x: 0, y: 0 },    // Player 0 (self)
-    { x: 90, y: -60 }, // Player to the right
-    { x: 0, y: -140 }, // Across the table
-    { x: -90, y: -60 } // Player to the left
-];
-
 const DEFAULT_PULSE_DURATION = 500;
 const HAND_SORT_DURATION = 400;
 const TURN_START_DURATION = 600;
@@ -195,12 +188,12 @@ export class AnimationController {
     /**
      * Animate a tile being claimed from discard pile to hand
      * @param {HTMLElement} tileElement - The tile DOM element
-     * @param {number} sourcePlayer - Player who discarded (0-3)
+     * @param {number} _sourcePlayer - Player who discarded (0-3)
      * @param {Object} targetPos - {x, y} target position in hand (optional, will calculate from container)
      * @param {HTMLElement} targetContainer - The container element for target position calculation
      * @returns {Promise} Resolves when animation completes
      */
-    animateTileClaim(tileElement, sourcePlayer = 0, targetPos = null, targetContainer = null) {
+    animateTileClaim(tileElement, _sourcePlayer = 0, targetPos = null, targetContainer = null) {
         return new Promise(resolve => {
             if (!tileElement) {
                 resolve();

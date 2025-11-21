@@ -363,7 +363,6 @@ export class MobileRenderer {
         // Animate discard from hand if it's the human player
         if (data.player === HUMAN_PLAYER) {
             // Find the hand container for better positioning context
-            const handContainer = this.handRenderer?.container;
             const discardContainer = this.discardPile?.element;
             
             // Animate from the hand to discard pile with container context
