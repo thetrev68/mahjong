@@ -1,3 +1,4 @@
+import { debugPrint } from "../../utils.js";
 import { tileSprites } from "../utils/tileSprites.js";
 
 export class HomePageTiles {
@@ -11,7 +12,7 @@ export class HomePageTiles {
     }
 
     render() {
-        console.log("HomePageTiles: Rendering scattered tiles");
+        debugPrint("HomePageTiles: Rendering scattered tiles");
         // Create scattered layout of micro tiles (144 visible - full set)
         for (let i = 0; i < 144; i++) {
             const tile = this.createRandomTile();
