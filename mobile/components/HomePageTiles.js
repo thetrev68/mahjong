@@ -12,8 +12,8 @@ export class HomePageTiles {
 
     render() {
         console.log("HomePageTiles: Rendering scattered tiles");
-        // Create scattered layout of micro tiles (approx 50 visible)
-        for (let i = 0; i < 50; i++) {
+        // Create scattered layout of micro tiles (144 visible - full set)
+        for (let i = 0; i < 144; i++) {
             const tile = this.createRandomTile();
             tile.classList.add("home-page-tile");
 
@@ -56,7 +56,7 @@ export class HomePageTiles {
         this.isAnimating = true;
 
         // Animate all tiles flying off to top-left
-        const animations = this.tiles.map((tile, index) =>
+        const animations = this.tiles.map((tile) =>
             new Promise(resolve => {
                 const duration = 800 + Math.random() * 800; // Variable speed
                 const delay = Math.random() * 200;
