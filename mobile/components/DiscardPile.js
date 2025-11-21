@@ -5,8 +5,8 @@ import { MobileTile } from "./MobileTile.js";
  * DiscardPile - Displays discarded tiles in center area
  *
  * Responsibilities:
- * - Render discards in 9-column grid
- * - Highlight most recent discard (yellow border + pulse)
+ * - Render discards in 10-column grid
+ * - Highlight most recent discard (blue border + pulse)
  * - Scroll vertically when more than ~108 tiles
  * - Allow clicking discards to see who discarded them
  */
@@ -213,7 +213,7 @@ export class DiscardPile {
         const padding = 8;
         const tileWidth = Math.max(
             26,
-            Math.floor((containerWidth - (8 * gap) - (2 * padding)) / 9)
+            Math.floor((containerWidth - (9 * gap) - (2 * padding)) / 10)
         );
         this.element.style.setProperty("--discard-tile-width", `${tileWidth}px`);
         this.element.style.setProperty("--discard-gap", `${gap}px`);
