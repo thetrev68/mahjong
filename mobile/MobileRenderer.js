@@ -367,21 +367,105 @@ export class MobileRenderer {
 
     /**
      * Handle tile claiming animation
-     * @param {Object} data - Claim event data
+     * @param {Object} data - Claim event data with {claimingPlayer, tile, claimType}
      */
-    onTileClaimed(data) {
-        // Remove the claimed tile from discard pile
-        this.discardPile.removeLatestDiscard();
-        
-        // If it's the human player claiming, animate the tile moving to hand
-        if (data?.player === HUMAN_PLAYER) {
-            // The tile is already removed, so we need to create a visual effect
-            // This could be enhanced by creating a floating tile element that animates to the hand
-            const handContainer = this.handRenderer?.container;
-            if (handContainer) {
-                // Create a visual feedback for claiming
-                this.animationController.animateTurnStart(handContainer);
+    async onTileClaimed(data) {
+        // Only animate for human player claims
+        if (data?.claimingPlayer !== HUMAN_PLAYER) {
+            // For non-human players, just remove from discard pile
+            this.discardPile.removeLatestDiscard();
+            return;
+        }
+
+        // Validate required components
+        if (!this.handRenderer || !this.animationController || !data?.tile) {
+            console.warn("MobileRenderer: Missing required components for claim animation");
+            this.discardPile.removeLatestDiscard();
+            return;
+        }
+
+        try {
+            // Get the last discard element before removing it
+            const lastDiscardElement = this.discardPile.getLatestDiscardElement();
+            if (!lastDiscardElement) {
+                console.warn("MobileRenderer: No discard element found for claim animation");
+                this.discardPile.removeLatestDiscard();
+                return;
             }
+
+            // Get the position of the discard tile before it's removed
+            const startPos = getElementCenterPosition(lastDiscardElement);
+
+            // Create a floating tile element for animation
+            const floatingTile = await this._createFloatingTile(data.tile, startPos);
+            if (!floatingTile) {
+                this.discardPile.removeLatestDiscard();
+                return;
+            }
+
+            // Remove the tile from discard pile now that we have the floating element
+            this.discardPile.removeLatestDiscard();
+
+            // Get target position (hand container center)
+            const handContainer = this.handRenderer.container;
+            const targetPos = handContainer ? getElementCenterPosition(handContainer) : null;
+
+            if (!targetPos) {
+                // Cleanup and exit if no target
+                floatingTile.remove();
+                return;
+            }
+
+            // Animate the floating tile to the hand
+            await this.animationController.animateTileClaim(
+                floatingTile,
+                data.claimingPlayer,
+                targetPos,
+                handContainer
+            );
+
+            // Remove the floating tile after animation completes
+            floatingTile.remove();
+
+        } catch (error) {
+            console.error("MobileRenderer: Error during claim animation:", error);
+            // Ensure discard is removed even if animation fails
+            this.discardPile.removeLatestDiscard();
+        }
+    }
+
+    /**
+     * Create a floating tile element for claim animation
+     * @param {Object} tileData - Tile data with suit, number, index
+     * @param {{x: number, y: number}} position - Initial position
+     * @returns {Promise<HTMLElement|null>} Floating tile element
+     * @private
+     */
+    async _createFloatingTile(tileData, position) {
+        try {
+            // Dynamically import MobileTile to avoid circular dependencies
+            const { MobileTile } = await import("./components/MobileTile.js");
+
+            // Create a normal-sized tile for the animation
+            const mobileTile = MobileTile.createHandTile(tileData, "normal");
+            const tileElement = mobileTile.createElement();
+
+            // Style the floating tile
+            tileElement.style.position = "fixed";
+            tileElement.style.left = `${position.x}px`;
+            tileElement.style.top = `${position.y}px`;
+            tileElement.style.transform = "translate(-50%, -50%)"; // Center on position
+            tileElement.style.zIndex = "9999"; // Above everything
+            tileElement.style.pointerEvents = "none"; // Don't interfere with clicks
+            tileElement.classList.add("floating-claim-tile");
+
+            // Append to body so it can move freely across the viewport
+            document.body.appendChild(tileElement);
+
+            return tileElement;
+        } catch (error) {
+            console.error("MobileRenderer: Error creating floating tile:", error);
+            return null;
         }
     }
 
