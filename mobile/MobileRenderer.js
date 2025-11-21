@@ -6,6 +6,7 @@ import { HomePageTiles } from "./components/HomePageTiles.js";
 import { PLAYER, STATE } from "../constants.js";
 import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
+import { getElementCenterPosition } from "./utils/positionUtils.js";
 
 const HUMAN_PLAYER = PLAYER.BOTTOM ?? 0;
 
@@ -304,7 +305,7 @@ export class MobileRenderer {
                         x: window.innerWidth / 2, // Start from screen center (wall area)
                         y: -50 // Start from above the screen
                     };
-                    const endPos = this._getElementPosition(lastTile);
+                    const endPos = getElementCenterPosition(lastTile);
                     
                     this.animationController.animateTileDraw(lastTile, startPos, endPos);
                 }
@@ -354,47 +355,13 @@ export class MobileRenderer {
             const latestDiscard = this.discardPile.getLatestDiscardElement();
             if (latestDiscard && discardContainer) {
                 // Get target position from discard container center
-                const targetPos = this._getContainerCenterPosition(discardContainer);
+                const targetPos = getElementCenterPosition(discardContainer);
                 this.animationController.animateTileDiscard(latestDiscard, targetPos);
             } else if (latestDiscard) {
                 // Fallback to automatic positioning
                 this.animationController.animateTileDiscard(latestDiscard);
             }
         }
-    }
-
-    /**
-     * Get the center position of a container element
-     * @param {HTMLElement} container 
-     * @returns {{x: number, y: number}} Center coordinates
-     * @private
-     */
-    _getContainerCenterPosition(container) {
-        if (!container || !container.getBoundingClientRect) {
-            return { x: 0, y: 0 };
-        }
-        const rect = container.getBoundingClientRect();
-        return {
-            x: rect.left + rect.width / 2,
-            y: rect.top + rect.height / 2
-        };
-    }
-
-    /**
-     * Get the center position of any element
-     * @param {HTMLElement} element 
-     * @returns {{x: number, y: number}} Center coordinates
-     * @private
-     */
-    _getElementPosition(element) {
-        if (!element || !element.getBoundingClientRect) {
-            return { x: 0, y: 0 };
-        }
-        const rect = element.getBoundingClientRect();
-        return {
-            x: rect.left + rect.width / 2,
-            y: rect.top + rect.height / 2
-        };
     }
 
     /**

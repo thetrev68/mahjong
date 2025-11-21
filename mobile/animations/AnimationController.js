@@ -1,3 +1,5 @@
+import { getElementCenterPosition } from "../utils/positionUtils.js";
+
 const TILE_ANIMATION_CLASSES = [
     "tile-drawing",
     "tile-discarding",
@@ -35,25 +37,9 @@ const toElementArray = elements => {
 };
 
 /**
- * Get element position relative to viewport
- * @param {HTMLElement} element 
- * @returns {{x: number, y: number}} Position coordinates
- */
-const getElementPosition = (element) => {
-    if (!element || !element.getBoundingClientRect) {
-        return { x: 0, y: 0 };
-    }
-    const rect = element.getBoundingClientRect();
-    return {
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2
-    };
-};
-
-/**
  * Calculate distance and direction between two points
- * @param {{x: number, y: number}} start 
- * @param {{x: number, y: number}} end 
+ * @param {{x: number, y: number}} start
+ * @param {{x: number, y: number}} end
  * @returns {{dx: number, dy: number, distance: number}}
  */
 const calculateMovement = (start, end) => {
@@ -106,7 +92,7 @@ export class AnimationController {
             this._resetElementAnimation(tileElement, TILE_ANIMATION_CLASSES);
 
             // Calculate positions if not provided
-            const actualEndPos = endPos || getElementPosition(tileElement);
+            const actualEndPos = endPos || getElementCenterPosition(tileElement);
             const actualStartPos = startPos || {
                 x: actualEndPos.x,
                 y: actualEndPos.y - 200 // Start from above
@@ -153,7 +139,7 @@ export class AnimationController {
             this._resetElementAnimation(tileElement, TILE_ANIMATION_CLASSES);
 
             // Calculate positions
-            const actualStartPos = getElementPosition(tileElement);
+            const actualStartPos = getElementCenterPosition(tileElement);
             const actualTargetPos = targetPos || {
                 x: actualStartPos.x + 50, // Move slightly to the right by default
                 y: actualStartPos.y + 100 // Move down towards discard area
@@ -203,8 +189,8 @@ export class AnimationController {
             this._resetElementAnimation(tileElement, TILE_ANIMATION_CLASSES);
 
             // Calculate positions
-            const currentPos = getElementPosition(tileElement);
-            const actualTargetPos = targetPos || (targetContainer ? getElementPosition(targetContainer) : {
+            const currentPos = getElementCenterPosition(tileElement);
+            const actualTargetPos = targetPos || (targetContainer ? getElementCenterPosition(targetContainer) : {
                 x: currentPos.x,
                 y: currentPos.y - 150 // Default move up
             });
