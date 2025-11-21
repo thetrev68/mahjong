@@ -176,9 +176,8 @@ export class MobileRenderer {
 
         if (drawBtn) drawBtn.addEventListener("click", () => this.onDrawClicked());
         if (sortBtn) sortBtn.addEventListener("click", () => this.onSortClicked());
-        if (this.actionButton) {
-            this.actionButton.addEventListener("click", () => this.startGame());
-        }
+        // Note: actionButton is controlled exclusively by updateActionButton method
+        // to avoid double-binding with onclick assignments
     }
 
     onDrawClicked() {
