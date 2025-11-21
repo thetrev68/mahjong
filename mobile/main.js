@@ -42,7 +42,7 @@ function createBottomMenu() {
 
 // Placeholder for mobile app initialization
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("Mobile Mahjong app initializing...");
+    // console.log("Mobile Mahjong app initializing...");
 
     // Hide loading message
     const loading = document.getElementById("loading");

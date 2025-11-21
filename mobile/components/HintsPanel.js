@@ -107,7 +107,7 @@ export class HintsPanel {
         try {
             // Rank the hand to get top patterns
             const rankCardHands = this.aiEngine.card.rankHandArray14(handData);
-            console.log("HintsPanel: rankCardHands:", rankCardHands);
+            // console.log("HintsPanel: rankCardHands:", rankCardHands);
 
             if (!rankCardHands || rankCardHands.length === 0) {
                 console.log("HintsPanel: No patterns available");
