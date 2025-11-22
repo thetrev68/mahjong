@@ -71,8 +71,8 @@ button.tile {
 /* Latest discard highlight */
 .latest,
 .discard-tile.latest {
-    outline: 2px solid #5ab6ff;
-    box-shadow: 0 0 14px rgba(90, 182, 255, 0.8);
+    outline: 2px solid #1d4ed8;
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.9);
     animation: pulse-glow-blue 1.5s infinite ease-in-out;
 }
 
