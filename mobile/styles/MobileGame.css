@@ -305,13 +305,13 @@
 
 @keyframes pulse-glow-blue {
     0% {
-        box-shadow: 0 0 8px rgba(100, 180, 255, 0.7);
+        box-shadow: 0 0 8px rgba(96, 165, 250, 0.8);
     }
     50% {
-        box-shadow: 0 0 16px rgba(100, 180, 255, 1);
+        box-shadow: 0 0 16px rgba(96, 165, 250, 1);
     }
     100% {
-        box-shadow: 0 0 8px rgba(100, 180, 255, 0.7);
+        box-shadow: 0 0 8px rgba(96, 165, 250, 0.8);
     }
 }
 

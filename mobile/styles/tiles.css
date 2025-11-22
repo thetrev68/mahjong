@@ -63,8 +63,9 @@ button.tile {
 
 .tile--newly-drawn {
     animation: pulse-blue 1.5s infinite ease-in-out;
-    border-color: #2563eb !important;
+    border-width: 3px !important; /* Thicker border like red appears */
     box-shadow: 0 0 12px rgba(37, 99, 235, 0.9);
+    /* Note: border-color removed - it's set by animation */
 }
 
 /* Latest discard highlight */
@@ -98,8 +99,9 @@ button.tile {
 
 .tile--hint-discard {
     animation: pulse-red 1.2s infinite ease-in-out;
-    border-color: #dc2626 !important; /* Darker red border for prominence */
+    border-width: 3px !important; /* Consistent with blue */
     box-shadow: 0 0 12px rgba(220, 38, 38, 0.9);
+    /* Note: border-color removed - it's set by animation */
 }
 
 @keyframes pulse-red {
@@ -116,38 +118,59 @@ button.tile {
 /* Alternating red/blue glow for tiles that are both newly drawn AND recommended for discard */
 .tile--newly-drawn.tile--hint-discard {
     animation: pulse-red-blue-alternate 2.4s infinite ease-in-out !important;
+    border-width: 3px !important; /* Thicker border for both colors */
+    /* Border color is controlled by animation keyframes ONLY */
 }
 
 @keyframes pulse-red-blue-alternate {
-    /* Red cycle: 0% (start) → 40% (peak at 80% of red cycle) → back down */
+    /* RED PHASE: 0% → 45% */
     0% {
-        box-shadow: 0 0 4px rgba(220, 38, 38, 0.3), inset 0 0 2px rgba(220, 38, 38, 0.2);
+        box-shadow: 0 0 8px rgba(220, 38, 38, 0.6), inset 0 0 10px rgba(220, 38, 38, 0.7);
         border-color: #dc2626;
+        border-width: 3px;
     }
     20% {
-        box-shadow: 0 0 20px rgba(220, 38, 38, 1), inset 0 0 10px rgba(220, 38, 38, 0.8);
+        box-shadow: 0 0 12px rgba(220, 38, 38, 1), inset 0 0 14px rgba(220, 38, 38, 0.9);
         border-color: #b91c1c;
+        border-width: 3px;
     }
-    40% {
-        box-shadow: 0 0 4px rgba(220, 38, 38, 0.3), inset 0 0 2px rgba(220, 38, 38, 0.2);
+    45% {
+        box-shadow: 0 0 5px rgba(220, 38, 38, 0.3), inset 0 0 5px rgba(220, 38, 38, 0.4);
         border-color: #dc2626;
+        border-width: 3px;
     }
-    /* Blue cycle: 50% (start) → 70% (peak at 80% of blue cycle) → back down */
+    /* TRANSITION: Red fades out, blue fades in */
+    48% {
+        box-shadow: 0 0 2px rgba(220, 38, 38, 0.1), inset 0 0 2px rgba(220, 38, 38, 0.1);
+        border-color: #7c3aed; /* Purple transition */
+        border-width: 3px;
+    }
+    /* BLUE PHASE: 50% → 95% */
     50% {
-        box-shadow: 0 0 4px rgba(37, 99, 235, 0.3), inset 0 0 2px rgba(37, 99, 235, 0.2);
-        border-color: #2563eb;
+        box-shadow: 0 0 18px rgba(96, 165, 250, 0.9), inset 0 0 12px rgba(147, 197, 253, 0.7);
+        border-color: #60a5fa;
+        border-width: 4px;
     }
     70% {
-        box-shadow: 0 0 20px rgba(37, 99, 235, 1), inset 0 0 10px rgba(37, 99, 235, 0.8);
-        border-color: #1d4ed8;
+        box-shadow: 0 0 30px rgba(96, 165, 250, 0.95), 0 0 35px rgba(147, 197, 253, 0.8), inset 0 0 16px rgba(147, 197, 253, 0.7);
+        border-color: #60a5fa;
+        border-width: 4px;
     }
-    90% {
-        box-shadow: 0 0 4px rgba(37, 99, 235, 0.3), inset 0 0 2px rgba(37, 99, 235, 0.2);
-        border-color: #2563eb;
+    95% {
+        box-shadow: 0 0 15px rgba(96, 165, 250, 0.85), inset 0 0 10px rgba(147, 197, 253, 0.65);
+        border-color: #60a5fa;
+        border-width: 4px;
+    }
+    /* TRANSITION: Blue fades out, red fades in */
+    98% {
+        box-shadow: 0 0 2px rgba(96, 165, 250, 0.1), inset 0 0 2px rgba(96, 165, 250, 0.1);
+        border-color: #7c3aed; /* Purple transition */
+        border-width: 3px;
     }
     100% {
-        box-shadow: 0 0 4px rgba(220, 38, 38, 0.3), inset 0 0 2px rgba(220, 38, 38, 0.2);
+        box-shadow: 0 0 8px rgba(220, 38, 38, 0.6), inset 0 0 10px rgba(220, 38, 38, 0.7);
         border-color: #dc2626;
+        border-width: 3px;
     }
 }
 
