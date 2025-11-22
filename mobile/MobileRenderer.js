@@ -535,7 +535,8 @@ export class MobileRenderer {
                     confirmLabel: "Pass Tiles",
                     cancelLabel: null,
                     fallback: null,
-                    callback: (tiles) => data.callback(tiles)
+                    callback: (tiles) => data.callback(tiles),
+                    useActionButton: true
                 });
                 break;
             case "SELECT_TILES":
@@ -627,7 +628,8 @@ export class MobileRenderer {
             max: config.max,
             callback: config.callback,
             fallback: config.fallback,
-            confirmUsesActionButton: !!config.useActionButton
+            confirmUsesActionButton: !!config.useActionButton,
+            baseLabel: config.confirmLabel ?? "Confirm"
         };
 
         this.handRenderer.setSelectionBehavior({
@@ -663,9 +665,11 @@ export class MobileRenderer {
                 disabled: true,
                 visible: true
             });
+            // Hide the prompt overlay when using action button
+            this.hidePrompt();
+        } else {
+            this.showPrompt(config.title, config.hint, actions);
         }
-
-        this.showPrompt(config.title, config.hint, actions);
 
         this.updateTileSelectionHint();
     }
@@ -684,7 +688,8 @@ export class MobileRenderer {
                 callback(tile);
             },
             fallback: null,
-            confirmUsesActionButton: true
+            confirmUsesActionButton: true,
+            baseLabel: "Discard"
         };
 
         this.handRenderer.setSelectionBehavior({
@@ -726,6 +731,9 @@ export class MobileRenderer {
         this.setPrimaryEnabled(ready);
         if (this.actionButton && this.pendingPrompt.confirmUsesActionButton) {
             this.actionButton.disabled = !ready;
+            // Update action button label to show selection count
+            const baseLabel = this.pendingPrompt.baseLabel || "Confirm";
+            this.actionButton.textContent = `${baseLabel} (${count}/${max})`;
         }
     }
 

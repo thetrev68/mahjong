@@ -74,23 +74,15 @@ export class DiscardPile {
      * @param {number} player - Player who discarded (0-3)
      */
     addDiscard(tile, player) {
-        // Add to discards array
+        // Add to discards array in chronological order (no sorting)
         const newDiscard = { tile, player };
         this.discards.push(newDiscard);
         this.lastDiscard = newDiscard;
 
-        // Sort the discards
-        this.discards.sort((a, b) => {
-            if (a.tile.suit !== b.tile.suit) {
-                return a.tile.suit - b.tile.suit;
-            }
-            return a.tile.number - b.tile.number;
-        });
-
         // Re-render the discard pile, highlighting the new tile
         this.rerender(newDiscard);
 
-        // Scroll to latest if needed
+        // Scroll to latest tile (rightmost)
         this.scrollToLatest();
     }
 
@@ -207,11 +199,10 @@ export class DiscardPile {
     }
 
     /**
-     * Scroll to bottom of discard pile
+     * Scroll to rightmost tile (latest discard)
      */
     scrollToLatest() {
         this.element.scrollTo({
-            top: this.element.scrollHeight,
             left: this.element.scrollWidth,
             behavior: "smooth"
         });
