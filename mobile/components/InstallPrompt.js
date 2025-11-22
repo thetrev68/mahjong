@@ -168,8 +168,8 @@ class InstallPrompt {
                     <h3 class="install-banner__title">Install Mahjong</h3>
                     <p class="install-banner__message">${
                         isIOS
-                            ? 'Tap <strong style="font-size: 20px;">⎙</strong> then "Add to Home Screen"'
-                            : 'Add to home screen for quick access'
+                            ? "Tap <strong style=\"font-size: 20px;\">⎙</strong> then \"Add to Home Screen\""
+                            : "Add to home screen for quick access"
                     }</p>
                 </div>
                 <div class="install-banner__actions">
@@ -177,9 +177,9 @@ class InstallPrompt {
                         <button class="install-banner__btn install-banner__btn--install" id="install-btn">
                             Install
                         </button>
-                    ` : ''}
+                    ` : ""}
                     <button class="install-banner__btn install-banner__btn--dismiss" id="dismiss-btn">
-                        ${isIOS ? 'Got It' : 'Not Now'}
+                        ${isIOS ? "Got It" : "Not Now"}
                     </button>
                 </div>
             </div>

@@ -332,7 +332,13 @@ export class HandRenderer {
         }
 
         const isSelected = this.selectedIndices.has(selectionKey);
-        const { mode, maxSelectable, allowToggle } = this.selectionBehavior;
+        const { mode, maxSelectable, allowToggle, validationMode } = this.selectionBehavior;
+
+        // Validate tile for selection based on validation mode
+        if (!isSelected && !this._validateTileForMode(index, validationMode)) {
+            // Tile cannot be selected in this mode - ignore click
+            return;
+        }
 
         if (mode === "single") {
             if (isSelected && allowToggle !== false) {
@@ -649,5 +655,46 @@ export class HandRenderer {
             return tile.clone();
         }
         return TileData.fromJSON(tile);
+    }
+
+    /**
+     * Validate whether a tile can be selected in the current validation mode
+     * @private
+     * @param {number} index - Index of the tile to validate
+     * @param {string} validationMode - Validation mode: "charleston", "courtesy", "play", or undefined
+     * @returns {boolean} True if tile passes all mode-specific rules
+     */
+    _validateTileForMode(index, validationMode) {
+        if (!validationMode) {
+            return true; // No validation mode - allow any tile
+        }
+
+        // Get tile data from current hand
+        if (!this.currentHandData || !Array.isArray(this.currentHandData.tiles)) {
+            return false;
+        }
+
+        const tile = this.currentHandData.tiles[index];
+        if (!tile) {
+            return false;
+        }
+
+        switch (validationMode) {
+        case "charleston":
+        case "courtesy":
+            // Cannot select jokers or blanks during Charleston or courtesy pass
+            if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
+                return false;
+            }
+            return true;
+
+        case "play":
+            // Any tile can be discarded during normal play
+            return true;
+
+        default:
+            // Unknown mode - allow any tile
+            return true;
+        }
     }
 }

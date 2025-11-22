@@ -140,9 +140,9 @@ export class GameController extends EventEmitter {
         // Initialize 4 players
         this.players = [
             new PlayerData(PLAYER.BOTTOM, "You"),
-            new PlayerData(PLAYER.RIGHT, "Opponent 1"),
-            new PlayerData(PLAYER.TOP, "Opponent 2"),
-            new PlayerData(PLAYER.LEFT, "Opponent 3")
+            new PlayerData(PLAYER.RIGHT, "Bot Bob"),
+            new PlayerData(PLAYER.TOP, "Sally Bot"),
+            new PlayerData(PLAYER.LEFT, "Stephen Bot")
         ];
 
         this.assignPlayerWinds();
@@ -463,9 +463,28 @@ export class GameController extends EventEmitter {
             .filter(p => !p.isHuman)
             .map(p => this.aiEngine.charlestonContinueVote(p.hand));
 
-        const yesVotes = [humanVote === "Yes", ...aiVotes].filter(v => v).length;
+        const allVotes = [humanVote === "Yes", ...aiVotes];
+        const yesVotes = allVotes.filter(v => v).length;
+        const noVotes = allVotes.filter(v => !v).length;
 
-        return yesVotes >= 2;  // Majority wins
+        // Show vote results to all players
+        const continueToPhase2 = yesVotes === 4; // Must be unanimous
+
+        if (continueToPhase2) {
+            const msgEvent = GameEvents.createMessageEvent(
+                "All players voted YES - continuing to Charleston phase 2",
+                "info"
+            );
+            this.emit("MESSAGE", msgEvent);
+        } else {
+            const msgEvent = GameEvents.createMessageEvent(
+                `Vote: ${yesVotes} Yes, ${noVotes} No - skipping Charleston phase 2`,
+                "info"
+            );
+            this.emit("MESSAGE", msgEvent);
+        }
+
+        return continueToPhase2;
     }
 
     /**

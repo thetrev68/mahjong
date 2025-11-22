@@ -531,6 +531,7 @@ export class MobileRenderer {
                     hint: `Select ${data.options?.requiredCount ?? 3} tiles to pass`,
                     min: data.options?.requiredCount ?? 3,
                     max: data.options?.requiredCount ?? 3,
+                    validationMode: "charleston",
                     confirmLabel: "Pass Tiles",
                     cancelLabel: null,
                     fallback: null,
@@ -543,6 +544,7 @@ export class MobileRenderer {
                     hint: `Select ${data.options?.minTiles ?? 1}–${data.options?.maxTiles ?? 3} tiles`,
                     min: data.options?.minTiles ?? 1,
                     max: data.options?.maxTiles ?? 3,
+                    validationMode: "courtesy",
                     confirmLabel: "Confirm",
                     cancelLabel: "Cancel",
                     fallback: () => this.getFallbackTiles(Math.max(1, data.options?.minTiles ?? 1)),
@@ -631,7 +633,8 @@ export class MobileRenderer {
         this.handRenderer.setSelectionBehavior({
             mode: config.max === 1 ? "single" : "multiple",
             maxSelectable: config.max,
-            allowToggle: true
+            allowToggle: true,
+            validationMode: config.validationMode
         });
         this.handRenderer.clearSelection(true);
 
@@ -687,7 +690,8 @@ export class MobileRenderer {
         this.handRenderer.setSelectionBehavior({
             mode: "single",
             maxSelectable: 1,
-            allowToggle: true
+            allowToggle: true,
+            validationMode: "play"
         });
         this.handRenderer.clearSelection(true);
         this.hidePrompt();
@@ -760,7 +764,8 @@ export class MobileRenderer {
         this.handRenderer.setSelectionBehavior({
             mode: "single",
             maxSelectable: 1,
-            allowToggle: true
+            allowToggle: true,
+            validationMode: undefined
         });
     }
 
