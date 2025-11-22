@@ -135,7 +135,7 @@ export class HintsPanel {
 
             // Render pattern visualizations with compact summaries
             let html = "<div class=\"hint-item\">";
-            top3Patterns.forEach((rankHand, index) => {
+            top3Patterns.forEach((rankHand, _index) => {
                 const patternHtml = renderPatternVariation(rankHand, playerTiles, hiddenTiles);
                 const groupDesc = this.compactText(rankHand.group?.groupDescription);
                 const handDesc = this.compactText(rankHand.hand?.description);
