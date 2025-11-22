@@ -213,15 +213,26 @@ async function initializeGame() {
 
     // Listen for settings changes
     window.addEventListener("settingsChanged", (event) => {
-        console.log("Settings changed, will take effect on next game:", event.detail);
+        console.log("Settings changed:", event.detail);
 
         // Show message to user
-        mobileRenderer?.updateStatus("Settings saved! Start a new game for changes to take effect.");
+        mobileRenderer?.updateStatus("Settings saved!");
 
         // Update AI difficulty if changed (can be done immediately)
         if (event.detail.difficulty && aiEngine) {
             aiEngine.difficulty = event.detail.difficulty;
             console.log("AI difficulty updated to:", event.detail.difficulty);
+        }
+
+        // Update GameController settings for next game
+        if (gameController && gameController.settings) {
+            gameController.settings.year = event.detail.cardYear;
+            gameController.settings.difficulty = event.detail.difficulty;
+            gameController.settings.skipCharleston = event.detail.skipCharleston;
+            gameController.settings.trainingMode = event.detail.trainingMode;
+            gameController.settings.trainingTileCount = event.detail.trainingTileCount;
+            gameController.settings.useBlankTiles = event.detail.useBlankTiles;
+            console.log("GameController settings updated:", gameController.settings);
         }
     });
 
