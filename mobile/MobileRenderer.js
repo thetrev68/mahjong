@@ -1,4 +1,6 @@
 import { HandRenderer } from "./renderers/HandRenderer.js";
+import { HandSelectionManager } from "./renderers/HandSelectionManager.js";
+import { HandEventCoordinator } from "./renderers/HandEventCoordinator.js";
 import { DiscardPile } from "./components/DiscardPile.js";
 import { OpponentBar } from "./components/OpponentBar.js";
 import { PlayerRack } from "./components/PlayerRack.js";
@@ -41,9 +43,19 @@ export class MobileRenderer {
         this.statusElement = options.statusElement || null;
         this.subscriptions = [];
 
-        // Pass gameController to HandRenderer so it can subscribe to hint events
-        // HandRenderer needs to listen for HINT_DISCARD_RECOMMENDATIONS to apply red glow
-        this.handRenderer = new HandRenderer(options.handContainer, options.gameController);
+        // Initialize HandRenderer with new architecture (dependency injection)
+        this.handRenderer = new HandRenderer(options.handContainer);
+        this.selectionManager = new HandSelectionManager();
+        this.eventCoordinator = new HandEventCoordinator(
+            options.gameController,
+            this.handRenderer,
+            this.selectionManager
+        );
+
+        // Inject dependencies into HandRenderer
+        this.handRenderer.setSelectionManager(this.selectionManager);
+        this.handRenderer.setEventCoordinator(this.eventCoordinator);
+
         this.discardPile = new DiscardPile(options.discardContainer);
         this.playerRack = new PlayerRack(document.getElementById("player-rack-container"));
         const homePageTilesContainer = document.getElementById("home-page-tiles");
@@ -55,12 +67,14 @@ export class MobileRenderer {
             this.homePageTiles.render();
         }
         this.animationController = new AnimationController();
-        this.handRenderer.setSelectionBehavior({
+
+        // Configure selection behavior via HandSelectionManager
+        this.selectionManager.setSelectionBehavior({
             mode: "single",
             maxSelectable: 1,
             allowToggle: true
         });
-        this.handRenderer.setSelectionListener((selection) => this.onHandSelectionChange(selection));
+        this.selectionManager.setSelectionListener((selection) => this.onHandSelectionChange(selection));
 
         this.opponentBars = this.createOpponentBars(options.opponentContainers || {});
 
@@ -98,6 +112,9 @@ export class MobileRenderer {
         });
         this.subscriptions = [];
         this.handRenderer?.destroy();
+        this.selectionManager = null;
+        this.eventCoordinator?.destroy();
+        this.eventCoordinator = null;
         this.discardPile?.destroy();
         this.homePageTiles?.destroy();
         this.promptUI?.container?.remove();
@@ -376,14 +393,14 @@ export class MobileRenderer {
     _restorePromptState(savedPrompt, clearSelection = false) {
         this.pendingPrompt = savedPrompt;
         if (savedPrompt) {
-            this.handRenderer.setSelectionBehavior({
+            this.selectionManager.setSelectionBehavior({
                 mode: savedPrompt.max === 1 ? "single" : "multiple",
                 maxSelectable: savedPrompt.max,
                 allowToggle: true,
                 validationMode: "play"
             });
             if (clearSelection) {
-                this.handRenderer.clearSelection(true);
+                this.selectionManager.clearSelection(true);
             }
         }
     }
@@ -1085,13 +1102,13 @@ export class MobileRenderer {
             baseLabel: config.confirmLabel ?? "Confirm"
         };
 
-        this.handRenderer.setSelectionBehavior({
+        this.selectionManager.setSelectionBehavior({
             mode: config.max === 1 ? "single" : "multiple",
             maxSelectable: config.max,
             allowToggle: true,
             validationMode: config.validationMode
         });
-        this.handRenderer.clearSelection(true);
+        this.selectionManager.clearSelection(true);
 
         // Build action buttons - only include cancel if explicitly provided
         const actions = config.useActionButton ? [] : [
@@ -1145,13 +1162,13 @@ export class MobileRenderer {
             baseLabel: "Discard"
         };
 
-        this.handRenderer.setSelectionBehavior({
+        this.selectionManager.setSelectionBehavior({
             mode: "single",
             maxSelectable: 1,
             allowToggle: true,
             validationMode: "play"
         });
-        this.handRenderer.clearSelection(true);
+        this.selectionManager.clearSelection(true);
         this.hidePrompt();
 
         this.updateActionButton({
@@ -1221,8 +1238,8 @@ export class MobileRenderer {
     }
 
     resetHandSelection() {
-        this.handRenderer.clearSelection(true);
-        this.handRenderer.setSelectionBehavior({
+        this.selectionManager.clearSelection(true);
+        this.selectionManager.setSelectionBehavior({
             mode: "single",
             maxSelectable: 1,
             allowToggle: true,
