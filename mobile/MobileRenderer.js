@@ -5,6 +5,7 @@ import { DiscardPile } from "./components/DiscardPile.js";
 import { OpponentBar } from "./components/OpponentBar.js";
 import { PlayerRack } from "./components/PlayerRack.js";
 import { AnimationController } from "./animations/AnimationController.js";
+import { CharlestonAnimationSequencer } from "./animations/CharlestonAnimationSequencer.js";
 import { HomePageTiles } from "./components/HomePageTiles.js";
 import { DiscardSelectionModal } from "./components/DiscardSelectionModal.js";
 import { PLAYER, STATE, SUIT } from "../constants.js";
@@ -67,6 +68,13 @@ export class MobileRenderer {
             this.homePageTiles.render();
         }
         this.animationController = new AnimationController();
+
+        // Initialize Charleston animation sequencer
+        this.charlestonSequencer = new CharlestonAnimationSequencer(
+            this.gameController,
+            this.handRenderer,
+            this.animationController
+        );
 
         // Configure selection behavior via HandSelectionManager
         this.selectionManager.setSelectionBehavior({
@@ -138,6 +146,8 @@ export class MobileRenderer {
         this.subscriptions.push(gc.on("CHARLESTON_PHASE", (data) => {
             this.updateStatus(`Charleston ${data.phase}: Pass ${data.round}`);
         }));
+        this.subscriptions.push(gc.on("CHARLESTON_PASS", (data) => this.onCharlestonPass(data)));
+        this.subscriptions.push(gc.on("TILES_RECEIVED", (data) => this.onTilesReceived(data)));
         this.subscriptions.push(gc.on("COURTESY_VOTE", (data) => {
             this.updateStatus(`Player ${data.player} voted ${data.vote} for courtesy pass`);
         }));
@@ -887,6 +897,73 @@ export class MobileRenderer {
 
         // Update blank swap button since discard pile changed
         this.updateBlankSwapButton();
+    }
+
+    /**
+     * Handle Charleston pass animation
+     * @param {Object} data - Charleston pass event data
+     */
+    onCharlestonPass(data) {
+        // Only animate for human player
+        if (data.fromPlayer !== HUMAN_PLAYER) {
+            return;
+        }
+
+        // Get indices of tiles being passed from selection
+        const passingIndices = Array.from(this.selectionManager.getSelectedTileIndices());
+
+        // Trigger animation sequence
+        this.charlestonSequencer.animateCharlestonPass(data, passingIndices);
+    }
+
+    /**
+     * Handle tiles received animation
+     * @param {Object} data - Tiles received event data
+     */
+    onTilesReceived(data) {
+        // Only animate for human player
+        if (data.player !== HUMAN_PLAYER) {
+            return;
+        }
+
+        // Only animate for Charleston context
+        if (data.animation?.type !== "charleston-receive") {
+            return;
+        }
+
+        // Find indices of received tiles in the new hand
+        const receivedIndices = this._findReceivedTileIndices(data.tiles);
+
+        // Trigger animation sequence
+        this.charlestonSequencer.handleTilesReceived(data, receivedIndices);
+    }
+
+    /**
+     * Find indices of received tiles in current hand
+     * @param {Array} receivedTiles - Tiles that were received
+     * @returns {Array<number>} Indices of received tiles in hand
+     * @private
+     */
+    _findReceivedTileIndices(receivedTiles) {
+        if (!this.handRenderer.currentHandData) {
+            return [];
+        }
+
+        const handTiles = this.handRenderer.currentHandData.tiles;
+        const indices = [];
+
+        // Match received tiles to hand tiles
+        // This assumes tiles are added to the end of the hand
+        const startIndex = handTiles.length - receivedTiles.length;
+
+        for (let i = 0; i < receivedTiles.length; i++) {
+            const index = startIndex + i;
+            if (index >= 0 && index < handTiles.length) {
+                indices.push(index);
+            }
+        }
+
+        return indices;
     }
 
     /**
