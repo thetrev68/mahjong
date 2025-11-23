@@ -252,7 +252,9 @@
 .tile-discarding,
 .tile-claiming-pulse,
 .tile-claiming-move,
-.tile-exposing {
+.tile-exposing,
+.tile-charleston-leaving,
+.tile-charleston-arriving {
     will-change: transform, opacity, filter;
     transform: translateZ(0);
     contain: layout style paint;
@@ -271,6 +273,8 @@
     .tile-claiming-pulse,
     .tile-claiming-move,
     .tile-exposing,
+    .tile-charleston-leaving,
+    .tile-charleston-arriving,
     .turn-starting,
     .turn-ending,
     .hand-sorting .mobile-tile,
@@ -279,6 +283,68 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
+}
+
+/* ===== Charleston Pass/Receive Animations ===== */
+
+/* Pass Out Animation - Tiles leaving hand */
+@keyframes charleston-pass-out {
+    0% {
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+
+    30% {
+        transform: translate3d(
+            calc(var(--exit-x, 0px) * 0.3),
+            calc(var(--exit-y, 0px) * 0.3),
+            0
+        ) rotate(5deg) scale(1.05);
+        opacity: 0.9;
+    }
+
+    100% {
+        transform: translate3d(var(--exit-x, 0px), var(--exit-y, 0px), 0)
+                   rotate(15deg) scale(0.5);
+        opacity: 0;
+    }
+}
+
+.tile-charleston-leaving {
+    animation: charleston-pass-out 600ms ease-in-out forwards;
+    will-change: transform, opacity;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}
+
+/* Receive Animation - Tiles arriving in hand */
+@keyframes charleston-receive {
+    0% {
+        transform: translate3d(var(--entry-x, 0px), var(--entry-y, 0px), 0)
+                   rotate(-15deg) scale(0.5);
+        opacity: 0;
+    }
+
+    70% {
+        transform: translate3d(
+            calc(var(--entry-x, 0px) * 0.3),
+            calc(var(--entry-y, 0px) * 0.3),
+            0
+        ) rotate(-5deg) scale(1.05);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+}
+
+.tile-charleston-arriving {
+    animation: charleston-receive 600ms ease-out forwards;
+    will-change: transform, opacity;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
 }
 
 /* ===== Home Page Tiles Animation ===== */
