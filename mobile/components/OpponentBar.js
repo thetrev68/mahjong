@@ -140,6 +140,38 @@ export class OpponentBar {
     }
 
     /**
+     * Add temporary dealing tiles to the opponent bar (for animation)
+     * @param {number} tileCount - Number of tiles to add
+     * @returns {HTMLElement[]} Array of created tile elements
+     */
+    addDealingTiles(tileCount) {
+        const exposuresContainer = this.element.querySelector(".exposures");
+        const tiles = [];
+
+        for (let i = 0; i < tileCount; i++) {
+            const tileEl = document.createElement("div");
+            tileEl.className = "mobile-tile tile-back dealing-tile";
+            tileEl.style.width = "24px";
+            tileEl.style.height = "32px";
+            tileEl.style.display = "inline-block";
+            tileEl.style.marginRight = "2px";
+            exposuresContainer.appendChild(tileEl);
+            tiles.push(tileEl);
+        }
+
+        return tiles;
+    }
+
+    /**
+     * Remove dealing tiles from the opponent bar
+     */
+    clearDealingTiles() {
+        const exposuresContainer = this.element.querySelector(".exposures");
+        const dealingTiles = exposuresContainer.querySelectorAll(".dealing-tile");
+        dealingTiles.forEach(tile => tile.remove());
+    }
+
+    /**
      * Get short label for exposure type
      * @param {string} type - Exposure type (PUNG, KONG, QUINT)
      * @returns {string} Short label

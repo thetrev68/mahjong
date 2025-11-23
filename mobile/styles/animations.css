@@ -300,3 +300,48 @@
     /* Force GPU acceleration */
     /* Transition is set dynamically in JavaScript for precise control */
 }
+
+/* ===== Tile Deal Animation (for initial dealing sequence) ===== */
+@keyframes tile-deal {
+    0% {
+        transform: translate3d(var(--start-x, 0px), var(--start-y, 0px), 0) scale(0.5);
+        opacity: 0;
+    }
+
+    70% {
+        transform: translate3d(
+            calc(var(--start-x, 0px) + var(--movement-dx, 0px) * 0.8),
+            calc(var(--start-y, 0px) + var(--movement-dy, 0px) * 0.8),
+            0
+        ) scale(1.05);
+        opacity: 0.9;
+    }
+
+    100% {
+        transform: translate3d(var(--end-x, 0px), var(--end-y, 0px), 0) scale(1);
+        opacity: 1;
+    }
+}
+
+.tile-dealing {
+    animation: tile-deal var(--tile-deal-duration, 400ms) var(--tile-deal-easing, ease-out) forwards;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}
+
+/* ===== Opponent Tiles Fade Out (after dealing round completes) ===== */
+@keyframes tile-fade-out {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+}
+
+.tile-fading-out {
+    animation: tile-fade-out 300ms ease-in forwards;
+}
