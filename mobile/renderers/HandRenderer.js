@@ -157,6 +157,12 @@ export class HandRenderer {
         tiles.forEach((tileData, index) => {
             const tileButton = this.createTileButton(tileData, index);
 
+            // Register tile with selection manager using stable selection key
+            if (this.selectionManager) {
+                const selectionKey = this.getTileSelectionKey(tileData, index);
+                this.selectionManager.registerTile(index, selectionKey);
+            }
+
             // Check selection via selectionManager
             if (this.selectionManager?.isSelected(index)) {
                 tileButton.classList.add("selected");
@@ -441,5 +447,22 @@ export class HandRenderer {
             return tile.clone();
         }
         return TileData.fromJSON(tile);
+    }
+
+    /**
+     * Generate a stable selection key for a tile
+     * Uses tile.index (unique 0-151) if available, otherwise suit:number:fallback
+     * @param {TileData} tile - Tile data
+     * @param {number} fallbackIndex - Fallback index if tile.index unavailable
+     * @returns {string} Selection key
+     */
+    getTileSelectionKey(tile, fallbackIndex) {
+        if (!tile) {
+            return `missing-${fallbackIndex}`;
+        }
+        if (typeof tile.index === "number" && tile.index >= 0) {
+            return `idx-${tile.index}`;
+        }
+        return `${tile.suit}:${tile.number}:${fallbackIndex}`;
     }
 }
