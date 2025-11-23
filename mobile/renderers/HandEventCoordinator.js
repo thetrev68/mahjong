@@ -91,16 +91,16 @@ export class HandEventCoordinator {
 
   /**
    * Handle TILE_SELECTED event
-   * Routes selection to HandRenderer
+   * Routes selection through SelectionManager
    */
   onTileSelected(data = {}) {
-    if (!this.handRenderer) {
+    if (!this.selectionManager) {
       return;
     }
 
     // Single tile selection
     if (typeof data.index === "number") {
-      this.handRenderer.selectTile(data.index, {
+      this.selectionManager.selectTile(data.index, {
         toggle: data.toggle !== false,
         clearOthers: !!data.exclusive,
         state: data.state
@@ -111,11 +111,11 @@ export class HandEventCoordinator {
     // Multiple tile selection
     if (Array.isArray(data.indices)) {
       if (data.clearExisting) {
-        this.handRenderer.clearSelection();
+        this.selectionManager.clearSelection();
       }
       data.indices.forEach((index) => {
         if (typeof index === "number") {
-          this.handRenderer.selectTile(index, { state: data.state ?? "on", toggle: false });
+          this.selectionManager.selectTile(index, { state: data.state ?? "on", toggle: false });
         }
       });
     }
@@ -186,8 +186,9 @@ export class HandEventCoordinator {
       return;
     }
 
+    const tiles = this.handRenderer.currentHandData?.tiles || [];
     this.handRenderer.tiles.forEach((button, index) => {
-      const key = this.handRenderer.selectionKeyByIndex.get(index);
+      const key = this.getTileSelectionKey(tiles[index], index);
       if (!key) {
         button.classList.remove("tile--hint-discard");
         return;
