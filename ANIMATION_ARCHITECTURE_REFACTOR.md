@@ -32,16 +32,16 @@
 
 ### Phase 1B: Charleston Animations (IN PROGRESS 🟡)
 
-| Task | Status | Owner | Est. Lines | Files |
-|------|--------|-------|------------|-------|
-| 1B.1 Create CharlestonAnimationSequencer.js | ⚪ Not Started | Sonnet | ~300 | 1 new |
-| 1B.2 Add CSS animations (pass/receive) | ⚪ Not Started | Haiku | ~100 | 1 modified |
-| 1B.3 Update GameController events | ⚪ Not Started | Sonnet | ~50 | 2 modified |
-| 1B.4 Wire MobileRenderer → Sequencer | ⚪ Not Started | Sonnet | ~60 | 1 modified |
-| 1B.5 Implement FLIP sort animation | ⚪ Not Started | Haiku | ~80 | 2 modified |
-| 1B.6 Integration testing (3 directions) | ⚪ Not Started | Sonnet | - | - |
-| 1B.7 Animation timing refinement | ⚪ Not Started | Sonnet | - | - |
-| 1B.8 Glow persistence validation | ⚪ Not Started | Sonnet | - | - |
+| Task | Status | Owner | Lines | Files | Commit |
+|------|--------|-------|-------|-------|--------|
+| 1B.1 Create CharlestonAnimationSequencer.js | 🟢 Complete | Sonnet | 298 | 1 new | [af73155] |
+| 1B.2 Add CSS animations (pass/receive) | 🟢 Complete | Haiku | +97 | 1 modified | [d7022d6] |
+| 1B.3 Update GameController events | 🟢 Complete | Sonnet | +24/-1 | 1 modified | [0ba7aad] |
+| 1B.4 Wire MobileRenderer → Sequencer | 🟢 Complete | Sonnet | +77 | 1 modified | [bcb0241] |
+| 1B.5 Implement FLIP sort animation | 🟢 Complete | Haiku | (in 1B.1) | - | [af73155] |
+| 1B.6 Integration testing (3 directions) | ⚪ Not Started | Sonnet | - | - | - |
+| 1B.7 Animation timing refinement | ⚪ Not Started | Sonnet | - | - | - |
+| 1B.8 Glow persistence validation | ⚪ Not Started | Sonnet | - | - | - |
 
 **Legend:** ⚪ Not Started | 🟡 In Progress | 🟢 Complete | 🔴 Blocked
 
