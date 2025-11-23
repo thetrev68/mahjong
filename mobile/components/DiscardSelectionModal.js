@@ -1,4 +1,3 @@
-import { TileData } from "../../core/models/TileData.js";
 import { tileSprites } from "../utils/tileSprites.js";
 
 /**
@@ -9,7 +8,7 @@ import { tileSprites } from "../utils/tileSprites.js";
  */
 export class DiscardSelectionModal {
     /**
-     * @param {TileData[]} discards - Array of available discard tiles
+     * @param {Object[]} discards - Array of available discard tiles
      * @param {Function} onSelect - Callback when tile selected: (tileData) => void
      * @param {Function} onCancel - Callback when cancelled: () => void
      */
@@ -62,7 +61,7 @@ export class DiscardSelectionModal {
         document.body.appendChild(this.element);
 
         // Trigger animation
-        requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
             this.element.classList.add("discard-selection-modal--visible");
         });
     }
