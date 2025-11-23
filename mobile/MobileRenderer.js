@@ -68,6 +68,7 @@ export class MobileRenderer {
         this.drawButton = document.getElementById("draw-btn");
         this.sortButton = document.getElementById("sort-btn");
         this.jokerButton = document.getElementById("exchange-joker-btn");
+        this.mahjongButton = document.getElementById("mahjong-btn");
 
         this.promptUI = this.createPromptUI(options.promptRoot || document.body);
         this.pendingPrompt = null;
@@ -191,6 +192,7 @@ export class MobileRenderer {
         if (sortBtn) sortBtn.addEventListener("click", () => this.onSortClicked());
         if (swapBlankBtn) swapBlankBtn.addEventListener("click", () => this.handleBlankSwap());
         if (jokerBtn) jokerBtn.addEventListener("click", () => this.handleJokerSwap());
+        if (this.mahjongButton) this.mahjongButton.addEventListener("click", () => this.declareMahjong());
         // Note: actionButton is controlled exclusively by updateActionButton method
         // to avoid double-binding with onclick assignments
     }
@@ -266,6 +268,42 @@ export class MobileRenderer {
     }
 
     /**
+     * Check if mahjong is available for the human player
+     * @returns {boolean} True if player has a valid winning hand
+     */
+    canDeclareMahjong() {
+        const humanPlayer = this.gameController.players?.[HUMAN_PLAYER];
+        if (!humanPlayer) return false;
+
+        // Must have exactly 14 tiles
+        if (humanPlayer.hand.getLength() !== 14) return false;
+
+        // Check if hand is valid using card validator
+        if (!this.gameController.cardValidator) return false;
+
+        const tiles = humanPlayer.hand.tiles;
+        const allHidden = humanPlayer.hand.exposures.length === 0;
+        const validationResult = this.gameController.cardValidator.validateHand(tiles, allHidden);
+
+        return validationResult && validationResult.valid;
+    }
+
+    /**
+     * Declare mahjong (player wins)
+     */
+    declareMahjong() {
+        if (!this.canDeclareMahjong()) {
+            this.showAlert("Invalid Hand", "You don't have a valid mahjong hand.");
+            return;
+        }
+
+        // Set game result and end game
+        this.gameController.gameResult.mahjong = true;
+        this.gameController.gameResult.winner = HUMAN_PLAYER;
+        this.gameController.endGame("mahjong");
+    }
+
+    /**
      * Update joker swap button visibility based on game state
      */
     updateJokerSwapButton() {
@@ -294,6 +332,22 @@ export class MobileRenderer {
         const blankRuleEnabled = this.gameController.settings?.useBlankTiles ?? false;
 
         swapBtn.style.display = (hasBlankTiles && hasDiscards && isValidState && blankRuleEnabled) ? "flex" : "none";
+    }
+
+    /**
+     * Update mahjong button visibility based on game state
+     */
+    updateMahjongButton() {
+        const mahjongBtn = this.mahjongButton;
+        if (!mahjongBtn) return;
+
+        const canDeclare = this.canDeclareMahjong();
+        const invalidStates = [STATE.INIT, STATE.DEAL, STATE.CHARLESTON1, STATE.CHARLESTON2,
+                              STATE.CHARLESTON_QUERY, STATE.COURTESY_QUERY, STATE.COURTESY];
+        const isValidState = !invalidStates.includes(this.gameController.state);
+        const isHumanTurn = this.gameController.currentPlayer === HUMAN_PLAYER;
+
+        mahjongBtn.style.display = (canDeclare && isValidState && isHumanTurn) ? "flex" : "none";
     }
 
     /**
@@ -508,6 +562,7 @@ export class MobileRenderer {
 
         this.updateJokerSwapButton();
         this.updateBlankSwapButton();
+        this.updateMahjongButton();
         this.updateActionButtonStateForGame(data.newState);
     }
 
@@ -536,6 +591,8 @@ export class MobileRenderer {
             this.updateJokerSwapButton();
             // Update blank swap button visibility
             this.updateBlankSwapButton();
+            // Update mahjong button visibility
+            this.updateMahjongButton();
 
             // If we just drew a tile (hand size increased to 14), animate it
             // This is a heuristic since we don't get explicit "DRAWN" event with tile data here
@@ -709,6 +766,8 @@ export class MobileRenderer {
         this.updateJokerSwapButton();
         // Update blank swap button visibility as hand may have changed
         this.updateBlankSwapButton();
+        // Update mahjong button visibility as hand may have changed
+        this.updateMahjongButton();
     }
 
     /**
