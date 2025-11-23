@@ -471,6 +471,8 @@ export class HandRenderer {
         if (typeof tile.index === "number" && tile.index >= 0) {
             return `idx-${tile.index}`;
         }
-        return `${tile.suit}:${tile.number}:${fallbackIndex}`;
+        const suit = tile.suit ?? "unknown";
+        const number = tile.number ?? "unknown";
+        return `${suit}:${number}:${fallbackIndex}`;
     }
 }
