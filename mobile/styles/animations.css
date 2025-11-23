@@ -291,8 +291,8 @@
 
 .home-page-tile {
     position: absolute;
-    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: transform;
     transform: translateZ(0);
     /* Force GPU acceleration */
+    /* Transition is set dynamically in JavaScript for precise control */
 }
