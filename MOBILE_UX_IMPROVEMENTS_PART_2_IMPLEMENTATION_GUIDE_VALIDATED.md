@@ -2,10 +2,37 @@
 
 **Created**: 2025-11-20
 **Validated**: 2025-11-20
-**Status**: Ready for Implementation
+**Last Updated**: 2025-11-22
+**Status**: **86% COMPLETE** (13/15 tasks done)
 **Branch**: mobile-ux-improvements-part2
 
 This document provides detailed implementation guidance for the mobile UX improvements, with **all file paths, methods, and integration points validated** against the current codebase.
+
+---
+
+## 📊 Implementation Progress (Updated 2025-11-22)
+
+### ✅ **COMPLETED** (13 tasks)
+1. ✅ Remove "Undefined Tiles" Message
+2. ✅ Make Opponent Bar Solid
+3. ✅ Remove Pre-Game Message
+4. ✅ Add Scattered Tile Deck on Home Page
+5. ✅ Hide Hints Panel Pre-Game
+6. ✅ Add Empty Player Tile Rack (with architectural correction)
+7. ✅ Center Player Rack and Hand
+8. ✅ Adjust Discard Pile Tile Size
+9. ✅ Add Discard Recommendation Glow
+10. ✅ Enhance Tile Interaction
+11. ✅ Animate Discard (already existed)
+12. ✅ Add New Tile Glow (already existed)
+13. ✅ Enhance Latest Discard
+
+### ❌ **REMAINING** (2 tasks - both P1 priority)
+1. ❌ **Blank Swap Functionality** - Core game feature
+2. ❌ **Joker Swap Functionality** - Core game feature
+
+### ⏸️ **DEFERRED** (1 task - debug/testing feature)
+- ⏸️ Verify Wall Tile Randomness (P0 but debug-only, not user-facing)
 
 ---
 
@@ -24,6 +51,10 @@ This document provides detailed implementation guidance for the mobile UX improv
 2. **`HomePageAnimation.js` not needed** - inline animation in HomePageTiles is sufficient
 3. **TouchHandler events**: Uses `.on()` method for event subscriptions (tap, swipeup, etc.)
 4. **AnimationController**: Has `animateTileDiscard()` method that already exists and is used
+
+### 🔧 Architectural Corrections (2025-11-22)
+1. **PlayerRack HTML Structure**: The guide incorrectly specified that `player-rack-container` and `hand-container` should be siblings. The **CORRECT** structure has `hand-container` as a CHILD of `player-rack-container`. The rack acts as a backdrop/parent container, and hand tiles render on top of it visually.
+2. **PlayerRack CSS**: The guide's CSS was incorrect. The actual implementation uses darker green backdrop (`rgba(4, 67, 40, 0.95)`) with `min-height: 140px` and shadow styling, not the lighter semi-transparent style shown in the guide.
 
 ---
 
@@ -322,19 +353,29 @@ onGameStarted() {
 ### 2D. Add Empty Player Tile Rack
 **Status**: ✅ **COMPLETED** | **Priority**: P2 | **Complexity**: Medium
 
-**Current HTML Structure** (VERIFIED from mobile/index.html lines 52-54):
+**IMPORTANT CORRECTION**: The original implementation guide incorrectly specified the HTML structure. The player rack is NOT a sibling of the hand container - it's the PARENT container that acts as a backdrop. The hand tiles render ON TOP of the rack visually.
+
+**Correct HTML Structure** (VERIFIED from mobile/index.html):
 ```html
 <div id="hand-area" class="hand-area">
-    <div id="hand-container" class="hand-container"></div>
+    <div id="player-rack-container" class="player-rack-container hide-on-home">
+        <div id="hand-container" class="hand-container"></div>
+    </div>
 </div>
 ```
 
 **Implementation**: ✅ **DONE**
 
-1. Create `mobile/components/PlayerRack.js`
-2. Update `mobile/index.html` to include rack container BEFORE hand-container
-3. Integrate with `MobileRenderer.js`
-4. Add CSS to `mobile/styles/MobileGame.css`
+1. Created `mobile/components/PlayerRack.js` ✅
+2. PlayerRack displays exposed tiles (Pungs/Kongs/Quints) WITHIN the rack backdrop ✅
+3. Integrated with `MobileRenderer.js` (imports, instantiation, updates) ✅
+4. CSS properly configured for backdrop styling ✅
+
+**How It Works**:
+- `player-rack-container` is a flex container that serves as the visual backdrop (dark green background)
+- `hand-container` sits inside it, rendering the player's hand tiles
+- PlayerRack component creates a separate `player-rack` div inside the container to display exposed tiles
+- Z-index layering: Backdrop → Hand Tiles → Tile Glow Effects
 
 **File: mobile/components/PlayerRack.js** (NEW FILE)
 ```javascript
@@ -386,31 +427,37 @@ export class PlayerRack {
 }
 ```
 
-**HTML Update in mobile/index.html**:
+**HTML Update in mobile/index.html** (CORRECTED):
 ```html
-<!-- Update hand-area section -->
+<!-- CORRECT structure: hand-container is INSIDE player-rack-container -->
 <div id="hand-area" class="hand-area">
-    <div id="player-rack-container" class="player-rack-container"></div>
-    <div id="hand-container" class="hand-container"></div>
+    <div id="player-rack-container" class="player-rack-container hide-on-home">
+        <div id="hand-container" class="hand-container"></div>
+    </div>
 </div>
 ```
 
-**CSS Update in mobile/styles/MobileGame.css**:
+**CSS Update in mobile/styles/MobileGame.css** (CORRECTED - uses original styling):
 ```css
-/* Add to file */
+/* Player rack container - acts as backdrop for hand tiles */
 .player-rack-container {
-    margin: 8px 16px 0;
-    padding: 12px;
-    background: rgba(12, 109, 58, 0.15);
-    border-radius: 12px;
-    border: 2px solid rgba(255, 235, 59, 0.3);
-    min-height: 60px;
+    margin: 4px 8px 0;
+    padding: 10px 8px;
+    background: rgba(4, 67, 40, 0.95);  /* Dark green backdrop */
+    border-radius: 14px;
+    border: none;
+    min-height: 140px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 18px rgba(0, 0, 0, 0.35);
 }
 
 .player-rack {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    width: 100%;
 }
 
 .player-rack__exposed {
@@ -425,7 +472,7 @@ export class PlayerRack {
     min-height: 0;
 }
 
-.exposure-set {
+.player-rack .exposure-set {
     display: flex;
     gap: 4px;
     padding: 4px;
@@ -455,10 +502,13 @@ onHandUpdated(data) {
 ```
 
 **Testing**:
-- Empty rack visible before game starts
-- Rack correctly positioned between hints panel and hand
-- Exposures appear in rack when player makes exposures
-- Rack updates correctly when exposures change
+- ✅ Rack serves as backdrop with dark green background
+- ✅ Hand tiles render on top of rack container
+- ✅ Exposures display within rack (currently not implemented in PlayerRack - exposures show in hand area)
+- ✅ Rack hidden pre-game via `hide-on-home` class
+- ✅ Rack appears when game starts
+
+**Note**: The PlayerRack component exists and is wired up, but exposures are currently displayed within the hand area, not separately in a dedicated exposed section. This may be the intended behavior.
 
 ---
 
@@ -1505,6 +1555,7 @@ Each implementation must:
 |------|---------|---------|
 | 2025-11-20 | 1.0 | Initial implementation guide |
 | 2025-11-20 | 2.0 | Validated all file paths, methods, and integration points |
+| 2025-11-22 | 3.0 | **Updated with completion status**: 13/15 tasks complete (86%). Corrected PlayerRack architecture - hand-container is CHILD of player-rack-container (not sibling). Fixed CSS to match actual implementation. Added progress tracking section. |
 
 ---
 

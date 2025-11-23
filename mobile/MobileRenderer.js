@@ -1,6 +1,7 @@
 import { HandRenderer } from "./renderers/HandRenderer.js";
 import { DiscardPile } from "./components/DiscardPile.js";
 import { OpponentBar } from "./components/OpponentBar.js";
+import { PlayerRack } from "./components/PlayerRack.js";
 import { AnimationController } from "./animations/AnimationController.js";
 import { HomePageTiles } from "./components/HomePageTiles.js";
 import { PLAYER, STATE } from "../constants.js";
@@ -43,6 +44,7 @@ export class MobileRenderer {
         // HandRenderer needs to listen for HINT_DISCARD_RECOMMENDATIONS to apply red glow
         this.handRenderer = new HandRenderer(options.handContainer, options.gameController);
         this.discardPile = new DiscardPile(options.discardContainer);
+        this.playerRack = new PlayerRack(document.getElementById("player-rack-container"));
         const homePageTilesContainer = document.getElementById("home-page-tiles");
         if (!homePageTilesContainer) {
             console.warn("MobileRenderer: home-page-tiles container not found");
@@ -293,6 +295,11 @@ export class MobileRenderer {
             const handData = HandData.fromJSON(data.hand);
             this.latestHandSnapshot = handData;
             this.handRenderer.render(handData);
+
+            // Update player rack with exposures
+            if (this.playerRack) {
+                this.playerRack.update(data.hand);
+            }
 
             // If we just drew a tile (hand size increased to 14), animate it
             // This is a heuristic since we don't get explicit "DRAWN" event with tile data here
