@@ -381,6 +381,41 @@ export class AnimationController {
     }
 
     /**
+     * Apply blue glow animation to received tiles (Charleston/Courtesy)
+     * Uses the same pulse-blue animation as newly drawn tiles for consistency
+     * Glow persists until manually removed
+     * @param {HTMLElement} element - The tile element to glow
+     * @returns {void}
+     */
+    applyReceivedTileGlow(element) {
+        if (!element) {
+            return;
+        }
+        element.classList.add("tile--newly-drawn");
+    }
+
+    /**
+     * Remove blue glow animation from a tile
+     * @param {HTMLElement} element - The tile element
+     * @returns {void}
+     */
+    removeReceivedTileGlow(element) {
+        if (!element) {
+            return;
+        }
+        element.classList.remove("tile--newly-drawn");
+    }
+
+    /**
+     * Remove glow from multiple tile elements
+     * @param {HTMLElement[]} elements - Array of tile elements
+     * @returns {void}
+     */
+    removeReceivedTileGlowFromAll(elements) {
+        toElementArray(elements).forEach(el => this.removeReceivedTileGlow(el));
+    }
+
+    /**
      * Runs a single CSS animation class and resolves when finished.
      * @param {HTMLElement} element
      * @param {string} className

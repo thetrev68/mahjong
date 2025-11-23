@@ -46,3 +46,54 @@ The dealing process occurs in three distinct phases, executed sequentially.
     *   **Player 0:** 14 tiles, face up, and sorted.
     *   **Players 1, 2, 3:** 13 tiles each, face down.
 *   **Game State:** The game is now waiting for Player 0 to make the first discard.
+
+---
+
+## Mobile Version Considerations
+
+**Status:** Not yet implemented. Mobile currently shows tiles instantly (no animation).
+
+**Key Architectural Challenges Identified:**
+
+1. **HandRenderer Lifecycle Conflict**
+   - Desktop uses Phaser sprites that persist and can be positioned independently
+   - Mobile uses HTML/CSS with `HandRenderer.render()` that calls `clearTiles()` before re-rendering
+   - This clear-then-render pattern conflicts with incremental tile-by-tile animation
+
+2. **Opponent Display Constraints**
+   - Mobile opponent bars don't have space to show 14 tiles
+   - Solution: Show 4 tiles temporarily, fade out before next 4 arrive
+   - Requires temporary tile elements that don't interfere with main hand rendering
+
+3. **Event Flow Issues**
+   - `TILES_DEALT` event triggers animation
+   - Must emit `DEALING_COMPLETE` when done
+   - GameController then emits `HAND_UPDATED` which can trigger re-renders
+   - Need flag to prevent `HAND_UPDATED` from clearing animated tiles mid-sequence
+
+**Recommended Approach for Future Implementation:**
+
+1. **Option A: Separate Animation Layer**
+   - Create overlay container for dealing animation only
+   - Animate tiles in overlay, independent of HandRenderer
+   - When complete, hide overlay and show final hand instantly
+   - Pro: No conflict with HandRenderer lifecycle
+   - Con: Requires creating duplicate tile visuals temporarily
+
+2. **Option B: Refactor HandRenderer**
+   - Add "append-only" mode that doesn't clear tiles
+   - Track which tiles are "real" vs "animating"
+   - Switch to normal mode after dealing completes
+   - Pro: Single source of truth for tiles
+   - Con: Significant refactor of core rendering logic
+
+3. **Option C: Simplified Animation**
+   - Skip incremental tile-by-tile animation
+   - Animate entire hand appearing at once with a "dealing" effect
+   - Much simpler to implement, still provides visual feedback
+   - Pro: Minimal code changes, low risk
+   - Con: Less authentic to real mahjong dealing
+
+**Reference Implementation:**
+- Desktop version: [desktop/adapters/PhaserAdapter.js:262-386](desktop/adapters/PhaserAdapter.js#L262-L386)
+- Key difference: Phaser sprites don't auto-clear like HTML elements do
