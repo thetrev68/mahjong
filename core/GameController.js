@@ -420,7 +420,12 @@ export class GameController extends EventEmitter {
                     toPlayer,
                     directionName,
                     tilesToPass.map(t => ({suit: t.suit, number: t.number})),
-                    {duration: 400}
+                    {
+                        type: "charleston-pass",
+                        direction: directionName,
+                        duration: 600,
+                        easing: "ease-in-out"
+                    }
                 );
                 this.emit("CHARLESTON_PASS", passEvent);
             }
@@ -434,6 +439,24 @@ export class GameController extends EventEmitter {
                 charlestonPassArray[fromPlayer].forEach(tile => {
                     this.players[toPlayer].hand.addTile(tile);
                 });
+
+                // Emit tiles received event (for animation coordination)
+                const receivedTiles = charlestonPassArray[fromPlayer].map(t => ({
+                    suit: t.suit,
+                    number: t.number
+                }));
+                const tilesReceivedEvent = GameEvents.createTilesReceivedEvent(
+                    toPlayer,
+                    receivedTiles,
+                    fromPlayer,
+                    {
+                        type: "charleston-receive",
+                        direction: directionName,
+                        duration: 600,
+                        glow: {persist: true, color: 0x1e90ff}
+                    }
+                );
+                this.emit("TILES_RECEIVED", tilesReceivedEvent);
 
                 // Emit hand updated for receiving player
                 const handEvent = GameEvents.createHandUpdatedEvent(
