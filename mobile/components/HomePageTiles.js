@@ -63,20 +63,23 @@ export class HomePageTiles {
         if (this.isAnimating || this.tiles.length === 0) return;
         this.isAnimating = true;
 
-        // Funnel point: top-left corner (-20vw, -20vh)
-        const exitX = -20;
-        const exitY = -20;
-
-        // Animate all tiles flying off to the same funnel point
+        // Animate all tiles flying off to randomized exit points in top-left corner
+        // This creates a funnel effect similar to desktop version
         const animations = this.tiles.map((tile) =>
             new Promise(resolve => {
-                const duration = 1200 + Math.random() * 600; // Slower: 1200-1800ms
+                const duration = 1200 + Math.random() * 800; // 1200-2000ms like desktop
                 const delay = Math.random() * 300;
 
+                // Randomized exit point in top-left corner (like desktop: -200 to -50 pixels)
+                // Convert to viewport units for responsive design
+                const exitX = -15 - Math.random() * 10; // -15vw to -25vw
+                const exitY = -15 - Math.random() * 10; // -15vh to -25vh
+
                 window.requestAnimationFrame(() => {
-                    tile.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`;
-                    // All tiles converge to the same exit point
-                    tile.style.transform = `translate(${exitX}vw, ${exitY}vh) rotate(${Math.random() * 360}deg)`;
+                    // Use cubic-bezier for curved path effect (approximates desktop's Bezier curves)
+                    tile.style.transition = `transform ${duration}ms cubic-bezier(0.55, 0.085, 0.68, 0.53) ${delay}ms`;
+                    // All tiles converge to randomized points in top-left corner
+                    tile.style.transform = `translate(${exitX}vw, ${exitY}vh) rotate(${Math.random() * 720}deg)`;
                     // Keep tiles visible as they slide off - they'll be clipped by overflow:hidden
                 });
 
