@@ -124,6 +124,86 @@ export class AnimationController {
     }
 
     /**
+     * Animate a tile being dealt from wall to hand/opponent rack
+     * @param {HTMLElement} tileElement - The tile DOM element
+     * @param {number} playerIndex - Player index (0=human, 1-3=opponents)
+     * @param {Object} startPos - {x, y} start position (wall location)
+     * @param {Object} endPos - {x, y} end position (hand/opponent rack)
+     * @returns {Promise} Resolves when animation completes
+     */
+    animateTileDeal(tileElement, _playerIndex = 0, startPos = null, endPos = null) {
+        return new Promise(resolve => {
+            if (!tileElement) {
+                resolve();
+                return;
+            }
+
+            this._resetElementAnimation(tileElement, TILE_ANIMATION_CLASSES);
+
+            // Calculate positions if not provided
+            const actualEndPos = endPos || getElementCenterPosition(tileElement);
+            const actualStartPos = startPos || {
+                x: window.innerWidth / 2,
+                y: -50 // Start from top of screen
+            };
+
+            // Calculate movement for smooth animation
+            const movement = calculateMovement(actualStartPos, actualEndPos);
+            
+            const dealDuration = this.duration + 50;
+            const cssVars = {
+                "--start-x": toPx(actualStartPos.x),
+                "--start-y": toPx(actualStartPos.y),
+                "--end-x": toPx(actualEndPos.x),
+                "--end-y": toPx(actualEndPos.y),
+                "--movement-dx": toPx(movement.dx),
+                "--movement-dy": toPx(movement.dy),
+                "--tile-deal-duration": `${dealDuration}ms`,
+                "--tile-deal-easing": this.easing
+            };
+
+            this._setCssVariables(tileElement, cssVars);
+            this._applyAnimationClass(tileElement, "tile-dealing");
+
+            this._scheduleTimer(tileElement, dealDuration, () => {
+                tileElement.classList.remove("tile-dealing");
+                this._clearCssVariables(tileElement, Object.keys(cssVars));
+                resolve();
+            });
+        });
+    }
+
+    /**
+     * Animate opponent tiles fading out after dealing
+     * @param {HTMLElement[]} tileElements - Array of tile elements to fade out
+     * @returns {Promise} Resolves when animation completes
+     */
+    animateOpponentTilesFadeOut(tileElements) {
+        const tiles = toElementArray(tileElements);
+        
+        return new Promise(resolve => {
+            if (!tiles.length) {
+                resolve();
+                return;
+            }
+
+            const fadeDuration = 300;
+            tiles.forEach(tile => {
+                this._resetElementAnimation(tile, ["tile-fading-out"]);
+                this._applyAnimationClass(tile, "tile-fading-out");
+            });
+
+            const anchor = tiles[0];
+            this._scheduleTimer(anchor, fadeDuration, () => {
+                tiles.forEach(tile => {
+                    tile.classList.remove("tile-fading-out");
+                });
+                resolve();
+            });
+        });
+    }
+
+    /**
      * Animate a tile being discarded from hand to discard pile
      * @param {HTMLElement} tileElement - The tile DOM element
      * @param {Object} targetPos - {x, y} target position in discard pile (optional, will use current position)
