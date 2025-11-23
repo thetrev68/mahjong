@@ -63,21 +63,34 @@ export class HomePageTiles {
         if (this.isAnimating || this.tiles.length === 0) return;
         this.isAnimating = true;
 
-        // Funnel point: top-left corner (-20vw, -20vh)
-        const exitX = -20;
-        const exitY = -20;
+        // Get viewport dimensions for calculating exit points
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
 
-        // Animate all tiles flying off to the same funnel point
+        // Animate all tiles flying off to randomized exit points in top-left corner
+        // This creates a funnel effect similar to desktop version
         const animations = this.tiles.map((tile) =>
             new Promise(resolve => {
-                const duration = 1200 + Math.random() * 600; // Slower: 1200-1800ms
+                const duration = 1200 + Math.random() * 800; // 1200-2000ms like desktop
                 const delay = Math.random() * 300;
 
+                // Get current position from left/top CSS properties
+                const currentLeft = parseFloat(tile.style.left) * viewportWidth / 100;
+                const currentTop = parseFloat(tile.style.top) * viewportHeight / 100;
+
+                // Calculate exit point off screen (top-left corner, well beyond edge)
+                const exitX = -viewportWidth * 0.3 + Math.random() * (-150); // Way off screen
+                const exitY = -viewportHeight * 0.3 + Math.random() * (-150); // Way off screen
+
+                // Calculate total translation needed (from current position to exit point)
+                const translateX = exitX - currentLeft;
+                const translateY = exitY - currentTop;
+
                 window.requestAnimationFrame(() => {
-                    tile.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`;
-                    // All tiles converge to the same exit point
-                    tile.style.transform = `translate(${exitX}vw, ${exitY}vh) rotate(${Math.random() * 360}deg)`;
-                    tile.style.opacity = "0";
+                    // Use ease-in cubic for acceleration toward exit point
+                    tile.style.transition = `transform ${duration}ms cubic-bezier(0.55, 0.085, 0.68, 0.53) ${delay}ms`;
+                    // Move from current position to exit point with spinning
+                    tile.style.transform = `translate(${translateX}px, ${translateY}px) rotate(${Math.random() * 720 + 360}deg)`;
                 });
 
                 setTimeout(() => {

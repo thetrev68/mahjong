@@ -4,6 +4,7 @@ import { OpponentBar } from "./components/OpponentBar.js";
 import { PlayerRack } from "./components/PlayerRack.js";
 import { AnimationController } from "./animations/AnimationController.js";
 import { HomePageTiles } from "./components/HomePageTiles.js";
+import { DiscardSelectionModal } from "./components/DiscardSelectionModal.js";
 import { PLAYER, STATE, SUIT } from "../constants.js";
 import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
@@ -67,6 +68,7 @@ export class MobileRenderer {
         this.drawButton = document.getElementById("draw-btn");
         this.sortButton = document.getElementById("sort-btn");
         this.jokerButton = document.getElementById("exchange-joker-btn");
+        this.mahjongButton = document.getElementById("mahjong-btn");
 
         this.promptUI = this.createPromptUI(options.promptRoot || document.body);
         this.pendingPrompt = null;
@@ -118,6 +120,7 @@ export class MobileRenderer {
         this.subscriptions.push(gc.on("DISCARD_CLAIMED", (data) => this.onTileClaimed(data)));
         this.subscriptions.push(gc.on("TILES_EXPOSED", (data) => this.onTilesExposed(data)));
         this.subscriptions.push(gc.on("JOKER_SWAPPED", (data) => this.onJokerSwapped(data)));
+        this.subscriptions.push(gc.on("BLANK_EXCHANGED", (data) => this.onBlankExchanged(data)));
         this.subscriptions.push(gc.on("MESSAGE", (data) => this.onMessage(data)));
         this.subscriptions.push(gc.on("CHARLESTON_PHASE", (data) => {
             this.updateStatus(`Charleston ${data.phase}: Pass ${data.round}`);
@@ -182,11 +185,14 @@ export class MobileRenderer {
     setupButtonListeners() {
         const drawBtn = this.drawButton;
         const sortBtn = this.sortButton;
+        const swapBlankBtn = document.getElementById("swap-blank-btn");
         const jokerBtn = this.jokerButton;
 
         if (drawBtn) drawBtn.addEventListener("click", () => this.onDrawClicked());
         if (sortBtn) sortBtn.addEventListener("click", () => this.onSortClicked());
+        if (swapBlankBtn) swapBlankBtn.addEventListener("click", () => this.handleBlankSwap());
         if (jokerBtn) jokerBtn.addEventListener("click", () => this.handleJokerSwap());
+        if (this.mahjongButton) this.mahjongButton.addEventListener("click", () => this.declareMahjong());
         // Note: actionButton is controlled exclusively by updateActionButton method
         // to avoid double-binding with onclick assignments
     }
@@ -262,6 +268,42 @@ export class MobileRenderer {
     }
 
     /**
+     * Check if mahjong is available for the human player
+     * @returns {boolean} True if player has a valid winning hand
+     */
+    canDeclareMahjong() {
+        const humanPlayer = this.gameController.players?.[HUMAN_PLAYER];
+        if (!humanPlayer) return false;
+
+        // Must have exactly 14 tiles
+        if (humanPlayer.hand.getLength() !== 14) return false;
+
+        // Check if hand is valid using card validator
+        if (!this.gameController.cardValidator) return false;
+
+        const tiles = humanPlayer.hand.tiles;
+        const allHidden = humanPlayer.hand.exposures.length === 0;
+        const validationResult = this.gameController.cardValidator.validateHand(tiles, allHidden);
+
+        return validationResult && validationResult.valid;
+    }
+
+    /**
+     * Declare mahjong (player wins)
+     */
+    declareMahjong() {
+        if (!this.canDeclareMahjong()) {
+            this.showAlert("Invalid Hand", "You don't have a valid mahjong hand.");
+            return;
+        }
+
+        // Set game result and end game
+        this.gameController.gameResult.mahjong = true;
+        this.gameController.gameResult.winner = HUMAN_PLAYER;
+        this.gameController.endGame("mahjong");
+    }
+
+    /**
      * Update joker swap button visibility based on game state
      */
     updateJokerSwapButton() {
@@ -274,6 +316,38 @@ export class MobileRenderer {
         const isValidState = !invalidStates.includes(this.gameController.state);
 
         jokerBtn.style.display = (canSwap && isValidState) ? "flex" : "none";
+    }
+
+    /**
+     * Update blank swap button visibility based on game state
+     */
+    updateBlankSwapButton() {
+        const swapBtn = document.getElementById("swap-blank-btn");
+        if (!swapBtn) return;
+
+        const player = this.gameController.players?.[HUMAN_PLAYER];
+        const hasBlankTiles = player?.hand?.tiles?.some(tile => tile.isBlank()) ?? false;
+        const hasDiscards = this.gameController.discards.length > 0;
+        const isValidState = this.gameController.state === STATE.LOOP_CHOOSE_DISCARD;
+        const blankRuleEnabled = this.gameController.settings?.useBlankTiles ?? false;
+
+        swapBtn.style.display = (hasBlankTiles && hasDiscards && isValidState && blankRuleEnabled) ? "flex" : "none";
+    }
+
+    /**
+     * Update mahjong button visibility based on game state
+     */
+    updateMahjongButton() {
+        const mahjongBtn = this.mahjongButton;
+        if (!mahjongBtn) return;
+
+        const canDeclare = this.canDeclareMahjong();
+        const invalidStates = [STATE.INIT, STATE.DEAL, STATE.CHARLESTON1, STATE.CHARLESTON2,
+                              STATE.CHARLESTON_QUERY, STATE.COURTESY_QUERY, STATE.COURTESY];
+        const isValidState = !invalidStates.includes(this.gameController.state);
+        const isHumanTurn = this.gameController.currentPlayer === HUMAN_PLAYER;
+
+        mahjongBtn.style.display = (canDeclare && isValidState && isHumanTurn) ? "flex" : "none";
     }
 
     /**
@@ -292,6 +366,147 @@ export class MobileRenderer {
             this.updateStatus(`Joker swap failed: ${error.message}`);
             console.error("Joker swap error:", error);
         }
+    }
+
+    /**
+     * Restore saved prompt state after blank swap interruption
+     * @private
+     * @param {Object} savedPrompt - The saved pending prompt object
+     * @param {boolean} clearSelection - Whether to clear hand selection
+     */
+    _restorePromptState(savedPrompt, clearSelection = false) {
+        this.pendingPrompt = savedPrompt;
+        if (savedPrompt) {
+            this.handRenderer.setSelectionBehavior({
+                mode: savedPrompt.max === 1 ? "single" : "multiple",
+                maxSelectable: savedPrompt.max,
+                allowToggle: true,
+                validationMode: "play"
+            });
+            if (clearSelection) {
+                this.handRenderer.clearSelection(true);
+            }
+        }
+    }
+
+    /**
+     * Handle blank tile swap - exchange blank in hand with discard pile tile
+     */
+    async handleBlankSwap() {
+        const player = this.gameController.players[HUMAN_PLAYER];
+
+        // Validate blank tiles exist in hand
+        const blankTiles = player.hand.tiles.filter(tile => tile.isBlank());
+        if (blankTiles.length === 0) {
+            this.showAlert("No Blank Tiles", "You don't have any blank tiles to swap.");
+            return;
+        }
+
+        // Validate discard pile has tiles
+        if (this.gameController.discards.length === 0) {
+            this.showAlert("No Discards", "The discard pile is empty.");
+            return;
+        }
+
+        // Save the current pending prompt so we can restore it after swap
+        const savedPrompt = this.pendingPrompt;
+
+        try {
+            // Step 1: Prompt user to select blank tile from hand
+            const blankTile = await new Promise((resolve) => {
+                this.startTileSelectionPrompt({
+                    title: "Select a blank tile to swap",
+                    hint: "Choose which blank to exchange",
+                    min: 1,
+                    max: 1,
+                    validationMode: "blank-only",
+                    confirmLabel: "Select Blank",
+                    cancelLabel: "Cancel",
+                    callback: (tiles) => {
+                        resolve(tiles && tiles.length > 0 ? tiles[0] : null);
+                    }
+                });
+            });
+
+            if (!blankTile) {
+                // Restore original prompt if user cancelled
+                this._restorePromptState(savedPrompt);
+                this.updateStatus("Blank swap cancelled");
+                return;
+            }
+
+            // Step 2: Prompt user to select discard tile
+            const discardTile = await this.showDiscardSelection();
+
+            if (!discardTile) {
+                // Restore original prompt if user cancelled
+                this._restorePromptState(savedPrompt);
+                this.updateStatus("Blank swap cancelled");
+                return;
+            }
+
+            // Step 3: Perform swap via GameController
+            const success = this.gameController.exchangeBlankWithDiscard(
+                blankTile,
+                discardTile
+            );
+
+            if (success) {
+                this.showAlert("Swap Successful", `Blank exchanged for ${discardTile.getText()}`);
+                // TODO: Add animation - blank tile flying to discard pile, discard tile flying to hand
+
+                // Restore the original discard prompt
+                this._restorePromptState(savedPrompt, true);
+            }
+        } catch (error) {
+            // Restore original prompt on error
+            this._restorePromptState(savedPrompt);
+            this.showAlert("Swap Failed", error.message);
+            console.error("Blank swap error:", error);
+        }
+    }
+
+    /**
+     * Show modal to select a tile from discard pile
+     * @returns {Promise<TileData|null>} Selected tile or null if cancelled
+     */
+    showDiscardSelection() {
+        return new Promise((resolve) => {
+            // Get available discards (excluding jokers per game rules)
+            const availableDiscards = this.gameController.discards.filter(
+                tile => !tile.isJoker()
+            );
+
+            if (availableDiscards.length === 0) {
+                this.showAlert("No Valid Discards", "No tiles available to swap (jokers cannot be swapped).");
+                resolve(null);
+                return;
+            }
+
+            // Show modal
+            new DiscardSelectionModal(
+                availableDiscards,
+                (selectedTile) => resolve(selectedTile),
+                () => resolve(null)
+            );
+        });
+    }
+
+    /**
+     * Show a simple alert modal
+     * @param {string} title - Alert title
+     * @param {string} message - Alert message
+     */
+    showAlert(title, message) {
+        // Reuse existing choice prompt for alerts
+        this.showChoicePrompt({
+            title: title,
+            hint: message,
+            options: [
+                { label: "OK", value: true, primary: true }
+            ],
+            onSelect: () => {} // No-op
+        });
     }
 
     onGameStarted() {
@@ -346,6 +561,8 @@ export class MobileRenderer {
         }
 
         this.updateJokerSwapButton();
+        this.updateBlankSwapButton();
+        this.updateMahjongButton();
         this.updateActionButtonStateForGame(data.newState);
     }
 
@@ -372,6 +589,10 @@ export class MobileRenderer {
 
             // Update joker swap button visibility
             this.updateJokerSwapButton();
+            // Update blank swap button visibility
+            this.updateBlankSwapButton();
+            // Update mahjong button visibility
+            this.updateMahjongButton();
 
             // If we just drew a tile (hand size increased to 14), animate it
             // This is a heuristic since we don't get explicit "DRAWN" event with tile data here
@@ -430,7 +651,7 @@ export class MobileRenderer {
         if (data.player === HUMAN_PLAYER) {
             // Find the hand container for better positioning context
             const discardContainer = this.discardPile?.element;
-            
+
             // Animate from the hand to discard pile with container context
             const latestDiscard = this.discardPile.getLatestDiscardElement();
             if (latestDiscard && discardContainer) {
@@ -442,6 +663,9 @@ export class MobileRenderer {
                 this.animationController.animateTileDiscard(latestDiscard);
             }
         }
+
+        // Update blank swap button since discard pile changed
+        this.updateBlankSwapButton();
     }
 
     /**
@@ -540,6 +764,10 @@ export class MobileRenderer {
 
         // Update joker swap button visibility as exposures may have changed
         this.updateJokerSwapButton();
+        // Update blank swap button visibility as hand may have changed
+        this.updateBlankSwapButton();
+        // Update mahjong button visibility as hand may have changed
+        this.updateMahjongButton();
     }
 
     /**
@@ -563,6 +791,36 @@ export class MobileRenderer {
         if (replacementData) {
             this.updateStatus(`${ownerName} swapped a joker for ${replacementData.getText()}`);
         }
+    }
+
+    /**
+     * Handle blank exchanged event
+     * GameController has already updated HandData, discards array, and emitted HAND_UPDATED events
+     * This handler provides visual feedback for the swap
+     * @param {Object} data - Blank exchange event data {player, blankTile, retrievedTile, discardIndex}
+     */
+    onBlankExchanged(data) {
+        const {player, blankTile, retrievedTile} = data;
+
+        // GameController has already updated HandData and emitted HAND_UPDATED events
+        // HandRenderer will handle the hand visual update automatically
+
+        // Force re-render of discard pile to show the blank tile that was added
+        // GameController has already updated the discards array
+        if (this.discardPile.discards && this.discardPile.discards.length > 0) {
+            const lastDiscardObj = this.discardPile.discards[this.discardPile.discards.length - 1];
+            this.discardPile.rerender(lastDiscardObj);
+        }
+
+        // Provide user feedback
+        const playerName = this.getPlayerName(player);
+        const blankData = TileData.fromJSON(blankTile);
+        const discardData = TileData.fromJSON(retrievedTile);
+
+        this.updateStatus(`${playerName} exchanged ${blankData.getText()} for ${discardData.getText()}`);
+
+        // TODO: Add animation - blank tile flying to discard pile, discard tile flying to hand
+        // Animation could be triggered here using AnimationController
     }
 
     /**

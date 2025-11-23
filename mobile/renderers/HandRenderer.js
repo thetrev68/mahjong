@@ -688,6 +688,10 @@ export class HandRenderer {
             }
             return true;
 
+        case "blank-only":
+            // Only blank tiles can be selected (for blank swap feature)
+            return tile.suit === SUIT.BLANK;
+
         case "play":
             // Any tile can be discarded during normal play
             return true;

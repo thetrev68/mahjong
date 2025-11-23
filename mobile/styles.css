@@ -6,6 +6,7 @@
 @import "./styles/HandRenderer.css";
 @import "./styles/OpponentBar.css";
 @import "./styles/SettingsSheet.css";
+@import "./styles/DiscardSelectionModal.css";
 
 /* CSS Custom Properties / Variables */
 :root {

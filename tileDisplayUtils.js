@@ -115,10 +115,11 @@ export function getPatternDisplayChars(patternTiles, playerTiles, componentCount
   const playerCounts = tally(playerTiles);
   const usedCounts = new Map();
 
-  // Count available jokers - only hidden jokers can be used for substitution
-  // Exposed jokers are already committed and can't be used elsewhere
+  // Count available jokers for pattern matching
+  // Use ALL jokers (both hidden and exposed) when checking if tiles match the pattern
+  // Only hidden jokers can be used for substitution (exposed jokers are already committed)
   const hiddenCounts = hiddenTiles ? tally(hiddenTiles) : playerCounts;
-  const availableJokers = hiddenCounts.get(`${SUIT.JOKER}-0`) || 0;
+  const availableJokersForSubstitution = hiddenCounts.get(`${SUIT.JOKER}-0`) || 0;
   let actualJokersUsed = 0;  // Track actual joker tiles matched from pattern
   let substitutedJokers = 0;  // Track jokers used for substitution
 
@@ -158,7 +159,7 @@ export function getPatternDisplayChars(patternTiles, playerTiles, componentCount
       // Joker substitution allowed only for pungs/kongs/quints
       // Only use hidden jokers that aren't already accounted for
       const totalJokersUsed = actualJokersUsed + substitutedJokers;
-      if (totalJokersUsed < availableJokers) {
+      if (totalJokersUsed < availableJokersForSubstitution) {
         isMatched = true;
         substitutedJokers++;
         display.char = "J"; // Display as J for substituted joker
