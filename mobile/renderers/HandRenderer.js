@@ -239,6 +239,14 @@ export class HandRenderer {
             }
         });
 
+        // Reset selection mappings when tiles are cleared so new renders register fresh keys
+        if (this.selectionManager) {
+            this.selectionManager.clearSelection(true);
+            if (this.selectionManager.selectionKeyByIndex?.clear) {
+                this.selectionManager.selectionKeyByIndex.clear();
+            }
+        }
+
         this.tiles = [];
 
         if (this.handContainer) {
