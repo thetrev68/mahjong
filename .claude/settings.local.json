@@ -14,7 +14,11 @@
       "WebFetch(domain:code.claude.com)",
       "Bash(npm run knip:*)",
       "Bash(mv:*)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(npm run lint:*)",
+      "Bash(node -e:*)",
+      "Bash(npx eslint:*)",
+      "Bash(node -c:*)"
     ],
     "deny": [],
     "ask": []
