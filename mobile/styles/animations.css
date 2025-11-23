@@ -286,12 +286,13 @@
     bottom: 0;
     z-index: 10;
     pointer-events: none;
+    overflow: hidden; /* Clip tiles at screen edges - funnel effect */
 }
 
 .home-page-tile {
     position: absolute;
     transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    will-change: transform, opacity;
+    will-change: transform;
     transform: translateZ(0);
     /* Force GPU acceleration */
 }

@@ -74,10 +74,10 @@ export class HomePageTiles {
                 const delay = Math.random() * 300;
 
                 window.requestAnimationFrame(() => {
-                    tile.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`;
+                    tile.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`;
                     // All tiles converge to the same exit point
                     tile.style.transform = `translate(${exitX}vw, ${exitY}vh) rotate(${Math.random() * 360}deg)`;
-                    tile.style.opacity = "0";
+                    // Keep tiles visible as they slide off - they'll be clipped by overflow:hidden
                 });
 
                 setTimeout(() => {
