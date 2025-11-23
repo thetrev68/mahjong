@@ -309,6 +309,33 @@
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 18px rgba(0, 0, 0, 0.35);
 }
 
+.player-rack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.player-rack__exposed {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    min-height: 42px;
+}
+
+.player-rack__exposed:empty {
+    min-height: 0;
+}
+
+.player-rack .exposure-set {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+}
+
 @keyframes pulse-glow-blue {
     0% {
         box-shadow: 0 0 8px rgba(96, 165, 250, 0.8);
