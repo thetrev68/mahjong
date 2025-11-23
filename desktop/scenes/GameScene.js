@@ -11,10 +11,6 @@ import { WINDOW_WIDTH, WINDOW_HEIGHT, getTotalTileCount } from "../../constants.
 import { AIEngine } from "../../core/AIEngine.js";
 import { Card } from "../../core/card/card.js";
 
-import tilesPng from "../../pwa/assets/tiles.png";
-import tilesJson from "../../pwa/assets/tiles.json";
-import backPng from "../../pwa/assets/back.png";
-
 class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: "GameScene" });
@@ -29,8 +25,8 @@ class GameScene extends Phaser.Scene {
 
     preload() {
         // From game.js preload()
-        this.load.atlas("tiles", tilesPng, tilesJson);
-        this.load.image("back", backPng);
+        this.load.atlas("tiles", "/assets/tiles.png", "/assets/tiles.json");
+        this.load.image("back", "/assets/back.png");
 
         // Load particle texture for fireworks
         // Create a simple 4x4 white particle texture programmatically to avoid WebGL errors
