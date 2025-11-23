@@ -665,7 +665,7 @@ export class MobileRenderer {
         }
 
         // Build staged hand data for tracking progress
-        const dealAnimationHands = Array.from({length: 4}, () => ({
+        const dealAnimationHands = Array.from({ length: 4 }, () => ({
             tiles: [],
             exposures: []
         }));
@@ -679,7 +679,7 @@ export class MobileRenderer {
                 if (this.handRenderer) {
                     this.handRenderer.sortHand(1);
                 }
-                
+
                 // Clear all opponent dealing tiles
                 this.opponentBars.forEach(({ bar }) => {
                     if (bar) {
@@ -707,7 +707,7 @@ export class MobileRenderer {
             // For opponents: create temporary tile elements in their bar
             let opponentTileElements = [];
             if (isOpponent) {
-                const opponentBarEntry = this.opponentBars.find(ob => ob.playerIndex === playerIndex);
+                const opponentBarEntry = this.opponentBars.find((ob) => ob.playerIndex === playerIndex);
                 if (opponentBarEntry && opponentBarEntry.bar) {
                     opponentTileElements = opponentBarEntry.bar.addDealingTiles(tilePayloads.length);
                 }
@@ -736,8 +736,9 @@ export class MobileRenderer {
 
                                 if (lastTileEl) {
                                     const endPos = getElementCenterPosition(lastTileEl);
-                                    const startPos = {x: window.innerWidth / 2, y: -50};
-                                    this.animationController.animateTileDeal(lastTileEl, playerIndex, startPos, endPos)
+                                    const startPos = { x: window.innerWidth / 2, y: -50 };
+                                    this.animationController
+                                        .animateTileDeal(lastTileEl, playerIndex, startPos, endPos)
                                         .then(resolve);
                                 } else {
                                     resolve();
@@ -749,8 +750,9 @@ export class MobileRenderer {
                             // For opponents: animate to the temporary tile element
                             const tileEl = opponentTileElements[i];
                             const endPos = getElementCenterPosition(tileEl);
-                            const startPos = {x: window.innerWidth / 2, y: -50};
-                            this.animationController.animateTileDeal(tileEl, playerIndex, startPos, endPos)
+                            const startPos = { x: window.innerWidth / 2, y: -50 };
+                            this.animationController
+                                .animateTileDeal(tileEl, playerIndex, startPos, endPos)
                                 .then(resolve);
                         } else {
                             resolve();
@@ -773,7 +775,7 @@ export class MobileRenderer {
             if (isOpponent && opponentTileElements.length > 0) {
                 await this.animationController.animateOpponentTilesFadeOut(opponentTileElements);
                 // Remove the tiles after fade
-                opponentTileElements.forEach(el => el.remove());
+                opponentTileElements.forEach((el) => el.remove());
             }
 
             // Small delay before next group
@@ -783,6 +785,9 @@ export class MobileRenderer {
 
         // Start the dealing sequence
         await dealNextGroup();
+    }
+
+    /**
      * Find which tile indices were newly added between previous and current hand
      * @param {HandData|null} previousHand - Previous hand snapshot
      * @param {HandData} currentHand - Current hand snapshot
