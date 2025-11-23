@@ -4,7 +4,7 @@ import { OpponentBar } from "./components/OpponentBar.js";
 import { PlayerRack } from "./components/PlayerRack.js";
 import { AnimationController } from "./animations/AnimationController.js";
 import { HomePageTiles } from "./components/HomePageTiles.js";
-import { PLAYER, STATE } from "../constants.js";
+import { PLAYER, STATE, SUIT } from "../constants.js";
 import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
 import { getElementCenterPosition } from "./utils/positionUtils.js";
@@ -66,6 +66,7 @@ export class MobileRenderer {
         this.actionButton = document.getElementById("new-game-btn");
         this.drawButton = document.getElementById("draw-btn");
         this.sortButton = document.getElementById("sort-btn");
+        this.jokerButton = document.getElementById("exchange-joker-btn");
 
         this.promptUI = this.createPromptUI(options.promptRoot || document.body);
         this.pendingPrompt = null;
@@ -115,7 +116,8 @@ export class MobileRenderer {
         this.subscriptions.push(gc.on("TURN_CHANGED", (data) => this.onTurnChanged(data)));
         this.subscriptions.push(gc.on("TILE_DISCARDED", (data) => this.onTileDiscarded(data)));
         this.subscriptions.push(gc.on("DISCARD_CLAIMED", (data) => this.onTileClaimed(data)));
-        this.subscriptions.push(gc.on("TILES_EXPOSED", () => this.refreshOpponentBars()));
+        this.subscriptions.push(gc.on("TILES_EXPOSED", (data) => this.onTilesExposed(data)));
+        this.subscriptions.push(gc.on("JOKER_SWAPPED", (data) => this.onJokerSwapped(data)));
         this.subscriptions.push(gc.on("MESSAGE", (data) => this.onMessage(data)));
         this.subscriptions.push(gc.on("CHARLESTON_PHASE", (data) => {
             this.updateStatus(`Charleston ${data.phase}: Pass ${data.round}`);
@@ -180,9 +182,11 @@ export class MobileRenderer {
     setupButtonListeners() {
         const drawBtn = this.drawButton;
         const sortBtn = this.sortButton;
+        const jokerBtn = this.jokerButton;
 
         if (drawBtn) drawBtn.addEventListener("click", () => this.onDrawClicked());
         if (sortBtn) sortBtn.addEventListener("click", () => this.onSortClicked());
+        if (jokerBtn) jokerBtn.addEventListener("click", () => this.handleJokerSwap());
         // Note: actionButton is controlled exclusively by updateActionButton method
         // to avoid double-binding with onclick assignments
     }
@@ -224,6 +228,70 @@ export class MobileRenderer {
         const state = this.gameController?.state ?? this.gameController?.gameState;
         return this.gameController.currentPlayer === HUMAN_PLAYER &&
             (state === STATE.LOOP_PICK_FROM_WALL || state === "LOOP_PICK_FROM_WALL");
+    }
+
+    /**
+     * Check if joker swap is available for the human player
+     * @returns {boolean} True if joker swap is possible
+     */
+    canSwapJoker() {
+        const humanPlayer = this.gameController.players?.[HUMAN_PLAYER];
+        if (!humanPlayer) return false;
+
+        // Find all exposed jokers across all players
+        let hasExposedJokers = false;
+        for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
+            const player = this.gameController.players[playerIndex];
+            for (const exposure of player.hand.exposures) {
+                if (exposure.tiles.some(tile => tile.suit === SUIT.JOKER)) {
+                    hasExposedJokers = true;
+                    break;
+                }
+            }
+            if (hasExposedJokers) break;
+        }
+
+        if (!hasExposedJokers) return false;
+
+        // Check if human has non-joker tiles that could match
+        const hasMatchingTiles = humanPlayer.hand.tiles.some(tile =>
+            tile.suit !== SUIT.JOKER
+        );
+
+        return hasMatchingTiles;
+    }
+
+    /**
+     * Update joker swap button visibility based on game state
+     */
+    updateJokerSwapButton() {
+        const jokerBtn = this.jokerButton;
+        if (!jokerBtn) return;
+
+        const canSwap = this.canSwapJoker();
+        const invalidStates = [STATE.INIT, STATE.DEAL, STATE.CHARLESTON1, STATE.CHARLESTON2,
+                              STATE.CHARLESTON_QUERY, STATE.COURTESY_QUERY, STATE.COURTESY];
+        const isValidState = !invalidStates.includes(this.gameController.state);
+
+        jokerBtn.style.display = (canSwap && isValidState) ? "flex" : "none";
+    }
+
+    /**
+     * Handle joker swap button click
+     * Calls GameController's onExchangeJoker method which auto-selects first available exchange
+     */
+    handleJokerSwap() {
+        try {
+            const success = this.gameController.onExchangeJoker();
+
+            if (!success) {
+                // Error messages already emitted by GameController via MESSAGE event
+                // No additional UI feedback needed here
+            }
+        } catch (error) {
+            this.updateStatus(`Joker swap failed: ${error.message}`);
+            console.error("Joker swap error:", error);
+        }
     }
 
     onGameStarted() {
@@ -277,6 +345,7 @@ export class MobileRenderer {
             sortBtn.style.display = isLoopState ? "flex" : "none";
         }
 
+        this.updateJokerSwapButton();
         this.updateActionButtonStateForGame(data.newState);
     }
 
@@ -300,6 +369,9 @@ export class MobileRenderer {
             if (this.playerRack) {
                 this.playerRack.update(data.hand);
             }
+
+            // Update joker swap button visibility
+            this.updateJokerSwapButton();
 
             // If we just drew a tile (hand size increased to 14), animate it
             // This is a heuristic since we don't get explicit "DRAWN" event with tile data here
@@ -456,6 +528,51 @@ export class MobileRenderer {
                 this.discardPile.removeLatestDiscard();
             }
         }
+    }
+
+    /**
+     * Handle tiles exposed event
+     * When exposures change, joker availability might change
+     */
+    onTilesExposed() {
+        // Refresh opponent bars to show updated exposures
+        this.refreshOpponentBars();
+
+        // Update joker swap button visibility as exposures may have changed
+        this.updateJokerSwapButton();
+    }
+
+    /**
+     * Handle joker swapped event
+     * GameController has already updated HandData and emitted HAND_UPDATED events
+     * This handler is just for logging and user feedback
+     * @param {Object} data - Joker swap event data {player, exposureIndex, jokerIndex, replacementTile, recipient}
+     */
+    onJokerSwapped(data) {
+        const {player, replacementTile} = data;
+
+        // GameController has already updated HandData and emitted HAND_UPDATED events
+        // HandRenderer will handle the visual update automatically
+        // Just provide user feedback
+
+        const ownerName = this.getPlayerName(player);
+        const replacementData = replacementTile instanceof TileData
+            ? replacementTile
+            : (replacementTile ? TileData.fromJSON(replacementTile) : null);
+
+        if (replacementData) {
+            this.updateStatus(`${ownerName} swapped a joker for ${replacementData.getText()}`);
+        }
+    }
+
+    /**
+     * Get player name for display
+     * @param {number} playerIndex - Player index (0-3)
+     * @returns {string} Player name
+     */
+    getPlayerName(playerIndex) {
+        const player = this.gameController.players?.[playerIndex];
+        return player?.name || `Player ${playerIndex + 1}`;
     }
 
     /**
