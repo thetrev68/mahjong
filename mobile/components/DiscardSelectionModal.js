@@ -18,6 +18,7 @@ export class DiscardSelectionModal {
         this.onSelect = onSelect;
         this.onCancel = onCancel;
         this.element = null;
+        this.isClosing = false; // Prevent double-click duplicate callbacks
         this.render();
     }
 
@@ -76,7 +77,11 @@ export class DiscardSelectionModal {
         const button = document.createElement("button");
         button.className = "discard-selection-modal__tile";
         button.dataset.index = index;
-        button.title = tile.getText(); // Accessibility via tooltip
+
+        // Accessibility: tooltip and screen reader label
+        const tileText = tile.getText();
+        button.title = tileText;
+        button.setAttribute("aria-label", `Select ${tileText} from discards`);
 
         // Create tile visual using tileSprites (default size)
         const tileDiv = tileSprites.createTileElement(tile);
@@ -94,6 +99,10 @@ export class DiscardSelectionModal {
      * @param {TileData|null} selectedTile - Selected tile or null if cancelled
      */
     close(selectedTile) {
+        // Prevent double-click duplicate callbacks
+        if (this.isClosing) return;
+        this.isClosing = true;
+
         // Fade out animation
         this.element.classList.remove("discard-selection-modal--visible");
 

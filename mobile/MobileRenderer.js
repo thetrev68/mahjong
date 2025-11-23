@@ -315,6 +315,27 @@ export class MobileRenderer {
     }
 
     /**
+     * Restore saved prompt state after blank swap interruption
+     * @private
+     * @param {Object} savedPrompt - The saved pending prompt object
+     * @param {boolean} clearSelection - Whether to clear hand selection
+     */
+    _restorePromptState(savedPrompt, clearSelection = false) {
+        this.pendingPrompt = savedPrompt;
+        if (savedPrompt) {
+            this.handRenderer.setSelectionBehavior({
+                mode: savedPrompt.max === 1 ? "single" : "multiple",
+                maxSelectable: savedPrompt.max,
+                allowToggle: true,
+                validationMode: "play"
+            });
+            if (clearSelection) {
+                this.handRenderer.clearSelection(true);
+            }
+        }
+    }
+
+    /**
      * Handle blank tile swap - exchange blank in hand with discard pile tile
      */
     async handleBlankSwap() {
@@ -355,15 +376,7 @@ export class MobileRenderer {
 
             if (!blankTile) {
                 // Restore original prompt if user cancelled
-                this.pendingPrompt = savedPrompt;
-                if (savedPrompt) {
-                    this.handRenderer.setSelectionBehavior({
-                        mode: savedPrompt.max === 1 ? "single" : "multiple",
-                        maxSelectable: savedPrompt.max,
-                        allowToggle: true,
-                        validationMode: "play"
-                    });
-                }
+                this._restorePromptState(savedPrompt);
                 this.updateStatus("Blank swap cancelled");
                 return;
             }
@@ -373,15 +386,7 @@ export class MobileRenderer {
 
             if (!discardTile) {
                 // Restore original prompt if user cancelled
-                this.pendingPrompt = savedPrompt;
-                if (savedPrompt) {
-                    this.handRenderer.setSelectionBehavior({
-                        mode: savedPrompt.max === 1 ? "single" : "multiple",
-                        maxSelectable: savedPrompt.max,
-                        allowToggle: true,
-                        validationMode: "play"
-                    });
-                }
+                this._restorePromptState(savedPrompt);
                 this.updateStatus("Blank swap cancelled");
                 return;
             }
@@ -397,29 +402,11 @@ export class MobileRenderer {
                 // TODO: Add animation - blank tile flying to discard pile, discard tile flying to hand
 
                 // Restore the original discard prompt
-                this.pendingPrompt = savedPrompt;
-                if (savedPrompt) {
-                    // Re-enable discard selection
-                    this.handRenderer.setSelectionBehavior({
-                        mode: savedPrompt.max === 1 ? "single" : "multiple",
-                        maxSelectable: savedPrompt.max,
-                        allowToggle: true,
-                        validationMode: "play"
-                    });
-                    this.handRenderer.clearSelection(true);
-                }
+                this._restorePromptState(savedPrompt, true);
             }
         } catch (error) {
             // Restore original prompt on error
-            this.pendingPrompt = savedPrompt;
-            if (savedPrompt) {
-                this.handRenderer.setSelectionBehavior({
-                    mode: savedPrompt.max === 1 ? "single" : "multiple",
-                    maxSelectable: savedPrompt.max,
-                    allowToggle: true,
-                    validationMode: "play"
-                });
-            }
+            this._restorePromptState(savedPrompt);
             this.showAlert("Swap Failed", error.message);
             console.error("Blank swap error:", error);
         }
@@ -761,8 +748,10 @@ export class MobileRenderer {
 
         // Force re-render of discard pile to show the blank tile that was added
         // GameController has already updated the discards array
-        const lastDiscardObj = this.discardPile.discards[this.discardPile.discards.length - 1];
-        this.discardPile.rerender(lastDiscardObj);
+        if (this.discardPile.discards && this.discardPile.discards.length > 0) {
+            const lastDiscardObj = this.discardPile.discards[this.discardPile.discards.length - 1];
+            this.discardPile.rerender(lastDiscardObj);
+        }
 
         // Provide user feedback
         const playerName = this.getPlayerName(player);
