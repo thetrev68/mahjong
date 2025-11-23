@@ -487,6 +487,18 @@ export class HandRenderer {
         return null;
     }
 
+    /**
+     * Get a tile element by its index in the hand
+     * @param {number} index - Index of the tile in the hand array
+     * @returns {HTMLElement|null} The tile element or null if not found
+     */
+    getTileElementByIndex(index) {
+        if (this.tiles && index >= 0 && index < this.tiles.length) {
+            return this.tiles[index];
+        }
+        return null;
+    }
+
     notifySelectionChange() {
         if (typeof this.selectionListener === "function") {
             this.selectionListener(this.getSelectionState());

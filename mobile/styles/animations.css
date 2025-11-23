@@ -70,6 +70,10 @@
     backface-visibility: hidden;
 }
 
+/* Note: Blue glow animation for Charleston/Courtesy received tiles
+ * is applied using the same .tile--newly-drawn class and pulse-blue animation
+ * defined in tiles.css. This ensures consistency with the draw animation glow. */
+
 /* ===== Tile Claim Animations (Performant) ===== */
 @keyframes claim-pulse-scale {
     0%, 100% { transform: scale(1); }

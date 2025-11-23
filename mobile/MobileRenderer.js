@@ -73,8 +73,7 @@ export class MobileRenderer {
         this.promptUI = this.createPromptUI(options.promptRoot || document.body);
         this.pendingPrompt = null;
         this.latestHandSnapshot = null;
-
-        this.latestHandSnapshot = null;
+        this.previousHandSnapshot = null;
 
         this.setupButtonListeners();
         this.registerEventListeners();
@@ -580,11 +579,17 @@ export class MobileRenderer {
             // Convert plain JSON object to HandData instance
             const handData = HandData.fromJSON(data.hand);
             this.latestHandSnapshot = handData;
+
+            // Detect and apply glow to newly received tiles (Charleston/Courtesy)
+            // Compare current hand with previous snapshot to find new tiles
+            const newlyReceivedTiles = this._findNewlyReceivedTiles(this.previousHandSnapshot, handData);
+
+            // Render the hand
             this.handRenderer.render(handData);
 
-            // Update player rack with exposures
+            // Update player rack with exposures - use handData, not raw data.hand
             if (this.playerRack) {
-                this.playerRack.update(data.hand);
+                this.playerRack.update(handData.toJSON());
             }
 
             // Update joker swap button visibility
@@ -593,6 +598,19 @@ export class MobileRenderer {
             this.updateBlankSwapButton();
             // Update mahjong button visibility
             this.updateMahjongButton();
+
+            // Apply glow to newly received tiles after rendering
+            if (newlyReceivedTiles.length > 0) {
+                newlyReceivedTiles.forEach(tileIndex => {
+                    const tileElement = this.handRenderer.getTileElementByIndex(tileIndex);
+                    if (tileElement) {
+                        this.animationController.applyReceivedTileGlow(tileElement);
+                    }
+                });
+            }
+
+            // Store current hand as previous for next comparison
+            this.previousHandSnapshot = handData.clone();
 
             // If we just drew a tile (hand size increased to 14), animate it
             // This is a heuristic since we don't get explicit "DRAWN" event with tile data here
@@ -617,6 +635,59 @@ export class MobileRenderer {
                 bar.bar.update(player);
             }
         }
+    }
+
+    /**
+     * Find which tile indices were newly added between previous and current hand
+     * @param {HandData|null} previousHand - Previous hand snapshot
+     * @param {HandData} currentHand - Current hand snapshot
+     * @returns {number[]} Array of tile indices that were newly received
+     * @private
+     */
+    _findNewlyReceivedTiles(previousHand, currentHand) {
+        if (!previousHand || !currentHand) {
+            return [];
+        }
+
+        const previousTiles = previousHand.tiles || [];
+        const currentTiles = currentHand.tiles || [];
+
+        // If hand size didn't increase, no new tiles
+        if (currentTiles.length <= previousTiles.length) {
+            return [];
+        }
+
+        // Create a map of previous tiles for efficient comparison
+        // Count tiles by suit:number since duplicates can exist
+        const previousTileCounts = new Map();
+        previousTiles.forEach(tile => {
+            const key = `${tile.suit}:${tile.number}`;
+            previousTileCounts.set(key, (previousTileCounts.get(key) || 0) + 1);
+        });
+
+        // Find tiles in current hand that weren't in previous hand
+        // Track by index position since we need to return the element index
+        const newTileIndices = [];
+        let newTilesFound = 0;
+        const tilesToFind = currentTiles.length - previousTiles.length;
+
+        // Work backwards through current tiles to find newly added ones
+        for (let i = currentTiles.length - 1; i >= 0 && newTilesFound < tilesToFind; i--) {
+            const tile = currentTiles[i];
+            const key = `${tile.suit}:${tile.number}`;
+            const count = previousTileCounts.get(key) || 0;
+
+            // If we still have unmatched copies of this tile type from previous hand,
+            // it's not a new tile. Otherwise, it's new.
+            if (count > 0) {
+                previousTileCounts.set(key, count - 1);
+            } else {
+                newTileIndices.push(i);
+                newTilesFound++;
+            }
+        }
+
+        return newTileIndices;
     }
 
     onTurnChanged(data) {

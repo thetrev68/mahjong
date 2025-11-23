@@ -439,13 +439,22 @@ export class AIEngine {
         const result = this.getTileRecommendations(copyHand);
         const recommendations = result.recommendations;
 
+        debugPrint(`[Charleston] Total recommendations: ${recommendations.length}`);
+        debugPrint(`[Charleston] Jokers in hand: ${recommendations.filter(r => r.tile.suit === SUIT.JOKER).length}`);
+        debugPrint(`[Charleston] Blanks in hand: ${recommendations.filter(r => r.tile.suit === SUIT.BLANK).length}`);
+
         // Filter out the invalid tile, jokers, and blanks (cannot pass jokers or blanks per NMJL rules)
         // then sort recommendations: DISCARD, PASS, KEEP
         const validRecommendations = recommendations.filter(r =>
             !r.tile.equals(invalidTile) &&
-            r.tile.suit !== SUIT.JOKER &&
-            r.tile.suit !== SUIT.BLANK
+            !r.tile.isJoker() &&
+            !r.tile.isBlank()
         );
+
+        debugPrint(`[Charleston] Valid recommendations after filtering: ${validRecommendations.length}`);
+        debugPrint(`[Charleston] Jokers in valid: ${validRecommendations.filter(r => r.tile.suit === SUIT.JOKER).length}`);
+        debugPrint(`[Charleston] Blanks in valid: ${validRecommendations.filter(r => r.tile.suit === SUIT.BLANK).length}`);
+
         validRecommendations.sort((a, b) => {
             const order = { [TILE_RECOMMENDATION.DISCARD]: 0, [TILE_RECOMMENDATION.PASS]: 1, [TILE_RECOMMENDATION.KEEP]: 2 };
             return order[a.recommendation] - order[b.recommendation];
@@ -455,6 +464,7 @@ export class AIEngine {
         for (let i = 0; i < 3; i++) {
             if (validRecommendations.length > i) {
                 const tile = validRecommendations[i].tile;
+                debugPrint(`[Charleston] Passing tile ${i}: ${tile.getText()} (suit=${tile.suit})`);
                 pass.push(tile);
             }
         }
