@@ -1,3 +1,4 @@
+/* global getComputedStyle */
 import { test, expect } from "@playwright/test";
 
 /**
@@ -47,7 +48,7 @@ test.describe("Charleston Animations", () => {
 
         // Wait for pass-out animation to complete (dynamic wait)
         await page.waitForFunction(() => {
-            const tiles = document.querySelectorAll('.tile-charleston-leaving');
+            const tiles = document.querySelectorAll(".tile-charleston-leaving");
             return tiles.length === 0; // Animation class removed when complete
         }, { timeout: 1000 });
 
@@ -60,7 +61,7 @@ test.describe("Charleston Animations", () => {
 
         // Wait for receive animation to complete (dynamic wait)
         await page.waitForFunction(() => {
-            const tiles = document.querySelectorAll('.tile-charleston-arriving');
+            const tiles = document.querySelectorAll(".tile-charleston-arriving");
             return tiles.length === 0; // Animation class removed when complete
         }, { timeout: 1000 });
 
@@ -71,10 +72,10 @@ test.describe("Charleston Animations", () => {
 
         // Wait for sort animation to complete (dynamic wait)
         await page.waitForFunction(() => {
-            const tiles = document.querySelectorAll('.hand-container .tile');
+            const tiles = document.querySelectorAll(".hand-container .tile");
             // Check if tiles no longer have sorting animation styles
             return Array.from(tiles).every(tile =>
-                !getComputedStyle(tile).transition.includes('transform')
+                !getComputedStyle(tile).transition.includes("transform")
             );
         }, { timeout: 1200 });
 
@@ -256,7 +257,7 @@ test.describe("Charleston Animations", () => {
         await page.waitForSelector(".tile-charleston-leaving", { timeout: 2000 });
 
         // Verify animation is running
-        const isAnimating = await page.evaluate(() => {
+        await page.evaluate(() => {
             const sequencer = window.__charlestonSequencer;
             return sequencer ? sequencer.isRunning() : false;
         });

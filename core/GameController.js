@@ -1,4 +1,5 @@
 /* eslint-disable no-await-in-loop */
+/* global process */
 
 /**
  * GameController - Platform-agnostic game state machine
@@ -95,6 +96,9 @@ export class GameController extends EventEmitter {
             useBlankTiles: false,
             skipCharleston: false
         };
+
+        /** @type {boolean} Optional verbose debug logging flag */
+        this.debug = false;
 
         /** @type {Object} Charleston state */
         this.charlestonState = {
@@ -403,6 +407,9 @@ export class GameController extends EventEmitter {
 
                 // Remove tiles from player's hand
                 tilesToPass.forEach(tile => player.hand.removeTile(tile));
+                if (this.debug || (typeof process !== "undefined" && process.env?.NODE_ENV === "development")) {
+                    console.log(`[GameController] Player ${playerIndex} removed ${tilesToPass.length} tiles, hand now has ${player.hand.tiles.length} tiles`);
+                }
 
                 charlestonPassArray[playerIndex] = tilesToPass;
 
@@ -439,6 +446,9 @@ export class GameController extends EventEmitter {
                 charlestonPassArray[fromPlayer].forEach(tile => {
                     this.players[toPlayer].hand.addTile(tile);
                 });
+                if (this.debug || (typeof process !== "undefined" && process.env?.NODE_ENV === "development")) {
+                    console.log(`[GameController] Player ${toPlayer} received ${charlestonPassArray[fromPlayer].length} tiles, hand now has ${this.players[toPlayer].hand.tiles.length} tiles`);
+                }
 
                 // Emit tiles received event (for animation coordination)
                 const receivedTiles = charlestonPassArray[fromPlayer].map(t => ({

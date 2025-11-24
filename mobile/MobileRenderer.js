@@ -73,7 +73,8 @@ export class MobileRenderer {
         this.charlestonSequencer = new CharlestonAnimationSequencer(
             this.gameController,
             this.handRenderer,
-            this.animationController
+            this.animationController,
+            () => this.eventCoordinator?.applyHintRecommendations()
         );
 
         // Configure selection behavior via HandSelectionManager
@@ -82,7 +83,11 @@ export class MobileRenderer {
             maxSelectable: 1,
             allowToggle: true
         });
-        this.selectionManager.setSelectionListener((selection) => this.onHandSelectionChange(selection));
+        this.selectionManager.setSelectionListener(() => {
+            const selectionState = this.selectionManager.getSelectionState(this.latestHandSnapshot);
+            this.handRenderer.applySelectionIndices(selectionState.indices);
+            this.onHandSelectionChange(selectionState);
+        });
 
         this.opponentBars = this.createOpponentBars(options.opponentContainers || {});
 
@@ -665,7 +670,7 @@ export class MobileRenderer {
      * Handle tiles dealt event with animation
      * @param {Object} data - Deal sequence data
      */
-    async onTilesDealt(data = {}) {
+    onTilesDealt(_data = {}) {
         // Skip dealing animation - just render the final hand immediately
         const player = this.gameController.players[HUMAN_PLAYER];
         if (player && this.handRenderer) {
@@ -1212,6 +1217,7 @@ export class MobileRenderer {
             validationMode: config.validationMode
         });
         this.selectionManager.clearSelection(true);
+        this.handRenderer.applySelectionIndices([]);
 
         // Build action buttons - only include cancel if explicitly provided
         const actions = config.useActionButton ? [] : [
@@ -1272,6 +1278,7 @@ export class MobileRenderer {
             validationMode: "play"
         });
         this.selectionManager.clearSelection(true);
+        this.handRenderer.applySelectionIndices([]);
         this.hidePrompt();
 
         this.updateActionButton({
@@ -1282,17 +1289,17 @@ export class MobileRenderer {
         });
 
         // Ensure CTA state matches current selection (likely 0/1 on entry)
-        this.updateTileSelectionHint(this.selectionManager.getSelectionState());
+        this.updateTileSelectionHint();
     }
 
-    onHandSelectionChange(selection) {
+    onHandSelectionChange(selection = this.selectionManager.getSelectionState(this.latestHandSnapshot)) {
         if (!this.pendingPrompt || this.pendingPrompt.type !== "tile-selection") {
             return;
         }
         this.updateTileSelectionHint(selection);
     }
 
-    updateTileSelectionHint(selection = this.selectionManager.getSelectionState()) {
+    updateTileSelectionHint(selection = this.selectionManager.getSelectionState(this.latestHandSnapshot)) {
         if (!this.pendingPrompt || this.pendingPrompt.type !== "tile-selection") {
             return;
         }
@@ -1314,7 +1321,7 @@ export class MobileRenderer {
         if (!this.pendingPrompt || this.pendingPrompt.type !== "tile-selection") {
             return;
         }
-        const selection = this.selectionManager.getSelectionState();
+        const selection = this.selectionManager.getSelectionState(this.latestHandSnapshot);
         const { min, max } = this.pendingPrompt;
         if (selection.count < min || selection.count > max) {
             return;
@@ -1342,6 +1349,7 @@ export class MobileRenderer {
 
     resetHandSelection() {
         this.selectionManager.clearSelection(true);
+        this.handRenderer.applySelectionIndices([]);
         this.selectionManager.setSelectionBehavior({
             mode: "single",
             maxSelectable: 1,
@@ -1440,7 +1448,7 @@ export class MobileRenderer {
 
         if (isDiscardState && this.pendingPrompt?.type === "tile-selection") {
             this.pendingPrompt.confirmUsesActionButton = true;
-            const selection = this.selectionManager.getSelectionState();
+            const selection = this.selectionManager.getSelectionState(this.latestHandSnapshot);
             const ready = selection.count >= (this.pendingPrompt.min || 1) && selection.count <= (this.pendingPrompt.max || 1);
             this.updateActionButton({
                 label: "Discard",

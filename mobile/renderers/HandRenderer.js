@@ -36,6 +36,7 @@ export class HandRenderer {
         }
 
         this.container = container;
+        this.debug = false; // optional verbose logging flag
         this.tiles = [];
         this.interactive = true;
         this.handContainer = null;
@@ -154,6 +155,9 @@ export class HandRenderer {
         this.clearTiles();
 
         const tiles = Array.isArray(handData.tiles) ? handData.tiles : [];
+        if (this.debug) {
+            console.log(`[HandRenderer] Rendering ${tiles.length} tiles`);
+        }
         tiles.forEach((tileData, index) => {
             const tileButton = this.createTileButton(tileData, index);
 
@@ -231,6 +235,9 @@ export class HandRenderer {
     }
 
     clearTiles() {
+        if (this.debug) {
+            console.log(`[HandRenderer] Clearing ${this.tiles.length} tiles from DOM`);
+        }
         this.tiles.forEach(tileButton => {
             const handler = tileButton.__handRendererHandler;
             if (handler) {
@@ -251,6 +258,9 @@ export class HandRenderer {
 
         if (this.handContainer) {
             this.handContainer.innerHTML = "";
+            if (this.debug) {
+                console.log(`[HandRenderer] DOM cleared, handContainer.children.length = ${this.handContainer.children.length}`);
+            }
         }
     }
 
@@ -314,6 +324,24 @@ export class HandRenderer {
             return this.tiles[index];
         }
         return null;
+    }
+
+    /**
+     * Apply selection styling to tiles based on selected indices
+     * @param {number[]|Set<number>} selectedIndices - Indices that should be marked selected
+     */
+    applySelectionIndices(selectedIndices = []) {
+        const selectedSet = selectedIndices instanceof Set ? selectedIndices : new Set(selectedIndices);
+        this.tiles.forEach((tileButton, index) => {
+            if (!tileButton) {
+                return;
+            }
+            if (selectedSet.has(index)) {
+                tileButton.classList.add("selected");
+            } else {
+                tileButton.classList.remove("selected");
+            }
+        });
     }
 
     sortHand(mode = "suit") {
