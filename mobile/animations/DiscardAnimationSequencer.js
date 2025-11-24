@@ -233,10 +233,10 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
 
     /**
      * Settle tile into discard pile with bounce
-     * @param {TileData} tile - Tile to add to discard pile
-     * @param {number} player - Player who discarded
+     * @param {TileData} _tile - Tile to add to discard pile (unused - already added)
+     * @param {number} _player - Player who discarded (unused)
      */
-    async settleTileInPile(tile, player) {
+    async settleTileInPile(_tile, _player) {
         // Tile was already added in animateTileToDiscard
         // Just apply the bounce animation
         const discardTileElement = this.discardPile.getLatestDiscardElement();
@@ -317,6 +317,7 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
     playDiscardSound() {
         try {
             // Use relative path from mobile directory
+            // eslint-disable-next-line no-undef
             const audio = new Audio("../pwa/assets/audio/tile_dropping.mp3");
             audio.volume = 0.5;
             audio.play().catch(err => {
