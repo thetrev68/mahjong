@@ -56,6 +56,15 @@ The `DealingAnimationSequencer` will orchestrate the initial tile dealing animat
 
 ## Technical Specification
 
+### HandRenderer API prerequisites (mobile/Desktop adapter)
+To support dealing animations (and to allow the spec below to compile), HandRenderer must expose or be polyfilled with:
+- `getTileElements(playerIndex: number): HTMLElement[]` — returns all tile DOM nodes for the given player in hand order. Used for flip animations; should return an empty array when the player isn't rendered.
+- `getLastTileElement(playerIndex: number): HTMLElement|null` — returns the last rendered tile element for the player (or `null`). Used to apply glow to East's 14th tile.
+- `addTileToHand(playerIndex: number, tile: TileData): HTMLElement|null|Promise<HTMLElement|null>` — appends a tile to the internal hand model for that player, inserts the DOM node at the end of the hand, and may run an insertion/flip animation. Should return the created node (or a promise resolving when any animation completes).
+- `addTilesToHand(playerIndex: number, tiles: TileData[]): HTMLElement[]|Promise<HTMLElement[]>` — batch append; preserves order and returns created nodes (or a promise). Implementers may delegate to `render` for correctness but incremental insertion is preferred for performance.
+
+If these APIs don't exist, DealingAnimationSequencer implementers must provide a shim around the current HandRenderer (e.g., mutate `player.hand.tiles` then call `render`) until native methods are added.
+
 ### Class Structure
 
 ```javascript
@@ -149,8 +158,15 @@ export class DealingAnimationSequencer extends AnimationSequencer {
             // Animate
             await this.animateTileSlide(tileElement, trajectory);
 
-            // Add to hand renderer
-            this.handRenderer.addTileToHand(playerIndex, tile);
+            // Update player hand model and re-render (HandRenderer doesn't expose addTileToHand)
+            const player = this.gameController.players[playerIndex];
+            if (player?.hand?.tiles) {
+                player.hand.tiles.push(tile);
+                // Re-render the appropriate hand (mobile currently renders only player 0)
+                if (playerIndex === 0) {
+                    this.handRenderer.render(player.hand);
+                }
+            }
 
             if (i < tiles.length - 1) {
                 await this.delay(dealDelay);
@@ -217,7 +233,13 @@ export class DealingAnimationSequencer extends AnimationSequencer {
         // Instantly populate all hands without animation
         dealSequence.rounds.forEach(round => {
             round.deals.forEach(deal => {
-                this.handRenderer.addTilesToHand(deal.player, deal.tiles);
+                const player = this.gameController.players[deal.player];
+                if (player?.hand?.tiles) {
+                    player.hand.tiles.push(...deal.tiles);
+                    if (deal.player === 0) {
+                        this.handRenderer.render(player.hand);
+                    }
+                }
             });
         });
     }
@@ -388,7 +410,7 @@ export class DealingAnimationSequencer extends AnimationSequencer {
 
 ## Event Integration
 
-### GameController Changes
+### GameController Changes (standard 13/14 tile deal)
 
 ```javascript
 // In core/GameController.js - dealTiles() method
@@ -402,8 +424,8 @@ async dealTiles() {
         rounds: []
     };
 
-    // 4 rounds of 4 tiles each
-    for (let round = 0; round < 4; round++) {
+    // Standard deal: 3 rounds of 4 tiles (12 each)
+    for (let round = 0; round < 3; round++) {
         const roundDeals = [];
         for (let player = 0; player < 4; player++) {
             const tiles = this.wallTiles.splice(0, 4);
@@ -412,15 +434,15 @@ async dealTiles() {
         dealSequence.rounds.push({ deals: roundDeals });
     }
 
-    // Charleston tile (1 per player)
-    const charlestonRound = [];
+    // Final single tile to each player (13th tile)
+    const finalSingleRound = [];
     for (let player = 0; player < 4; player++) {
         const tile = this.wallTiles.splice(0, 1);
-        charlestonRound.push({ player, tiles: tile });
+        finalSingleRound.push({ player, tiles: tile });
     }
-    dealSequence.rounds.push({ deals: charlestonRound });
+    dealSequence.rounds.push({ deals: finalSingleRound });
 
-    // East player starter tile
+    // East player starter tile (14th)
     const eastPlayer = this.getEastPlayerIndex();
     const starterTile = this.wallTiles.splice(0, 1);
     dealSequence.rounds.push({
@@ -590,6 +612,7 @@ Default: `fast` for returning players, `slow` for first game
 - [ ] Update `GameController.dealTiles()` to emit detailed sequence
 - [ ] Wire sequencer into `MobileRenderer`
 - [ ] Add deal speed setting to SettingsSheet
+- [ ] Provide/verify HandRenderer APIs (`getTileElements`, `getLastTileElement`, `addTileToHand`, `addTilesToHand`) or ship shims in sequencer
 - [ ] Write unit tests for path calculation and timing
 - [ ] Write Playwright tests for full dealing flow
 - [ ] Performance profiling (60fps validation)

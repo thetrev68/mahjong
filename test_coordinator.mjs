@@ -1,4 +1,4 @@
-import('./mobile/renderers/HandEventCoordinator.js').then(async module => {
+import("./mobile/renderers/HandEventCoordinator.js").then(module => {
   const { HandEventCoordinator } = module;
   
   // Mock GameController with event tracking
@@ -33,29 +33,29 @@ import('./mobile/renderers/HandEventCoordinator.js').then(async module => {
   
   // Verify all 5 events are subscribed
   const expectedEvents = [
-    'HAND_UPDATED',
-    'TILE_SELECTED',
-    'TILE_DRAWN',
-    'TILE_DISCARDED',
-    'HINT_DISCARD_RECOMMENDATIONS'
+    "HAND_UPDATED",
+    "TILE_SELECTED",
+    "TILE_DRAWN",
+    "TILE_DISCARDED",
+    "HINT_DISCARD_RECOMMENDATIONS"
   ];
   
-  console.log('Event Subscriptions:');
+  console.log("Event Subscriptions:");
   expectedEvents.forEach(eventName => {
     const count = events[eventName]?.length || 0;
     if (count > 0) {
-      console.log('✓ ' + eventName + ' (' + count + ' handler)');
+      console.log("✓ " + eventName + " (" + count + " handler)");
     } else {
-      console.log('✗ ' + eventName + ' (NOT SUBSCRIBED)');
+      console.log("✗ " + eventName + " (NOT SUBSCRIBED)");
     }
   });
   
   // Test destroy cleans up
-  console.log('\nDestroy Test:');
+  console.log("\nDestroy Test:");
   const unsubsBefore = coordinator.unsubscribeFns.length;
   coordinator.destroy();
   const unsubsAfter = coordinator.unsubscribeFns.length;
-  console.log('✓ Unsubscribe functions before: ' + unsubsBefore);
-  console.log('✓ Unsubscribe functions after: ' + unsubsAfter);
+  console.log("✓ Unsubscribe functions before: " + unsubsBefore);
+  console.log("✓ Unsubscribe functions after: " + unsubsAfter);
   
-}).catch(e => console.error('Error:', e.message));
+}).catch(e => console.error("Error:", e.message));

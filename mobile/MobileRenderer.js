@@ -670,7 +670,7 @@ export class MobileRenderer {
      * Handle tiles dealt event with animation
      * @param {Object} data - Deal sequence data
      */
-    async onTilesDealt(data = {}) {
+    onTilesDealt(_data = {}) {
         // Skip dealing animation - just render the final hand immediately
         const player = this.gameController.players[HUMAN_PLAYER];
         if (player && this.handRenderer) {
@@ -1289,7 +1289,7 @@ export class MobileRenderer {
         });
 
         // Ensure CTA state matches current selection (likely 0/1 on entry)
-        this.updateTileSelectionHint(this.selectionManager.getSelectionState(this.latestHandSnapshot));
+        this.updateTileSelectionHint();
     }
 
     onHandSelectionChange(selection = this.selectionManager.getSelectionState(this.latestHandSnapshot)) {
