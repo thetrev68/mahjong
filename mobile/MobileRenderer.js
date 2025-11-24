@@ -666,135 +666,28 @@ export class MobileRenderer {
      * @param {Object} data - Deal sequence data
      */
     async onTilesDealt(data = {}) {
-        const sequence = Array.isArray(data.sequence) ? data.sequence : [];
-
-        if (!sequence.length) {
-            // No sequence provided, immediately complete
-            this.gameController.emit("DEALING_COMPLETE");
-            return;
+        // Skip dealing animation - just render the final hand immediately
+        const player = this.gameController.players[HUMAN_PLAYER];
+        if (player && this.handRenderer) {
+            const handData = HandData.fromJSON(player.hand);
+            this.handRenderer.render(handData);
         }
 
-        // Build staged hand data for tracking progress
-        const dealAnimationHands = Array.from({ length: 4 }, () => ({
-            tiles: [],
-            exposures: []
-        }));
-
-        let currentStepIndex = 0;
-
-        const dealNextGroup = async () => {
-            if (currentStepIndex >= sequence.length) {
-                // All dealing complete
-                // Sort and reveal human player's hand
-                if (this.handRenderer) {
-                    this.handRenderer.sortHand(1);
-                }
-
-                // Clear all opponent dealing tiles
-                this.opponentBars.forEach(({ bar }) => {
-                    if (bar) {
-                        bar.clearDealingTiles();
-                    }
-                });
-
-                this.gameController.emit("DEALING_COMPLETE");
-                return;
-            }
-
-            const step = sequence[currentStepIndex];
-            const playerIndex = typeof step.player === "number" ? step.player : PLAYER.BOTTOM;
-            const tilePayloads = Array.isArray(step.tiles) ? step.tiles : [];
-
-            if (!tilePayloads.length) {
-                currentStepIndex++;
-                setTimeout(() => dealNextGroup(), 0);
-                return;
-            }
-
-            const isHumanPlayer = playerIndex === HUMAN_PLAYER;
-            const isOpponent = !isHumanPlayer;
-
-            // For opponents: create temporary tile elements in their bar
-            let opponentTileElements = [];
-            if (isOpponent) {
-                const opponentBarEntry = this.opponentBars.find((ob) => ob.playerIndex === playerIndex);
-                if (opponentBarEntry && opponentBarEntry.bar) {
-                    opponentTileElements = opponentBarEntry.bar.addDealingTiles(tilePayloads.length);
+        // Update opponent bars with their final tile counts
+        this.opponentBars.forEach(({ playerIndex, bar }) => {
+            if (playerIndex !== HUMAN_PLAYER) {
+                const opponentPlayer = this.gameController.players[playerIndex];
+                if (opponentPlayer && bar) {
+                    bar.update({
+                        tileCount: opponentPlayer.hand?.tiles?.length || 0,
+                        wind: opponentPlayer.wind,
+                        exposures: opponentPlayer.hand?.exposures || []
+                    });
                 }
             }
+        });
 
-            // Animate each tile in the batch with staggered delays
-            const animationPromises = [];
-            for (let i = 0; i < tilePayloads.length; i++) {
-                const tileJSON = tilePayloads[i];
-                const tileData = TileData.fromJSON(tileJSON);
-
-                // Add to staged hand
-                dealAnimationHands[playerIndex].tiles.push(tileData);
-
-                // Create animation promise with delay
-                const animPromise = new Promise((resolve) => {
-                    setTimeout(() => {
-                        if (isHumanPlayer) {
-                            // For human player: add tile to hand renderer
-                            if (this.handRenderer) {
-                                const handData = new HandData(dealAnimationHands[playerIndex].tiles, []);
-                                this.handRenderer.render(handData, false); // Don't sort yet
-
-                                const tileElements = this.handRenderer.container.querySelectorAll(".mobile-tile");
-                                const lastTileEl = tileElements[tileElements.length - 1];
-
-                                if (lastTileEl) {
-                                    const endPos = getElementCenterPosition(lastTileEl);
-                                    const startPos = { x: window.innerWidth / 2, y: -50 };
-                                    this.animationController
-                                        .animateTileDeal(lastTileEl, playerIndex, startPos, endPos)
-                                        .then(resolve);
-                                } else {
-                                    resolve();
-                                }
-                            } else {
-                                resolve();
-                            }
-                        } else if (opponentTileElements[i]) {
-                            // For opponents: animate to the temporary tile element
-                            const tileEl = opponentTileElements[i];
-                            const endPos = getElementCenterPosition(tileEl);
-                            const startPos = { x: window.innerWidth / 2, y: -50 };
-                            this.animationController
-                                .animateTileDeal(tileEl, playerIndex, startPos, endPos)
-                                .then(resolve);
-                        } else {
-                            resolve();
-                        }
-
-                        // TODO: Play sound effect when mobile audio manager is implemented
-                        // if (this.audioManager) {
-                        //     this.audioManager.playSFX("rack_tile");
-                        // }
-                    }, i * 100);
-                });
-
-                animationPromises.push(animPromise);
-            }
-
-            // Wait for all animations in this batch to complete
-            await Promise.all(animationPromises);
-
-            // For opponents: fade out the tiles before next round
-            if (isOpponent && opponentTileElements.length > 0) {
-                await this.animationController.animateOpponentTilesFadeOut(opponentTileElements);
-                // Remove the tiles after fade
-                opponentTileElements.forEach((el) => el.remove());
-            }
-
-            // Small delay before next group
-            currentStepIndex++;
-            setTimeout(() => dealNextGroup(), 150);
-        };
-
-        // Start the dealing sequence
-        await dealNextGroup();
+        this.gameController.emit("DEALING_COMPLETE");
     }
 
     /**
@@ -1389,7 +1282,7 @@ export class MobileRenderer {
         });
 
         // Ensure CTA state matches current selection (likely 0/1 on entry)
-        this.updateTileSelectionHint(this.handRenderer.getSelectionState());
+        this.updateTileSelectionHint(this.selectionManager.getSelectionState());
     }
 
     onHandSelectionChange(selection) {
@@ -1399,7 +1292,7 @@ export class MobileRenderer {
         this.updateTileSelectionHint(selection);
     }
 
-    updateTileSelectionHint(selection = this.handRenderer.getSelectionState()) {
+    updateTileSelectionHint(selection = this.selectionManager.getSelectionState()) {
         if (!this.pendingPrompt || this.pendingPrompt.type !== "tile-selection") {
             return;
         }
@@ -1421,7 +1314,7 @@ export class MobileRenderer {
         if (!this.pendingPrompt || this.pendingPrompt.type !== "tile-selection") {
             return;
         }
-        const selection = this.handRenderer.getSelectionState();
+        const selection = this.selectionManager.getSelectionState();
         const { min, max } = this.pendingPrompt;
         if (selection.count < min || selection.count > max) {
             return;
@@ -1547,7 +1440,7 @@ export class MobileRenderer {
 
         if (isDiscardState && this.pendingPrompt?.type === "tile-selection") {
             this.pendingPrompt.confirmUsesActionButton = true;
-            const selection = this.handRenderer.getSelectionState();
+            const selection = this.selectionManager.getSelectionState();
             const ready = selection.count >= (this.pendingPrompt.min || 1) && selection.count <= (this.pendingPrompt.max || 1);
             this.updateActionButton({
                 label: "Discard",
