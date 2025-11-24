@@ -84,7 +84,7 @@ export class CharlestonAnimationSequencer extends AnimationSequencer {
             return;
         }
 
-        const { direction } = data;
+        const direction = data.animation?.direction || data.direction;
         this.receivedTileIndices = new Set(receivedIndices);
 
         await this.executeSequence([
