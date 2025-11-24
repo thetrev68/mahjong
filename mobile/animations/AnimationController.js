@@ -204,54 +204,6 @@ export class AnimationController {
     }
 
     /**
-     * Animate a tile being discarded from hand to discard pile
-     * @param {HTMLElement} tileElement - The tile DOM element
-     * @param {Object} targetPos - {x, y} target position in discard pile (optional, will use current position)
-     * @returns {Promise} Resolves when animation completes
-     */
-    animateTileDiscard(tileElement, targetPos = null) {
-        return new Promise(resolve => {
-            if (!tileElement) {
-                resolve();
-                return;
-            }
-
-            this._resetElementAnimation(tileElement, TILE_ANIMATION_CLASSES);
-
-            // Calculate positions
-            const actualStartPos = getElementCenterPosition(tileElement);
-            const actualTargetPos = targetPos || {
-                x: actualStartPos.x + 50, // Move slightly to the right by default
-                y: actualStartPos.y + 100 // Move down towards discard area
-            };
-
-            // Calculate movement for smooth animation
-            const movement = calculateMovement(actualStartPos, actualTargetPos);
-            
-            const discardDuration = this.duration + 100;
-            const cssVars = {
-                "--start-x": toPx(actualStartPos.x),
-                "--start-y": toPx(actualStartPos.y),
-                "--target-x": toPx(actualTargetPos.x),
-                "--target-y": toPx(actualTargetPos.y),
-                "--movement-dx": toPx(movement.dx),
-                "--movement-dy": toPx(movement.dy),
-                "--tile-discard-duration": `${discardDuration}ms`,
-                "--tile-discard-easing": "ease-in"
-            };
-
-            this._setCssVariables(tileElement, cssVars);
-            this._applyAnimationClass(tileElement, "tile-discarding");
-
-            this._scheduleTimer(tileElement, discardDuration, () => {
-                tileElement.classList.remove("tile-discarding");
-                this._clearCssVariables(tileElement, Object.keys(cssVars));
-                resolve();
-            });
-        });
-    }
-
-    /**
      * Animate a tile being claimed from discard pile to hand
      * @param {HTMLElement} tileElement - The tile DOM element
      * @param {number} _sourcePlayer - Player who discarded (0-3)

@@ -96,6 +96,11 @@ export class HandEventCoordinator {
         return;
       }
 
+      // Skip if discard animation is running
+      if (this.mobileRenderer?.isDiscardAnimationRunning) {
+        return;
+      }
+
       // Skip if dealing just completed (but update snapshots)
       const handData = HandData.fromJSON(data.hand);
       if (this.mobileRenderer?.justCompletedDealingAnimation) {
