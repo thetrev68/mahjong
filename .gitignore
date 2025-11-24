@@ -5,6 +5,7 @@ node_modules/
 # Playwright test results
 test-results/
 playwright-report/
+playwright-report/index.html
 test-output.txt
 
 # Logs

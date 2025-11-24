@@ -130,14 +130,15 @@ export class CharlestonAnimationSequencer extends AnimationSequencer {
         // Wait for animation to complete
         await this.delay(this.PASS_OUT_DURATION);
 
-        // Hide tiles after animation (they'll be removed by GameController)
-        this.handRenderer.hideTemporarily(indices);
-
-        // Cleanup
-        tileElements.forEach(tile => {
-            tile.classList.remove("tile-charleston-leaving");
-            tile.style.removeProperty("--exit-x");
-            tile.style.removeProperty("--exit-y");
+        // Remove tiles from DOM and tiles array immediately
+        // Sort indices in reverse order to avoid index shifting issues
+        const sortedIndices = [...indices].sort((a, b) => b - a);
+        sortedIndices.forEach(idx => {
+            const tile = this.handRenderer.tiles[idx];
+            if (tile && tile.parentNode) {
+                tile.parentNode.removeChild(tile);
+            }
+            this.handRenderer.tiles.splice(idx, 1);
         });
     }
 
@@ -200,10 +201,14 @@ export class CharlestonAnimationSequencer extends AnimationSequencer {
      * @private
      */
     async animateSortWithGlow() {
-        const handData = this.handRenderer.currentHandData;
-        if (!handData) {
+        // Get the FRESH hand data from GameController instead of using cached currentHandData
+        // This is critical because currentHandData may be stale if a render was skipped
+        const humanPlayer = this.gameController.players[0];
+        if (!humanPlayer || !humanPlayer.hand) {
+            console.warn("CharlestonAnimationSequencer: Cannot sort - no human player hand");
             return;
         }
+        const handData = humanPlayer.hand;
 
         // Get all current tile elements and their positions (FIRST)
         const tiles = this.handRenderer.tiles;

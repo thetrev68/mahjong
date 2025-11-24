@@ -640,6 +640,13 @@ export class MobileRenderer {
         // Clear flag - animation is done
         this.isDealingAnimationRunning = false;
 
+        // Initialize latestHandSnapshot with current hand after dealing
+        // This is critical for Charleston tile selection to work properly
+        const humanPlayer = this.gameController.players[0];
+        if (humanPlayer && humanPlayer.hand) {
+            this.latestHandSnapshot = humanPlayer.hand.clone();
+        }
+
         // Update opponent bars (no animation for AI players)
         this.opponentBars.forEach(({ playerIndex, bar }) => {
             if (playerIndex !== HUMAN_PLAYER) {
