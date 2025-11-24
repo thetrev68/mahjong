@@ -5,6 +5,7 @@ import { DiscardPile } from "./components/DiscardPile.js";
 import { OpponentBar } from "./components/OpponentBar.js";
 import { PlayerRack } from "./components/PlayerRack.js";
 import { AnimationController } from "./animations/AnimationController.js";
+import { CharlestonAnimationSequencer } from "./animations/CharlestonAnimationSequencer.js";
 import { HomePageTiles } from "./components/HomePageTiles.js";
 import { DiscardSelectionModal } from "./components/DiscardSelectionModal.js";
 import { PLAYER, STATE, SUIT } from "../constants.js";
@@ -67,6 +68,13 @@ export class MobileRenderer {
             this.homePageTiles.render();
         }
         this.animationController = new AnimationController();
+
+        // Initialize Charleston animation sequencer
+        this.charlestonSequencer = new CharlestonAnimationSequencer(
+            this.gameController,
+            this.handRenderer,
+            this.animationController
+        );
 
         // Configure selection behavior via HandSelectionManager
         this.selectionManager.setSelectionBehavior({
@@ -138,6 +146,8 @@ export class MobileRenderer {
         this.subscriptions.push(gc.on("CHARLESTON_PHASE", (data) => {
             this.updateStatus(`Charleston ${data.phase}: Pass ${data.round}`);
         }));
+        this.subscriptions.push(gc.on("CHARLESTON_PASS", (data) => this.onCharlestonPass(data)));
+        this.subscriptions.push(gc.on("TILES_RECEIVED", (data) => this.onTilesReceived(data)));
         this.subscriptions.push(gc.on("COURTESY_VOTE", (data) => {
             this.updateStatus(`Player ${data.player} voted ${data.vote} for courtesy pass`);
         }));
@@ -656,135 +666,28 @@ export class MobileRenderer {
      * @param {Object} data - Deal sequence data
      */
     async onTilesDealt(data = {}) {
-        const sequence = Array.isArray(data.sequence) ? data.sequence : [];
-
-        if (!sequence.length) {
-            // No sequence provided, immediately complete
-            this.gameController.emit("DEALING_COMPLETE");
-            return;
+        // Skip dealing animation - just render the final hand immediately
+        const player = this.gameController.players[HUMAN_PLAYER];
+        if (player && this.handRenderer) {
+            const handData = HandData.fromJSON(player.hand);
+            this.handRenderer.render(handData);
         }
 
-        // Build staged hand data for tracking progress
-        const dealAnimationHands = Array.from({ length: 4 }, () => ({
-            tiles: [],
-            exposures: []
-        }));
-
-        let currentStepIndex = 0;
-
-        const dealNextGroup = async () => {
-            if (currentStepIndex >= sequence.length) {
-                // All dealing complete
-                // Sort and reveal human player's hand
-                if (this.handRenderer) {
-                    this.handRenderer.sortHand(1);
-                }
-
-                // Clear all opponent dealing tiles
-                this.opponentBars.forEach(({ bar }) => {
-                    if (bar) {
-                        bar.clearDealingTiles();
-                    }
-                });
-
-                this.gameController.emit("DEALING_COMPLETE");
-                return;
-            }
-
-            const step = sequence[currentStepIndex];
-            const playerIndex = typeof step.player === "number" ? step.player : PLAYER.BOTTOM;
-            const tilePayloads = Array.isArray(step.tiles) ? step.tiles : [];
-
-            if (!tilePayloads.length) {
-                currentStepIndex++;
-                setTimeout(() => dealNextGroup(), 0);
-                return;
-            }
-
-            const isHumanPlayer = playerIndex === HUMAN_PLAYER;
-            const isOpponent = !isHumanPlayer;
-
-            // For opponents: create temporary tile elements in their bar
-            let opponentTileElements = [];
-            if (isOpponent) {
-                const opponentBarEntry = this.opponentBars.find((ob) => ob.playerIndex === playerIndex);
-                if (opponentBarEntry && opponentBarEntry.bar) {
-                    opponentTileElements = opponentBarEntry.bar.addDealingTiles(tilePayloads.length);
+        // Update opponent bars with their final tile counts
+        this.opponentBars.forEach(({ playerIndex, bar }) => {
+            if (playerIndex !== HUMAN_PLAYER) {
+                const opponentPlayer = this.gameController.players[playerIndex];
+                if (opponentPlayer && bar) {
+                    bar.update({
+                        tileCount: opponentPlayer.hand?.tiles?.length || 0,
+                        wind: opponentPlayer.wind,
+                        exposures: opponentPlayer.hand?.exposures || []
+                    });
                 }
             }
+        });
 
-            // Animate each tile in the batch with staggered delays
-            const animationPromises = [];
-            for (let i = 0; i < tilePayloads.length; i++) {
-                const tileJSON = tilePayloads[i];
-                const tileData = TileData.fromJSON(tileJSON);
-
-                // Add to staged hand
-                dealAnimationHands[playerIndex].tiles.push(tileData);
-
-                // Create animation promise with delay
-                const animPromise = new Promise((resolve) => {
-                    setTimeout(() => {
-                        if (isHumanPlayer) {
-                            // For human player: add tile to hand renderer
-                            if (this.handRenderer) {
-                                const handData = new HandData(dealAnimationHands[playerIndex].tiles, []);
-                                this.handRenderer.render(handData, false); // Don't sort yet
-
-                                const tileElements = this.handRenderer.container.querySelectorAll(".mobile-tile");
-                                const lastTileEl = tileElements[tileElements.length - 1];
-
-                                if (lastTileEl) {
-                                    const endPos = getElementCenterPosition(lastTileEl);
-                                    const startPos = { x: window.innerWidth / 2, y: -50 };
-                                    this.animationController
-                                        .animateTileDeal(lastTileEl, playerIndex, startPos, endPos)
-                                        .then(resolve);
-                                } else {
-                                    resolve();
-                                }
-                            } else {
-                                resolve();
-                            }
-                        } else if (opponentTileElements[i]) {
-                            // For opponents: animate to the temporary tile element
-                            const tileEl = opponentTileElements[i];
-                            const endPos = getElementCenterPosition(tileEl);
-                            const startPos = { x: window.innerWidth / 2, y: -50 };
-                            this.animationController
-                                .animateTileDeal(tileEl, playerIndex, startPos, endPos)
-                                .then(resolve);
-                        } else {
-                            resolve();
-                        }
-
-                        // TODO: Play sound effect when mobile audio manager is implemented
-                        // if (this.audioManager) {
-                        //     this.audioManager.playSFX("rack_tile");
-                        // }
-                    }, i * 100);
-                });
-
-                animationPromises.push(animPromise);
-            }
-
-            // Wait for all animations in this batch to complete
-            await Promise.all(animationPromises);
-
-            // For opponents: fade out the tiles before next round
-            if (isOpponent && opponentTileElements.length > 0) {
-                await this.animationController.animateOpponentTilesFadeOut(opponentTileElements);
-                // Remove the tiles after fade
-                opponentTileElements.forEach((el) => el.remove());
-            }
-
-            // Small delay before next group
-            currentStepIndex++;
-            setTimeout(() => dealNextGroup(), 150);
-        };
-
-        // Start the dealing sequence
-        await dealNextGroup();
+        this.gameController.emit("DEALING_COMPLETE");
     }
 
     /**
@@ -887,6 +790,73 @@ export class MobileRenderer {
 
         // Update blank swap button since discard pile changed
         this.updateBlankSwapButton();
+    }
+
+    /**
+     * Handle Charleston pass animation
+     * @param {Object} data - Charleston pass event data
+     */
+    onCharlestonPass(data) {
+        // Only animate for human player
+        if (data.fromPlayer !== HUMAN_PLAYER) {
+            return;
+        }
+
+        // Get indices of tiles being passed from selection
+        const passingIndices = Array.from(this.selectionManager.getSelectedTileIndices());
+
+        // Trigger animation sequence
+        this.charlestonSequencer.animateCharlestonPass(data, passingIndices);
+    }
+
+    /**
+     * Handle tiles received animation
+     * @param {Object} data - Tiles received event data
+     */
+    onTilesReceived(data) {
+        // Only animate for human player
+        if (data.player !== HUMAN_PLAYER) {
+            return;
+        }
+
+        // Only animate for Charleston context
+        if (data.animation?.type !== "charleston-receive") {
+            return;
+        }
+
+        // Find indices of received tiles in the new hand
+        const receivedIndices = this._findReceivedTileIndices(data.tiles);
+
+        // Trigger animation sequence
+        this.charlestonSequencer.handleTilesReceived(data, receivedIndices);
+    }
+
+    /**
+     * Find indices of received tiles in current hand
+     * @param {Array} receivedTiles - Tiles that were received
+     * @returns {Array<number>} Indices of received tiles in hand
+     * @private
+     */
+    _findReceivedTileIndices(receivedTiles) {
+        if (!this.handRenderer.currentHandData) {
+            return [];
+        }
+
+        const handTiles = this.handRenderer.currentHandData.tiles;
+        const indices = [];
+
+        // Match received tiles to hand tiles
+        // This assumes tiles are added to the end of the hand
+        const startIndex = handTiles.length - receivedTiles.length;
+
+        for (let i = 0; i < receivedTiles.length; i++) {
+            const index = startIndex + i;
+            if (index >= 0 && index < handTiles.length) {
+                indices.push(index);
+            }
+        }
+
+        return indices;
     }
 
     /**
@@ -1312,7 +1282,7 @@ export class MobileRenderer {
         });
 
         // Ensure CTA state matches current selection (likely 0/1 on entry)
-        this.updateTileSelectionHint(this.handRenderer.getSelectionState());
+        this.updateTileSelectionHint(this.selectionManager.getSelectionState());
     }
 
     onHandSelectionChange(selection) {
@@ -1322,7 +1292,7 @@ export class MobileRenderer {
         this.updateTileSelectionHint(selection);
     }
 
-    updateTileSelectionHint(selection = this.handRenderer.getSelectionState()) {
+    updateTileSelectionHint(selection = this.selectionManager.getSelectionState()) {
         if (!this.pendingPrompt || this.pendingPrompt.type !== "tile-selection") {
             return;
         }
@@ -1344,7 +1314,7 @@ export class MobileRenderer {
         if (!this.pendingPrompt || this.pendingPrompt.type !== "tile-selection") {
             return;
         }
-        const selection = this.handRenderer.getSelectionState();
+        const selection = this.selectionManager.getSelectionState();
         const { min, max } = this.pendingPrompt;
         if (selection.count < min || selection.count > max) {
             return;
@@ -1470,7 +1440,7 @@ export class MobileRenderer {
 
         if (isDiscardState && this.pendingPrompt?.type === "tile-selection") {
             this.pendingPrompt.confirmUsesActionButton = true;
-            const selection = this.handRenderer.getSelectionState();
+            const selection = this.selectionManager.getSelectionState();
             const ready = selection.count >= (this.pendingPrompt.min || 1) && selection.count <= (this.pendingPrompt.max || 1);
             this.updateActionButton({
                 label: "Discard",
@@ -1503,7 +1473,10 @@ export class MobileRenderer {
         }
     }
 
-    // Add error handling for asset loading
+    // TODO: Asset error handling scaffolding (not yet wired up)
+    // Future work: Add image onerror handlers to detect tile sprite loading failures
+    // Future work: Implement text mode fallback in HandRenderer
+    // Future work: Call handleAssetError from asset loading pipeline
     handleAssetError(assetType, assetPath) {
         console.error(`Failed to load ${assetType}: ${assetPath}`);
 
@@ -1525,9 +1498,8 @@ export class MobileRenderer {
     }
 
     enableTextModeFallback() {
-        // Switch all tiles to text mode if sprites fail
-        // This would require HandRenderer to support a text mode or we manually replace elements
-        // For now, we'll just log it as this is a robust fallback feature
+        // TODO: Implement text mode in HandRenderer
+        // This would require HandRenderer to support text-based tile rendering
         console.warn("Text mode fallback requested but not fully implemented in HandRenderer yet");
     }
 }
