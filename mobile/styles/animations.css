@@ -416,7 +416,7 @@
 
 /* Face-down tile state (show back of tile) */
 .tile--face-down {
-    background-image: url('../assets/back.png') !important;
+    background-image: url('../../pwa/assets/back.png') !important;
     background-size: cover !important;
     background-position: center !important;
 }

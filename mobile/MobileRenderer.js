@@ -634,30 +634,32 @@ export class MobileRenderer {
             this.handRenderer.container.style.visibility = "visible";
         }
 
-        // Animate dealing for human player
-        await this.dealingSequencer.animateDeal(data.sequence);
+        try {
+            // Animate dealing for human player
+            await this.dealingSequencer.animateDeal(data.sequence);
+        } finally {
+            // Clear flags - animation is done (or failed)
+            this.isDealingAnimationRunning = false;
 
-        // Clear flag - animation is done
-        this.isDealingAnimationRunning = false;
-
-        // Initialize latestHandSnapshot with current hand after dealing
-        // This is critical for Charleston tile selection to work properly
-        const humanPlayer = this.gameController.players[0];
-        if (humanPlayer && humanPlayer.hand) {
-            this.latestHandSnapshot = humanPlayer.hand.clone();
-        }
-
-        // Update opponent bars (no animation for AI players)
-        this.opponentBars.forEach(({ playerIndex, bar }) => {
-            if (playerIndex !== HUMAN_PLAYER) {
-                const opponentPlayer = this.gameController.players[playerIndex];
-                if (opponentPlayer && bar) {
-                    bar.update(opponentPlayer);
-                }
+            // Initialize latestHandSnapshot with current hand after dealing
+            // This is critical for Charleston tile selection to work properly
+            const humanPlayer = this.gameController.players[0];
+            if (humanPlayer && humanPlayer.hand) {
+                this.latestHandSnapshot = humanPlayer.hand.clone();
             }
-        });
 
-        // Note: DEALING_COMPLETE is now emitted by dealingSequencer.onSequenceComplete()
+            // Update opponent bars (no animation for AI players)
+            this.opponentBars.forEach(({ playerIndex, bar }) => {
+                if (playerIndex !== HUMAN_PLAYER) {
+                    const opponentPlayer = this.gameController.players[playerIndex];
+                    if (opponentPlayer && bar) {
+                        bar.update(opponentPlayer);
+                    }
+                }
+            });
+
+            // Note: DEALING_COMPLETE is now emitted by dealingSequencer.onSequenceComplete()
+        }
     }
 
     // _findNewlyReceivedTiles has been moved to HandEventCoordinator

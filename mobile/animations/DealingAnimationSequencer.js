@@ -100,8 +100,17 @@ export class DealingAnimationSequencer extends AnimationSequencer {
         // Render hand normally
         this.handRenderer.render(handData);
 
+        // Defensive guard: ensure tiles array exists and is valid
+        const tiles = this.handRenderer && Array.isArray(this.handRenderer.tiles)
+            ? this.handRenderer.tiles
+            : null;
+
+        if (!tiles || tiles.length === 0) {
+            console.warn("DealingAnimationSequencer: No valid tiles to render");
+            return;
+        }
+
         // Add face-down class to all tiles
-        const tiles = this.handRenderer.tiles;
         tiles.forEach(tile => {
             tile.classList.add("tile--face-down");
         });
@@ -121,7 +130,15 @@ export class DealingAnimationSequencer extends AnimationSequencer {
      * @private
      */
     async revealTilesSequentially() {
-        const tiles = this.handRenderer.tiles;
+        // Defensive guard: ensure tiles array exists and is valid
+        const tiles = this.handRenderer && Array.isArray(this.handRenderer.tiles)
+            ? this.handRenderer.tiles
+            : null;
+
+        if (!tiles || tiles.length === 0) {
+            console.warn("DealingAnimationSequencer: No valid tiles to reveal");
+            return;
+        }
 
         for (let i = 0; i < tiles.length; i++) {
             const tile = tiles[i];
