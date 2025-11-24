@@ -76,6 +76,17 @@ export function createTileDrawnEvent(player, tile, animation = {}) {
 /**
  * Event: TILE_DISCARDED
  * Emitted when a player discards a tile
+ *
+ * @param {number} player - Player index (0-3)
+ * @param {Object} tile - TileData object with suit, number, and index
+ * @param {Object} [animation={}] - Animation metadata
+ * @param {string} [animation.type] - Animation type (e.g., "discard-arc", "discard-slide")
+ * @param {number} [animation.tileIndex] - Index of tile in hand before discard (for mobile animation)
+ * @param {number} [animation.rotation] - Rotation degrees during animation (360 for human, 180 for AI)
+ * @param {number} [animation.duration] - Animation duration in milliseconds
+ * @param {string} [animation.easing] - CSS easing function
+ * @param {number} [animation.speedMultiplier] - Optional speed multiplier for animation
+ * @returns {Object} Event object with type, player, tile, animation, and timestamp
  */
 export function createTileDiscardedEvent(player, tile, animation = {}) {
     return {
