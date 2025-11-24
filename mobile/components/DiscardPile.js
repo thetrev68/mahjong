@@ -223,6 +223,46 @@ export class DiscardPile {
     }
 
     /**
+     * Get the position where the next tile should land
+     * @returns {{x: number, y: number}}
+     */
+    getNextTilePosition() {
+        // Get discard pile container position
+        const rect = this.element.getBoundingClientRect();
+
+        // Calculate next grid position (tiles are laid out horizontally)
+        const tileWidth = 48; // From tiles.css
+        const tileGap = 4;
+        const tilesPerRow = 10;
+
+        const currentCount = this.discards.length;
+        const row = Math.floor(currentCount / tilesPerRow);
+        const col = currentCount % tilesPerRow;
+
+        return {
+            x: rect.left + (col * (tileWidth + tileGap)) + (tileWidth / 2),
+            y: rect.top + (row * (tileWidth + tileGap)) + (tileWidth / 2)
+        };
+    }
+
+    /**
+     * Get the position of the last discarded tile
+     * @returns {{x: number, y: number}|null}
+     */
+    getLastTilePosition() {
+        const latestElement = this.getLatestDiscardElement();
+        if (!latestElement) {
+            return null;
+        }
+
+        const rect = latestElement.getBoundingClientRect();
+        return {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2
+        };
+    }
+
+    /**
      * Clear all discards
      */
     clear() {

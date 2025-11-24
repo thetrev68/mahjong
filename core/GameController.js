@@ -830,6 +830,9 @@ export class GameController extends EventEmitter {
             }
         }
 
+        // Capture tile index before removing from hand (needed for animation)
+        const tileIndex = player.hand.tiles.findIndex(t => t.isSameTile(tileToDiscard));
+
         // Remove from hand
         const removed = player.hand.removeTile(tileToDiscard);
         if (!removed) {
@@ -850,9 +853,11 @@ export class GameController extends EventEmitter {
             index: tileToDiscard.index
         };
         const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, tileData, {
-            type: "discard-slide",
-            duration: 300,
-            easing: "Power2.easeInOut"
+            type: "discard-arc",
+            duration: this.currentPlayer === 0 ? 300 : 200,
+            easing: "ease-out",
+            rotation: this.currentPlayer === 0 ? 360 : 180,
+            tileIndex: tileIndex
         });
         this.emit("TILE_DISCARDED", discardEvent);
 

@@ -7,6 +7,7 @@ import { PlayerRack } from "./components/PlayerRack.js";
 import { AnimationController } from "./animations/AnimationController.js";
 import { CharlestonAnimationSequencer } from "./animations/CharlestonAnimationSequencer.js";
 import { DealingAnimationSequencer } from "./animations/DealingAnimationSequencer.js";
+import { DiscardAnimationSequencer } from "./animations/DiscardAnimationSequencer.js";
 import { HomePageTiles } from "./components/HomePageTiles.js";
 import { DiscardSelectionModal } from "./components/DiscardSelectionModal.js";
 import { PLAYER, STATE, SUIT } from "../constants.js";
@@ -84,6 +85,15 @@ export class MobileRenderer {
             this.gameController,
             this.handRenderer,
             this.animationController
+        );
+
+        // Initialize Discard animation sequencer
+        this.discardSequencer = new DiscardAnimationSequencer(
+            this.gameController,
+            this.handRenderer,
+            this.animationController,
+            this.discardPile,
+            this // Pass MobileRenderer for animation flags
         );
 
         // Track if we just completed dealing animation to avoid re-render
@@ -685,29 +695,13 @@ export class MobileRenderer {
         this.updateActionButtonStateForGame(this.gameController.state);
     }
 
-    onTileDiscarded(data) {
+    async onTileDiscarded(data) {
         if (!data?.tile) {
             return;
         }
-        const tile = TileData.fromJSON(data.tile);
-        this.discardPile.addDiscard(tile, data.player);
 
-        // Animate discard from hand if it's the human player
-        if (data.player === HUMAN_PLAYER) {
-            // Find the hand container for better positioning context
-            const discardContainer = this.discardPile?.element;
-
-            // Animate from the hand to discard pile with container context
-            const latestDiscard = this.discardPile.getLatestDiscardElement();
-            if (latestDiscard && discardContainer) {
-                // Get target position from discard container center
-                const targetPos = getElementCenterPosition(discardContainer);
-                this.animationController.animateTileDiscard(latestDiscard, targetPos);
-            } else if (latestDiscard) {
-                // Fallback to automatic positioning
-                this.animationController.animateTileDiscard(latestDiscard);
-            }
-        }
+        // Route to sequencer for animation
+        await this.discardSequencer.animateDiscard(data);
 
         // Update blank swap button since discard pile changed
         this.updateBlankSwapButton();
