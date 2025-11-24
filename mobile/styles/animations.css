@@ -411,3 +411,43 @@
 .tile-fading-out {
     animation: tile-fade-out 300ms ease-in forwards;
 }
+
+/* ===== Initial Deal Tile Reveal Animation ===== */
+
+/* Face-down tile state (show back of tile) */
+.tile--face-down {
+    background-image: url('../assets/back.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+/* Reveal animation (flip from back to face) */
+.tile--revealing {
+    animation: tile-reveal 500ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+@keyframes tile-reveal {
+    0% {
+        transform: scale(0.95) rotateY(0deg);
+    }
+    50% {
+        transform: scale(1.05) rotateY(90deg);
+    }
+    100% {
+        transform: scale(1) rotateY(0deg);
+    }
+}
+
+/* Add tile-revealing to performance optimization list */
+.tile--revealing {
+    will-change: transform, opacity, filter;
+    transform: translateZ(0);
+    contain: layout style paint;
+}
+
+/* Reduced motion support for dealing animation */
+@media (prefers-reduced-motion: reduce) {
+    .tile--revealing {
+        animation-duration: 50ms !important;
+    }
+}

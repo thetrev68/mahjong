@@ -121,6 +121,21 @@
     display: block;
 }
 
+/* Skeleton loading state for hints */
+.hint-pattern-skeleton {
+    opacity: 0.5;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+    0%, 100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+
 .primary-btn {
     background-color: #ffd166;
     color: #1f1400;

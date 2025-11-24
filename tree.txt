@@ -74,7 +74,7 @@ mahjong/
 │   │   ├── PlayerData.js (87 lines)
 │   │   └── TileData.js (160 lines)
 │   ├── AIEngine.js (546 lines)
-│   ├── GameController.js (1203 lines)
+│   ├── GameController.js (1234 lines)
 │   └── tileDefinitions.js (64 lines)
 ├── desktop/
 │   ├── adapters/
@@ -98,29 +98,34 @@ mahjong/
 │   ├── renderers/
 │   │   └── HandRenderer.js (410 lines)
 │   ├── scenes/
-│   │   └── GameScene.js (578 lines)
+│   │   └── GameScene.js (575 lines)
 │   ├── ADAPTER_PATTERNS.md
 │   └── FUTURE_REFACTORS.md
 ├── mobile/
 │   ├── animations/
-│   │   └── AnimationController.js (450 lines)
+│   │   ├── AnimationController.js (519 lines)
+│   │   ├── AnimationSequencer.js (145 lines)
+│   │   ├── CharlestonAnimationSequencer.js (260 lines)
+│   │   └── DealingAnimationSequencer.js (178 lines)
 │   ├── assets/
 │   ├── components/
 │   │   ├── DiscardPile.js (217 lines)
 │   │   ├── DiscardSelectionModal.js (105 lines)
-│   │   ├── HintsPanel.js (347 lines)
+│   │   ├── HintsPanel.js (404 lines)
 │   │   ├── HomePageTiles.js (109 lines)
 │   │   ├── InstallPrompt.js (343 lines)
 │   │   ├── MobileTile.css (160 lines)
 │   │   ├── MobileTile.js (156 lines)
-│   │   ├── OpponentBar.js (168 lines)
+│   │   ├── OpponentBar.js (196 lines)
 │   │   ├── PlayerRack.js (68 lines)
 │   │   ├── SettingsSheet.js (251 lines)
 │   │   └── WallCounter.js (94 lines)
 │   ├── gestures/
 │   │   └── TouchHandler.js (283 lines)
 │   ├── renderers/
-│   │   └── HandRenderer.js (611 lines)
+│   │   ├── HandEventCoordinator.js (308 lines)
+│   │   ├── HandRenderer.js (435 lines)
+│   │   └── HandSelectionManager.js (274 lines)
 │   ├── screencaps(Temp)/
 │   │   ├── Bot 2 Claims.png
 │   │   ├── IMG_0469.PNG
@@ -134,11 +139,11 @@ mahjong/
 │   │   ├── Screenshot 2025-11-22 205133.png
 │   │   └── Screenshot 2025-11-22 212015.png
 │   ├── styles/
-│   │   ├── animations.css (258 lines)
+│   │   ├── animations.css (387 lines)
 │   │   ├── base.css (72 lines)
 │   │   ├── DiscardSelectionModal.css (157 lines)
 │   │   ├── HandRenderer.css (107 lines)
-│   │   ├── MobileGame.css (340 lines)
+│   │   ├── MobileGame.css (353 lines)
 │   │   ├── OpponentBar.css (113 lines)
 │   │   ├── SettingsSheet.css (236 lines)
 │   │   └── tiles.css (186 lines)
@@ -150,7 +155,7 @@ mahjong/
 │   ├── index.html (77 lines)
 │   ├── main.js (293 lines)
 │   ├── MOBILE_INTERFACES.md
-│   ├── MobileRenderer.js (1205 lines)
+│   ├── MobileRenderer.js (1235 lines)
 │   ├── mockup.css (468 lines)
 │   ├── mockup.html (152 lines)
 │   └── styles.css (62 lines)
@@ -186,14 +191,16 @@ mahjong/
 │   ├── e2e/
 │   │   ├── desktop/
 │   │   │   └── game-basic.spec.js (193 lines)
-│   │   └── mobile/
-│   │       ├── interactions.spec.js (91 lines)
-│   │       ├── layout.spec.js (21 lines)
-│   │       ├── mobile.spec.js (228 lines)
-│   │       ├── phase0-setup.spec.js (126 lines)
-│   │       ├── responsive.spec.js (216 lines)
-│   │       ├── sprites.spec.js (54 lines)
-│   │       └── touch-handler.spec.js (59 lines)
+│   │   ├── mobile/
+│   │   │   ├── dealing-animations.spec.js (139 lines)
+│   │   │   ├── interactions.spec.js (91 lines)
+│   │   │   ├── layout.spec.js (21 lines)
+│   │   │   ├── mobile.spec.js (228 lines)
+│   │   │   ├── phase0-setup.spec.js (126 lines)
+│   │   │   ├── responsive.spec.js (216 lines)
+│   │   │   ├── sprites.spec.js (54 lines)
+│   │   │   └── touch-handler.spec.js (59 lines)
+│   │   └── charleston-animations.spec.js (260 lines)
 │   ├── unit/
 │   │   ├── core/
 │   │   │   └── aiengine.test.js (224 lines)
@@ -203,7 +210,9 @@ mahjong/
 │   │       └── mobile-tile.test.js (343 lines)
 │   └── utils/
 │       └── mobile-helpers.js (197 lines)
+├── ANIMATION_ARCHITECTURE_REFACTOR.md
 ├── audioManager.js (96 lines)
+├── CHARLESTON_ANIMATION_TESTING.md
 ├── CLAUDE.md
 ├── constants.js (108 lines)
 ├── Description_Animation_Deal.md
@@ -213,12 +222,15 @@ mahjong/
 ├── Description_Animation_Select.md
 ├── favicon.ico
 ├── favicon.svg
+├── FUTURE_REFACTORS.md
 ├── index.html (163 lines)
 ├── main.js (28 lines)
 ├── playwright.config.js (54 lines)
 ├── README.md
 ├── settings.js (439 lines)
 ├── styles.css (821 lines)
+├── TASK_1A2_COMPLETION_REPORT.md
+├── test_coordinator.mjs
 ├── tileDisplayUtils.js (269 lines)
 ├── untrack.ps1
 └── utils.js (42 lines)
@@ -227,9 +239,9 @@ mahjong/
 DIRECTORY TREE STATISTICS
 ==================================================
 Total directories: 42
-Total files: 181
-Files with line counts: 134
-Total lines of code: 35,639
+Total files: 193
+Files with line counts: 141
+Total lines of code: 37,381
 
 Configuration:
   Excluded directories: .archive, .claude, .geminiignore, .git, .github, .gitignore, .idea, .kilocode, .pytest_cache, .ruff_cache, .serena, .vite, .vscode, __pycache__, agents.md, backlog.md, build, claude.md, coverage, dist, docs, eslint.config.js, gemini.md, jules-scratch, knip.json, legacy, logs, node_modules, package-lock.json, package.json, playwright-report, public, test-results, tree.txt, tree_scanner.py, venv, vite.config.js

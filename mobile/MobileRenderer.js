@@ -6,6 +6,7 @@ import { OpponentBar } from "./components/OpponentBar.js";
 import { PlayerRack } from "./components/PlayerRack.js";
 import { AnimationController } from "./animations/AnimationController.js";
 import { CharlestonAnimationSequencer } from "./animations/CharlestonAnimationSequencer.js";
+import { DealingAnimationSequencer } from "./animations/DealingAnimationSequencer.js";
 import { HomePageTiles } from "./components/HomePageTiles.js";
 import { DiscardSelectionModal } from "./components/DiscardSelectionModal.js";
 import { PLAYER, STATE, SUIT } from "../constants.js";
@@ -50,7 +51,8 @@ export class MobileRenderer {
         this.eventCoordinator = new HandEventCoordinator(
             options.gameController,
             this.handRenderer,
-            this.selectionManager
+            this.selectionManager,
+            this // Pass MobileRenderer so it can check animation flags
         );
 
         // Inject dependencies into HandRenderer
@@ -76,6 +78,18 @@ export class MobileRenderer {
             this.animationController,
             () => this.eventCoordinator?.applyHintRecommendations()
         );
+
+        // Initialize Dealing animation sequencer
+        this.dealingSequencer = new DealingAnimationSequencer(
+            this.gameController,
+            this.handRenderer,
+            this.animationController
+        );
+
+        // Track if we just completed dealing animation to avoid re-render
+        this.justCompletedDealingAnimation = false;
+        // Track if dealing animation is currently running
+        this.isDealingAnimationRunning = false;
 
         // Configure selection behavior via HandSelectionManager
         this.selectionManager.setSelectionBehavior({
@@ -140,7 +154,7 @@ export class MobileRenderer {
         this.subscriptions.push(gc.on("GAME_ENDED", (data) => this.onGameEnded(data)));
         this.subscriptions.push(gc.on("STATE_CHANGED", (data) => this.onStateChanged(data)));
         this.subscriptions.push(gc.on("TILES_DEALT", (data) => this.onTilesDealt(data)));
-        this.subscriptions.push(gc.on("HAND_UPDATED", (data) => this.onHandUpdated(data)));
+        // HAND_UPDATED is now handled exclusively by HandEventCoordinator
         this.subscriptions.push(gc.on("TURN_CHANGED", (data) => this.onTurnChanged(data)));
         this.subscriptions.push(gc.on("TILE_DISCARDED", (data) => this.onTileDiscarded(data)));
         this.subscriptions.push(gc.on("DISCARD_CLAIMED", (data) => this.onTileClaimed(data)));
@@ -538,9 +552,14 @@ export class MobileRenderer {
     }
 
     onGameStarted() {
-        // Trigger home page animation
+        // Hide hand container until dealing animation is ready
+        if (this.handRenderer?.container) {
+            this.handRenderer.container.style.visibility = "hidden";
+        }
+
+        // Trigger home page animation and store promise
         if (this.homePageTiles) {
-            this.homePageTiles.animateStart().catch(err => {
+            this.homePageAnimationPromise = this.homePageTiles.animateStart().catch(err => {
                 console.error("HomePageTiles animation error:", err);
             });
         }
@@ -549,8 +568,6 @@ export class MobileRenderer {
         this.updateStatus("Game started - dealing tiles...");
         this.refreshOpponentBars();
         this.updateActionButton({ label: "Start", onClick: () => this.startGame(), disabled: true, visible: true });
-
-
     }
 
     onGameEnded(data) {
@@ -594,159 +611,56 @@ export class MobileRenderer {
         this.updateActionButtonStateForGame(data.newState);
     }
 
-    onHandUpdated(data) {
-        if (!data) {
-            return;
-        }
-
-        const player = this.gameController.players[data.player];
-        if (!player) {
-            return;
-        }
-
-        if (data.player === HUMAN_PLAYER) {
-            // Convert plain JSON object to HandData instance
-            const handData = HandData.fromJSON(data.hand);
-            this.latestHandSnapshot = handData;
-
-            // Detect and apply glow to newly received tiles (Charleston/Courtesy)
-            // Compare current hand with previous snapshot to find new tiles
-            const newlyReceivedTiles = this._findNewlyReceivedTiles(this.previousHandSnapshot, handData);
-
-            // Render the hand
-            this.handRenderer.render(handData);
-
-            // Update player rack with exposures - use handData, not raw data.hand
-            if (this.playerRack) {
-                this.playerRack.update(handData.toJSON());
-            }
-
-            // Update joker swap button visibility
-            this.updateJokerSwapButton();
-            // Update blank swap button visibility
-            this.updateBlankSwapButton();
-            // Update mahjong button visibility
-            this.updateMahjongButton();
-
-            // Apply glow to newly received tiles after rendering
-            if (newlyReceivedTiles.length > 0) {
-                newlyReceivedTiles.forEach(tileIndex => {
-                    const tileElement = this.handRenderer.getTileElementByIndex(tileIndex);
-                    if (tileElement) {
-                        this.animationController.applyReceivedTileGlow(tileElement);
-                    }
-                });
-            }
-
-            // Store current hand as previous for next comparison
-            this.previousHandSnapshot = handData.clone();
-
-            // If we just drew a tile (hand size increased to 14), animate it
-            // This is a heuristic since we don't get explicit "DRAWN" event with tile data here
-            // Ideally GameController would pass the drawn tile or we'd diff the hand
-            if (handData.tiles.length % 3 === 2) { // 14 tiles (or 2, 5, 8, 11) means we have a draw
-                const lastTile = this.handRenderer.getLastTileElement();
-                if (lastTile) {
-                    // Calculate draw animation from wall position (top-left) to hand position
-                    // Wall "funnel point" is at -20vw, -20vh (matching HomePageTiles animation)
-                    const startPos = {
-                        x: window.innerWidth * -0.20, // -20vw: off-screen top-left
-                        y: window.innerHeight * -0.20 // -20vh: off-screen top-left
-                    };
-                    const endPos = getElementCenterPosition(lastTile);
-
-                    this.animationController.animateTileDraw(lastTile, startPos, endPos);
-                }
-            }
-        } else {
-            const bar = this.opponentBars.find(ob => ob.playerIndex === data.player);
-            if (bar) {
-                bar.bar.update(player);
-            }
-        }
-    }
+    // onHandUpdated is now handled exclusively by HandEventCoordinator
+    // This eliminates the duplicate listener code smell
 
     /**
      * Handle tiles dealt event with animation
      * @param {Object} data - Deal sequence data
      */
-    onTilesDealt(_data = {}) {
-        // Skip dealing animation - just render the final hand immediately
-        const player = this.gameController.players[HUMAN_PLAYER];
-        if (player && this.handRenderer) {
-            const handData = HandData.fromJSON(player.hand);
-            this.handRenderer.render(handData);
+    async onTilesDealt(data = {}) {
+        // Set flags to prevent any re-renders during dealing
+        this.isDealingAnimationRunning = true;
+        this.justCompletedDealingAnimation = true;
+
+        // Wait for home page animation to complete before starting dealing
+        if (this.homePageAnimationPromise) {
+            await this.homePageAnimationPromise;
+            this.homePageAnimationPromise = null;
         }
 
-        // Update opponent bars with their final tile counts
+        // Make hand visible now that we're ready to animate
+        if (this.handRenderer?.container) {
+            this.handRenderer.container.style.visibility = "visible";
+        }
+
+        // Animate dealing for human player
+        await this.dealingSequencer.animateDeal(data.sequence);
+
+        // Clear flag - animation is done
+        this.isDealingAnimationRunning = false;
+
+        // Initialize latestHandSnapshot with current hand after dealing
+        // This is critical for Charleston tile selection to work properly
+        const humanPlayer = this.gameController.players[0];
+        if (humanPlayer && humanPlayer.hand) {
+            this.latestHandSnapshot = humanPlayer.hand.clone();
+        }
+
+        // Update opponent bars (no animation for AI players)
         this.opponentBars.forEach(({ playerIndex, bar }) => {
             if (playerIndex !== HUMAN_PLAYER) {
                 const opponentPlayer = this.gameController.players[playerIndex];
                 if (opponentPlayer && bar) {
-                    bar.update({
-                        tileCount: opponentPlayer.hand?.tiles?.length || 0,
-                        wind: opponentPlayer.wind,
-                        exposures: opponentPlayer.hand?.exposures || []
-                    });
+                    bar.update(opponentPlayer);
                 }
             }
         });
 
-        this.gameController.emit("DEALING_COMPLETE");
+        // Note: DEALING_COMPLETE is now emitted by dealingSequencer.onSequenceComplete()
     }
 
-    /**
-     * Find which tile indices were newly added between previous and current hand
-     * @param {HandData|null} previousHand - Previous hand snapshot
-     * @param {HandData} currentHand - Current hand snapshot
-     * @returns {number[]} Array of tile indices that were newly received
-     * @private
-     */
-    _findNewlyReceivedTiles(previousHand, currentHand) {
-        if (!previousHand || !currentHand) {
-            return [];
-        }
-
-        const previousTiles = previousHand.tiles || [];
-        const currentTiles = currentHand.tiles || [];
-
-        // If hand size didn't increase, no new tiles
-        if (currentTiles.length <= previousTiles.length) {
-            return [];
-        }
-
-        // Create a map of previous tiles for efficient comparison
-        // Count tiles by suit:number since duplicates can exist
-        const previousTileCounts = new Map();
-        previousTiles.forEach(tile => {
-            const key = `${tile.suit}:${tile.number}`;
-            previousTileCounts.set(key, (previousTileCounts.get(key) || 0) + 1);
-        });
-
-        // Find tiles in current hand that weren't in previous hand
-        // Track by index position since we need to return the element index
-        const newTileIndices = [];
-        let newTilesFound = 0;
-        const tilesToFind = currentTiles.length - previousTiles.length;
-
-        // Work backwards through current tiles to find newly added ones
-        for (let i = currentTiles.length - 1; i >= 0 && newTilesFound < tilesToFind; i--) {
-            const tile = currentTiles[i];
-            const key = `${tile.suit}:${tile.number}`;
-            const count = previousTileCounts.get(key) || 0;
-
-            // If we still have unmatched copies of this tile type from previous hand,
-            // it's not a new tile. Otherwise, it's new.
-            if (count > 0) {
-                previousTileCounts.set(key, count - 1);
-            } else {
-                newTileIndices.push(i);
-                newTilesFound++;
-            }
-        }
-
-        return newTileIndices;
-    }
+    // _findNewlyReceivedTiles has been moved to HandEventCoordinator
 
     onTurnChanged(data) {
         const currentPlayer = data?.currentPlayer ?? this.gameController.currentPlayer;

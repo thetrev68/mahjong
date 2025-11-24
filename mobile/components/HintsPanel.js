@@ -27,7 +27,7 @@ export class HintsPanel {
         this.container = container;
         this.gameController = gameController;
         this.aiEngine = aiEngine;
-        this.isExpanded = true;
+        this.isExpanded = true; // Start expanded (panel visible by default)
         this.unsubscribeFns = [];
         this._disabled = false;
         this.latestHandData = null;
@@ -67,9 +67,12 @@ export class HintsPanel {
         this.toggleBtn.addEventListener("touchstart", this._onTouchStart, { passive: true });
         this.toggleBtn.addEventListener("touchend", this._onTouchEnd);
 
-        // Set initial state (expanded so it's visible by default)
+        // Set initial state (expanded with skeleton to reserve space)
         this.toggleBtn.setAttribute("aria-expanded", "true");
         this.contentEl.style.display = "block";
+
+        // Show skeleton immediately to reserve layout space
+        this.showSkeletonHints();
     }
 
     /**
@@ -114,6 +117,58 @@ export class HintsPanel {
             return;
         }
 
+        // Only show skeleton and compute if panel is expanded
+        // If collapsed, we'll show skeleton when user expands
+        if (this.isExpanded) {
+            this.showSkeletonHints();
+            // Delay computation to keep skeleton visible and prevent layout jump
+            setTimeout(() => {
+                this.computeAndRenderHints(handData);
+            }, 300); // 300ms delay to show skeleton
+        }
+    }
+
+    /**
+     * Show skeleton/placeholder hints to reserve layout space
+     * This prevents layout shift when real hints load
+     */
+    showSkeletonHints() {
+        if (this._disabled || !this.contentEl) {
+            return;
+        }
+
+        console.log("HintsPanel.showSkeletonHints: Rendering skeleton HTML");
+        // Create 3 skeleton pattern blocks with empty content
+        // This reserves the vertical space so hand doesn't jump
+        let html = "<div class=\"hint-item\">";
+        for (let i = 0; i < 3; i++) {
+            html += `
+                <div class="hint-pattern hint-pattern-skeleton">
+                    <div class="hint-pattern-header">
+                        <strong>&nbsp;</strong>
+                        <span class="hint-rank">&nbsp;</span>
+                    </div>
+                    <div class="hint-pattern-tiles" style="min-height: 32px;">&nbsp;</div>
+                </div>
+            `;
+        }
+        html += "</div>";
+
+        this.contentEl.innerHTML = html;
+        console.log("HintsPanel.showSkeletonHints: Skeleton HTML set");
+    }
+
+    /**
+     * Compute and render actual hints (async operation)
+     * @param {HandData} handData - Player's hand data
+     */
+    computeAndRenderHints(handData) {
+        // Early return if component is disabled or DOM is missing
+        if (this._disabled || !this.contentEl) {
+            return;
+        }
+
+        console.log("HintsPanel.computeAndRenderHints: Starting computation");
         try {
             // Rank the hand to get top patterns
             const rankCardHands = this.aiEngine.card.rankHandArray14(handData);
@@ -296,13 +351,22 @@ export class HintsPanel {
             return;
         }
 
+        console.log("HintsPanel.expand: EXPANDING PANEL");
         this.isExpanded = true;
         this.contentEl.style.display = "block";
         this.toggleBtn.setAttribute("aria-expanded", "true");
 
         if (this.latestHandData) {
-            const recs = this.getDiscardRecommendations(this.latestHandData);
-            this.emitDiscardRecommendations(recs, true);
+            console.log("HintsPanel.expand: Showing skeleton...");
+            // Show skeleton immediately when expanding
+            this.showSkeletonHints();
+
+            // Compute and render actual hints asynchronously with delay
+            // (computeAndRenderHints already handles discard recommendations)
+            setTimeout(() => {
+                console.log("HintsPanel.expand: Computing real hints...");
+                this.computeAndRenderHints(this.latestHandData);
+            }, 500); // 500ms delay to show skeleton before computing
         }
     }
 
