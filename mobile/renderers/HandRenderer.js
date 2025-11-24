@@ -154,6 +154,7 @@ export class HandRenderer {
         this.clearTiles();
 
         const tiles = Array.isArray(handData.tiles) ? handData.tiles : [];
+        console.log(`[HandRenderer] Rendering ${tiles.length} tiles`);
         tiles.forEach((tileData, index) => {
             const tileButton = this.createTileButton(tileData, index);
 
@@ -231,6 +232,7 @@ export class HandRenderer {
     }
 
     clearTiles() {
+        console.log(`[HandRenderer] Clearing ${this.tiles.length} tiles from DOM`);
         this.tiles.forEach(tileButton => {
             const handler = tileButton.__handRendererHandler;
             if (handler) {
@@ -251,6 +253,7 @@ export class HandRenderer {
 
         if (this.handContainer) {
             this.handContainer.innerHTML = "";
+            console.log(`[HandRenderer] DOM cleared, handContainer.children.length = ${this.handContainer.children.length}`);
         }
     }
 
