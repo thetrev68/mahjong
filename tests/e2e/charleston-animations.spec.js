@@ -45,8 +45,11 @@ test.describe("Charleston Animations", () => {
         const leavingTiles = page.locator(".tile-charleston-leaving");
         await expect(leavingTiles).toHaveCount(3);
 
-        // Wait for pass-out animation to complete
-        await page.waitForTimeout(700); // PASS_OUT_DURATION + buffer
+        // Wait for pass-out animation to complete (dynamic wait)
+        await page.waitForFunction(() => {
+            const tiles = document.querySelectorAll('.tile-charleston-leaving');
+            return tiles.length === 0; // Animation class removed when complete
+        }, { timeout: 1000 });
 
         // Wait for receive animation
         await page.waitForSelector(".tile-charleston-arriving", { timeout: 2000 });
@@ -55,16 +58,25 @@ test.describe("Charleston Animations", () => {
         const arrivingTiles = page.locator(".tile-charleston-arriving");
         await expect(arrivingTiles).toHaveCount(3);
 
-        // Wait for receive animation to complete
-        await page.waitForTimeout(700); // RECEIVE_DURATION + buffer
+        // Wait for receive animation to complete (dynamic wait)
+        await page.waitForFunction(() => {
+            const tiles = document.querySelectorAll('.tile-charleston-arriving');
+            return tiles.length === 0; // Animation class removed when complete
+        }, { timeout: 1000 });
 
         // Verify blue glow is applied to received tiles
         await page.waitForSelector(".tile--newly-drawn", { timeout: 1000 });
         const glowingTiles = page.locator(".tile--newly-drawn");
         await expect(glowingTiles).toHaveCount(3);
 
-        // Wait for sort animation
-        await page.waitForTimeout(900); // SORT_DURATION + buffer
+        // Wait for sort animation to complete (dynamic wait)
+        await page.waitForFunction(() => {
+            const tiles = document.querySelectorAll('.hand-container .tile');
+            // Check if tiles no longer have sorting animation styles
+            return Array.from(tiles).every(tile =>
+                !getComputedStyle(tile).transition.includes('transform')
+            );
+        }, { timeout: 1200 });
 
         // Verify glow persists after sort
         const persistedGlow = page.locator(".tile--newly-drawn");
@@ -145,7 +157,8 @@ test.describe("Charleston Animations", () => {
         const exitX = await leavingTile.evaluate(el =>
             getComputedStyle(el).getPropertyValue("--exit-x")
         );
-        expect(parseInt(exitX)).toBeGreaterThan(0);
+        const exitXValue = parseFloat(exitX) || 0;
+        expect(exitXValue).toBeGreaterThan(0);
 
         await page.waitForTimeout(3000); // Wait for complete sequence
 
@@ -166,8 +179,10 @@ test.describe("Charleston Animations", () => {
         const acrossExitY = await acrossTile.evaluate(el =>
             getComputedStyle(el).getPropertyValue("--exit-y")
         );
-        expect(parseInt(acrossExitX)).toBe(0);
-        expect(parseInt(acrossExitY)).toBeLessThan(0);
+        const acrossExitXValue = parseFloat(acrossExitX) || 0;
+        const acrossExitYValue = parseFloat(acrossExitY) || 0;
+        expect(acrossExitXValue).toBe(0);
+        expect(acrossExitYValue).toBeLessThan(0);
 
         await page.waitForTimeout(3000);
 
@@ -185,7 +200,8 @@ test.describe("Charleston Animations", () => {
         const leftExitX = await leftTile.evaluate(el =>
             getComputedStyle(el).getPropertyValue("--exit-x")
         );
-        expect(parseInt(leftExitX)).toBeLessThan(0);
+        const leftExitXValue = parseFloat(leftExitX) || 0;
+        expect(leftExitXValue).toBeLessThan(0);
     });
 
     test("should maintain glow through sort animation", async ({ page }) => {

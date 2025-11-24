@@ -1473,7 +1473,10 @@ export class MobileRenderer {
         }
     }
 
-    // Add error handling for asset loading
+    // TODO: Asset error handling scaffolding (not yet wired up)
+    // Future work: Add image onerror handlers to detect tile sprite loading failures
+    // Future work: Implement text mode fallback in HandRenderer
+    // Future work: Call handleAssetError from asset loading pipeline
     handleAssetError(assetType, assetPath) {
         console.error(`Failed to load ${assetType}: ${assetPath}`);
 
@@ -1495,9 +1498,8 @@ export class MobileRenderer {
     }
 
     enableTextModeFallback() {
-        // Switch all tiles to text mode if sprites fail
-        // This would require HandRenderer to support a text mode or we manually replace elements
-        // For now, we'll just log it as this is a robust fallback feature
+        // TODO: Implement text mode in HandRenderer
+        // This would require HandRenderer to support text-based tile rendering
         console.warn("Text mode fallback requested but not fully implemented in HandRenderer yet");
     }
 }
