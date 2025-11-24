@@ -31,17 +31,8 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
         const tile = TileData.fromJSON(tileJSON);
         const tileIndex = animation?.tileIndex;
 
-        console.log('[DiscardSequencer] animateDiscard called:', {
-            player,
-            tileIndex,
-            tile: tile.toString(),
-            handRendererTileCount: this.handRenderer?.tiles?.length,
-            currentHandData: this.handRenderer?.currentHandData?.tiles?.length
-        });
-
         // For AI players or when tile element not found, skip animation
         if (player !== HUMAN_PLAYER || tileIndex === undefined) {
-            console.log('[DiscardSequencer] Skipping animation - not human player or no tileIndex');
             this.skipAnimation(tile, player);
             return;
         }
@@ -50,7 +41,6 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
         // This must happen before HAND_UPDATED can fire and re-render the hand
         const tileElement = this.handRenderer.getTileElementByIndex(tileIndex);
         if (!tileElement) {
-            console.warn("[DiscardSequencer] Tile element not found at index:", tileIndex, "- skipping animation");
             this.skipAnimation(tile, player);
             return;
         }
@@ -90,7 +80,6 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
             // This ensures the hand reflects the actual game state (tile removed)
             const currentPlayer = this.gameController?.players?.[0];
             if (currentPlayer?.hand) {
-                console.log('[DiscardSequencer] Forcing hand re-render after animation');
                 this.handRenderer.render(currentPlayer.hand);
             }
         }
@@ -121,8 +110,6 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
      * @param {{x: number, y: number}} startPos - Pre-captured start position
      */
     async animateTileToDiscard(player, tile, tileIndex, animation, tileElement, startPos) {
-        console.log('[DiscardSequencer] Animating from position:', startPos);
-
         // Add tile to discard pile FIRST to get its actual position
         this.discardPile.addDiscard(tile, player);
 

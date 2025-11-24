@@ -91,21 +91,13 @@ export class HandEventCoordinator {
    */
   onHandUpdated(data = {}) {
     if (data.player === 0) {
-      console.log('[HandEventCoordinator] HAND_UPDATED received:', {
-        isDealingAnimationRunning: this.mobileRenderer?.isDealingAnimationRunning,
-        isDiscardAnimationRunning: this.mobileRenderer?.isDiscardAnimationRunning,
-        handSize: data.hand?.tiles?.length
-      });
-
       // Skip if dealing animation is running
       if (this.mobileRenderer?.isDealingAnimationRunning) {
-        console.log('[HandEventCoordinator] Skipping - dealing animation running');
         return;
       }
 
       // Skip if discard animation is running
       if (this.mobileRenderer?.isDiscardAnimationRunning) {
-        console.log('[HandEventCoordinator] Skipping - discard animation running');
         return;
       }
 
