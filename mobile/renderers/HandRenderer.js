@@ -319,6 +319,24 @@ export class HandRenderer {
         return null;
     }
 
+    /**
+     * Apply selection styling to tiles based on selected indices
+     * @param {number[]|Set<number>} selectedIndices - Indices that should be marked selected
+     */
+    applySelectionIndices(selectedIndices = []) {
+        const selectedSet = selectedIndices instanceof Set ? selectedIndices : new Set(selectedIndices);
+        this.tiles.forEach((tileButton, index) => {
+            if (!tileButton) {
+                return;
+            }
+            if (selectedSet.has(index)) {
+                tileButton.classList.add("selected");
+            } else {
+                tileButton.classList.remove("selected");
+            }
+        });
+    }
+
     sortHand(mode = "suit") {
         if (!this.currentHandData) {
             return;

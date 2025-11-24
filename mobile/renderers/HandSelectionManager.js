@@ -201,14 +201,16 @@ export class HandSelectionManager {
 
     /**
      * Get current selection state
+     * @param {HandData} [handData] Optional hand data to include selected tiles
      * @returns {Object} Object with count, indices, and tiles
      */
-    getSelectionState() {
+    getSelectionState(handData) {
         const indices = this.getSelectedTileIndices();
+        const tiles = Array.isArray(handData?.tiles) ? this.getSelectedTiles(handData) : [];
         return {
             count: indices.length,
             indices,
-            tiles: []  // Tiles array would need handData parameter
+            tiles
         };
     }
 

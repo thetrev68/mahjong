@@ -85,6 +85,8 @@ export class HandEventCoordinator {
       const handData = HandData.fromJSON(data.hand);
       if (this.handRenderer) {
         this.handRenderer.render(handData);
+        // Reapply any active hint highlights after rerender (Charleston receive clears DOM)
+        this.applyHintRecommendations();
       }
     }
   }

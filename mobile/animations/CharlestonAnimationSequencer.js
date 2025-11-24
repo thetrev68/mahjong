@@ -21,11 +21,13 @@ export class CharlestonAnimationSequencer extends AnimationSequencer {
      * @param {HandRenderer} handRenderer
      * @param {AnimationController} animationController
      */
-    constructor(gameController, handRenderer, animationController) {
+    constructor(gameController, handRenderer, animationController, refreshHints) {
         super(gameController, handRenderer, animationController);
 
         // Track received tiles for glow application
         this.receivedTileIndices = new Set();
+        // Optional callback to reapply hint highlights after re-render
+        this.refreshHints = refreshHints;
 
         // Direction vectors for animation coordinates
         this.directionVectors = {
@@ -215,6 +217,10 @@ export class CharlestonAnimationSequencer extends AnimationSequencer {
 
         // Re-render with glow on received tiles (LAST)
         this.handRenderer.renderWithGlow(handData, this.receivedTileIndices);
+        // Reapply hint highlights after rerender (Charleston refresh clears DOM)
+        if (typeof this.refreshHints === "function") {
+            this.refreshHints();
+        }
 
         // Get new positions after render
         const newTiles = this.handRenderer.tiles;
