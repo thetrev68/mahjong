@@ -208,8 +208,15 @@ export class DiscardPile {
         });
     }
 
-    updateTileSizing() {
-        if (!this.container || !this.element) return;
+    /**
+     * Calculate responsive tile sizing based on container width
+     * @returns {{tileWidth: number, gap: number, padding: number}}
+     */
+    calculateResponsiveSizing() {
+        if (!this.container || !this.element) {
+            return { tileWidth: 48, gap: 4, padding: 8 }; // Fallback values
+        }
+        
         const containerWidth = this.container.clientWidth || window.innerWidth;
         const gap = 4;
         const padding = 8;
@@ -217,6 +224,14 @@ export class DiscardPile {
             26,
             Math.floor((containerWidth - (9 * gap) - (2 * padding)) / 10)
         );
+        
+        return { tileWidth, gap, padding };
+    }
+
+    updateTileSizing() {
+        if (!this.container || !this.element) return;
+        
+        const { tileWidth, gap, padding } = this.calculateResponsiveSizing();
         this.element.style.setProperty("--discard-tile-width", `${tileWidth}px`);
         this.element.style.setProperty("--discard-gap", `${gap}px`);
         this.element.style.setProperty("--discard-padding", `${padding}px`);
@@ -227,12 +242,16 @@ export class DiscardPile {
      * @returns {{x: number, y: number}}
      */
     getNextTilePosition() {
+        // Safety guard - return default position if element not ready
+        if (!this.element) {
+            return { x: 0, y: 0 };
+        }
+
         // Get discard pile container position
         const rect = this.element.getBoundingClientRect();
 
-        // Calculate next grid position (tiles are laid out horizontally)
-        const tileWidth = 48; // From tiles.css
-        const tileGap = 4;
+        // Use consistent responsive sizing calculation
+        const { tileWidth, gap } = this.calculateResponsiveSizing();
         const tilesPerRow = 10;
 
         const currentCount = this.discards.length;
@@ -240,8 +259,8 @@ export class DiscardPile {
         const col = currentCount % tilesPerRow;
 
         return {
-            x: rect.left + (col * (tileWidth + tileGap)) + (tileWidth / 2),
-            y: rect.top + (row * (tileWidth + tileGap)) + (tileWidth / 2)
+            x: rect.left + (col * (tileWidth + gap)) + (tileWidth / 2),
+            y: rect.top + (row * (tileWidth + gap)) + (tileWidth / 2)
         };
     }
 

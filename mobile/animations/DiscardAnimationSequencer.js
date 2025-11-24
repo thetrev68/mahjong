@@ -4,6 +4,14 @@ import { TileData } from "../../core/models/TileData.js";
 const HUMAN_PLAYER = 0;
 
 /**
+ * Check if user prefers reduced motion
+ * @returns {boolean} true if user prefers reduced motion
+ */
+function prefersReducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/**
  * Handles discard tile animations for mobile platform
  * Animates tiles flying from hand to discard pile with arc trajectory
  */
@@ -216,19 +224,24 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
         // Force reflow before starting the animation to ensure it triggers
         tileClone.getBoundingClientRect();
         tileClone.classList.add("tile-discard-throw");
-        // Explicit inline animation to guarantee it runs (even if reduce-motion is set)
-        tileClone.style.setProperty(
-            "animation",
-            `tile-discard-throw ${trajectory.duration}ms ${trajectory.easing} forwards`,
-            "important"
-        );
+        
+        // Only force inline animation if user does not prefer reduced motion
+        if (!prefersReducedMotion()) {
+            tileClone.style.setProperty(
+                "animation",
+                `tile-discard-throw ${trajectory.duration}ms ${trajectory.easing} forwards`,
+                "important"
+            );
+        }
 
         // Play sound effect
         if (this.soundEnabled) {
             this.playDiscardSound();
         }
 
-        await this.delay(trajectory.duration);
+        // Use minimal delay for reduced motion users
+        const delayDuration = prefersReducedMotion() ? 100 : trajectory.duration;
+        await this.delay(delayDuration);
     }
 
     /**

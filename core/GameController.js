@@ -852,13 +852,18 @@ export class GameController extends EventEmitter {
             number: tileToDiscard.number,
             index: tileToDiscard.index
         };
-        const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, tileData, {
+        // Create animation payload - treat negative index as "no index"
+        const animationPayload = {
             type: "discard-arc",
             duration: this.currentPlayer === 0 ? 300 : 200,
             easing: "ease-out",
-            rotation: this.currentPlayer === 0 ? 360 : 180,
-            tileIndex: tileIndex
-        });
+            rotation: this.currentPlayer === 0 ? 360 : 180
+        };
+        if (tileIndex >= 0) {
+            animationPayload.tileIndex = tileIndex;
+        }
+        
+        const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, tileData, animationPayload);
         this.emit("TILE_DISCARDED", discardEvent);
 
         // Emit hand updated event

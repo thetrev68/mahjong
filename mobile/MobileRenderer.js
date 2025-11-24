@@ -696,14 +696,28 @@ export class MobileRenderer {
     }
 
     async onTileDiscarded(data) {
+        // Defensive guard: return early if data or tile is falsy
         if (!data?.tile) {
             return;
         }
 
-        // Route to sequencer for animation
-        await this.discardSequencer.animateDiscard(data);
+        try {
+            // Route to sequencer for animation
+            await this.discardSequencer.animateDiscard(data);
+        } catch (error) {
+            // Log the error with full details
+            console.error("Discard animation failed:", error);
+            
+            // Apply non-animated fallback update to keep UI consistent
+            try {
+                // Add the tile to discard pile directly
+                this.discardPile.addTile(data.tile);
+            } catch (fallbackError) {
+                console.error("Failed to apply fallback discard update:", fallbackError);
+            }
+        }
 
-        // Update blank swap button since discard pile changed
+        // Ensure updateBlankSwapButton runs regardless of animation success
         this.updateBlankSwapButton();
     }
 
@@ -717,11 +731,23 @@ export class MobileRenderer {
             return;
         }
 
-        // Get indices of tiles being passed from selection
-        const passingIndices = Array.from(this.selectionManager.getSelectedTileIndices());
+        // Defensive guard: ensure required data is available
+        if (!data || !this.charlestonSequencer) {
+            console.warn("MobileRenderer: Missing required data for Charleston pass animation");
+            return;
+        }
 
-        // Trigger animation sequence
-        this.charlestonSequencer.animateCharlestonPass(data, passingIndices);
+        try {
+            // Get indices of tiles being passed from selection
+            const passingIndices = Array.from(this.selectionManager.getSelectedTileIndices());
+
+            // Trigger animation sequence
+            this.charlestonSequencer.animateCharlestonPass(data, passingIndices);
+        } catch (error) {
+            console.error("Charleston pass animation failed:", error);
+            // Reset selection on error to prevent UI being stuck
+            this.selectionManager.clearSelection();
+        }
     }
 
     /**
@@ -739,11 +765,23 @@ export class MobileRenderer {
             return;
         }
 
-        // Find indices of received tiles in the new hand
-        const receivedIndices = this._findReceivedTileIndices(data.tiles);
+        // Defensive guard: ensure required data and components are available
+        if (!data?.tiles || !this.charlestonSequencer) {
+            console.warn("MobileRenderer: Missing required data for tiles received animation");
+            return;
+        }
 
-        // Trigger animation sequence
-        this.charlestonSequencer.handleTilesReceived(data, receivedIndices);
+        try {
+            // Find indices of received tiles in the new hand
+            const receivedIndices = this._findReceivedTileIndices(data.tiles);
+
+            // Trigger animation sequence
+            this.charlestonSequencer.handleTilesReceived(data, receivedIndices);
+        } catch (error) {
+            console.error("Tiles received animation failed:", error);
+            // Force a hand re-render to ensure UI consistency
+            this.handRenderer.render(this.handRenderer.currentHandData);
+        }
     }
 
     /**

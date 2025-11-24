@@ -41,11 +41,11 @@ class GameScene extends Phaser.Scene {
         this.textures.addCanvas("particle", particleCanvas);
 
         // Load audio assets
-        this.load.audio("bgm", "./assets/audio/2406haidao_bgm_loop.mp3");
-        this.load.audio("rack_tile", "./assets/audio/rack_tile.mp3");
-        this.load.audio("tile_dropping", "./assets/audio/tile_dropping.mp3");
-        this.load.audio("fireworks", "./assets/audio/fireworks.mp3");
-        this.load.audio("wall_fail", "./assets/audio/normalflyin.mp3");
+        this.load.audio("bgm", "/mahjong/assets/audio/2406haidao_bgm_loop.mp3");
+        this.load.audio("rack_tile", "/mahjong/assets/audio/rack_tile.mp3");
+        this.load.audio("tile_dropping", "/mahjong/assets/audio/tile_dropping.mp3");
+        this.load.audio("fireworks", "/mahjong/assets/audio/fireworks.mp3");
+        this.load.audio("wall_fail", "/mahjong/assets/audio/normalflyin.mp3");
 
         // The scale manager stuff will be handled in main.js config, so I'm omitting it here as per the plan.
         // The resizeCallback is also a separate step.

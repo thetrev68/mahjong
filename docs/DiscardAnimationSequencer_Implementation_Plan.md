@@ -626,11 +626,10 @@ If critical issues arise post-deployment:
 
 ## Questions for Review
 
-1. **AI Animation**: Should AI players get the arc animation (200ms, 180°) or instant?
-2. **Sound Integration**: Implement sound placeholders now, or wait for audio system?
-3. **Claim Interrupt**: Implement claim re-routing now, or add later?
-4. **Desktop Platform**: Leave desktop as-is, or add Phaser sequencer in future?
-5. **Animation Timing**: Keep GameController's 500ms sleep, or adjust to match sequencer?
+1. **Sound Integration**: Implement sound placeholders now, or wait for audio system?
+2. **Claim Interrupt**: Implement claim re-routing now, or add later?
+3. **Desktop Platform**: Leave desktop as-is, or add Phaser sequencer in future?
+4. **Animation Timing**: Keep GameController's 500ms sleep, or adjust to match sequencer?
 
 ---
 
