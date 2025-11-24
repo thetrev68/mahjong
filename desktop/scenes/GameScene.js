@@ -25,8 +25,8 @@ class GameScene extends Phaser.Scene {
 
     preload() {
         // From game.js preload()
-        this.load.atlas("tiles", "/assets/tiles.png", "/assets/tiles.json");
-        this.load.image("back", "/assets/back.png");
+        this.load.atlas("tiles", "/mahjong/assets/tiles.png", "/mahjong/assets/tiles.json");
+        this.load.image("back", "/mahjong/assets/back.png");
 
         // Load particle texture for fireworks
         // Create a simple 4x4 white particle texture programmatically to avoid WebGL errors
