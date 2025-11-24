@@ -1,4 +1,5 @@
 import { HandData } from "../../core/models/HandData.js";
+import { getElementCenterPosition } from "../utils/positionUtils.js";
 
 /**
  * HandEventCoordinator
@@ -20,15 +21,25 @@ export class HandEventCoordinator {
    * @param {HandRenderer} handRenderer - The hand renderer instance
    * @param {SelectionManager} selectionManager - The selection manager instance (optional)
    */
-  constructor(gameController, handRenderer, selectionManager) {
+  /**
+   * @param {GameController} gameController - The game controller instance
+   * @param {HandRenderer} handRenderer - The hand renderer instance
+   * @param {SelectionManager} selectionManager - The selection manager instance (optional)
+   * @param {MobileRenderer} mobileRenderer - The mobile renderer instance (for animation flags and callbacks)
+   */
+  constructor(gameController, handRenderer, selectionManager, mobileRenderer = null) {
     this.gameController = gameController;
     this.handRenderer = handRenderer;
     this.selectionManager = selectionManager;
+    this.mobileRenderer = mobileRenderer;
 
     // Properties extracted from HandRenderer
     this.unsubscribeFns = [];
     this.hintRecommendationKeys = new Set();
     this.newlyDrawnTileIndex = null;
+
+    // Charleston/Courtesy glow tracking
+    this.previousHandSnapshot = null;
 
     this.setupEventListeners();
   }
@@ -73,20 +84,98 @@ export class HandEventCoordinator {
    * Handle HAND_UPDATED event
    * Converts plain JSON to HandData and renders
    */
+  /**
+   * Handle HAND_UPDATED event
+   * Converts plain JSON to HandData and renders
+   * This is now the SINGLE handler for HAND_UPDATED (MobileRenderer no longer listens)
+   */
   onHandUpdated(data = {}) {
     if (data.player === 0) {
+      // Skip if dealing animation is running
+      if (this.mobileRenderer?.isDealingAnimationRunning) {
+        return;
+      }
+
+      // Skip if dealing just completed (but update snapshots)
+      const handData = HandData.fromJSON(data.hand);
+      if (this.mobileRenderer?.justCompletedDealingAnimation) {
+        this.mobileRenderer.justCompletedDealingAnimation = false;
+        this.previousHandSnapshot = handData.clone();
+        if (this.mobileRenderer) {
+          this.mobileRenderer.latestHandSnapshot = handData;
+          this.mobileRenderer.previousHandSnapshot = handData.clone();
+        }
+        return;
+      }
+
+      // Detect newly received tiles (Charleston/Courtesy)
+      const newlyReceivedTiles = this._findNewlyReceivedTiles(this.previousHandSnapshot, handData);
+
       // Reset sort mode when hand updated from game (not user sort)
-      // This allows auto-sort to resume after hand changes (draw, discard, etc.)
       if (this.handRenderer) {
         this.handRenderer.currentSortMode = null;
       }
 
-      // Convert plain JSON object to HandData instance
-      const handData = HandData.fromJSON(data.hand);
+      // Render the hand
       if (this.handRenderer) {
         this.handRenderer.render(handData);
-        // Reapply any active hint highlights after rerender (Charleston receive clears DOM)
+        
+        // Reapply any active hint highlights after rerender
         this.applyHintRecommendations();
+      }
+
+      // Update player rack with exposures (via MobileRenderer callback)
+      if (this.mobileRenderer?.playerRack) {
+        this.mobileRenderer.playerRack.update(handData.toJSON());
+      }
+
+      // Update button visibility (via MobileRenderer callbacks)
+      if (this.mobileRenderer) {
+        this.mobileRenderer.updateJokerSwapButton();
+        this.mobileRenderer.updateBlankSwapButton();
+        this.mobileRenderer.updateMahjongButton();
+      }
+
+      // Apply glow to newly received tiles after rendering
+      if (newlyReceivedTiles.length > 0 && this.handRenderer && this.mobileRenderer?.animationController) {
+        newlyReceivedTiles.forEach(tileIndex => {
+          const tileElement = this.handRenderer.getTileElementByIndex(tileIndex);
+          if (tileElement) {
+            this.mobileRenderer.animationController.applyReceivedTileGlow(tileElement);
+          }
+        });
+      }
+
+      // Store current hand as previous for next comparison
+      this.previousHandSnapshot = handData.clone();
+      if (this.mobileRenderer) {
+        this.mobileRenderer.latestHandSnapshot = handData;
+        this.mobileRenderer.previousHandSnapshot = handData.clone();
+      }
+
+      // If we just drew a tile (hand size increased to 14), animate it
+      if (handData.tiles.length % 3 === 2 && this.handRenderer && this.mobileRenderer?.animationController) {
+        const lastTile = this.handRenderer.getLastTileElement();
+        if (lastTile) {
+          // Calculate draw animation from wall position (top-left) to hand position
+          const startPos = {
+            x: window.innerWidth * -0.20, // -20vw: off-screen top-left
+            y: window.innerHeight * -0.20 // -20vh: off-screen top-left
+          };
+          const endPos = getElementCenterPosition(lastTile);
+          this.mobileRenderer.animationController.animateTileDraw(lastTile, startPos, endPos);
+        }
+      }
+    } else {
+      // Handle opponent bar updates
+      if (this.mobileRenderer && this.gameController) {
+        const player = this.gameController.players[data.player];
+        if (player) {
+          const bar = this.mobileRenderer.opponentBars.find(ob => ob.playerIndex === data.player);
+          if (bar) {
+            bar.bar.update(player);
+          }
+        }
       }
     }
   }
@@ -220,6 +309,25 @@ export class HandEventCoordinator {
   /**
    * Clean up all event subscriptions
    */
+  /**
+   * Find newly received tiles by comparing previous and current hand snapshots
+   * Used for Charleston/Courtesy glow effects
+   * @param {HandData} prevHand - Previous hand snapshot
+   * @param {HandData} currentHand - Current hand snapshot
+   * @returns {number[]} Array of tile indices that are new
+   */
+  _findNewlyReceivedTiles(prevHand, currentHand) {
+    if (!prevHand || !currentHand) {
+      return [];
+    }
+
+    const prevIndices = new Set(prevHand.tiles.map(t => t.index));
+    const currentIndices = currentHand.tiles.map(t => t.index);
+
+    // Find tiles in current hand that weren't in previous hand
+    return currentIndices.filter(idx => !prevIndices.has(idx));
+  }
+
   destroy() {
     this.unsubscribeFns.forEach((unsub) => {
       if (typeof unsub === "function") {
