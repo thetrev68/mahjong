@@ -321,8 +321,15 @@ export class HandEventCoordinator {
       return [];
     }
 
-    const prevIndices = new Set(prevHand.tiles.map(t => t.index));
-    const currentIndices = currentHand.tiles.map(t => t.index);
+    // Filter out undefined/non-numeric indices when building index arrays
+    const prevIndices = new Set(
+      prevHand.tiles
+        .map(t => t?.index)
+        .filter(idx => typeof idx === "number" && !isNaN(idx))
+    );
+    const currentIndices = currentHand.tiles
+      .map(t => t?.index)
+      .filter(idx => typeof idx === "number" && !isNaN(idx));
 
     // Find tiles in current hand that weren't in previous hand
     return currentIndices.filter(idx => !prevIndices.has(idx));
