@@ -45,18 +45,27 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
             return;
         }
 
-        // Clear selection to ensure tile is in its natural position before capturing rect
-        if (this.mobileRenderer?.selectionManager) {
-            this.mobileRenderer.selectionManager.clearSelection();
-        }
-
-        // CRITICAL: Capture position IMMEDIATELY after clearing selection
-        // This ensures we get the tile's actual resting position, not the "selected/lifted" position
+        // Capture the tile's CURRENT (selected) position so the arc starts where the user sees it
         const startRect = tileElement.getBoundingClientRect();
         const startPos = {
             x: startRect.left,
             y: startRect.top
         };
+
+        // Build the clone up front while the tile is still in-place
+        const tileClone = this.createDiscardTileClone(tileElement, startRect);
+        if (!tileClone) {
+            this.skipAnimation(tile, player);
+            return;
+        }
+        // Hide the original tile before clearing selection to avoid visible "drop back" jank
+        tileElement.style.visibility = "hidden";
+        document.body.appendChild(tileClone);
+
+        // Clear selection state (no visual impact because original is hidden)
+        if (this.mobileRenderer?.selectionManager) {
+            this.mobileRenderer.selectionManager.clearSelection();
+        }
 
         // Set flag to prevent hand re-renders during animation
         if (this.mobileRenderer) {
@@ -65,8 +74,8 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
 
         try {
             await this.executeSequence([
-                () => this.prepareDiscard(player, tileIndex, tileElement),
-                () => this.animateTileToDiscard(player, tile, tileIndex, animation, tileElement, startPos),
+                () => this.prepareDiscard(player, tileClone),
+                () => this.animateTileToDiscard(player, tile, animation, tileClone, startPos),
                 () => this.settleTileInPile(tile, player),
                 () => this.updateHandAfterDiscard(player, tileIndex, tileElement)
             ]);
@@ -88,28 +97,29 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
     /**
      * Prepare tile for discard (visual highlight)
      * @param {number} player - Player index
-     * @param {number} tileIndex - Index in hand
-     * @param {HTMLElement} tileElement - Pre-captured tile element
+     * @param {HTMLElement} tileClone - Clone that will animate
      */
-    async prepareDiscard(player, tileIndex, tileElement) {
-        if (player !== HUMAN_PLAYER || !tileElement) {
+    async prepareDiscard(player, tileClone) {
+        if (player !== HUMAN_PLAYER || !tileClone) {
             return;
         }
 
-        tileElement.classList.add("tile-discarding-prep");
+        tileClone.classList.add("tile-discarding-prep");
+        // Force layout so the prep animation always triggers
+        tileClone.getBoundingClientRect();
         await this.delay(100); // Brief pause for visual feedback
+        tileClone.classList.remove("tile-discarding-prep");
     }
 
     /**
      * Animate tile from hand to discard pile
      * @param {number} player - Player index
      * @param {TileData} tile - Tile being discarded
-     * @param {number} tileIndex - Index in hand
      * @param {Object} animation - Animation metadata
-     * @param {HTMLElement} tileElement - Pre-captured tile element
+     * @param {HTMLElement} tileClone - Pre-built tile clone
      * @param {{x: number, y: number}} startPos - Pre-captured start position
      */
-    async animateTileToDiscard(player, tile, tileIndex, animation, tileElement, startPos) {
+    async animateTileToDiscard(player, tile, animation, tileClone, startPos) {
         // Add tile to discard pile FIRST to get its actual position
         this.discardPile.addDiscard(tile, player);
 
@@ -128,15 +138,6 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
 
         // Hide the target tile (we'll animate a clone to it)
         addedTileElement.style.opacity = "0";
-
-        // Create clone for animation
-        const tileClone = this.createDiscardTileClone(tileElement, tile);
-        document.body.appendChild(tileClone);
-
-        // Hide original tile in hand
-        if (tileElement) {
-            tileElement.style.visibility = "hidden";
-        }
 
         // Calculate trajectory
         const trajectory = this.calculateDiscardTrajectory(
@@ -182,7 +183,11 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
             start: { x: startPos.x, y: startPos.y },
             control: controlPoint,
             end: { x: endPos.x, y: endPos.y },
-            duration: animation?.duration || (isHuman ? 400 : 250),
+            // Slow the animation a bit for visibility; allow overrides via metadata
+            duration: Math.max(
+                220,
+                (animation?.duration ?? (isHuman ? 550 : 320)) * (animation?.speedMultiplier ?? 1)
+            ),
             rotation: animation?.rotation || (isHuman ? 360 : 180),
             easing: animation?.easing || "ease-out"
         };
@@ -208,7 +213,15 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
         tileClone.style.setProperty("--rotation", `${trajectory.rotation}deg`);
         tileClone.style.setProperty("--duration", `${trajectory.duration}ms`);
 
+        // Force reflow before starting the animation to ensure it triggers
+        tileClone.getBoundingClientRect();
         tileClone.classList.add("tile-discard-throw");
+        // Explicit inline animation to guarantee it runs (even if reduce-motion is set)
+        tileClone.style.setProperty(
+            "animation",
+            `tile-discard-throw ${trajectory.duration}ms ${trajectory.easing} forwards`,
+            "important"
+        );
 
         // Play sound effect
         if (this.soundEnabled) {
@@ -258,11 +271,17 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
     /**
      * Create clone of tile for animation
      * @param {HTMLElement} originalElement - Original tile element
-     * @returns {HTMLElement} Cloned tile element
+     * @param {{left:number, top:number}} startRect - Pre-captured bounds (avoids shifting after deselect)
+     * @returns {HTMLElement|null} Cloned tile element
      */
-    createDiscardTileClone(originalElement) {
+    createDiscardTileClone(originalElement, startRect) {
+        if (!originalElement || !startRect) {
+            return null;
+        }
+
         const clone = originalElement.cloneNode(true);
         clone.classList.add("tile-clone-animating");
+        clone.classList.remove("selected"); // Prevent inherited lift transform
         clone.style.position = "fixed";
         clone.style.zIndex = "9999";
         clone.style.pointerEvents = "none";
@@ -272,10 +291,10 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
         clone.style.width = computedStyle.width;
         clone.style.height = computedStyle.height;
 
-        // Get initial position from original element
-        const rect = originalElement.getBoundingClientRect();
-        clone.style.left = `${rect.left}px`;
-        clone.style.top = `${rect.top}px`;
+        // Pin to the exact on-screen position we captured
+        clone.style.left = `${startRect.left}px`;
+        clone.style.top = `${startRect.top}px`;
+        clone.style.transform = "translate3d(0, 0, 0)";
 
         return clone;
     }
@@ -287,6 +306,9 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
      */
     skipAnimation(tile, player) {
         this.discardPile.addDiscard(tile, player);
+        if (this.soundEnabled) {
+            this.playDiscardSound();
+        }
     }
 
     /**

@@ -285,9 +285,6 @@
 @media (prefers-reduced-motion: reduce) {
 
     .tile-drawing,
-    .tile-discarding-prep,
-    .tile-discard-throw,
-    .tile-settle-bounce,
     .tile-claiming-pulse,
     .tile-claiming-move,
     .tile-exposing,
@@ -300,6 +297,21 @@
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+/* Force discard animation to run even if reduced-motion is enabled */
+@media (prefers-reduced-motion: reduce) {
+    .tile-discarding-prep {
+        animation: tile-discard-prep 100ms ease-out forwards !important;
+    }
+
+    .tile-discard-throw {
+        animation: tile-discard-throw var(--duration, 300ms) var(--easing, ease-out) forwards !important;
+    }
+
+    .tile-settle-bounce {
+        animation: tile-settle 200ms cubic-bezier(0.5, 1.5, 0.5, 1) !important;
     }
 }
 
