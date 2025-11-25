@@ -139,10 +139,16 @@ export class AIEngine {
             const patternNeeds = new Map();
 
             // Count tiles needed in this specific pattern
+            // IMPORTANT: Use component.count (required count) not tileArray.length (matched count)
+            // Otherwise, if pattern needs 3 flowers but hand only has 1, we'd think pattern only needs 1
             for (const compInfo of ranked.componentInfoArray) {
-                for (const compTile of compInfo.tileArray) {
-                    const tileKey = `${compTile.suit}-${compTile.number}`;
-                    patternNeeds.set(tileKey, (patternNeeds.get(tileKey) || 0) + 1);
+                // Get the tile type from the component (use first tile if any, or infer from component definition)
+                if (compInfo.tileArray.length > 0) {
+                    // Use the first tile to determine the suit/number for this component
+                    const firstTile = compInfo.tileArray[0];
+                    const tileKey = `${firstTile.suit}-${firstTile.number}`;
+                    // Add the REQUIRED count (component.count), not the matched count (tileArray.length)
+                    patternNeeds.set(tileKey, (patternNeeds.get(tileKey) || 0) + compInfo.component.count);
                 }
             }
 
