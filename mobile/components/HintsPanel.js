@@ -437,29 +437,6 @@ export class HintsPanel {
     }
 
     /**
-     * Compute discard recommendations using AI engine
-     * @param {HandData} handData
-     * @returns {Array} recommended discard tiles
-     */
-    getDiscardRecommendations(handData) {
-        if (!handData || !this.aiEngine || typeof this.aiEngine.getTileRecommendations !== "function") {
-            return [];
-        }
-        try {
-            const result = this.aiEngine.getTileRecommendations(handData);
-            if (!result || !Array.isArray(result.recommendations)) {
-                return [];
-            }
-            return result.recommendations
-                .filter((r) => r.recommendation === "DISCARD" && r.tile)
-                .map((r) => r.tile);
-        } catch (err) {
-            console.warn("HintsPanel: getDiscardRecommendations failed:", err);
-            return [];
-        }
-    }
-
-    /**
      * Emit discard recommendation tiles so the hand renderer can highlight them
      * @param {Array} tiles
      * @param {boolean} active
