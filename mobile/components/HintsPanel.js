@@ -194,8 +194,8 @@ export class HintsPanel {
                 this.emitDiscardRecommendations(discardRecommendations, true);
             }
 
-            // Get all player tiles (including exposed tiles)
-            const playerTiles = handData.getTileArray();
+            // Get all player tiles (including exposed tiles) for pattern matching
+            const playerTiles = handData.getAllTilesIncludingExposures();
             const hiddenTiles = handData.tiles;
 
             // Render pattern visualizations with compact summaries
