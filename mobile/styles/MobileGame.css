@@ -252,41 +252,28 @@
     padding: 40px 20px;
 }
 
-/* Backdrop overlay for action prompts */
-.mobile-prompt::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
-    backdrop-filter: blur(2px);
-}
-
 .mobile-prompt {
     position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: calc(100% - 32px);
-    max-width: 400px;
+    left: 16px;
+    right: 16px;
+    top: 20%;
     background: rgba(4, 67, 40, 0.98);
-    border: 2px solid #ffd166;
+    border: 3px solid #ffd166;
     border-radius: 12px;
     padding: 16px;
     color: #ffd166;
     font-family: var(--font-stack);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
     z-index: 1100;
     transition: opacity 0.2s ease, transform 0.2s ease;
+    max-height: 35vh;
+    overflow-y: auto;
 }
 
 .mobile-prompt.hidden {
     opacity: 0;
     pointer-events: none;
-    transform: translate(-50%, -50%) scale(0.95);
+    transform: translateY(-20px);
 }
 
 .mobile-prompt__message {
