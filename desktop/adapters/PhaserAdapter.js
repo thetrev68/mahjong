@@ -225,8 +225,13 @@ export class PhaserAdapter {
     onGameEnded(data) {
         const {reason, winner, mahjong} = data;
 
+        let dialogTitle = "";
+        let dialogMessage = "";
+
         if (mahjong) {
             const winnerName = this.getPlayerName(winner);
+            dialogTitle = "Mahjong!";
+            dialogMessage = `${winnerName} wins!`;
             printMessage(`${winnerName} wins with Mahjong!`);
 
             // Show fireworks (existing functionality)
@@ -234,8 +239,11 @@ export class PhaserAdapter {
                 this.scene.audioManager.playFireworks();
             }
         } else if (reason === "wall_game") {
+            dialogTitle = "Wall Game";
+            dialogMessage = "No tiles remaining. No winner.";
             printMessage("Wall game - no winner");
             printInfo("Wall game reached. No moves available.");
+            
             // Phase 6: Show all hands face-up using HandRenderer
             for (let i = 0; i < 4; i++) {
                 this.handRenderer.showHand(i, true);  // Force all face-up
@@ -248,10 +256,25 @@ export class PhaserAdapter {
             }
         }
 
-        // Show start button again
-        const startButton = document.getElementById("start");
-        if (startButton) {
-            startButton.style.display = "block";
+        // Show modal dialog for game end
+        if (dialogTitle) {
+            this.dialogManager.showModalDialog(
+                dialogMessage,
+                [{label: "OK", value: true}],
+                () => {
+                    // Dialog closed - show start button
+                    const startButton = document.getElementById("start");
+                    if (startButton) {
+                        startButton.style.display = "block";
+                    }
+                }
+            );
+        } else {
+            // Fallback - show start button immediately
+            const startButton = document.getElementById("start");
+            if (startButton) {
+                startButton.style.display = "block";
+            }
         }
     }
 

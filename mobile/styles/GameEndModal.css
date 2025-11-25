@@ -1,0 +1,143 @@
+/* Game End Modal - For Mahjong win and wall game announcements */
+
+.game-end-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.game-end-modal--visible {
+    display: block;
+    opacity: 1;
+}
+
+/* Backdrop */
+.game-end-modal__backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+}
+
+/* Content Container - Centered modal */
+.game-end-modal__content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    width: 90%;
+    max-width: 400px;
+    background: linear-gradient(to bottom, #044328, #0c6d3a);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease-out;
+    z-index: 1;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.game-end-modal--visible .game-end-modal__content {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Header Section */
+.game-end-modal__header {
+    padding: 32px 24px 16px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Title - Large and prominent */
+.game-end-modal__title {
+    margin: 0;
+    font-size: 36px;
+    font-weight: 700;
+    color: #f5fbf7;
+    text-align: center;
+    font-family: var(--font-stack);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Body Section */
+.game-end-modal__body {
+    padding: 24px;
+}
+
+/* Message */
+.game-end-modal__message {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+    color: #f5fbf7;
+    text-align: center;
+    font-family: var(--font-stack);
+    line-height: 1.5;
+}
+
+/* Footer with OK Button */
+.game-end-modal__footer {
+    padding: 16px 24px 24px 24px;
+}
+
+.game-end-modal__ok {
+    width: 100%;
+    background: linear-gradient(to bottom, #2563eb, #1d4ed8);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 16px 32px;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: var(--font-stack);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.game-end-modal__ok:hover {
+    background: linear-gradient(to bottom, #1d4ed8, #1e40af);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.6);
+    transform: translateY(-2px);
+}
+
+.game-end-modal__ok:active {
+    background: linear-gradient(to bottom, #1e40af, #1e3a8a);
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 400px) {
+    .game-end-modal__header {
+        padding: 24px 16px 12px 16px;
+    }
+
+    .game-end-modal__title {
+        font-size: 32px;
+    }
+
+    .game-end-modal__body {
+        padding: 20px 16px;
+    }
+
+    .game-end-modal__message {
+        font-size: 18px;
+    }
+
+    .game-end-modal__footer {
+        padding: 12px 16px 20px 16px;
+    }
+
+    .game-end-modal__ok {
+        font-size: 16px;
+        padding: 14px 24px;
+    }
+}
