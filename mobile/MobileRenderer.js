@@ -10,6 +10,7 @@ import { DealingAnimationSequencer } from "./animations/DealingAnimationSequence
 import { DiscardAnimationSequencer } from "./animations/DiscardAnimationSequencer.js";
 import { HomePageTiles } from "./components/HomePageTiles.js";
 import { DiscardSelectionModal } from "./components/DiscardSelectionModal.js";
+import { GameEndModal } from "./components/GameEndModal.js";
 import { PLAYER, STATE, SUIT } from "../constants.js";
 import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
@@ -582,14 +583,31 @@ export class MobileRenderer {
 
     onGameEnded(data) {
         const reason = data?.reason ?? "end";
+        let title = "";
+        let message = "";
+
         if (reason === "mahjong") {
             const winner = this.gameController.players?.[data.winner];
-            this.updateStatus(winner ? `${winner.name} wins!` : "Mahjong!");
+            title = "Mahjong!";
+            message = winner ? `${winner.name} wins!` : "Mahjong!";
+            this.updateStatus(message);
         } else if (reason === "wall_game") {
+            title = "Wall Game";
+            message = "No tiles remaining. No winner.";
             this.updateStatus("Wall game - no winner");
         } else {
+            title = "Game Ended";
+            message = "The game has ended.";
             this.updateStatus("Game ended");
         }
+
+        // Show modal dialog
+        if (title) {
+            new GameEndModal(title, message, () => {
+                // Modal closed - cleanup
+            });
+        }
+
         this.hidePrompt();
         this.resetHandSelection();
         this.updateActionButton({ label: "Start", onClick: () => this.startGame(), disabled: false, visible: true });

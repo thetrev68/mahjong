@@ -256,22 +256,24 @@
     position: fixed;
     left: 16px;
     right: 16px;
-    bottom: 76px;
-    background: rgba(4, 67, 40, 0.95);
-    border: 2px solid #ffd166;
+    top: 20%;
+    background: rgba(4, 67, 40, 0.98);
+    border: 3px solid #ffd166;
     border-radius: 12px;
-    padding: 12px;
+    padding: 16px;
     color: #ffd166;
     font-family: var(--font-stack);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
     z-index: 1100;
     transition: opacity 0.2s ease, transform 0.2s ease;
+    max-height: 35vh;
+    overflow-y: auto;
 }
 
 .mobile-prompt.hidden {
     opacity: 0;
     pointer-events: none;
-    transform: translateY(10px);
+    transform: translateY(-20px);
 }
 
 .mobile-prompt__message {

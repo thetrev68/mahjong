@@ -189,18 +189,32 @@ export class HintsPanel {
             const top3Patterns = sortedPatterns.slice(0, 3);
             console.log("HintsPanel: top3Patterns:", top3Patterns);
 
-            const discardRecommendations = this.getDiscardRecommendations(handData);
+            // Get AI recommendations to determine which patterns are actually being considered
+            const recommendationResult = this.aiEngine.getTileRecommendations(handData);
+            const consideredPatternCount = recommendationResult.consideredPatternCount;
+            console.log("HintsPanel: consideredPatternCount:", consideredPatternCount);
+
+            const discardRecommendations = recommendationResult.recommendations
+                .filter((r) => r.recommendation === "DISCARD" && r.tile)
+                .map((r) => r.tile);
+
             if (this.isExpanded) {
                 this.emitDiscardRecommendations(discardRecommendations, true);
             }
 
-            // Get all player tiles (including exposed tiles)
-            const playerTiles = handData.getTileArray();
+            // Get all player tiles (including exposed tiles) for pattern matching
+            const playerTiles = handData.getAllTilesIncludingExposures();
             const hiddenTiles = handData.tiles;
 
             // Render pattern visualizations with compact summaries
             let html = "<div class=\"hint-item\">";
-            top3Patterns.forEach((rankHand, _index) => {
+            top3Patterns.forEach((rankHand, index) => {
+                // Pattern #1 (index 0) is never dimmed
+                // Patterns beyond consideredPatternCount are dimmed
+                const isConsidered = index === 0 || index < consideredPatternCount;
+                const dimStyle = isConsidered ? "" : "opacity: 0.4;";
+                const notConsideredLabel = !isConsidered && index > 0 ? " <em>(not considered)</em>" : "";
+
                 const patternHtml = renderPatternVariation(rankHand, playerTiles, hiddenTiles);
                 const groupDesc = this.compactText(rankHand.group?.groupDescription);
                 const handDesc = this.compactText(rankHand.hand?.description);
@@ -211,10 +225,10 @@ export class HintsPanel {
                 const headerParts = [year, groupDesc, handDesc].filter(Boolean);
 
                 html += `
-                    <div class="hint-pattern" title="${groupDesc}${handDesc ? " - " + handDesc : ""}">
+                    <div class="hint-pattern" style="${dimStyle}" title="${groupDesc}${handDesc ? " - " + handDesc : ""}">
                         <div class="hint-pattern-header">
                             <strong>${headerParts.join(" - ")}</strong>
-                            <span class="hint-rank">(Rank: ${rank})</span>
+                            <span class="hint-rank">(Rank: ${rank})${notConsideredLabel}</span>
                             ${badge}
                         </div>
                         ${patternHtml}
@@ -420,29 +434,6 @@ export class HintsPanel {
         this.toggleBtn = null;
         this.contentEl = null;
         this._onToggle = null;
-    }
-
-    /**
-     * Compute discard recommendations using AI engine
-     * @param {HandData} handData
-     * @returns {Array} recommended discard tiles
-     */
-    getDiscardRecommendations(handData) {
-        if (!handData || !this.aiEngine || typeof this.aiEngine.getTileRecommendations !== "function") {
-            return [];
-        }
-        try {
-            const result = this.aiEngine.getTileRecommendations(handData);
-            if (!result || !Array.isArray(result.recommendations)) {
-                return [];
-            }
-            return result.recommendations
-                .filter((r) => r.recommendation === "DISCARD" && r.tile)
-                .map((r) => r.tile);
-        } catch (err) {
-            console.warn("HintsPanel: getDiscardRecommendations failed:", err);
-            return [];
-        }
     }
 
     /**

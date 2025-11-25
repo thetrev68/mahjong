@@ -139,10 +139,21 @@ export class AIEngine {
             const patternNeeds = new Map();
 
             // Count tiles needed in this specific pattern
+            // For each component, we want to know: how many non-joker/non-blank tiles of each type should we keep?
+            // Answer: Keep all non-joker/non-blank tiles that are part of this component
             for (const compInfo of ranked.componentInfoArray) {
-                for (const compTile of compInfo.tileArray) {
-                    const tileKey = `${compTile.suit}-${compTile.number}`;
-                    patternNeeds.set(tileKey, (patternNeeds.get(tileKey) || 0) + 1);
+                // Count each non-joker/non-blank tile type in this component
+                const tileCounts = new Map();
+                for (const tile of compInfo.tileArray) {
+                    if (tile.suit !== SUIT.JOKER && tile.suit !== SUIT.BLANK) {
+                        const tileKey = `${tile.suit}-${tile.number}`;
+                        tileCounts.set(tileKey, (tileCounts.get(tileKey) || 0) + 1);
+                    }
+                }
+
+                // Add these counts to the pattern's needs
+                for (const [tileKey, count] of tileCounts.entries()) {
+                    patternNeeds.set(tileKey, (patternNeeds.get(tileKey) || 0) + count);
                 }
             }
 
@@ -206,13 +217,22 @@ export class AIEngine {
 
     /**
      * Get tile recommendations for a hand
-     * @param {HandData} handData - Plain hand data object
+     * @param {HandData} handData - Plain hand data object (13 or 14 tiles)
      * @returns {Object} {recommendations: Array, consideredPatternCount: number}
      */
     getTileRecommendations(handData) {
         const recommendations = [];
-        const rankCardHands = this.card.rankHandArray14(handData);
+
+        // Ensure we have 14 tiles for pattern ranking (pad with INVALID if needed)
+        const workingHand = handData.clone();
+        while (workingHand.getLength() < 14) {
+            workingHand.addTile(new TileData(SUIT.INVALID, VNUMBER.INVALID));
+        }
+
+        const rankCardHands = this.card.rankHandArray14(workingHand);
         const sortedRankCardHands = [...rankCardHands].sort((a, b) => b.rank - a.rank);
+
+        // Use ORIGINAL hand tiles for recommendations (not the padded version)
         const handTiles = handData.getTileArray();
 
         debugPrint(`Total patterns available: ${sortedRankCardHands.length}`);
@@ -254,6 +274,11 @@ export class AIEngine {
         // Build a map of how many of each tile type we need vs. have
         const tileNeeds = this.calculateTileNeeds(handTiles, consideredPatterns);
 
+        debugPrint("Tile needs map:");
+        for (const [tileKey, counts] of tileNeeds.entries()) {
+            debugPrint(`  ${tileKey}: needed=${counts.needed}, have=${counts.have}`);
+        }
+
         for (const tile of handTiles) {
             let recommendation = TILE_RECOMMENDATION.DISCARD; // Default to DISCARD
 
@@ -267,7 +292,10 @@ export class AIEngine {
                 if (need && need.needed > 0) {
                     // We still need this tile for a pattern
                     recommendation = TILE_RECOMMENDATION.KEEP;
+                    debugPrint(`  ${tile.getText()}: KEEP (need.needed=${need.needed} before decrement)`);
                     need.needed--; // Decrement so next instance might be DISCARD
+                } else {
+                    debugPrint(`  ${tile.getText()}: DISCARD (need=${need ? `${need.needed}/${need.have}` : "not found"})`);
                 }
                 // else: tile not needed or we have excess, so DISCARD
             }
@@ -431,22 +459,17 @@ export class AIEngine {
     charlestonPass(handData) {
         const pass = [];
 
-        // We have 13 tiles, but recommendation engine works on 14. Add a bogus tile.
-        const copyHand = handData.clone();
-        const invalidTile = new TileData(SUIT.INVALID, VNUMBER.INVALID);
-        copyHand.addTile(invalidTile);
-
-        const result = this.getTileRecommendations(copyHand);
+        // getTileRecommendations handles 13-tile hands by padding internally
+        const result = this.getTileRecommendations(handData);
         const recommendations = result.recommendations;
 
         debugPrint(`[Charleston] Total recommendations: ${recommendations.length}`);
         debugPrint(`[Charleston] Jokers in hand: ${recommendations.filter(r => r.tile.suit === SUIT.JOKER).length}`);
         debugPrint(`[Charleston] Blanks in hand: ${recommendations.filter(r => r.tile.suit === SUIT.BLANK).length}`);
 
-        // Filter out the invalid tile, jokers, and blanks (cannot pass jokers or blanks per NMJL rules)
+        // Filter out jokers and blanks (cannot pass jokers or blanks per NMJL rules)
         // then sort recommendations: DISCARD, PASS, KEEP
         const validRecommendations = recommendations.filter(r =>
-            !r.tile.equals(invalidTile) &&
             !r.tile.isJoker() &&
             !r.tile.isBlank()
         );

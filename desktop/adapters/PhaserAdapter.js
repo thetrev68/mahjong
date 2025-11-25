@@ -225,8 +225,11 @@ export class PhaserAdapter {
     onGameEnded(data) {
         const {reason, winner, mahjong} = data;
 
+        let dialogMessage = "";
+
         if (mahjong) {
             const winnerName = this.getPlayerName(winner);
+            dialogMessage = `Mahjong!\n\n${winnerName} wins!`;
             printMessage(`${winnerName} wins with Mahjong!`);
 
             // Show fireworks (existing functionality)
@@ -234,8 +237,10 @@ export class PhaserAdapter {
                 this.scene.audioManager.playFireworks();
             }
         } else if (reason === "wall_game") {
+            dialogMessage = "Wall Game\n\nNo tiles remaining. No winner.";
             printMessage("Wall game - no winner");
             printInfo("Wall game reached. No moves available.");
+
             // Phase 6: Show all hands face-up using HandRenderer
             for (let i = 0; i < 4; i++) {
                 this.handRenderer.showHand(i, true);  // Force all face-up
@@ -248,10 +253,25 @@ export class PhaserAdapter {
             }
         }
 
-        // Show start button again
-        const startButton = document.getElementById("start");
-        if (startButton) {
-            startButton.style.display = "block";
+        // Show modal dialog for game end
+        if (dialogMessage) {
+            this.dialogManager.showModalDialog(
+                dialogMessage,
+                [{label: "OK", value: true}],
+                () => {
+                    // Dialog closed - show start button
+                    const startButton = document.getElementById("start");
+                    if (startButton) {
+                        startButton.style.display = "block";
+                    }
+                }
+            );
+        } else {
+            // Fallback - show start button immediately
+            const startButton = document.getElementById("start");
+            if (startButton) {
+                startButton.style.display = "block";
+            }
         }
     }
 

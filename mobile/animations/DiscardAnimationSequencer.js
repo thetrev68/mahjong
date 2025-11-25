@@ -8,7 +8,7 @@ const HUMAN_PLAYER = 0;
  * @returns {boolean} true if user prefers reduced motion
  */
 function prefersReducedMotion() {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 /**

@@ -59,6 +59,20 @@ export class HandData {
     }
 
     /**
+     * Get ALL tiles including both hidden and exposed tiles
+     * This is useful for pattern visualization where we need to show
+     * that exposed tiles match pattern requirements
+     * @returns {TileData[]}
+     */
+    getAllTilesIncludingExposures() {
+        const allTiles = [...this.tiles];
+        this.exposures.forEach(exposure => {
+            allTiles.push(...exposure.tiles);
+        });
+        return allTiles;
+    }
+
+    /**
      * Add a hidden tile to hand
      * @param {TileData} tile
      */

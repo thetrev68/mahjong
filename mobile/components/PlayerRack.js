@@ -23,6 +23,12 @@ export class PlayerRack {
 
         const exposedSection = this.element.querySelector(".player-rack__exposed");
 
+        // Guard against missing DOM element (can happen during initialization or teardown)
+        if (!exposedSection) {
+            console.warn("PlayerRack.update: exposedSection element not found");
+            return;
+        }
+
         if (handData.exposures && handData.exposures.length > 0) {
             this.renderExposures(handData.exposures, exposedSection);
         } else {
