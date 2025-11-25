@@ -139,16 +139,21 @@ export class AIEngine {
             const patternNeeds = new Map();
 
             // Count tiles needed in this specific pattern
-            // IMPORTANT: Use component.count (required count) not tileArray.length (matched count)
-            // Otherwise, if pattern needs 3 flowers but hand only has 1, we'd think pattern only needs 1
+            // For each component, we want to know: how many non-joker tiles of each type should we keep?
+            // Answer: Keep all non-joker tiles that are part of this component
             for (const compInfo of ranked.componentInfoArray) {
-                // Get the tile type from the component (use first tile if any, or infer from component definition)
-                if (compInfo.tileArray.length > 0) {
-                    // Use the first tile to determine the suit/number for this component
-                    const firstTile = compInfo.tileArray[0];
-                    const tileKey = `${firstTile.suit}-${firstTile.number}`;
-                    // Add the REQUIRED count (component.count), not the matched count (tileArray.length)
-                    patternNeeds.set(tileKey, (patternNeeds.get(tileKey) || 0) + compInfo.component.count);
+                // Count each non-joker tile type in this component
+                const tileCounts = new Map();
+                for (const tile of compInfo.tileArray) {
+                    if (tile.suit !== SUIT.JOKER) {
+                        const tileKey = `${tile.suit}-${tile.number}`;
+                        tileCounts.set(tileKey, (tileCounts.get(tileKey) || 0) + 1);
+                    }
+                }
+
+                // Add these counts to the pattern's needs
+                for (const [tileKey, count] of tileCounts.entries()) {
+                    patternNeeds.set(tileKey, (patternNeeds.get(tileKey) || 0) + count);
                 }
             }
 
@@ -212,13 +217,22 @@ export class AIEngine {
 
     /**
      * Get tile recommendations for a hand
-     * @param {HandData} handData - Plain hand data object
+     * @param {HandData} handData - Plain hand data object (13 or 14 tiles)
      * @returns {Object} {recommendations: Array, consideredPatternCount: number}
      */
     getTileRecommendations(handData) {
         const recommendations = [];
-        const rankCardHands = this.card.rankHandArray14(handData);
+
+        // Ensure we have 14 tiles for pattern ranking (pad with INVALID if needed)
+        const workingHand = handData.clone();
+        while (workingHand.getLength() < 14) {
+            workingHand.addTile(new TileData(SUIT.INVALID, VNUMBER.INVALID));
+        }
+
+        const rankCardHands = this.card.rankHandArray14(workingHand);
         const sortedRankCardHands = [...rankCardHands].sort((a, b) => b.rank - a.rank);
+
+        // Use ORIGINAL hand tiles for recommendations (not the padded version)
         const handTiles = handData.getTileArray();
 
         debugPrint(`Total patterns available: ${sortedRankCardHands.length}`);
@@ -260,6 +274,11 @@ export class AIEngine {
         // Build a map of how many of each tile type we need vs. have
         const tileNeeds = this.calculateTileNeeds(handTiles, consideredPatterns);
 
+        debugPrint(`Tile needs map:`);
+        for (const [tileKey, counts] of tileNeeds.entries()) {
+            debugPrint(`  ${tileKey}: needed=${counts.needed}, have=${counts.have}`);
+        }
+
         for (const tile of handTiles) {
             let recommendation = TILE_RECOMMENDATION.DISCARD; // Default to DISCARD
 
@@ -273,7 +292,10 @@ export class AIEngine {
                 if (need && need.needed > 0) {
                     // We still need this tile for a pattern
                     recommendation = TILE_RECOMMENDATION.KEEP;
+                    debugPrint(`  ${tile.getText()}: KEEP (need.needed=${need.needed} before decrement)`);
                     need.needed--; // Decrement so next instance might be DISCARD
+                } else {
+                    debugPrint(`  ${tile.getText()}: DISCARD (need=${need ? `${need.needed}/${need.have}` : 'not found'})`);
                 }
                 // else: tile not needed or we have excess, so DISCARD
             }
