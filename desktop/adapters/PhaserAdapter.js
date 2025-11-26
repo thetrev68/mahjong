@@ -302,11 +302,8 @@ export class PhaserAdapter {
                 if (this.scene && typeof this.scene.handleDealAnimationComplete === "function") {
                     this.scene.handleDealAnimationComplete();
                 }
-                // Clear dealAnimationHands BEFORE emitting DEALING_COMPLETE
-                // so that the HAND_UPDATED events triggered by DEALING_COMPLETE
-                // are handled normally by onHandUpdated (not skipped)
-                this.dealAnimationHands = null;
                 this.gameController.emit("DEALING_COMPLETE");
+                this.dealAnimationHands = null;
                 return;
             }
 
@@ -679,13 +676,7 @@ export class PhaserAdapter {
 
         console.log(`Hand updated for player ${playerIndex}: ${handData.tiles.length} hidden, ${handData.exposures.length} exposed`);
 
-        // Skip syncAndRender during dealing animation - the animation handles rendering
-        // with staged hands to show progressive dealing. syncAndRender would show all tiles at once.
-        if (this.dealAnimationHands !== null) {
-            console.log(`[onHandUpdated] Skipping syncAndRender during deal animation for player ${playerIndex}`);
-            return;
-        }
-
+        // Phase 2.5: Always sync, including during DEAL state
         // HandData is the authoritative source of truth for ALL game states
         // HandRenderer.syncAndRender() will handle the rendering
         this.handRenderer.syncAndRender(playerIndex, handData);
