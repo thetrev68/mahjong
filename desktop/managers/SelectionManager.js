@@ -759,27 +759,40 @@ export class SelectionManager {
      */
     _attachClickHandlers() {
         const tiles = this.handRenderer.getHiddenTiles(this.playerIndex);
+        console.log(`[SelectionManager] Attaching handlers to ${tiles.length} tiles`);
 
         for (const tile of tiles) {
+            if (!tile) {
+                console.warn("[SelectionManager] Null tile in hiddenTiles array");
+                continue;
+            }
+            
+            if (!tile.sprite) {
+                console.warn(`[SelectionManager] Tile has no sprite:`, tile);
+                continue;
+            }
+
             // Ensure Phaser knows this tile should fire pointer events.
             // Tiles passed in from AI players arrive with interaction disabled,
             // so re-enable it every time we enter a selection phase.
-            if (tile?.sprite) {
-                tile.sprite.setInteractive({useHandCursor: true});
-                if (tile.sprite.input) {
-                    tile.sprite.input.enabled = true;
-                }
+            tile.sprite.setInteractive({ useHandCursor: true });
+            if (tile.sprite.input) {
+                tile.sprite.input.enabled = true;
             }
 
             // Create and store handler for this tile
             const handler = () => {
+                console.log(`[SelectionManager] Tile clicked: ${tile.getText?.() || tile.index}`);
+                
                 // Ignore if not enabled
                 if (!this._isEnabled) {
+                    console.log("[SelectionManager] Selection not enabled, ignoring");
                     return;
                 }
 
                 // Ignore if this was a drag operation
                 if (tile.drag) {
+                    console.log("[SelectionManager] Drag operation, ignoring");
                     return;
                 }
 
@@ -791,9 +804,8 @@ export class SelectionManager {
             this.clickHandlers.set(tile, handler);
 
             // Attach to sprite
-            if (tile.sprite) {
-                tile.sprite.on("pointerup", handler);
-            }
+            tile.sprite.on("pointerup", handler);
+            console.log(`[SelectionManager] Handler attached to tile ${tile.index}`);
         }
     }
 

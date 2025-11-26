@@ -74,7 +74,8 @@ export class HintAnimationManager {
             // Check if this tile matches the target
             if (tileData.suit === targetTile.suit && tileData.number === targetTile.number) {
                 // Get the Phaser sprite for this tile via TileManager
-                const phaserTile = this.tileManager.getTileSprite(tileData.index);
+                // Use getOrCreateTile to ensure tile is registered even if missing from map
+                const phaserTile = this.tileManager.getOrCreateTile(tileData);
 
                 // Check if this specific tile instance hasn't been highlighted yet
                 if (phaserTile && !highlightedTiles.has(phaserTile)) {
@@ -164,7 +165,8 @@ export class HintAnimationManager {
 
         // Get hidden tiles
         for (const tileData of handData.tiles) {
-            const phaserTile = this.tileManager.getTileSprite(tileData.index);
+            // Use getOrCreateTile to ensure tile is registered even if missing from map
+            const phaserTile = this.tileManager.getOrCreateTile(tileData);
             if (phaserTile) {
                 allPhaserTiles.push(phaserTile);
             }
@@ -173,7 +175,8 @@ export class HintAnimationManager {
         // Get exposed tiles
         for (const exposure of handData.exposures) {
             for (const tileData of exposure.tiles) {
-                const phaserTile = this.tileManager.getTileSprite(tileData.index);
+                // Use getOrCreateTile to ensure tile is registered even if missing from map
+                const phaserTile = this.tileManager.getOrCreateTile(tileData);
                 if (phaserTile) {
                     allPhaserTiles.push(phaserTile);
                 }
@@ -190,7 +193,8 @@ export class HintAnimationManager {
         const hiddenPhaserTiles = [];
 
         for (const tileData of handData.tiles) {
-            const phaserTile = this.tileManager.getTileSprite(tileData.index);
+            // Use getOrCreateTile to ensure tile is registered even if missing from map
+            const phaserTile = this.tileManager.getOrCreateTile(tileData);
             if (phaserTile) {
                 hiddenPhaserTiles.push(phaserTile);
             }

@@ -60,22 +60,24 @@ export class HandRenderer {
 
         // Convert HandData indices to Phaser sprites
         playerHand.hiddenTiles = handData.tiles.map(tileData => {
-            const phaserTile = this.tileManager.getTileSprite(tileData.index);
+            // Use getOrCreateTile to ensure tile is registered even if missing from map
+            const phaserTile = this.tileManager.getOrCreateTile(tileData);
             if (!phaserTile) {
-                console.error(`HandRenderer.syncAndRender: Could not find Phaser tile for index ${tileData.index}`);
+                console.error(`HandRenderer.syncAndRender: Could not find/create Phaser tile for index ${tileData.index}`);
             }
             return phaserTile;
-        }).filter(tile => tile !== undefined);
+        }).filter(tile => tile !== undefined && tile !== null);
 
         // Sync exposed tiles from HandData.exposures
         playerHand.exposedSets = handData.exposures.map(exposure => {
             return exposure.tiles.map(tileData => {
-                const phaserTile = this.tileManager.getTileSprite(tileData.index);
+                // Use getOrCreateTile to ensure tile is registered even if missing from map
+                const phaserTile = this.tileManager.getOrCreateTile(tileData);
                 if (!phaserTile) {
-                    console.error(`HandRenderer.syncAndRender: Could not find Phaser tile for exposure index ${tileData.index}`);
+                    console.error(`HandRenderer.syncAndRender: Could not find/create Phaser tile for exposure index ${tileData.index}`);
                 }
                 return phaserTile;
-            }).filter(tile => tile !== undefined);
+            }).filter(tile => tile !== undefined && tile !== null);
         });
 
         // Render the synced hand
