@@ -278,6 +278,13 @@ export class PhaserAdapter {
     /**
      * Handle initial tiles dealt - sequential animation matching 07c41b9
      * This method handles the ENTIRE dealing sequence including wall manipulation
+     *
+     * TODO: Refactor to DealingAnimationSequencer class
+     * This orchestration logic should be extracted into a dedicated class (similar to
+     * mobile/animations/DealingAnimationSequencer.js) that uses AnimationLibrary
+     * primitives. Current implementation mixes animation calls with complex timing/
+     * batching logic directly in PhaserAdapter, violating separation of concerns.
+     * See: docs/DEALING_ANIMATION_CRITICAL_FLOW.md for full flow documentation.
      */
     onTilesDealt(data = {}) {
         const sequence = Array.isArray(data.sequence) ? data.sequence : [];
@@ -325,7 +332,7 @@ export class PhaserAdapter {
             let animationsCompleted = 0;
 
             tilePayloads.forEach((tileJSON, tileIndexInBatch) => {
-                this.scene.time.delayedCall(tileIndexInBatch * 100, () => {
+                this.scene.time.delayedCall(tileIndexInBatch * 50, () => {
                     const tileData = TileData.fromJSON(tileJSON);
                     const phaserTile = this.tileManager.getOrCreateTile(tileData);
 
@@ -357,12 +364,12 @@ export class PhaserAdapter {
                         animationHand.tiles.splice(targetIndex, 0, tileData);
                     }
 
-                    const tween = phaserTile.animate(targetPos.x, targetPos.y, PLAYER_LAYOUT[playerIndex].angle, 300);
+                    const tween = phaserTile.animate(targetPos.x, targetPos.y, PLAYER_LAYOUT[playerIndex].angle, 200);
 
                     this.scene.tweens.add({
                         targets: [phaserTile.sprite, phaserTile.spriteBack],
                         alpha: 1,
-                        duration: 300
+                        duration: 200
                     });
 
                     if (tween) {
@@ -397,7 +404,7 @@ export class PhaserAdapter {
                 }
 
                 currentStepIndex++;
-                this.scene.time.delayedCall(150, dealNextGroup);
+                this.scene.time.delayedCall(50, dealNextGroup);
             };
 
             this.tilesRemovedFromWall += tilePayloads.length;
