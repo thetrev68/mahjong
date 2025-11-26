@@ -431,10 +431,10 @@ export class Tile {
             if (phase < 0.45) {
                 currentColor = 0xff0000; // Red (hint color)
             } else if (phase >= 0.5 && phase < 0.95) {
-                currentColor = 0x60a5fa; // Light blue (new-tile color)
+                currentColor = 0x1e3a8a; // Dark blue (new-tile color, matches priority 10 glow)
             } else {
                 // Transition phases - blend colors
-                currentColor = phase < 0.5 ? 0xff0000 : 0x60a5fa;
+                currentColor = phase < 0.5 ? 0xff0000 : 0x1e3a8a;
             }
         }
 
