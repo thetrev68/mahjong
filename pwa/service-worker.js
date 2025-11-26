@@ -15,6 +15,8 @@ const CACHE_NAME = `mahjong-${CACHE_VERSION}`;
 /* eslint-disable no-undef */
 // Assets to cache immediately on install
 const STATIC_ASSETS = [
+    "/mahjong/",
+    "/mahjong/index.html",
     "/mahjong/mobile/",
     "/mahjong/mobile/index.html",
     "/mahjong/manifest.json",
