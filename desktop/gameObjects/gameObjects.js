@@ -348,6 +348,26 @@ export class Tile {
 
         // Set depth below tile but above background
         this.glowEffect.setDepth(this.sprite.depth - 1);
+
+        // Create pulsing animation similar to mobile
+        // Animate both intensity (opacity) and size for a true pulsing effect
+        this.glowAnimationData = {
+            intensity: intensity,
+            size: 8
+        };
+
+        this.glowTween = scene.tweens.add({
+            targets: this.glowAnimationData,
+            intensity: {from: intensity * 0.5, to: intensity},
+            size: {from: 6, to: 12},
+            duration: 1200,
+            ease: "Sine.easeInOut",
+            yoyo: true,
+            repeat: -1,
+            onUpdate: () => {
+                this.updateGlowPosition();
+            }
+        });
     }
 
     // Update glow position and appearance dynamically
@@ -365,10 +385,14 @@ export class Tile {
         }
 
         this.glowEffect.setVisible(true);
-        this.glowEffect.fillStyle(this.glowColor, this.glowIntensity);
+
+        // Use animated values if they exist, otherwise fall back to static values
+        const currentIntensity = this.glowAnimationData ? this.glowAnimationData.intensity : this.glowIntensity;
+        const glowSize = this.glowAnimationData ? this.glowAnimationData.size : 8;
+
+        this.glowEffect.fillStyle(this.glowColor, currentIntensity);
 
         const bounds = this.sprite.getBounds();
-        const glowSize = 8;
 
         // Account for tile scale in glow size
         const scaleFactor = this.sprite.scaleX;
@@ -387,6 +411,12 @@ export class Tile {
     }
 
     removeGlowEffect() {
+        if (this.glowTween) {
+            this.glowTween.stop();
+            this.glowTween = null;
+            this.glowAnimationData = null;
+        }
+
         if (this.glowEffect) {
             this.glowEffect.destroy();
             this.glowEffect = null;
