@@ -576,15 +576,15 @@ export class PhaserAdapter {
         // Add pulsing blue glow to the newly discarded tile AFTER animation completes
         if (discardTween && typeof phaserTile.addGlowEffect === "function") {
             discardTween.once("complete", () => {
-                // Bright blue glow (0x60a5fa is lighter blue-400 for better visibility)
+                // Dark blue glow (0x2563eb is blue-600, matches mobile)
                 // Priority 5: Lower than new-tile glow (10) but higher than hint glow (0)
-                // Intensity 0.9 for prominence (vs 0.7 before)
-                phaserTile.addGlowEffect(this.scene, 0x60a5fa, 0.9, 5);
+                // Intensity 0.9 for prominence
+                phaserTile.addGlowEffect(this.scene, 0x2563eb, 0.9, 5);
                 this.lastDiscardGlowTile = phaserTile; // Track for cleanup
             });
         } else if (typeof phaserTile.addGlowEffect === "function") {
             // Fallback if no tween (shouldn't happen, but handle gracefully)
-            phaserTile.addGlowEffect(this.scene, 0x60a5fa, 0.9, 5);
+            phaserTile.addGlowEffect(this.scene, 0x2563eb, 0.9, 5);
             this.lastDiscardGlowTile = phaserTile;
         }
 
