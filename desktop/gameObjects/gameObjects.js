@@ -351,16 +351,17 @@ export class Tile {
 
         // Create pulsing animation similar to mobile
         // Animate both intensity (opacity) and size for a true pulsing effect
+        // Mobile pulse range: 10px → 20px for prominence
         this.glowAnimationData = {
             intensity: intensity,
-            size: 8
+            size: 12
         };
 
         this.glowTween = scene.tweens.add({
             targets: this.glowAnimationData,
-            intensity: {from: intensity * 0.5, to: intensity},
-            size: {from: 6, to: 12},
-            duration: 1200,
+            intensity: {from: intensity * 0.7, to: intensity}, // Less dramatic opacity change (70% to 100%)
+            size: {from: 10, to: 20}, // Larger size range for more visibility (matches mobile)
+            duration: 1500, // Match mobile's 1.5s duration
             ease: "Sine.easeInOut",
             yoyo: true,
             repeat: -1,

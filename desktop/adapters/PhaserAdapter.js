@@ -564,21 +564,28 @@ export class PhaserAdapter {
         // GameController emits HAND_UPDATED after discarding, which triggers syncAndRender()
         // No need to call removeTileFromHand - HandData is source of truth
 
+        // Clear glow from previous last discard
+        this.clearLastDiscardGlow();
+
         // Add to discard pile (handles animation + audio)
-        this.tileManager.addTileToDiscardPile(phaserTile);
+        const discardTween = this.tileManager.addTileToDiscardPile(phaserTile);
 
         // Phase 6: Discard tile tracking moved to SelectionManager if needed
         // TODO: Verify exposure validation works without setDiscardTile
 
-        // Clear glow from previous last discard
-        this.clearLastDiscardGlow();
-
-        // Add pulsing blue glow to the newly discarded tile
-        if (typeof phaserTile.addGlowEffect === "function") {
-            // Blue glow (0x2563eb is blue-600 from mobile)
-            // Priority 5: Lower than new-tile glow (10) but higher than hint glow (0)
-            phaserTile.addGlowEffect(this.scene, 0x2563eb, 0.7, 5);
-            this.lastDiscardGlowTile = phaserTile; // Track for cleanup
+        // Add pulsing blue glow to the newly discarded tile AFTER animation completes
+        if (discardTween && typeof phaserTile.addGlowEffect === "function") {
+            discardTween.once("complete", () => {
+                // Bright blue glow (0x60a5fa is lighter blue-400 for better visibility)
+                // Priority 5: Lower than new-tile glow (10) but higher than hint glow (0)
+                // Intensity 0.9 for prominence (vs 0.7 before)
+                phaserTile.addGlowEffect(this.scene, 0x60a5fa, 0.9, 5);
+                this.lastDiscardGlowTile = phaserTile; // Track for cleanup
+            });
+        } else if (typeof phaserTile.addGlowEffect === "function") {
+            // Fallback if no tween (shouldn't happen, but handle gracefully)
+            phaserTile.addGlowEffect(this.scene, 0x60a5fa, 0.9, 5);
+            this.lastDiscardGlowTile = phaserTile;
         }
 
         // Show discards (updates layout)
