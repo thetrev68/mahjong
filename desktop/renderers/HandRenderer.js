@@ -329,6 +329,10 @@ export class HandRenderer {
             tile.sprite.setDepth(10 + index);
             tile.spriteBack.setDepth(10 + index);
 
+            // Store original position for selection animation (tile raises/lowers from this position)
+            tile.origX = x;
+            tile.origY = y;
+
             // Show tile face-up or face-down using Tile's showTile method
             tile.showTile(true, exposed);
         });
@@ -351,6 +355,10 @@ export class HandRenderer {
             tile.angle = playerInfo.angle;
             tile.sprite.setDepth(10 + index);
             tile.spriteBack.setDepth(10 + index);
+
+            // Store original position for selection animation (tile raises/lowers from this position)
+            tile.origX = x;
+            tile.origY = y;
 
             // Show tile face-up or face-down using Tile's showTile method
             tile.showTile(true, exposed);

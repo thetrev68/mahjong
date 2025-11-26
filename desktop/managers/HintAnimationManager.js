@@ -237,32 +237,53 @@ export class HintAnimationManager {
     }
 
     // Update hint panel text with colorized patterns
+    // Structure matches mobile HintsPanel for consistency
     updateHintDisplay(rankCardHands, recommendations, consideredPatternCount) {
-        let html = "<h3>Top Possible Hands:</h3>";
-
         // Get all player tiles for matching (includes exposed tiles)
         const playerTiles = this.getAllPlayerTiles();
 
         // Get only hidden tiles (for joker substitution availability)
         const hiddenTiles = this.getHiddenPlayerTiles();
 
+        // Get card year from game controller settings
+        const year = this.gameController?.settings?.year || this.card?.year || "";
+
+        let html = "<h3>Top Possible Hands:</h3>";
+        html += "<div class=\"hint-item\">";
+
         for (let i = 0; i < Math.min(3, rankCardHands.length); i++) {
             const rankHand = rankCardHands[i];
             // Pattern #1 (index 0) is never dimmed
             const isConsidered = i === 0 || i < consideredPatternCount;
             const dimStyle = isConsidered ? "" : "opacity: 0.4;";
-
-            html += `<p style="${dimStyle}"><strong>${rankHand.group.groupDescription}</strong> - ${rankHand.hand.description} (Rank: ${rankHand.rank.toFixed(2)})`;
-            // Only show "not considered" label for patterns after #1
-            if (!isConsidered && i > 0) {
-                html += " <em>(not considered)</em>";
-            }
-            html += "</p>";
+            const notConsideredLabel = !isConsidered && i > 0 ? " <em>(not considered)</em>" : "";
 
             // Render colorized pattern with matching
             const patternHtml = renderPatternVariation(rankHand, playerTiles, hiddenTiles);
-            html += `<div style="${dimStyle}">${patternHtml}</div>`;
+
+            // Get group and hand descriptions (keep full descriptions, unlike mobile)
+            const groupDesc = rankHand.group?.groupDescription || "";
+            const handDesc = rankHand.hand?.description || "";
+            const rank = rankHand.rank?.toFixed(2) || "0.00";
+
+            // Check if hand is concealed
+            const concealed = rankHand.hand?.concealed === true;
+            const badge = concealed ? "<span class=\"concealed-badge\" title=\"Concealed\">C</span>" : "";
+
+            // Build header parts: year, group, hand description
+            const headerParts = [year, groupDesc, handDesc].filter(Boolean);
+
+            html += `
+                <div class="hint-pattern" style="${dimStyle}">
+                    <div class="hint-pattern-header">
+                        <strong>${headerParts.join(" - ")}</strong> <span class="hint-rank">(Rank: ${rank})${notConsideredLabel}</span>${badge}
+                    </div>
+                    ${patternHtml}
+                </div>
+            `;
         }
+
+        html += "</div>";
 
         html += "<h3>Discard Suggestions (Best to Discard First):</h3>";
         // Only show DISCARD recommendations, and limit to actual count available (not artificially capped at 3)

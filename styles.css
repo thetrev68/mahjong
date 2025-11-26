@@ -96,13 +96,22 @@ a:focus-visible {
     display: grid;
     grid-template-columns: minmax(0, 1fr) clamp(280px, 24%, 340px);
     min-height: 0;
+    max-height: 100vh;
     overflow: hidden;
 }
 
 #gamediv {
     position: relative;
     min-height: 0;
+    height: 100%;
+    max-height: 100vh;
     background: var(--gradient-table);
+    overflow: hidden;
+}
+
+#gamediv canvas {
+    max-height: 100%;
+    object-fit: contain;
 }
 
 #uidiv {
@@ -231,9 +240,10 @@ a:focus-visible {
 }
 
 #hint-content {
-    padding: 10px;
+    padding: 6px 4px;
     border-top: 1px solid #ccc;
-    min-height: 120px; 
+    min-height: 120px;
+    overflow-x: hidden;
 }
 
 #hint-toggle {
@@ -908,7 +918,9 @@ select:focus {
 .border-blue-700 { border-color: #1e40af; }
 .border-blue-200 { border-color: #dbeafe; }
 
+.bg-black { background-color: #1f2937; } /* Dark gray for black background */
 .bg-black-600 { background-color: #1f2937; } /* Dark gray for black */
+.text-black { color: #1f2937; } /* Black text for unmatched tiles */
 .text-black-600 { color: #1f2937; }
 .border-black-700 { border-color: #111827; }
 .border-black-200 { border-color: #e5e7eb; }
@@ -922,10 +934,10 @@ select:focus {
 .pattern-row {
   display: flex;
   flex-wrap: nowrap;
-  gap: 1px; /* Even smaller spacing */
+  gap: 0;
   margin-bottom: 4px;
-  overflow-x: auto;
-  padding: 2px 0;
+  overflow-x: hidden;
+  padding: 1px 0;
 }
 
 /* Individual tile styling */
@@ -943,13 +955,90 @@ select:focus {
   box-sizing: border-box;
 }
 
-/* Component spacer */
+/* Component spacer - needs display and min-width to take up space */
 .component-spacer {
-  width: 8px; /* Increased gap between components */
+  display: inline-block;
+  width: 6px;
+  min-width: 6px;
+  height: 1px;
+  flex-shrink: 0;
 }
 
 /* Add visibility for unmatched */
 .bg-white {
   background-color: #ffffff !important;
   opacity: 1;
+}
+
+/* Hint pattern display - matches mobile HintsPanel */
+.hint-pattern {
+  margin-bottom: 8px;
+  padding: 4px 2px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+.hint-pattern-header {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.hint-pattern-header strong {
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+
+.hint-rank {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.hint-rank em {
+  color: rgba(255, 150, 150, 0.8);
+}
+
+/* Concealed badge */
+.concealed-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  font-weight: bold;
+  color: #fff;
+  background-color: #8b5cf6;
+  border-radius: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Skeleton loading state */
+.hint-pattern-skeleton {
+  opacity: 0.5;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.3; }
+}
+
+/* Hint section headers */
+#hint-content h3 {
+  font-size: 0.8rem;
+  color: var(--color-accent);
+  margin: 12px 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+#hint-content h3:first-child {
+  margin-top: 0;
 }
