@@ -344,10 +344,12 @@ export class Tile {
 
         // Create glow effect that will be positioned dynamically
         this.glowEffect = scene.add.graphics();
-        this.updateGlowPosition();
 
-        // Set depth below tile but above background
-        this.glowEffect.setDepth(this.sprite.depth - 1);
+        // Set glow depth to a fixed low value (5) to ensure it's always behind ALL tiles
+        // Tiles typically have depth 100-200, so depth 5 ensures glow is always in background
+        this.glowEffect.setDepth(5);
+
+        this.updateGlowPosition();
 
         // Create pulsing animation similar to mobile
         // Animate both intensity (opacity) and size for a true pulsing effect
@@ -407,8 +409,9 @@ export class Tile {
             10 * scaleFactor
         );
 
-        // Update depth to match tile
-        this.glowEffect.setDepth(this.sprite.depth - 1);
+        // Set glow depth to a fixed low value (5) to ensure it's always behind ALL tiles
+        // Tiles typically have depth 100-200, so depth 5 ensures glow is always in background
+        this.glowEffect.setDepth(5);
     }
 
     removeGlowEffect() {
