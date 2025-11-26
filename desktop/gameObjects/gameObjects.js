@@ -562,6 +562,11 @@ export class Discards {
         return this.tileArray.filter(tile => tile.suit !== SUIT.JOKER);
     }
 
+    getLastDiscardedTile() {
+        // Return the most recently discarded tile (null if empty)
+        return this.tileArray.length > 0 ? this.tileArray[this.tileArray.length - 1] : null;
+    }
+
     enableDiscardSelection(onSelectCallback) {
         // Make non-joker discard tiles clickable
         this.selectionEnabled = true;

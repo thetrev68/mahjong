@@ -570,11 +570,32 @@ export class PhaserAdapter {
         // Phase 6: Discard tile tracking moved to SelectionManager if needed
         // TODO: Verify exposure validation works without setDiscardTile
 
+        // Clear glow from previous last discard
+        this.clearLastDiscardGlow();
+
+        // Add pulsing blue glow to the newly discarded tile
+        if (typeof phaserTile.addGlowEffect === "function") {
+            // Blue glow (0x2563eb is blue-600 from mobile)
+            // Priority 5: Lower than new-tile glow (10) but higher than hint glow (0)
+            phaserTile.addGlowEffect(this.scene, 0x2563eb, 0.7, 5);
+            this.lastDiscardGlowTile = phaserTile; // Track for cleanup
+        }
+
         // Show discards (updates layout)
         const playerName = this.getPlayerName(playerIndex);
         printMessage(`${playerName} discarded ${tileDataObj.getText()}`);
 
         this.blankSwapManager?.handleDiscardPileChanged();
+    }
+
+    /**
+     * Clear the glow effect from the last discarded tile
+     */
+    clearLastDiscardGlow() {
+        if (this.lastDiscardGlowTile && typeof this.lastDiscardGlowTile.removeGlowEffect === "function") {
+            this.lastDiscardGlowTile.removeGlowEffect();
+            this.lastDiscardGlowTile = null;
+        }
     }
 
     /**
