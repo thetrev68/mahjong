@@ -48,7 +48,8 @@ export class HintAnimationManager {
             if (targetTile) {
                 // Use TileData's getText() for debug logging (safer than sprite's getText())
                 debugPrint(`Applying red glow to tile: ${rec.tile.getText()}`);
-                targetTile.addGlowEffect(this.scene, 0xff0000, 0.6);
+                // Priority 0 for hint glow (lowest priority - won't override other glows)
+                targetTile.addGlowEffect(this.scene, 0xff0000, 0.6, 0);
                 this.glowedTiles.push(targetTile);
                 // Mark this specific tile instance as highlighted
                 highlightedTiles.add(targetTile);
