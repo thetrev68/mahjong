@@ -329,18 +329,28 @@ export class Tile {
 
     // Dynamic glow effect methods
     addGlowEffect(scene, color = 0xff0000, intensity = 0.6, priority = 0) {
-        // Priority system: higher priority glows override lower priority ones
-        // Blue new-tile glow (priority 10) > Red hint glow (priority 0)
-        if (this.glowEffect && this.glowPriority > priority) {
+        // Special case: Alternating red/blue glow when both apply
+        // Red hint (priority 0) + Blue new-tile (priority 10) = Alternating animation
+        const hasRedHint = (this.glowPriority === 0 && this.glowColor === 0xff0000);
+        const hasBlueNew = (this.glowPriority === 10 && this.glowColor === 0x1e3a8a);
+        const isRedHint = (priority === 0 && color === 0xff0000);
+        const isBlueNew = (priority === 10 && color === 0x1e3a8a);
+
+        if ((hasRedHint && isBlueNew) || (hasBlueNew && isRedHint)) {
+            // Both red hint and blue new-tile apply - use alternating animation
+            this.removeGlowEffect();
+            this.glowColor = "alternate"; // Special marker for alternating colors
+            this.glowIntensity = Math.max(intensity, this.glowIntensity || 0);
+            this.glowPriority = 10; // Use higher priority
+        } else if (this.glowEffect && this.glowPriority > priority) {
             // Don't override a higher priority glow
             return;
+        } else {
+            this.removeGlowEffect();
+            this.glowColor = color;
+            this.glowIntensity = intensity;
+            this.glowPriority = priority;
         }
-
-        this.removeGlowEffect();
-
-        this.glowColor = color;
-        this.glowIntensity = intensity;
-        this.glowPriority = priority;
 
         // Create glow effect that will be positioned dynamically
         this.glowEffect = scene.add.graphics();
@@ -355,22 +365,40 @@ export class Tile {
         // Animate both intensity (opacity) and size for a true pulsing effect
         // Mobile pulse range: 10px → 20px for prominence
         this.glowAnimationData = {
-            intensity: intensity,
-            size: 12
+            intensity: this.glowIntensity,
+            size: 12,
+            phase: 0 // For alternating colors: 0-1 progress through animation
         };
 
-        this.glowTween = scene.tweens.add({
-            targets: this.glowAnimationData,
-            intensity: {from: intensity * 0.7, to: intensity}, // Less dramatic opacity change (70% to 100%)
-            size: {from: 10, to: 20}, // Larger size range for more visibility (matches mobile)
-            duration: 1500, // Match mobile's 1.5s duration
-            ease: "Sine.easeInOut",
-            yoyo: true,
-            repeat: -1,
-            onUpdate: () => {
-                this.updateGlowPosition();
-            }
-        });
+        if (this.glowColor === "alternate") {
+            // Alternating red/blue animation (2.4s cycle like mobile)
+            this.glowTween = scene.tweens.add({
+                targets: this.glowAnimationData,
+                phase: 1,
+                intensity: {from: this.glowIntensity * 0.7, to: this.glowIntensity},
+                size: {from: 10, to: 20},
+                duration: 2400, // 2.4s for full red→blue→red cycle
+                ease: "Linear",
+                repeat: -1,
+                onUpdate: () => {
+                    this.updateGlowPosition();
+                }
+            });
+        } else {
+            // Standard single-color pulsing animation
+            this.glowTween = scene.tweens.add({
+                targets: this.glowAnimationData,
+                intensity: {from: this.glowIntensity * 0.7, to: this.glowIntensity},
+                size: {from: 10, to: 20},
+                duration: 1500,
+                ease: "Sine.easeInOut",
+                yoyo: true,
+                repeat: -1,
+                onUpdate: () => {
+                    this.updateGlowPosition();
+                }
+            });
+        }
     }
 
     // Update glow position and appearance dynamically
@@ -393,7 +421,24 @@ export class Tile {
         const currentIntensity = this.glowAnimationData ? this.glowAnimationData.intensity : this.glowIntensity;
         const glowSize = this.glowAnimationData ? this.glowAnimationData.size : 8;
 
-        this.glowEffect.fillStyle(this.glowColor, currentIntensity);
+        // Handle alternating red/blue color animation
+        let currentColor = this.glowColor;
+        if (this.glowColor === "alternate" && this.glowAnimationData) {
+            const phase = this.glowAnimationData.phase;
+            // Red phase: 0 → 0.45
+            // Blue phase: 0.5 → 0.95
+            // Transitions: 0.45-0.5 and 0.95-1.0
+            if (phase < 0.45) {
+                currentColor = 0xff0000; // Red (hint color)
+            } else if (phase >= 0.5 && phase < 0.95) {
+                currentColor = 0x60a5fa; // Light blue (new-tile color)
+            } else {
+                // Transition phases - blend colors
+                currentColor = phase < 0.5 ? 0xff0000 : 0x60a5fa;
+            }
+        }
+
+        this.glowEffect.fillStyle(currentColor, currentIntensity);
 
         const bounds = this.sprite.getBounds();
 
