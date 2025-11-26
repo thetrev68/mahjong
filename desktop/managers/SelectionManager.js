@@ -759,16 +759,15 @@ export class SelectionManager {
      */
     _attachClickHandlers() {
         const tiles = this.handRenderer.getHiddenTiles(this.playerIndex);
-        console.log(`[SelectionManager] Attaching handlers to ${tiles.length} tiles`);
 
         for (const tile of tiles) {
             if (!tile) {
                 console.warn("[SelectionManager] Null tile in hiddenTiles array");
                 continue;
             }
-            
+
             if (!tile.sprite) {
-                console.warn(`[SelectionManager] Tile has no sprite:`, tile);
+                console.warn("[SelectionManager] Tile has no sprite:", tile);
                 continue;
             }
 
@@ -782,17 +781,13 @@ export class SelectionManager {
 
             // Create and store handler for this tile
             const handler = () => {
-                console.log(`[SelectionManager] Tile clicked: ${tile.getText?.() || tile.index}`);
-                
                 // Ignore if not enabled
                 if (!this._isEnabled) {
-                    console.log("[SelectionManager] Selection not enabled, ignoring");
                     return;
                 }
 
                 // Ignore if this was a drag operation
                 if (tile.drag) {
-                    console.log("[SelectionManager] Drag operation, ignoring");
                     return;
                 }
 
@@ -805,7 +800,6 @@ export class SelectionManager {
 
             // Attach to sprite
             tile.sprite.on("pointerup", handler);
-            console.log(`[SelectionManager] Handler attached to tile ${tile.index}`);
         }
     }
 

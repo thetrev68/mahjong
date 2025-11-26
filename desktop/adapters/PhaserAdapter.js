@@ -676,8 +676,6 @@ export class PhaserAdapter {
     onHandUpdated(data) {
         const {player: playerIndex, hand: handData} = data;
 
-        console.log(`Hand updated for player ${playerIndex}: ${handData.tiles.length} hidden, ${handData.exposures.length} exposed`);
-
         // Skip syncAndRender during dealing animation - the animation handles rendering
         // with staged hands to show progressive dealing. syncAndRender would show all tiles at once.
         // But allow the rest of the handler to run for hints/selection setup.
@@ -685,8 +683,6 @@ export class PhaserAdapter {
             // HandData is the authoritative source of truth for ALL game states
             // HandRenderer.syncAndRender() will handle the rendering
             this.handRenderer.syncAndRender(playerIndex, handData);
-        } else {
-            console.log(`[onHandUpdated] Skipping syncAndRender during deal animation for player ${playerIndex}`);
         }
 
         // After sync, if selection is enabled for human player, re-attach click handlers

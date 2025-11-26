@@ -299,11 +299,12 @@ export class GameController extends EventEmitter {
             this.once("DEALING_COMPLETE", completeDealing);
 
             // Fallback timeout for mobile/headless (no animation adapter present)
-            // If DEALING_COMPLETE doesn't arrive within 3 seconds, proceed anyway
+            // If DEALING_COMPLETE doesn't arrive within 30 seconds, proceed anyway
+            // Desktop dealing animation takes 6-12 seconds depending on tile count
             timeoutId = setTimeout(() => {
                 this.off("DEALING_COMPLETE", completeDealing); // Remove event listener
                 completeDealing();
-            }, 3000);
+            }, 30000);
         });
     }
 
