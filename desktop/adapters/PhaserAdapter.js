@@ -78,6 +78,9 @@ export class PhaserAdapter {
         /** @type {Array<{tiles: TileData[], exposures: Array}>|null} Track staged hands during dealing */
         this.dealAnimationHands = null;
 
+        /** @type {boolean} Skip next HAND_UPDATED for tile draw (already handled in onTileDrawn) */
+        this.skipNextDrawHandUpdate = false;
+
         this.setupEventListeners();
     }
 
@@ -489,17 +492,24 @@ export class PhaserAdapter {
 
         this.tileManager.removeTileFromWall(tileDataObj.index);
 
-        // GameController emits HAND_UPDATED after drawing, which triggers syncAndRender()
-        // No need to call insertTileIntoHand - HandData is source of truth
+        // Synchronize hand state BEFORE calculating tile position
+        // This ensures we have the updated hand with the newly drawn tile included
+        const currentHand = this.gameController.players[playerIndex].hand;
+        this.handRenderer.syncAndRender(playerIndex, currentHand);
+
+        // Skip the upcoming HAND_UPDATED event since we already synced
+        this.skipNextDrawHandUpdate = true;
+
         if (playerIndex === PLAYER.BOTTOM) {
             this.setPendingHumanGlowTile(phaserTile);
         }
 
-        // Animate tile draw (slide from wall to hand)
+        // Now calculate position using UPDATED hand state
         const hiddenTiles = this.handRenderer.getHiddenTiles(playerIndex);
+        const tileIndexInHand = hiddenTiles.findIndex(t => t === phaserTile);
         const targetPos = this.handRenderer.calculateTilePosition(
             playerIndex,
-            hiddenTiles.length - 1
+            tileIndexInHand >= 0 ? tileIndexInHand : hiddenTiles.length - 1
         );
 
         // Animate to hand with tile.animate() method
@@ -714,10 +724,16 @@ export class PhaserAdapter {
         // Skip syncAndRender during dealing animation - the animation handles rendering
         // with staged hands to show progressive dealing. syncAndRender would show all tiles at once.
         // But allow the rest of the handler to run for hints/selection setup.
-        if (this.dealAnimationHands === null) {
+        // Also skip if onTileDrawn already synced (to prevent double-render after draw)
+        if (this.dealAnimationHands === null && !this.skipNextDrawHandUpdate) {
             // HandData is the authoritative source of truth for ALL game states
             // HandRenderer.syncAndRender() will handle the rendering
             this.handRenderer.syncAndRender(playerIndex, handData);
+        }
+
+        // Reset the flag after checking
+        if (this.skipNextDrawHandUpdate) {
+            this.skipNextDrawHandUpdate = false;
         }
 
         // After sync, if selection is enabled for human player, re-attach click handlers

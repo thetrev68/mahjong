@@ -247,28 +247,40 @@ export class AIEngine {
         }
 
         // Use override if provided, otherwise use difficulty-based config
-        // Override is used for: Charleston (needs 3), normal discard (needs 1)
+        // Override is used for: Charleston (needs minimum 3), normal discard (needs minimum 1)
         const minDiscardable = minDiscardableOverride !== null ? minDiscardableOverride : this.config.minDiscardable;
+
+        // Start by reducing patterns until we find the sweet spot that gives us
+        // enough discardable tiles while maximizing pattern consideration
+        let bestPatternCount = patternCount;
+        let bestDiscardableCount = 0;
 
         while (patternCount > 1) {  // Always keep at least pattern #1
             const consideredPatterns = sortedRankCardHands.slice(0, patternCount);
             const discardableCount = this.countDiscardableTiles(handTiles, consideredPatterns);
 
-            debugPrint(`Considering ${patternCount} patterns: ${discardableCount} discardable tiles (need ${minDiscardable})`);
+            debugPrint(`Considering ${patternCount} patterns: ${discardableCount} discardable tiles (need minimum ${minDiscardable})`);
 
-            // If we have at least the minimum discardable tiles, we're done
-            if (discardableCount >= minDiscardable) {
-                break;
+            // Track the best option that meets our minimum requirement
+            if (discardableCount >= minDiscardable && discardableCount > bestDiscardableCount) {
+                bestPatternCount = patternCount;
+                bestDiscardableCount = discardableCount;
             }
 
-            // Not enough discardable tiles, reduce the number of patterns considered
+            // Continue reducing to find more discardable tiles
             patternCount--;
         }
 
-        // Ensure we always consider at least pattern #1
-        if (patternCount === 0) {
-            patternCount = 1;
+        // Check pattern #1 as well
+        const pattern1Patterns = sortedRankCardHands.slice(0, 1);
+        const pattern1DiscardableCount = this.countDiscardableTiles(handTiles, pattern1Patterns);
+        if (pattern1DiscardableCount >= minDiscardable && pattern1DiscardableCount > bestDiscardableCount) {
+            bestPatternCount = 1;
+            bestDiscardableCount = pattern1DiscardableCount;
         }
+
+        // Use the best pattern count we found, or fallback to 1 if none met the minimum
+        patternCount = bestPatternCount > 0 ? bestPatternCount : 1;
 
         debugPrint(`Final decision: considering ${patternCount} patterns`);
 
