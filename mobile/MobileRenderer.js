@@ -262,6 +262,18 @@ export class MobileRenderer {
             return;
         }
 
+        // Collect tiles that currently have glow (tile--newly-drawn class)
+        const glowedTileIndices = new Set();
+        this.handRenderer.tiles.forEach((tileEl, index) => {
+            if (tileEl && tileEl.classList.contains("tile--newly-drawn")) {
+                // Store the tile's unique index to reapply glow after sort
+                const tileData = this.latestHandSnapshot.tiles[index];
+                if (tileData && typeof tileData.index === "number") {
+                    glowedTileIndices.add(tileData.index);
+                }
+            }
+        });
+
         // Clone the current hand and use HandData's own sort helper for consistency
         const sortedHand = typeof this.latestHandSnapshot.clone === "function"
             ? this.latestHandSnapshot.clone()
@@ -279,7 +291,22 @@ export class MobileRenderer {
         }
 
         this.latestHandSnapshot = sortedHand;
-        this.handRenderer.render(sortedHand);
+
+        // Find indices of glowed tiles in the sorted hand
+        const newGlowIndices = [];
+        sortedHand.tiles.forEach((tile, index) => {
+            if (tile && glowedTileIndices.has(tile.index)) {
+                newGlowIndices.push(index);
+            }
+        });
+
+        // Render with glow preserved on the same tiles
+        if (newGlowIndices.length > 0) {
+            this.handRenderer.renderWithGlow(sortedHand, newGlowIndices);
+        } else {
+            this.handRenderer.render(sortedHand);
+        }
+
         this.animationController.animateHandSort(this.handRenderer.container);
     }
 
