@@ -757,7 +757,8 @@ export class MobileRenderer {
 
         try {
             // Get indices of tiles being passed from selection
-            const passingIndices = Array.from(this.selectionManager.getSelectedTileIndices());
+            // Pass current hand data to ensure indices are accurate
+            const passingIndices = Array.from(this.selectionManager.getSelectedTileIndices(this.latestHandSnapshot));
 
             // Trigger animation sequence
             this.charlestonSequencer.animateCharlestonPass(data, passingIndices);

@@ -246,12 +246,14 @@ export class HandRenderer {
             }
         });
 
-        // Reset selection mappings when tiles are cleared so new renders register fresh keys
+        // Clear the index-to-key mapping (will be rebuilt during render)
+        // but preserve the selected keys so selection survives hand re-ordering
         if (this.selectionManager) {
-            this.selectionManager.clearSelection(true);
             if (this.selectionManager.selectionKeyByIndex?.clear) {
                 this.selectionManager.selectionKeyByIndex.clear();
             }
+            // Note: We do NOT call clearSelection() here - we want to preserve
+            // the selectedIndices Set so tiles stay selected after swaps/sorts
         }
 
         this.tiles = [];

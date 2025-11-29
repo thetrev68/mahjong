@@ -220,7 +220,7 @@ export class AIEngine {
      * @param {HandData} handData - Plain hand data object (13 or 14 tiles)
      * @returns {Object} {recommendations: Array, consideredPatternCount: number}
      */
-    getTileRecommendations(handData) {
+    getTileRecommendations(handData, minDiscardableOverride = null) {
         const recommendations = [];
 
         // Ensure we have 14 tiles for pattern ranking (pad with INVALID if needed)
@@ -238,7 +238,7 @@ export class AIEngine {
         debugPrint(`Total patterns available: ${sortedRankCardHands.length}`);
 
         // Dynamically determine how many patterns to consider
-        // Start with all patterns and reduce until we have at least 3 discardable tiles
+        // Start with all patterns and reduce until we have enough discardable tiles
         let patternCount = sortedRankCardHands.length;
 
         // Apply difficulty-based pattern limit
@@ -246,14 +246,18 @@ export class AIEngine {
             patternCount = Math.min(patternCount, this.config.maxPatterns);
         }
 
-        while (patternCount > 1) {  // Changed from > 0 to > 1 - always keep at least pattern #1
+        // Use override if provided, otherwise use difficulty-based config
+        // Override is used for: Charleston (needs 3), normal discard (needs 1)
+        const minDiscardable = minDiscardableOverride !== null ? minDiscardableOverride : this.config.minDiscardable;
+
+        while (patternCount > 1) {  // Always keep at least pattern #1
             const consideredPatterns = sortedRankCardHands.slice(0, patternCount);
             const discardableCount = this.countDiscardableTiles(handTiles, consideredPatterns);
 
-            debugPrint(`Considering ${patternCount} patterns: ${discardableCount} discardable tiles`);
+            debugPrint(`Considering ${patternCount} patterns: ${discardableCount} discardable tiles (need ${minDiscardable})`);
 
-            // If we have at least 3 discardable tiles, we're done
-            if (discardableCount >= this.config.minDiscardable) {
+            // If we have at least the minimum discardable tiles, we're done
+            if (discardableCount >= minDiscardable) {
                 break;
             }
 
@@ -329,7 +333,8 @@ export class AIEngine {
      */
     chooseDiscard(handData) {
         // Choose tile to discard using the recommendation engine
-        const result = this.getTileRecommendations(handData);
+        // Pass minDiscardableOverride=1 since we only need 1 tile to discard during normal play
+        const result = this.getTileRecommendations(handData, 1);
         const recommendations = result.recommendations;
 
         let discardTile = null;
@@ -460,7 +465,8 @@ export class AIEngine {
         const pass = [];
 
         // getTileRecommendations handles 13-tile hands by padding internally
-        const result = this.getTileRecommendations(handData);
+        // Pass minDiscardableOverride=3 since we need to select 3 tiles during Charleston
+        const result = this.getTileRecommendations(handData, 3);
         const recommendations = result.recommendations;
 
         debugPrint(`[Charleston] Total recommendations: ${recommendations.length}`);
@@ -588,7 +594,8 @@ export class AIEngine {
      * @returns {TileData[]} Array of tiles to pass
      */
     courtesyPass(handData, maxCount) {
-        const result = this.getTileRecommendations(handData);
+        // Pass maxCount as minDiscardableOverride since we need to select that many tiles
+        const result = this.getTileRecommendations(handData, maxCount);
         const tileRecommendations = result.recommendations;
 
         const pass = [];

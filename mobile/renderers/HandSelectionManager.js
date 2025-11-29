@@ -160,9 +160,37 @@ export class HandSelectionManager {
 
     /**
      * Get array of selected tile indices
-     * @returns {number[]} Array of selected indices
+     * NOTE: This returns indices based on the CURRENT hand ordering.
+     * If the hand has been sorted/reordered since selection, the indices reflect the new positions.
+     * @param {HandData} [handData] Optional hand data to find current indices (recommended after swaps/sorts)
+     * @returns {number[]} Array of selected indices in current hand order
      */
-    getSelectedTileIndices() {
+    getSelectedTileIndices(handData = null) {
+        // If handData provided, find current indices by matching selection keys
+        if (handData && Array.isArray(handData.tiles)) {
+            const indices = [];
+            for (let i = 0; i < handData.tiles.length; i++) {
+                const tile = handData.tiles[i];
+                if (!tile) continue;
+
+                // Generate selection key matching HandRenderer.getTileSelectionKey logic
+                let key;
+                if (typeof tile.index === "number" && tile.index >= 0) {
+                    key = `idx-${tile.index}`;
+                } else {
+                    const suit = tile.suit ?? "unknown";
+                    const number = tile.number ?? "unknown";
+                    key = `${suit}:${number}:${i}`;
+                }
+
+                if (this.selectedIndices.has(key)) {
+                    indices.push(i);
+                }
+            }
+            return indices;
+        }
+
+        // Fallback: return old cached indices (may be stale after sort/swap)
         const indices = [];
         for (const [index, selectionKey] of this.selectionKeyByIndex.entries()) {
             if (this.selectedIndices.has(selectionKey)) {
@@ -183,11 +211,28 @@ export class HandSelectionManager {
         }
 
         const tiles = [];
-        for (const [index, selectionKey] of this.selectionKeyByIndex.entries()) {
-            if (!this.selectedIndices.has(selectionKey)) {
+
+        // Build a map of selection keys for all current tiles in the hand
+        // This is necessary because tile positions may have changed due to sorting
+        const currentKeyToTile = new Map();
+        for (const tile of handData.tiles) {
+            if (!tile) continue;
+
+            // Generate selection key matching HandRenderer.getTileSelectionKey logic
+            let key;
+            if (typeof tile.index === "number" && tile.index >= 0) {
+                key = `idx-${tile.index}`;
+            } else {
+                // For tiles without index, we can't reliably match after sorting
+                // This is a fallback scenario that shouldn't happen in normal gameplay
                 continue;
             }
-            const tile = handData.tiles[index];
+            currentKeyToTile.set(key, tile);
+        }
+
+        // Find selected tiles by matching selection keys
+        for (const selectionKey of this.selectedIndices) {
+            const tile = currentKeyToTile.get(selectionKey);
             if (!tile) {
                 continue;
             }
@@ -196,6 +241,7 @@ export class HandSelectionManager {
                 tiles.push(normalized);
             }
         }
+
         return tiles;
     }
 
@@ -205,7 +251,7 @@ export class HandSelectionManager {
      * @returns {Object} Object with count, indices, and tiles
      */
     getSelectionState(handData) {
-        const indices = this.getSelectedTileIndices();
+        const indices = this.getSelectedTileIndices(handData);
         const tiles = Array.isArray(handData?.tiles) ? this.getSelectedTiles(handData) : [];
         return {
             count: indices.length,

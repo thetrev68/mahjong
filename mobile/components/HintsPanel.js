@@ -190,7 +190,8 @@ export class HintsPanel {
             console.log("HintsPanel: top3Patterns:", top3Patterns);
 
             // Get AI recommendations to determine which patterns are actually being considered
-            const recommendationResult = this.aiEngine.getTileRecommendations(handData);
+            // Pass minDiscardableOverride=1 for hints during normal play (only need 1 tile to discard)
+            const recommendationResult = this.aiEngine.getTileRecommendations(handData, 1);
             const consideredPatternCount = recommendationResult.consideredPatternCount;
             console.log("HintsPanel: consideredPatternCount:", consideredPatternCount);
 

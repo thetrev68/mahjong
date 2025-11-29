@@ -149,7 +149,8 @@ export class HintAnimationManager {
     // Centralized method to get recommendations from the AI engine
     getRecommendations() {
         const handData = this.buildHandDataForHintEngine();
-        const result = this.aiEngine.getTileRecommendations(handData);
+        // Pass minDiscardableOverride=1 for hints during normal play (only need 1 tile to discard)
+        const result = this.aiEngine.getTileRecommendations(handData, 1);
 
         // Reverse recommendations for display: DISCARD, PASS, KEEP
         return {
