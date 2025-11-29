@@ -250,13 +250,16 @@ export class AIEngine {
         // Override is used for: Charleston (needs minimum 3), normal discard (needs minimum 1)
         const minDiscardable = minDiscardableOverride !== null ? minDiscardableOverride : this.config.minDiscardable;
 
-        // Strategy: Prefer MORE patterns (better strategic analysis) while ensuring minimum discardable tiles
-        // Try patterns in descending order: start with all patterns, reduce only if needed
-        // This gives the AI better strategic insight while guaranteeing playability
+        // Strategy: Try pattern counts in preferred order (3, 2, 1) to balance
+        // strategic insight with having enough discardable tiles
+        // Prefer more patterns for better AI strategy, but ensure playability
         let finalPatternCount = 1; // Fallback to pattern #1 (always safe)
 
-        // Start from the maximum and work down, stop at first configuration that meets minimum
-        for (let tryCount = patternCount; tryCount >= 1; tryCount--) {
+        // Try pattern counts in descending order starting from min(patternCount, 3)
+        // This gives preference to 3 patterns, then 2, then 1
+        const maxTryCount = Math.min(patternCount, 3);
+
+        for (let tryCount = maxTryCount; tryCount >= 1; tryCount--) {
             const consideredPatterns = sortedRankCardHands.slice(0, tryCount);
             const discardableCount = this.countDiscardableTiles(handTiles, consideredPatterns);
 
