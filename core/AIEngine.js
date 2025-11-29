@@ -250,27 +250,29 @@ export class AIEngine {
         // Override is used for: Charleston (needs minimum 3), normal discard (needs minimum 1)
         const minDiscardable = minDiscardableOverride !== null ? minDiscardableOverride : this.config.minDiscardable;
 
-        // Strategy: Try pattern counts in preferred order (3, 2, 1) to balance
-        // strategic insight with having enough discardable tiles
-        // Prefer more patterns for better AI strategy, but ensure playability
+        // Strategy: Keep as many hands "alive" as possible for maximum strategic flexibility
+        // Human player strategy: Try to keep 3 hands alive (patterns #1, #2, #3), then reduce
+        // to 2, then 1 only if needed to ensure we have discard options available
+
+        // Start with preferred count: 3 hands alive (or fewer if not enough patterns available)
+        const preferredCount = Math.min(3, patternCount);
         let finalPatternCount = 1; // Fallback to pattern #1 (always safe)
 
-        // Try pattern counts in descending order starting from min(patternCount, 3)
-        // This gives preference to 3 patterns, then 2, then 1
-        const maxTryCount = Math.min(patternCount, 3);
-
-        for (let tryCount = maxTryCount; tryCount >= 1; tryCount--) {
+        // Try pattern counts in descending order: 3, 2, 1
+        // Use the HIGHEST count that still gives us enough discard options
+        for (let tryCount = preferredCount; tryCount >= 1; tryCount--) {
             const consideredPatterns = sortedRankCardHands.slice(0, tryCount);
             const discardableCount = this.countDiscardableTiles(handTiles, consideredPatterns);
 
-            debugPrint(`Trying ${tryCount} patterns: ${discardableCount} discardable tiles (need minimum ${minDiscardable})`);
+            debugPrint(`Trying ${tryCount} hand(s) alive: ${discardableCount} discardable tiles (need minimum ${minDiscardable})`);
 
-            // If this configuration meets our minimum requirement, use it and stop
+            // If keeping this many hands alive still gives us enough discard options, use it
             if (discardableCount >= minDiscardable) {
                 finalPatternCount = tryCount;
-                debugPrint(`Found valid configuration with ${tryCount} patterns (${discardableCount} discardable)`);
+                debugPrint(`Keeping ${tryCount} hand(s) alive with ${discardableCount} discard options`);
                 break;
             }
+            // Otherwise, reduce the number of hands we're trying to keep alive
         }
 
         patternCount = finalPatternCount;
