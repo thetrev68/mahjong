@@ -93,7 +93,10 @@ class GameScene extends Phaser.Scene {
                 year: year,
                 difficulty: (window.settingsManager && window.settingsManager.getDifficulty?.()) || "medium",
                 useBlankTiles: (window.settingsManager && window.settingsManager.getUseBlankTiles?.()) || false,
-                skipCharleston: (window.settingsManager && window.settingsManager.getSetting?.("skipCharleston", false)) || false
+                skipCharleston: (window.settingsManager && window.settingsManager.getSetting?.("skipCharleston", false)) || false,
+                trainingMode: (window.settingsManager && window.settingsManager.getSetting?.("trainingMode", false)) || false,
+                trainingHand: (window.settingsManager && window.settingsManager.getSetting?.("trainingHand", "")) || "",
+                trainingTileCount: (window.settingsManager && window.settingsManager.getSetting?.("trainingTileCount", 13)) || 13
             }
         });
 

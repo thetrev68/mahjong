@@ -85,7 +85,13 @@
                 <main class="settings-content">
                     <section class="settings-section">
                         <h2 class="settings-section-title">Game Settings</h2>
-                        <p class="settings-placeholder">AI difficulty scaling and game preferences will be added here.</p>
+                        <div class="house-rules-container">
+                            <div class="house-rules-item">
+                                <input id="skipCharlestonCheckbox" type="checkbox">
+                                <label for="skipCharlestonCheckbox" class="house-rules-label">Skip Charleston Phase</label>
+                            </div>
+                            <p class="settings-description">When enabled, the Charleston tile-passing phase will be skipped and the game will start directly with the main play phase.</p>
+                        </div>
                     </section>
 
                     <section class="settings-section">
@@ -108,10 +114,6 @@
                                     <div class="training-form__item">
                                         <label class="training-form__label" for="numTileSelect">Number of Tiles</label>
                                         <select id="numTileSelect" class="training-form__select training-form__select--compact"></select>
-                                    </div>
-                                    <div class="training-form__item training-form__item--checkbox">
-                                        <input id="skipCharlestonCheckbox" type="checkbox">
-                                        <label for="skipCharlestonCheckbox">Skip Charleston Phase</label>
                                     </div>
                                 </div>
                             </fieldset>

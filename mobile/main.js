@@ -111,6 +111,7 @@ async function initializeGame() {
             difficulty: settings.difficulty,
             skipCharleston: skipCharleston,
             trainingMode: settings.trainingMode,
+            trainingHand: settings.trainingHand,
             trainingTileCount: settings.trainingTileCount,
             useBlankTiles: settings.useBlankTiles
         }

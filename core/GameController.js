@@ -94,7 +94,10 @@ export class GameController extends EventEmitter {
             year: 2025,
             difficulty: "medium",
             useBlankTiles: false,
-            skipCharleston: false
+            skipCharleston: false,
+            trainingMode: false,
+            trainingHand: "",
+            trainingTileCount: 13
         };
 
         /** @type {boolean} Optional verbose debug logging flag */
@@ -310,17 +313,75 @@ export class GameController extends EventEmitter {
 
     /**
      * Build the initial dealing sequence and mutate player hands accordingly
+     * In training mode, player 0 gets a generated hand instead of random tiles
      * @returns {Array<{player:number, tiles:Object[]}>}
      */
     buildInitialDealSequence() {
         const sequence = [];
+        let trainingTiles = null;
+        let trainingTileIndex = 0;
 
+        // Training mode: Pre-generate tiles for player 0
+        if (this.settings.trainingMode && this.settings.trainingHand) {
+            // Generate training hand using card validator
+            const generatedHand = this.cardValidator.generateHand(
+                this.settings.trainingHand,
+                this.settings.trainingTileCount
+            );
+
+            const templateTiles = generatedHand.getTileArray();
+
+            // Find matching tiles from the wall for each generated tile
+            // This ensures proper indices for rendering
+            trainingTiles = [];
+            for (const template of templateTiles) {
+                // Find a matching tile in the wall
+                const wallIndex = this.wallTiles.findIndex(
+                    wallTile => wallTile.suit === template.suit && wallTile.number === template.number
+                );
+
+                if (wallIndex !== -1) {
+                    // Remove from wall and use it
+                    const matchedTile = this.wallTiles.splice(wallIndex, 1)[0];
+                    trainingTiles.push(matchedTile);
+                } else {
+                    // Fallback: use the template (shouldn't happen with a valid wall)
+                    console.warn(`Could not find matching tile for ${template.suit}-${template.number}`);
+                    trainingTiles.push(template);
+                }
+            }
+
+            if (this.debug || true) {  // Force logging for now
+                console.log("Training Mode Settings:", {
+                    trainingMode: this.settings.trainingMode,
+                    trainingHand: this.settings.trainingHand,
+                    trainingTileCount: this.settings.trainingTileCount
+                });
+                console.log("Generated hand tiles:", trainingTiles.map(t => `${t.suit}-${t.number} (index: ${t.index})`));
+            }
+
+            this.emit("MESSAGE", {
+                text: `Training Mode: Dealing ${this.settings.trainingTileCount} tiles for "${this.settings.trainingHand}"`,
+                type: "info"
+            });
+        }
+
+        // Use standard dealing sequence for animation
         for (const [playerIndex, tileCount] of DEAL_SEQUENCE) {
             const tilesForPlayer = [];
             const player = this.players[playerIndex];
 
             for (let i = 0; i < tileCount; i++) {
-                const tileData = this.drawTileFromWall();
+                let tileData;
+
+                // Player 0 in training mode: use pre-generated tiles
+                if (playerIndex === PLAYER.BOTTOM && trainingTiles && trainingTileIndex < trainingTiles.length) {
+                    tileData = trainingTiles[trainingTileIndex++];
+                } else {
+                    // Normal: draw from wall
+                    tileData = this.drawTileFromWall();
+                }
+
                 player.hand.addTile(tileData);
                 tilesForPlayer.push(tileData.toJSON());
             }

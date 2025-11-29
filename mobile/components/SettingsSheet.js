@@ -70,6 +70,11 @@ class SettingsSheet {
                         <label for="mobile-blank-tiles">Use Blank Tiles</label>
                         <input type="checkbox" id="mobile-blank-tiles" class="settings-checkbox">
                     </div>
+
+                    <div class="settings-item settings-item--toggle">
+                        <label for="mobile-skip-charleston">Skip Charleston</label>
+                        <input type="checkbox" id="mobile-skip-charleston" class="settings-checkbox">
+                    </div>
                 </section>
 
                 <!-- Audio Settings Section -->
@@ -126,11 +131,6 @@ class SettingsSheet {
                             <option value="13">13 tiles</option>
                             <option value="14">14 tiles</option>
                         </select>
-                    </div>
-
-                    <div class="settings-item settings-item--toggle" id="mobile-training-skip" style="display: none;">
-                        <label for="mobile-skip-charleston">Skip Charleston</label>
-                        <input type="checkbox" id="mobile-skip-charleston" class="settings-checkbox">
                     </div>
                 </section>
             </div>
@@ -262,13 +262,9 @@ class SettingsSheet {
      */
     updateTrainingVisibility(enabled) {
         const controls = document.getElementById("mobile-training-controls");
-        const skipControl = document.getElementById("mobile-training-skip");
 
         if (controls) {
             controls.style.display = enabled ? "block" : "none";
-        }
-        if (skipControl) {
-            skipControl.style.display = enabled ? "flex" : "none";
         }
     }
 

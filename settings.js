@@ -143,6 +143,7 @@ class DesktopSettingsManager {
         const yearChanged = oldYear !== newYearValue;
 
         // Save all current settings
+        this.saveGameSettings();
         this.saveTrainingSettings();
         this.saveDifficultySettings();
         this.saveYearSettings();
@@ -213,6 +214,9 @@ class DesktopSettingsManager {
         const settings = SettingsManager.load();
         debugPrint("Loaded settings:", settings);
 
+        // Apply general game settings
+        this.applyGameSettings(settings);
+
         // Apply training mode settings
         this.applyTrainingSettings(settings);
 
@@ -224,16 +228,23 @@ class DesktopSettingsManager {
 
         // Apply house rules settings
         this.applyHouseRuleSettings(settings);
-        
+
         // Apply audio settings
         this.applyAudioSettings(settings);
+    }
+
+    applyGameSettings(settings) {
+        const skipCharlestonCheckbox = document.getElementById("skipCharlestonCheckbox");
+
+        if (skipCharlestonCheckbox && Object.prototype.hasOwnProperty.call(settings, "skipCharleston")) {
+            skipCharlestonCheckbox.checked = settings.skipCharleston;
+        }
     }
 
     applyTrainingSettings(settings) {
         const trainCheckbox = document.getElementById("trainCheckbox");
         const handSelect = document.getElementById("handSelect");
         const numTileSelect = document.getElementById("numTileSelect");
-        const skipCharlestonCheckbox = document.getElementById("skipCharlestonCheckbox");
 
         if (trainCheckbox && Object.prototype.hasOwnProperty.call(settings, "trainingMode")) {
             trainCheckbox.checked = settings.trainingMode;
@@ -245,10 +256,6 @@ class DesktopSettingsManager {
 
         if (numTileSelect && settings.trainingTileCount) {
             numTileSelect.value = settings.trainingTileCount.toString();
-        }
-
-        if (skipCharlestonCheckbox && Object.prototype.hasOwnProperty.call(settings, "skipCharleston")) {
-            skipCharlestonCheckbox.checked = settings.skipCharleston;
         }
 
         // Update form visibility based on loaded settings
@@ -279,13 +286,18 @@ class DesktopSettingsManager {
         }
     }
 
+    saveGameSettings() {
+        const settings = {};
+        settings.skipCharleston = document.getElementById("skipCharlestonCheckbox")?.checked ?? SettingsManager.getDefault("skipCharleston");
+        SettingsManager.save(settings);
+    }
+
     saveTrainingSettings() {
         const settings = {};
 
         settings.trainingMode = document.getElementById("trainCheckbox")?.checked ?? SettingsManager.getDefault("trainingMode");
         settings.trainingHand = document.getElementById("handSelect")?.value ?? SettingsManager.getDefault("trainingHand");
         settings.trainingTileCount = parseInt(document.getElementById("numTileSelect")?.value ?? SettingsManager.getDefault("trainingTileCount").toString(), 10);
-        settings.skipCharleston = document.getElementById("skipCharlestonCheckbox")?.checked ?? SettingsManager.getDefault("skipCharleston");
 
         // Save settings to SettingsManager
         SettingsManager.save(settings);
