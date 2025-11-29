@@ -351,7 +351,7 @@ export class GameController extends EventEmitter {
                 }
             }
 
-            if (this.debug || true) {  // Force logging for now
+            if (this.debug) {
                 console.log("Training Mode Settings:", {
                     trainingMode: this.settings.trainingMode,
                     trainingHand: this.settings.trainingHand,
