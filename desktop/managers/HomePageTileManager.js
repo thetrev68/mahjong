@@ -119,12 +119,12 @@ export class HomePageTileManager {
             promises.push(new Promise(resolve => {
                 const initialY = tile.y;
                 const jumpHeight = Phaser.Math.Between(5, 15);
-                const delay = Phaser.Math.Between(0, 150);
+                const delay = Phaser.Math.Between(0, 75);
 
                 tile.withRaisedDepth(() => {
                     const dummyTween = this.scene.tweens.add({
                         targets: {},
-                        duration: 800 + delay,
+                        duration: 400 + delay,
                         onComplete: () => {
                             // Depth will be lowered here
                         }
@@ -135,7 +135,7 @@ export class HomePageTileManager {
                         targets: tile,
                         y: initialY - jumpHeight,
                         scale: 0.65,
-                        duration: 400,
+                        duration: 200,
                         ease: Phaser.Math.Easing.Cubic.Out,
                         delay: delay
                     });
@@ -145,9 +145,9 @@ export class HomePageTileManager {
                         targets: tile,
                         y: initialY,
                         scale: 0.6,
-                        duration: 400,
+                        duration: 200,
                         ease: Phaser.Math.Easing.Cubic.In,
-                        delay: delay + 400
+                        delay: delay + 200
                     });
 
                     return dummyTween;
@@ -157,7 +157,7 @@ export class HomePageTileManager {
                 this.scene.tweens.add({
                     targets: { scaleY: tile.sprite.scaleY },
                     scaleY: 0,
-                    duration: 400,
+                    duration: 200,
                     ease: Phaser.Math.Easing.Cubic.In,
                     delay: delay,
                     onUpdate: (tween) => {
@@ -171,7 +171,7 @@ export class HomePageTileManager {
                         this.scene.tweens.add({
                             targets: { scaleY: 0 },
                             scaleY: 0.6,
-                            duration: 400,
+                            duration: 200,
                             ease: Phaser.Math.Easing.Cubic.Out,
                             onUpdate: (tween) => {
                                 tile.sprite.scaleY = tween.targets[0].scaleY;
@@ -191,14 +191,14 @@ export class HomePageTileManager {
     animateFlyOffScreen() {
         const promises = [];
         const batchSize = 20;
-        const batchDelay = 150;
+        const batchDelay = 75;
 
         for (let i = 0; i < this.tileArray.length; i += batchSize) {
             const batch = this.tileArray.slice(i, i + batchSize);
             promises.push(new Promise(resolveBatch => {
                 this.scene.time.delayedCall(i / batchSize * batchDelay, () => {
                     const batchPromises = batch.map(tile => new Promise(resolveTile => {
-                        const duration = Phaser.Math.Between(1200, 2000);
+                        const duration = Phaser.Math.Between(600, 1000);
                         const endX = Phaser.Math.Between(-200, -50);
                         const endY = Phaser.Math.Between(-200, -50);
 
