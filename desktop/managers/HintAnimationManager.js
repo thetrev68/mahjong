@@ -30,9 +30,13 @@ export class HintAnimationManager {
     applyGlowToDiscardSuggestions(recommendations) {
         this.clearAllGlows();
 
-        // Filter to only DISCARD recommendations
+        // Filter to only DISCARD recommendations, excluding Jokers and Blanks
+        // Jokers and Blanks should never be discarded
         const discardRecs = recommendations.filter(rec =>
-            rec.tile.suit !== SUIT.INVALID && rec.recommendation === "DISCARD"
+            rec.tile.suit !== SUIT.INVALID &&
+            rec.tile.suit !== SUIT.JOKER &&
+            rec.tile.suit !== SUIT.BLANK &&
+            rec.recommendation === "DISCARD"
         );
 
         // Phase 5: Get HandData from GameController (authoritative source)

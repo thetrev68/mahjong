@@ -250,37 +250,27 @@ export class AIEngine {
         // Override is used for: Charleston (needs minimum 3), normal discard (needs minimum 1)
         const minDiscardable = minDiscardableOverride !== null ? minDiscardableOverride : this.config.minDiscardable;
 
-        // Start by reducing patterns until we find the sweet spot that gives us
-        // enough discardable tiles while maximizing pattern consideration
-        let bestPatternCount = patternCount;
-        let bestDiscardableCount = 0;
+        // Strategy: Prefer MORE patterns (better strategic analysis) while ensuring minimum discardable tiles
+        // Try patterns in descending order: start with all patterns, reduce only if needed
+        // This gives the AI better strategic insight while guaranteeing playability
+        let finalPatternCount = 1; // Fallback to pattern #1 (always safe)
 
-        while (patternCount > 1) {  // Always keep at least pattern #1
-            const consideredPatterns = sortedRankCardHands.slice(0, patternCount);
+        // Start from the maximum and work down, stop at first configuration that meets minimum
+        for (let tryCount = patternCount; tryCount >= 1; tryCount--) {
+            const consideredPatterns = sortedRankCardHands.slice(0, tryCount);
             const discardableCount = this.countDiscardableTiles(handTiles, consideredPatterns);
 
-            debugPrint(`Considering ${patternCount} patterns: ${discardableCount} discardable tiles (need minimum ${minDiscardable})`);
+            debugPrint(`Trying ${tryCount} patterns: ${discardableCount} discardable tiles (need minimum ${minDiscardable})`);
 
-            // Track the best option that meets our minimum requirement
-            if (discardableCount >= minDiscardable && discardableCount > bestDiscardableCount) {
-                bestPatternCount = patternCount;
-                bestDiscardableCount = discardableCount;
+            // If this configuration meets our minimum requirement, use it and stop
+            if (discardableCount >= minDiscardable) {
+                finalPatternCount = tryCount;
+                debugPrint(`Found valid configuration with ${tryCount} patterns (${discardableCount} discardable)`);
+                break;
             }
-
-            // Continue reducing to find more discardable tiles
-            patternCount--;
         }
 
-        // Check pattern #1 as well
-        const pattern1Patterns = sortedRankCardHands.slice(0, 1);
-        const pattern1DiscardableCount = this.countDiscardableTiles(handTiles, pattern1Patterns);
-        if (pattern1DiscardableCount >= minDiscardable && pattern1DiscardableCount > bestDiscardableCount) {
-            bestPatternCount = 1;
-            bestDiscardableCount = pattern1DiscardableCount;
-        }
-
-        // Use the best pattern count we found, or fallback to 1 if none met the minimum
-        patternCount = bestPatternCount > 0 ? bestPatternCount : 1;
+        patternCount = finalPatternCount;
 
         debugPrint(`Final decision: considering ${patternCount} patterns`);
 
