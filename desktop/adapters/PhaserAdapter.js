@@ -1105,14 +1105,23 @@ export class PhaserAdapter {
      * @param {Function} callback - Called with array of selected TileData objects
      */
     handleSelectTilesPrompt(options, callback) {
-        const {minTiles = 1, maxTiles = 3, mode} = options || {};
+        const {minTiles = 1, maxTiles = 3, mode, question} = options || {};
 
         if (!this.selectionManager) {
             callback?.([]);
             return;
         }
 
-        printInfo(`Select ${minTiles}–${maxTiles} tiles`);
+        // Use custom question if provided, otherwise generate default message
+        if (question) {
+            printInfo(question);
+        } else {
+            // Show exact count if min equals max, otherwise show range
+            const message = minTiles === maxTiles
+                ? `Select exactly ${minTiles} tile${minTiles !== 1 ? "s" : ""}`
+                : `Select ${minTiles}–${maxTiles} tiles`;
+            printInfo(message);
+        }
 
         this.selectionManager.requestSelection({
             min: minTiles,

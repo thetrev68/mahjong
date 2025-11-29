@@ -561,9 +561,17 @@ export class GameController extends EventEmitter {
             const player13Vote = Math.min(votes[1].vote, votes[3].vote);
 
             if (player02Vote > 0 || player13Vote > 0) {
-                // Emit rich message event
+                // Build informative message showing individual votes
+                const voteMessages = [];
+                for (let i = 0; i < 4; i++) {
+                    const playerName = this.players[i].name;
+                    const vote = votes[i].vote;
+                    voteMessages.push(`${playerName} voted ${vote}`);
+                }
+
+                // Emit rich message event with detailed vote information
                 const msgEvent = GameEvents.createMessageEvent(
-                    `Courtesy pass approved. P0-P2 pass ${player02Vote}, P1-P3 pass ${player13Vote}.`,
+                    `Courtesy pass: ${voteMessages.join(", ")}. Passing ${player02Vote > 0 ? player02Vote + " tile(s) with opposite player" : "no tiles"}.`,
                     "info"
                 );
                 this.emit("MESSAGE", msgEvent);
@@ -574,24 +582,29 @@ export class GameController extends EventEmitter {
                 // Sequential processing required - human player needs to select tiles via UI
                 for (let i = 0; i < 4; i++) {
                     const player = this.players[i];
-                    const maxTiles = (i === 0 || i === 2) ? player02Vote : player13Vote;
+                    const passingCount = (i === 0 || i === 2) ? player02Vote : player13Vote;
 
-                    if (maxTiles === 0) {
+                    if (passingCount === 0) {
                         tilesToPass[i] = [];
                         continue;
                     }
 
                     let selectedTiles;
                     if (player.isHuman) {
-                        // Prompt human to select tiles (flexible range: 1 to maxTiles)
+                        // Get opposite player's info for better messaging
+                        const oppositePlayer = this.players[(i + 2) % 4];
+                        const oppositeVote = votes[(i + 2) % 4].vote;
+                        const yourVote = votes[i].vote;
+
+                        // Prompt human to select exact number of tiles (minimum of both votes)
                         selectedTiles = await this.promptUI("SELECT_TILES", {
-                            question: `Select 1–${maxTiles} tile(s) to pass to opposite player`,
-                            minTiles: 1,
-                            maxTiles: maxTiles
+                            question: `${oppositePlayer.name} voted ${oppositeVote}, you voted ${yourVote}. Select exactly ${passingCount} tile(s) to pass.`,
+                            minTiles: passingCount,
+                            maxTiles: passingCount
                         });
                     } else {
                         // AI selects tiles using courtesyPass method
-                        selectedTiles = await this.aiEngine.courtesyPass(player.hand, maxTiles);
+                        selectedTiles = await this.aiEngine.courtesyPass(player.hand, passingCount);
                     }
 
                     tilesToPass[i] = selectedTiles;

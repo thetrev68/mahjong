@@ -1084,19 +1084,27 @@ export class MobileRenderer {
                     useActionButton: true
                 });
                 break;
-            case "SELECT_TILES":
+            case "SELECT_TILES": {
+                const minTiles = data.options?.minTiles ?? 1;
+                const maxTiles = data.options?.maxTiles ?? 3;
+                // Show exact count if min equals max, otherwise show range
+                const defaultHint = minTiles === maxTiles
+                    ? `Select exactly ${minTiles} tile${minTiles !== 1 ? "s" : ""}`
+                    : `Select ${minTiles}–${maxTiles} tiles`;
+
                 this.startTileSelectionPrompt({
                     title: data.options?.question ?? "Select tiles",
-                    hint: `Select ${data.options?.minTiles ?? 1}–${data.options?.maxTiles ?? 3} tiles`,
-                    min: data.options?.minTiles ?? 1,
-                    max: data.options?.maxTiles ?? 3,
+                    hint: defaultHint,
+                    min: minTiles,
+                    max: maxTiles,
                     validationMode: "courtesy",
                     confirmLabel: "Confirm",
                     cancelLabel: "Cancel",
-                    fallback: () => this.getFallbackTiles(Math.max(1, data.options?.minTiles ?? 1)),
+                    fallback: () => this.getFallbackTiles(Math.max(1, minTiles)),
                     callback: (tiles) => data.callback(tiles)
                 });
                 break;
+            }
             case "CLAIM_DISCARD": {
                 const promptTile = data.options?.tile;
                 const tileObj = promptTile instanceof TileData
