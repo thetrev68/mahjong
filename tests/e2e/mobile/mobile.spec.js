@@ -295,4 +295,105 @@ test.describe("Mobile Interface", () => {
         });
     });
 
+    test.describe("Test 9: Training Mode Settings", () => {
+        test("training mode settings are available and functional", async ({ page }) => {
+            await gotoMobileApp(page);
+            await waitForMobileReady(page);
+
+            // Open settings
+            await page.click("#mobile-settings-btn");
+            await page.waitForSelector("#settings-sheet.open", { timeout: 3000 });
+
+            // Check that training mode checkbox exists
+            const trainingCheckbox = page.locator("#mobile-training-mode");
+            await expect(trainingCheckbox).toBeVisible();
+
+            // Enable training mode
+            await trainingCheckbox.check();
+            await page.waitForSelector("#mobile-training-controls:visible", { timeout: 1000 });
+
+            // Verify hand selector is visible and populated
+            const handSelector = page.locator("#mobile-training-hand");
+            await expect(handSelector).toBeVisible();
+
+            // Check that hand selector has options (should be populated from card patterns)
+            const optionCount = await handSelector.locator("option").count();
+            expect(optionCount).toBeGreaterThan(1); // Should have "Select a hand..." plus actual patterns
+
+            // Check that there are optgroups for categories
+            const optgroupCount = await handSelector.locator("optgroup").count();
+            expect(optgroupCount).toBeGreaterThan(0);
+
+            // Verify tile count selector is visible
+            const tileCountSelector = page.locator("#mobile-training-tiles");
+            await expect(tileCountSelector).toBeVisible();
+
+            // Select a specific hand
+            await handSelector.selectOption({ index: 1 }); // Select first actual hand (not the placeholder)
+            const selectedValue = await handSelector.inputValue();
+            expect(selectedValue).not.toBe(""); // Should not be empty
+
+            // Select tile count
+            await tileCountSelector.selectOption("10");
+
+            // Save settings
+            await page.click("#mobile-settings-save");
+            await page.waitForSelector("#settings-sheet:not(.open)", { timeout: 1000 });
+
+            // Verify settings were saved
+            const savedSettings = await page.evaluate(() => {
+                return {
+                    trainingMode: localStorage.getItem("mahjong_trainingMode"),
+                    trainingHand: localStorage.getItem("mahjong_trainingHand"),
+                    trainingTileCount: localStorage.getItem("mahjong_trainingTileCount")
+                };
+            });
+
+            expect(savedSettings.trainingMode).toBe("true");
+            expect(savedSettings.trainingHand).not.toBe("");
+            expect(savedSettings.trainingHand).not.toBe(null);
+            expect(savedSettings.trainingTileCount).toBe("10");
+        });
+
+        test("training mode deals correct number of tiles", async ({ page }) => {
+            await gotoMobileApp(page);
+            await waitForMobileReady(page);
+
+            // Configure training mode via localStorage before starting game
+            await page.evaluate(() => {
+                localStorage.setItem("mahjong_trainingMode", "true");
+                // Get first available hand pattern (will be set in settings)
+                localStorage.setItem("mahjong_trainingTileCount", "11");
+            });
+
+            // Reload to pick up settings
+            await page.reload();
+            await waitForMobileReady(page);
+
+            // Open settings and select a hand pattern
+            await page.click("#mobile-settings-btn");
+            await page.waitForSelector("#settings-sheet.open");
+            await page.locator("#mobile-training-mode").check();
+            await page.waitForSelector("#mobile-training-controls:visible");
+
+            // Select first available hand
+            await page.locator("#mobile-training-hand").selectOption({ index: 1 });
+            await page.locator("#mobile-training-tiles").selectOption("11");
+            await page.click("#mobile-settings-save");
+            await page.waitForSelector("#settings-sheet:not(.open)");
+
+            // Start game
+            await page.click("#new-game-btn");
+
+            // Wait for tiles to be dealt
+            await page.waitForSelector(HAND_TILE_SELECTOR, { timeout: 20000 });
+
+            // Count tiles in hand
+            const tileCount = await page.locator(HAND_TILE_SELECTOR).count();
+
+            // Should have exactly 11 tiles (training mode with 11 tiles selected)
+            expect(tileCount).toBe(11);
+        });
+    });
+
 });

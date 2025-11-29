@@ -221,10 +221,13 @@ async function initializeGame() {
         settingsBtn.onclick = () => {
             settingsSheet.open();
         };
+
+        // Populate hand selector with card patterns
+        settingsSheet.populateHandSelector(card);
     }
 
     // Listen for settings changes
-    window.addEventListener("settingsChanged", (event) => {
+    window.addEventListener("settingsChanged", async (event) => {
         console.log("Settings changed:", event.detail);
 
         // Show message to user
@@ -236,12 +239,33 @@ async function initializeGame() {
             console.log("AI difficulty updated to:", event.detail.difficulty);
         }
 
+        // If card year changed, reinitialize card and repopulate hand selector
+        if (event.detail.cardYear && event.detail.cardYear !== card.year) {
+            console.log("Card year changed from", card.year, "to", event.detail.cardYear);
+            card.year = event.detail.cardYear;
+            await card.init();
+
+            // Repopulate hand selector with new year's patterns
+            if (settingsSheet) {
+                settingsSheet.populateHandSelector(card);
+            }
+
+            // Update card validator in AI and GameController
+            if (aiEngine) {
+                aiEngine.cardValidator = card;
+            }
+            if (gameController) {
+                gameController.cardValidator = card;
+            }
+        }
+
         // Update GameController settings for next game
         if (gameController && gameController.settings) {
             gameController.settings.year = event.detail.cardYear;
             gameController.settings.difficulty = event.detail.difficulty;
             gameController.settings.skipCharleston = event.detail.skipCharleston;
             gameController.settings.trainingMode = event.detail.trainingMode;
+            gameController.settings.trainingHand = event.detail.trainingHand;
             gameController.settings.trainingTileCount = event.detail.trainingTileCount;
             gameController.settings.useBlankTiles = event.detail.useBlankTiles;
             console.log("GameController settings updated:", gameController.settings);

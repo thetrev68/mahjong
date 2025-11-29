@@ -121,16 +121,24 @@ class SettingsSheet {
                         <input type="checkbox" id="mobile-training-mode" class="settings-checkbox">
                     </div>
 
-                    <div class="settings-item" id="mobile-training-controls" style="display: none;">
-                        <label for="mobile-training-tiles">Starting Tiles</label>
-                        <select id="mobile-training-tiles" class="settings-select">
-                            <option value="9">9 tiles</option>
-                            <option value="10">10 tiles</option>
-                            <option value="11">11 tiles</option>
-                            <option value="12">12 tiles</option>
-                            <option value="13">13 tiles</option>
-                            <option value="14">14 tiles</option>
-                        </select>
+                    <div id="mobile-training-controls" style="display: none;">
+                        <div class="settings-item">
+                            <label for="mobile-training-hand">Starting Hand Pattern</label>
+                            <select id="mobile-training-hand" class="settings-select">
+                                <option value="">Select a hand...</option>
+                            </select>
+                        </div>
+                        <div class="settings-item">
+                            <label for="mobile-training-tiles">Number of Tiles</label>
+                            <select id="mobile-training-tiles" class="settings-select">
+                                <option value="9">9 tiles</option>
+                                <option value="10">10 tiles</option>
+                                <option value="11">11 tiles</option>
+                                <option value="12">12 tiles</option>
+                                <option value="13">13 tiles</option>
+                                <option value="14">14 tiles</option>
+                            </select>
+                        </div>
                     </div>
                 </section>
             </div>
@@ -174,6 +182,7 @@ class SettingsSheet {
 
         // Training mode
         document.getElementById("mobile-training-mode").checked = settings.trainingMode;
+        document.getElementById("mobile-training-hand").value = settings.trainingHand;
         document.getElementById("mobile-training-tiles").value = settings.trainingTileCount;
         document.getElementById("mobile-skip-charleston").checked = settings.skipCharleston;
 
@@ -245,9 +254,9 @@ class SettingsSheet {
             sfxMuted: document.getElementById("mobile-sfx-mute")?.checked ?? SettingsManager.getDefault("sfxMuted"),
 
             trainingMode: document.getElementById("mobile-training-mode")?.checked ?? SettingsManager.getDefault("trainingMode"),
+            trainingHand: document.getElementById("mobile-training-hand")?.value ?? SettingsManager.getDefault("trainingHand"),
             trainingTileCount: parseInt(document.getElementById("mobile-training-tiles")?.value ?? SettingsManager.getDefault("trainingTileCount").toString()),
-            skipCharleston: document.getElementById("mobile-skip-charleston")?.checked ?? SettingsManager.getDefault("skipCharleston"),
-            trainingHand: SettingsManager.getDefault("trainingHand")  // Not used on mobile
+            skipCharleston: document.getElementById("mobile-skip-charleston")?.checked ?? SettingsManager.getDefault("skipCharleston")
         };
 
         SettingsManager.save(settings);
@@ -266,6 +275,37 @@ class SettingsSheet {
         if (controls) {
             controls.style.display = enabled ? "block" : "none";
         }
+    }
+
+    /**
+     * Populate training hand selector with card patterns
+     * Called by MobileRenderer after card is initialized
+     * @param {Card} card - Card instance with valid hands
+     */
+    populateHandSelector(card) {
+        const handSelect = document.getElementById("mobile-training-hand");
+        if (!handSelect || !card || !card.validHandGroups) {
+            return;
+        }
+
+        // Clear existing options except the first one
+        handSelect.innerHTML = '<option value="">Select a hand...</option>';
+
+        // Add hand options from card
+        for (const group of card.validHandGroups) {
+            const optionGroup = document.createElement("optgroup");
+            optionGroup.label = group.groupDescription;
+            handSelect.appendChild(optionGroup);
+
+            for (const validHand of group.hands) {
+                const option = document.createElement("option");
+                option.value = validHand.description;
+                option.text = validHand.description;
+                handSelect.appendChild(option);
+            }
+        }
+
+        console.log("Hand selector populated with", card.validHandGroups.length, "groups");
     }
 
     /**
