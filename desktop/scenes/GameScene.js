@@ -192,6 +192,9 @@ class GameScene extends Phaser.Scene {
 
                 this.prepareActionPanelForNewGame();
 
+                // Reload settings before starting game (for training mode, skip charleston, etc.)
+                this.updateGameControllerSettings();
+
                 if (this.homePageTileManager) {
                     // First game - animate tiles and transition
                     this.homePageTileManager.onAnimationComplete = async () => {
@@ -622,6 +625,25 @@ class GameScene extends Phaser.Scene {
                 resolve();
             }
         });
+    }
+
+    /**
+     * Update GameController settings from SettingsManager
+     * Called before starting each new game to pick up setting changes
+     */
+    updateGameControllerSettings() {
+        if (!this.gameController || !window.settingsManager) {
+            return;
+        }
+
+        // Update settings with current values from SettingsManager
+        this.gameController.settings = {
+            ...this.gameController.settings,
+            skipCharleston: window.settingsManager.getSetting("skipCharleston", false) || false,
+            trainingMode: window.settingsManager.getSetting("trainingMode", false) || false,
+            trainingHand: window.settingsManager.getSetting("trainingHand", "") || "",
+            trainingTileCount: window.settingsManager.getSetting("trainingTileCount", 13) || 13
+        };
     }
 
     /**

@@ -194,6 +194,17 @@ async function initializeGame() {
             try {
                 console.log("Starting game...", gameController);
                 mobileRenderer?.updateStatus("Starting game...");
+
+                // Reload settings before starting game (for training mode, skip charleston, etc.)
+                const currentSettings = SettingsManager.load();
+                gameController.settings = {
+                    ...gameController.settings,
+                    skipCharleston: currentSettings.skipCharleston,
+                    trainingMode: currentSettings.trainingMode,
+                    trainingHand: currentSettings.trainingHand,
+                    trainingTileCount: currentSettings.trainingTileCount
+                };
+
                 await gameController.startGame();
                 console.log("Game started successfully");
             } catch (error) {
