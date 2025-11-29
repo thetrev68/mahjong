@@ -18,7 +18,8 @@
       "Bash(npm run lint:*)",
       "Bash(node -e:*)",
       "Bash(npx eslint:*)",
-      "Bash(node -c:*)"
+      "Bash(node -c:*)",
+      "Bash(npm run test:headed:*)"
     ],
     "deny": [],
     "ask": []
