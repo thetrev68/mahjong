@@ -250,10 +250,12 @@ export class HintAnimationManager {
     // Structure matches mobile HintsPanel for consistency
     updateHintDisplay(rankCardHands, recommendations, consideredPatternCount) {
         // Get all player tiles for matching (includes exposed tiles)
-        const playerTiles = this.getAllPlayerTiles();
+        // Use TileData from HandData, not Phaser sprites
+        const handData = this.gameController.players[PLAYER.BOTTOM].hand;
+        const playerTiles = handData.getAllTilesIncludingExposures();
 
         // Get only hidden tiles (for joker substitution availability)
-        const hiddenTiles = this.getHiddenPlayerTiles();
+        const hiddenTiles = handData.tiles;
 
         // Get card year from game controller settings
         const year = this.gameController?.settings?.year || this.card?.year || "";

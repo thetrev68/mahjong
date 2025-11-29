@@ -8,9 +8,8 @@ const SUIT_COLORS = {
   [SUIT.VSUIT2]: "red",
   [SUIT.VSUIT3]: "blue",
   [SUIT.FLOWER]: "black",
-  [SUIT.VSUIT1_DRAGON]: "green",
-  [SUIT.VSUIT2_DRAGON]: "red",
-  [SUIT.VSUIT3_DRAGON]: "blue",
+  // Note: VSUIT*_DRAGON colors are determined dynamically based on vsuitArray
+  // in getTileDisplayChar(), not from static mappings here
   [SUIT.WIND]: "black",
   [SUIT.DRAGON]: "blue",
   [SUIT.JOKER]: "gray", // Added for jokers
@@ -21,7 +20,7 @@ const SUIT_COLORS = {
 
 // Map tile to display character and color
 /* knip-ignore */
-export function getTileDisplayChar(tile, isEvenHand = false, vsuitArray = null) {
+export function getTileDisplayChar(tile, isEvenHand = false, vsuitArray = null, dragonMapping = null) {
   if (tile.suit === SUIT.JOKER) {
     return { char: "J", color: SUIT_COLORS[SUIT.JOKER], tile };
   }
@@ -46,22 +45,57 @@ export function getTileDisplayChar(tile, isEvenHand = false, vsuitArray = null) 
     if (tile.suit === SUIT.DRAGON) {
       // Regular dragon - color depends on the dragon type (number)
       // RED (0) = red, GREEN (1) = green, WHITE (2) = blue (though WHITE is handled above as "0")
-      const dragonColors = {
-        [DRAGON.RED]: "red",
-        [DRAGON.GREEN]: "green",
-        [DRAGON.WHITE]: "blue"
-      };
-      dragonColor = dragonColors[tile.number] || "blue";
-    } else if (tile.suit >= SUIT.VSUIT1_DRAGON && tile.suit <= SUIT.VSUIT3_DRAGON) {
-      // Virtual suit dragons - match their corresponding virtual suit color using vsuitArray
-      if (vsuitArray) {
-        // Map virtual dragon to real suit using vsuitArray
-        const realSuit = vsuitArray[tile.suit - SUIT.VSUIT1_DRAGON];
-        dragonColor = SUIT_COLORS[realSuit] || "blue";
+      // Check if this is a translated VSUIT*_DRAGON placeholder (has _originalVsuit)
+      if (tile._originalVsuit !== undefined && dragonMapping && dragonMapping.has(tile._originalVsuit)) {
+        // Use the color from the dragon mapping for this virtual suit
+        const mappedNumber = dragonMapping.get(tile._originalVsuit);
+        const dragonColors = {
+          [DRAGON.RED]: "red",
+          [DRAGON.GREEN]: "green",
+          [DRAGON.WHITE]: "blue"
+        };
+        dragonColor = dragonColors[mappedNumber] || "blue";
       } else {
-        // Fallback to fixed color mapping if no vsuitArray
+        const dragonColors = {
+          [DRAGON.RED]: "red",
+          [DRAGON.GREEN]: "green",
+          [DRAGON.WHITE]: "blue"
+        };
+        dragonColor = dragonColors[tile.number] || "blue";
+      }
+    } else if (tile.suit >= SUIT.VSUIT1_DRAGON && tile.suit <= SUIT.VSUIT3_DRAGON) {
+      // Virtual suit dragons - determine color from dragonMapping
+      // dragonMapping should always be populated by renderPatternVariation()
+      if (dragonMapping && dragonMapping.has(tile.suit)) {
+        const dragonNumber = dragonMapping.get(tile.suit);
+        const dragonColors = {
+          [DRAGON.RED]: "red",
+          [DRAGON.GREEN]: "green",
+          [DRAGON.WHITE]: "blue"
+        };
+        dragonColor = dragonColors[dragonNumber] || "blue";
+      } else if (vsuitArray) {
+        // Fallback: Try vsuitArray, but ONLY if the value is valid (>= 0)
+        // vsuitArray can have -1 for unused positions when vsuitCount < 3
+        const vsuitIndex = tile.suit - SUIT.VSUIT1_DRAGON;
+        const dragonNumber = vsuitArray[vsuitIndex];
+        if (dragonNumber >= 0 && dragonNumber <= 2) {
+          const dragonColors = {
+            [DRAGON.RED]: "red",
+            [DRAGON.GREEN]: "green",
+            [DRAGON.WHITE]: "blue"
+          };
+          dragonColor = dragonColors[dragonNumber] || "blue";
+        } else {
+          // vsuitArray value is -1 (unused), use fixed color based on vsuit index
+          const vsuitColors = ["red", "green", "blue"];
+          dragonColor = vsuitColors[vsuitIndex] || "blue";
+        }
+      } else {
+        // Final fallback to fixed color mapping if no dragonMapping or vsuitArray
+        // VSUIT1_DRAGON=red, VSUIT2_DRAGON=green, VSUIT3_DRAGON=blue
         const vsuitIndex = tile.suit - SUIT.VSUIT1_DRAGON; // 0, 1, or 2
-        const vsuitColors = ["green", "red", "blue"];
+        const vsuitColors = ["red", "green", "blue"];
         dragonColor = vsuitColors[vsuitIndex] || "blue";
       }
     }
@@ -111,7 +145,7 @@ function tally(tiles) {
 // Get display chars for pattern tiles, with matching against player's hand
 // Supports joker substitution only for components with count >=3
 /* knip-ignore */
-export function getPatternDisplayChars(patternTiles, playerTiles, componentCounts, isEvenHand, vsuitArray = null, hiddenTiles = null, consecutiveMapping = null) {
+export function getPatternDisplayChars(patternTiles, playerTiles, componentCounts, isEvenHand, vsuitArray = null, hiddenTiles = null, consecutiveMapping = null, dragonMapping = null) {
   const playerCounts = tally(playerTiles);
   const usedCounts = new Map();
 
@@ -131,12 +165,12 @@ export function getPatternDisplayChars(patternTiles, playerTiles, componentCount
       const mappedNumber = consecutiveMapping.get(tile.number);
       if (mappedNumber !== undefined) {
         const modifiedTile = { ...tile, number: mappedNumber };
-        display = getTileDisplayChar(modifiedTile, isEvenHand, vsuitArray);
+        display = getTileDisplayChar(modifiedTile, isEvenHand, vsuitArray, dragonMapping);
       } else {
-        display = getTileDisplayChar(tile, isEvenHand, vsuitArray);
+        display = getTileDisplayChar(tile, isEvenHand, vsuitArray, dragonMapping);
       }
     } else {
-      display = getTileDisplayChar(tile, isEvenHand, vsuitArray);
+      display = getTileDisplayChar(tile, isEvenHand, vsuitArray, dragonMapping);
     }
 
     const key = `${tile.suit}-${tile.number}`;
@@ -217,6 +251,63 @@ export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = nu
   // This ensures all CONSECUTIVE1 instances resolve to the same number across the entire hand
   const consecutiveMapping = new Map();
 
+  // Build a dragon mapping for VSUIT*_DRAGON components
+  // Maps VSUIT1_DRAGON/VSUIT2_DRAGON/VSUIT3_DRAGON to actual dragon numbers (RED/GREEN/WHITE)
+  //
+  // IMPORTANT: vsuitArray is ONLY for regular suits (CRACK/BAM/DOT), NOT for dragons!
+  // When vsuitCount < 3, vsuitArray positions can be -1 (unused), which is invalid for dragons.
+  // We must build dragonMapping independently.
+  const dragonMapping = new Map();
+
+  // First pass: Build dragon mapping from matched dragon tiles in componentInfoArray
+  rankedHand.componentInfoArray.forEach(component => {
+    const componentSuit = component.component.suit;
+
+    // Check if this component is a virtual dragon suit
+    if (componentSuit >= SUIT.VSUIT1_DRAGON && componentSuit <= SUIT.VSUIT3_DRAGON) {
+      // Find the actual dragon tile that was matched (if any)
+      if (component.tileArray && component.tileArray.length > 0) {
+        const dragonTile = component.tileArray.find(tile => tile.suit === SUIT.DRAGON);
+        if (dragonTile) {
+          // Map this virtual dragon suit to the actual dragon number that was matched
+          dragonMapping.set(componentSuit, dragonTile.number);
+        }
+      }
+    }
+  });
+
+  // Second pass: Fill in missing dragon mappings with default distinct values
+  // This ensures all VSUIT*_DRAGON components get a color even when not matched
+  const virtualDragonSuits = [];
+  rankedHand.componentInfoArray.forEach(component => {
+    const componentSuit = component.component.suit;
+    if (componentSuit >= SUIT.VSUIT1_DRAGON && componentSuit <= SUIT.VSUIT3_DRAGON) {
+      if (!virtualDragonSuits.includes(componentSuit)) {
+        virtualDragonSuits.push(componentSuit);
+      }
+    }
+  });
+
+  // Assign default dragon numbers to unmapped virtual suits
+  const usedDragons = new Set(dragonMapping.values());
+  const allDragons = [DRAGON.RED, DRAGON.GREEN, DRAGON.WHITE];
+  const availableDragons = allDragons.filter(d => !usedDragons.has(d));
+  let availableIndex = 0;
+
+  virtualDragonSuits.forEach(vsuit => {
+    if (!dragonMapping.has(vsuit)) {
+      // Assign next available dragon, or cycle through if exhausted
+      if (availableIndex < availableDragons.length) {
+        dragonMapping.set(vsuit, availableDragons[availableIndex]);
+        availableIndex++;
+      } else {
+        // Fallback: use default based on vsuit index (for visualization only)
+        const vsuitIndex = vsuit - SUIT.VSUIT1_DRAGON;
+        dragonMapping.set(vsuit, allDragons[vsuitIndex] || DRAGON.RED);
+      }
+    }
+  });
+
   rankedHand.componentInfoArray.forEach(component => {
     if (component.tileArray && component.tileArray.length > 0) {
       // Check if this component uses a consecutive number
@@ -253,10 +344,26 @@ export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = nu
 
     // If we have fewer tiles than expected, add placeholders for the rest
     if (actualTileCount < expectedCount) {
-      const placeholderTile = {
-        suit: component.component.suit || SUIT.INVALID,
-        number: component.component.number || 0
-      };
+      let placeholderTile;
+      const componentSuit = component.component.suit;
+      
+      // For VSUIT*_DRAGON components, translate to actual DRAGON suit with mapped number
+      // This allows matching against player's dragon tiles
+      if (componentSuit >= SUIT.VSUIT1_DRAGON && componentSuit <= SUIT.VSUIT3_DRAGON) {
+        const dragonNumber = dragonMapping.get(componentSuit);
+        placeholderTile = {
+          suit: SUIT.DRAGON,
+          number: dragonNumber !== undefined ? dragonNumber : 0,
+          // Store original virtual suit for color determination in getTileDisplayChar
+          _originalVsuit: componentSuit
+        };
+      } else {
+        placeholderTile = {
+          suit: componentSuit || SUIT.INVALID,
+          number: component.component.number || 0
+        };
+      }
+      
       for (let i = actualTileCount; i < expectedCount; i++) {
         patternTiles.push(placeholderTile);
         componentCounts.push(expectedCount);
@@ -276,7 +383,7 @@ export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = nu
   // Only pass actual tiles to getPatternDisplayChars
   const actualTiles = patternTiles.filter(t => !t.isSpacer);
   const actualCounts = componentCounts.filter((_, i) => !patternTiles[i].isSpacer);
-  const displayChars = getPatternDisplayChars(actualTiles, playerTiles, actualCounts, isEvenHand, rankedHand.vsuitArray, hiddenTiles, consecutiveMapping);
+  const displayChars = getPatternDisplayChars(actualTiles, playerTiles, actualCounts, isEvenHand, rankedHand.vsuitArray, hiddenTiles, consecutiveMapping, dragonMapping);
 
   // Reinsert spacers into displayChars
   const finalDisplay = [];

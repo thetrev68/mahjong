@@ -296,6 +296,11 @@ export class Card {
             return false;
         }
 
+        // Calculate effective vsuitCount by considering both regular and dragon virtual suits
+        // vsuitCount only accounts for regular VSUIT1/2/3, but VSUIT*_DRAGON components also need
+        // valid vsuitArray positions. The vsuitArray values are used as dragon numbers (0=RED, 1=GREEN, 2=WHITE).
+        const effectiveVsuitCount = this._getEffectiveVsuitCount(validHand);
+
         // Number of suits (crack,dot,bam,flower,dragon,wind,joker) must be >= number of vsuits
         if (info.suits.length < validHand.vsuitCount) {
             return false;
@@ -329,7 +334,7 @@ export class Card {
         ];
 
         let permArray = null;
-        switch (validHand.vsuitCount) {
+        switch (effectiveVsuitCount) {
         case 1:
             permArray = permVsuit1;
             break;
@@ -515,6 +520,11 @@ export class Card {
             return;
         }
 
+        // Calculate effective vsuitCount by considering both regular and dragon virtual suits
+        // vsuitCount only accounts for regular VSUIT1/2/3, but VSUIT*_DRAGON components also need
+        // valid vsuitArray positions. The vsuitArray values are used as dragon numbers (0=RED, 1=GREEN, 2=WHITE).
+        const effectiveVsuitCount = this._getEffectiveVsuitCount(validHand);
+
         // Generate permutations of VSUIT1, VSUIT2, VSUIT3
         const permVsuit0 = [[-1, -1, -1]];
 
@@ -543,7 +553,7 @@ export class Card {
         ];
 
         let permArray = null;
-        switch (validHand.vsuitCount) {
+        switch (effectiveVsuitCount) {
         case 1:
             permArray = permVsuit1;
             break;
@@ -800,6 +810,32 @@ export class Card {
         }
 
         return componentInfoArray;
+    }
+
+    // Calculate the effective vsuitCount for a hand by considering both regular virtual suits
+    // (VSUIT1/2/3) AND dragon virtual suits (VSUIT1/2/3_DRAGON).
+    // This is necessary because vsuitCount in hand definitions only accounts for regular virtual suits,
+    // but VSUIT*_DRAGON components also require valid vsuitArray positions.
+    // The vsuitArray values serve dual purposes:
+    // - For regular VSUITs: map to actual suits (CRACK=0, BAM=1, DOT=2)
+    // - For VSUIT*_DRAGONs: map to dragon numbers (RED=0, GREEN=1, WHITE=2)
+    _getEffectiveVsuitCount(validHand) {
+        let maxIndex = -1;
+        
+        for (const comp of validHand.components) {
+            if (comp.suit >= SUIT.VSUIT1_DRAGON && comp.suit <= SUIT.VSUIT3_DRAGON) {
+                // Dragon virtual suit - index is 0, 1, or 2
+                const index = comp.suit - SUIT.VSUIT1_DRAGON;
+                maxIndex = Math.max(maxIndex, index);
+            } else if (comp.suit >= SUIT.VSUIT1 && comp.suit <= SUIT.VSUIT3) {
+                // Regular virtual suit - index is 0, 1, or 2
+                const index = comp.suit - SUIT.VSUIT1;
+                maxIndex = Math.max(maxIndex, index);
+            }
+        }
+        
+        // Return effective count (1, 2, or 3 based on max index, or 0 if no virtual suits)
+        return maxIndex >= 0 ? maxIndex + 1 : 0;
     }
 
     sortHandRankArray(rankCardHands) {
