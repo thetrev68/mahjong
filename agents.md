@@ -53,9 +53,9 @@ Mobile Stack
 - Keeps full breakdowns: required tiles, exposures, joker placement, and risk scoring.
 
 ### Tile Ranking & Discard Selection
-- Produces per-tile deltas: “keep”, “pass”, or “discard” (see `TILE_RECOMMENDATION` constants).
-- Integrates **opponent safety** (don’t feed recent exposures), **wall depth** (probabilities shrink later), and **training mode** overrides.
-- Injects controlled randomness based on difficulty for more “human” play.
+- Produces per-tile deltas: "keep", "pass", or "discard" (see `TILE_RECOMMENDATION` constants).
+- Integrates **opponent safety** (don't feed recent exposures), **wall depth** (probabilities shrink later), and **training mode** overrides.
+- Injects controlled randomness based on difficulty for more "human" play.
 
 ### Charleston & Courtesy Strategy
 - Phase-specific heuristics:
@@ -82,7 +82,7 @@ Mobile Stack
 - `PhaserAdapter` bridges controller events into managers:
   - **TileManager** registers sprites, handles drag/drop, and animations.
   - **SelectionManager** enforces prompts (`min/max` selection) for Charleston, courtesy, exposures, discards.
-  - **DialogManager** renders modal prompts (e.g., “Claim discards?”).
+  - **DialogManager` renders modal prompts (e.g., "Claim discards?").
   - **HandRenderer/ButtonManager** sync UI state with controller states.
 - Desktop exposes `window.gameController` for debugging/tests; Playwright asserts controller state changes and event emissions.
 
@@ -113,11 +113,87 @@ Mobile Stack
 
 ## 7. Roadmap / Future Enhancements
 
-1. **Machine Learning Assist:** Plug-in scoring functions or reinforcement-learning policies by wrapping `AIEngine`’s selection methods.
+1. **Machine Learning Assist:** Plug-in scoring functions or reinforcement-learning policies by wrapping `AIEngine`'s selection methods.
 2. **Monte Carlo Rollouts:** Simulate future draws before deciding on a discard or claim.
-3. **Opponent Modeling:** Track opponents’ exposures and discards to feed into risk heuristics.
-4. **Cross-Platform Consistency Tests:** “Same seed, same outcome” regression suite tying desktop and mobile runs together.
+3. **Opponent Modeling:** Track opponents' exposures and discards to feed into risk heuristics.
+4. **Cross-Platform Consistency Tests:** "Same seed, same outcome" regression suite tying desktop and mobile runs together.
 5. **Telemetry Hooks:** Stream `STATE_CHANGED`, `MESSAGE`, and AI confidence metrics for analytics dashboards or live spectators.
 
+## 8. Debugging & Development Tips for LLMs
+
+### Key Entry Points for Debugging
+- **GameController**: Start with `core/GameController.js` - this is the central hub for game state and AI integration
+- **AIEngine**: `core/AIEngine.js` contains all AI decision-making logic
+- **Event System**: `core/events/` directory contains event definitions and emitter
+
+### Common Debugging Scenarios
+
+#### AI Not Making Expected Moves
+1. Check `AIEngine.chooseDiscard()` and related methods
+2. Examine difficulty configuration in `AIEngine.getDifficultyConfig()`
+3. Verify tile rankings and pattern evaluation logic
+
+#### State Transition Issues
+1. Review the state machine in `GameController`
+2. Check event emissions and subscriptions
+3. Verify adapter implementations handle all required events
+
+#### Cross-Platform Inconsistencies
+1. Compare event handling between `PhaserAdapter` and `MobileRenderer`
+2. Ensure both platforms subscribe to the same events
+3. Verify data model consistency across platforms
+
+### Adding New Features
+
+#### New AI Strategies
+1. Extend `AIEngine` with new methods while maintaining existing interface
+2. Add new difficulty configurations in `getDifficultyConfig()`
+3. Update pattern evaluation and tile ranking logic as needed
+
+#### New Game Modes
+1. Add new state transitions in `GameController`
+2. Create corresponding event types in `core/events/GameEvents.js`
+3. Implement platform-specific rendering in both adapters
+
+#### New Card Years
+1. Create new card definition files in `core/card/<year>/`
+2. Implement year-specific pattern validation
+3. Update `Card` class to support the new year
+
+### Testing New Features
+- **Unit Tests**: Add tests for core logic in the appropriate test files
+- **E2E Tests**: Create Playwright tests in `tests/e2e/` directories
+- **Manual Testing**: Use `window.gameController` for debugging in desktop mode
+
+## 9. File Structure Reference
+
+```
+core/
+├── AIEngine.js              # Main AI logic
+├── GameController.js        # Central game state management
+├── tileDefinitions.js       # Tile definitions
+├── card/                    # Card validation and patterns
+│   ├── card.js              # Base card class
+│   ├── CardHand.js          # Hand management
+│   └── <year>/              # Year-specific implementations
+├── events/                  # Event system
+│   ├── EventEmitter.js      # Event emitter
+│   └── GameEvents.js        # Event definitions
+└── models/                  # Data models
+    ├── HandData.js
+    ├── PlayerData.js
+    └── TileData.js
+
+desktop/
+├── adapters/
+│   └── PhaserAdapter.js     # Desktop platform adapter
+└── ...                      # Desktop-specific components
+
+mobile/
+├── MobileRenderer.js        # Mobile platform renderer
+└── ...                      # Mobile-specific components
+```
+
 ---
-**Key Takeaway:** After the refactors, AI agents live inside a platform-neutral controller that exposes deterministic events. Adapters render state, while AI logic stays shared across desktop and mobile, ensuring consistent strategy and easier future enhancements.
+
+**Key Takeaway:** After the refactors, AI agents live inside a platform-neutral controller that exposes deterministic events. Adapters render state, while AI logic stays shared across desktop and mobile, ensuring consistent strategy and easier future enhancements. This architecture provides clear separation of concerns and well-defined extension points for adding new features.
