@@ -78,6 +78,19 @@
     align-items: center;
 }
 
+/* Compact mode for when there are many tiles (prevents pushing discard pile off screen) */
+.exposures.compact {
+    gap: 1px;
+    max-width: 100%;
+}
+
+.exposures.compact .exposure-icon {
+    width: 24px;
+    height: 32px;
+    font-size: 10px;
+    padding: 1px;
+}
+
 /* Apply suit colors to opponent tiles */
 .exposure-icon {
     color: #ff0000;
@@ -122,6 +135,13 @@
 }
 
 @keyframes pulse-warning {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
 }

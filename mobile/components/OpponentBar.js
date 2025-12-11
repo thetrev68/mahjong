@@ -126,7 +126,24 @@ export class OpponentBar {
         exposuresContainer.innerHTML = "";
 
         if (!exposures || exposures.length === 0) {
-            return; // No exposures to display
+            // Remove compact class if empty
+            exposuresContainer.classList.remove("compact");
+            return;
+        }
+
+        // Calculate total tile count to decide on compaction
+        let totalTiles = 0;
+        exposures.forEach(exposure => {
+            if (Array.isArray(exposure.tiles)) {
+                totalTiles += exposure.tiles.length;
+            }
+        });
+
+        // If more than 4 tiles (wrapping expected), use compact mode
+        if (totalTiles > 4) {
+            exposuresContainer.classList.add("compact");
+        } else {
+            exposuresContainer.classList.remove("compact");
         }
 
         exposures.forEach(exposure => {
