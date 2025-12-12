@@ -110,6 +110,7 @@ export class PhaserAdapter {
         gc.on("TILES_DEALT", (data) => this.onTilesDealt(data));
         gc.on("TILE_DRAWN", (data) => this.onTileDrawn(data));
         gc.on("TILE_DISCARDED", (data) => this.onTileDiscarded(data));
+        gc.on("TILES_RECEIVED", (data) => this.onTilesReceived(data));
         gc.on("BLANK_EXCHANGED", (data) => this.onBlankExchanged(data));
         gc.on("DISCARD_CLAIMED", (data) => this.onDiscardClaimed(data));
         gc.on("TILES_EXPOSED", (data) => this.onTilesExposed(data));
@@ -555,6 +556,43 @@ export class PhaserAdapter {
     }
 
     /**
+     * Handle tiles received (Charleston, Courtesy passes)
+     * Applies blue glow to newly received tiles for human player
+     */
+    onTilesReceived(data) {
+        const {player: playerIndex, tiles: tilesData} = data;
+
+        // Only apply glow for human player
+        if (playerIndex !== PLAYER.BOTTOM) {
+            return;
+        }
+
+        // Convert tile data array to Phaser tiles and apply glow to all received tiles
+        const receivedTiles = tilesData
+            .map(td => TileData.fromJSON(td))
+            .map(tileData => this.tileManager.getOrCreateTile(tileData))
+            .filter(Boolean);
+
+        // Clear previous glow
+        if (this.activeHumanGlowTile) {
+            this.activeHumanGlowTile.removeGlowEffect();
+            this.activeHumanGlowTile = null;
+        }
+
+        // Apply glow to all received tiles (priority 10 for blue new-tile glow)
+        receivedTiles.forEach(tile => {
+            if (typeof tile.addGlowEffect === "function") {
+                tile.addGlowEffect(this.scene, 0x1e3a8a, 0.5, 10);
+            }
+        });
+
+        // Track the last received tile for cleanup
+        if (receivedTiles.length > 0) {
+            this.activeHumanGlowTile = receivedTiles[receivedTiles.length - 1];
+        }
+    }
+
+    /**
      * Handle tile discarded
      */
     onTileDiscarded(data) {
@@ -633,6 +671,9 @@ export class PhaserAdapter {
             this.table.discards.removeDiscardTile(retrievedPhaserTile);
             retrievedPhaserTile.sprite.visible = false;
             retrievedPhaserTile.spriteBack.visible = false;
+
+            // Apply blue glow to the retrieved tile (now in human player's hand)
+            this.setPendingHumanGlowTile(retrievedPhaserTile);
         }
 
         if (blankPhaserTile) {
@@ -645,6 +686,9 @@ export class PhaserAdapter {
 
         this.table.discards.layoutTiles();
         this.blankSwapManager?.handleBlankExchangeEvent();
+
+        // Apply glow after hand update completes
+        this.scene.time.delayedCall(100, () => this.applyHumanDrawGlow());
     }
 
     /**
@@ -664,6 +708,14 @@ export class PhaserAdapter {
             this.table.discards.removeDiscardTile(claimedTile);
             this.table.discards.layoutTiles();
         }
+
+        // Apply blue glow to claimed tile for human player
+        if (claimingPlayer === PLAYER.BOTTOM && claimedTile) {
+            this.setPendingHumanGlowTile(claimedTile);
+            // Apply glow immediately since tile is already in hand
+            this.applyHumanDrawGlow();
+        }
+
         const playerName = this.getPlayerName(claimingPlayer);
         printMessage(`${playerName} claimed ${tileDataObj.getText()} for ${claimType}`);
     }
@@ -699,11 +751,10 @@ export class PhaserAdapter {
      * so this handler is minimal - just for logging
      */
     onJokerSwapped(data) {
-        const {player, replacementTile} = data;
+        const {player, replacementTile, recipient} = data;
 
         // GameController has already updated HandData and emitted HAND_UPDATED events
         // HandRenderer.syncAndRender() will handle the visual update
-        // Just log the message for user feedback
 
         const ownerName = this.getPlayerName(player);
         const replacementData = replacementTile instanceof TileData
@@ -712,6 +763,16 @@ export class PhaserAdapter {
 
         if (replacementData) {
             printInfo(`${ownerName} swapped a joker for ${replacementData.getText()}`);
+        }
+
+        // Apply blue glow to the joker tile received by human player
+        if (recipient === PLAYER.BOTTOM && replacementData) {
+            const jokerTile = this.tileManager.getOrCreateTile(replacementData);
+            if (jokerTile) {
+                this.setPendingHumanGlowTile(jokerTile);
+                // Apply glow after hand update completes
+                this.scene.time.delayedCall(100, () => this.applyHumanDrawGlow());
+            }
         }
     }
 
