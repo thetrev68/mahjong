@@ -273,7 +273,7 @@ async function initializeGame() {
     });
 
     // Clear status - board will be blank pre-game (until tile animation is added)
-    mobileRenderer?.updateStatus("");
+    mobileRenderer?.updateStatus("Ready");
 
     // Expose to window for testing
     if (window.location.search.includes("playwright=true")) {

@@ -6,6 +6,20 @@
     z-index: 100;
 }
 
+.game-status {
+    text-align: center;
+    color: #ffd166;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 2px 8px;
+    background: rgba(0, 0, 0, 0.2);
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
 /* Game center section */
 .game-center {
     flex: 1;
@@ -17,7 +31,8 @@
     overflow-y: auto;
     overflow-x: hidden;
     position: relative;
-    min-height: 0; /* Allow flex child to shrink below content size */
+    min-height: 0;
+    /* Allow flex child to shrink below content size */
 }
 
 
@@ -41,9 +56,11 @@
     display: flex;
     flex-direction: column;
     margin-top: 4px;
-    margin-bottom: calc(68px + env(safe-area-inset-bottom, 0px)); /* Space above bottom menu + safe area */
+    margin-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+    /* Space above bottom menu + safe area */
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.35);
-    max-height: 40vh; /* Limit hint panel to 40% of viewport height */
+    max-height: 40vh;
+    /* Limit hint panel to 40% of viewport height */
 }
 
 .hints-toggle {
@@ -68,10 +85,12 @@
 
 .hints-content {
     padding: 6px 8px 8px;
-    overflow-y: auto; /* Allow scrolling within hints if content is too tall */
+    overflow-y: auto;
+    /* Allow scrolling within hints if content is too tall */
     overflow-x: hidden;
     flex: 1;
-    min-height: 0; /* Allow flex child to shrink and scroll */
+    min-height: 0;
+    /* Allow flex child to shrink and scroll */
 }
 
 .hint-item {
@@ -128,9 +147,12 @@
 }
 
 @keyframes skeleton-pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 0.5;
     }
+
     50% {
         opacity: 0.3;
     }
@@ -182,7 +204,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 44px; /* Apple's recommended minimum touch target */
+    min-height: 44px;
+    /* Apple's recommended minimum touch target */
 }
 
 .menu-btn:active {
@@ -210,10 +233,13 @@
 }
 
 @keyframes pulse-mahjong {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 10px rgba(255, 215, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
         transform: scale(1);
     }
+
     50% {
         box-shadow: 0 0 35px rgba(255, 215, 0, 1), 0 0 20px rgba(255, 215, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.7);
         transform: scale(1.05);
@@ -227,11 +253,14 @@
 }
 
 @keyframes pulse-button-blue {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 20px rgba(37, 99, 235, 1), 0 0 10px rgba(37, 99, 235, 0.8), inset 0 0 10px rgba(37, 99, 235, 0.8);
         border-color: #2563eb;
         transform: scale(1);
     }
+
     50% {
         box-shadow: 0 0 35px rgba(37, 99, 235, 1), 0 0 20px rgba(37, 99, 235, 1), inset 0 0 15px rgba(37, 99, 235, 1);
         border-color: #1d4ed8;
@@ -339,7 +368,8 @@
     min-height: calc((34px * 2) + 3px + 12px);
     scroll-snap-type: x proximity;
     -webkit-overflow-scrolling: touch;
-    flex-shrink: 0; /* Prevent flexbox from squashing the pile */
+    flex-shrink: 0;
+    /* Prevent flexbox from squashing the pile */
 }
 
 /* Snap the last tile into view */
@@ -391,9 +421,11 @@
     0% {
         box-shadow: 0 0 8px rgba(96, 165, 250, 0.8);
     }
+
     50% {
         box-shadow: 0 0 16px rgba(96, 165, 250, 1);
     }
+
     100% {
         box-shadow: 0 0 8px rgba(96, 165, 250, 0.8);
     }

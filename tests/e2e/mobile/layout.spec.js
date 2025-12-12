@@ -15,9 +15,21 @@ test.describe("Mobile Layout & CSS", () => {
         expect(hasBackground).toBe(true);
 
         // Verify all containers exist
+        // Wall counter should be visible
         await expect(page.locator("#wall-counter")).toBeVisible();
-        await expect(page.locator("#hints-panel")).toBeVisible();
+
+        // Hints panel and player rack are hidden on home screen (class .hide-on-home)
+        await expect(page.locator("#hints-panel")).toBeHidden();
+        await expect(page.locator("#player-rack-container")).toBeHidden();
+
         await expect(page.locator(".bottom-menu")).toBeVisible();
+
+        // Start game to verify game layout
+        await MobileTestHelpers.startNewGame(page, true);
+
+        // Now hints panel and rack should be visible
+        await expect(page.locator("#hints-panel")).toBeVisible();
+        await expect(page.locator("#player-rack-container")).toBeVisible();
 
         // Take snapshot for visual comparison
         await MobileTestHelpers.takeSnapshot(page, "layout-complete");
