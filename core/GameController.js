@@ -563,8 +563,8 @@ export class GameController extends EventEmitter {
         const yesVotes = allVotes.filter(v => v).length;
         const noVotes = allVotes.filter(v => !v).length;
 
-        // Show vote results to all players
-        const continueToPhase2 = yesVotes === 4; // Must be unanimous
+        // TEMPORARY: Force continuation for testing Charleston Phase 2 glow bug
+        const continueToPhase2 = true; // Must be unanimous (normally: yesVotes === 4)
 
         if (continueToPhase2) {
             const msgEvent = GameEvents.createMessageEvent(
