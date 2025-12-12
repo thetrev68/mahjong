@@ -952,7 +952,7 @@ export class MobileRenderer {
      * Handle tiles exposed event
      * When exposures change, joker availability might change
      */
-    onTilesExposed() {
+    onTilesExposed(data) {
         // Refresh opponent bars to show updated exposures
         this.refreshOpponentBars();
 
@@ -962,6 +962,24 @@ export class MobileRenderer {
         this.updateBlankSwapButton();
         // Update mahjong button visibility as hand may have changed
         this.updateMahjongButton();
+
+        // Apply blue glow to exposed tiles for human player
+        if (data?.player === HUMAN_PLAYER && data?.tiles && this.playerRack && this.animationController) {
+            // Find the newly created exposure in the player rack
+            // The tiles will be in the exposure display, not the hand
+            const exposedTileIndices = data.tiles.map(t => t.index).filter(idx => typeof idx === "number");
+
+            // Apply glow to exposed tiles in the player rack
+            setTimeout(() => {
+                const exposureTiles = this.playerRack.container.querySelectorAll(".exposure-tile");
+                exposureTiles.forEach(tileElement => {
+                    const tileIndex = parseInt(tileElement.dataset.tileIndex);
+                    if (exposedTileIndices.includes(tileIndex)) {
+                        this.animationController.applyReceivedTileGlow(tileElement);
+                    }
+                });
+            }, 100);
+        }
     }
 
     /**
