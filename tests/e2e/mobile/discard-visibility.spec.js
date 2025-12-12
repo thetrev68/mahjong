@@ -39,22 +39,10 @@ test.describe("Mobile Discard Visibility", () => {
 
         // Inject many exposures into an opponent
         await page.evaluate(() => {
-            const opponentBar = mobileRenderer.opponentBars[0].bar;
-            // Mock exposures: 5 pungs (15 tiles) -> should trigger compact
-            const mockExposures = [
-                { type: "PUNG", tiles: [{ suit: "BAM", number: 1 }, { suit: "BAM", number: 1 }, { suit: "BAM", number: 1 }] }, // 3
-                { type: "PUNG", tiles: [{ suit: "BAM", number: 2 }, { suit: "BAM", number: 2 }, { suit: "BAM", number: 2 }] }, // 6
-                // This alone is > 4, so should compact
-            ];
+            // Access the global mobileRenderer instance
+            const opponentBar = window.mobileRenderer.opponentBars[0].bar;
 
-            // We need to create TileData objects or mocks that match what OpponentBar expects
-            // OpponentBar usage: exposure.tiles.forEach(tile => tile.getText())
-            // Implementation uses MobileTile.createExposedTile(tile)
-
-            // Let's use the actual GameController/Player structure if possible, 
-            // or just call updateExposures directly on the component instance if reachable.
-
-            // Since we can access mobileRenderer global (exposed in main.js for testing), let's use it
+            // Create mock tiles with getText method
             const mockTiles = Array(5).fill(0).map(() => ({
                 suit: "BAM", number: 1, getText: () => "1 Bam"
             }));

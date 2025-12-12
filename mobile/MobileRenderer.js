@@ -844,14 +844,18 @@ export class MobileRenderer {
         const handTiles = this.handRenderer.currentHandData.tiles;
         const indices = [];
 
-        // Match received tiles to hand tiles
-        // This assumes tiles are added to the end of the hand
-        const startIndex = handTiles.length - receivedTiles.length;
+        // Build set of received tile IDs for O(1) lookup
+        const receivedTileIds = new Set(
+            receivedTiles
+                .map(t => t.index)
+                .filter(idx => typeof idx === "number" && !isNaN(idx))
+        );
 
-        for (let i = 0; i < receivedTiles.length; i++) {
-            const index = startIndex + i;
-            if (index >= 0 && index < handTiles.length) {
-                indices.push(index);
+        // Find positions in hand that match the received tile IDs
+        for (let i = 0; i < handTiles.length; i++) {
+            const handTile = handTiles[i];
+            if (handTile?.index !== undefined && receivedTileIds.has(handTile.index)) {
+                indices.push(i);
             }
         }
 

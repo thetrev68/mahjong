@@ -87,7 +87,17 @@ export class CharlestonAnimationSequencer extends AnimationSequencer {
         }
 
         const direction = data.animation?.direction || data.direction;
-        this.receivedTileIndices = new Set(receivedIndices);
+
+        // Convert positions to tile IDs (0-151) so they persist across sorting
+        const currentHand = this.handRenderer.currentHandData;
+        if (currentHand && currentHand.tiles) {
+            const tileIds = receivedIndices
+                .map(pos => currentHand.tiles[pos]?.index)
+                .filter(idx => typeof idx === "number");
+            this.receivedTileIndices = new Set(tileIds);
+        } else {
+            this.receivedTileIndices = new Set(receivedIndices);
+        }
 
         await this.executeSequence([
             // Step 3: Animate tiles arriving
@@ -220,8 +230,18 @@ export class CharlestonAnimationSequencer extends AnimationSequencer {
         // Sort the hand data
         handData.sortBySuit();
 
+        // Convert tile IDs (0-151) to positions in sorted hand
+        const sortedTiles = handData.tiles;
+        const glowPositions = [];
+        this.receivedTileIndices.forEach(tileId => {
+            const position = sortedTiles.findIndex(t => t?.index === tileId);
+            if (position >= 0) {
+                glowPositions.push(position);
+            }
+        });
+
         // Re-render with glow on received tiles (LAST)
-        this.handRenderer.renderWithGlow(handData, this.receivedTileIndices);
+        this.handRenderer.renderWithGlow(handData, glowPositions);
         // Reapply hint highlights after rerender (Charleston refresh clears DOM)
         if (typeof this.refreshHints === "function") {
             this.refreshHints();

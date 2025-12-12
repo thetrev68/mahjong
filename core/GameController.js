@@ -488,7 +488,7 @@ export class GameController extends EventEmitter {
                     playerIndex,
                     toPlayer,
                     directionName,
-                    tilesToPass.map(t => ({suit: t.suit, number: t.number})),
+                    tilesToPass.map(t => ({suit: t.suit, number: t.number, index: t.index})),
                     {
                         type: "charleston-pass",
                         direction: directionName,
@@ -515,7 +515,8 @@ export class GameController extends EventEmitter {
                 // Emit tiles received event (for animation coordination)
                 const receivedTiles = charlestonPassArray[fromPlayer].map(t => ({
                     suit: t.suit,
-                    number: t.number
+                    number: t.number,
+                    index: t.index
                 }));
                 const tilesReceivedEvent = GameEvents.createTilesReceivedEvent(
                     toPlayer,
@@ -678,7 +679,7 @@ export class GameController extends EventEmitter {
                     const passEvent = GameEvents.createCourtesyPassEvent(
                         i,
                         oppositePlayer,
-                        selectedTiles.map(t => ({suit: t.suit, number: t.number})),
+                        selectedTiles.map(t => ({suit: t.suit, number: t.number, index: t.index})),
                         {duration: 500}
                     );
                     this.emit("COURTESY_PASS", passEvent);
@@ -695,7 +696,7 @@ export class GameController extends EventEmitter {
                         // Emit rich tiles received event
                         const receivedEvent = GameEvents.createTilesReceivedEvent(
                             i,
-                            receivedTiles.map(t => ({suit: t.suit, number: t.number})),
+                            receivedTiles.map(t => ({suit: t.suit, number: t.number, index: t.index})),
                             oppositePlayer,
                             {duration: 500}
                         );

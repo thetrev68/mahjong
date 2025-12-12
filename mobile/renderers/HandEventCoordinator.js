@@ -143,10 +143,16 @@ export class HandEventCoordinator {
 
       // Apply glow to newly received tiles after rendering
       if (newlyReceivedTiles.length > 0 && this.handRenderer && this.mobileRenderer?.animationController) {
+        // newlyReceivedTiles contains tile.index values (0-151), need to find positions in hand
+        const handTiles = handData.tiles;
         newlyReceivedTiles.forEach(tileIndex => {
-          const tileElement = this.handRenderer.getTileElementByIndex(tileIndex);
-          if (tileElement) {
-            this.mobileRenderer.animationController.applyReceivedTileGlow(tileElement);
+          // Find position in hand that has this tile index
+          const position = handTiles.findIndex(t => t?.index === tileIndex);
+          if (position >= 0) {
+            const tileElement = this.handRenderer.getTileElementByIndex(position);
+            if (tileElement) {
+              this.mobileRenderer.animationController.applyReceivedTileGlow(tileElement);
+            }
           }
         });
       }
