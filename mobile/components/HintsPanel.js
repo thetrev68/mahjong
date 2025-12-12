@@ -137,7 +137,6 @@ export class HintsPanel {
             return;
         }
 
-        console.log("HintsPanel.showSkeletonHints: Rendering skeleton HTML");
         // Create 3 skeleton pattern blocks with empty content
         // This reserves the vertical space so hand doesn't jump
         let html = "<div class=\"hint-item\">";
@@ -155,7 +154,6 @@ export class HintsPanel {
         html += "</div>";
 
         this.contentEl.innerHTML = html;
-        console.log("HintsPanel.showSkeletonHints: Skeleton HTML set");
     }
 
     /**
@@ -168,14 +166,11 @@ export class HintsPanel {
             return;
         }
 
-        console.log("HintsPanel.computeAndRenderHints: Starting computation");
         try {
             // Rank the hand to get top patterns
             const rankCardHands = this.aiEngine.card.rankHandArray14(handData);
-            // console.log("HintsPanel: rankCardHands:", rankCardHands);
 
             if (!rankCardHands || rankCardHands.length === 0) {
-                console.log("HintsPanel: No patterns available");
                 this.contentEl.innerHTML = `
                     <div class="hint-item">
                         <span class="hint-label">No patterns available</span>
@@ -187,13 +182,11 @@ export class HintsPanel {
             // Get top 3 patterns sorted by rank
             const sortedPatterns = [...rankCardHands].sort((a, b) => b.rank - a.rank);
             const top3Patterns = sortedPatterns.slice(0, 3);
-            console.log("HintsPanel: top3Patterns:", top3Patterns);
 
             // Get AI recommendations to determine which patterns are actually being considered
             // Pass minDiscardableOverride=1 for hints during normal play (only need 1 tile to discard)
             const recommendationResult = this.aiEngine.getTileRecommendations(handData, 1);
             const consideredPatternCount = recommendationResult.consideredPatternCount;
-            console.log("HintsPanel: consideredPatternCount:", consideredPatternCount);
 
             const discardRecommendations = recommendationResult.recommendations
                 .filter((r) => r.recommendation === "DISCARD" && r.tile)
@@ -366,20 +359,17 @@ export class HintsPanel {
             return;
         }
 
-        console.log("HintsPanel.expand: EXPANDING PANEL");
         this.isExpanded = true;
         this.contentEl.style.display = "block";
         this.toggleBtn.setAttribute("aria-expanded", "true");
 
         if (this.latestHandData) {
-            console.log("HintsPanel.expand: Showing skeleton...");
             // Show skeleton immediately when expanding
             this.showSkeletonHints();
 
             // Compute and render actual hints asynchronously with delay
             // (computeAndRenderHints already handles discard recommendations)
             setTimeout(() => {
-                console.log("HintsPanel.expand: Computing real hints...");
                 this.computeAndRenderHints(this.latestHandData);
             }, 500); // 500ms delay to show skeleton before computing
         }

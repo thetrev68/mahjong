@@ -114,7 +114,25 @@ export class HandEventCoordinator {
       }
 
       // Detect newly received tiles (Charleston/Courtesy)
-      const newlyReceivedTiles = this._findNewlyReceivedTiles(this.previousHandSnapshot, handData);
+      // CRITICAL FIX: Only compare when hand size is stable (both 13 or both 14)
+      // This prevents false matches when tiles are in transition
+      const bothHandsSameSize = this.previousHandSnapshot &&
+                                 handData.tiles.length === this.previousHandSnapshot.tiles.length;
+      const newlyReceivedTiles = bothHandsSameSize
+        ? this._findNewlyReceivedTiles(this.previousHandSnapshot, handData)
+        : [];
+
+      // Debug logging for Charleston glow issue
+      if (newlyReceivedTiles.length > 0 || (this.previousHandSnapshot && Math.abs(handData.tiles.length - this.previousHandSnapshot.tiles.length) === 3)) {
+        console.log('[HandEventCoordinator] HAND_UPDATED:', {
+          currentTileCount: handData.tiles.length,
+          previousTileCount: this.previousHandSnapshot?.tiles.length || 0,
+          newlyReceivedCount: newlyReceivedTiles.length,
+          newlyReceived: newlyReceivedTiles,
+          bothSameSize: bothHandsSameSize
+        });
+        console.trace('[HandEventCoordinator] Stack trace for HAND_UPDATED');
+      }
 
       // Reset sort mode when hand updated from game (not user sort)
       if (this.handRenderer) {
@@ -123,8 +141,10 @@ export class HandEventCoordinator {
 
       // Render the hand
       if (this.handRenderer) {
+        console.log('[HandEventCoordinator] BEFORE render:', handData.tiles.length, 'tiles');
         this.handRenderer.render(handData);
-        
+        console.log('[HandEventCoordinator] AFTER render');
+
         // Reapply any active hint highlights after rerender
         this.applyHintRecommendations();
       }
@@ -143,8 +163,10 @@ export class HandEventCoordinator {
 
       // Apply glow to newly received tiles after rendering
       if (newlyReceivedTiles.length > 0 && this.handRenderer && this.mobileRenderer?.animationController) {
+        console.log('[HandEventCoordinator] BEFORE applying glow, checking tile elements exist...');
         // newlyReceivedTiles contains tile.index values (0-151), need to find positions in hand
         const handTiles = handData.tiles;
+        let glowAppliedCount = 0;
         newlyReceivedTiles.forEach(tileIndex => {
           // Find position in hand that has this tile index
           const position = handTiles.findIndex(t => t?.index === tileIndex);
@@ -152,16 +174,54 @@ export class HandEventCoordinator {
             const tileElement = this.handRenderer.getTileElementByIndex(position);
             if (tileElement) {
               this.mobileRenderer.animationController.applyReceivedTileGlow(tileElement);
+              glowAppliedCount++;
+              const hasGlowClass = tileElement.classList.contains('tile--newly-drawn');
+              console.log(`[HandEventCoordinator] Applied glow to tile at position ${position}, index ${tileIndex}, hasGlowClass: ${hasGlowClass}`);
+            } else {
+              console.warn(`[HandEventCoordinator] Could not find tile element at position ${position} for index ${tileIndex}`);
             }
+          } else {
+            console.warn(`[HandEventCoordinator] Could not find tile index ${tileIndex} in hand`);
           }
         });
+        console.log(`[HandEventCoordinator] AFTER applying glow: ${glowAppliedCount}/${newlyReceivedTiles.length} tiles have glow`);
       }
 
       // Store current hand as previous for next comparison
-      this.previousHandSnapshot = handData.clone();
+      // KEY INSIGHT: Update snapshot when:
+      // 1. First snapshot (no previous)
+      // 2. Hand size increased (receiving initial tiles)
+      // 3. Newly received tiles detected (Charleston/Courtesy exchange)
+      const handSizeIncreased = this.previousHandSnapshot &&
+                                 handData.tiles.length > this.previousHandSnapshot.tiles.length;
+      const isFirstSnapshot = !this.previousHandSnapshot;
+      const tilesWereReceived = newlyReceivedTiles.length > 0;
+      const shouldUpdateSnapshot = isFirstSnapshot || handSizeIncreased || tilesWereReceived;
+
+      // Debug logging for snapshot updates
+      if (!shouldUpdateSnapshot && this.previousHandSnapshot) {
+        console.log('[HandEventCoordinator] Skipping snapshot update:', {
+          from: this.previousHandSnapshot?.tiles.length,
+          to: handData.tiles.length,
+          reason: handData.tiles.length < this.previousHandSnapshot.tiles.length ? 'decreased' : 'same size, no new tiles'
+        });
+      }
+
+      if (shouldUpdateSnapshot) {
+        console.log('[HandEventCoordinator] Updating snapshot:', {
+          from: this.previousHandSnapshot?.tiles.length || 0,
+          to: handData.tiles.length,
+          reason: isFirstSnapshot ? 'first' : (tilesWereReceived ? `received ${newlyReceivedTiles.length} tiles` : 'size increased')
+        });
+        this.previousHandSnapshot = handData.clone();
+        if (this.mobileRenderer) {
+          this.mobileRenderer.previousHandSnapshot = handData.clone();
+        }
+      }
+
+      // Always update latestHandSnapshot regardless
       if (this.mobileRenderer) {
         this.mobileRenderer.latestHandSnapshot = handData;
-        this.mobileRenderer.previousHandSnapshot = handData.clone();
       }
 
       // If we just drew a tile (hand size increased to 14), animate it
@@ -343,7 +403,18 @@ export class HandEventCoordinator {
       .filter(idx => typeof idx === "number" && !isNaN(idx));
 
     // Find tiles in current hand that weren't in previous hand
-    return currentIndices.filter(idx => !prevIndices.has(idx));
+    const newIndices = currentIndices.filter(idx => !prevIndices.has(idx));
+
+    // Debug logging
+    if (newIndices.length > 0 && newIndices.length < 3) {
+      console.log('[HandEventCoordinator] _findNewlyReceivedTiles detected partial match:', {
+        prevIndices: Array.from(prevIndices).sort((a, b) => a - b),
+        currentIndices: currentIndices.sort((a, b) => a - b),
+        newIndices: newIndices
+      });
+    }
+
+    return newIndices;
   }
 
   destroy() {

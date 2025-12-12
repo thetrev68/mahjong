@@ -88,14 +88,24 @@ export class CharlestonAnimationSequencer extends AnimationSequencer {
 
         const direction = data.animation?.direction || data.direction;
 
+        console.log('[CharlestonAnimationSequencer] handleTilesReceived:', {
+            receivedIndices,
+            currentHandData: this.handRenderer.currentHandData?.tiles?.length
+        });
+
         // Convert positions to tile IDs (0-151) so they persist across sorting
         const currentHand = this.handRenderer.currentHandData;
         if (currentHand && currentHand.tiles) {
             const tileIds = receivedIndices
                 .map(pos => currentHand.tiles[pos]?.index)
                 .filter(idx => typeof idx === "number");
+            console.log('[CharlestonAnimationSequencer] Converted positions to tile IDs:', {
+                receivedIndices,
+                tileIds
+            });
             this.receivedTileIndices = new Set(tileIds);
         } else {
+            console.log('[CharlestonAnimationSequencer] No currentHandData, using receivedIndices directly');
             this.receivedTileIndices = new Set(receivedIndices);
         }
 
@@ -241,6 +251,7 @@ export class CharlestonAnimationSequencer extends AnimationSequencer {
         });
 
         // Re-render with glow on received tiles (LAST)
+        console.log(`[CharlestonAnimationSequencer] animateSortWithGlow: receivedTileIndices=${Array.from(this.receivedTileIndices).join(',')}, glowPositions=${glowPositions.join(',')}`);
         this.handRenderer.renderWithGlow(handData, glowPositions);
         // Reapply hint highlights after rerender (Charleston refresh clears DOM)
         if (typeof this.refreshHints === "function") {

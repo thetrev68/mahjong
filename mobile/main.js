@@ -168,7 +168,6 @@ async function initializeGame() {
     const hintsPanelContainer = document.getElementById("hints-panel");
     if (hintsPanelContainer) {
         _hintsPanel = new HintsPanel(hintsPanelContainer, gameController, aiEngine);
-        console.log("HintsPanel initialized");
     }
 
     // Track games played for install prompt

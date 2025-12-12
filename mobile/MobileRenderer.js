@@ -811,6 +811,12 @@ export class MobileRenderer {
             return;
         }
 
+        // TEMPORARY FIX: Disable Charleston animation sequencer
+        // HandEventCoordinator already handles the glow correctly via HAND_UPDATED event
+        // The animation sequencer was interfering by clearing tiles after glow was applied
+        console.log('[MobileRenderer] onTilesReceived: Skipping Charleston animation (HandEventCoordinator handles glow)');
+        return;
+
         // Defensive guard: ensure required data and components are available
         if (!data?.tiles || !this.charlestonSequencer) {
             console.warn("MobileRenderer: Missing required data for tiles received animation");
