@@ -2,7 +2,7 @@
 
 import { test, expect } from "@playwright/test";
 
-const MOBILE_APP_PATH = process.env.PLAYWRIGHT_MOBILE_PATH || "/mahjong/mobile/?playwright=true";
+const MOBILE_APP_PATH = process.env.PLAYWRIGHT_MOBILE_PATH || "/mobile/?playwright=true";
 
 /**
  * Helper: Wait for mobile app to be ready

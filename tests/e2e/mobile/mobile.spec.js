@@ -2,7 +2,7 @@
 
 import { test, expect } from "@playwright/test";
 
-const MOBILE_APP_PATH = process.env.PLAYWRIGHT_MOBILE_PATH || "/mahjong/mobile/?playwright=true";
+const MOBILE_APP_PATH = process.env.PLAYWRIGHT_MOBILE_PATH || "/mobile/?playwright=true";
 const HAND_TILE_SELECTOR = "#hand-container button";
 
 /**
@@ -267,7 +267,7 @@ test.describe("Mobile Interface", () => {
             await waitForMobileReady(page);
 
             const result = await page.evaluate(async () => {
-                const module = await import("/mahjong/mobile/animations/AnimationController.js");
+                const module = await import("/mobile/animations/AnimationController.js");
                 const controller = new module.AnimationController({ duration: 50 });
                 const tile = document.createElement("div");
                 tile.className = "mobile-tile";

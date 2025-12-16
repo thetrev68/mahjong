@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  base: "/mahjong/",
+  base: process.env.NODE_ENV === "production" ? "/mahjong/" : "/",
   build: {
     chunkSizeWarningLimit: 1500, // phaser is large
     rollupOptions: {

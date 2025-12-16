@@ -82,7 +82,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
     });
 
     test("opponent bar highlights current turn with golden glow", async ({ page }) => {
-        await page.goto("/mahjong/mobile/index.html");
+        await page.goto("/mobile/?playwright=true");
         await MobileTestHelpers.waitForMobileReady(page);
 
         await page.click("button:has-text(\"NEW GAME\")");
@@ -108,7 +108,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
     });
 
     test("latest discard has pulse animation", async ({ page }) => {
-        await page.goto("/mahjong/mobile/index.html");
+        await page.goto("/mobile/?playwright=true");
         await MobileTestHelpers.waitForMobileReady(page);
 
         await page.click("button:has-text(\"NEW GAME\")");
@@ -130,7 +130,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
     });
 
     test("exposed tiles display correctly as sprites", async ({ page }) => {
-        await page.goto("/mahjong/mobile/index.html");
+        await page.goto("/mobile/?playwright=true");
         await MobileTestHelpers.waitForMobileReady(page);
 
         await page.click("button:has-text(\"NEW GAME\")");
@@ -153,7 +153,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
     });
 
     test("hand grid wraps properly with 14 tiles", async ({ page }) => {
-        await page.goto("/mahjong/mobile/index.html");
+        await page.goto("/mobile/?playwright=true");
         await MobileTestHelpers.waitForMobileReady(page);
 
         await page.click("button:has-text(\"NEW GAME\")");
@@ -178,7 +178,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
     });
 
     test("tiles have visual feedback when selected", async ({ page }) => {
-        await page.goto("/mahjong/mobile/index.html");
+        await page.goto("/mobile/?playwright=true");
         await MobileTestHelpers.waitForMobileReady(page);
 
         await page.click("button:has-text(\"NEW GAME\")");
