@@ -66,11 +66,15 @@ test.describe("Mobile Interface", () => {
             // Wait for mobile app to be ready
             await MobileTestHelpers.waitForMobileReady(page);
 
+            // Start game with Charleston skipped for simpler testing
+            await page.goto("/mobile/?skipCharleston=true&playwright=true");
+            await MobileTestHelpers.waitForMobileReady(page);
             await page.click("#new-game-btn");
 
             // Wait for player's turn and tiles to be dealt
             await page.waitForSelector(HAND_TILE_SELECTOR);
-            await page.waitForTimeout(2000); // Wait for Charleston/dealing to complete
+            // Wait for dealing animation to complete (home page + dealing)
+            await page.waitForTimeout(3000);
 
             // Get initial hand size
             const initialTileCount = await page.locator(HAND_TILE_SELECTOR).count();
@@ -80,7 +84,7 @@ test.describe("Mobile Interface", () => {
             await firstTile.dblclick(); // Playwright converts to touch events
 
             // Wait for discard animation
-            await page.waitForTimeout(500);
+            await page.waitForTimeout(1000);
 
             // Verify tile appears in discard pile
             await expect(page.locator(".discard-tile")).toHaveCount(1);
