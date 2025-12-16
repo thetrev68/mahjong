@@ -14,12 +14,16 @@ test.describe("Mobile Interface", () => {
             // Wait for mobile renderer to initialize
             await MobileTestHelpers.waitForMobileReady(page);
 
-            // Verify mobile-specific elements exist (updated IDs)
-            await expect(page.locator("#hand-container")).toBeVisible();
+            // Verify mobile-specific elements exist and are attached to DOM
+            // Hand container is hidden before game starts, check it's attached
+            await expect(page.locator("#hand-container")).toBeAttached();
+            // Opponent containers should be visible
             await expect(page.locator("#opponent-left")).toBeVisible();
             await expect(page.locator("#opponent-top")).toBeVisible();
             await expect(page.locator("#opponent-right")).toBeVisible();
+            // Discard container should be attached
             await expect(page.locator("#discard-container")).toBeAttached();
+            // Bottom menu should be visible
             await expect(page.locator(".bottom-menu")).toBeVisible();
 
             // Verify desktop elements don't exist
