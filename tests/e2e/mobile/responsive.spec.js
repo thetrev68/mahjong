@@ -85,7 +85,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
         await page.goto("/mobile/?playwright=true");
         await MobileTestHelpers.waitForMobileReady(page);
 
-        await page.click("button:has-text(\"NEW GAME\")");
+        await page.click("#new-game-btn");
         await page.waitForTimeout(2000);
 
         // Find opponent bar with current turn
@@ -111,7 +111,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
         await page.goto("/mobile/?playwright=true");
         await MobileTestHelpers.waitForMobileReady(page);
 
-        await page.click("button:has-text(\"NEW GAME\")");
+        await page.click("#new-game-btn");
         await page.waitForTimeout(3000); // Wait for game to progress
 
         // Check if latest discard has animation class
@@ -133,7 +133,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
         await page.goto("/mobile/?playwright=true");
         await MobileTestHelpers.waitForMobileReady(page);
 
-        await page.click("button:has-text(\"NEW GAME\")");
+        await page.click("#new-game-btn");
         await page.waitForTimeout(5000); // Wait for potential exposures
 
         // Check if any exposures exist
@@ -156,7 +156,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
         await page.goto("/mobile/?playwright=true");
         await MobileTestHelpers.waitForMobileReady(page);
 
-        await page.click("button:has-text(\"NEW GAME\")");
+        await page.click("#new-game-btn");
         await page.waitForTimeout(2000);
 
         // Check hand container grid
@@ -181,7 +181,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
         await page.goto("/mobile/?playwright=true");
         await MobileTestHelpers.waitForMobileReady(page);
 
-        await page.click("button:has-text(\"NEW GAME\")");
+        await page.click("#new-game-btn");
         await page.waitForTimeout(2000);
 
         // Click a tile to select it
