@@ -1,25 +1,7 @@
 /* eslint-disable no-await-in-loop */
 
 import { test, expect } from "@playwright/test";
-
-const MOBILE_APP_PATH = process.env.PLAYWRIGHT_MOBILE_PATH || "/mobile/?playwright=true";
-
-/**
- * Helper: Wait for mobile app to be ready
- */
-async function waitForMobileReady(page) {
-    await page.waitForFunction(() => {
-        const status = document.getElementById("game-status");
-        return status && status.textContent.includes("Ready");
-    }, { timeout: 10000 });
-
-    // Also wait for new-game button to be enabled
-    await page.waitForSelector("#new-game-btn:not([disabled])", { timeout: 5000 });
-}
-
-async function gotoMobileApp(page) {
-    await page.goto(MOBILE_APP_PATH);
-}
+import { MobileTestHelpers } from "../../utils/mobile-helpers.js";
 
 /**
  * Integration tests for initial dealing animation sequence (MOBILE ONLY)
@@ -28,8 +10,8 @@ async function gotoMobileApp(page) {
 
 test.describe("Mobile Dealing Animations", () => {
     test.beforeEach(async ({ page }) => {
-        await gotoMobileApp(page);
-        await waitForMobileReady(page);
+        await MobileTestHelpers.gotoMobileApp(page);
+        await MobileTestHelpers.waitForMobileReady(page);
     });
 
     test("should animate dealing tiles with face-down reveal", async ({ page }) => {

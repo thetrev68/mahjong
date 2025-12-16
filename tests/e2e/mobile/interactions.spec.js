@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { MobileTestHelpers } from "../../utils/mobile-helpers.js";
 
 // Only run these tests on mobile viewport with touch support
 test.use({
@@ -11,9 +12,7 @@ test.use({
 test.describe("Core Interactions", () => {
     test("DRAW button appears during player turn", async ({ page }) => {
         await page.goto("/mobile?skipCharleston=true&playwright=true");
-
-        // Wait for NEW GAME button to be visible
-        await expect(page.locator("#new-game-btn")).toBeVisible({ timeout: 10000 });
+        await MobileTestHelpers.waitForMobileReady(page);
 
         // Start game and wait for player's turn
         await page.click("#new-game-btn");
@@ -33,8 +32,8 @@ test.describe("Core Interactions", () => {
 
     test("tile tap selects for discard", async ({ page }) => {
         await page.goto("/mobile?skipCharleston=true&playwright=true");
+        await MobileTestHelpers.waitForMobileReady(page);
 
-        await expect(page.locator("#new-game-btn")).toBeVisible({ timeout: 10000 });
         await page.click("#new-game-btn");
 
         // Wait for tiles to be dealt
@@ -56,8 +55,8 @@ test.describe("Core Interactions", () => {
 
     test("SORT button rearranges hand", async ({ page }) => {
         await page.goto("/mobile?skipCharleston=true&playwright=true");
+        await MobileTestHelpers.waitForMobileReady(page);
 
-        await expect(page.locator("#new-game-btn")).toBeVisible({ timeout: 10000 });
         await page.click("#new-game-btn");
 
         // Wait for tiles to be dealt
@@ -100,8 +99,7 @@ test.describe("Core Interactions", () => {
         await page.route("**/assets/tiles.png", route => route.abort());
 
         await page.goto("/mobile?skipCharleston=true&playwright=true");
-
-        await expect(page.locator("#new-game-btn")).toBeVisible({ timeout: 10000 });
+        await MobileTestHelpers.waitForMobileReady(page);
 
         // Start a game
         await page.click("#new-game-btn");

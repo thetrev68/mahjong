@@ -1,35 +1,18 @@
 /* eslint-disable no-await-in-loop */
 
 import { test, expect } from "@playwright/test";
+import { MobileTestHelpers } from "../../utils/mobile-helpers.js";
 
-const MOBILE_APP_PATH = process.env.PLAYWRIGHT_MOBILE_PATH || "/mobile/?playwright=true";
 const HAND_TILE_SELECTOR = "#hand-container button";
-
-/**
- * Helper: Wait for mobile app to be ready
- */
-async function waitForMobileReady(page) {
-    await page.waitForFunction(() => {
-        const status = document.getElementById("game-status");
-        return status && status.textContent.includes("Ready");
-    }, { timeout: 10000 });
-
-    // Also wait for new-game button to be enabled
-    await page.waitForSelector("#new-game-btn:not([disabled])", { timeout: 5000 });
-}
-
-async function gotoMobileApp(page) {
-    await page.goto(MOBILE_APP_PATH);
-}
 
 test.describe("Mobile Interface", () => {
     
     test.describe("Test 1: Mobile Page Load", () => {
         test("mobile game loads with correct viewport", async ({ page }) => {
-            await gotoMobileApp(page);
+            await MobileTestHelpers.gotoMobileApp(page);
 
             // Wait for mobile renderer to initialize
-            await waitForMobileReady(page);
+            await MobileTestHelpers.waitForMobileReady(page);
 
             // Verify mobile-specific elements exist (updated IDs)
             await expect(page.locator("#hand-container")).toBeVisible();
@@ -46,10 +29,10 @@ test.describe("Mobile Interface", () => {
 
     test.describe("Test 2: Tile Selection via Tap", () => {
         test("tile selection via tap", async ({ page }) => {
-            await gotoMobileApp(page);
+            await MobileTestHelpers.gotoMobileApp(page);
 
             // Wait for mobile app to be ready
-            await waitForMobileReady(page);
+            await MobileTestHelpers.waitForMobileReady(page);
 
             // Wait for game to start and tiles to be dealt
             await page.click("#new-game-btn");
@@ -74,10 +57,10 @@ test.describe("Mobile Interface", () => {
 
     test.describe("Test 3: Tile Discard via Double-Tap", () => {
         test("tile discard via double-tap", async ({ page }) => {
-            await gotoMobileApp(page);
+            await MobileTestHelpers.gotoMobileApp(page);
 
             // Wait for mobile app to be ready
-            await waitForMobileReady(page);
+            await MobileTestHelpers.waitForMobileReady(page);
 
             await page.click("#new-game-btn");
 
@@ -106,10 +89,10 @@ test.describe("Mobile Interface", () => {
 
     test.describe("Test 4: Charleston Pass Flow", () => {
         test("charleston pass flow on mobile", async ({ page }) => {
-            await gotoMobileApp(page);
+            await MobileTestHelpers.gotoMobileApp(page);
 
             // Wait for mobile app to be ready
-            await waitForMobileReady(page);
+            await MobileTestHelpers.waitForMobileReady(page);
 
             // Enable settings to ensure Charleston happens
             await page.click("#mobile-settings-btn");
@@ -147,10 +130,10 @@ test.describe("Mobile Interface", () => {
 
     test.describe("Test 5: Settings Save/Load", () => {
         test("settings persist across page reloads", async ({ page }) => {
-            await gotoMobileApp(page);
+            await MobileTestHelpers.gotoMobileApp(page);
 
             // Wait for mobile app to be ready
-            await waitForMobileReady(page);
+            await MobileTestHelpers.waitForMobileReady(page);
 
             // Open settings
             await page.click("#mobile-settings-btn");
@@ -189,10 +172,10 @@ test.describe("Mobile Interface", () => {
 
     test.describe("Test 6: Opponent Bar Updates", () => {
         test("opponent bars update during game", async ({ page }) => {
-            await gotoMobileApp(page);
+            await MobileTestHelpers.gotoMobileApp(page);
 
             // Wait for mobile app to be ready
-            await waitForMobileReady(page);
+            await MobileTestHelpers.waitForMobileReady(page);
 
             await page.click("#new-game-btn");
 
@@ -217,10 +200,10 @@ test.describe("Mobile Interface", () => {
     test.describe("Test 7: Touch Handler Swipe Gesture", () => {
         test("swipe up gesture for exposing tiles", async ({ page }, testInfo) => {
             test.skip(testInfo.project.name !== "mobile", "Swipe gesture requires touch-enabled mobile project");
-            await gotoMobileApp(page);
+            await MobileTestHelpers.gotoMobileApp(page);
 
             // Wait for mobile app to be ready
-            await waitForMobileReady(page);
+            await MobileTestHelpers.waitForMobileReady(page);
 
             await page.click("#new-game-btn");
 
@@ -263,8 +246,8 @@ test.describe("Mobile Interface", () => {
 
     test.describe("Test 8: Mobile Animations", () => {
         test("tile animations controller toggles classes", async ({ page }) => {
-            await gotoMobileApp(page);
-            await waitForMobileReady(page);
+            await MobileTestHelpers.gotoMobileApp(page);
+            await MobileTestHelpers.waitForMobileReady(page);
 
             const result = await page.evaluate(async () => {
                 const module = await import("/mobile/animations/AnimationController.js");
@@ -297,8 +280,8 @@ test.describe("Mobile Interface", () => {
 
     test.describe("Test 9: Training Mode Settings", () => {
         test("training mode settings are available and functional", async ({ page }) => {
-            await gotoMobileApp(page);
-            await waitForMobileReady(page);
+            await MobileTestHelpers.gotoMobileApp(page);
+            await MobileTestHelpers.waitForMobileReady(page);
 
             // Open settings
             await page.click("#mobile-settings-btn");
@@ -356,8 +339,8 @@ test.describe("Mobile Interface", () => {
         });
 
         test("training mode deals correct number of tiles", async ({ page }) => {
-            await gotoMobileApp(page);
-            await waitForMobileReady(page);
+            await MobileTestHelpers.gotoMobileApp(page);
+            await MobileTestHelpers.waitForMobileReady(page);
 
             // Configure training mode via localStorage before starting game
             await page.evaluate(() => {
@@ -368,7 +351,7 @@ test.describe("Mobile Interface", () => {
 
             // Reload to pick up settings
             await page.reload();
-            await waitForMobileReady(page);
+            await MobileTestHelpers.waitForMobileReady(page);
 
             // Open settings and select a hand pattern
             await page.click("#mobile-settings-btn");
