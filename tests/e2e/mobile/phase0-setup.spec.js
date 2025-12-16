@@ -44,6 +44,7 @@ test.describe("Phase 0: Testing Framework Setup", () => {
 
     test("asset paths are accessible", async ({ page }) => {
         await MobileTestHelpers.gotoMobileApp(page);
+        await page.waitForLoadState("networkidle");
 
         // Verify tiles.png is accessible
         const tilesImageLoaded = await page.evaluate(() => {
@@ -74,17 +75,21 @@ test.describe("Phase 0: Testing Framework Setup", () => {
         await MobileTestHelpers.gotoMobileApp(page);
         await MobileTestHelpers.waitForMobileReady(page);
 
-        const containerStatus = await MobileTestHelpers.verifyCriticalContainers(page);
-
-        // Verify critical containers are visible
-        expect(containerStatus.opponentsContainer).toBe(true);
-        expect(containerStatus.gameCenter).toBe(true);
-        expect(containerStatus.handArea).toBe(true);
-        expect(containerStatus.handContainer).toBe(true);
-        expect(containerStatus.bottomMenu).toBe(true);
-
-        // Discard container exists but may not be visible until game starts
+        // Verify critical containers exist (attached to DOM)
+        // Some may be hidden by hide-on-home class until game starts
+        await expect(page.locator("#opponents-container")).toBeAttached();
+        await expect(page.locator("#game-center")).toBeAttached();
+        await expect(page.locator("#hand-area")).toBeAttached();
+        await expect(page.locator("#player-rack-container")).toBeAttached();
+        await expect(page.locator("#hand-container")).toBeAttached();
+        await expect(page.locator(".bottom-menu")).toBeAttached();
         await expect(page.locator("#discard-container")).toBeAttached();
+
+        // Verify visible containers are actually visible
+        await expect(page.locator("#opponents-container")).toBeVisible();
+        await expect(page.locator("#game-center")).toBeVisible();
+        await expect(page.locator("#hand-area")).toBeVisible();
+        await expect(page.locator(".bottom-menu")).toBeVisible();
     });
 
     test("mobile renderer initializes", async ({ page }) => {
