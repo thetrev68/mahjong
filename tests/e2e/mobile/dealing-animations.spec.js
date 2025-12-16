@@ -19,7 +19,8 @@ test.describe("Mobile Dealing Animations", () => {
         await page.click("#new-game-btn");
 
         // Wait for tiles to be rendered face-down
-        await page.waitForSelector(".tile--face-down", { timeout: 2000 });
+        // Home page animation (1-2s) + dealing animation (0.5s initial delay) = up to 2.5s
+        await page.waitForSelector(".tile--face-down", { timeout: 5000 });
 
         // Verify tiles start face-down (darkened)
         const faceDownTiles = page.locator(".tile--face-down");
@@ -116,7 +117,8 @@ test.describe("Mobile Dealing Animations", () => {
     test("should handle rapid game restart gracefully", async ({ page }) => {
         // Start first game
         await page.click("#new-game-btn");
-        await page.waitForSelector(".tile--face-down", { timeout: 2000 });
+        // Home page animation (1-2s) + dealing animation (0.5s initial delay) = up to 2.5s
+        await page.waitForSelector(".tile--face-down", { timeout: 5000 });
 
         // Immediately restart before animation completes
         await page.click("#new-game-btn");
