@@ -9,7 +9,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Charleston Animations", () => {
     test.beforeEach(async ({ page }) => {
         // Navigate to mobile version
-        await page.goto("/mobile/");
+        await page.goto("/mobile/?playwright=true");
         await page.waitForLoadState("networkidle");
 
         // Wait for game to be ready
@@ -293,7 +293,7 @@ test.describe("Charleston Animations", () => {
             });
         });
 
-        await page.goto("/mobile/");
+        await page.goto("/mobile/?playwright=true");
         await page.waitForLoadState("networkidle");
 
         // Start game

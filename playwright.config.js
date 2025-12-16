@@ -27,8 +27,8 @@ export default defineConfig({
 
   // Shared settings for all the projects below
   use: {
-    // Base URL for tests (Vite dev server)
-    baseURL: "http://localhost:5173?playwright=true",
+    // Base URL for tests (Vite dev server - note: no /mahjong/ in dev)
+    baseURL: "http://localhost:5173",
 
     // Collect trace when retrying the failed test
     trace: "on-first-retry",
@@ -41,6 +41,10 @@ export default defineConfig({
   projects: [
     {
       name: "desktop",
+      testMatch: [
+        "**/e2e/desktop/**/*.spec.js",
+        "**/e2e/charleston-animations.spec.js",
+      ],
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1280, height: 720 },
@@ -48,6 +52,7 @@ export default defineConfig({
     },
     {
       name: "mobile",
+      testMatch: "**/e2e/mobile/**/*.spec.js",
       use: {
         ...devices["iPhone 12"],
         viewport: { width: 390, height: 844 },

@@ -11,7 +11,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
     viewports.forEach(viewport => {
         test(`layout looks correct on ${viewport.name} (${viewport.width}x${viewport.height})`, async ({ page }) => {
             await page.setViewportSize({ width: viewport.width, height: viewport.height });
-            await page.goto("/mahjong/mobile/index.html");
+            await page.goto("/mobile/?playwright=true");
             await MobileTestHelpers.waitForMobileReady(page);
 
             // Start game to populate UI
@@ -48,7 +48,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
 
         test(`tiles are appropriately sized on ${viewport.name}`, async ({ page }) => {
             await page.setViewportSize({ width: viewport.width, height: viewport.height });
-            await page.goto("/mahjong/mobile/index.html");
+            await page.goto("/mobile/?playwright=true");
             await MobileTestHelpers.waitForMobileReady(page);
 
             await page.click("button:has-text(\"NEW GAME\")");
@@ -209,7 +209,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
         /* eslint-disable no-await-in-loop */
         for (const breakpoint of breakpoints) {
             await page.setViewportSize({ width: breakpoint.width, height: 844 });
-            await page.goto("/mahjong/mobile/index.html");
+            await page.goto("/mobile/?playwright=true");
             await MobileTestHelpers.waitForMobileReady(page);
 
             await page.click("button:has-text(\"NEW GAME\")");
@@ -238,7 +238,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
         /* eslint-disable no-await-in-loop */
         for (const viewport of viewports) {
             await page.setViewportSize(viewport);
-            await page.goto("/mahjong/mobile/index.html");
+            await page.goto("/mobile/?playwright=true");
             await MobileTestHelpers.waitForMobileReady(page);
 
             await page.click("button:has-text(\"NEW GAME\")");

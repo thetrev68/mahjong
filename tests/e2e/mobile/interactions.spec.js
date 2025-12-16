@@ -10,7 +10,7 @@ test.use({
 
 test.describe("Core Interactions", () => {
     test("DRAW button appears during player turn", async ({ page }) => {
-        await page.goto("/mahjong/mobile?skipCharleston=true&playwright=true");
+        await page.goto("/mobile?skipCharleston=true&playwright=true");
 
         // Wait for NEW GAME button to be visible
         await expect(page.locator("#new-game-btn")).toBeVisible({ timeout: 10000 });
@@ -32,7 +32,7 @@ test.describe("Core Interactions", () => {
     });
 
     test("tile tap selects for discard", async ({ page }) => {
-        await page.goto("/mahjong/mobile?skipCharleston=true&playwright=true");
+        await page.goto("/mobile?skipCharleston=true&playwright=true");
 
         await expect(page.locator("#new-game-btn")).toBeVisible({ timeout: 10000 });
         await page.click("#new-game-btn");
@@ -55,7 +55,7 @@ test.describe("Core Interactions", () => {
     });
 
     test("SORT button rearranges hand", async ({ page }) => {
-        await page.goto("/mahjong/mobile?skipCharleston=true&playwright=true");
+        await page.goto("/mobile?skipCharleston=true&playwright=true");
 
         await expect(page.locator("#new-game-btn")).toBeVisible({ timeout: 10000 });
         await page.click("#new-game-btn");
@@ -99,7 +99,7 @@ test.describe("Core Interactions", () => {
         // Simulate failed asset loading by blocking the tiles.png request
         await page.route("**/assets/tiles.png", route => route.abort());
 
-        await page.goto("/mahjong/mobile?skipCharleston=true&playwright=true");
+        await page.goto("/mobile?skipCharleston=true&playwright=true");
 
         await expect(page.locator("#new-game-btn")).toBeVisible({ timeout: 10000 });
 

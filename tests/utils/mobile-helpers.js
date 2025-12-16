@@ -3,7 +3,7 @@
  * Utility functions for testing the mobile implementation
  */
 
-const MOBILE_APP_PATH = process.env.PLAYWRIGHT_MOBILE_PATH || "/mahjong/mobile/?playwright=true";
+const MOBILE_APP_PATH = process.env.PLAYWRIGHT_MOBILE_PATH || "/mobile/?playwright=true";
 
 export class MobileTestHelpers {
     /**
@@ -35,7 +35,7 @@ export class MobileTestHelpers {
                 const img = new Image();
                 img.onload = () => resolve(true);
                 img.onerror = () => resolve(false);
-                img.src = "/mahjong/pwa/assets/tiles.png";
+                img.src = "/pwa/assets/tiles.png";
             });
         }, { timeout: 10000 });
     }
