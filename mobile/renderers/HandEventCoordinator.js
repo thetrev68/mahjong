@@ -124,14 +124,14 @@ export class HandEventCoordinator {
 
       // Debug logging for Charleston glow issue
       if (newlyReceivedTiles.length > 0 || (this.previousHandSnapshot && Math.abs(handData.tiles.length - this.previousHandSnapshot.tiles.length) === 3)) {
-        console.log('[HandEventCoordinator] HAND_UPDATED:', {
+        console.log("[HandEventCoordinator] HAND_UPDATED:", {
           currentTileCount: handData.tiles.length,
           previousTileCount: this.previousHandSnapshot?.tiles.length || 0,
           newlyReceivedCount: newlyReceivedTiles.length,
           newlyReceived: newlyReceivedTiles,
           bothSameSize: bothHandsSameSize
         });
-        console.trace('[HandEventCoordinator] Stack trace for HAND_UPDATED');
+        console.trace("[HandEventCoordinator] Stack trace for HAND_UPDATED");
       }
 
       // Reset sort mode when hand updated from game (not user sort)
@@ -141,9 +141,9 @@ export class HandEventCoordinator {
 
       // Render the hand
       if (this.handRenderer) {
-        console.log('[HandEventCoordinator] BEFORE render:', handData.tiles.length, 'tiles');
+        console.log("[HandEventCoordinator] BEFORE render:", handData.tiles.length, "tiles");
         this.handRenderer.render(handData);
-        console.log('[HandEventCoordinator] AFTER render');
+        console.log("[HandEventCoordinator] AFTER render");
 
         // Reapply any active hint highlights after rerender
         this.applyHintRecommendations();
@@ -163,7 +163,7 @@ export class HandEventCoordinator {
 
       // Apply glow to newly received tiles after rendering
       if (newlyReceivedTiles.length > 0 && this.handRenderer && this.mobileRenderer?.animationController) {
-        console.log('[HandEventCoordinator] BEFORE applying glow, checking tile elements exist...');
+        console.log("[HandEventCoordinator] BEFORE applying glow, checking tile elements exist...");
         // newlyReceivedTiles contains tile.index values (0-151), need to find positions in hand
         const handTiles = handData.tiles;
         let glowAppliedCount = 0;
@@ -175,7 +175,7 @@ export class HandEventCoordinator {
             if (tileElement) {
               this.mobileRenderer.animationController.applyReceivedTileGlow(tileElement);
               glowAppliedCount++;
-              const hasGlowClass = tileElement.classList.contains('tile--newly-drawn');
+              const hasGlowClass = tileElement.classList.contains("tile--newly-drawn");
               console.log(`[HandEventCoordinator] Applied glow to tile at position ${position}, index ${tileIndex}, hasGlowClass: ${hasGlowClass}`);
             } else {
               console.warn(`[HandEventCoordinator] Could not find tile element at position ${position} for index ${tileIndex}`);
@@ -200,18 +200,18 @@ export class HandEventCoordinator {
 
       // Debug logging for snapshot updates
       if (!shouldUpdateSnapshot && this.previousHandSnapshot) {
-        console.log('[HandEventCoordinator] Skipping snapshot update:', {
+        console.log("[HandEventCoordinator] Skipping snapshot update:", {
           from: this.previousHandSnapshot?.tiles.length,
           to: handData.tiles.length,
-          reason: handData.tiles.length < this.previousHandSnapshot.tiles.length ? 'decreased' : 'same size, no new tiles'
+          reason: handData.tiles.length < this.previousHandSnapshot.tiles.length ? "decreased" : "same size, no new tiles"
         });
       }
 
       if (shouldUpdateSnapshot) {
-        console.log('[HandEventCoordinator] Updating snapshot:', {
+        console.log("[HandEventCoordinator] Updating snapshot:", {
           from: this.previousHandSnapshot?.tiles.length || 0,
           to: handData.tiles.length,
-          reason: isFirstSnapshot ? 'first' : (tilesWereReceived ? `received ${newlyReceivedTiles.length} tiles` : 'size increased')
+          reason: isFirstSnapshot ? "first" : (tilesWereReceived ? `received ${newlyReceivedTiles.length} tiles` : "size increased")
         });
         this.previousHandSnapshot = handData.clone();
         if (this.mobileRenderer) {
@@ -407,7 +407,7 @@ export class HandEventCoordinator {
 
     // Debug logging
     if (newIndices.length > 0 && newIndices.length < 3) {
-      console.log('[HandEventCoordinator] _findNewlyReceivedTiles detected partial match:', {
+      console.log("[HandEventCoordinator] _findNewlyReceivedTiles detected partial match:", {
         prevIndices: Array.from(prevIndices).sort((a, b) => a - b),
         currentIndices: currentIndices.sort((a, b) => a - b),
         newIndices: newIndices

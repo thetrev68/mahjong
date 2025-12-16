@@ -130,7 +130,8 @@ export class Card {
 
     validateHand14(hand) {
         // Consolidate hand (14 tiles) to test array
-        const test = hand.getTileArray();
+        // Include both hidden and exposed tiles for validation
+        const test = hand.getAllTilesIncludingExposures ? hand.getAllTilesIncludingExposures() : hand.getTileArray();
 
         return this.validateHand(test, hand.isAllHidden());
     }

@@ -835,7 +835,8 @@ export class GameController extends EventEmitter {
         const tempHand = player.hand.clone();
         const tileClone = tile.clone ? tile.clone() : new TileData(tile.suit, tile.number, tile.index);
         tempHand.addTile(tileClone);
-        const tiles = tempHand.tiles;
+        // Include both hidden and exposed tiles for validation
+        const tiles = tempHand.getAllTilesIncludingExposures ? tempHand.getAllTilesIncludingExposures() : tempHand.tiles;
         const allHidden = tempHand.exposures.length === 0;
         try {
             const result = this.cardValidator.validateHand(tiles, allHidden);
@@ -1210,7 +1211,8 @@ export class GameController extends EventEmitter {
         // Use card validator to check for winning hand
         if (this.cardValidator) {
             // Card validator expects array of tiles and allHidden flag
-            const tiles = player.hand.tiles;
+            // Include both hidden and exposed tiles for validation
+            const tiles = player.hand.getAllTilesIncludingExposures ? player.hand.getAllTilesIncludingExposures() : player.hand.tiles;
             const allHidden = player.hand.exposures.length === 0;
             const isWinning = this.cardValidator.validateHand(tiles, allHidden);
             if (isWinning && isWinning.valid) {

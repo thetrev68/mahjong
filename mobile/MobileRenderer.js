@@ -814,26 +814,8 @@ export class MobileRenderer {
         // TEMPORARY FIX: Disable Charleston animation sequencer
         // HandEventCoordinator already handles the glow correctly via HAND_UPDATED event
         // The animation sequencer was interfering by clearing tiles after glow was applied
-        console.log('[MobileRenderer] onTilesReceived: Skipping Charleston animation (HandEventCoordinator handles glow)');
+        console.log("[MobileRenderer] onTilesReceived: Skipping Charleston animation (HandEventCoordinator handles glow)");
         return;
-
-        // Defensive guard: ensure required data and components are available
-        if (!data?.tiles || !this.charlestonSequencer) {
-            console.warn("MobileRenderer: Missing required data for tiles received animation");
-            return;
-        }
-
-        try {
-            // Find indices of received tiles in the new hand
-            const receivedIndices = this._findReceivedTileIndices(data.tiles);
-
-            // Trigger animation sequence
-            this.charlestonSequencer.handleTilesReceived(data, receivedIndices);
-        } catch (error) {
-            console.error("Tiles received animation failed:", error);
-            // Force a hand re-render to ensure UI consistency
-            this.handRenderer.render(this.handRenderer.currentHandData);
-        }
     }
 
     /**
