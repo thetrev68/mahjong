@@ -51,7 +51,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
             await page.goto("/mobile/?playwright=true");
             await MobileTestHelpers.waitForMobileReady(page);
 
-            await page.click("button:has-text(\"NEW GAME\")");
+            await page.click("#new-game-btn");
             await page.waitForTimeout(2000);
 
             // Check hand tile size
@@ -212,7 +212,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
             await page.goto("/mobile/?playwright=true");
             await MobileTestHelpers.waitForMobileReady(page);
 
-            await page.click("button:has-text(\"NEW GAME\")");
+            await page.click("#new-game-btn");
             await page.waitForTimeout(1000);
 
             // Check actual tile width
@@ -241,7 +241,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
             await page.goto("/mobile/?playwright=true");
             await MobileTestHelpers.waitForMobileReady(page);
 
-            await page.click("button:has-text(\"NEW GAME\")");
+            await page.click("#new-game-btn");
             await page.waitForTimeout(1000);
 
             // Check if horizontal scrollbar exists
