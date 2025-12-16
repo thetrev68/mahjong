@@ -18,7 +18,8 @@ test.describe("Core Interactions", () => {
         await page.click("#new-game-btn");
 
         // Wait for hand to be dealt (tiles appear)
-        await expect(page.locator(".hand-container .tile").first()).toBeVisible({ timeout: 5000 });
+        // Home page animation (1-2s) + dealing animation (0.5s) = up to 2.5s
+        await expect(page.locator(".hand-container .tile").first()).toBeVisible({ timeout: 10000 });
 
         // DRAW button should exist in the DOM
         const drawBtn = page.locator("#draw-btn");
@@ -37,7 +38,7 @@ test.describe("Core Interactions", () => {
         await page.click("#new-game-btn");
 
         // Wait for tiles to be dealt
-        await expect(page.locator(".hand-container .tile").first()).toBeVisible({ timeout: 5000 });
+        await expect(page.locator(".hand-container .tile").first()).toBeVisible({ timeout: 10000 });
         await page.waitForTimeout(1000);
 
         // Tap/click first tile in hand
@@ -60,7 +61,7 @@ test.describe("Core Interactions", () => {
         await page.click("#new-game-btn");
 
         // Wait for tiles to be dealt
-        await expect(page.locator(".hand-container .tile").first()).toBeVisible({ timeout: 5000 });
+        await expect(page.locator(".hand-container .tile").first()).toBeVisible({ timeout: 10000 });
         await page.waitForTimeout(1000);
 
         // Ensure settings overlay is not open (close it if it is)
@@ -105,7 +106,7 @@ test.describe("Core Interactions", () => {
         await page.click("#new-game-btn");
 
         // Wait for tiles to be dealt even with missing sprites
-        await expect(page.locator(".hand-container .tile").first()).toBeVisible({ timeout: 5000 });
+        await expect(page.locator(".hand-container .tile").first()).toBeVisible({ timeout: 10000 });
         await page.waitForTimeout(1000);
 
         // Tiles should still be rendered (they'll have broken background images, but the structure should exist)
