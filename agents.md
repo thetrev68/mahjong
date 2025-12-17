@@ -23,6 +23,7 @@ Mobile Stack
 ## 2. Core Control Loop
 
 1. **Initialization**
+
    ```javascript
    await gameController.init({
        aiEngine: new AIEngine(card, null, "medium"),
@@ -31,6 +32,7 @@ Mobile Stack
        settings: { year: 2025, skipCharleston: false, difficulty: "medium" }
    });
    ```
+
    - Builds data models, shuffles wall (unless injected), seeds AI config.
 
 2. **State Machine**
@@ -48,16 +50,19 @@ Mobile Stack
 ## 3. AI Engine Responsibilities
 
 ### Pattern & Hand Evaluation
+
 - Uses `Card` definitions (multiple years) to enumerate legal hands.
 - Ranks candidate hands based on tile availability, joker pressure, virtual suit mapping, and run flexibility.
 - Keeps full breakdowns: required tiles, exposures, joker placement, and risk scoring.
 
 ### Tile Ranking & Discard Selection
+
 - Produces per-tile deltas: "keep", "pass", or "discard" (see `TILE_RECOMMENDATION` constants).
 - Integrates **opponent safety** (don't feed recent exposures), **wall depth** (probabilities shrink later), and **training mode** overrides.
 - Injects controlled randomness based on difficulty for more "human" play.
 
 ### Charleston & Courtesy Strategy
+
 - Phase-specific heuristics:
   - Prefers shedding isolated honors early.
   - Avoids passing tiles that weaken best pattern groups.
@@ -65,11 +70,13 @@ Mobile Stack
 - Courtesy votes respect game state, difficulty config, and exposure risk.
 
 ### Exposure & Claim Logic
+
 - Evaluates whether claiming a discard increases hand rank beyond the configured threshold.
 - Distinguishes between pung/kong/quint, training prompts, and joker swaps.
 - Provides structured payloads to adapters so UI can animate exposures correctly.
 
 ### Configurable Difficulty (`easy`, `medium`, `hard`)
+
 - Tunable knobs (from `AIEngine.getDifficultyConfig`):
   - `maxPatterns`, `minDiscardable`, `exposureThreshold`
   - Courtesy thresholds, Charleston continuation chance
@@ -79,6 +86,7 @@ Mobile Stack
 ## 4. Platform Integration Highlights
 
 ### Desktop (Phaser)
+
 - `PhaserAdapter` bridges controller events into managers:
   - **TileManager** registers sprites, handles drag/drop, and animations.
   - **SelectionManager** enforces prompts (`min/max` selection) for Charleston, courtesy, exposures, discards.
@@ -87,6 +95,7 @@ Mobile Stack
 - Desktop exposes `window.gameController` for debugging/tests; Playwright asserts controller state changes and event emissions.
 
 ### Mobile (Web Components + CSS Animations)
+
 - `MobileRenderer` attaches to DOM containers (`hand-container`, `discard-container`, `opponent bars`).
 - Components:
   - `OpponentBar` shows tile counts, exposures, and turn highlights.
@@ -122,6 +131,7 @@ Mobile Stack
 ## 8. Debugging & Development Tips for LLMs
 
 ### Key Entry Points for Debugging
+
 - **GameController**: Start with `core/GameController.js` - this is the central hub for game state and AI integration
 - **AIEngine**: `core/AIEngine.js` contains all AI decision-making logic
 - **Event System**: `core/events/` directory contains event definitions and emitter
@@ -129,16 +139,19 @@ Mobile Stack
 ### Common Debugging Scenarios
 
 #### AI Not Making Expected Moves
+
 1. Check `AIEngine.chooseDiscard()` and related methods
 2. Examine difficulty configuration in `AIEngine.getDifficultyConfig()`
 3. Verify tile rankings and pattern evaluation logic
 
 #### State Transition Issues
+
 1. Review the state machine in `GameController`
 2. Check event emissions and subscriptions
 3. Verify adapter implementations handle all required events
 
 #### Cross-Platform Inconsistencies
+
 1. Compare event handling between `PhaserAdapter` and `MobileRenderer`
 2. Ensure both platforms subscribe to the same events
 3. Verify data model consistency across platforms
@@ -146,21 +159,25 @@ Mobile Stack
 ### Adding New Features
 
 #### New AI Strategies
+
 1. Extend `AIEngine` with new methods while maintaining existing interface
 2. Add new difficulty configurations in `getDifficultyConfig()`
 3. Update pattern evaluation and tile ranking logic as needed
 
 #### New Game Modes
+
 1. Add new state transitions in `GameController`
 2. Create corresponding event types in `core/events/GameEvents.js`
 3. Implement platform-specific rendering in both adapters
 
 #### New Card Years
+
 1. Create new card definition files in `core/card/<year>/`
 2. Implement year-specific pattern validation
 3. Update `Card` class to support the new year
 
 ### Testing New Features
+
 - **Unit Tests**: Add tests for core logic in the appropriate test files
 - **E2E Tests**: Create Playwright tests in `tests/e2e/` directories
 - **Manual Testing**: Use `window.gameController` for debugging in desktop mode

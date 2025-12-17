@@ -10,6 +10,7 @@
 ## 🎯 Critical Understanding
 
 **The Good News:**
+
 1. Your architecture is **excellent** - the AnimationSequencer base class and CharlestonAnimationSequencer provide perfect patterns to follow
 2. GameController already emits `TILES_DEALT` with the sequence data
 3. The event-driven flow is clean: GameController → event → MobileRenderer → DealingAnimationSequencer
@@ -30,9 +31,11 @@ The spec makes some **incorrect assumptions** about the API. Here's what actuall
 ## 📋 Implementation Plan
 
 ### **Phase 1: Mobile-First Approach (2-3 hours)**
+
 Focus on **human player only** - skip the wall animation complexity for MVP.
 
 **Files to create:**
+
 1. [mobile/animations/DealingAnimationSequencer.js](../mobile/animations/DealingAnimationSequencer.js)
 
 **Files to modify:**
@@ -44,6 +47,7 @@ Focus on **human player only** - skip the wall animation complexity for MVP.
 ### **Step 1: Create DealingAnimationSequencer (Mobile Version)**
 
 **Key simplifications for mobile:**
+
 - **No wall display** (complex, not essential for mobile UX)
 - **No multi-player animations** (mobile only shows human hand)
 - **Focus on reveal animation** (tiles appear face-down, then flip face-up)
@@ -305,6 +309,7 @@ test("should apply glow to East player 14th tile", async ({ page }) => {
 ## 🔮 Future Enhancements (Post-MVP)
 
 Once mobile version is solid:
+
 1. Desktop version with full wall animation (PhaserAdapter)
 2. Sound effects (tile flip, shuffle)
 3. Particle effects for polish
@@ -342,6 +347,7 @@ All animation timing constants are at the top of DealingAnimationSequencer const
 - `INITIAL_DELAY` - Pause before reveal starts (breathing room)
 
 To adjust CSS animation duration, update both:
+
 1. `.tile--revealing` animation duration
 2. `this.TILE_FLIP_DURATION` in JavaScript (must match)
 

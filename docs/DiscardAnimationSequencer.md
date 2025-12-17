@@ -13,6 +13,7 @@
 The `DiscardAnimationSequencer` orchestrates tile discard animations during the main game loop, providing satisfying visual feedback for the most common player action in American Mahjong.
 
 ### Animation Goals
+
 - **Feedback**: Clear confirmation that discard was successful
 - **Clarity**: Show which tile was discarded
 - **Speed**: Fast enough to not slow down gameplay (200-350ms)
@@ -23,6 +24,7 @@ The `DiscardAnimationSequencer` orchestrates tile discard animations during the 
 ## User Experience
 
 ### Visual Flow
+
 ```
 1. Player selects tile to discard
    ↓
@@ -45,11 +47,13 @@ The `DiscardAnimationSequencer` orchestrates tile discard animations during the 
 ### Animation Variants
 
 **Human Player Discard** (BOTTOM):
+
 - Full animation with bounce
 - Sound effect (tile click)
 - 300ms duration
 
 **AI Player Discard** (RIGHT/TOP/LEFT):
+
 - Faster animation (200ms)
 - No bounce (AI is "precise")
 - Different exit angle based on player position
@@ -543,6 +547,7 @@ class MobileRenderer {
    - 60fps guaranteed on modern devices
 
 ### Performance Budget
+
 - **Target:** 60fps throughout animation
 - **Duration:** 200-350ms (fast gameplay feel)
 - **Memory:** < 1MB for animation assets
@@ -618,14 +623,17 @@ test('should animate tile discard correctly', async ({ page }) => {
 ## Accessibility
 
 ### Screen Reader Support
+
 - Announce discard: "You discarded Red Dragon"
 - Announce AI discard: "Player 2 discarded 3 Bamboo"
 
 ### Keyboard Support
+
 - `Enter` on selected tile → Discard
 - `Space` on selected tile → Discard
 
 ### Reduced Motion
+
 - Instant discard (no arc animation)
 - No rotation
 - No bounce

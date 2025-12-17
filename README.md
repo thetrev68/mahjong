@@ -17,14 +17,19 @@ You need to have [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/
 ### Installation
 
 1. Clone the repository:
+
    ```sh
    git clone <repository-url>
    ```
+
 2. Navigate to the project directory:
+
    ```sh
    cd mahjong
    ```
+
 3. Install the dependencies:
+
    ```sh
    npm install
    ```
@@ -44,26 +49,31 @@ Open your browser and navigate to the URL provided by Vite (usually `http://loca
 This project uses [Playwright](https://playwright.dev/) for end-to-end testing.
 
 - **Run all tests:**
+
   ```sh
   npm test
   ```
 
 - **Run tests in UI mode:**
+
   ```sh
   npm run test:ui
   ```
 
 - **Run tests in headed mode:**
+
   ```sh
   npm run test:headed
   ```
 
 - **Run tests specifically for the mobile version:**
+
   ```sh
   npm run test:mobile
   ```
 
 - **Generate a test report:**
+
   ```sh
   npm run test:report
   ```
@@ -72,23 +82,26 @@ This project uses [Playwright](https://playwright.dev/) for end-to-end testing.
 
 The project is organized into the following main directories:
 
--   `assets/`: Contains all game assets like images and audio files.
--   `core/`: Holds the core game logic, including the AI engine and game controller, shared between platforms.
--   `desktop/`: Contains the implementation specific to the desktop version of the game.
--   `mobile/`: Contains the implementation specific to the mobile version of the game.
--   `pwa/`: Progressive Web App configuration files.
--   `tests/`: Contains all the end-to-end tests written with Playwright.
--   `shared/`: Contains code shared across different parts of the application.
+- `assets/`: Contains all game assets like images and audio files.
+- `core/`: Holds the core game logic, including the AI engine and game controller, shared between platforms.
+- `desktop/`: Contains the implementation specific to the desktop version of the game.
+- `mobile/`: Contains the implementation specific to the mobile version of the game.
+- `pwa/`: Progressive Web App configuration files.
+- `tests/`: Contains all the end-to-end tests written with Playwright.
+- `shared/`: Contains code shared across different parts of the application.
 
 ## ✨ Linting and Code Quality
 
 This project uses ESLint for code linting and Knip for detecting unused files and exports.
 
--   **Run ESLint:**
+- **Run ESLint:**
+
     ```sh
     npm run lint
     ```
--   **Run Knip:**
+
+- **Run Knip:**
+
     ```sh
     npm run knip
     ```

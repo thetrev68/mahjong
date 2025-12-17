@@ -28,6 +28,7 @@ This plan implements the `DiscardAnimationSequencer` specification for the **mob
 ### Existing Discard Flow
 
 **GameController** ([core/GameController.js:845-863](core/GameController.js#L845-L863))
+
 ```javascript
 // 1. Remove tile from hand
 player.hand.removeTile(tileIndex);
@@ -55,6 +56,7 @@ await this.sleep(500);
 ```
 
 **MobileRenderer** ([mobile/MobileRenderer.js:687-713](mobile/MobileRenderer.js#L687-L713))
+
 ```javascript
 onTileDiscarded(data) {
     // 1. Add tile to discard pile component
@@ -74,6 +76,7 @@ onTileDiscarded(data) {
 ### Existing Animation Infrastructure (To Be Replaced)
 
 **AnimationController.animateTileDiscard()** ([mobile/animations/AnimationController.js:211-251](mobile/animations/AnimationController.js#L211-L251))
+
 - ✅ Handles basic slide animation
 - ✅ Uses CSS variables for positioning
 - ✅ Promise-based completion tracking
@@ -84,6 +87,7 @@ onTileDiscarded(data) {
 **STATUS**: This method will be **REMOVED** and replaced with sequencer.
 
 **Existing CSS** ([mobile/styles/animations.css:32-71](mobile/styles/animations.css#L32-L71))
+
 - ✅ `@keyframes tile-discard` with fade out
 - ✅ GPU-accelerated transforms
 - ✅ Reduced motion support
@@ -105,6 +109,7 @@ onTileDiscarded(data) {
 **Location**: `mobile/animations/DiscardAnimationSequencer.js`
 
 **Base Structure**:
+
 ```javascript
 import { AnimationSequencer } from './AnimationSequencer.js';
 
@@ -129,6 +134,7 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
 ```
 
 **Dependencies**:
+
 - ✅ Extends existing `AnimationSequencer` base class
 - ✅ Uses existing `HandRenderer` for tile element access
 - ✅ Uses existing `AnimationController` for primitives
@@ -143,6 +149,7 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
 **Location**: `mobile/styles/animations.css`
 
 **Remove** (lines 32-71):
+
 ```css
 /* OLD: Tile Discard Animation (Movement-Based) */
 @keyframes tile-discard { ... }
@@ -150,6 +157,7 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
 ```
 
 **Replace With**:
+
 ```css
 /* ===== Enhanced Discard Animations (DiscardAnimationSequencer) ===== */
 
@@ -243,6 +251,7 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
 **Change Location**: Constructor (after line ~100)
 
 **Add**:
+
 ```javascript
 import { DiscardAnimationSequencer } from './animations/DiscardAnimationSequencer.js';
 
@@ -266,6 +275,7 @@ constructor(options) {
 **File**: [mobile/MobileRenderer.js:687-713](mobile/MobileRenderer.js#L687-L713)
 
 **Remove Old Code**:
+
 ```javascript
 onTileDiscarded(data) {
     if (!data?.tile) {
@@ -291,6 +301,7 @@ onTileDiscarded(data) {
 ```
 
 **Replace With**:
+
 ```javascript
 onTileDiscarded(data) {
     if (!data?.tile) {
@@ -306,6 +317,7 @@ onTileDiscarded(data) {
 ```
 
 **Changes**:
+
 - ❌ Remove `TileData.fromJSON()` call (sequencer handles this)
 - ❌ Remove `discardPile.addDiscard()` call (sequencer handles this)
 - ❌ Remove old animation code with `animationController.animateTileDiscard()`
@@ -318,6 +330,7 @@ onTileDiscarded(data) {
 **File**: [mobile/animations/AnimationController.js:211-251](mobile/animations/AnimationController.js#L211-L251)
 
 **Remove Entire Method**:
+
 ```javascript
 animateTileDiscard(tileElement, targetPos = null) {
     // ...41 lines of code...
@@ -339,6 +352,7 @@ animateTileDiscard(tileElement, targetPos = null) {
 **File**: [core/GameController.js:845-863](core/GameController.js#L845-L863)
 
 **Current Code**:
+
 ```javascript
 const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, tileData, {
     type: "discard-slide",
@@ -348,6 +362,7 @@ const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, til
 ```
 
 **Enhanced Code**:
+
 ```javascript
 const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, tileData, {
     type: "discard-arc",  // NEW: Signal enhanced animation
@@ -359,6 +374,7 @@ const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, til
 ```
 
 **Impact**:
+
 - ✅ Mobile: Used by sequencer for DOM lookup
 - ✅ Desktop: Ignored (Phaser has its own system)
 
@@ -371,6 +387,7 @@ const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, til
 **Find**: `createTileDiscardedEvent()` method
 
 **Add** to JSDoc:
+
 ```javascript
 /**
  * @param {number} player - Player index
@@ -394,6 +411,7 @@ const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, til
 **File**: [mobile/components/DiscardPile.js](mobile/components/DiscardPile.js)
 
 **Add** (after `addDiscard()` method):
+
 ```javascript
 /**
  * Get the position where the next tile should land
@@ -437,6 +455,7 @@ getLastTilePosition() {
 ```
 
 **Impact**:
+
 - ✅ New methods only, no changes to existing methods
 - ✅ Returns null safely if no tiles exist
 
@@ -453,6 +472,7 @@ getLastTilePosition() {
 **Check**: Does this method already exist? (Likely yes, based on CharlestonAnimationSequencer)
 
 **If Missing, Add**:
+
 ```javascript
 /**
  * Get tile DOM element by its index in the hand
@@ -468,6 +488,7 @@ getTileElementByIndex(index) {
 ```
 
 **Note**:
+
 - ✅ Likely already exists (used by CharlestonAnimationSequencer)
 - ✅ Includes defensive bounds checking
 
@@ -480,6 +501,7 @@ getTileElementByIndex(index) {
 **File**: `tests/animations/DiscardAnimationSequencer.test.js` (new)
 
 **Test Cases**:
+
 ```javascript
 describe('DiscardAnimationSequencer', () => {
     test('calculates correct trajectory for human player', () => {
@@ -505,6 +527,7 @@ describe('DiscardAnimationSequencer', () => {
 #### Step 6.2: Integration Testing (Manual)
 
 **Test Plan**:
+
 1. ✅ **Human Player**: Verify arc animation with 360° rotation
 2. ✅ **AI Players**: Verify faster, lower arc with 180° rotation
 3. ✅ **Tile from Hand**: Verify animation starts from hand position, not discard pile
@@ -517,6 +540,7 @@ describe('DiscardAnimationSequencer', () => {
 ## Deployment Plan
 
 ### Pre-Deployment
+
 1. ✅ Complete all 6 implementation phases
 2. ✅ Run unit tests (100% pass rate)
 3. ✅ Manual testing on local dev environment
@@ -525,6 +549,7 @@ describe('DiscardAnimationSequencer', () => {
 6. ✅ Verify reduced motion accessibility
 
 ### Deployment
+
 1. **Merge to main**: PR with all changes
 2. **Deploy to production**: Standard deployment process
 3. **Monitor**: Watch for errors in console logs
@@ -563,6 +588,7 @@ If critical issues arise post-deployment:
 ## Dependencies & Prerequisites
 
 ### Required
+
 - ✅ Existing `AnimationSequencer` base class
 - ✅ Existing `CharlestonAnimationSequencer` (reference implementation)
 - ✅ Existing `AnimationController` primitives
@@ -570,6 +596,7 @@ If critical issues arise post-deployment:
 - ✅ Existing `HandRenderer` with tile access methods
 
 ### Optional
+
 - ❌ Sound system integration (placeholder for future)
 - ❌ Claim interrupt handling (can be added later)
 
@@ -578,16 +605,19 @@ If critical issues arise post-deployment:
 ## Success Metrics
 
 ### Performance
+
 - ✅ 60fps throughout animation (use DevTools Performance tab)
 - ✅ < 5ms scripting time per animation frame
 - ✅ No memory leaks (tile clones removed after animation)
 
 ### User Experience
+
 - ✅ Animation feels smooth and satisfying
 - ✅ No jank or stuttering
 - ✅ Reduced motion respects user preference
 
 ### Technical
+
 - ✅ Zero regressions in existing discard flow
 - ✅ Feature flag works as expected
 - ✅ Fallback animation continues working
@@ -597,15 +627,19 @@ If critical issues arise post-deployment:
 ## Risk Mitigation
 
 ### Risk 1: Clone Element Not Removed
+
 **Mitigation**: Use try/finally blocks in `animateTileToDiscard()`
 
 ### Risk 2: Tile Element Not Found
+
 **Mitigation**: Fallback to `skipAnimation()` method
 
 ### Risk 3: CSS Conflicts with Existing Animations
+
 **Mitigation**: Use unique class names (`.tile-discard-throw` vs `.tile-discarding`)
 
 ### Risk 4: Desktop Platform Affected
+
 **Mitigation**: Desktop uses PhaserAdapter, not MobileRenderer - completely isolated
 
 ---

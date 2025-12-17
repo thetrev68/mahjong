@@ -124,12 +124,14 @@ c:\Repos\mahjong\
 **The codebase uses a custom event-driven architecture, NOT Redux or any formal state management library.**
 
 #### State Location
+
 - **GameController** ([core/GameController.js](core/GameController.js)) - Single source of truth
   - Owns game state machine (STATE enum from [constants.js](constants.js))
   - Maintains player data, wall tiles, discard pile
   - Manages turn order and game phase transitions
 
 #### State Flow Pattern
+
 ```
 GameController (owns state)
     ↓ emits events
@@ -145,6 +147,7 @@ Callbacks to GameController
 ```
 
 #### Key Events (from [core/events/GameEvents.js](core/events/GameEvents.js))
+
 - **STATE_CHANGED** - Game phase transitions
 - **TILES_DEALT** - Initial distribution
 - **TILE_DRAWN** - Tile picked from wall
@@ -170,6 +173,7 @@ INIT → START → DEAL → CHARLESTON1 → CHARLESTON_QUERY → CHARLESTON2
 ```
 
 Each state has corresponding async methods in GameController:
+
 - `async startGame()`
 - `async dealTiles()`
 - `async charlestonPhase1()` / `charlestonPhase2()`
@@ -179,6 +183,7 @@ Each state has corresponding async methods in GameController:
 ## Platform Support
 
 ### Desktop Platform
+
 - **Entry Point**: [index.html](index.html) → [main.js](main.js) → [desktop/scenes/GameScene.js](desktop/scenes/GameScene.js)
 - **Renderer**: WebGL/Canvas via Phaser 3
 - **UI**: HTML buttons ([index.html](index.html)) + Phaser sprites
@@ -187,6 +192,7 @@ Each state has corresponding async methods in GameController:
 - **Build Target**: `npm run dev` → Vite serves [index.html](index.html)
 
 ### Mobile Platform (PWA)
+
 - **Entry Point**: [mobile/index.html](mobile/index.html) → [mobile/main.js](mobile/main.js)
 - **Renderer**: Pure HTML/CSS (no Phaser)
 - **UI**: CSS Grid layout with touch-friendly components
@@ -196,7 +202,9 @@ Each state has corresponding async methods in GameController:
 - **PWA Features**: Service worker, app manifest, install prompt
 
 ### Shared Components
+
 Both platforms use:
+
 - [core/GameController.js](core/GameController.js) - Game orchestration
 - [core/AIEngine.js](core/AIEngine.js) - AI decisions
 - [card/card.js](card/card.js) - Hand validation
@@ -211,6 +219,7 @@ Both platforms use:
 **IMPORTANT**: The old `GameLogic` class has been **completely replaced** by `GameController`.
 
 **Responsibilities**:
+
 1. **State Machine Management** - Enforces state transitions
 2. **Game Flow Orchestration** - Async methods for each game phase
 3. **Event Emission** - Fires events at every significant action
@@ -219,6 +228,7 @@ Both platforms use:
 6. **UI Prompts** - Emits `UI_PROMPT` events with callbacks for user input
 
 **Key Methods**:
+
 ```javascript
 async startGame()
 async dealTiles()
@@ -236,6 +246,7 @@ promptUI(promptType, options, callback)  // Request user input
 Platform-agnostic AI decision engine with difficulty scaling:
 
 **Capabilities**:
+
 - `chooseDiscard(playerData, handData)` - Select tile to discard
 - `claimDiscard(playerData, tile, claimTypes)` - Decide on claim
 - `charlestonPass(playerData, direction)` - Choose tiles to pass
@@ -244,6 +255,7 @@ Platform-agnostic AI decision engine with difficulty scaling:
 - `getTileRecommendations(handData)` - Rank tiles by "keep value"
 
 **Difficulty Levels** (easy/medium/hard):
+
 - Pattern consideration depth
 - Exposure timing thresholds
 - Mistake randomness factor
@@ -256,16 +268,19 @@ Platform-agnostic AI decision engine with difficulty scaling:
 Pattern validation and hand ranking engine:
 
 **Core Methods**:
+
 - `validateHand(tiles)` - Checks if hand matches winning patterns
 - `rankHand(tiles)` - Scores hand based on proximity to winning
 - `matchComponents(tiles, pattern)` - Breaks hand into valid component groups
 
 **Year-Specific Patterns**:
+
 - [core/card/2017/](core/card/2017/) through [core/card/2025/](core/card/2025/)
 - Each year has category-specific files: handsSinglesPairs.js, handsConsecutive.js, handsLikeNumbers.js, hands2468.js, hands13579.js, handsWindsDragons.js, handsQuints.js
 - Patterns define valid 14-tile combinations using components (Pair, Pung, Kong, Quint, Run)
 
 **Adding New Years**:
+
 1. Create new directory under `core/card/YYYY/`
 2. Import pattern categories in `core/card/cardYYYY.js`
 3. Update `core/card/card.js` init() to load the new year
@@ -279,6 +294,7 @@ Pattern validation and hand ranking engine:
 Translates GameController events into Phaser-specific rendering calls.
 
 **Pattern**: Listens to events, delegates to managers:
+
 ```javascript
 setupEventListeners() {
   this.gameController.on("TILE_DRAWN", (data) => this.onTileDrawn(data));
@@ -290,30 +306,36 @@ setupEventListeners() {
 ### Desktop Managers
 
 **ButtonManager** ([desktop/managers/ButtonManager.js](desktop/managers/ButtonManager.js))
+
 - Updates button visibility per game state
 - Manages button text (e.g., "Pass Right", "Mahjong!")
 - Routes clicks to GameController callbacks
 
 **DialogManager** ([desktop/managers/DialogManager.js](desktop/managers/DialogManager.js))
+
 - Modal overlays for prompts (courtesy vote, etc.)
 - Promise-based async dialog flow
 
 **SelectionManager** ([desktop/managers/SelectionManager.js](desktop/managers/SelectionManager.js))
+
 - Tracks selected tiles (Set data structure)
 - Validates selection rules per mode (Charleston: exactly 3, no jokers)
 - Visual feedback (tile Y-position: 575 = selected, 600 = normal)
 
 **HandRenderer** ([desktop/renderers/HandRenderer.js](desktop/renderers/HandRenderer.js))
+
 - Positions tiles for all 4 players
 - BOTTOM (human): horizontal row, face-up, full size
 - RIGHT/TOP/LEFT (AI): scaled 0.75, face-down (unless debug)
 - Handles exposed tile sets (Pung/Kong/Quint)
 
 **TileManager** ([desktop/managers/TileManager.js](desktop/managers/TileManager.js))
+
 - Registry of all 152 tile sprites (index → Tile object)
 - Sprite pool management
 
 **HintAnimationManager** ([desktop/managers/HintAnimationManager.js](desktop/managers/HintAnimationManager.js))
+
 - AI hint system (suggests best discard)
 - Tile glow animations
 
@@ -344,6 +366,7 @@ setupEventListeners() {
 Parallel to PhaserAdapter - translates GameController events into HTML/CSS updates.
 
 **Pattern**: Listens to events, delegates to components:
+
 ```javascript
 setupEventListeners() {
   this.gameController.on("TILE_DRAWN", (data) => this.onTileDrawn(data));
@@ -355,23 +378,29 @@ setupEventListeners() {
 ### Mobile Components
 
 **HandRenderer** ([mobile/renderers/HandRenderer.js](mobile/renderers/HandRenderer.js))
+
 - Creates `<div>` elements for tiles (no Phaser)
 - CSS-based layout (flexbox)
 - Touch-friendly sizing
 
 **MobileTile** ([mobile/components/MobileTile.js](mobile/components/MobileTile.js))
+
 - Single tile component with CSS sprite positioning
 
 **DiscardPile** ([mobile/components/DiscardPile.js](mobile/components/DiscardPile.js))
+
 - Displays discarded tiles in horizontal scrolling grid
 
 **OpponentBar** ([mobile/components/OpponentBar.js](mobile/components/OpponentBar.js))
+
 - Shows opponent hand count, exposed tiles, wind indicator
 
 **InstallPrompt** ([mobile/components/InstallPrompt.js](mobile/components/InstallPrompt.js))
+
 - PWA install flow (appears after 3 games)
 
 **SettingsSheet** ([mobile/components/SettingsSheet.js](mobile/components/SettingsSheet.js))
+
 - Bottom sheet for settings
 
 ### Mobile UI Structure ([mobile/index.html](mobile/index.html))
@@ -387,6 +416,7 @@ setupEventListeners() {
 ## Data Models (Platform-Agnostic)
 
 ### TileData ([core/models/TileData.js](core/models/TileData.js))
+
 ```javascript
 class TileData {
   constructor(suit, rank, index) { ... }
@@ -395,6 +425,7 @@ class TileData {
 ```
 
 ### HandData ([core/models/HandData.js](core/models/HandData.js))
+
 ```javascript
 class HandData {
   constructor(tiles, exposures) { ... }
@@ -404,6 +435,7 @@ class HandData {
 ```
 
 ### PlayerData ([core/models/PlayerData.js](core/models/PlayerData.js))
+
 ```javascript
 class PlayerData {
   constructor(playerIndex, wind, hand) { ... }
@@ -497,6 +529,7 @@ async mainGameLoop() {
 ### Debugging
 
 Toggle debug output via `gdebug` flag in [utils.js:14](utils.js#L14):
+
 ```javascript
 export const gdebug = 0; // Set to 1 to enable debug messages
 ```
@@ -504,6 +537,7 @@ export const gdebug = 0; // Set to 1 to enable debug messages
 ### Training Mode
 
 Enable via Settings → Training Mode checkbox. Allows:
+
 - Selecting specific starting hands
 - Choosing tile count (1-14)
 - Skipping Charleston phase
@@ -513,6 +547,7 @@ Controlled by GameController methods (search for "training" in [core/GameControl
 ### Constants
 
 All game enums and magic numbers in [constants.js](constants.js):
+
 - `STATE`: Game state machine states
 - `SUIT`, `WIND`, `DRAGON`: Tile types
 - `PLAYER`: Player positions (BOTTOM=0, RIGHT=1, TOP=2, LEFT=3)
@@ -522,6 +557,7 @@ All game enums and magic numbers in [constants.js](constants.js):
 ### Tile Representation
 
 Tiles have two representations:
+
 1. **Sprite representation** (Desktop): Phaser sprite objects with visual properties
 2. **Logical representation** (Core): `TileData {suit, rank, index}` objects
    - `index` is unique identifier (0-151) for each physical tile
@@ -529,6 +565,7 @@ Tiles have two representations:
 ### Legacy Phaser Objects
 
 **IMPORTANT**: The codebase is in transition:
+
 - Old files: [desktop/gameObjects/gameObjects_table.js](desktop/gameObjects/gameObjects_table.js), [desktop/gameObjects/gameObjects_hand.js](desktop/gameObjects/gameObjects_hand.js), [desktop/gameObjects/gameObjects_player.js](desktop/gameObjects/gameObjects_player.js)
 - These are **being phased out** in favor of Data models
 - New code should use [core/models/](core/models/) classes
@@ -544,6 +581,7 @@ Tiles have two representations:
 ## Build Configuration
 
 **Vite Config** ([vite.config.js](vite.config.js)):
+
 ```javascript
 rollupOptions: {
   input: {
@@ -554,12 +592,14 @@ rollupOptions: {
 ```
 
 **GitHub Pages Deployment**:
+
 - Base path: `/mahjong/`
 - Deployed from `dist/` directory
 
 ## Testing
 
 **Playwright Tests** ([tests/](tests/)):
+
 - Desktop tests: Test desktop Phaser version
 - Mobile tests: Test mobile HTML/CSS version
 - Run `npm test` (headless) or `npm run test:ui` (interactive)

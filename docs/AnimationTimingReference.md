@@ -152,6 +152,7 @@ export const ANIMATION_DELAYS = {
 ### Charleston Animations
 
 **Timeline:**
+
 ```
 0ms     → Pass out starts (tiles slide away)
 600ms   → Pass out completes
@@ -176,6 +177,7 @@ Total: ~2500ms (2.5 seconds)
 | Sort (FLIP) | 1900ms | 800ms | Material | 2700ms |
 
 **CSS Implementation:**
+
 ```css
 .tile-charleston-leaving {
     animation: charleston-pass-out 600ms ease-in-out forwards;
@@ -195,6 +197,7 @@ Total: ~2500ms (2.5 seconds)
 ### Dealing Animations
 
 **Fast Mode (Default):**
+
 ```
 0ms     → Wall appears
 200ms   → First tile deals
@@ -206,6 +209,7 @@ Total: ~3000ms (3 seconds)
 ```
 
 **Slow Mode (Tutorial):**
+
 ```
 0ms     → Wall appears
 500ms   → First tile deals
@@ -231,6 +235,7 @@ Total: ~10000ms (10 seconds)
 ### Discard Animations
 
 **Human Player:**
+
 ```
 0ms     → Tile lifts (prep)
 100ms   → Tile throws (arc animation)
@@ -241,6 +246,7 @@ Total: ~600ms
 ```
 
 **AI Player:**
+
 ```
 0ms     → Tile throws (no prep)
 200ms   → Tile lands in discard pile
@@ -262,6 +268,7 @@ Total: ~200ms (faster, no bounce)
 ### Claim Animations
 
 **Claim Flow:**
+
 ```
 0ms     → Highlight discarded tile
 300ms   → Tile travels to claiming player
@@ -313,51 +320,63 @@ Total: ~950ms
 ### Common Bezier Curves
 
 **Linear** (`linear`)
+
 ```
 Progress: 0% ────────────────────────── 100%
 Time:     |─────────────────────────────|
           Start                        End
 ```
+
 Use: Progress bars, loading indicators
 
 **Ease-Out** (`ease-out`)
+
 ```
 Progress: 0% ─────────────────▄▄▄▄▄▄▄▄▄ 100%
 Time:     |─────────────────────────────|
           Start                        End
 ```
+
 Use: Entering animations, receive tiles, settle effects
 
 **Ease-In** (`ease-in`)
+
 ```
 Progress: 0% ▄▄▄▄▄▄▄▄▄───────────────── 100%
 Time:     |─────────────────────────────|
           Start                        End
 ```
+
 Use: Exiting animations, discard throw
 
 **Ease-In-Out** (`ease-in-out`)
+
 ```
 Progress: 0% ▄▄▄▄────────────▄▄▄▄ 100%
 Time:     |─────────────────────────────|
           Start                        End
 ```
+
 Use: Charleston pass, symmetric transitions
 
 **Material Design** (`cubic-bezier(0.4, 0.0, 0.2, 1)`)
+
 ```
 Progress: 0% ▄▄▄▄▄──────────▄▄▄▄▄▄▄▄ 100%
 Time:     |─────────────────────────────|
           Start                        End
 ```
+
 Use: Sort animations, UI transitions
 
 **Spring/Bounce** (`cubic-bezier(0.5, 1.5, 0.5, 1)`)
+
 ```
 Progress: 0% ▄▄────────────▄▄▆██▆▄ 100%
 Time:     |─────────────────────────────|
           Start     Overshoot!       End
 ```
+
 Use: Settle effects, bounce animations
 
 ---
@@ -427,6 +446,7 @@ const duration = prefersReducedMotion
 ```
 
 **Reduced Motion Rules:**
+
 - Maximum duration: 50ms
 - No bounce/spring effects
 - No rotation animations
@@ -434,6 +454,7 @@ const duration = prefersReducedMotion
 - Skip purely decorative animations
 
 **CSS Implementation:**
+
 ```css
 @media (prefers-reduced-motion: reduce) {
     * {
@@ -460,6 +481,7 @@ const duration = prefersReducedMotion
 **Target:** 60fps = 16.67ms per frame
 
 **Animation Budget per Frame:**
+
 - JavaScript execution: < 5ms
 - Style calculation: < 3ms
 - Layout: < 2ms
@@ -471,11 +493,13 @@ const duration = prefersReducedMotion
 ### Animation Constraints
 
 **Simultaneous Animations:**
+
 - Maximum 4 tiles animating at once (one per player)
 - Avoid animating > 20 elements simultaneously
 - Batch DOM updates with `requestAnimationFrame`
 
 **GPU-Accelerated Properties:**
+
 - ✅ `transform` (translate, scale, rotate)
 - ✅ `opacity`
 - ❌ `width`, `height` (causes layout)
@@ -489,11 +513,13 @@ const duration = prefersReducedMotion
 ### Manual Testing
 
 **Visual Inspection:**
+
 1. Verify animation feels "natural"
 2. Check for jank/stuttering
 3. Ensure timing matches constants
 
 **Tools:**
+
 - Chrome DevTools Performance tab
 - Firefox Animation Inspector
 - React DevTools Profiler
@@ -501,6 +527,7 @@ const duration = prefersReducedMotion
 ### Automated Testing
 
 **Playwright Tests:**
+
 ```javascript
 test('Charleston animation completes in expected time', async ({ page }) => {
     const start = Date.now();
@@ -519,6 +546,7 @@ test('Charleston animation completes in expected time', async ({ page }) => {
 ### Performance Monitoring
 
 **FPS Tracking:**
+
 ```javascript
 let lastFrameTime = performance.now();
 let fps = 60;
@@ -543,6 +571,7 @@ function measureFPS() {
 ### ❌ Anti-Patterns
 
 **1. Using `setTimeout` instead of CSS animations:**
+
 ```javascript
 // BAD: JavaScript animation loop
 function animate() {
@@ -551,6 +580,7 @@ function animate() {
     if (x < 100) setTimeout(animate, 16);
 }
 ```
+
 ```css
 /* GOOD: CSS animation */
 @keyframes slide {
@@ -560,6 +590,7 @@ function animate() {
 ```
 
 **2. Animating layout properties:**
+
 ```css
 /* BAD: Causes layout thrashing */
 .tile {
@@ -573,6 +604,7 @@ function animate() {
 ```
 
 **3. Not cleaning up animations:**
+
 ```javascript
 // BAD: Leaves animation classes
 element.classList.add('animating');
@@ -584,6 +616,7 @@ element.classList.remove('animating');
 ```
 
 **4. Hardcoded timing values:**
+
 ```javascript
 // BAD: Magic numbers
 await this.delay(600);

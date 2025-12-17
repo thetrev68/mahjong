@@ -39,7 +39,7 @@ This is a well-architected multi-platform American Mahjong game with strong even
 
 **Problem Summary:** 200+ console.log/warn/error statements throughout production code, many are debug statements that should be removed.
 
-#### Specific Locations:
+#### Specific Locations
 
 **File: `core/AIEngine.js:364`**
 
@@ -122,12 +122,12 @@ export const debugWarn = (message, data = null) => {
 };
 ```
 
-2. **Search and replace systematically:**
+1. **Search and replace systematically:**
    - Find all `console.log(` and evaluate for removal
    - Keep only critical error logs (use `console.error()`)
    - Use `debugPrint()` for development-only output
 
-3. **Run ESLint rule:**
+2. **Run ESLint rule:**
    Add no-console rule to `.eslintrc.js`:
 
    ```javascript
@@ -145,7 +145,7 @@ export const debugWarn = (message, data = null) => {
 
 **Problem:** Error handling is inconsistent across codebase - some errors logged and ignored, others thrown, others silently fallback.
 
-#### Specific Issues:
+#### Specific Issues
 
 **File: `core/GameController.js:845-846`**
 
@@ -204,7 +204,7 @@ try {
 - Game stuck in waiting state
 - **Problem:** User can't proceed
 
-#### Recommendations:
+#### Recommendations
 
 1. **Define error handling strategy:**
 
@@ -231,7 +231,7 @@ export class RenderingError extends GameError {
 }
 ```
 
-2. **Use in GameController:**
+1. **Use in GameController:**
 
 ```javascript
 if (!tileToDiscard) {
@@ -239,7 +239,7 @@ if (!tileToDiscard) {
 }
 ```
 
-3. **Handle in adapters:**
+1. **Handle in adapters:**
 
 ```javascript
 try {
@@ -308,7 +308,7 @@ x: 1000, y: 520
 // - Timing values
 ```
 
-#### Recommendations:
+#### Recommendations
 
 1. **Expand `constants.js` with animation configuration:**
 
@@ -350,7 +350,7 @@ export const TILE_POSITIONS = {
 };
 ```
 
-2. **Update code to use constants:**
+1. **Update code to use constants:**
 
 ```javascript
 // Before:
@@ -366,7 +366,7 @@ tile.y = 575;
 tile.y = TILE_POSITIONS.SELECTED_Y;
 ```
 
-3. **Add comments explaining values:**
+1. **Add comments explaining values:**
 
 ```javascript
 // playerLayout.js
@@ -467,7 +467,7 @@ private async updateWallState(sequence) {
 }
 ```
 
-2. **Break `charlestonPhase1()` into steps:**
+1. **Break `charlestonPhase1()` into steps:**
 
 ```javascript
 async charlestonPhase1() {
@@ -477,12 +477,12 @@ async charlestonPhase1() {
 }
 ```
 
-3. **Apply to all oversized methods:**
+1. **Apply to all oversized methods:**
    - `courtesyPhase()` → `collectVotes()` + `revealVoteResults()` + `exposeTiles()`
    - `mainGameLoop()` → Keep loop structure, extract phase handlers
    - `queryClaimDiscard()` → `shouldClaim()` + `resolveClaim()` + `endTurn()`
 
-4. **Testing benefit:**
+2. **Testing benefit:**
 
 ```javascript
 // Before - can't test dealTiles in isolation
@@ -502,7 +502,7 @@ test("dealTiles distributes exactly 108 tiles to 4 players", () => {
 **Severity:** 🟡 **MEDIUM**
 **Impact:** Confusing codebase, maintenance burden, false sense of test coverage
 
-#### Unused Unit Tests:
+#### Unused Unit Tests
 
 **Files:**
 
@@ -521,15 +521,18 @@ test("dealTiles distributes exactly 108 tiles to 4 players", () => {
 - `jsdom` package dependency (line 27 in package.json) - only needed for unit tests
 - Never called in active test suite
 
-#### Recommendations:
+#### Recommendations
 
 1. **Decision point:** Keep or delete unit tests?
    - **Option A (RECOMMENDED):** Integrate into test suite
+
      ```javascript
      // playwright.config.js
      testMatch: ['tests/**/*.{test,spec}.js'],
      ```
+
    - **Option B:** Delete to reduce confusion
+
      ```bash
      rm -rf tests/unit/
      ```
@@ -540,6 +543,7 @@ test("dealTiles distributes exactly 108 tiles to 4 players", () => {
    - Target 70%+ coverage on core/
 
 3. **Clean up dependencies:**
+
    ```bash
    # If deleting unit tests:
    npm uninstall jsdom
@@ -552,7 +556,7 @@ test("dealTiles distributes exactly 108 tiles to 4 players", () => {
 **Severity:** 🟡 **MEDIUM**
 **Impact:** Features not fully implemented, unclear what's done
 
-#### Open TODOs:
+#### Open TODOs
 
 **File: `core/GameController.js:1369`** (Joker Exchange Feature)
 
@@ -606,7 +610,7 @@ test("dealTiles distributes exactly 108 tiles to 4 players", () => {
 - Status: File marked for removal
 - **Action:** CREATE MIGRATION PLAN - which code depends on this?
 
-#### Recommendations:
+#### Recommendations
 
 1. **Create GitHub issues for each TODO:**
 
@@ -650,7 +654,7 @@ test("dealTiles distributes exactly 108 tiles to 4 players", () => {
 **Severity:** 🟢 **LOW-MEDIUM**
 **Impact:** Confusion, accidental usage of deprecated APIs
 
-#### Methods Marked Deprecated:
+#### Methods Marked Deprecated
 
 **File: `desktop/managers/TileManager.js:127-136`**
 
@@ -672,7 +676,7 @@ getTileAtHandPosition(...) {
 - Error logged instead of thrown (inconsistent with function name)
 - Takes code space
 
-#### Recommendations:
+#### Recommendations
 
 1. **If migration complete - delete entirely:**
 
@@ -685,7 +689,7 @@ insertTileIntoHand() {
 // Just delete the method
 ```
 
-2. **If still migrating - use proper deprecation:**
+1. **If still migrating - use proper deprecation:**
 
 ```javascript
 /**
@@ -699,7 +703,7 @@ insertTileIntoHand(_playerIndex, _tile) {
 }
 ```
 
-3. **Add deprecation policy to CLAUDE.md:**
+1. **Add deprecation policy to CLAUDE.md:**
 
 ```markdown
 ## Deprecation Policy
@@ -717,7 +721,7 @@ insertTileIntoHand(_playerIndex, _tile) {
 **Severity:** 🟢 **LOW**
 **Impact:** Code clutter, confusion about what code is active
 
-#### Examples:
+#### Examples
 
 **File: `mobile/main.js:45`**
 
@@ -731,7 +735,7 @@ insertTileIntoHand(_playerIndex, _tile) {
 // console.log("Tile.create() called for tile:", this.suit, this.number, "sprite:", this.sprite);
 ```
 
-#### Recommendations:
+#### Recommendations
 
 1. **Delete all commented code (keep git history):**
 
@@ -740,7 +744,7 @@ insertTileIntoHand(_playerIndex, _tile) {
 grep -r "^\s*//.*console\|^\s*//" src/
 ```
 
-2. **If unsure about removing - commit before deletion:**
+1. **If unsure about removing - commit before deletion:**
 
 ```bash
 git commit -m "chore: Clean up commented debug code"
@@ -756,7 +760,7 @@ git rm <file>
 
 **Problem:** Event registration logic nearly identical in both adapters but slightly different.
 
-#### Desktop Pattern (`PhaserAdapter.js:98-136`):
+#### Desktop Pattern (`PhaserAdapter.js:98-136`)
 
 ```javascript
 setupEventListeners() {
@@ -770,7 +774,7 @@ setupEventListeners() {
 }
 ```
 
-#### Mobile Pattern (`MobileRenderer.js:169-190`):
+#### Mobile Pattern (`MobileRenderer.js:169-190`)
 
 ```javascript
 registerEventListeners() {
@@ -783,7 +787,7 @@ registerEventListeners() {
 }
 ```
 
-#### Differences:
+#### Differences
 
 | Aspect                | Desktop   | Mobile | Better |
 | --------------------- | --------- | ------ | ------ |
@@ -792,7 +796,7 @@ registerEventListeners() {
 | Handler naming        | `on*`     | `on*`  | Same ✓ |
 | Memory safety         | Leak risk | Safe   | Mobile |
 
-#### Recommendations:
+#### Recommendations
 
 1. **Create base adapter class:**
 
@@ -829,7 +833,7 @@ export class BaseAdapter {
 }
 ```
 
-2. **Update desktop adapter:**
+1. **Update desktop adapter:**
 
 ```javascript
 // desktop/adapters/PhaserAdapter.js
@@ -857,7 +861,7 @@ export class PhaserAdapter extends BaseAdapter {
 }
 ```
 
-3. **Update mobile renderer:**
+1. **Update mobile renderer:**
 
 ```javascript
 // mobile/MobileRenderer.js
@@ -884,7 +888,7 @@ export class MobileRenderer extends BaseAdapter {
 }
 ```
 
-4. **Benefits:**
+1. **Benefits:**
    - Single source of truth for subscription management
    - Automatic cleanup (no forgotten unsubscribes)
    - Consistent pattern across platforms
@@ -904,7 +908,7 @@ export class MobileRenderer extends BaseAdapter {
 - Some files well documented (EventEmitter.js ✓, TileData.js ✓)
 - Many files missing JSDoc (AIEngine.js ❌, AnimationController.js ❌)
 
-#### Missing Documentation Examples:
+#### Missing Documentation Examples
 
 **File: `core/AIEngine.js`** - No JSDoc on public methods:
 
@@ -952,7 +956,7 @@ constructor(config) {
 }
 ```
 
-#### Good Examples (for reference):
+#### Good Examples (for reference)
 
 **File: `core/events/EventEmitter.js` ✓**
 
@@ -989,7 +993,7 @@ export class TileData {
 }
 ```
 
-#### Recommendations:
+#### Recommendations
 
 1. **Add JSDoc to all public methods in core/ directory:**
 
@@ -1002,7 +1006,7 @@ export class TileData {
 setDifficulty(difficulty) { ... }
 ```
 
-2. **Add class-level documentation:**
+1. **Add class-level documentation:**
 
 ```javascript
 /**
@@ -1019,7 +1023,7 @@ setDifficulty(difficulty) { ... }
 export class AIEngine { ... }
 ```
 
-3. **Configure ESLint for require-jsdoc:**
+1. **Configure ESLint for require-jsdoc:**
 
 ```javascript
 // eslint.config.js
@@ -1036,7 +1040,7 @@ rules: {
 }
 ```
 
-4. **Add JSDoc coverage target:**
+1. **Add JSDoc coverage target:**
 
 ```bash
 # Add to CI/CD
@@ -1050,7 +1054,7 @@ npm run jsdoc:check  # New script to verify coverage
 **Severity:** 🟢 **LOW**
 **Impact:** Developer confusion, outdated knowledge base
 
-#### Discrepancies Found:
+#### Discrepancies Found
 
 **Issue 1: Cross-Platform Utilities**
 
@@ -1118,7 +1122,7 @@ CLAUDE.md (line 140) shows:
 
 Reality: Files exist but gameObjects/ directory isn't clearly marked as legacy. No deprecation timeline.
 
-#### Recommendations:
+#### Recommendations
 
 1. **Create deprecation section in CLAUDE.md:**
 
@@ -1144,7 +1148,7 @@ These files are maintained for backward compatibility but should not be used for
 - HandRenderer partially migrated (waiting on desktop)
 ```
 
-2. **Update to clarify shared utilities:**
+1. **Update to clarify shared utilities:**
 
 ```markdown
 ## Cross-Platform Utilities
@@ -1164,7 +1168,7 @@ These files are maintained for backward compatibility but should not be used for
 - Tile display utilities
 ```
 
-3. **Document animation architecture mismatch:**
+1. **Document animation architecture mismatch:**
 
 ```markdown
 ## Animation Sequencers
@@ -1210,7 +1214,7 @@ Option A: Rename to desktopSettings.js
 Option B: Move to desktop/managers/DesktopSettingsManager.js
 ```
 
-2. **Update comment:**
+1. **Update comment:**
 
 ```javascript
 /**
@@ -1236,7 +1240,7 @@ Option B: Move to desktop/managers/DesktopSettingsManager.js
 
 **Problem:** Mobile and desktop adapters have different patterns for event management.
 
-#### Comparison:
+#### Comparison
 
 **Desktop (`PhaserAdapter.js`) - No cleanup:**
 
@@ -1287,7 +1291,7 @@ export class MobileRenderer {
 }
 ```
 
-#### Problems This Creates:
+#### Problems This Creates
 
 1. **Memory Leak Risk (Desktop):**
    - Event listeners never unsubscribed
@@ -1303,7 +1307,7 @@ export class MobileRenderer {
    - No cleanup path exists for desktop
    - Even if listeners removed, managers have state to clean
 
-#### Recommendations:
+#### Recommendations
 
 1. **Create base adapter (see Section 2.5 for full code):**
 
@@ -1329,7 +1333,7 @@ export class BaseAdapter {
 }
 ```
 
-2. **Extend in PhaserAdapter:**
+1. **Extend in PhaserAdapter:**
 
 ```javascript
 // desktop/adapters/PhaserAdapter.js
@@ -1359,7 +1363,7 @@ export class PhaserAdapter extends BaseAdapter {
 }
 ```
 
-3. **Call destroy() on game restart:**
+1. **Call destroy() on game restart:**
 
 ```javascript
 // In GameScene.js or game restart logic:
@@ -1370,7 +1374,7 @@ async restartGame() {
 }
 ```
 
-4. **Update mobile renderer:**
+1. **Update mobile renderer:**
 
 ```javascript
 // mobile/MobileRenderer.js
@@ -1393,7 +1397,7 @@ export class MobileRenderer extends BaseAdapter {
 
 **Problem:** While GameController is primary state holder, adapters store UI state that mirrors or supplements game state.
 
-#### State in PhaserAdapter:
+#### State in PhaserAdapter
 
 **File: `desktop/adapters/PhaserAdapter.js:79-82`**
 
@@ -1404,7 +1408,7 @@ this.pendingHumanGlowTile = null; // UI state
 this.activeHumanGlowTile = null; // UI state
 ```
 
-#### Analysis:
+#### Analysis
 
 | State                  | Location      | Purpose                        | OK?             |
 | ---------------------- | ------------- | ------------------------------ | --------------- |
@@ -1424,7 +1428,7 @@ this.gameController.emit("HAND_UPDATED", data); // This will be skipped
 
 **Problem:** This suggests duplicate events from GameController
 
-#### Recommendations:
+#### Recommendations
 
 1. **Investigate root cause of duplicate events:**
 
@@ -1440,7 +1444,7 @@ emit(eventName, data) {
 // Check if HAND_UPDATED fires twice in same operation
 ```
 
-2. **Option A (Fix at source):**
+1. **Option A (Fix at source):**
 
 ```javascript
 // In GameController - ensure only one HAND_UPDATED per operation
@@ -1451,7 +1455,7 @@ async tileDraw(player) {
 }
 ```
 
-3. **Option B (Fix in adapter):**
+1. **Option B (Fix in adapter):**
    If duplicate events are necessary, use deduplication:
 
 ```javascript
@@ -1466,7 +1470,7 @@ onHandUpdated(data) {
 }
 ```
 
-4. **Remove workaround flag:**
+1. **Remove workaround flag:**
 
 ```javascript
 // After fixing root cause:
@@ -1487,7 +1491,7 @@ onHandUpdated(data) {
 - Desktop has `desktop/config/` with platform-specific layout
 - Core has utilities scattered in main files
 
-#### Opportunities:
+#### Opportunities
 
 1. **Animation Timing Constants** - Currently scattered:
 
@@ -1506,7 +1510,7 @@ DURATION: 400,  // Discard animation
 DELAY: 100,     // Tile draw
 ```
 
-2. **Tile Display Utilities** - Duplicated:
+1. **Tile Display Utilities** - Duplicated:
 
 ```javascript
 // Root level: tileDisplayUtils.js (17 KB)
@@ -1514,7 +1518,7 @@ DELAY: 100,     // Tile draw
 // Both have similar tile positioning logic
 ```
 
-3. **Position Utilities:**
+1. **Position Utilities:**
 
 ```javascript
 // mobile/utils/positionUtils.js
@@ -1523,7 +1527,7 @@ export function getElementCenterPosition(element) { ... }
 // Could be useful for desktop too
 ```
 
-#### Recommendations:
+#### Recommendations
 
 1. **Create shared animation configuration:**
 
@@ -1552,7 +1556,7 @@ export const ANIMATION_SEQUENCES = {
 };
 ```
 
-2. **Use in GameController:**
+1. **Use in GameController:**
 
 ```javascript
 // core/GameController.js
@@ -1564,7 +1568,7 @@ async charlestonPhase1() {
 }
 ```
 
-3. **Create shared position utilities:**
+1. **Create shared position utilities:**
 
 ```javascript
 // shared/PositionUtils.js
@@ -1574,7 +1578,7 @@ export function calculateDistance(from, to) { ... }
 // Use in mobile and desktop
 ```
 
-4. **Consolidate tile display utils:**
+1. **Consolidate tile display utils:**
 
 ```
 Option A: Keep tileDisplayUtils.js at root, remove duplication
@@ -1598,7 +1602,7 @@ This single class handles:
 4. **Audio Controls** - Mute/unmute, volume adjust
 5. **Event Binding** - Listen for button clicks
 
-#### Example of Mixed Concerns:
+#### Example of Mixed Concerns
 
 ```javascript
 // Line 1: UI presentation
@@ -1625,7 +1629,7 @@ saveSettings() {
 }
 ```
 
-#### Recommendations:
+#### Recommendations
 
 1. **Extract SettingsUI component:**
 
@@ -1652,7 +1656,7 @@ export class SettingsUI {
 }
 ```
 
-2. **Extract AudioControls:**
+1. **Extract AudioControls:**
 
 ```javascript
 // desktop/managers/AudioControlsManager.js
@@ -1671,7 +1675,7 @@ export class AudioControlsManager {
 }
 ```
 
-3. **Extract SettingsController:**
+1. **Extract SettingsController:**
 
 ```javascript
 // desktop/managers/SettingsController.js
@@ -1698,7 +1702,7 @@ export class SettingsController {
 }
 ```
 
-4. **Result:**
+1. **Result:**
 
 ```javascript
 // Before: 534 lines in one class doing 5 different things
@@ -1721,7 +1725,7 @@ export class SettingsController {
 
 **Problem:** Event listeners are never unsubscribed. After game restart, old listeners still fire.
 
-#### Specific Issues:
+#### Specific Issues
 
 **Desktop - No cleanup anywhere:**
 
@@ -1757,7 +1761,7 @@ setupButtonListeners() {
 // No removeEventListener when game ends
 ```
 
-#### Memory Leak Scenario:
+#### Memory Leak Scenario
 
 ```javascript
 // User starts game 1
@@ -1776,7 +1780,7 @@ adapter2.setupEventListeners();
 // Each event fired triggers 4+ handlers
 ```
 
-#### Mobile - Correct Pattern:
+#### Mobile - Correct Pattern
 
 **File: `mobile/MobileRenderer.js:148-167`**
 
@@ -1796,7 +1800,7 @@ destroy() {
 }
 ```
 
-#### Recommendations:
+#### Recommendations
 
 1. **Implement destroy() pattern everywhere (see Section 4.1 for base class):**
 
@@ -1837,7 +1841,7 @@ export class ButtonManager {
 }
 ```
 
-2. **Call destroy() on game reset:**
+1. **Call destroy() on game reset:**
 
 ```javascript
 // In GameScene.js or wherever games are restarted:
@@ -1852,7 +1856,7 @@ async startNewGame() {
 }
 ```
 
-3. **Document cleanup requirement in CLAUDE.md:**
+1. **Document cleanup requirement in CLAUDE.md:**
 
 ```markdown
 ## Memory Management
@@ -1872,7 +1876,7 @@ All adapters and managers must implement destroy() method:
 **Severity:** 🟢 **LOW**
 **Impact:** Minor performance overhead in specific scenarios
 
-#### Example 1 - AIEngine:
+#### Example 1 - AIEngine
 
 **File: `core/AIEngine.js:146`**
 
@@ -1889,7 +1893,7 @@ Analysis:
 - Not called frequently (only during hand analysis)
 - **Status:** Low impact, no fix needed
 
-#### Example 2 - Mobile Hand Rendering:
+#### Example 2 - Mobile Hand Rendering
 
 **File: `mobile/renderers/HandRenderer.js:159-246`**
 
@@ -1908,7 +1912,7 @@ Analysis:
 - Only called on hand changes (infrequent)
 - **Status:** Acceptable pattern
 
-#### Recommendations:
+#### Recommendations
 
 1. **Monitor performance in production** - No immediate action needed
 2. **If performance issues arise:**
@@ -1944,7 +1948,7 @@ timers.forEach(id => clearTimeout(id));
 **Severity:** 🟡 **MEDIUM**
 **Impact:** Potential garbage collection issues if destroy() not called
 
-#### Problem:
+#### Problem
 
 **File: `desktop/managers/SelectionManager.js:22-26`**
 
@@ -1961,7 +1965,7 @@ this.selectionManager = selectionManager;
 
 **Circular dependency:** SelectionManager ↔ ButtonManager
 
-#### Scenario:
+#### Scenario
 
 ```
 PhaserAdapter
@@ -1975,7 +1979,7 @@ If destroy() doesn't null out these references:
   → Memory leak even after adapter is destroyed
 ```
 
-#### Recommendations:
+#### Recommendations
 
 1. **Implement destroy() with explicit reference cleanup:**
 
@@ -1994,7 +1998,7 @@ destroy() {
 }
 ```
 
-2. **Or use WeakMap to avoid strong references:**
+1. **Or use WeakMap to avoid strong references:**
 
 ```javascript
 // desktop/adapters/PhaserAdapter.js
@@ -2027,7 +2031,7 @@ getSelectionManager() {
 | **Settings UI**          | DesktopSettingsManager | SettingsSheet component      | ✓ OK   | Both supported              |
 | **Touch Support**        | ✗ Mouse only           | ✓ Full touch gestures        | ✓ OK   | Appropriate for platforms   |
 
-#### Detailed Gaps:
+#### Detailed Gaps
 
 **Problem 1: Animation Sequencers on Desktop**
 
@@ -2179,66 +2183,66 @@ npm update phaser
 
 ### 🟡 High Priority (Next Sprint)
 
-4. **Implement PhaserAdapter.destroy()** (Section 4.1)
+1. **Implement PhaserAdapter.destroy()** (Section 4.1)
    - Completes memory leak fix
    - **Effort:** 1 hour
    - **Impact:** High - finalizes cleanup pattern
 
-5. **Extract Animation Sequencers on Desktop** (Section 6.1)
+2. **Extract Animation Sequencers on Desktop** (Section 6.1)
    - Matches mobile architecture (200 lines → 3 classes)
    - **Effort:** 3 hours
    - **Impact:** Medium - consistency, testability
 
-6. **Resolve TODO Comments** (Section 2.2)
+3. **Resolve TODO Comments** (Section 2.2)
    - 12 incomplete features/fixes
    - **Effort:** 2-8 hours depending on scope
    - **Impact:** Medium - completes features or documents decisions
 
-7. **Add JSDoc to Core Methods** (Section 3.1)
+4. **Add JSDoc to Core Methods** (Section 3.1)
    - AIEngine, AnimationController, GameController
    - **Effort:** 2 hours
    - **Impact:** Medium - developer experience
 
 ### 🟡 Medium Priority (Backlog)
 
-8. **Move Magic Numbers to Constants** (Section 1.3)
+1. **Move Magic Numbers to Constants** (Section 1.3)
    - 30+ hardcoded values scattered
    - **Effort:** 1.5 hours
    - **Impact:** Low-Medium - maintainability
 
-9. **Break Up Long Functions** (Section 1.4)
+2. **Break Up Long Functions** (Section 1.4)
    - GameController methods 100-200 lines
    - **Effort:** 3 hours
    - **Impact:** Medium - complexity reduction
 
-10. **Create Shared Animation Configuration** (Section 4.3)
+3. **Create Shared Animation Configuration** (Section 4.3)
     - Consolidate timing constants
     - **Effort:** 1 hour
     - **Impact:** Low - DRY principle
 
-11. **Fix Unit Tests or Remove Them** (Section 2.1)
+4. **Fix Unit Tests or Remove Them** (Section 2.1)
     - 3 unused test files
     - **Effort:** 1 hour
     - **Impact:** Low - test hygiene
 
-12. **Implement Mobile Blank Swap Animation** (Section 6.1)
+5. **Implement Mobile Blank Swap Animation** (Section 6.1)
     - Feature parity with desktop
     - **Effort:** 2 hours
     - **Impact:** Medium - consistent user experience
 
 ### 🟢 Low Priority (Nice to Have)
 
-13. **TypeScript Migration** (Section 7.2)
+1. **TypeScript Migration** (Section 7.2)
     - Enhanced type safety
     - **Effort:** 20+ hours
     - **Impact:** High long-term, medium immediate
 
-14. **Extract Base Adapter Class** (Section 2.5)
+2. **Extract Base Adapter Class** (Section 2.5)
     - Code reuse
     - **Effort:** 1 hour
     - **Impact:** Low - code organization
 
-15. **Update CLAUDE.md** (Section 3.2)
+3. **Update CLAUDE.md** (Section 3.2)
     - Accuracy and completeness
     - **Effort:** 30 min
     - **Impact:** Low - documentation

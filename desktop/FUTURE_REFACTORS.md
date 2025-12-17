@@ -33,12 +33,14 @@ handleClaimPrompt(options, callback) {
 ```
 
 **Considerations:**
+
 - **Risk:** HIGH - Claim flow was recently debugged by Codex and works correctly
 - **Benefit:** MEDIUM - Consistency with other prompts, less code
 - **UX Impact:** Changes from action panel buttons to modal overlay
 - **Priority:** LOW - Only refactor if DialogManager pattern proves more reliable
 
 **Decision:** Leave as-is for Phase 2. Revisit in Phase 3 only if:
+
 1. Users prefer modal dialogs over action panel buttons
 2. Button-based pattern causes issues
 3. Mobile renderer needs unified dialog approach
@@ -77,17 +79,20 @@ async handleCharlestonPassPrompt(options, callback) {
 ```
 
 **Considerations:**
+
 - **Risk:** MEDIUM - Requires GameController changes to support async handlers
 - **Benefit:** HIGH - Cleaner code, easier error handling, better async flow
 - **Implementation:** Requires `SelectionManager.requestSelection()` method (added in Phase 2)
 - **Priority:** MEDIUM - Good target for Phase 3
 
 **Blockers:**
+
 1. GameController's `promptUI()` method must support async callbacks
 2. Need to ensure promise rejections are handled (user cancels, timeout, etc.)
 3. State machine must wait for promise resolution before advancing
 
 **Next Steps:**
+
 1. Add `requestSelection()` to SelectionManager (Phase 2) ✅
 2. Test with ONE handler (e.g., discard) in controlled environment
 3. If successful, gradually migrate other handlers
@@ -132,11 +137,13 @@ const tileDatas = this.convertToTileData(selection);
 ```
 
 **Considerations:**
+
 - **Risk:** LOW - Simple extraction, easy to test
 - **Benefit:** LOW-MEDIUM - DRY principle, easier to maintain
 - **Priority:** LOW - Minor cleanup, not urgent
 
 **When to Implement:**
+
 - During Phase 3 code cleanup
 - If TileData format changes (easier to update in one place)
 - When adding new prompt handlers (establishes pattern)
@@ -163,17 +170,20 @@ this.handRenderer.showHand(playerIndex, playerIndex === PLAYER.BOTTOM);
 ```
 
 **Considerations:**
+
 - **Risk:** LOW - HandRenderer delegates to Hand.showHand() internally
 - **Benefit:** MEDIUM - Clear separation of concerns, easier to add mobile renderer
 - **Priority:** MEDIUM - Good for Phase 2/3
 
 **Implementation:**
+
 1. Find all `player.showHand()` calls in PhaserAdapter
 2. Replace with `this.handRenderer.showHand(playerIndex, faceUp)`
 3. Test rendering after each change
 4. Revert if any visual differences occur
 
 **Locations to Check:**
+
 - `onTilesDealt()` - line 402, 475
 - `onHandUpdated()` - likely uses player.showHand()
 - Any direct hand rendering in event handlers
@@ -211,11 +221,13 @@ onUIPrompt(data) {
 ```
 
 **Considerations:**
+
 - **Risk:** MEDIUM - Requires GameController changes
 - **Benefit:** HIGH - Messages defined in one place, easier i18n support
 - **Priority:** LOW-MEDIUM - Nice-to-have for Phase 3+
 
 **Benefits:**
+
 1. **Internationalization:** Messages in GameController can be localized
 2. **Consistency:** All prompts have proper messages
 3. **Mobile:** Mobile renderer gets same messages without duplication
@@ -253,11 +265,13 @@ async handleCharlestonPassPrompt(options, callback) {
 ```
 
 **Considerations:**
+
 - **Risk:** MEDIUM - Requires careful state management
 - **Benefit:** HIGH - More robust, handles edge cases
 - **Priority:** MEDIUM - Important for production
 
 **Edge Cases to Handle:**
+
 1. User closes browser mid-selection
 2. User waits indefinitely without selecting
 3. Game state changes (opponent declares Mahjong)
@@ -298,6 +312,7 @@ async requestSelection(config) { ... }
 ```
 
 **Considerations:**
+
 - **Risk:** NONE - Just documentation
 - **Benefit:** MEDIUM - Better IDE autocomplete, clearer API
 - **Priority:** LOW - Quality-of-life improvement
@@ -333,11 +348,13 @@ onHandUpdated(data) {
 ```
 
 **Considerations:**
+
 - **Risk:** MEDIUM - Requires GameController to emit differential data
 - **Benefit:** MEDIUM - Smoother animations, better performance
 - **Priority:** LOW - Optimization, not critical
 
 **When to Implement:**
+
 - When animation performance becomes noticeable issue
 - After mobile renderer is added (more critical for mobile)
 - Phase 4+ (polish)
@@ -390,6 +407,7 @@ Before implementing any refactor from this document:
 These refactors are **opportunities**, not **requirements**. Each one should be evaluated on its own merits when the time comes. The game is playable end-to-end, which means the current patterns are sufficient.
 
 Focus on:
+
 1. Making mobile renderer work alongside desktop
 2. Fixing actual bugs
 3. Improving UX based on user feedback

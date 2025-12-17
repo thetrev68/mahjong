@@ -13,6 +13,7 @@ The PhaserAdapter acts as a **messenger** between the platform-agnostic `GameCon
 **Examples:** Charleston pass, Discard selection, Courtesy pass
 
 ### Flow
+
 1. **GameController** emits `UI_PROMPT` with `promptType` + `options` + `callback`
 2. **PhaserAdapter.onUIPrompt()** routes to appropriate handler (e.g., `handleCharlestonPassPrompt()`)
 3. **Handler** calls `SelectionManager.enableTileSelection(min, max, mode)`
@@ -24,6 +25,7 @@ The PhaserAdapter acts as a **messenger** between the platform-agnostic `GameCon
 9. **SelectionManager** clears selection and disables tile selection
 
 ### Code Example (Charleston Pass)
+
 ```javascript
 handleCharlestonPassPrompt(options, callback) {
     const {direction, requiredCount} = options;
@@ -61,12 +63,15 @@ handleCharlestonPassPrompt(options, callback) {
 ```
 
 ### Key Components
+
 - **SelectionManager:** Tracks which tiles are selected, validates mode-specific rules
 - **ButtonManager:** Shows/hides/enables confirm button based on selection state
 - **TileData conversion:** `TileData.fromPhaserTile()` converts Phaser sprites back to data
 
 ### Validation Modes
+
 SelectionManager supports different validation rules per mode:
+
 - `"charleston"`: Cannot select jokers or blanks, exactly 3 tiles
 - `"courtesy"`: Cannot select jokers or blanks, 1-3 tiles
 - `"play"`: Any tile, exactly 1 tile
@@ -81,6 +86,7 @@ SelectionManager supports different validation rules per mode:
 **Examples:** Claim discard (Mahjong/Pung/Kong/Pass)
 
 ### Flow
+
 1. **GameController** emits `UI_PROMPT` with available options
 2. **PhaserAdapter.onUIPrompt()** routes to handler (e.g., `handleClaimPrompt()`)
 3. **ButtonManager** shows appropriate buttons (via `updateForState()` in `onStateChanged`)
@@ -89,6 +95,7 @@ SelectionManager supports different validation rules per mode:
 6. No selection state, no validation needed - just button → callback
 
 ### Code Example (Claim Discard)
+
 ```javascript
 handleClaimPrompt(options, callback) {
     const {discardedTile} = options;
@@ -115,12 +122,14 @@ handleClaimPrompt(options, callback) {
 ```
 
 ### Why This Pattern?
+
 - **Simpler:** No selection state to manage
 - **Immediate:** Button click directly triggers game logic
 - **Debugged:** This pattern was recently debugged by Codex and works correctly
 - **Don't break it:** Claim prompts are critical path - don't refactor without extensive testing
 
 ### Key Components
+
 - **ButtonManager:** Handles all button visibility, text, and callbacks
 - **No SelectionManager needed:** User isn't selecting tiles
 
@@ -133,6 +142,7 @@ handleClaimPrompt(options, callback) {
 **Examples:** Courtesy vote, Yes/No questions
 
 ### Flow
+
 1. **GameController** emits `UI_PROMPT`
 2. **PhaserAdapter.onUIPrompt()** routes to handler
 3. **Handler** calls `DialogManager.showXxxDialog()`
@@ -141,6 +151,7 @@ handleClaimPrompt(options, callback) {
 6. **DialogManager** removes overlay and re-enables game input
 
 ### Code Example (Courtesy Vote)
+
 ```javascript
 handleCourtesyVotePrompt(callback) {
     this.dialogManager.showCourtesyVoteDialog((result) => {
@@ -150,11 +161,13 @@ handleCourtesyVotePrompt(callback) {
 ```
 
 ### When to Use Dialog vs Buttons?
+
 - **Dialog pattern:** Best for interrupting gameplay (yes/no decisions, votes)
 - **Button pattern:** Best for in-flow gameplay (claim, discard)
 - **Selection pattern:** Required when user must select tiles
 
 ### Key Components
+
 - **DialogManager:** Creates modal overlays, blocks game input during dialog
 - **Promise-based:** DialogManager methods return promises or use callbacks
 
@@ -173,25 +186,31 @@ handleCourtesyVotePrompt(callback) {
 ## Design Principles
 
 ### 1. PhaserAdapter is a Messenger
+
 The adapter should **route** events to managers, not implement business logic.
 
 **Good:** `this.selectionManager.enableTileSelection(...)`
 **Bad:** Inline tile selection loops and validation
 
 ### 2. Managers Own Their Concerns
+
 - **SelectionManager:** Tile selection state, validation rules
 - **ButtonManager:** Button visibility, enable/disable, text
 - **DialogManager:** Modal overlays, user prompts
 - **HandRenderer:** Tile positioning, face-up/down rendering
 
 ### 3. Don't Break Working Code
+
 If a pattern works (like claim prompts), document it but don't refactor it without:
+
 - A clear UX improvement
 - Extensive testing
 - Approval from the team
 
 ### 4. Prefer Promises for New Code
+
 New prompt handlers should use promise-based APIs when available:
+
 ```javascript
 // New: Promise-based
 const tiles = await selectionManager.requestSelection({min: 3, max: 3, mode: "charleston"});
@@ -206,6 +225,7 @@ buttonManager.registerCallback("button1", () => { ... });
 ## Common Pitfalls
 
 ### ❌ Forgetting to Clear Selection
+
 ```javascript
 // BAD - selection state persists
 const selection = this.selectionManager.getSelection();
@@ -219,6 +239,7 @@ callback(selection);
 ```
 
 ### ❌ Mixing Patterns Unnecessarily
+
 ```javascript
 // BAD - using dialog for tile selection
 this.dialogManager.showSelectTilesDialog(...);
@@ -229,6 +250,7 @@ this.selectionManager.enableTileSelection(...);
 ```
 
 ### ❌ Direct Hand Manipulation
+
 ```javascript
 // BAD - adapter shouldn't touch hand state directly
 player.hand.setValidationMode("charleston");
@@ -244,6 +266,7 @@ const selection = this.selectionManager.getSelection();
 ## Testing Checklist
 
 When modifying prompt handlers, verify:
+
 - [ ] Buttons appear at correct game states
 - [ ] Tiles can be selected/deselected with visual feedback
 - [ ] Confirm button enables only when selection is valid

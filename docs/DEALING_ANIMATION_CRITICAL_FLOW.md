@@ -38,6 +38,7 @@ This allows the dealing animation to complete naturally and emit DEALING_COMPLET
 ## Critical Flow (DO NOT BREAK THIS)
 
 ### Step 1: GameController.dealTiles()
+
 ```
 - Builds deal sequence
 - Emits TILES_DEALT event with sequence
@@ -47,6 +48,7 @@ This allows the dealing animation to complete naturally and emit DEALING_COMPLET
 ```
 
 ### Step 2: PhaserAdapter.onTilesDealt()
+
 ```
 - Creates dealAnimationHands array (staged hands for progressive rendering)
 - Starts recursive dealNextGroup() function
@@ -59,6 +61,7 @@ This allows the dealing animation to complete naturally and emit DEALING_COMPLET
 ```
 
 ### Step 3: Animation Complete
+
 ```
 dealNextGroup() detects all batches complete:
 1. Sets dealAnimationHands = null (CRITICAL TIMING!)
@@ -67,6 +70,7 @@ dealNextGroup() detects all batches complete:
 ```
 
 ### Step 4: GameController receives DEALING_COMPLETE
+
 ```
 - completeDealing() callback fires
 - Clears timeout
@@ -75,6 +79,7 @@ dealNextGroup() detects all batches complete:
 ```
 
 ### Step 5: PhaserAdapter.onHandUpdated()
+
 ```
 - Checks if dealAnimationHands === null (it is!)
 - Calls handRenderer.syncAndRender() with FINAL hand
@@ -83,6 +88,7 @@ dealNextGroup() detects all batches complete:
 ```
 
 ### Step 6: Charleston Phase Begins
+
 ```
 - handleCharlestonPassPrompt() called
 - selectionManager.enableTileSelection(3, 3, "charleston")
@@ -105,6 +111,7 @@ dealNextGroup() detects all batches complete:
 **Purpose**: Prevents HAND_UPDATED events from calling syncAndRender() during animation
 
 **States**:
+
 - `!== null` during animation → syncAndRender SKIPPED
 - `=== null` after animation → syncAndRender ALLOWED
 
@@ -131,6 +138,7 @@ If tiles aren't clickable after dealing:
 ## Console Logs to Watch For
 
 **Success**:
+
 ```
 [PhaserAdapter] Emitting DEALING_COMPLETE event
 [GameController] completeDealing called, resolved = false
@@ -140,6 +148,7 @@ If tiles aren't clickable after dealing:
 ```
 
 **Failure** (timeout fired too early):
+
 ```
 [GameController] Timeout fired after 3016ms
 [onHandUpdated] Skipping syncAndRender during deal animation

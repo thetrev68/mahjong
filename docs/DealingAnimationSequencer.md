@@ -13,6 +13,7 @@
 The `DealingAnimationSequencer` will orchestrate the initial tile dealing animation at game start, creating a visually engaging experience that mimics the physical dealing process in American Mahjong.
 
 ### Animation Goals
+
 - **Educational**: Help new players understand dealing mechanics
 - **Excitement**: Build anticipation for the game start
 - **Clarity**: Show tile distribution clearly across all 4 players
@@ -23,6 +24,7 @@ The `DealingAnimationSequencer` will orchestrate the initial tile dealing animat
 ## User Experience
 
 ### Visual Flow
+
 ```
 1. Wall appears (all 152 tiles face-down in organized rows)
    ↓
@@ -48,6 +50,7 @@ The `DealingAnimationSequencer` will orchestrate the initial tile dealing animat
 ```
 
 ### Timing Philosophy
+
 - **Fast mode** (default): 2-3 seconds total
 - **Slow mode** (first game/tutorial): 8-10 seconds total
 - **Skip mode** (preference): Instant deal
@@ -57,7 +60,9 @@ The `DealingAnimationSequencer` will orchestrate the initial tile dealing animat
 ## Technical Specification
 
 ### HandRenderer API prerequisites (mobile/Desktop adapter)
+
 To support dealing animations (and to allow the spec below to compile), HandRenderer must expose or be polyfilled with:
+
 - `getTileElements(playerIndex: number): HTMLElement[]` — returns all tile DOM nodes for the given player in hand order. Used for flip animations; should return an empty array when the player isn't rendered.
 - `getLastTileElement(playerIndex: number): HTMLElement|null` — returns the last rendered tile element for the player (or `null`). Used to apply glow to East's 14th tile.
 - `addTileToHand(playerIndex: number, tile: TileData): HTMLElement|null|Promise<HTMLElement|null>` — appends a tile to the internal hand model for that player, inserts the DOM node at the end of the hand, and may run an insertion/flip animation. Should return the created node (or a promise resolving when any animation completes).
@@ -495,6 +500,7 @@ calculateDealDuration(dealSequence) {
    - Skip flip animations entirely
 
 ### Performance Budget
+
 - **Target:** 60fps (16.67ms per frame)
 - **Max simultaneous animations:** 4 tiles (one per player)
 - **Memory:** < 5MB for all dealing assets

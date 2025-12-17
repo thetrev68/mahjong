@@ -59,6 +59,7 @@
 | CPU usage peak | < 50% | 42% | ✅ Pass |
 
 **Analysis:**
+
 - Modern devices: Excellent performance (near-perfect 60fps)
 - Mid-range devices: Good performance (minor drops acceptable)
 - Budget devices: Acceptable performance (above 45fps minimum)
@@ -71,6 +72,7 @@
 ### 1. Chrome DevTools Performance Profiler
 
 **How to Use:**
+
 1. Open DevTools (F12)
 2. Go to Performance tab
 3. Click Record (⚫)
@@ -79,12 +81,14 @@
 6. Analyze flame chart
 
 **What to Look For:**
+
 - **FPS meter:** Should stay above 55fps
 - **Long tasks:** Any task > 50ms (red flags)
 - **Layout thrashing:** Multiple layout/paint cycles per frame
 - **JavaScript execution:** Should be < 5ms per frame during animation
 
 **Screenshot Analysis:**
+
 ```
 FPS: ████████████████████████████ 60
      └─ Green = good (60fps)
@@ -105,6 +109,7 @@ Main Thread:
 ### 2. Firefox Animation Inspector
 
 **How to Use:**
+
 1. Open DevTools (F12)
 2. Go to Inspector tab
 3. Click "Animations" panel
@@ -112,6 +117,7 @@ Main Thread:
 5. Scrub through timeline
 
 **Benefits:**
+
 - Visual animation timeline
 - See all CSS animations/transitions
 - Adjust timing curves live
@@ -122,12 +128,14 @@ Main Thread:
 ### 3. Lighthouse Performance Audit
 
 **How to Run:**
+
 1. Open Chrome DevTools
 2. Go to Lighthouse tab
 3. Select "Performance" category
 4. Click "Analyze page load"
 
 **Key Metrics:**
+
 - **First Contentful Paint (FCP):** < 1.8s
 - **Largest Contentful Paint (LCP):** < 2.5s
 - **Total Blocking Time (TBT):** < 200ms
@@ -140,6 +148,7 @@ Main Thread:
 ### 4. Custom FPS Monitor
 
 **Implementation:**
+
 ```javascript
 // mobile/utils/PerformanceMonitor.js
 export class PerformanceMonitor {
@@ -239,6 +248,7 @@ if (increase > 5) {
 **Use GPU-Accelerated Properties:**
 
 ✅ **Good (GPU-accelerated):**
+
 ```css
 .tile {
     transform: translate3d(100px, 50px, 0); /* Use translate3d, not translate */
@@ -247,6 +257,7 @@ if (increase > 5) {
 ```
 
 ❌ **Bad (CPU-bound, causes layout):**
+
 ```css
 .tile {
     left: 100px;  /* Triggers layout */
@@ -256,6 +267,7 @@ if (increase > 5) {
 ```
 
 **Force GPU Acceleration:**
+
 ```css
 .tile-animating {
     will-change: transform, opacity;
@@ -264,6 +276,7 @@ if (increase > 5) {
 ```
 
 **Cleanup:**
+
 ```javascript
 element.classList.add('tile-animating');
 element.style.willChange = 'transform, opacity';
@@ -279,6 +292,7 @@ element.style.willChange = 'auto'; // Release GPU memory
 ### 2. Avoid Layout Thrashing
 
 **❌ Layout Thrashing (Bad):**
+
 ```javascript
 // Causes multiple reflows (slow!)
 for (let i = 0; i < tiles.length; i++) {
@@ -288,6 +302,7 @@ for (let i = 0; i < tiles.length; i++) {
 ```
 
 **✅ Batch DOM Operations (Good):**
+
 ```javascript
 // Read all dimensions first
 const widths = tiles.map(tile => tile.offsetWidth);
@@ -299,6 +314,7 @@ tiles.forEach((tile, i) => {
 ```
 
 **Use RequestAnimationFrame:**
+
 ```javascript
 function updatePositions() {
     requestAnimationFrame(() => {
@@ -355,6 +371,7 @@ async animateSortWithGlow(handData, glowIndices) {
 ```
 
 **Benefits:**
+
 - Smooth animation even with complex DOM changes
 - GPU-accelerated (only transform changes)
 - No layout calculations during animation
@@ -378,6 +395,7 @@ async animateSortWithGlow(handData, glowIndices) {
 ```
 
 **Benefits:**
+
 - Browser can optimize compositing
 - Reduces paint area
 - Improves scrolling performance
@@ -525,11 +543,13 @@ test('Charleston animation maintains 55fps minimum', async ({ page }) => {
 ### Issue 1: Animation Stuttering
 
 **Symptoms:**
+
 - Jerky motion
 - Inconsistent frame timing
 - FPS drops during animation
 
 **Diagnosis:**
+
 ```javascript
 // Check frame time in DevTools
 const times = [];
@@ -550,6 +570,7 @@ console.log(`Long frames: ${longFrames.length}/${times.length}`);
 ```
 
 **Solutions:**
+
 - Use `transform` instead of `left`/`top`
 - Apply `will-change` before animation
 - Reduce simultaneous animations
@@ -560,11 +581,13 @@ console.log(`Long frames: ${longFrames.length}/${times.length}`);
 ### Issue 2: Memory Leaks
 
 **Symptoms:**
+
 - Increasing memory usage over time
 - Browser slowdown after multiple animations
 - Eventual crash on long sessions
 
 **Diagnosis:**
+
 ```javascript
 // Take heap snapshots before/after
 const before = performance.memory.usedJSHeapSize;
@@ -585,6 +608,7 @@ if (perAnimation > 0.5) {
 ```
 
 **Solutions:**
+
 - Remove event listeners in `destroy()`
 - Clear DOM references (set to `null`)
 - Remove temporary DOM elements
@@ -596,16 +620,19 @@ if (perAnimation > 0.5) {
 ### Issue 3: Layout Thrashing
 
 **Symptoms:**
+
 - Purple bars in DevTools Performance timeline
 - Frequent "Forced reflow" warnings
 - Choppy animations
 
 **Diagnosis:**
+
 - Look for interleaved read/write operations
 - Check for `offsetWidth`/`getBoundingClientRect()` in loops
 - Use DevTools rendering tab: "Paint flashing"
 
 **Solutions:**
+
 - Batch reads before writes (FLIP technique)
 - Use `requestAnimationFrame` for DOM updates
 - Cache layout values
@@ -652,6 +679,7 @@ if (perAnimation > 0.5) {
 | Pixel 7 | Android 14 | Chrome | High | P2 |
 
 **Desktop Testing:**
+
 - Chrome (latest)
 - Firefox (latest)
 - Safari (latest, macOS only)
