@@ -204,6 +204,8 @@ try {
 - Game stuck in waiting state
 - **Problem:** User can't proceed
 
+**Status:** ✅ **COMPLETED: December 17, 2025** — Implemented `GameErrors` classes, updated `GameController`, `PhaserAdapter`, and `MobileRenderer` to use standardized error handling and safe fallbacks.
+
 #### Recommendations
 
 1. **Define error handling strategy:**
@@ -1759,6 +1761,8 @@ setupButtonListeners() {
     });
 }
 // No removeEventListener when game ends
+
+**Status:** ✅ **COMPLETED: December 17, 2025** — Implemented `BaseAdapter`, added `destroy()` to `PhaserAdapter` and desktop managers, and wired `GameScene` to call `adapter.destroy()` on shutdown. Unit tests and `vitest.config.js` were added; `npm run test:unit` verifies teardown behavior.
 ```
 
 #### Memory Leak Scenario
@@ -2160,16 +2164,22 @@ npm update phaser
 - **To enable debug mode:** Set `gdebug = 1` in `utils.js`
 - **Impact:** Production console now clean, performance improved
 
+**Event Listener Cleanup & Adapter Teardown (Sections 5.1 & 4.1)** - ✅ **COMPLETED: December 17, 2025**
+
+- Added `shared/BaseAdapter.js` to centralize event subscription tracking.
+- Refactored `desktop/adapters/PhaserAdapter.js` and `mobile/MobileRenderer.js` to extend `BaseAdapter` and use `registerEventHandlers`.
+- Implemented `destroy()` on `PhaserAdapter` and managers: `ButtonManager`, `SelectionManager`, `BlankSwapManager`, and wired `GameScene` to call `adapter.destroy()` on shutdown.
+- Added unit tests (`tests/unit/*`) and `vitest.config.js`; updated `package.json` scripts; `npm run test:unit` passes for the new specs.
+- **Verification:** Unit tests green and manual restart smoke test confirms no duplicate listener behavior after restart.
+
 ---
 
 ## PRIORITY RECOMMENDATIONS SUMMARY
 
 ### 🔴 Critical (Fix Immediately)
 
-1. **Add Event Listener Cleanup to Desktop** (Section 5.1)
-   - Memory leak risk after game restarts
-   - **Effort:** 2 hours
-   - **Impact:** High - prevents memory degradation
+1. ~~**Add Event Listener Cleanup to Desktop** (Section 5.1)~~ ✅ **COMPLETED: December 17, 2025**
+   - Implemented `BaseAdapter` and teardown across desktop adapters/managers; unit tests added and verified.
 
 2. ~~**Remove/Gate Console.log Statements** (Section 1.1)~~ ✅ **COMPLETED**
    - ~~200+ debug logs in production~~
@@ -2183,9 +2193,8 @@ npm update phaser
 
 ### 🟡 High Priority (Next Sprint)
 
-1. **Implement PhaserAdapter.destroy()** (Section 4.1)
-   - Completes memory leak fix
-   - **Effort:** 1 hour
+1. ~~**Implement PhaserAdapter.destroy()** (Section 4.1)~~ ✅ **COMPLETED: December 17, 2025**
+   - PhaserAdapter now calls `super.destroy()` and tears down managers on shutdown.
    - **Impact:** High - finalizes cleanup pattern
 
 2. **Extract Animation Sequencers on Desktop** (Section 6.1)
@@ -2237,10 +2246,8 @@ npm update phaser
     - **Effort:** 20+ hours
     - **Impact:** High long-term, medium immediate
 
-2. **Extract Base Adapter Class** (Section 2.5)
-    - Code reuse
-    - **Effort:** 1 hour
-    - **Impact:** Low - code organization
+2. ~~**Extract Base Adapter Class** (Section 2.5)~~ ✅ **COMPLETED: December 17, 2025**
+    - `shared/BaseAdapter.js` added and in use by desktop and mobile adapters.
 
 3. **Update CLAUDE.md** (Section 3.2)
     - Accuracy and completeness

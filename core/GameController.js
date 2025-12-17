@@ -38,6 +38,7 @@ import {ExposureData} from "./models/HandData.js";
 import * as GameEvents from "./events/GameEvents.js";
 import {gTileGroups} from "./tileDefinitions.js";
 import {debugPrint, debugWarn, debugError} from "../utils.js";
+import {GameError, ValidationError, RenderingError, StateError} from "./errors/GameErrors.js";
 
 const CHARLESTON_DIRECTION_SEQUENCE = {
     1: ["right", "across", "left"],
@@ -236,7 +237,7 @@ export class GameController extends EventEmitter {
             : buildDefaultWallTiles(this.settings.useBlankTiles);
 
         if (!Array.isArray(rawTiles) || rawTiles.length === 0) {
-            throw new Error("Failed to generate wall tiles. Wall generator returned empty set.");
+            throw new StateError("Failed to generate wall tiles. Wall generator returned empty set.");
         }
 
         // Normalize into TileData instances
@@ -783,7 +784,7 @@ export class GameController extends EventEmitter {
      */
     drawTileFromWall() {
         if (this.wallTiles.length === 0) {
-            throw new Error("Attempted to draw from an empty wall");
+            throw new StateError("Attempted to draw from an empty wall");
         }
         return this.wallTiles.pop();
     }
@@ -839,7 +840,8 @@ export class GameController extends EventEmitter {
             const result = this.cardValidator.validateHand(tiles, allHidden);
             return Boolean(result && result.valid);
         } catch (error) {
-            console.error("Failed to validate hand for Mahjong check:", error);
+            debugError("CRITICAL: CardValidator crashed during checkMahjong", error);
+            // Return false to prevent game crash, but log specifically as critical
             return false;
         }
     }
@@ -895,12 +897,12 @@ export class GameController extends EventEmitter {
         }
 
         if (!tileToDiscard) {
-            console.error("chooseDiscard: No tile returned, falling back to first tile", {
-                playerIndex: this.currentPlayer
-            });
-            tileToDiscard = player.hand.tiles[0];
-            if (!tileToDiscard) {
-                throw new Error("chooseDiscard: Player hand is empty, cannot discard");
+            // Attempt recovery by picking first available tile
+            if (player.hand.tiles.length > 0) {
+                debugWarn(`chooseDiscard: No tile returned for player ${this.currentPlayer}, falling back to first tile.`);
+                tileToDiscard = player.hand.tiles[0];
+            } else {
+                throw new StateError(`chooseDiscard: Player ${this.currentPlayer} hand is empty, cannot discard.`);
             }
         }
 
@@ -910,10 +912,7 @@ export class GameController extends EventEmitter {
         // Remove from hand
         const removed = player.hand.removeTile(tileToDiscard);
         if (!removed) {
-            console.error("chooseDiscard: Failed to remove tile from hand", {
-                playerIndex: this.currentPlayer,
-                tile: tileToDiscard
-            });
+             throw new StateError(`chooseDiscard: Failed to remove tile ${tileToDiscard.toString()} from player ${this.currentPlayer} hand.`);
         }
 
         // Add to discard pile

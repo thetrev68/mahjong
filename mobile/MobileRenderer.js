@@ -1131,118 +1131,130 @@ export class MobileRenderer extends BaseAdapter {
             return;
         }
 
-        // If there's a pending prompt, auto-cancel it WITHOUT invoking callback
-        // (new prompt will handle the callback)
-        if (this.pendingPrompt) {
-            console.warn("MobileRenderer: New prompt received while previous prompt pending. Clearing previous prompt state.");
-            this.resetHandSelection();
-            this.hidePrompt();
-            this.pendingPrompt = null;
-        }
-
-        switch (data.promptType) {
-            case "CHOOSE_DISCARD":
-                this.startDiscardSelection(data.callback);
-                break;
-            case "CHARLESTON_PASS":
-                this.startTileSelectionPrompt({
-                    title: `Charleston Pass (${data.options?.direction ?? "?"})`,
-                    hint: `Select ${data.options?.requiredCount ?? 3} tiles to pass`,
-                    min: data.options?.requiredCount ?? 3,
-                    max: data.options?.requiredCount ?? 3,
-                    validationMode: "charleston",
-                    confirmLabel: "Pass Tiles",
-                    cancelLabel: null,
-                    fallback: null,
-                    callback: (tiles) => data.callback(tiles),
-                    useActionButton: true
-                });
-                break;
-            case "SELECT_TILES": {
-                const minTiles = data.options?.minTiles ?? 1;
-                const maxTiles = data.options?.maxTiles ?? 3;
-                // Show exact count if min equals max, otherwise show range
-                const defaultHint = minTiles === maxTiles
-                    ? `Select exactly ${minTiles} tile${minTiles !== 1 ? "s" : ""}`
-                    : `Select ${minTiles}–${maxTiles} tiles`;
-
-                this.startTileSelectionPrompt({
-                    title: data.options?.question ?? "Select tiles",
-                    hint: defaultHint,
-                    min: minTiles,
-                    max: maxTiles,
-                    validationMode: "courtesy",
-                    confirmLabel: "Confirm",
-                    cancelLabel: "Cancel",
-                    fallback: () => this.getFallbackTiles(Math.max(1, minTiles)),
-                    callback: (tiles) => data.callback(tiles)
-                });
-                break;
+        try {
+            // If there's a pending prompt, auto-cancel it WITHOUT invoking callback
+            // (new prompt will handle the callback)
+            if (this.pendingPrompt) {
+                console.warn("MobileRenderer: New prompt received while previous prompt pending. Clearing previous prompt state.");
+                this.resetHandSelection();
+                this.hidePrompt();
+                this.pendingPrompt = null;
             }
-            case "CLAIM_DISCARD": {
-                const promptTile = data.options?.tile;
-                const tileObj = promptTile instanceof TileData
-                    ? promptTile
-                    : (promptTile ? TileData.fromJSON(promptTile) : null);
-                this.showChoicePrompt({
-                    title: tileObj ? `Claim ${tileObj.getText()}?` : "Claim discard?",
-                    hint: "Choose how to react",
-                    options: (data.options?.options || []).map(option => ({
-                        label: option,
-                        value: option
-                    })),
-                    onSelect: (choice) => data.callback(choice)
-                });
-                break;
+
+            switch (data.promptType) {
+                case "CHOOSE_DISCARD":
+                    this.startDiscardSelection(data.callback);
+                    break;
+                case "CHARLESTON_PASS":
+                    this.startTileSelectionPrompt({
+                        title: `Charleston Pass (${data.options?.direction ?? "?"})`,
+                        hint: `Select ${data.options?.requiredCount ?? 3} tiles to pass`,
+                        min: data.options?.requiredCount ?? 3,
+                        max: data.options?.requiredCount ?? 3,
+                        validationMode: "charleston",
+                        confirmLabel: "Pass Tiles",
+                        cancelLabel: null,
+                        fallback: null,
+                        callback: (tiles) => data.callback(tiles),
+                        useActionButton: true
+                    });
+                    break;
+                case "SELECT_TILES": {
+                    const minTiles = data.options?.minTiles ?? 1;
+                    const maxTiles = data.options?.maxTiles ?? 3;
+                    // Show exact count if min equals max, otherwise show range
+                    const defaultHint = minTiles === maxTiles
+                        ? `Select exactly ${minTiles} tile${minTiles !== 1 ? "s" : ""}`
+                        : `Select ${minTiles}–${maxTiles} tiles`;
+
+                    this.startTileSelectionPrompt({
+                        title: data.options?.question ?? "Select tiles",
+                        hint: defaultHint,
+                        min: minTiles,
+                        max: maxTiles,
+                        validationMode: "courtesy",
+                        confirmLabel: "Confirm",
+                        cancelLabel: "Cancel",
+                        fallback: () => this.getFallbackTiles(Math.max(1, minTiles)),
+                        callback: (tiles) => data.callback(tiles)
+                    });
+                    break;
+                }
+                case "CLAIM_DISCARD": {
+                    const promptTile = data.options?.tile;
+                    const tileObj = promptTile instanceof TileData
+                        ? promptTile
+                        : (promptTile ? TileData.fromJSON(promptTile) : null);
+                    this.showChoicePrompt({
+                        title: tileObj ? `Claim ${tileObj.getText()}?` : "Claim discard?",
+                        hint: "Choose how to react",
+                        options: (data.options?.options || []).map(option => ({
+                            label: option,
+                            value: option
+                        })),
+                        onSelect: (choice) => data.callback(choice)
+                    });
+                    break;
+                }
+                case "EXPOSE_TILES":
+                    this.showChoicePrompt({
+                        title: "Expose selected tiles?",
+                        hint: "Exposed tiles become visible to everyone",
+                        options: [
+                            { label: "Expose", value: true, primary: true },
+                            { label: "Keep Hidden", value: false }
+                        ],
+                        onSelect: (choice) => data.callback(choice)
+                    });
+                    break;
+                case "YES_NO":
+                    this.showChoicePrompt({
+                        title: data.options?.message ?? "Continue?",
+                        hint: "",
+                        options: [
+                            { label: "Yes", value: true, primary: true },
+                            { label: "No", value: false }
+                        ],
+                        onSelect: (choice) => data.callback(choice)
+                    });
+                    break;
+                case "CHARLESTON_CONTINUE":
+                    this.showChoicePrompt({
+                        title: data.options?.question ?? "Continue to Charleston phase 2?",
+                        hint: "",
+                        options: [
+                            { label: "Yes", value: "Yes", primary: true },
+                            { label: "No", value: "No" }
+                        ],
+                        onSelect: (choice) => data.callback(choice)
+                    });
+                    break;
+                case "COURTESY_VOTE":
+                    this.showChoicePrompt({
+                        title: data.options?.question ?? "Courtesy pass vote",
+                        hint: "How many tiles to exchange?",
+                        options: (data.options?.options || ["0", "1", "2", "3"]).map(option => ({
+                            label: option,
+                            value: option
+                        })),
+                        onSelect: (choice) => data.callback(choice)
+                    });
+                    break;
+                default: {
+                    // Unknown prompt type – resolve with null to prevent deadlock
+                    console.warn(`Unhandled UI prompt: ${data.promptType}`);
+                    data.callback(null);
+                }
             }
-            case "EXPOSE_TILES":
-                this.showChoicePrompt({
-                    title: "Expose selected tiles?",
-                    hint: "Exposed tiles become visible to everyone",
-                    options: [
-                        { label: "Expose", value: true, primary: true },
-                        { label: "Keep Hidden", value: false }
-                    ],
-                    onSelect: (choice) => data.callback(choice)
-                });
-                break;
-            case "YES_NO":
-                this.showChoicePrompt({
-                    title: data.options?.message ?? "Continue?",
-                    hint: "",
-                    options: [
-                        { label: "Yes", value: true, primary: true },
-                        { label: "No", value: false }
-                    ],
-                    onSelect: (choice) => data.callback(choice)
-                });
-                break;
-            case "CHARLESTON_CONTINUE":
-                this.showChoicePrompt({
-                    title: data.options?.question ?? "Continue to Charleston phase 2?",
-                    hint: "",
-                    options: [
-                        { label: "Yes", value: "Yes", primary: true },
-                        { label: "No", value: "No" }
-                    ],
-                    onSelect: (choice) => data.callback(choice)
-                });
-                break;
-            case "COURTESY_VOTE":
-                this.showChoicePrompt({
-                    title: data.options?.question ?? "Courtesy pass vote",
-                    hint: "How many tiles to exchange?",
-                    options: (data.options?.options || ["0", "1", "2", "3"]).map(option => ({
-                        label: option,
-                        value: option
-                    })),
-                    onSelect: (choice) => data.callback(choice)
-                });
-                break;
-            default: {
-                // Unknown prompt type – resolve with null to prevent deadlock
-                console.warn(`Unhandled UI prompt: ${data.promptType}`);
-                data.callback(null);
+        } catch (error) {
+            debugPrint(`[MobileRenderer] Error in UI prompt handler: ${error.message}`);
+            // Prevent game hang by resolving callback with null (cancel/default)
+            if (data.callback) {
+                try {
+                    data.callback(null);
+                } catch (cbError) {
+                    console.error("Failed to recover from UI prompt error via callback:", cbError);
+                }
             }
         }
     }

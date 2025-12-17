@@ -16,7 +16,7 @@
 
 import {TileData} from "../../core/models/TileData.js";
 import {PLAYER, getTotalTileCount} from "../../constants.js";
-import {printMessage, printInfo, debugPrint} from "../../utils.js";
+import {printMessage, printInfo, debugPrint, debugError} from "../../utils.js";
 import {PLAYER_LAYOUT} from "../config/playerLayout.js";
 import {TileManager} from "../managers/TileManager.js";
 import {ButtonManager} from "../managers/ButtonManager.js";
@@ -25,6 +25,7 @@ import {SelectionManager} from "../managers/SelectionManager.js";
 import {BlankSwapManager} from "../managers/BlankSwapManager.js";
 import {HandRenderer} from "../renderers/HandRenderer.js";
 import { BaseAdapter } from "../../shared/BaseAdapter.js";
+import { RenderingError } from "../../core/errors/GameErrors.js";
 
 export class PhaserAdapter extends BaseAdapter {
     /**
@@ -330,7 +331,7 @@ export class PhaserAdapter extends BaseAdapter {
                     const phaserTile = this.tileManager.getOrCreateTile(tileData);
 
                     if (!phaserTile) {
-                        console.error(`Could not find Phaser Tile for index ${tileData.index} during dealing`);
+                        debugError(`Could not find Phaser Tile for index ${tileData.index} during dealing`);
                         return;
                     }
 
@@ -467,7 +468,7 @@ export class PhaserAdapter extends BaseAdapter {
 
         const phaserTile = this.tileManager.getOrCreateTile(tileDataObj);
         if (!phaserTile) {
-            console.error(`Could not find Phaser Tile for index ${tileDataObj.index}.`);
+            debugError(`Could not find Phaser Tile for index ${tileDataObj.index}.`);
             return;
         }
 
@@ -591,7 +592,7 @@ export class PhaserAdapter extends BaseAdapter {
         const phaserTile = this.tileManager.getOrCreateTile(tileDataObj);
 
         if (!phaserTile) {
-            console.error(`Could not find Phaser Tile for index ${tileDataObj.index}`);
+            debugError(`Could not find Phaser Tile for index ${tileDataObj.index}`);
             return;
         }
         if (playerIndex === PLAYER.BOTTOM) {
