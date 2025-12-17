@@ -52,7 +52,7 @@ test.describe("Phase 0: Testing Framework Setup", () => {
                 const img = new Image();
                 img.onload = () => resolve(true);
                 img.onerror = () => resolve(false);
-                img.src = "/pwa/assets/tiles.png";
+                img.src = "/mahjong/assets/tiles.png";
             });
         });
 
@@ -61,7 +61,7 @@ test.describe("Phase 0: Testing Framework Setup", () => {
         // Verify tiles.json is accessible
         const tilesJsonLoaded = await page.evaluate(async () => {
             try {
-                const response = await fetch("/pwa/assets/tiles.json");
+                const response = await fetch("/mahjong/assets/tiles.json");
                 return response.ok;
             } catch {
                 return false;

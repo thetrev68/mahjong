@@ -35,7 +35,7 @@ export class MobileTestHelpers {
                 const img = new Image();
                 img.onload = () => resolve(true);
                 img.onerror = () => resolve(false);
-                img.src = "/pwa/assets/tiles.png";
+                img.src = "/mahjong/assets/tiles.png";
             });
         }, { timeout: 10000 });
     }
