@@ -25,8 +25,9 @@ class GameScene extends Phaser.Scene {
 
     preload() {
         // From game.js preload()
-        this.load.atlas("tiles", "/mahjong/assets/tiles.png", "/mahjong/assets/tiles.json");
-        this.load.image("back", "/mahjong/assets/back.png");
+        // Use relative paths that work with Vite's base config (/ in dev, /mahjong/ in prod)
+        this.load.atlas("tiles", "assets/tiles.png", "assets/tiles.json");
+        this.load.image("back", "assets/back.png");
 
         // Load particle texture for fireworks
         // Create a simple 4x4 white particle texture programmatically to avoid WebGL errors
@@ -41,11 +42,11 @@ class GameScene extends Phaser.Scene {
         this.textures.addCanvas("particle", particleCanvas);
 
         // Load audio assets
-        this.load.audio("bgm", "/mahjong/assets/audio/2406haidao_bgm_loop.mp3");
-        this.load.audio("rack_tile", "/mahjong/assets/audio/rack_tile.mp3");
-        this.load.audio("tile_dropping", "/mahjong/assets/audio/tile_dropping.mp3");
-        this.load.audio("fireworks", "/mahjong/assets/audio/fireworks.mp3");
-        this.load.audio("wall_fail", "/mahjong/assets/audio/normalflyin.mp3");
+        this.load.audio("bgm", "assets/audio/2406haidao_bgm_loop.mp3");
+        this.load.audio("rack_tile", "assets/audio/rack_tile.mp3");
+        this.load.audio("tile_dropping", "assets/audio/tile_dropping.mp3");
+        this.load.audio("fireworks", "assets/audio/fireworks.mp3");
+        this.load.audio("wall_fail", "assets/audio/normalflyin.mp3");
 
         // The scale manager stuff will be handled in main.js config, so I'm omitting it here as per the plan.
         // The resizeCallback is also a separate step.
