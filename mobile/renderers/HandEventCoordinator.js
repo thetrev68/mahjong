@@ -122,7 +122,9 @@ export class HandEventCoordinator {
         ? this._findNewlyReceivedTiles(this.previousHandSnapshot, handData)
         : [];
 
-      // Debug logging for Charleston glow issue
+      // Debug logging for Charleston glow issue (disabled - was causing console spam)
+      // To re-enable for troubleshooting, uncomment the block below:
+      /*
       if (newlyReceivedTiles.length > 0 || (this.previousHandSnapshot && Math.abs(handData.tiles.length - this.previousHandSnapshot.tiles.length) === 3)) {
         console.log("[HandEventCoordinator] HAND_UPDATED:", {
           currentTileCount: handData.tiles.length,
@@ -133,6 +135,7 @@ export class HandEventCoordinator {
         });
         console.trace("[HandEventCoordinator] Stack trace for HAND_UPDATED");
       }
+      */
 
       // Reset sort mode when hand updated from game (not user sort)
       if (this.handRenderer) {
@@ -141,9 +144,8 @@ export class HandEventCoordinator {
 
       // Render the hand
       if (this.handRenderer) {
-        console.log("[HandEventCoordinator] BEFORE render:", handData.tiles.length, "tiles");
+        // Debug logging disabled - was causing console spam on each HAND_UPDATED
         this.handRenderer.render(handData);
-        console.log("[HandEventCoordinator] AFTER render");
 
         // Reapply any active hint highlights after rerender
         this.applyHintRecommendations();
@@ -163,10 +165,9 @@ export class HandEventCoordinator {
 
       // Apply glow to newly received tiles after rendering
       if (newlyReceivedTiles.length > 0 && this.handRenderer && this.mobileRenderer?.animationController) {
-        console.log("[HandEventCoordinator] BEFORE applying glow, checking tile elements exist...");
+        // Debug logging disabled - was causing console spam
         // newlyReceivedTiles contains tile.index values (0-151), need to find positions in hand
         const handTiles = handData.tiles;
-        let glowAppliedCount = 0;
         newlyReceivedTiles.forEach(tileIndex => {
           // Find position in hand that has this tile index
           const position = handTiles.findIndex(t => t?.index === tileIndex);
@@ -174,17 +175,9 @@ export class HandEventCoordinator {
             const tileElement = this.handRenderer.getTileElementByIndex(position);
             if (tileElement) {
               this.mobileRenderer.animationController.applyReceivedTileGlow(tileElement);
-              glowAppliedCount++;
-              const hasGlowClass = tileElement.classList.contains("tile--newly-drawn");
-              console.log(`[HandEventCoordinator] Applied glow to tile at position ${position}, index ${tileIndex}, hasGlowClass: ${hasGlowClass}`);
-            } else {
-              console.warn(`[HandEventCoordinator] Could not find tile element at position ${position} for index ${tileIndex}`);
             }
-          } else {
-            console.warn(`[HandEventCoordinator] Could not find tile index ${tileIndex} in hand`);
           }
         });
-        console.log(`[HandEventCoordinator] AFTER applying glow: ${glowAppliedCount}/${newlyReceivedTiles.length} tiles have glow`);
       }
 
       // Store current hand as previous for next comparison
@@ -198,21 +191,8 @@ export class HandEventCoordinator {
       const tilesWereReceived = newlyReceivedTiles.length > 0;
       const shouldUpdateSnapshot = isFirstSnapshot || handSizeIncreased || tilesWereReceived;
 
-      // Debug logging for snapshot updates
-      if (!shouldUpdateSnapshot && this.previousHandSnapshot) {
-        console.log("[HandEventCoordinator] Skipping snapshot update:", {
-          from: this.previousHandSnapshot?.tiles.length,
-          to: handData.tiles.length,
-          reason: handData.tiles.length < this.previousHandSnapshot.tiles.length ? "decreased" : "same size, no new tiles"
-        });
-      }
-
+      // Debug logging for snapshot updates (disabled - was causing console spam)
       if (shouldUpdateSnapshot) {
-        console.log("[HandEventCoordinator] Updating snapshot:", {
-          from: this.previousHandSnapshot?.tiles.length || 0,
-          to: handData.tiles.length,
-          reason: isFirstSnapshot ? "first" : (tilesWereReceived ? `received ${newlyReceivedTiles.length} tiles` : "size increased")
-        });
         this.previousHandSnapshot = handData.clone();
         if (this.mobileRenderer) {
           this.mobileRenderer.previousHandSnapshot = handData.clone();
