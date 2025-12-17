@@ -1,12 +1,12 @@
-import {hands2025} from "../../card/2025/hands2025.js";
-import {hands2468} from "../../card/2025/hands2468.js";
-import {handsLikeNumbers} from "../../card/2025/handsLikeNumbers.js";
-import {handsQuints} from "../../card/2025/handsQuints.js";
-import {handsConsecutive} from "../../card/2025/handsConsecutive.js";
-import {hands13579} from "../../card/2025/hands13579.js";
-import {handsWindsDragons} from "../../card/2025/handsWindsDragons.js";
-import {hands369} from "../../card/2025/hands369.js";
-import {handsSinglesPairs} from "../../card/2025/handsSinglesPairs.js";
+import {hands2025} from "./hands2025.js";
+import {hands2468} from "./hands2468.js";
+import {handsLikeNumbers} from "./handsLikeNumbers.js";
+import {handsQuints} from "./handsQuints.js";
+import {handsConsecutive} from "./handsConsecutive.js";
+import {hands13579} from "./hands13579.js";
+import {handsWindsDragons} from "./handsWindsDragons.js";
+import {hands369} from "./hands369.js";
+import {handsSinglesPairs} from "./handsSinglesPairs.js";
 
 
 // PRIVATE CONSTANTS
