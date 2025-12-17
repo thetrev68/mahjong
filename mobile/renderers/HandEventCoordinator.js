@@ -20,11 +20,6 @@ export class HandEventCoordinator {
    * @param {GameController} gameController - The game controller instance
    * @param {HandRenderer} handRenderer - The hand renderer instance
    * @param {SelectionManager} selectionManager - The selection manager instance (optional)
-   */
-  /**
-   * @param {GameController} gameController - The game controller instance
-   * @param {HandRenderer} handRenderer - The hand renderer instance
-   * @param {SelectionManager} selectionManager - The selection manager instance (optional)
    * @param {MobileRenderer} mobileRenderer - The mobile renderer instance (for animation flags and callbacks)
    */
   constructor(gameController, handRenderer, selectionManager, mobileRenderer = null) {
@@ -83,10 +78,6 @@ export class HandEventCoordinator {
   /**
    * Handle HAND_UPDATED event
    * Converts plain JSON to HandData and renders
-   */
-  /**
-   * Handle HAND_UPDATED event
-   * Converts plain JSON to HandData and renders
    * This is now the SINGLE handler for HAND_UPDATED (MobileRenderer no longer listens)
    */
   onHandUpdated(data = {}) {
@@ -122,21 +113,6 @@ export class HandEventCoordinator {
         ? this._findNewlyReceivedTiles(this.previousHandSnapshot, handData)
         : [];
 
-      // Debug logging for Charleston glow issue (disabled - was causing console spam)
-      // To re-enable for troubleshooting, uncomment the block below:
-      /*
-      if (newlyReceivedTiles.length > 0 || (this.previousHandSnapshot && Math.abs(handData.tiles.length - this.previousHandSnapshot.tiles.length) === 3)) {
-        console.log("[HandEventCoordinator] HAND_UPDATED:", {
-          currentTileCount: handData.tiles.length,
-          previousTileCount: this.previousHandSnapshot?.tiles.length || 0,
-          newlyReceivedCount: newlyReceivedTiles.length,
-          newlyReceived: newlyReceivedTiles,
-          bothSameSize: bothHandsSameSize
-        });
-        console.trace("[HandEventCoordinator] Stack trace for HAND_UPDATED");
-      }
-      */
-
       // Reset sort mode when hand updated from game (not user sort)
       if (this.handRenderer) {
         this.handRenderer.currentSortMode = null;
@@ -144,7 +120,6 @@ export class HandEventCoordinator {
 
       // Render the hand
       if (this.handRenderer) {
-        // Debug logging disabled - was causing console spam on each HAND_UPDATED
         this.handRenderer.render(handData);
 
         // Reapply any active hint highlights after rerender
@@ -165,7 +140,6 @@ export class HandEventCoordinator {
 
       // Apply glow to newly received tiles after rendering
       if (newlyReceivedTiles.length > 0 && this.handRenderer && this.mobileRenderer?.animationController) {
-        // Debug logging disabled - was causing console spam
         // newlyReceivedTiles contains tile.index values (0-151), need to find positions in hand
         const handTiles = handData.tiles;
         newlyReceivedTiles.forEach(tileIndex => {
@@ -191,7 +165,6 @@ export class HandEventCoordinator {
       const tilesWereReceived = newlyReceivedTiles.length > 0;
       const shouldUpdateSnapshot = isFirstSnapshot || handSizeIncreased || tilesWereReceived;
 
-      // Debug logging for snapshot updates (disabled - was causing console spam)
       if (shouldUpdateSnapshot) {
         this.previousHandSnapshot = handData.clone();
         if (this.mobileRenderer) {
