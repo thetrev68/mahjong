@@ -329,9 +329,9 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
      */
     playDiscardSound() {
         try {
-            // Use relative path from mobile directory
+            // Use absolute path to assets directory
             // eslint-disable-next-line no-undef
-            const audio = new Audio("../pwa/assets/audio/tile_dropping.mp3");
+            const audio = new Audio("/assets/audio/tile_dropping.mp3");
             audio.volume = 0.5;
             audio.play().catch(err => {
                 console.warn("Could not play discard sound:", err);

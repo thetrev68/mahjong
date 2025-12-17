@@ -182,6 +182,13 @@ export class HandRenderer {
         });
 
         this.setInteractive(this.interactive);
+
+        // Reapply selection after render is complete
+        // This ensures selection state matches the newly rendered DOM
+        if (this.selectionManager) {
+            const currentSelection = this.selectionManager.getSelectionState(handData);
+            this.applySelectionIndices(currentSelection.indices);
+        }
     }
 
     renderExposures(exposures) {
