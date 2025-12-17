@@ -40,6 +40,9 @@ export class PhaserAdapter extends BaseAdapter {
      * @param {Table} table - Existing Phaser table object
      */
     constructor(gameController, scene, table) {
+        // MUST call super() before accessing 'this'
+        super(gameController);
+
         this.gameController = gameController;
         this.scene = scene;
         this.table = table;
@@ -82,8 +85,6 @@ export class PhaserAdapter extends BaseAdapter {
 
         /** @type {boolean} Skip next HAND_UPDATED for tile draw (already handled in onTileDrawn) */
         this.skipNextDrawHandUpdate = false;
-
-        super(gameController);
 
         this.setupEventListeners();
     }
