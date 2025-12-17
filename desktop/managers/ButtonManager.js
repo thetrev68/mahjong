@@ -55,9 +55,13 @@ export class ButtonManager {
      * Set up click listeners for all buttons
      */
     setupButtonListeners() {
+        // Track DOM handlers so they can be removed on destroy
+        this._domListeners = new Map();
         Object.entries(this.buttons).forEach(([id, btn]) => {
             if (btn) {
-                btn.addEventListener("click", () => this.onButtonClicked(id));
+                const handler = () => this.onButtonClicked(id);
+                btn.addEventListener("click", handler);
+                this._domListeners.set(id, { element: btn, handler });
             }
         });
     }
@@ -487,6 +491,27 @@ export class ButtonManager {
      */
     clearAllCallbacks() {
         this.buttonCallbacks.clear();
+    }
+
+    /**
+     * Destroy the ButtonManager and remove DOM listeners
+     */
+    destroy() {
+        if (this._domListeners) {
+            this._domListeners.forEach(({ element, handler }) => {
+                try {
+                    element.removeEventListener("click", handler);
+                } catch (e) {
+                    // ignore
+                }
+            });
+            this._domListeners.clear();
+            this._domListeners = null;
+        }
+        this.clearAllCallbacks();
+        this.buttons = {};
+        this.selectionManager = null;
+        this.gameController = null;
     }
 
     /**

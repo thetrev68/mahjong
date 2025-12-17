@@ -122,6 +122,17 @@ class GameScene extends Phaser.Scene {
             this.gTable
         );
 
+        // Ensure adapter and related managers are cleaned up when the scene shuts down
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+            try { this.adapter?.destroy(); } catch (e) {}
+            try { this.hintAnimationManager?.destroy?.(); } catch (e) {}
+            try { this.homePageTileManager?.cleanup?.(); } catch (e) {}
+            // Null references to help GC
+            this.adapter = null;
+            this.hintAnimationManager = null;
+            this.homePageTileManager = null;
+        });
+
         // Phase 5: Initialize HintAnimationManager after PhaserAdapter (needs TileManager)
         this.hintAnimationManager = new HintAnimationManager(
             this,

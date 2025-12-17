@@ -121,6 +121,20 @@ export class SelectionManager {
         this.discardTile = null;
     }
 
+    /**
+     * Destroy the SelectionManager and remove all handlers and references
+     */
+    destroy() {
+        // Ensure selection is disabled and handlers removed
+        try { this.disableTileSelection(); } catch (e) {}
+        // Clear any leftover state
+        this.selectedTiles.clear();
+        this.clickHandlers.clear();
+        this.onSelectionChanged = null;
+        this.handRenderer = null;
+        this.buttonManager = null;
+    }
+
     // ============================================================================
     // SELECTION CONTROL METHODS
     // ============================================================================

@@ -187,4 +187,15 @@ export class BlankSwapManager {
     printDefaultPrompt() {
         printInfo("Select a tile to discard.");
     }
+
+    /**
+     * Cleanup references to avoid memory leaks
+     */
+    destroy() {
+        try { this.cancelSwapFlow(false); } catch (e) {}
+        this.discardPile = null;
+        this.selectionManager = null;
+        this.buttonManager = null;
+        this.gameController = null;
+    }
 }

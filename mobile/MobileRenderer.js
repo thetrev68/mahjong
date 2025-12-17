@@ -17,6 +17,7 @@ import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
 import { getElementCenterPosition } from "./utils/positionUtils.js";
 import { debugPrint } from "../utils.js";
+import { BaseAdapter } from "../shared/BaseAdapter.js";
 
 const HUMAN_PLAYER = PLAYER.BOTTOM ?? 0;
 
@@ -26,7 +27,7 @@ const HUMAN_PLAYER = PLAYER.BOTTOM ?? 0;
  * Listens to GameController events and routes them to HTML/CSS components.
  * Mirrors the "adapter" role that PhaserAdapter plays on desktop.
  */
-export class MobileRenderer {
+export class MobileRenderer extends BaseAdapter {
     /**
      * @param {Object} options
      * @param {GameController} options.gameController
@@ -41,13 +42,18 @@ export class MobileRenderer {
      * @param {HTMLElement} [options.playerRackContainer]
      */
     constructor(options = {}) {
+        // Note: BaseAdapter will be mixed in to provide subscription management
+        // Keep existing constructor signature for backward compatibility
+        // We'll call registerEventHandlers in registerEventListeners
         if (!options.gameController) {
             throw new Error("MobileRenderer requires a GameController instance");
         }
 
+        // Initialize BaseAdapter with gameController for subscription management
+        super(options.gameController);
+
         this.gameController = options.gameController;
         this.statusElement = options.statusElement || null;
-        this.subscriptions = [];
         this.audioManager = new MobileAudioManager();
 
         // Initialize HandRenderer with new architecture (dependency injection)
@@ -147,12 +153,9 @@ export class MobileRenderer {
     }
 
     destroy() {
-        this.subscriptions.forEach(unsub => {
-            if (typeof unsub === "function") {
-                unsub();
-            }
-        });
-        this.subscriptions = [];
+        // Unsubscribe all GameController handlers
+        try { super.destroy(); } catch (e) {}
+
         if (this.settingsChangedListener) {
             window.removeEventListener("settingsChanged", this.settingsChangedListener);
         }
@@ -169,41 +172,37 @@ export class MobileRenderer {
 
     registerEventListeners() {
         const gc = this.gameController;
-        this.subscriptions.push(gc.on("GAME_STARTED", (data) => this.onGameStarted(data)));
-        this.subscriptions.push(gc.on("GAME_ENDED", (data) => this.onGameEnded(data)));
-        this.subscriptions.push(gc.on("STATE_CHANGED", (data) => this.onStateChanged(data)));
-        this.subscriptions.push(gc.on("TILES_DEALT", (data) => this.onTilesDealt(data)));
-        // HAND_UPDATED is now handled exclusively by HandEventCoordinator
-        this.subscriptions.push(gc.on("TURN_CHANGED", (data) => this.onTurnChanged(data)));
-        this.subscriptions.push(gc.on("TILE_DISCARDED", (data) => this.onTileDiscarded(data)));
-        this.subscriptions.push(gc.on("DISCARD_CLAIMED", (data) => this.onTileClaimed(data)));
-        this.subscriptions.push(gc.on("TILES_EXPOSED", (data) => this.onTilesExposed(data)));
-        this.subscriptions.push(gc.on("JOKER_SWAPPED", (data) => this.onJokerSwapped(data)));
-        this.subscriptions.push(gc.on("BLANK_EXCHANGED", (data) => this.onBlankExchanged(data)));
-        this.subscriptions.push(gc.on("MESSAGE", (data) => this.onMessage(data)));
-        this.subscriptions.push(gc.on("CHARLESTON_PHASE", (data) => {
-            this.updateStatus(`Charleston ${data.phase}: Pass ${data.round}`);
-        }));
-        this.subscriptions.push(gc.on("CHARLESTON_PASS", (data) => this.onCharlestonPass(data)));
-        this.subscriptions.push(gc.on("TILES_RECEIVED", (data) => this.onTilesReceived(data)));
-        this.subscriptions.push(gc.on("COURTESY_VOTE", (data) => {
-            this.updateStatus(`Player ${data.player} voted ${data.vote} for courtesy pass`);
-        }));
-        this.subscriptions.push(gc.on("COURTESY_PASS", () => {
-            this.refreshOpponentBars();
-        }));
-        this.subscriptions.push(gc.on("UI_PROMPT", (data) => this.handleUIPrompt(data)));
+        this.registerEventHandlers({
+            GAME_STARTED: (data) => this.onGameStarted(data),
+            GAME_ENDED: (data) => this.onGameEnded(data),
+            STATE_CHANGED: (data) => this.onStateChanged(data),
+            TILES_DEALT: (data) => this.onTilesDealt(data),
+            TURN_CHANGED: (data) => this.onTurnChanged(data),
+            TILE_DISCARDED: (data) => this.onTileDiscarded(data),
+            DISCARD_CLAIMED: (data) => this.onTileClaimed(data),
+            TILES_EXPOSED: (data) => this.onTilesExposed(data),
+            JOKER_SWAPPED: (data) => this.onJokerSwapped(data),
+            BLANK_EXCHANGED: (data) => this.onBlankExchanged(data),
+            MESSAGE: (data) => this.onMessage(data),
+            CHARLESTON_PHASE: (data) => this.updateStatus(`Charleston ${data.phase}: Pass ${data.round}`),
+            CHARLESTON_PASS: (data) => this.onCharlestonPass(data),
+            TILES_RECEIVED: (data) => this.onTilesReceived(data),
+            COURTESY_VOTE: (data) => this.updateStatus(`Player ${data.player} voted ${data.vote} for courtesy pass`),
+            COURTESY_PASS: () => this.refreshOpponentBars(),
+            UI_PROMPT: (data) => this.handleUIPrompt(data)
+        });
 
-        // Audio event handlers
-        this.subscriptions.push(gc.on("GAME_STARTED", () => this.audioManager.playBGM("bgm")));
-        this.subscriptions.push(gc.on("GAME_ENDED", () => this.audioManager.stopBGM()));
-        this.subscriptions.push(gc.on("TILE_DRAWN", () => this.audioManager.playSFX("rack_tile")));
-        this.subscriptions.push(gc.on("TILES_EXPOSED", (data) => {
-            // Play sound when tiles are exposed
-            if (data.exposure?.length > 0) {
-                this.audioManager.playSFX("wall_fail");
+        // Audio event handlers (separate registration so they can be removed individually)
+        this.registerEventHandlers({
+            GAME_STARTED: () => this.audioManager.playBGM("bgm"),
+            GAME_ENDED: () => this.audioManager.stopBGM(),
+            TILE_DRAWN: () => this.audioManager.playSFX("rack_tile"),
+            TILES_EXPOSED: (data) => {
+                if (data.exposure?.length > 0) {
+                    this.audioManager.playSFX("wall_fail");
+                }
             }
-        }));
+        });
 
         // Listen for settings changes from SettingsSheet
         const onSettingsChanged = (event) => {

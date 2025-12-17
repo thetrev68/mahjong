@@ -24,8 +24,9 @@ import {DialogManager} from "../managers/DialogManager.js";
 import {SelectionManager} from "../managers/SelectionManager.js";
 import {BlankSwapManager} from "../managers/BlankSwapManager.js";
 import {HandRenderer} from "../renderers/HandRenderer.js";
+import { BaseAdapter } from "../../shared/BaseAdapter.js";
 
-export class PhaserAdapter {
+export class PhaserAdapter extends BaseAdapter {
     /**
      * @param {GameController} gameController - Core game controller
      * @param {GameScene} scene - Phaser scene
@@ -81,6 +82,8 @@ export class PhaserAdapter {
         /** @type {boolean} Skip next HAND_UPDATED for tile draw (already handled in onTileDrawn) */
         this.skipNextDrawHandUpdate = false;
 
+        super(gameController);
+
         this.setupEventListeners();
     }
 
@@ -96,43 +99,29 @@ export class PhaserAdapter {
      * Subscribe to all GameController events
      */
     setupEventListeners() {
-        const gc = this.gameController;
-
-        // Game flow events
-        gc.on("STATE_CHANGED", (data) => this.onStateChanged(data));
-        gc.on("GAME_STARTED", (data) => this.onGameStarted(data));
-        gc.on("GAME_ENDED", (data) => this.onGameEnded(data));
-
-        // Wall setup event
-        gc.on("WALL_CREATED", (data) => this.onWallCreated(data));
-
-        // Tile events
-        gc.on("TILES_DEALT", (data) => this.onTilesDealt(data));
-        gc.on("TILE_DRAWN", (data) => this.onTileDrawn(data));
-        gc.on("TILE_DISCARDED", (data) => this.onTileDiscarded(data));
-        gc.on("TILES_RECEIVED", (data) => this.onTilesReceived(data));
-        gc.on("BLANK_EXCHANGED", (data) => this.onBlankExchanged(data));
-        gc.on("DISCARD_CLAIMED", (data) => this.onDiscardClaimed(data));
-        gc.on("TILES_EXPOSED", (data) => this.onTilesExposed(data));
-        gc.on("JOKER_SWAPPED", (data) => this.onJokerSwapped(data));
-
-        // Hand events
-        gc.on("HAND_UPDATED", (data) => this.onHandUpdated(data));
-
-        // Turn events
-        gc.on("TURN_CHANGED", (data) => this.onTurnChanged(data));
-
-        // Charleston events
-        gc.on("CHARLESTON_PHASE", (data) => this.onCharlestonPhase(data));
-        gc.on("CHARLESTON_PASS", (data) => this.onCharlestonPass(data));
-
-        // Courtesy events
-        gc.on("COURTESY_VOTE", (data) => this.onCourtesyVote(data));
-        gc.on("COURTESY_PASS", (data) => this.onCourtesyPass(data));
-
-        // UI events
-        gc.on("MESSAGE", (data) => this.onMessage(data));
-        gc.on("UI_PROMPT", (data) => this.onUIPrompt(data));
+        // Register handlers using BaseAdapter utility (keeps subscriptions tracked)
+        this.registerEventHandlers({
+            STATE_CHANGED: (data) => this.onStateChanged(data),
+            GAME_STARTED: (data) => this.onGameStarted(data),
+            GAME_ENDED: (data) => this.onGameEnded(data),
+            WALL_CREATED: (data) => this.onWallCreated(data),
+            TILES_DEALT: (data) => this.onTilesDealt(data),
+            TILE_DRAWN: (data) => this.onTileDrawn(data),
+            TILE_DISCARDED: (data) => this.onTileDiscarded(data),
+            TILES_RECEIVED: (data) => this.onTilesReceived(data),
+            BLANK_EXCHANGED: (data) => this.onBlankExchanged(data),
+            DISCARD_CLAIMED: (data) => this.onDiscardClaimed(data),
+            TILES_EXPOSED: (data) => this.onTilesExposed(data),
+            JOKER_SWAPPED: (data) => this.onJokerSwapped(data),
+            HAND_UPDATED: (data) => this.onHandUpdated(data),
+            TURN_CHANGED: (data) => this.onTurnChanged(data),
+            CHARLESTON_PHASE: (data) => this.onCharlestonPhase(data),
+            CHARLESTON_PASS: (data) => this.onCharlestonPass(data),
+            COURTESY_VOTE: (data) => this.onCourtesyVote(data),
+            COURTESY_PASS: (data) => this.onCourtesyPass(data),
+            MESSAGE: (data) => this.onMessage(data),
+            UI_PROMPT: (data) => this.onUIPrompt(data)
+        });
     }
 
     /**
@@ -1234,11 +1223,24 @@ export class PhaserAdapter {
      * Cleanup adapter (remove event listeners, etc.)
      */
     destroy() {
-        this.gameController.clear();  // Remove all event listeners
-        if (this.dialogManager) {
-            this.dialogManager.closeDialog();
-        }
-        // TODO: delete messy manual cleanup once adapter delegates lifespan to managers.
+        // Use BaseAdapter cleanup first
+        try { super.destroy(); } catch (e) {}
+
+        // Disable selection and cancel any in-progress UI flows
+        try { this.selectionManager?.disableTileSelection(); } catch (e) {}
+        try { this.blankSwapManager?.handleDiscardPromptEnd(); } catch (e) {}
+
+        // Close dialogs and destroy managers that have teardown methods
+        try { this.dialogManager?.closeDialog(); } catch (e) {}
+        try { if (typeof this.buttonManager?.destroy === "function") this.buttonManager.destroy(); } catch (e) {}
+        try { if (typeof this.handRenderer?.destroy === "function") this.handRenderer.destroy(); } catch (e) {}
+
+        // Break references
+        this.selectionManager = null;
+        this.blankSwapManager = null;
+        this.buttonManager = null;
+        this.dialogManager = null;
+        this.handRenderer = null;
     }
 
     /**

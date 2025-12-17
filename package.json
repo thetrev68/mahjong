@@ -11,6 +11,7 @@
     "test:headed": "playwright test --headed",
     "test:report": "playwright show-report",
     "test:mobile": "playwright test --project=mobile",
+    "test:unit": "vitest run tests/unit/selectionManager.spec.js tests/unit/phaserAdapter.spec.js tests/unit/buttonManager.spec.js --run",
     "test:mobile:ui": "playwright test --project=mobile --ui",
     "test:mobile:headed": "playwright test --project=mobile --headed",
     "test:mobile:debug": "playwright test --project=mobile --debug",
@@ -29,6 +30,14 @@
     "markdownlint-cli": "^0.47.0",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3",
+    "vitest": "^1.4.3",
     "vite": "^5.3.0"
+  },
+  "vitest": {
+    "environment": "jsdom",
+    "test": {
+      "include": ["tests/unit/**/*.spec.js"],
+      "exclude": ["tests/e2e/**", "tests/unit/**/*.test.js"]
+    }
   }
 }
