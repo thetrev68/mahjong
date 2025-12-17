@@ -11,6 +11,7 @@ import { DiscardAnimationSequencer } from "./animations/DiscardAnimationSequence
 import { HomePageTiles } from "./components/HomePageTiles.js";
 import { DiscardSelectionModal } from "./components/DiscardSelectionModal.js";
 import { GameEndModal } from "./components/GameEndModal.js";
+import MobileAudioManager from "./MobileAudioManager.js";
 import { PLAYER, STATE, SUIT } from "../constants.js";
 import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
@@ -46,6 +47,7 @@ export class MobileRenderer {
         this.gameController = options.gameController;
         this.statusElement = options.statusElement || null;
         this.subscriptions = [];
+        this.audioManager = new MobileAudioManager();
 
         // Initialize HandRenderer with new architecture (dependency injection)
         this.handRenderer = new HandRenderer(options.handContainer);
@@ -85,7 +87,8 @@ export class MobileRenderer {
         this.dealingSequencer = new DealingAnimationSequencer(
             this.gameController,
             this.handRenderer,
-            this.animationController
+            this.animationController,
+            this.audioManager
         );
 
         // Initialize Discard animation sequencer
@@ -149,6 +152,10 @@ export class MobileRenderer {
             }
         });
         this.subscriptions = [];
+        if (this.settingsChangedListener) {
+            window.removeEventListener("settingsChanged", this.settingsChangedListener);
+        }
+        this.audioManager?.destroy();
         this.handRenderer?.destroy();
         this.selectionManager = null;
         this.eventCoordinator?.destroy();
@@ -185,6 +192,36 @@ export class MobileRenderer {
             this.refreshOpponentBars();
         }));
         this.subscriptions.push(gc.on("UI_PROMPT", (data) => this.handleUIPrompt(data)));
+
+        // Audio event handlers
+        this.subscriptions.push(gc.on("GAME_STARTED", () => this.audioManager.playBGM("bgm")));
+        this.subscriptions.push(gc.on("GAME_ENDED", () => this.audioManager.stopBGM()));
+        this.subscriptions.push(gc.on("TILE_DRAWN", () => this.audioManager.playSFX("rack_tile")));
+        this.subscriptions.push(gc.on("TILES_EXPOSED", (data) => {
+            // Play sound when tiles are exposed
+            if (data.exposure?.length > 0) {
+                this.audioManager.playSFX("wall_fail");
+            }
+        }));
+
+        // Listen for settings changes from SettingsSheet
+        const onSettingsChanged = (event) => {
+            const settings = event.detail;
+            if (settings.bgmMuted !== undefined) {
+                this.audioManager.muteBGM(settings.bgmMuted);
+            }
+            if (settings.bgmVolume !== undefined) {
+                this.audioManager.setBGMVolume(settings.bgmVolume / 100);
+            }
+            if (settings.sfxMuted !== undefined) {
+                this.audioManager.muteSFX(settings.sfxMuted);
+            }
+            if (settings.sfxVolume !== undefined) {
+                this.audioManager.setSFXVolume(settings.sfxVolume / 100);
+            }
+        };
+        window.addEventListener("settingsChanged", onSettingsChanged);
+        this.settingsChangedListener = onSettingsChanged;
     }
 
     createOpponentBars(containers) {

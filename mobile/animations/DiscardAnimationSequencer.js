@@ -1,5 +1,7 @@
 import { AnimationSequencer } from "./AnimationSequencer.js";
 import { TileData } from "../../core/models/TileData.js";
+import SettingsManager from "../../shared/SettingsManager.js";
+import tileDroppingSoundUrl from "/assets/audio/tile_dropping.mp3?url";
 
 const HUMAN_PLAYER = 0;
 
@@ -329,15 +331,29 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
      */
     playDiscardSound() {
         try {
-            // Use absolute path to assets directory
+            // Check user settings
+            const settings = SettingsManager.load();
+            if (settings.sfxMuted) {
+                return;
+            }
+
             // eslint-disable-next-line no-undef
-            const audio = new Audio("/assets/audio/tile_dropping.mp3");
-            audio.volume = 0.5;
-            audio.play().catch(err => {
-                console.warn("Could not play discard sound:", err);
-            });
+            const audio = new Audio(tileDroppingSoundUrl);
+            // Convert sfxVolume from 0-100 to 0-1 scale
+            audio.volume = (settings.sfxVolume || 50) / 100;
+            const playPromise = audio.play();
+
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        // Audio playback started successfully
+                    })
+                    .catch(err => {
+                        console.warn("Could not play discard sound:", err.message);
+                    });
+            }
         } catch (err) {
-            console.warn("Error creating discard audio:", err);
+            console.warn("Error creating discard audio:", err.message);
         }
     }
 }

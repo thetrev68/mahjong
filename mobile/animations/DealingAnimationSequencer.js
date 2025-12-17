@@ -1,4 +1,5 @@
 import { AnimationSequencer } from "./AnimationSequencer.js";
+import MobileAudioManager from "../MobileAudioManager.js";
 
 /**
  * DealingAnimationSequencer
@@ -25,9 +26,11 @@ export class DealingAnimationSequencer extends AnimationSequencer {
      * @param {GameController} gameController - Game controller instance
      * @param {HandRenderer} handRenderer - Hand renderer for accessing tile elements
      * @param {AnimationController} animationController - Animation primitives
+     * @param {MobileAudioManager} audioManager - Audio manager for sound effects
      */
-    constructor(gameController, handRenderer, animationController) {
+    constructor(gameController, handRenderer, animationController, audioManager) {
         super(gameController, handRenderer, animationController);
+        this.audioManager = audioManager || new MobileAudioManager();
 
         // ========== ANIMATION TIMING (Adjust here) ==========
         /**
@@ -124,7 +127,7 @@ export class DealingAnimationSequencer extends AnimationSequencer {
      *
      * Removes face-down class and adds revealing animation class
      * to each tile with TILE_REVEAL_STAGGER ms delay between tiles.
-     * Creates a cascading reveal effect.
+     * Creates a cascading reveal effect with sound effects.
      *
      * @returns {Promise<void>}
      * @private
@@ -143,6 +146,11 @@ export class DealingAnimationSequencer extends AnimationSequencer {
         for (let i = 0; i < tiles.length; i++) {
             const tile = tiles[i];
 
+            // Play normalflyin sound as tile flies into view
+            if (this.audioManager) {
+                this.audioManager.playSFX("wall_fail");
+            }
+
             // Remove face-down, add flip animation
             tile.classList.remove("tile--face-down");
             tile.classList.add("tile--revealing");
@@ -156,6 +164,11 @@ export class DealingAnimationSequencer extends AnimationSequencer {
 
         // Wait for last tile's animation to complete
         await this.delay(this.TILE_FLIP_DURATION);
+
+        // Play rack_tile sound as final landing sound
+        if (this.audioManager) {
+            this.audioManager.playSFX("rack_tile");
+        }
 
         // Cleanup animation classes
         tiles.forEach(tile => {
