@@ -64,7 +64,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Initialize mobile game components
-    initializeGame();
+    initializeGame().catch(error => {
+        console.error("Failed to initialize mobile game:", error);
+        const statusEl = document.getElementById("game-status");
+        if (statusEl) {
+            statusEl.textContent = `ERROR: ${error.message}`;
+            statusEl.style.color = "#ff6b6b";
+        }
+    });
 
     // Register Service Worker
     registerServiceWorker();
