@@ -358,15 +358,6 @@ export class HandEventCoordinator {
     // Find tiles in current hand that weren't in previous hand
     const newIndices = currentIndices.filter(idx => !prevIndices.has(idx));
 
-    // Debug logging
-    if (newIndices.length > 0 && newIndices.length < 3) {
-      console.log("[HandEventCoordinator] _findNewlyReceivedTiles detected partial match:", {
-        prevIndices: Array.from(prevIndices).sort((a, b) => a - b),
-        currentIndices: currentIndices.sort((a, b) => a - b),
-        newIndices: newIndices
-      });
-    }
-
     return newIndices;
   }
 
