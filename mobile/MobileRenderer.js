@@ -16,6 +16,7 @@ import { PLAYER, STATE, SUIT } from "../constants.js";
 import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
 import { getElementCenterPosition } from "./utils/positionUtils.js";
+import { debugPrint } from "../utils.js";
 
 const HUMAN_PLAYER = PLAYER.BOTTOM ?? 0;
 
@@ -851,7 +852,7 @@ export class MobileRenderer {
         // TEMPORARY FIX: Disable Charleston animation sequencer
         // HandEventCoordinator already handles the glow correctly via HAND_UPDATED event
         // The animation sequencer was interfering by clearing tiles after glow was applied
-        console.log("[MobileRenderer] onTilesReceived: Skipping Charleston animation (HandEventCoordinator handles glow)");
+        debugPrint("[MobileRenderer] onTilesReceived: Skipping Charleston animation (HandEventCoordinator handles glow)");
         return;
     }
 

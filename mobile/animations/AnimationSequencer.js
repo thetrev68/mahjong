@@ -10,6 +10,8 @@
  * Subclasses (e.g., CharlestonAnimationSequencer) extend this to implement
  * specific animation flows while leveraging common functionality.
  */
+import {debugPrint} from "../../utils.js";
+
 export class AnimationSequencer {
     /**
      * @param {GameController} gameController - Game controller instance
@@ -45,7 +47,7 @@ export class AnimationSequencer {
 
             for (let i = 0; i < steps.length; i++) {
                 if (this.cancelRequested) {
-                    console.log("Animation sequence cancelled");
+                    debugPrint("Animation sequence cancelled");
                     break;
                 }
 

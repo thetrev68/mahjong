@@ -16,7 +16,7 @@
 
 import {TileData} from "../../core/models/TileData.js";
 import {PLAYER, getTotalTileCount} from "../../constants.js";
-import {printMessage, printInfo} from "../../utils.js";
+import {printMessage, printInfo, debugPrint} from "../../utils.js";
 import {PLAYER_LAYOUT} from "../config/playerLayout.js";
 import {TileManager} from "../managers/TileManager.js";
 import {ButtonManager} from "../managers/ButtonManager.js";
@@ -156,7 +156,7 @@ export class PhaserAdapter {
      */
     onStateChanged(data) {
         const {oldState, newState} = data;
-        console.log(`State: ${oldState} → ${newState}`);
+        debugPrint(`State: ${oldState} → ${newState}`);
 
         // Update button visibility and state based on new game state
         this.buttonManager.updateForState(newState);

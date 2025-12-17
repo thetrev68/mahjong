@@ -5,6 +5,8 @@
  * Platform-agnostic (works on desktop and mobile).
  */
 
+import {debugPrint} from "../utils.js";
+
 const DEFAULTS = {
     // Game settings
     cardYear: 2025,
@@ -71,7 +73,7 @@ class SettingsManager {
             localStorage.setItem(storageKey, String(value));
         }
 
-        console.log("Settings saved:", settings);
+        debugPrint("Settings saved:", settings);
     }
 
     /**
@@ -120,7 +122,7 @@ class SettingsManager {
         const storageKey = STORAGE_PREFIX + key;
         localStorage.setItem(storageKey, String(value));
 
-        console.log(`Setting updated: ${key} = ${value}`);
+        debugPrint(`Setting updated: ${key} = ${value}`);
     }
 
     /**
@@ -133,7 +135,7 @@ class SettingsManager {
             localStorage.removeItem(storageKey);
         }
 
-        console.log("Settings reset to defaults");
+        debugPrint("Settings reset to defaults");
     }
 
     /**

@@ -37,6 +37,7 @@ import {TileData} from "./models/TileData.js";
 import {ExposureData} from "./models/HandData.js";
 import * as GameEvents from "./events/GameEvents.js";
 import {gTileGroups} from "./tileDefinitions.js";
+import {debugPrint, debugWarn, debugError} from "../utils.js";
 
 const CHARLESTON_DIRECTION_SEQUENCE = {
     1: ["right", "across", "left"],
@@ -190,7 +191,7 @@ export class GameController extends EventEmitter {
     async startGame() {
         // Prevent multiple simultaneous game starts
         if (this.state !== STATE.INIT && this.state !== STATE.END) {
-            console.warn("GameController: startGame called while game in progress, ignoring");
+            debugWarn("GameController: startGame called while game in progress, ignoring");
             return;
         }
 
@@ -346,18 +347,18 @@ export class GameController extends EventEmitter {
                     trainingTiles.push(matchedTile);
                 } else {
                     // Fallback: use the template (shouldn't happen with a valid wall)
-                    console.warn(`Could not find matching tile for ${template.suit}-${template.number}`);
+                    debugWarn(`Could not find matching tile for ${template.suit}-${template.number}`);
                     trainingTiles.push(template);
                 }
             }
 
             if (this.debug) {
-                console.log("Training Mode Settings:", {
+                debugPrint("Training Mode Settings:", {
                     trainingMode: this.settings.trainingMode,
                     trainingHand: this.settings.trainingHand,
                     trainingTileCount: this.settings.trainingTileCount
                 });
-                console.log("Generated hand tiles:", trainingTiles.map(t => `${t.suit}-${t.number} (index: ${t.index})`));
+                debugPrint("Generated hand tiles:", trainingTiles.map(t => `${t.suit}-${t.number} (index: ${t.index})`));
             }
 
             this.emit("MESSAGE", {
@@ -469,9 +470,7 @@ export class GameController extends EventEmitter {
 
                 // Remove tiles from player's hand
                 tilesToPass.forEach(tile => player.hand.removeTile(tile));
-                if (this.debug || (typeof process !== "undefined" && process.env?.NODE_ENV === "development")) {
-                    console.log(`[GameController] Player ${playerIndex} removed ${tilesToPass.length} tiles, hand now has ${player.hand.tiles.length} tiles`);
-                }
+                debugPrint(`[GameController] Player ${playerIndex} removed ${tilesToPass.length} tiles, hand now has ${player.hand.tiles.length} tiles`);
 
                 charlestonPassArray[playerIndex] = tilesToPass;
 
@@ -508,9 +507,7 @@ export class GameController extends EventEmitter {
                 charlestonPassArray[fromPlayer].forEach(tile => {
                     this.players[toPlayer].hand.addTile(tile);
                 });
-                if (this.debug || (typeof process !== "undefined" && process.env?.NODE_ENV === "development")) {
-                    console.log(`[GameController] Player ${toPlayer} received ${charlestonPassArray[fromPlayer].length} tiles, hand now has ${this.players[toPlayer].hand.tiles.length} tiles`);
-                }
+                debugPrint(`[GameController] Player ${toPlayer} received ${charlestonPassArray[fromPlayer].length} tiles, hand now has ${this.players[toPlayer].hand.tiles.length} tiles`);
 
                 // Emit tiles received event (for animation coordination)
                 const receivedTiles = charlestonPassArray[fromPlayer].map(t => ({

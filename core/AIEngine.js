@@ -360,9 +360,7 @@ export class AIEngine {
             );
             discardTile = discardableRecommendations[randomIndex].tile;
 
-            if (gdebug) {
-                console.log(`[AIEngine] Made suboptimal discard choice (difficulty: ${this.difficulty})`);
-            }
+            debugPrint(`[AIEngine] Made suboptimal discard choice (difficulty: ${this.difficulty})`);
         } else {
             // Hard: Always pick the optimal (worst-ranked) tile
             for (let i = recommendations.length - 1; i >= 0; i--) {

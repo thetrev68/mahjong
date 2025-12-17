@@ -112,7 +112,6 @@ export class Tile {
         } else {
             this.sprite = this.scene.add.sprite(0, 0, "tiles", this.spriteName);
         }
-        // console.log("Tile.create() called for tile:", this.suit, this.number, "sprite:", this.sprite);
         this.sprite.visible = false;
         this.sprite.setOrigin(0.5, 0.5);
 

@@ -25,19 +25,39 @@ export function getGtrace() {
 // Conditional debug functions
 let debugPrint = function() {};
 let debugTrace = function() {};
+let debugWarn = function() {};
+let debugError = function() {};
 
 if (gdebug) {
-    debugPrint = function(str) {
-        console.log(str);
+    debugPrint = function(str, data = null) {
+        if (data !== null) {
+            console.log(str, data);
+        } else {
+            console.log(str);
+        }
     };
     debugTrace = function(str) {
         if (getGtrace()) { // This will now check gdebug
             console.log(str);
         }
     };
+    debugWarn = function(str, data = null) {
+        if (data !== null) {
+            console.warn(str, data);
+        } else {
+            console.warn(str);
+        }
+    };
+    debugError = function(str, data = null) {
+        if (data !== null) {
+            console.error(str, data);
+        } else {
+            console.error(str);
+        }
+    };
 }
 
-export { debugPrint, debugTrace };
+export { debugPrint, debugTrace, debugWarn, debugError };
 
 // Print to hint window
 export function printHint(html) {
