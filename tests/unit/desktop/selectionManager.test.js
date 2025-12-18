@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest";
-import { SelectionManager } from "../../desktop/managers/SelectionManager.js";
+import { test, expect } from "@playwright/test";
+import { SelectionManager } from "../../../desktop/managers/SelectionManager.js";
 
-describe("SelectionManager destroy", () => {
-  it("clears selections and breaks references", () => {
+test.describe("SelectionManager destroy", () => {
+  test("clears selections and breaks references", () => {
     const fakeHandRenderer = {};
     const sm = new SelectionManager(fakeHandRenderer, 0, null);
 

@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { GameController } from "../../core/GameController.js";
-import { BaseAdapter } from "../../shared/BaseAdapter.js";
+import { test, expect } from "@playwright/test";
+import { GameController } from "../../../core/GameController.js";
+import { BaseAdapter } from "../../../shared/BaseAdapter.js";
 
-describe("BaseAdapter teardown", () => {
-  it("registers event listeners and unsubscribes them on destroy", () => {
+test.describe("BaseAdapter teardown", () => {
+  test("registers event listeners and unsubscribes them on destroy", () => {
     const gc = new GameController();
 
     class FakeAdapter extends BaseAdapter {
