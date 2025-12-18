@@ -30,7 +30,7 @@
  */
 
 import {EventEmitter} from "./events/EventEmitter.js";
-import {STATE, PLAYER, PLAYER_OPTION, SUIT, WIND} from "../constants.js";
+import {STATE, PLAYER, PLAYER_OPTION, SUIT, WIND, ANIMATION_TIMINGS} from "../constants.js";
 import {PlayerData} from "./models/PlayerData.js";
 import {TileData} from "./models/TileData.js";
 import {ExposureData} from "./models/HandData.js";
@@ -873,7 +873,7 @@ export class GameController extends EventEmitter {
         const handEvent = GameEvents.createHandUpdatedEvent(this.currentPlayer, player.hand.toJSON());
         this.emit("HAND_UPDATED", handEvent);
 
-        await this.sleep(300);
+        await this.sleep(ANIMATION_TIMINGS.TILE_DRAWN_DELAY);
     }
 
     /**
@@ -927,7 +927,7 @@ export class GameController extends EventEmitter {
         // Create animation payload - treat negative index as "no index"
         const animationPayload = {
             type: "discard-arc",
-            duration: this.currentPlayer === 0 ? 300 : 200,
+            duration: this.currentPlayer === 0 ? ANIMATION_TIMINGS.DISCARD_ANIMATION_HUMAN : ANIMATION_TIMINGS.DISCARD_ANIMATION_AI,
             easing: "ease-out",
             rotation: this.currentPlayer === 0 ? 360 : 180
         };
@@ -942,7 +942,7 @@ export class GameController extends EventEmitter {
         const handEvent = GameEvents.createHandUpdatedEvent(this.currentPlayer, player.hand.toJSON());
         this.emit("HAND_UPDATED", handEvent);
 
-        await this.sleep(500);
+        await this.sleep(ANIMATION_TIMINGS.DISCARD_COMPLETE_DELAY);
     }
 
     /**

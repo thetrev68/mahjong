@@ -16,12 +16,12 @@ in several areas:
 
 **Key Issues:**
 
-- 200+ console.log statements left in production code (debug pollution)
-- Memory leak risks on desktop (no event listener cleanup)
+- ~~200+ console.log statements left in production code (debug pollution)~~ ✅ **COMPLETED: December 17, 2025**
+- ~~Memory leak risks on desktop (no event listener cleanup)~~~ ✅ **COMPLETED: December 17, 2025**
 - Inconsistent cleanup patterns between mobile (good) and desktop (poor)
 - 8+ oversized functions in core GameController (>100 lines each)
 - 12 TODO/FIXME comments indicating incomplete features
-- Mobile and desktop architectures diverging (animation sequencers)
+- ~~Mobile and desktop architectures diverging (animation sequencers)~~~ ✅ **COMPLETED: December 17, 2025**
 
 **Strengths:**
 
@@ -270,8 +270,10 @@ try {
 
 ### 1.3 Magic Numbers Throughout Codebase
 
-**Severity:** 🟡 **MEDIUM**
+**Severity:** 🟡 **MEDIUM** → ✅ **RESOLVED**
 **Impact:** Hard to maintain, hard to understand intent, easy to break
+
+**Status:** ✅ **COMPLETED: December 17, 2025** — Added ANIMATION_TIMINGS and UI_POSITIONS constants to constants.js, updated GameController.js and SelectionManager.js to use them.
 
 **Problem:** Numeric values scattered throughout code without explanation.
 
@@ -393,6 +395,37 @@ export const PLAYER_POSITIONS = {
   // ...
 };
 ```
+
+#### Implementation Summary
+
+**✅ Changes Made (December 17, 2025):**
+
+1. **Added ANIMATION_TIMINGS to [constants.js](constants.js:110-140)**
+   - Comprehensive animation timing constants for all game phases
+   - Dealing, Charleston, Courtesy, Gameplay, and End game timings
+   - All values documented with inline comments
+
+2. **Added UI_POSITIONS to [constants.js](constants.js:142-161)**
+   - Tile selection Y-positions (TILE_SELECTED_Y: 575, TILE_NORMAL_Y: 600)
+   - Player hand base positions for reference
+   - SELECTION_RAISE_OFFSET constant (25 pixels)
+
+3. **Updated [SelectionManager.js](desktop/managers/SelectionManager.js)**
+   - Imported UI_POSITIONS constant
+   - Replaced hardcoded 575/600 values with UI_POSITIONS.TILE_SELECTED_Y/TILE_NORMAL_Y
+   - Updated JSDoc to reference constant names instead of magic numbers
+
+4. **Updated [GameController.js](core/GameController.js)**
+   - Imported ANIMATION_TIMINGS constant
+   - Replaced `await this.sleep(300)` with `ANIMATION_TIMINGS.TILE_DRAWN_DELAY`
+   - Replaced `await this.sleep(500)` with `ANIMATION_TIMINGS.DISCARD_COMPLETE_DELAY`
+   - Replaced hardcoded discard durations (300/200) with `ANIMATION_TIMINGS.DISCARD_ANIMATION_HUMAN/AI`
+
+**Benefits:**
+- Single source of truth for all animation timings
+- Easy to adjust animation speeds globally
+- Self-documenting code with descriptive constant names
+- Consistent with existing constants pattern in codebase
 
 ---
 
@@ -2147,17 +2180,18 @@ December 17, 2025**
    - **Effort:** 2-8 hours depending on scope
    - **Impact:** Medium - completes features or documents decisions
 
-4. **Add JSDoc to Core Methods** (Section 3.1)
-   - AIEngine, AnimationController, GameController
-   - **Effort:** 2 hours
-   - **Impact:** Medium - developer experience
+4. ~~**Add JSDoc to Core Methods** (Section 3.1)~~ ✅ **COMPLETED: December 17, 2025**
+   - ~~AIEngine, AnimationController, GameController~~
+   - ~~**Effort:** 2 hours~~
+   - ~~**Impact:** Medium - developer experience~~
 
 ### 🟡 Medium Priority (Backlog)
 
-1. **Move Magic Numbers to Constants** (Section 1.3)
-   - 30+ hardcoded values scattered
-   - **Effort:** 1.5 hours
-   - **Impact:** Low-Medium - maintainability
+1. ~~**Move Magic Numbers to Constants** (Section 1.3)~~ ✅ **COMPLETED: December 17, 2025**
+   - ~~30+ hardcoded values scattered~~
+   - ~~**Effort:** 1.5 hours~~
+   - ~~**Impact:** Low-Medium - maintainability~~
+   - **Result:** Added ANIMATION_TIMINGS and UI_POSITIONS to constants.js, updated GameController and SelectionManager
 
 2. **Break Up Long Functions** (Section 1.4)
    - GameController methods 100-200 lines

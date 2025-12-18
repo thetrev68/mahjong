@@ -107,6 +107,59 @@ export const DRAGON = {
 };
 
 
+// Animation Timing Configuration (milliseconds)
+// These constants control animation speeds throughout the game
+export const ANIMATION_TIMINGS = {
+    // Dealing phase animations
+    TILE_DRAW_DELAY: 100,           // Delay between dealing individual tiles
+    TILE_FLY_DURATION: 300,         // Duration of tile flying from wall to hand
+    DEALING_COMPLETE_DELAY: 500,    // Pause after dealing finishes
+
+    // Charleston phase animations
+    CHARLESTON_PASS: 400,           // Duration of Charleston pass animation
+    CHARLESTON_RECEIVE: 400,        // Duration of Charleston receive animation
+    CHARLESTON_TRANSITION: 500,     // Delay between Charleston phases
+
+    // Courtesy phase animations
+    COURTESY_QUERY_DELAY: 300,      // Delay before courtesy vote query
+    COURTESY_REVEAL: 300,           // Duration of courtesy tile reveal
+
+    // Main gameplay animations
+    DRAW_ANIMATION: 200,            // Duration of tile draw from wall
+    DISCARD_ANIMATION_HUMAN: 300,   // Duration of human player discard
+    DISCARD_ANIMATION_AI: 200,      // Duration of AI player discard
+    EXPOSURE_ANIMATION: 250,        // Duration of exposure (pung/kong/quint) animation
+    CLAIM_POPUP_DELAY: 100,         // Delay before showing claim popup
+
+    // Game end animations
+    GAME_END_DELAY: 1000,           // Pause before showing end game results
+
+    // Generic delays (used in GameController sleep() calls)
+    TILE_DRAWN_DELAY: 300,          // Delay after tile is drawn (line 876)
+    DISCARD_COMPLETE_DELAY: 500     // Delay after discard is complete (line 945)
+};
+
+// UI Position Constants (Desktop Phaser coordinates)
+// Screen dimensions: 0,0 (top-left) to WINDOW_WIDTH,WINDOW_HEIGHT (bottom-right)
+export const UI_POSITIONS = {
+    // Tile Y-positions for selection feedback (PLAYER.BOTTOM only)
+    TILE_SELECTED_Y: 575,           // Y position when tile is selected (raised)
+    TILE_NORMAL_Y: 600,             // Y position when tile is in normal state
+
+    // Player hand base positions (from playerLayout.js - duplicated here for reference)
+    BOTTOM_PLAYER_X: 200,
+    BOTTOM_PLAYER_Y: 600,
+    RIGHT_PLAYER_X: 1000,
+    RIGHT_PLAYER_Y: 520,
+    TOP_PLAYER_X: 750,
+    TOP_PLAYER_Y: 50,
+    LEFT_PLAYER_X: 50,
+    LEFT_PLAYER_Y: 50,
+
+    // Selection visual offset
+    SELECTION_RAISE_OFFSET: 25      // How many pixels to raise selected tiles (600 - 575)
+};
+
 // Tile Count Helper
 export function getTotalTileCount() {
     // Default to 152 if settingsManager is not yet initialized or method doesn't exist

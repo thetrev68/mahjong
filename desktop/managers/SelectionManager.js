@@ -1,4 +1,4 @@
-import { SUIT } from "../../constants.js";
+import { SUIT, UI_POSITIONS } from "../../constants.js";
 
 /**
  * SelectionManager - Manages tile selection state and visual feedback
@@ -444,16 +444,16 @@ export class SelectionManager {
      * Updates tile's visual appearance to reflect selection state.
      *
      * If isSelected:
-     * - Raise tile: animate to Y = 575 (25 pixels above normal)
+     * - Raise tile: animate to Y = TILE_SELECTED_Y (25 pixels above normal)
      * - Raise depth: set sprite.depth = 150 (render on top)
      * - Selected tiles appear "popped up" above deselected tiles
      *
      * If not isSelected:
-     * - Lower tile: animate to Y = 600 (normal position)
+     * - Lower tile: animate to Y = TILE_NORMAL_Y (normal position)
      * - Lower depth: set sprite.depth = 0 (normal rendering)
      * - Tile blends back into rack
      *
-     * The Y-position change (575 vs 600) is the primary visual signal.
+     * The Y-position change is the primary visual signal.
      * The depth change ensures selected tiles aren't obscured.
      *
      * @example
@@ -471,8 +471,8 @@ export class SelectionManager {
             if (tile.spriteBack) {
                 tile.spriteBack.setDepth(150);
             }
-            // Animate to elevated position (Y=575)
-            tile.animate(tile.origX, 575, angle);
+            // Animate to elevated position
+            tile.animate(tile.origX, UI_POSITIONS.TILE_SELECTED_Y, angle);
             tile._isVisuallySelected = true;
         } else {
             // Lower tile and reset depth
@@ -480,8 +480,8 @@ export class SelectionManager {
             if (tile.spriteBack) {
                 tile.spriteBack.setDepth(0);
             }
-            // Animate to normal position (Y=600)
-            tile.animate(tile.origX, 600, angle);
+            // Animate to normal position
+            tile.animate(tile.origX, UI_POSITIONS.TILE_NORMAL_Y, angle);
             tile._isVisuallySelected = false;
         }
     }
