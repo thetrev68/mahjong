@@ -2020,43 +2020,52 @@ getSelectionManager() {
 
 ### 6.1 Feature Parity Analysis
 
-**Severity:** 🟡 **MEDIUM**
-**Impact:** Users get different experience on different platforms
+**Status:** ✅ **COMPLETED: December 17, 2025** — Animation sequencer extraction completed
 
-| Feature                  | Desktop                | Mobile                       | Parity | Issue                       |
-| ------------------------ | ---------------------- | ---------------------------- | ------ | --------------------------- |
-| **Charleston Animation** | Inline in adapter      | CharlestonAnimationSequencer | ❌ No  | Desktop not refactored      |
-| **Dealing Animation**    | Inline (200 lines)     | DealingAnimationSequencer    | ❌ No  | Desktop needs extraction    |
-| **Discard Animation**    | Inline in adapter      | DiscardAnimationSequencer    | ❌ No  | Desktop missing sequencer   |
-| **Blank Tile Swap**      | ✓ Animated             | ✗ Missing (TODO)             | ❌ No  | Mobile needs implementation |
-| **Event Cleanup**        | ✗ None                 | ✓ destroy() method           | ❌ No  | Desktop missing             |
-| **Audio Manager**        | audioManager.js        | MobileAudioManager.js        | ✓ OK   | Both platforms supported    |
-| **Hints Panel**          | HintAnimationManager   | HintsPanel component         | ✓ OK   | Both have implementation    |
-| **Settings UI**          | DesktopSettingsManager | SettingsSheet component      | ✓ OK   | Both supported              |
-| **Touch Support**        | ✗ Mouse only           | ✓ Full touch gestures        | ✓ OK   | Appropriate for platforms   |
+**Severity:** 🟡 **MEDIUM** → ✅ **RESOLVED**
+**Impact:** Desktop and mobile now have consistent animation architecture
 
-#### Detailed Gaps
+| Feature                  | Desktop                        | Mobile                       | Parity | Status                         |
+| ------------------------ | ------------------------------ | ---------------------------- | ------ | ------------------------------ |
+| **Charleston Animation** | CharlestonAnimationSequencer   | CharlestonAnimationSequencer | ✅ Yes | Extracted to sequencer         |
+| **Dealing Animation**    | DealingAnimationSequencer      | DealingAnimationSequencer    | ✅ Yes | Extracted to sequencer         |
+| **Discard Animation**    | DiscardAnimationSequencer      | DiscardAnimationSequencer    | ✅ Yes | Extracted to sequencer         |
+| **Blank Tile Swap**      | ✓ Animated                     | ✗ Missing (TODO)             | ❌ No  | Mobile needs implementation    |
+| **Event Cleanup**        | ✓ destroy() method             | ✓ destroy() method           | ✅ Yes | Completed in Section 5.1       |
+| **Audio Manager**        | audioManager.js                | MobileAudioManager.js        | ✓ OK   | Both platforms supported       |
+| **Hints Panel**          | HintAnimationManager           | HintsPanel component         | ✓ OK   | Both have implementation       |
+| **Settings UI**          | DesktopSettingsManager         | SettingsSheet component      | ✓ OK   | Both supported                 |
+| **Touch Support**        | ✗ Mouse only                   | ✓ Full touch gestures        | ✓ OK   | Appropriate for platforms      |
 
-**Problem 1: Animation Sequencers on Desktop**
+#### Implementation Summary
 
-Mobile has three animation sequencers:
+**✅ Problem 1: Animation Sequencers on Desktop** — **RESOLVED**
+
+Desktop now has animation sequencers matching mobile architecture:
 
 ```javascript
-mobile/animations/
+desktop/animations/
+├── AnimationSequencer.js (base class)
 ├── DealingAnimationSequencer.js (dealing phase)
 ├── DiscardAnimationSequencer.js (discard animation)
 └── CharlestonAnimationSequencer.js (charleston passes)
 ```
 
-Desktop has **none** - logic embedded in PhaserAdapter:
+**Changes Made:**
 
-```javascript
-// PhaserAdapter.js - 200+ line method
-onTilesDealt(data) {
-    // All dealing animation logic here
-    // Should be in DealingAnimationSequencer.js
-}
-```
+- Created `AnimationSequencer` base class with promise-based flow control
+- Extracted 200+ lines from `PhaserAdapter.onTilesDealt()` to `DealingAnimationSequencer`
+- Extracted discard logic from `PhaserAdapter.onTileDiscarded()` to `DiscardAnimationSequencer`
+- Created `CharlestonAnimationSequencer` with fade animations for pass/receive
+- Removed legacy `recenterPlayerHand()` method (now handled by sequencers)
+- Updated `PhaserAdapter` to delegate to sequencers
+
+**Benefits:**
+
+- Consistent architecture across desktop and mobile
+- Improved testability (sequencers are independent units)
+- Better separation of concerns
+- Easier to maintain and extend animations
 
 **Problem 2: Blank Tile Swap Animation Missing on Mobile**
 
@@ -2197,10 +2206,16 @@ npm update phaser
    - PhaserAdapter now calls `super.destroy()` and tears down managers on shutdown.
    - **Impact:** High - finalizes cleanup pattern
 
-2. **Extract Animation Sequencers on Desktop** (Section 6.1)
-   - Matches mobile architecture (200 lines → 3 classes)
-   - **Effort:** 3 hours
-   - **Impact:** Medium - consistency, testability
+2. ~~**Extract Animation Sequencers on Desktop** (Section 6.1)~~ ✅ **COMPLETED: December 17, 2025**
+   - Created `desktop/animations/AnimationSequencer.js` base class
+   - Created `desktop/animations/DealingAnimationSequencer.js`
+   - Created `desktop/animations/CharlestonAnimationSequencer.js`
+   - Created `desktop/animations/DiscardAnimationSequencer.js`
+   - Refactored `PhaserAdapter.onTilesDealt()` to use `DealingAnimationSequencer`
+   - Refactored `PhaserAdapter.onTileDiscarded()` to use `DiscardAnimationSequencer`
+   - Removed legacy `recenterPlayerHand()` method (now handled by sequencers)
+   - Desktop now matches mobile architecture for animation orchestration
+   - **Impact:** High - consistency achieved, testability improved
 
 3. **Resolve TODO Comments** (Section 2.2)
    - 12 incomplete features/fixes

@@ -25,7 +25,9 @@ import {SelectionManager} from "../managers/SelectionManager.js";
 import {BlankSwapManager} from "../managers/BlankSwapManager.js";
 import {HandRenderer} from "../renderers/HandRenderer.js";
 import { BaseAdapter } from "../../shared/BaseAdapter.js";
-import { RenderingError } from "../../core/errors/GameErrors.js";
+import { DealingAnimationSequencer } from "../animations/DealingAnimationSequencer.js";
+import { CharlestonAnimationSequencer } from "../animations/CharlestonAnimationSequencer.js";
+import { DiscardAnimationSequencer } from "../animations/DiscardAnimationSequencer.js";
 
 export class PhaserAdapter extends BaseAdapter {
     /**
@@ -80,11 +82,38 @@ export class PhaserAdapter extends BaseAdapter {
             gameController
         });
 
-        /** @type {Array<{tiles: TileData[], exposures: Array}>|null} Track staged hands during dealing */
-        this.dealAnimationHands = null;
-
         /** @type {boolean} Skip next HAND_UPDATED for tile draw (already handled in onTileDrawn) */
         this.skipNextDrawHandUpdate = false;
+
+        // Initialize animation sequencers
+        this.dealingSequencer = new DealingAnimationSequencer(
+            gameController,
+            scene,
+            this.tileManager,
+            this.handRenderer,
+            (count) => {
+                this.tilesRemovedFromWall += count;
+                this.updateWallTileCounter();
+            }
+        );
+
+        this.charlestonSequencer = new CharlestonAnimationSequencer(
+            gameController,
+            scene,
+            this.tileManager,
+            this.handRenderer
+        );
+
+        this.discardSequencer = new DiscardAnimationSequencer(
+            gameController,
+            scene,
+            this.tileManager,
+            this.handRenderer,
+            {
+                clearHumanDrawGlow: (tile) => this.clearHumanDrawGlow(tile),
+                blankSwapManager: this.blankSwapManager
+            }
+        );
 
         this.setupEventListeners();
     }
@@ -271,191 +300,14 @@ export class PhaserAdapter extends BaseAdapter {
     }
 
     /**
-     * Handle initial tiles dealt - sequential animation matching 07c41b9
-     * This method handles the ENTIRE dealing sequence including wall manipulation
+     * Handle initial tiles dealt - delegates to DealingAnimationSequencer
      *
-     * TODO: Refactor to DealingAnimationSequencer class
-     * This orchestration logic should be extracted into a dedicated class (similar to
-     * mobile/animations/DealingAnimationSequencer.js) that uses AnimationLibrary
-     * primitives. Current implementation mixes animation calls with complex timing/
-     * batching logic directly in PhaserAdapter, violating separation of concerns.
-     * See: docs/DEALING_ANIMATION_CRITICAL_FLOW.md for full flow documentation.
+     * Refactored from inline implementation to use dedicated animation sequencer.
+     * This matches the mobile architecture and improves separation of concerns.
      */
     onTilesDealt(data = {}) {
-        const sequence = Array.isArray(data.sequence) ? data.sequence : [];
-
-        if (!sequence.length) {
-            this.executeLegacyDealSequence();
-            return;
-        }
-
-        // Build staged HandData objects so we only render tiles that have actually been dealt
-        this.dealAnimationHands = Array.from({length: 4}, () => ({
-            tiles: [],
-            exposures: []
-        }));
-
-        let currentStepIndex = 0;
-
-        const dealNextGroup = () => {
-            if (currentStepIndex >= sequence.length) {
-                this.autoSortHumanHand();
-                this.applyHumanDrawGlow();
-                if (this.scene && typeof this.scene.handleDealAnimationComplete === "function") {
-                    this.scene.handleDealAnimationComplete();
-                }
-                // Clear animation state BEFORE emitting event so any handlers
-                // that trigger HAND_UPDATED will render correctly
-                this.dealAnimationHands = null;
-                this.gameController.emit("DEALING_COMPLETE");
-                return;
-            }
-
-            const step = sequence[currentStepIndex];
-            const playerIndex = typeof step.player === "number" ? step.player : PLAYER.BOTTOM;
-            const tilePayloads = Array.isArray(step.tiles) ? step.tiles : [];
-            const animationHand = this.dealAnimationHands?.[playerIndex];
-
-            if (!tilePayloads.length) {
-                currentStepIndex++;
-                this.scene.time.delayedCall(0, dealNextGroup);
-                return;
-            }
-
-            const currentHandSize = animationHand ? animationHand.tiles.length : 0;
-            const targetHandSize = currentHandSize + tilePayloads.length;
-            let animationsCompleted = 0;
-
-            tilePayloads.forEach((tileJSON, tileIndexInBatch) => {
-                this.scene.time.delayedCall(tileIndexInBatch * 50, () => {
-                    const tileData = TileData.fromJSON(tileJSON);
-                    const phaserTile = this.tileManager.getOrCreateTile(tileData);
-
-                    if (!phaserTile) {
-                        debugError(`Could not find Phaser Tile for index ${tileData.index} during dealing`);
-                        return;
-                    }
-
-                    this.tileManager.removeTileFromWall(tileData.index);
-
-                    const wallX = 50;
-                    const wallY = 50;
-                    phaserTile.x = wallX;
-                    phaserTile.y = wallY;
-                    phaserTile.sprite.setAlpha(0);
-                    if (phaserTile.spriteBack) {
-                        phaserTile.spriteBack.setAlpha(0);
-                    }
-
-                    // Prepare tile with correct scale/angle BEFORE animation
-                    this.handRenderer.prepareTileForAnimation(phaserTile, playerIndex);
-
-                    phaserTile.showTile(true, playerIndex === PLAYER.BOTTOM);
-
-                    const targetIndex = currentHandSize + tileIndexInBatch;
-                    const targetPos = this.handRenderer.calculateTilePosition(playerIndex, targetIndex, targetHandSize);
-
-                    if (animationHand) {
-                        animationHand.tiles.splice(targetIndex, 0, tileData);
-                    }
-
-                    const tween = phaserTile.animate(targetPos.x, targetPos.y, PLAYER_LAYOUT[playerIndex].angle, 200);
-
-                    this.scene.tweens.add({
-                        targets: [phaserTile.sprite, phaserTile.spriteBack],
-                        alpha: 1,
-                        duration: 200
-                    });
-
-                    if (tween) {
-                        tween.once("complete", () => {
-                            this.scene.audioManager.playSFX("rack_tile");
-                            animationsCompleted++;
-                            if (animationsCompleted === tilePayloads.length) {
-                                recenterAndContinue();
-                            }
-                        });
-                    } else {
-                        // Null tween - treat as immediate completion to prevent hanging
-                        animationsCompleted++;
-                        if (animationsCompleted === tilePayloads.length) {
-                            recenterAndContinue();
-                        }
-                    }
-
-                    if (playerIndex === PLAYER.BOTTOM) {
-                        this.setPendingHumanGlowTile(phaserTile);
-                    }
-                });
-            });
-
-            const recenterAndContinue = () => {
-                const stagedHand = this.dealAnimationHands?.[playerIndex];
-
-                if (stagedHand) {
-                    this.handRenderer.syncAndRender(playerIndex, stagedHand);
-                } else if (this.gameController?.players?.[playerIndex]?.hand) {
-                    this.handRenderer.syncAndRender(playerIndex, this.gameController.players[playerIndex].hand);
-                }
-
-                currentStepIndex++;
-                this.scene.time.delayedCall(50, dealNextGroup);
-            };
-
-            this.tilesRemovedFromWall += tilePayloads.length;
-            this.updateWallTileCounter();
-        };
-
-        dealNextGroup();
-    }
-
-    /**
-     * Recenter all tiles in a player's hand based on current hand size
-     * Used during dealing to progressively center tiles as hand grows
-     * INTERNAL: Only safe for playerIndex 0-3 after HandRenderer initialization
-     * @param {number} playerIndex - Must be 0-3
-     */
-    recenterPlayerHand(playerIndex) {
-        // Validate playerIndex to prevent out-of-bounds access
-        if (playerIndex < 0 || playerIndex > 3) {
-            return;
-        }
-
-        const playerInfo = PLAYER_LAYOUT[playerIndex];
-        const playerHand = this.handRenderer.playerHands[playerIndex];
-
-        // Safety check for uninitialized playerHands
-        if (!playerHand) {
-            return;
-        }
-
-        const hiddenTiles = playerHand.hiddenTiles;
-
-        if (hiddenTiles.length === 0) {
-            return;
-        }
-
-        // Calculate positions using HandRenderer's logic
-        const pos = this.handRenderer.calculateHiddenTilePositions(playerInfo, hiddenTiles.length);
-
-        // Reposition each tile instantly (no animation) maintaining proper rotation
-        hiddenTiles.forEach((tile, index) => {
-            if (playerInfo.id === PLAYER.BOTTOM || playerInfo.id === PLAYER.TOP) {
-                // Horizontal layout
-                const x = pos.startX + index * (pos.tileWidth + pos.gap);
-                const y = pos.startY;
-                tile.x = x;
-                tile.y = y;
-                tile.angle = playerInfo.angle;
-            } else {
-                // Vertical layout
-                const x = pos.startX;
-                const y = pos.startY + index * (pos.tileWidth + pos.gap);
-                tile.x = x;
-                tile.y = y;
-                tile.angle = playerInfo.angle;
-            }
-        });
+        // Delegate to dealing sequencer
+        this.dealingSequencer.animateDeal(data);
     }
 
     /**
@@ -584,65 +436,23 @@ export class PhaserAdapter extends BaseAdapter {
     }
 
     /**
-     * Handle tile discarded
+     * Handle tile discarded - delegates to DiscardAnimationSequencer
+     *
+     * Refactored from inline implementation to use dedicated animation sequencer.
+     * This matches the mobile architecture and improves separation of concerns.
      */
     onTileDiscarded(data) {
         const {player: playerIndex, tile: tileData} = data;
 
+        // Delegate to discard sequencer
+        this.discardSequencer.animateDiscard(data);
+
+        // Logging (sequencer doesn't handle this)
         const tileDataObj = TileData.fromJSON(tileData);
-        const phaserTile = this.tileManager.getOrCreateTile(tileDataObj);
-
-        if (!phaserTile) {
-            debugError(`Could not find Phaser Tile for index ${tileDataObj.index}`);
-            return;
-        }
-        if (playerIndex === PLAYER.BOTTOM) {
-            this.clearHumanDrawGlow(phaserTile);
-        }
-
-        // GameController emits HAND_UPDATED after discarding, which triggers syncAndRender()
-        // No need to call removeTileFromHand - HandData is source of truth
-
-        // Clear glow from previous last discard
-        this.clearLastDiscardGlow();
-
-        // Add to discard pile (handles animation + audio)
-        const discardTween = this.tileManager.addTileToDiscardPile(phaserTile);
-
-        // Phase 6: Discard tile tracking moved to SelectionManager if needed
-        // TODO: Verify exposure validation works without setDiscardTile
-
-        // Add pulsing blue glow to the newly discarded tile AFTER animation completes
-        if (discardTween && typeof phaserTile.addGlowEffect === "function") {
-            discardTween.once("complete", () => {
-                // Dark blue glow (0x2563eb is blue-600, matches mobile)
-                // Priority 5: Lower than new-tile glow (10) but higher than hint glow (0)
-                // Intensity 0.9 for prominence
-                phaserTile.addGlowEffect(this.scene, 0x2563eb, 0.9, 5);
-                this.lastDiscardGlowTile = phaserTile; // Track for cleanup
-            });
-        } else if (typeof phaserTile.addGlowEffect === "function") {
-            // Fallback if no tween (shouldn't happen, but handle gracefully)
-            phaserTile.addGlowEffect(this.scene, 0x2563eb, 0.9, 5);
-            this.lastDiscardGlowTile = phaserTile;
-        }
-
-        // Show discards (updates layout)
         const playerName = this.getPlayerName(playerIndex);
         printMessage(`${playerName} discarded ${tileDataObj.getText()}`);
-
-        this.blankSwapManager?.handleDiscardPileChanged();
     }
 
-    /**
-     * Clear the glow effect from the last discarded tile
-     */
-    clearLastDiscardGlow() {
-        if (this.lastDiscardGlowTile && typeof this.lastDiscardGlowTile.removeGlowEffect === "function") {
-            this.lastDiscardGlowTile.removeGlowEffect();
-            this.lastDiscardGlowTile = null;
-        }
-    }
 
     /**
      * Handle blank exchange (human swaps blank with discard pile)
@@ -773,11 +583,11 @@ export class PhaserAdapter extends BaseAdapter {
     onHandUpdated(data) {
         const {player: playerIndex, hand: handData} = data;
 
-        // Skip syncAndRender during dealing animation - the animation handles rendering
+        // Skip syncAndRender during dealing animation - the sequencer handles rendering
         // with staged hands to show progressive dealing. syncAndRender would show all tiles at once.
-        // But allow the rest of the handler to run for hints/selection setup.
         // Also skip if onTileDrawn already synced (to prevent double-render after draw)
-        if (this.dealAnimationHands === null && !this.skipNextDrawHandUpdate) {
+        const isDealingInProgress = this.dealingSequencer && this.dealingSequencer.isRunning();
+        if (!isDealingInProgress && !this.skipNextDrawHandUpdate) {
             // HandData is the authoritative source of truth for ALL game states
             // HandRenderer.syncAndRender() will handle the rendering
             this.handRenderer.syncAndRender(playerIndex, handData);
@@ -1226,16 +1036,16 @@ export class PhaserAdapter extends BaseAdapter {
      */
     destroy() {
         // Use BaseAdapter cleanup first
-        try { super.destroy(); } catch (e) {}
+        try { super.destroy(); } catch (_e) { /* ignore errors during cleanup */ }
 
         // Disable selection and cancel any in-progress UI flows
-        try { this.selectionManager?.disableTileSelection(); } catch (e) {}
-        try { this.blankSwapManager?.handleDiscardPromptEnd(); } catch (e) {}
+        try { this.selectionManager?.disableTileSelection(); } catch (_e) { /* ignore errors */ }
+        try { this.blankSwapManager?.handleDiscardPromptEnd(); } catch (_e) { /* ignore errors */ }
 
         // Close dialogs and destroy managers that have teardown methods
-        try { this.dialogManager?.closeDialog(); } catch (e) {}
-        try { if (typeof this.buttonManager?.destroy === "function") this.buttonManager.destroy(); } catch (e) {}
-        try { if (typeof this.handRenderer?.destroy === "function") this.handRenderer.destroy(); } catch (e) {}
+        try { this.dialogManager?.closeDialog(); } catch (_e) { /* ignore errors */ }
+        try { if (typeof this.buttonManager?.destroy === "function") this.buttonManager.destroy(); } catch (_e) { /* ignore errors */ }
+        try { if (typeof this.handRenderer?.destroy === "function") this.handRenderer.destroy(); } catch (_e) { /* ignore errors */ }
 
         // Break references
         this.selectionManager = null;
