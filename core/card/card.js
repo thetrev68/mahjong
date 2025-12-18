@@ -10,12 +10,33 @@ import {SUIT, VNUMBER} from "../../constants.js";
 
 // Currently support 2017, 2018, 2019, 2020, 2025 card
 
+/**
+ * Card - Hand validation and ranking engine
+ *
+ * Platform-agnostic card validator that works with plain data models (TileData, CardHand).
+ * Handles:
+ * - Hand validation (14 tiles, 13 tiles + drawn tile)
+ * - Hand ranking by proximity to winning
+ * - Pattern matching and component extraction
+ * - Year-specific rule definitions (2017-2025)
+ * - Hand generation from descriptions (for testing/training mode)
+ *
+ * @class Card
+ */
 export class Card {
+    /**
+     * @param {number} year - Card year (2017-2025)
+     */
     constructor(year) {
         this.year = year;
         this.validHandGroups = null;
     }
 
+    /**
+     * Initialize card validator with year-specific hand patterns
+     * @async
+     * @returns {Promise<void>}
+     */
     async init() {
         const year = this.year;
         const {validHandGroups} = await import(`./${year}/card${year}.js`);
@@ -43,6 +64,12 @@ export class Card {
         }
     }
 
+    /**
+     * Generate a hand from a hand description (for testing/training mode)
+     * @param {string} handDescription - Description of desired hand pattern
+     * @param {number} [numTiles=14] - Number of tiles to generate (1-14)
+     * @returns {CardHand} Hand with specified tile pattern
+     */
     generateHand(handDescription, numTiles) {
         let currentNumTiles = numTiles;
         const vsuitArray = [SUIT.CRACK, SUIT.BAM, SUIT.DOT];
@@ -128,6 +155,11 @@ export class Card {
         return hand;
     }
 
+    /**
+     * Validate a complete 14-tile hand for winning patterns
+     * @param {CardHand} hand - Hand with 14 tiles (hidden + exposed)
+     * @returns {boolean} True if hand matches a valid winning pattern
+     */
     validateHand14(hand) {
         // Consolidate hand (14 tiles) to test array
         // Include both hidden and exposed tiles for validation
@@ -136,8 +168,12 @@ export class Card {
         return this.validateHand(test, hand.isAllHidden());
     }
 
-    // Diagnose why a hand is invalid by finding the closest matching hand
-    // and identifying which tiles match vs. don't match
+    /**
+     * Diagnose why a hand is invalid by finding the closest matching hand
+     * Identifies which tiles match vs. don't match the closest pattern
+     * @param {CardHand} hand - Hand to diagnose
+     * @returns {Object} {closestHand, closestGroup, rank, matchingTiles, nonMatchingTiles}
+     */
     diagnoseInvalidHand(hand) {
         // Get all possible hands ranked by closeness
         const rankedHands = this.rankHandArray14(hand);
@@ -182,6 +218,12 @@ export class Card {
         };
     }
 
+    /**
+     * Validate a 13-tile hand plus one additional tile for winning
+     * @param {CardHand} hand - Hand with 13 tiles
+     * @param {TileData} singleTile - The additional tile (14th tile)
+     * @returns {boolean} True if hand+tile matches a valid winning pattern
+     */
     validateHand13(hand, singleTile) {
         // Consolidate hand + singleTile to test array
         const test = hand.getTileArray();
@@ -195,6 +237,12 @@ export class Card {
 
     // Input - tile array of length 14, allHidden
     // Output - validation info object
+    /**
+     * Validate tiles against all possible winning hands
+     * @param {TileData[]} test - Array of tiles to validate
+     * @param {boolean} allHidden - Whether all tiles are hidden (no exposures)
+     * @returns {Object} {valid, tileCount, numJokers, minNumLow, minNumHigh, suits, allHidden}
+     */
     validateHand(test, allHidden) {
         // Filter out blank tiles before validation
         const validationTiles = test.filter(tile => tile.suit !== SUIT.BLANK);
@@ -290,6 +338,14 @@ export class Card {
         return info;
     }
 
+    /**
+     * Test if tiles match a specific hand pattern
+     * @param {TileData[]} test - Array of tiles to match
+     * @param {Object} info - Hand validation info (suits, jokers, etc.)
+     * @param {Object} handGroup - Hand group definition
+     * @param {Object} validHand - Hand pattern to match against
+     * @returns {boolean} True if tiles match this hand pattern
+     */
     matchHand(test, info, handGroup, validHand) {
         let match = false;
 
@@ -466,6 +522,11 @@ export class Card {
         return match;
     }
 
+    /**
+     * Print validation info to debug console
+     * @param {Object} info - Validation info object from validateHand()
+     * @returns {void}
+     */
     printValidationInfo(info) {
         if (!gdebug) {
             return;
@@ -482,8 +543,11 @@ export class Card {
         debugPrint("suit(s) = " + suitStr + "\n");
     }
 
-    // Given hand (must be 14 tiles), rank against all card hands
-    // Output:  rankCardHands array of rankInfo, NOT sorted by rank.  Inorder by group/hands.
+    /**
+     * Rank a 14-tile hand against all possible winning hands
+     * @param {CardHand} hand - Hand with 14 tiles (hidden + exposed)
+     * @returns {Array} Array of rankInfo objects (unsorted, in group/hand order)
+     */
     rankHandArray14(hand) {
         const rankCardHands = [];
 
@@ -507,11 +571,14 @@ export class Card {
     }
 
 
-    // Compute rank for test (tile array) against validHand (Card Hand)
-    // Input
-    //  - test        - tile array of test hand
-    //  - rankInfo    - rankInfo for test hand
-    //  - validHand   - card hand
+    /**
+     * Compute rank score for a hand against a specific pattern
+     * Populates rankInfo with rank score and component matching info
+     * @param {CardHand} hand - Hand to rank
+     * @param {Object} rankInfo - RankInfo object to populate (from rankHandArray14)
+     * @param {Object} validHand - Hand pattern to rank against
+     * @returns {void}
+     */
     rankHand(hand, rankInfo, validHand) {
 
         // Rank is 0 if test hand has exposures and validHand is required to be concealed
@@ -624,9 +691,14 @@ export class Card {
         }
     }
 
-    // Try to match given tile set with given component
-    // Input - test (tile array of tile set, do not modify)
-    // Return - matchInfo.match, matchInfo.tileArray, length of array = (0-n) tiles that match the component, where n = component size (in tiles)
+    /**
+     * Try to match tile set against a component pattern
+     * @param {TileData[]} test - Tile array to match (not modified)
+     * @param {number} minNum - Minimum tile number for virtual number translation
+     * @param {Object} comp - Component pattern to match
+     * @param {Array} vsuitArray - Virtual suit array mapping
+     * @returns {Object} {match: boolean, tileArray: TileData[]} Tiles that match the component
+     */
     rankMatchComp(test, minNum, comp, vsuitArray) {
         let compSuit = comp.suit;
         let compNum = comp.number;
@@ -839,10 +911,21 @@ export class Card {
         return maxIndex >= 0 ? maxIndex + 1 : 0;
     }
 
+    /**
+     * Sort hand rank array by rank score (descending)
+     * @param {Array} rankCardHands - Array of rankInfo objects (from rankHandArray14)
+     * @returns {void} Sorts in place
+     */
     sortHandRankArray(rankCardHands) {
         rankCardHands.sort((a, b) => b.rank - a.rank);
     }
 
+    /**
+     * Print hand rank array to debug console
+     * @param {Array} rankCardHands - Array of rankInfo objects
+     * @param {number} [elemCount] - Number of elements to print (default all)
+     * @returns {void}
+     */
     printHandRankArray(rankCardHands, elemCount) {
         debugPrint("Hand Rank Info\n");
 

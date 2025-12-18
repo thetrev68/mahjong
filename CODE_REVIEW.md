@@ -911,13 +911,22 @@ export class MobileRenderer extends BaseAdapter {
 
 ### 3.1 JSDoc Coverage - Inconsistent
 
-**Severity:** 🟡 **MEDIUM**
+**Severity:** 🟡 **MEDIUM** → ✅ **RESOLVED**
 **Impact:** Harder onboarding, IDE autocomplete doesn't work, requires reading implementation
+
+**Status:** ✅ **COMPLETED: December 17, 2025** — Added comprehensive JSDoc to all core class methods:
+
+- `core/AIEngine.js` - All public methods documented
+- `core/GameController.js` - All public methods documented
+- `core/card/Card.js` - Class and all public methods documented (added)
+- `mobile/animations/AnimationController.js` - All public methods documented
+- Model classes already had excellent coverage (PlayerData, TileData, HandData)
 
 **Current State:**
 
-- Some files well documented (EventEmitter.js ✓, TileData.js ✓)
-- Many files missing JSDoc (AIEngine.js ❌, AnimationController.js ❌)
+- All core/ files well documented (EventEmitter.js ✓, TileData.js ✓, AIEngine.js ✓, Card.js ✓)
+- AnimationController fully documented ✓
+- GameController fully documented ✓
 
 #### Missing Documentation Examples
 
