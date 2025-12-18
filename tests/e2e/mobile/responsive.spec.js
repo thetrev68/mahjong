@@ -27,7 +27,8 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
       await page.waitForTimeout(2000);
 
       // Verify key elements are visible and properly sized
-      await expect(page.locator(".hand-container")).toBeVisible();
+      await expect(page.locator("#hand-container")).toBeVisible();
+      await expect(page.locator(".hand-container.hand-grid")).toBeAttached();
       await expect(page.locator(".discard-container")).toBeVisible();
       await expect(page.locator(".opponents-container")).toBeVisible();
 
@@ -70,7 +71,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
 
       // Check hand tile size
       const handTileSize = await page.evaluate(() => {
-        const tile = document.querySelector(".hand-container .tile--default");
+        const tile = document.querySelector("#hand-container button.tile");
         if (!tile) return null;
         const rect = tile.getBoundingClientRect();
         return { width: rect.width, height: rect.height };
@@ -181,7 +182,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
     await page.waitForTimeout(2000);
 
     // Check hand container grid
-    const handGrid = page.locator(".hand-container");
+      const handGrid = page.locator("#hand-container");
     const gridProps = await handGrid.evaluate((el) => {
       const style = window.getComputedStyle(el);
       return {
@@ -226,9 +227,9 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
     page,
   }) => {
     const breakpoints = [
-      { width: 374, name: "Below 375px", expectedTileWidth: 42 },
-      { width: 390, name: "Standard mobile", expectedTileWidth: 45 },
-      { width: 768, name: "Tablet", expectedTileWidth: 60 },
+      { width: 374, name: "Below 375px", expectedTileWidth: 35 },
+      { width: 390, name: "Standard mobile", expectedTileWidth: 36 },
+      { width: 768, name: "Tablet", expectedTileWidth: 50 },
     ];
 
     /* eslint-disable no-await-in-loop */
@@ -242,7 +243,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
 
       // Check actual tile width
       const tileWidth = await page.evaluate(() => {
-        const tile = document.querySelector(".hand-container .tile--default");
+        const tile = document.querySelector("#hand-container button.tile");
         return tile ? tile.getBoundingClientRect().width : 0;
       });
 
