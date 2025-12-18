@@ -65,273 +65,273 @@ The `DiscardAnimationSequencer` orchestrates tile discard animations during the 
 ### Class Structure
 
 ```javascript
-import { AnimationSequencer } from './AnimationSequencer.js';
+import { AnimationSequencer } from "./AnimationSequencer.js";
 
 export class DiscardAnimationSequencer extends AnimationSequencer {
-    constructor(gameController, handRenderer, animationController, discardPile) {
-        super(gameController, handRenderer, animationController);
+  constructor(gameController, handRenderer, animationController, discardPile) {
+    super(gameController, handRenderer, animationController);
 
-        this.discardPile = discardPile; // Reference to DiscardPile component
-        this.soundEnabled = true;
+    this.discardPile = discardPile; // Reference to DiscardPile component
+    this.soundEnabled = true;
+  }
+
+  /**
+   * Main entry point - animates tile discard
+   * @param {Object} data - From GameController TILE_DISCARDED event
+   * @param {number} data.player - Player index (0-3)
+   * @param {Object} data.tile - TileData object
+   * @param {number} data.tileIndex - Index in hand before discard
+   * @param {Object} data.animation - Animation metadata
+   */
+  async animateDiscard(data) {
+    const { player, tile, tileIndex, animation } = data;
+
+    await this.executeSequence([
+      () => this.prepareDiscard(player, tileIndex),
+      () => this.animateTileToDiscard(player, tile, animation),
+      () => this.settleTileInPile(tile),
+      () => this.updateHandAfterDiscard(player, tileIndex),
+    ]);
+  }
+
+  /**
+   * Prepare tile for discard (visual highlight)
+   */
+  async prepareDiscard(player, tileIndex) {
+    if (player !== 0) return; // Only for human player
+
+    const tileElement = this.handRenderer.getTileElementByIndex(tileIndex);
+    if (tileElement) {
+      tileElement.classList.add("tile-discarding-prep");
+      await this.delay(100); // Brief pause for visual feedback
+    }
+  }
+
+  /**
+   * Animate tile from hand to discard pile
+   */
+  async animateTileToDiscard(player, tile, animation) {
+    // Get tile element position
+    const tileElement = this.handRenderer.getTileElementByIndex(tile.index);
+    if (!tileElement) {
+      console.warn("Tile element not found for discard animation");
+      return this.skipAnimation(tile);
     }
 
-    /**
-     * Main entry point - animates tile discard
-     * @param {Object} data - From GameController TILE_DISCARDED event
-     * @param {number} data.player - Player index (0-3)
-     * @param {Object} data.tile - TileData object
-     * @param {number} data.tileIndex - Index in hand before discard
-     * @param {Object} data.animation - Animation metadata
-     */
-    async animateDiscard(data) {
-        const { player, tile, tileIndex, animation } = data;
+    const startPos = tileElement.getBoundingClientRect();
+    const endPos = this.discardPile.getNextTilePosition();
 
-        await this.executeSequence([
-            () => this.prepareDiscard(player, tileIndex),
-            () => this.animateTileToDiscard(player, tile, animation),
-            () => this.settleTileInPile(tile),
-            () => this.updateHandAfterDiscard(player, tileIndex)
-        ]);
+    // Create clone for animation
+    const tileClone = this.createDiscardTileClone(tileElement, tile);
+    document.body.appendChild(tileClone);
+
+    // Hide original tile
+    tileElement.style.visibility = "hidden";
+
+    // Calculate trajectory
+    const trajectory = this.calculateDiscardTrajectory(
+      startPos,
+      endPos,
+      player,
+      animation,
+    );
+
+    // Animate clone
+    await this.animateTileThrow(tileClone, trajectory);
+
+    // Cleanup
+    tileClone.remove();
+  }
+
+  /**
+   * Calculate parabolic arc from hand to discard pile
+   */
+  calculateDiscardTrajectory(startPos, endPos, player, animation) {
+    const isHuman = player === 0;
+
+    // Calculate arc height based on distance
+    const dx = endPos.x - startPos.x;
+    const dy = endPos.y - startPos.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    const arcHeight = isHuman ? -80 : -40; // Human has higher arc
+
+    // Control point for quadratic bezier
+    const controlPoint = {
+      x: startPos.x + dx * 0.5,
+      y: startPos.y + dy * 0.5 + arcHeight,
+    };
+
+    return {
+      start: { x: startPos.x, y: startPos.y },
+      control: controlPoint,
+      end: { x: endPos.x, y: endPos.y },
+      duration: animation?.duration || (isHuman ? 300 : 200),
+      rotation: isHuman ? 360 : 180, // Human has full spin
+      easing: animation?.easing || "ease-out",
+    };
+  }
+
+  /**
+   * Animate tile along trajectory with CSS
+   */
+  async animateTileThrow(tileClone, trajectory) {
+    // Set CSS custom properties
+    tileClone.style.setProperty("--start-x", `${trajectory.start.x}px`);
+    tileClone.style.setProperty("--start-y", `${trajectory.start.y}px`);
+    tileClone.style.setProperty("--control-x", `${trajectory.control.x}px`);
+    tileClone.style.setProperty("--control-y", `${trajectory.control.y}px`);
+    tileClone.style.setProperty("--end-x", `${trajectory.end.x}px`);
+    tileClone.style.setProperty("--end-y", `${trajectory.end.y}px`);
+    tileClone.style.setProperty("--rotation", `${trajectory.rotation}deg`);
+    tileClone.style.setProperty("--duration", `${trajectory.duration}ms`);
+
+    tileClone.classList.add("tile-discarding");
+
+    // Play sound effect
+    if (this.soundEnabled) {
+      this.playDiscardSound();
     }
 
-    /**
-     * Prepare tile for discard (visual highlight)
-     */
-    async prepareDiscard(player, tileIndex) {
-        if (player !== 0) return; // Only for human player
+    await this.delay(trajectory.duration);
+  }
 
-        const tileElement = this.handRenderer.getTileElementByIndex(tileIndex);
-        if (tileElement) {
-            tileElement.classList.add('tile-discarding-prep');
-            await this.delay(100); // Brief pause for visual feedback
-        }
+  /**
+   * Settle tile into discard pile with bounce
+   */
+  async settleTileInPile(tile) {
+    // Add tile to discard pile component
+    const discardTileElement = this.discardPile.addTile(tile);
+
+    // Apply bounce animation
+    discardTileElement.classList.add("tile-settle-bounce");
+
+    await this.delay(200); // Bounce duration
+
+    // Remove animation class
+    discardTileElement.classList.remove("tile-settle-bounce");
+  }
+
+  /**
+   * Update hand renderer after discard
+   */
+  async updateHandAfterDiscard(player, tileIndex) {
+    // Hand will be re-rendered via HAND_UPDATED event
+    // This just ensures cleanup of any animation states
+    const tileElement = this.handRenderer.getTileElementByIndex(tileIndex);
+    if (tileElement) {
+      tileElement.style.visibility = "";
+      tileElement.classList.remove("tile-discarding-prep");
     }
+  }
 
-    /**
-     * Animate tile from hand to discard pile
-     */
-    async animateTileToDiscard(player, tile, animation) {
-        // Get tile element position
-        const tileElement = this.handRenderer.getTileElementByIndex(tile.index);
-        if (!tileElement) {
-            console.warn('Tile element not found for discard animation');
-            return this.skipAnimation(tile);
-        }
+  /**
+   * Create clone of tile for animation
+   */
+  createDiscardTileClone(originalElement, tile) {
+    const clone = originalElement.cloneNode(true);
+    clone.classList.add("tile-clone-animating");
+    clone.style.position = "fixed";
+    clone.style.zIndex = "9999";
 
-        const startPos = tileElement.getBoundingClientRect();
-        const endPos = this.discardPile.getNextTilePosition();
+    // Copy computed styles
+    const computedStyle = getComputedStyle(originalElement);
+    clone.style.width = computedStyle.width;
+    clone.style.height = computedStyle.height;
 
-        // Create clone for animation
-        const tileClone = this.createDiscardTileClone(tileElement, tile);
-        document.body.appendChild(tileClone);
+    return clone;
+  }
 
-        // Hide original tile
-        tileElement.style.visibility = 'hidden';
+  /**
+   * Skip animation (instant discard)
+   */
+  skipAnimation(tile) {
+    this.discardPile.addTile(tile);
+  }
 
-        // Calculate trajectory
-        const trajectory = this.calculateDiscardTrajectory(
-            startPos,
-            endPos,
-            player,
-            animation
-        );
+  /**
+   * Play discard sound effect
+   */
+  playDiscardSound() {
+    // TODO: Integrate with audio system
+    // Play subtle "tile click" sound
+    console.log("🔊 Discard sound");
+  }
 
-        // Animate clone
-        await this.animateTileThrow(tileClone, trajectory);
+  /**
+   * Handle claim interruption (tile is claimed mid-animation)
+   */
+  async handleClaimInterrupt(data) {
+    // If tile is claimed while animating, change trajectory
+    // to go to claiming player instead of discard pile
 
-        // Cleanup
-        tileClone.remove();
-    }
+    if (!this.isRunning()) return;
 
-    /**
-     * Calculate parabolic arc from hand to discard pile
-     */
-    calculateDiscardTrajectory(startPos, endPos, player, animation) {
-        const isHuman = player === 0;
+    // Cancel current sequence
+    this.cancel();
 
-        // Calculate arc height based on distance
-        const dx = endPos.x - startPos.x;
-        const dy = endPos.y - startPos.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+    // Re-route to claiming player
+    await this.animateDiscardClaim(data);
+  }
 
-        const arcHeight = isHuman ? -80 : -40; // Human has higher arc
+  /**
+   * Animate discard being claimed by another player
+   */
+  async animateDiscardClaim(data) {
+    const { tile, claimingPlayer, claimType } = data;
 
-        // Control point for quadratic bezier
-        const controlPoint = {
-            x: startPos.x + dx * 0.5,
-            y: startPos.y + dy * 0.5 + arcHeight
-        };
+    // Get last tile position in discard pile
+    const discardPos = this.discardPile.getLastTilePosition();
 
-        return {
-            start: { x: startPos.x, y: startPos.y },
-            control: controlPoint,
-            end: { x: endPos.x, y: endPos.y },
-            duration: animation?.duration || (isHuman ? 300 : 200),
-            rotation: isHuman ? 360 : 180, // Human has full spin
-            easing: animation?.easing || 'ease-out'
-        };
-    }
+    // Get claiming player hand position
+    const claimPos = this.getPlayerHandPosition(claimingPlayer);
 
-    /**
-     * Animate tile along trajectory with CSS
-     */
-    async animateTileThrow(tileClone, trajectory) {
-        // Set CSS custom properties
-        tileClone.style.setProperty('--start-x', `${trajectory.start.x}px`);
-        tileClone.style.setProperty('--start-y', `${trajectory.start.y}px`);
-        tileClone.style.setProperty('--control-x', `${trajectory.control.x}px`);
-        tileClone.style.setProperty('--control-y', `${trajectory.control.y}px`);
-        tileClone.style.setProperty('--end-x', `${trajectory.end.x}px`);
-        tileClone.style.setProperty('--end-y', `${trajectory.end.y}px`);
-        tileClone.style.setProperty('--rotation', `${trajectory.rotation}deg`);
-        tileClone.style.setProperty('--duration', `${trajectory.duration}ms`);
+    // Animate tile from discard to claiming player
+    const trajectory = {
+      start: discardPos,
+      control: {
+        x: (discardPos.x + claimPos.x) / 2,
+        y: Math.min(discardPos.y, claimPos.y) - 60,
+      },
+      end: claimPos,
+      duration: 400,
+      rotation: 180,
+      easing: "ease-in-out",
+    };
 
-        tileClone.classList.add('tile-discarding');
+    // Create tile element and animate
+    const tileClone = this.createClaimTileClone(tile);
+    await this.animateTileThrow(tileClone, trajectory);
 
-        // Play sound effect
-        if (this.soundEnabled) {
-            this.playDiscardSound();
-        }
+    // Add to claiming player's hand
+    this.handRenderer.addTileToHand(claimingPlayer, tile);
+  }
 
-        await this.delay(trajectory.duration);
-    }
+  /**
+   * Get player hand position for claim animation
+   */
+  getPlayerHandPosition(playerIndex) {
+    const positions = {
+      0: { x: 400, y: 650 }, // BOTTOM
+      1: { x: 950, y: 360 }, // RIGHT
+      2: { x: 400, y: 70 }, // TOP
+      3: { x: 50, y: 360 }, // LEFT
+    };
+    return positions[playerIndex];
+  }
 
-    /**
-     * Settle tile into discard pile with bounce
-     */
-    async settleTileInPile(tile) {
-        // Add tile to discard pile component
-        const discardTileElement = this.discardPile.addTile(tile);
-
-        // Apply bounce animation
-        discardTileElement.classList.add('tile-settle-bounce');
-
-        await this.delay(200); // Bounce duration
-
-        // Remove animation class
-        discardTileElement.classList.remove('tile-settle-bounce');
-    }
-
-    /**
-     * Update hand renderer after discard
-     */
-    async updateHandAfterDiscard(player, tileIndex) {
-        // Hand will be re-rendered via HAND_UPDATED event
-        // This just ensures cleanup of any animation states
-        const tileElement = this.handRenderer.getTileElementByIndex(tileIndex);
-        if (tileElement) {
-            tileElement.style.visibility = '';
-            tileElement.classList.remove('tile-discarding-prep');
-        }
-    }
-
-    /**
-     * Create clone of tile for animation
-     */
-    createDiscardTileClone(originalElement, tile) {
-        const clone = originalElement.cloneNode(true);
-        clone.classList.add('tile-clone-animating');
-        clone.style.position = 'fixed';
-        clone.style.zIndex = '9999';
-
-        // Copy computed styles
-        const computedStyle = getComputedStyle(originalElement);
-        clone.style.width = computedStyle.width;
-        clone.style.height = computedStyle.height;
-
-        return clone;
-    }
-
-    /**
-     * Skip animation (instant discard)
-     */
-    skipAnimation(tile) {
-        this.discardPile.addTile(tile);
-    }
-
-    /**
-     * Play discard sound effect
-     */
-    playDiscardSound() {
-        // TODO: Integrate with audio system
-        // Play subtle "tile click" sound
-        console.log('🔊 Discard sound');
-    }
-
-    /**
-     * Handle claim interruption (tile is claimed mid-animation)
-     */
-    async handleClaimInterrupt(data) {
-        // If tile is claimed while animating, change trajectory
-        // to go to claiming player instead of discard pile
-
-        if (!this.isRunning()) return;
-
-        // Cancel current sequence
-        this.cancel();
-
-        // Re-route to claiming player
-        await this.animateDiscardClaim(data);
-    }
-
-    /**
-     * Animate discard being claimed by another player
-     */
-    async animateDiscardClaim(data) {
-        const { tile, claimingPlayer, claimType } = data;
-
-        // Get last tile position in discard pile
-        const discardPos = this.discardPile.getLastTilePosition();
-
-        // Get claiming player hand position
-        const claimPos = this.getPlayerHandPosition(claimingPlayer);
-
-        // Animate tile from discard to claiming player
-        const trajectory = {
-            start: discardPos,
-            control: {
-                x: (discardPos.x + claimPos.x) / 2,
-                y: Math.min(discardPos.y, claimPos.y) - 60
-            },
-            end: claimPos,
-            duration: 400,
-            rotation: 180,
-            easing: 'ease-in-out'
-        };
-
-        // Create tile element and animate
-        const tileClone = this.createClaimTileClone(tile);
-        await this.animateTileThrow(tileClone, trajectory);
-
-        // Add to claiming player's hand
-        this.handRenderer.addTileToHand(claimingPlayer, tile);
-    }
-
-    /**
-     * Get player hand position for claim animation
-     */
-    getPlayerHandPosition(playerIndex) {
-        const positions = {
-            0: { x: 400, y: 650 },  // BOTTOM
-            1: { x: 950, y: 360 },  // RIGHT
-            2: { x: 400, y: 70 },   // TOP
-            3: { x: 50, y: 360 }    // LEFT
-        };
-        return positions[playerIndex];
-    }
-
-    /**
-     * Create tile clone for claim animation
-     */
-    createClaimTileClone(tile) {
-        const clone = document.createElement('div');
-        clone.className = 'tile tile-claim-animating';
-        clone.dataset.suit = tile.suit;
-        clone.dataset.rank = tile.rank;
-        clone.style.position = 'fixed';
-        clone.style.zIndex = '10000';
-        return clone;
-    }
+  /**
+   * Create tile clone for claim animation
+   */
+  createClaimTileClone(tile) {
+    const clone = document.createElement("div");
+    clone.className = "tile tile-claim-animating";
+    clone.dataset.suit = tile.suit;
+    clone.dataset.rank = tile.rank;
+    clone.style.position = "fixed";
+    clone.style.zIndex = "10000";
+    return clone;
+  }
 }
 ```
 
@@ -344,88 +344,89 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
 ```css
 /* Discard preparation (lift) */
 .tile-discarding-prep {
-    animation: tile-discard-prep 100ms ease-out;
-    transform: translateY(-8px);
+  animation: tile-discard-prep 100ms ease-out;
+  transform: translateY(-8px);
 }
 
 @keyframes tile-discard-prep {
-    from {
-        transform: translateY(0);
-    }
-    to {
-        transform: translateY(-8px);
-    }
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-8px);
+  }
 }
 
 /* Discard throw animation */
 .tile-discarding {
-    animation: tile-discard-throw var(--duration, 300ms) var(--easing, ease-out) forwards;
+  animation: tile-discard-throw var(--duration, 300ms) var(--easing, ease-out)
+    forwards;
 }
 
 @keyframes tile-discard-throw {
-    0% {
-        transform: translate(var(--start-x), var(--start-y)) rotate(0deg);
-        opacity: 1;
-    }
-    50% {
-        /* Bezier arc peak */
-        transform: translate(var(--control-x), var(--control-y))
-                   rotate(calc(var(--rotation, 360deg) * 0.5));
-        opacity: 1;
-    }
-    100% {
-        transform: translate(var(--end-x), var(--end-y))
-                   rotate(var(--rotation, 360deg));
-        opacity: 0.9;
-    }
+  0% {
+    transform: translate(var(--start-x), var(--start-y)) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    /* Bezier arc peak */
+    transform: translate(var(--control-x), var(--control-y))
+      rotate(calc(var(--rotation, 360deg) * 0.5));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y))
+      rotate(var(--rotation, 360deg));
+    opacity: 0.9;
+  }
 }
 
 /* Settle bounce in discard pile */
 .tile-settle-bounce {
-    animation: tile-settle 200ms cubic-bezier(0.5, 1.5, 0.5, 1);
+  animation: tile-settle 200ms cubic-bezier(0.5, 1.5, 0.5, 1);
 }
 
 @keyframes tile-settle {
-    0% {
-        transform: scale(1.1) translateY(-5px);
-    }
-    50% {
-        transform: scale(0.95) translateY(2px);
-    }
-    100% {
-        transform: scale(1) translateY(0);
-    }
+  0% {
+    transform: scale(1.1) translateY(-5px);
+  }
+  50% {
+    transform: scale(0.95) translateY(2px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* Claim animation (discard → claiming player) */
 .tile-claim-animating {
-    animation: tile-claim-travel var(--duration, 400ms) ease-in-out forwards;
+  animation: tile-claim-travel var(--duration, 400ms) ease-in-out forwards;
 }
 
 @keyframes tile-claim-travel {
-    0% {
-        transform: translate(var(--start-x), var(--start-y)) rotate(0deg) scale(1);
-    }
-    50% {
-        transform: translate(var(--control-x), var(--control-y))
-                   rotate(calc(var(--rotation, 180deg) * 0.5)) scale(1.1);
-    }
-    100% {
-        transform: translate(var(--end-x), var(--end-y))
-                   rotate(var(--rotation, 180deg)) scale(1);
-    }
+  0% {
+    transform: translate(var(--start-x), var(--start-y)) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate(var(--control-x), var(--control-y))
+      rotate(calc(var(--rotation, 180deg) * 0.5)) scale(1.1);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y))
+      rotate(var(--rotation, 180deg)) scale(1);
+  }
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-    .tile-discarding,
-    .tile-claim-animating {
-        animation-duration: 50ms;
-    }
+  .tile-discarding,
+  .tile-claim-animating {
+    animation-duration: 50ms;
+  }
 
-    .tile-settle-bounce {
-        animation: none;
-    }
+  .tile-settle-bounce {
+    animation: none;
+  }
 }
 ```
 
@@ -480,46 +481,46 @@ async handleDiscard(tileIndex) {
 ```javascript
 // In mobile/MobileRenderer.js
 
-import { DiscardAnimationSequencer } from './animations/DiscardAnimationSequencer.js';
+import { DiscardAnimationSequencer } from "./animations/DiscardAnimationSequencer.js";
 
 class MobileRenderer {
-    constructor(options) {
-        // ...existing code...
+  constructor(options) {
+    // ...existing code...
 
-        // Initialize discard sequencer
-        this.discardSequencer = new DiscardAnimationSequencer(
-            this.gameController,
-            this.handRenderer,
-            this.animationController,
-            this.discardPile
-        );
-    }
+    // Initialize discard sequencer
+    this.discardSequencer = new DiscardAnimationSequencer(
+      this.gameController,
+      this.handRenderer,
+      this.animationController,
+      this.discardPile,
+    );
+  }
 
-    registerEventListeners() {
-        // ...existing subscriptions...
+  registerEventListeners() {
+    // ...existing subscriptions...
 
-        this.subscriptions.push(
-            this.gameController.on('TILE_DISCARDED', (data) =>
-                this.onTileDiscarded(data)
-            )
-        );
+    this.subscriptions.push(
+      this.gameController.on("TILE_DISCARDED", (data) =>
+        this.onTileDiscarded(data),
+      ),
+    );
 
-        this.subscriptions.push(
-            this.gameController.on('DISCARD_CLAIMED', (data) =>
-                this.onDiscardClaimed(data)
-            )
-        );
-    }
+    this.subscriptions.push(
+      this.gameController.on("DISCARD_CLAIMED", (data) =>
+        this.onDiscardClaimed(data),
+      ),
+    );
+  }
 
-    onTileDiscarded(data) {
-        // Route to discard sequencer
-        this.discardSequencer.animateDiscard(data);
-    }
+  onTileDiscarded(data) {
+    // Route to discard sequencer
+    this.discardSequencer.animateDiscard(data);
+  }
 
-    onDiscardClaimed(data) {
-        // Handle claim interruption
-        this.discardSequencer.handleClaimInterrupt(data);
-    }
+  onDiscardClaimed(data) {
+    // Handle claim interruption
+    this.discardSequencer.handleClaimInterrupt(data);
+  }
 }
 ```
 
@@ -593,28 +594,31 @@ describe('DiscardAnimationSequencer', () => {
 ### Integration Tests (Playwright)
 
 ```javascript
-test('should animate tile discard correctly', async ({ page }) => {
-    // Start game and advance to main loop
-    await page.click('#new-game-btn');
-    await page.waitForTimeout(5000); // Skip Charleston
+test("should animate tile discard correctly", async ({ page }) => {
+  // Start game and advance to main loop
+  await page.click("#new-game-btn");
+  await page.waitForTimeout(5000); // Skip Charleston
 
-    // Select and discard a tile
-    const tile = page.locator('.hand-container .tile').first();
-    await tile.click();
-    await page.click('button:has-text("Discard")');
+  // Select and discard a tile
+  const tile = page.locator(".hand-container .tile").first();
+  await tile.click();
+  await page.click('button:has-text("Discard")');
 
-    // Wait for discard animation to start
-    await page.waitForSelector('.tile-discarding', { timeout: 1000 });
+  // Wait for discard animation to start
+  await page.waitForSelector(".tile-discarding", { timeout: 1000 });
 
-    // Verify tile appears in discard pile
-    await page.waitForFunction(() => {
-        const discardedTiles = document.querySelectorAll('.discard-pile .tile');
-        return discardedTiles.length > 0;
-    }, { timeout: 2000 });
+  // Verify tile appears in discard pile
+  await page.waitForFunction(
+    () => {
+      const discardedTiles = document.querySelectorAll(".discard-pile .tile");
+      return discardedTiles.length > 0;
+    },
+    { timeout: 2000 },
+  );
 
-    // Verify discard pile has correct count
-    const discardPileTiles = page.locator('.discard-pile .tile');
-    await expect(discardPileTiles).toHaveCount(1);
+  // Verify discard pile has correct count
+  const discardPileTiles = page.locator(".discard-pile .tile");
+  await expect(discardPileTiles).toHaveCount(1);
 });
 ```
 

@@ -1,11 +1,13 @@
 # Task for Claude Haiku: SelectionManager Design (Tasks 1a & 1b)
 
 ## Context
+
 We're completing a refactor of an American Mahjong game to have clean separation between game logic (GameController) and rendering (PhaserAdapter). We need a SelectionManager component to handle tile selection across different game phases.
 
 You can read about the full context here: https://github.com/anthropics/claude-code/issues (this is just example context - no actual link needed)
 
 **Key documents created for reference:**
+
 - `OLD_SYSTEM_GAME_FLOW.md` - Complete game flow from working commit 07c41b9
 - `IMPLEMENTATION_ROADMAP.md` - Implementation plan and architecture
 - `CODEBASE_AUDIT.md` - Current state of codebase
@@ -17,7 +19,9 @@ You can read about the full context here: https://github.com/anthropics/claude-c
 **Objective**: Understand how tile selection worked in the last working version (commit 07c41b9)
 
 **Steps**:
+
 1. Get the old gameObjects_hand.js from commit 07c41b9:
+
    ```bash
    git show 07c41b9:gameObjects_hand.js > gameObjects_hand.old.js
    ```
@@ -50,6 +54,7 @@ You can read about the full context here: https://github.com/anthropics/claude-c
 
 **Context from our analysis**:
 The SelectionManager needs to:
+
 - Track which tiles are selected
 - Enforce min/max selection counts per game phase
 - Provide visual feedback (raise/lower tiles)
@@ -57,9 +62,11 @@ The SelectionManager needs to:
 - Work with PhaserAdapter and Hand/TileSet
 
 **Steps**:
+
 1. Create a new file: `SELECTIONMANAGER_API_DESIGN.md`
 
 2. Design the complete API with these sections:
+
    ```
    ## SelectionManager Interface
 
@@ -107,6 +114,7 @@ The SelectionManager needs to:
    - Clear structure ready for implementation
 
 **Example of what I mean by skeleton**:
+
 ```javascript
 /**
  * SelectionManager - Tracks tile selection state and visual feedback
@@ -114,31 +122,31 @@ The SelectionManager needs to:
  * Handles tile selection across different game phases with min/max validation
  */
 export class SelectionManager {
-    /**
-     * @param {Hand} hand - The Hand object to manage selection for
-     * @param {TileManager} tileManager - For visual feedback on tiles
-     */
-    constructor(hand, tileManager) {
-        this.hand = hand
-        this.tileManager = tileManager
-        this.selectedTiles = new Set()
-        this.minCount = 1
-        this.maxCount = 3
-        this.mode = null
-        this.isEnabled = false
-    }
+  /**
+   * @param {Hand} hand - The Hand object to manage selection for
+   * @param {TileManager} tileManager - For visual feedback on tiles
+   */
+  constructor(hand, tileManager) {
+    this.hand = hand;
+    this.tileManager = tileManager;
+    this.selectedTiles = new Set();
+    this.minCount = 1;
+    this.maxCount = 3;
+    this.mode = null;
+    this.isEnabled = false;
+  }
 
-    /**
-     * Enable tile selection for a game phase
-     * @param {number} minCount - Minimum tiles to select
-     * @param {number} maxCount - Maximum tiles to select
-     * @param {string} mode - Selection mode: "charleston", "courtesy", "play", "expose"
-     */
-    enableTileSelection(minCount, maxCount, mode) {
-        // TODO: Implement
-    }
+  /**
+   * Enable tile selection for a game phase
+   * @param {number} minCount - Minimum tiles to select
+   * @param {number} maxCount - Maximum tiles to select
+   * @param {string} mode - Selection mode: "charleston", "courtesy", "play", "expose"
+   */
+  enableTileSelection(minCount, maxCount, mode) {
+    // TODO: Implement
+  }
 
-    // ... etc for all methods
+  // ... etc for all methods
 }
 ```
 
@@ -150,29 +158,34 @@ export class SelectionManager {
    - Assumptions about TileData and Tile objects
 
 **Output**:
+
 - `SELECTIONMANAGER_API_DESIGN.md` - Complete API specification
 - `SelectionManager.js` (skeleton) - Empty class ready for implementation
 
 ---
 
 ## What NOT to Do
+
 - ❌ Don't implement the full logic (that's next phase)
 - ❌ Don't modify any game files yet
 - ❌ Don't worry about PhaserAdapter integration details
 - ❌ Don't create tests yet
 
 ## What Success Looks Like
+
 - Clear, well-documented explanation of how selection worked in old code
 - Complete API design that covers all use cases (Charleston, courtesy, discard, exposure)
 - Skeleton class ready for implementation
 - Someone (even with no game knowledge) could use these docs to implement SelectionManager
 
 ## Deliverables
+
 1. `TILESELECTION_LOGIC_EXTRACTED.md` - Extracted logic documentation
 2. `SELECTIONMANAGER_API_DESIGN.md` - API specification
 3. `SelectionManager.js` - Skeleton class with JSDoc
 
 ## Questions to Answer in Your Docs
+
 - What exactly is selectCount tracking?
 - How do tiles know they're selected (is it a property, or are they in an array)?
 - What does Y-position 575 vs 600 mean?
@@ -183,9 +196,11 @@ export class SelectionManager {
 ---
 
 ## File Locations
+
 Repository: c:\Repos\mahjong
 
 Key files to reference:
+
 - Current codebase: GameScene.js, gameObjects_hand.js, PhaserAdapter
 - Old code: commit 07c41b9 (use git show to view)
 - Analysis docs: OLD_SYSTEM_GAME_FLOW.md, CODEBASE_AUDIT.md
@@ -193,6 +208,7 @@ Key files to reference:
 ---
 
 ## How to Run Git Commands
+
 ```bash
 # View old file
 git show 07c41b9:gameObjects_hand.js
@@ -207,6 +223,7 @@ git show 07c41b9:gameObjects_hand.js | grep -n "selectCount\|getSelection\|reset
 ---
 
 ## Success Criteria
+
 - [ ] TILESELECTION_LOGIC_EXTRACTED.md is clear and complete
 - [ ] SELECTIONMANAGER_API_DESIGN.md has all methods documented
 - [ ] SelectionManager.js skeleton is well-structured with JSDoc

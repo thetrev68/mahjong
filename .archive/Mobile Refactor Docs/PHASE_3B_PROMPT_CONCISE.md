@@ -11,6 +11,7 @@
 Define complete interface specifications for all mobile components. This is a **design-only phase** - no implementation code.
 
 ### Context Files
+
 - Mockup: [mobile/mockup.html](mobile/mockup.html), [mobile/mockup.css](mobile/mockup.css)
 - Core: [core/GameController.js](core/GameController.js)
 - Reference: [desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js)
@@ -22,6 +23,7 @@ Define complete interface specifications for all mobile components. This is a **
 ### 1. Component Interfaces (10 total)
 
 For each component, define:
+
 - **Purpose** (1 sentence)
 - **Constructor params**
 - **Public methods** (with JSDoc signatures)
@@ -30,6 +32,7 @@ For each component, define:
 - **State managed** (what properties it holds)
 
 **Components:**
+
 1. MobileGameController (orchestrator)
 2. HandRenderer (2-row player hand)
 3. ExposedTilesRenderer (player's exposed tiles)
@@ -44,12 +47,14 @@ For each component, define:
 ### 2. Event Flow Scenarios (4 required)
 
 Document these as step-by-step flows:
+
 1. **Player draws tile** (wall → hand)
 2. **Player discards tile** (hand → discard pile)
 3. **Opponent exposes tiles** (update OpponentBar)
 4. **Hand changes** (update HintsPanel)
 
 Format:
+
 ```
 Event X fires → ComponentA receives → ComponentA does Y → ComponentB updates
 ```
@@ -57,18 +62,22 @@ Event X fires → ComponentA receives → ComponentA does Y → ComponentB updat
 ### 3. Critical Decisions (4 required)
 
 **Decision 1: Component Creation**
+
 - Eager (all components created upfront) vs Lazy (created on demand)?
 - Document choice + rationale
 
 **Decision 2: Error Handling**
+
 - What happens if event fires before component ready?
 - Event queue? Ignore? Re-query state?
 
 **Decision 3: Animation Coordination**
+
 - How to prevent animation conflicts when rapid events occur?
 - Lock UI? Queue changes? Cancel animations?
 
 **Decision 4: Touch Event Propagation**
+
 - How to handle overlapping touch targets (exposed tiles above hand)?
 - z-index? event.target check? stopPropagation?
 
@@ -84,6 +93,7 @@ Event X fires → ComponentA receives → ComponentA does Y → ComponentB updat
 ### 5. Test Scenarios (3 per component)
 
 Format:
+
 ```
 Test: [Component] handles [scenario]
 Given: [initial state]
@@ -93,6 +103,7 @@ And: [additional assertions]
 ```
 
 Example:
+
 ```
 Test: HandRenderer handles rapid state changes
 Given: HandRenderer initialized
@@ -104,16 +115,17 @@ And: No duplicate tiles or visual glitches
 ### 6. Example Usage
 
 Show how to bootstrap the system:
+
 ```javascript
 // mobile/main.js example
-import { MobileGameController } from './MobileGameController.js';
-import { GameController } from '../core/GameController.js';
+import { MobileGameController } from "./MobileGameController.js";
+import { GameController } from "../core/GameController.js";
 
 async function initMobileGame() {
-    const gameController = new GameController();
-    const mobileUI = new MobileGameController(document.body, gameController);
-    await mobileUI.init();
-    gameController.startGame();
+  const gameController = new GameController();
+  const mobileUI = new MobileGameController(document.body, gameController);
+  await mobileUI.init();
+  gameController.startGame();
 }
 ```
 

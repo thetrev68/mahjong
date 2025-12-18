@@ -5,10 +5,13 @@ import { test, expect } from "@playwright/test";
  * Wait until GameController is available on window.
  */
 async function waitForGameController(page) {
-  await page.waitForFunction(() => {
-    const gc = window.gameController;
-    return gc && Array.isArray(gc.players) && gc.players.length === 4;
-  }, { timeout: 15000 });
+  await page.waitForFunction(
+    () => {
+      const gc = window.gameController;
+      return gc && Array.isArray(gc.players) && gc.players.length === 4;
+    },
+    { timeout: 15000 },
+  );
 }
 
 /**
@@ -17,7 +20,7 @@ async function waitForGameController(page) {
 async function resetTestSubscriptions(page) {
   await page.evaluate(() => {
     if (Array.isArray(window.__gcTestSubscriptions)) {
-      window.__gcTestSubscriptions.forEach(unsub => {
+      window.__gcTestSubscriptions.forEach((unsub) => {
         try {
           unsub?.();
         } catch (error) {
@@ -61,7 +64,9 @@ test.describe("Game Initialization", () => {
 });
 
 test.describe("Game Start", () => {
-  test("should start a new game when Start Game is clicked", async ({ page }) => {
+  test("should start a new game when Start Game is clicked", async ({
+    page,
+  }) => {
     await page.goto("/");
 
     // Wait for game to initialize
@@ -77,23 +82,31 @@ test.describe("Game Start", () => {
     await startButton.click();
 
     // Wait for game log to report that the game has started (dealing complete)
-    await page.waitForFunction(() => {
-      const log = document.querySelector("#messages");
-      return log && log.value.includes("Game started!");
-    }, { timeout: 15000 });
+    await page.waitForFunction(
+      () => {
+        const log = document.querySelector("#messages");
+        return log && log.value.includes("Game started!");
+      },
+      { timeout: 15000 },
+    );
 
     const logText = await page.locator("#messages").inputValue();
     expect(logText).toContain("Game started!");
 
     // Verify each player has tiles in their hand (dealer receives 14, others 13)
     const handSizes = await page.evaluate(() => {
-      if (!window.gameController || !Array.isArray(window.gameController.players)) {
+      if (
+        !window.gameController ||
+        !Array.isArray(window.gameController.players)
+      ) {
         return [];
       }
-      return window.gameController.players.map(player => player?.hand?.tiles?.length || 0);
+      return window.gameController.players.map(
+        (player) => player?.hand?.tiles?.length || 0,
+      );
     });
     expect(handSizes[0]).toBeGreaterThanOrEqual(13);
-    handSizes.slice(1).forEach(count => {
+    handSizes.slice(1).forEach((count) => {
       expect(count).toBeGreaterThanOrEqual(13);
     });
   });
@@ -183,20 +196,28 @@ test.describe("Game Logic", () => {
       };
 
       const subscriptions = [
-        window.gameController.on("GAME_STARTED", () => pushEvent("GAME_STARTED")),
-        window.gameController.on("TILES_DEALT", () => pushEvent("TILES_DEALT"))
+        window.gameController.on("GAME_STARTED", () =>
+          pushEvent("GAME_STARTED"),
+        ),
+        window.gameController.on("TILES_DEALT", () => pushEvent("TILES_DEALT")),
       ];
 
       window.__gcTestSubscriptions.push(...subscriptions);
     });
 
     await page.click("#start");
-    await page.waitForFunction(() => {
-      if (!window.capturedEvents) {
-        return false;
-      }
-      return window.capturedEvents.has("GAME_STARTED") && window.capturedEvents.has("TILES_DEALT");
-    }, { timeout: 20000 });
+    await page.waitForFunction(
+      () => {
+        if (!window.capturedEvents) {
+          return false;
+        }
+        return (
+          window.capturedEvents.has("GAME_STARTED") &&
+          window.capturedEvents.has("TILES_DEALT")
+        );
+      },
+      { timeout: 20000 },
+    );
 
     // Retrieve the captured events
     const events = await page.evaluate(() => Array.from(window.capturedEvents));
@@ -227,13 +248,16 @@ test.describe("Game Logic", () => {
 
     await page.click("#start");
 
-    await page.waitForFunction(() => {
-      const log = document.querySelector("#messages");
-      if (!log) {
-        return false;
-      }
-      return log.value.includes("Charleston Phase 1");
-    }, { timeout: 45000 });
+    await page.waitForFunction(
+      () => {
+        const log = document.querySelector("#messages");
+        if (!log) {
+          return false;
+        }
+        return log.value.includes("Charleston Phase 1");
+      },
+      { timeout: 45000 },
+    );
 
     const logText = await page.locator("#messages").inputValue();
     expect(logText).toContain("Charleston Phase 1");

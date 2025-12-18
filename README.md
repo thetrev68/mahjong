@@ -96,15 +96,15 @@ This project uses ESLint for code linting and Knip for detecting unused files an
 
 - **Run ESLint:**
 
-    ```sh
-    npm run lint
-    ```
+  ```sh
+  npm run lint
+  ```
 
 - **Run Knip:**
 
-    ```sh
-    npm run knip
-    ```
+  ```sh
+  npm run knip
+  ```
 
 ## 🤝 Contributing
 

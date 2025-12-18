@@ -1,6 +1,7 @@
 # Complete Game Flow from Commit 07c41b9
 
 ## Overview
+
 This documents the exact flow of a complete game in the last known working version, from start to end game.
 
 ---
@@ -8,19 +9,20 @@ This documents the exact flow of a complete game in the last known working versi
 ## Architecture: Promise-Based with Button Handlers
 
 The old system used a consistent pattern:
+
 ```javascript
 return new Promise((resolve) => {
-    // Remove old button listeners
-    button.removeEventListener("click", this.oldFunction);
+  // Remove old button listeners
+  button.removeEventListener("click", this.oldFunction);
 
-    // Create new handler that calls resolve when done
-    this.buttonFunction = function() {
-        // Do game logic
-        resolve(result)
-    }.bind(this);
+  // Create new handler that calls resolve when done
+  this.buttonFunction = function () {
+    // Do game logic
+    resolve(result);
+  }.bind(this);
 
-    // Attach new handler
-    button.addEventListener("click", this.buttonFunction);
+  // Attach new handler
+  button.addEventListener("click", this.buttonFunction);
 });
 ```
 
@@ -31,6 +33,7 @@ return new Promise((resolve) => {
 ## Complete Game Flow
 
 ### Phase 1: INITIALIZATION (STATE.INIT)
+
 ```javascript
 GameLogic.init():
 1. Load Card for the year
@@ -41,6 +44,7 @@ GameLogic.init():
 ```
 
 ### Phase 2: START (STATE.START)
+
 ```javascript
 GameLogic.start():
 1. Set state = STATE.START
@@ -53,6 +57,7 @@ GameLogic.start():
 ```
 
 ### Phase 3: DEAL (STATE.DEAL)
+
 ```javascript
 GameLogic.deal():
 1. Set state = STATE.DEAL
@@ -73,11 +78,13 @@ GameLogic.deal():
 ### Phase 4A: CHARLESTON1 (STATE.CHARLESTON1)
 
 **Charleston has UP TO 3 passes** (can quit after 1st 3):
+
 - Pass 1: RIGHT (player 1)
 - Pass 2: ACROSS (player 2)
 - Pass 3: LEFT (player 3)
 
 **Then optional:**
+
 - Pass 4: LEFT (reverse)
 - Pass 5: ACROSS (reverse)
 - Pass 6: RIGHT (reverse)
@@ -119,6 +126,7 @@ async charleston():
 ```
 
 ### Phase 4B: CHARLESTON PASS DETAILS
+
 ```javascript
 async charlestonPass(playerId):
 1. Print: "Choose 3 tiles to pass [direction]"
@@ -142,6 +150,7 @@ async charlestonPass(playerId):
 ```
 
 **Key: How does human select 3 tiles?**
+
 - User clicks tiles to select them
 - Tiles visually raise (Y position: 575 instead of 600)
 - Hand maintains `selectCount` property
@@ -149,6 +158,7 @@ async charlestonPass(playerId):
 - handler calls `getSelectionHidden()` to get them
 
 ### Phase 5A: COURTESY_QUERY (STATE.COURTESY_QUERY)
+
 ```javascript
 1. Set state = STATE.COURTESY_QUERY
 2. updateUI()
@@ -176,6 +186,7 @@ async charlestonPass(playerId):
 ```
 
 ### Phase 5B: COURTESY PASS DETAILS
+
 ```javascript
 async courtesyPass():
 1. Setup button handler:
@@ -195,7 +206,7 @@ async courtesyPass():
 2. Wait for button click
 ```
 
-### Phase 6: MAIN LOOP (STATE.LOOP_*)
+### Phase 6: MAIN LOOP (STATE.LOOP\_\*)
 
 **This is the core game flow that repeats until mahjong or wall game:**
 
@@ -288,6 +299,7 @@ async loop():
 ```
 
 ### Phase 7: END GAME (STATE.END)
+
 ```javascript
 async end():
 1. Set state = STATE.END
@@ -302,6 +314,7 @@ async end():
 ## Tile Selection System (CRITICAL)
 
 ### How Tiles Are Selected (in Hand class)
+
 ```javascript
 TileSet {
     selectCount = 0  // Track how many selected
@@ -331,6 +344,7 @@ TileSet {
 ```
 
 ### Visual Feedback for Selected Tiles
+
 ```javascript
 Tile.select():
     // Y position determines visual state
@@ -343,25 +357,28 @@ Tile.deselect():
 ```
 
 ### Validation Rules
+
 **Charleston/Courtesy**: Must select EXACTLY 3 (or 1-3 for courtesy)
+
 ```javascript
 // In charlestonPass():
 if (selectCount !== 3) {
-    // Can't click Pass button
-    // OR button click is ignored
+  // Can't click Pass button
+  // OR button click is ignored
 }
 
 // In courtesyPass():
 if (selectCount < 1 || selectCount > 3) {
-    // Invalid
+  // Invalid
 }
 ```
 
 **Discard**: Must select EXACTLY 1
+
 ```javascript
 // In chooseDiscard():
 if (selectCount !== 1) {
-    // Can't click Discard button
+  // Can't click Discard button
 }
 ```
 
@@ -370,6 +387,7 @@ if (selectCount !== 1) {
 ## Button Management (State-Based)
 
 ### updateUI() - Changes buttons based on STATE
+
 ```javascript
 updateUI():
     switch (this.state):
@@ -414,6 +432,7 @@ updateUI():
 ## Key Data Structures
 
 ### Hand Selection State
+
 ```javascript
 Hand {
     hiddenTileSet: TileSet {
@@ -433,6 +452,7 @@ Hand {
 ```
 
 ### Game Result
+
 ```javascript
 gameResult {
     mahjong: boolean
@@ -472,31 +492,40 @@ START → DEAL → CHARLESTON1 → CHARLESTON_QUERY ─→ CHARLESTON_QUERY_COMP
 ## Critical Implementation Details
 
 ### 1. Promise-Based Flow
+
 Game doesn't use traditional callbacks. Each awaitable action returns a Promise.
+
 ```javascript
-const result = await chooseDiscard()  // Waits for button click
-const vote = await yesNoQuery()        // Waits for button click
-const tiles = await charlestonPass()   // Waits for button click
+const result = await chooseDiscard(); // Waits for button click
+const vote = await yesNoQuery(); // Waits for button click
+const tiles = await charlestonPass(); // Waits for button click
 ```
 
 ### 2. Button Hijacking
+
 Each state removes old listeners and adds new ones.
+
 ```javascript
-button.removeEventListener("click", this.oldFunction)
-this.buttonFunction = newHandler
-button.addEventListener("click", this.buttonFunction)
+button.removeEventListener("click", this.oldFunction);
+this.buttonFunction = newHandler;
+button.addEventListener("click", this.buttonFunction);
 ```
 
 ### 3. Tile Position for Selection
+
 Y-coordinate indicates selection state:
+
 - 600 = deselected (normal)
 - 575 = selected (raised)
 
 ### 4. Validation Happens in updateUI
+
 If selection count is invalid, button may be disabled or non-functional.
 
 ### 5. Hint Updates
+
 After every action that changes player 0's hand:
+
 - Drawing tile
 - Discarding (receiving tiles back from opponents)
 - Charleston pass (sending/receiving tiles)
@@ -509,17 +538,17 @@ Always call: `hintAnimationManager.updateHintsForNewTiles()`
 
 ## Key Methods Summary
 
-| Method | Called During | Returns | Notes |
-|--------|---------------|---------|-------|
-| `sequentialDealTiles()` | DEAL | Promise | Animates tile dealing |
-| `charlestonPass()` | CHARLESTON | Promise<void> | Waits for button, does exchange |
-| `yesNoQuery()` | CHARLESTON_QUERY | Promise<boolean> | Continue charleston? |
-| `courtesyQuery()` | COURTESY_QUERY | Promise<0-3> | How many to exchange |
-| `courtesyPass()` | COURTESY | Promise<void> | Waits for selection, exchanges |
-| `pickFromWall()` | LOOP_PICK_FROM_WALL | Tile | Returns drawn tile or null |
-| `chooseDiscard()` | LOOP_CHOOSE_DISCARD | Promise<{playerOption, tileArray}> | Waits for button |
-| `claimDiscard()` | LOOP_QUERY_CLAIM_DISCARD | Promise<claim_option> | Decision per player |
-| `end()` | END | Promise<void> | Finale, fireworks |
+| Method                  | Called During            | Returns                            | Notes                           |
+| ----------------------- | ------------------------ | ---------------------------------- | ------------------------------- |
+| `sequentialDealTiles()` | DEAL                     | Promise                            | Animates tile dealing           |
+| `charlestonPass()`      | CHARLESTON               | Promise<void>                      | Waits for button, does exchange |
+| `yesNoQuery()`          | CHARLESTON_QUERY         | Promise<boolean>                   | Continue charleston?            |
+| `courtesyQuery()`       | COURTESY_QUERY           | Promise<0-3>                       | How many to exchange            |
+| `courtesyPass()`        | COURTESY                 | Promise<void>                      | Waits for selection, exchanges  |
+| `pickFromWall()`        | LOOP_PICK_FROM_WALL      | Tile                               | Returns drawn tile or null      |
+| `chooseDiscard()`       | LOOP_CHOOSE_DISCARD      | Promise<{playerOption, tileArray}> | Waits for button                |
+| `claimDiscard()`        | LOOP_QUERY_CLAIM_DISCARD | Promise<claim_option>              | Decision per player             |
+| `end()`                 | END                      | Promise<void>                      | Finale, fireworks               |
 
 ---
 
@@ -539,6 +568,7 @@ We need to recreate:
 ## Next Step
 
 With this detailed flow understood, we can now:
+
 1. Map old GameLogic methods to new GameController
 2. Design SelectionManager based on TileSet behavior
 3. Wire PhaserAdapter handlers to DialogManager + managers

@@ -13,6 +13,7 @@ This document provides detailed implementation guidance for the mobile UX improv
 ## 📊 Implementation Progress (Updated 2025-11-22)
 
 ### ✅ **COMPLETED** (13 tasks)
+
 1. ✅ Remove "Undefined Tiles" Message
 2. ✅ Make Opponent Bar Solid
 3. ✅ Remove Pre-Game Message
@@ -28,10 +29,12 @@ This document provides detailed implementation guidance for the mobile UX improv
 13. ✅ Enhance Latest Discard
 
 ### ❌ **REMAINING** (2 tasks - both P1 priority)
+
 1. ❌ **Blank Swap Functionality** - Core game feature
 2. ❌ **Joker Swap Functionality** - Core game feature
 
 ### ⏸️ **DEFERRED** (1 task - debug/testing feature)
+
 - ⏸️ Verify Wall Tile Randomness (P0 but debug-only, not user-facing)
 
 ---
@@ -39,6 +42,7 @@ This document provides detailed implementation guidance for the mobile UX improv
 ## 🔍 Validation Summary
 
 ### ✅ Validated Components
+
 - **CSS Files**: All referenced CSS files exist (`OpponentBar.css`, `HandRenderer.css`, `animations.css`, `tiles.css`)
 - **JavaScript Files**: `MobileRenderer.js`, `TouchHandler.js`, `AnimationController.js`, `DiscardPile.js` all exist
 - **Global Objects**: `tileSprites` confirmed as exported singleton from `mobile/utils/tileSprites.js`
@@ -47,12 +51,14 @@ This document provides detailed implementation guidance for the mobile UX improv
 - **Existing Features**: Blue glow for newly drawn tiles already implemented (`tile--newly-drawn` class exists in `tiles.css`)
 
 ### ⚠️ Clarifications Made
+
 1. **No `promptUI()` method** exists in MobileRenderer - uses `handleUIPrompt()` instead (receives UI_PROMPT events)
 2. **`HomePageAnimation.js` not needed** - inline animation in HomePageTiles is sufficient
 3. **TouchHandler events**: Uses `.on()` method for event subscriptions (tap, swipeup, etc.)
 4. **AnimationController**: Has `animateTileDiscard()` method that already exists and is used
 
 ### 🔧 Architectural Corrections (2025-11-22)
+
 1. **PlayerRack HTML Structure**: The guide incorrectly specified that `player-rack-container` and `hand-container` should be siblings. The **CORRECT** structure has `hand-container` as a CHILD of `player-rack-container`. The rack acts as a backdrop/parent container, and hand tiles render on top of it visually.
 2. **PlayerRack CSS**: The guide's CSS was incorrect. The actual implementation uses darker green backdrop (`rgba(4, 67, 40, 0.95)`) with `min-height: 140px` and shadow styling, not the lighter semi-transparent style shown in the guide.
 
@@ -61,6 +67,7 @@ This document provides detailed implementation guidance for the mobile UX improv
 ## Executive Summary
 
 This implementation guide expands on the high-level task list with:
+
 - **Code-level implementation details** for each task
 - **File path validation** against existing codebase ✅
 - **Event integration points** for GameController communication ✅
@@ -75,20 +82,23 @@ The plan modifies existing mobile components while adding missing ones (HomePage
 ## Implementation Strategy
 
 ### Phase 1: Critical Fixes (P0)
+
 1. **6. Verify Wall Tile Randomness** - Game integrity validation (testing/debugging feature)
 2. ✅ **2B. Enhance Tile Interaction** - Core usability improvement
 
 ### Phase 2: High Priority Features (P1)
+
 3. ✅ **1B. Remove "## Tiles" Message** - Quick UX win **[COMPLETED]**
 4. ✅ **2A. Remove Pre-Game Message** - User guidance improvement **[COMPLETED]**
 5. ✅ **1C. Make Opponent Bar Solid** - Visual consistency **[COMPLETED]**
 6. ✅ **2C. Hide Hints Panel Pre-Game** - Visual cleanup **[COMPLETED]**
 7. ✅ **1B. Center Player Rack and Hand** - Visual alignment
-6. ✅ **1D. Adjust Discard Pile Tile Size** - Functionality fix
-7. **4. Blank Swap Functionality** - Core game feature
-8. **5. Joker Swap Functionality** - Core game feature
+8. ✅ **1D. Adjust Discard Pile Tile Size** - Functionality fix
+9. **4. Blank Swap Functionality** - Core game feature
+10. **5. Joker Swap Functionality** - Core game feature
 
 ### Phase 3: Visual Polish (P2)
+
 9-18. **Remaining visual and interaction enhancements**
 
 ---
@@ -98,29 +108,33 @@ The plan modifies existing mobile components while adding missing ones (HomePage
 ## Pre-Game Improvements
 
 ### 1B. Remove "Undefined Tiles" Message
+
 **Status**: ✅ **COMPLETED** | **Priority**: P1 | **Complexity**: Low
 
 **Current Analysis**: The OpponentBar component shows tile counts via `getTileCount()` method on lines 98-110. The message appears when `countElement.textContent` is set.
 
 **Implementation**: ✅ **DONE**
+
 ```javascript
 // In mobile/components/OpponentBar.js, modified lines 60-63:
 // OLD:
 countElement.textContent = Number.isFinite(count)
-    ? `${count} tile${count !== 1 ? "s" : ""}`
-    : "";
+  ? `${count} tile${count !== 1 ? "s" : ""}`
+  : "";
 
 // NEW:
 countElement.textContent = ""; // Hide tile count - exposures are visible instead
 ```
 
 **Testing**:
+
 - Load game, verify no "13 tiles" messages appear
 - Check all opponent bars during different game phases
 
 ---
 
 ### 1C. Make Opponent Bar a Solid Bar
+
 **Status**: ✅ **COMPLETED** | **Priority**: P2 | **Complexity**: Low
 
 **Current Analysis**: The issue was nested `.opponent-bar` elements - the HTML containers had class `opponent-bar`, and OpponentBar.js created another `.opponent-bar` inside them, causing double styling and visual inner boxes.
@@ -128,6 +142,7 @@ countElement.textContent = ""; // Hide tile count - exposures are visible instea
 **Implementation**: ✅ **DONE**
 
 **Primary Fix - Remove nested class from HTML:**
+
 ```html
 <!-- In mobile/index.html, modified lines 40-42: -->
 <!-- OLD: -->
@@ -142,24 +157,26 @@ countElement.textContent = ""; // Hide tile count - exposures are visible instea
 ```
 
 **Supporting CSS - Ensure transparency:**
+
 ```css
 /* Updated mobile/styles/OpponentBar.css and mobile/styles.css */
 .opponent-info {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .exposures {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 ```
 
 **Note**: The root cause was nested `.opponent-bar` elements applying styles twice. Removing the class from container divs allows OpponentBar.js to create the styled bar without nesting issues.
 
 **Testing**:
+
 - ✅ Visual inspection shows single continuous bars for all opponents
 - ✅ No visual separation or inner boxes
 - ✅ All three opponent bars render identically
@@ -167,11 +184,13 @@ countElement.textContent = ""; // Hide tile count - exposures are visible instea
 ---
 
 ### 2A. Remove Pre-Game "Ready to Play" Message
+
 **Status**: ✅ **COMPLETED** | **Priority**: P1 | **Complexity**: Low
 
 **Current Analysis**: After initialization, `mobile/main.js` line 228 displays "Ready to play! Click Start to begin." The user wants NO message shown pre-game - the board should be blank until the scattered tile animation is implemented.
 
 **Implementation**: ✅ **DONE**
+
 ```javascript
 // In mobile/main.js, modified line 227-228:
 // OLD:
@@ -182,6 +201,7 @@ mobileRenderer?.updateStatus(""); // Clear status - board will be blank pre-game
 ```
 
 **Testing**:
+
 - Verify no message displays on home page after load
 - Game status area should be empty/blank before clicking Start
 - After clicking Start, game proceeds normally with status updates
@@ -189,9 +209,11 @@ mobileRenderer?.updateStatus(""); // Clear status - board will be blank pre-game
 ---
 
 ### 2B. Add Scattered Tile Deck on Home Page
-**Status**:  ✅ **COMPLETED** | **Priority**: P2 | **Complexity**: Medium
+
+**Status**: ✅ **COMPLETED** | **Priority**: P2 | **Complexity**: Medium
 
 **Implementation**: ✅ **DONE**
+
 1. Create `mobile/components/HomePageTiles.js`
 2. Modify `mobile/MobileRenderer.js` to include animation trigger
 3. Update `mobile/index.html` to include home page container
@@ -202,74 +224,82 @@ mobileRenderer?.updateStatus(""); // Clear status - board will be blank pre-game
 **Detailed Implementation**:
 
 **File: mobile/components/HomePageTiles.js** (NEW FILE)
+
 ```javascript
 import { tileSprites } from "../utils/tileSprites.js";
 
 export class HomePageTiles {
-    constructor(container) {
-        this.container = container;
-        this.tiles = [];
-        this.isAnimating = false;
-        if (container) {
-            this.render();
-        }
+  constructor(container) {
+    this.container = container;
+    this.tiles = [];
+    this.isAnimating = false;
+    if (container) {
+      this.render();
     }
+  }
 
-    render() {
-        // Create scattered layout of small tiles
-        for (let i = 0; i < 12; i++) {
-            const tile = this.createRandomTile();
-            tile.classList.add("home-page-tile");
-            tile.style.left = `${Math.random() * 80 + 10}%`;
-            tile.style.top = `${Math.random() * 60 + 20}%`;
-            tile.style.transform = `rotate(${Math.random() * 60 - 30}deg)`;
-            this.container.appendChild(tile);
-            this.tiles.push(tile);
-        }
-        // Show container
-        this.container.style.display = "block";
+  render() {
+    // Create scattered layout of small tiles
+    for (let i = 0; i < 12; i++) {
+      const tile = this.createRandomTile();
+      tile.classList.add("home-page-tile");
+      tile.style.left = `${Math.random() * 80 + 10}%`;
+      tile.style.top = `${Math.random() * 60 + 20}%`;
+      tile.style.transform = `rotate(${Math.random() * 60 - 30}deg)`;
+      this.container.appendChild(tile);
+      this.tiles.push(tile);
     }
+    // Show container
+    this.container.style.display = "block";
+  }
 
-    createRandomTile() {
-        const tile = document.createElement("div");
-        tile.className = "tile tile--small home-page-tile";
-        const suit = Math.floor(Math.random() * 3) + 1; // CRACK, BAM, DOT
-        const number = Math.floor(Math.random() * 9) + 1;
-        const pos = tileSprites.getSpritePosition({ suit, number });
-        tile.style.backgroundPosition = `${pos.xPct}% ${pos.yPct}%`;
-        return tile;
+  createRandomTile() {
+    const tile = document.createElement("div");
+    tile.className = "tile tile--small home-page-tile";
+    const suit = Math.floor(Math.random() * 3) + 1; // CRACK, BAM, DOT
+    const number = Math.floor(Math.random() * 9) + 1;
+    const pos = tileSprites.getSpritePosition({ suit, number });
+    tile.style.backgroundPosition = `${pos.xPct}% ${pos.yPct}%`;
+    return tile;
+  }
+
+  async animateStart() {
+    if (this.isAnimating || this.tiles.length === 0) return;
+    this.isAnimating = true;
+
+    // Animate all tiles flying off
+    const animations = this.tiles.map(
+      (tile, index) =>
+        new Promise((resolve) => {
+          tile.style.transition =
+            "all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+          tile.style.transform +=
+            " translate(-200px, -300px) scale(0.3) rotate(720deg)";
+          tile.style.opacity = "0";
+
+          setTimeout(
+            () => {
+              tile.remove();
+              resolve();
+            },
+            800 + index * 50,
+          );
+        }),
+    );
+
+    await Promise.all(animations);
+    this.tiles = [];
+    this.isAnimating = false;
+    // Hide container after animation
+    if (this.container) {
+      this.container.style.display = "none";
     }
-
-    async animateStart() {
-        if (this.isAnimating || this.tiles.length === 0) return;
-        this.isAnimating = true;
-
-        // Animate all tiles flying off
-        const animations = this.tiles.map((tile, index) =>
-            new Promise(resolve => {
-                tile.style.transition = "all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
-                tile.style.transform += " translate(-200px, -300px) scale(0.3) rotate(720deg)";
-                tile.style.opacity = "0";
-
-                setTimeout(() => {
-                    tile.remove();
-                    resolve();
-                }, 800 + (index * 50));
-            })
-        );
-
-        await Promise.all(animations);
-        this.tiles = [];
-        this.isAnimating = false;
-        // Hide container after animation
-        if (this.container) {
-            this.container.style.display = "none";
-        }
-    }
+  }
 }
 ```
 
 **Integration in MobileRenderer.js**:
+
 ```javascript
 // Add import at top
 import { HomePageTiles } from "./components/HomePageTiles.js";
@@ -288,33 +318,40 @@ onGameStarted() {
 ```
 
 **HTML Update in mobile/index.html**:
+
 ```html
 <!-- Add inside mobile-app, before opponents-container -->
-<div id="home-page-tiles" class="home-page-tiles-container" style="display: none;">
-    <!-- Populated by HomePageTiles component -->
+<div
+  id="home-page-tiles"
+  class="home-page-tiles-container"
+  style="display: none;"
+>
+  <!-- Populated by HomePageTiles component -->
 </div>
 ```
 
 **CSS Update in mobile/styles/animations.css**:
+
 ```css
 /* Add to end of file */
 .home-page-tiles-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 10;
-    pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .home-page-tile {
-    position: absolute;
-    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: absolute;
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 ```
 
 **Testing**:
+
 - Home page shows scattered tiles on load
 - Animation triggers when game starts
 - Tiles smoothly fly off screen and are removed from DOM
@@ -323,11 +360,13 @@ onGameStarted() {
 ---
 
 ### 2C. Hide Hints Panel Pre-Game
+
 **Status**: ✅ **COMPLETED** | **Priority**: P2 | **Complexity**: Low
 
 **Current Analysis**: **VERIFIED**: Hints panel exists in `mobile/index.html` at line 57-62 with id "hints-panel".
 
 **Implementation**: ✅ **DONE**
+
 ```javascript
 // In mobile/MobileRenderer.js constructor, added lines 73-77:
 this.hintsPanel = document.getElementById("hints-panel");
@@ -345,22 +384,25 @@ onGameStarted() {
 ```
 
 **Testing**:
+
 - ✅ Hints panel invisible on page load
 - ✅ Hints panel appears when game starts
 
 ---
 
 ### 2D. Add Empty Player Tile Rack
+
 **Status**: ✅ **COMPLETED** | **Priority**: P2 | **Complexity**: Medium
 
 **IMPORTANT CORRECTION**: The original implementation guide incorrectly specified the HTML structure. The player rack is NOT a sibling of the hand container - it's the PARENT container that acts as a backdrop. The hand tiles render ON TOP of the rack visually.
 
 **Correct HTML Structure** (VERIFIED from mobile/index.html):
+
 ```html
 <div id="hand-area" class="hand-area">
-    <div id="player-rack-container" class="player-rack-container hide-on-home">
-        <div id="hand-container" class="hand-container"></div>
-    </div>
+  <div id="player-rack-container" class="player-rack-container hide-on-home">
+    <div id="hand-container" class="hand-container"></div>
+  </div>
 </div>
 ```
 
@@ -372,116 +414,123 @@ onGameStarted() {
 4. CSS properly configured for backdrop styling ✅
 
 **How It Works**:
+
 - `player-rack-container` is a flex container that serves as the visual backdrop (dark green background)
 - `hand-container` sits inside it, rendering the player's hand tiles
 - PlayerRack component creates a separate `player-rack` div inside the container to display exposed tiles
 - Z-index layering: Backdrop → Hand Tiles → Tile Glow Effects
 
 **File: mobile/components/PlayerRack.js** (NEW FILE)
+
 ```javascript
 import { tileSprites } from "../utils/tileSprites.js";
 
 export class PlayerRack {
-    constructor(container) {
-        this.container = container;
-        this.element = null;
-        if (container) {
-            this.render();
-        }
+  constructor(container) {
+    this.container = container;
+    this.element = null;
+    if (container) {
+      this.render();
     }
+  }
 
-    render() {
-        this.element = document.createElement("div");
-        this.element.className = "player-rack";
-        this.element.innerHTML = `
+  render() {
+    this.element = document.createElement("div");
+    this.element.className = "player-rack";
+    this.element.innerHTML = `
             <div class="player-rack__exposed"></div>
         `;
-        this.container.appendChild(this.element);
+    this.container.appendChild(this.element);
+  }
+
+  update(handData) {
+    if (!this.element || !handData) return;
+
+    const exposedSection = this.element.querySelector(".player-rack__exposed");
+
+    if (handData.exposures && handData.exposures.length > 0) {
+      this.renderExposures(handData.exposures, exposedSection);
+    } else {
+      exposedSection.innerHTML = "";
     }
+  }
 
-    update(handData) {
-        if (!this.element || !handData) return;
-
-        const exposedSection = this.element.querySelector(".player-rack__exposed");
-
-        if (handData.exposures && handData.exposures.length > 0) {
-            this.renderExposures(handData.exposures, exposedSection);
-        } else {
-            exposedSection.innerHTML = "";
-        }
-    }
-
-    renderExposures(exposures, container) {
-        container.innerHTML = "";
-        exposures.forEach(exposure => {
-            const set = document.createElement("div");
-            set.className = "exposure-set";
-            exposure.tiles.forEach(tile => {
-                const tileEl = tileSprites.createTileElement(tile, "small");
-                tileEl.classList.add("exposed-tile");
-                set.appendChild(tileEl);
-            });
-            container.appendChild(set);
-        });
-    }
+  renderExposures(exposures, container) {
+    container.innerHTML = "";
+    exposures.forEach((exposure) => {
+      const set = document.createElement("div");
+      set.className = "exposure-set";
+      exposure.tiles.forEach((tile) => {
+        const tileEl = tileSprites.createTileElement(tile, "small");
+        tileEl.classList.add("exposed-tile");
+        set.appendChild(tileEl);
+      });
+      container.appendChild(set);
+    });
+  }
 }
 ```
 
 **HTML Update in mobile/index.html** (CORRECTED):
+
 ```html
 <!-- CORRECT structure: hand-container is INSIDE player-rack-container -->
 <div id="hand-area" class="hand-area">
-    <div id="player-rack-container" class="player-rack-container hide-on-home">
-        <div id="hand-container" class="hand-container"></div>
-    </div>
+  <div id="player-rack-container" class="player-rack-container hide-on-home">
+    <div id="hand-container" class="hand-container"></div>
+  </div>
 </div>
 ```
 
 **CSS Update in mobile/styles/MobileGame.css** (CORRECTED - uses original styling):
+
 ```css
 /* Player rack container - acts as backdrop for hand tiles */
 .player-rack-container {
-    margin: 4px 8px 0;
-    padding: 10px 8px;
-    background: rgba(4, 67, 40, 0.95);  /* Dark green backdrop */
-    border-radius: 14px;
-    border: none;
-    min-height: 140px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 18px rgba(0, 0, 0, 0.35);
+  margin: 4px 8px 0;
+  padding: 10px 8px;
+  background: rgba(4, 67, 40, 0.95); /* Dark green backdrop */
+  border-radius: 14px;
+  border: none;
+  min-height: 140px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 8px 18px rgba(0, 0, 0, 0.35);
 }
 
 .player-rack {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
 }
 
 .player-rack__exposed {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    justify-content: center;
-    min-height: 42px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  min-height: 42px;
 }
 
 .player-rack__exposed:empty {
-    min-height: 0;
+  min-height: 0;
 }
 
 .player-rack .exposure-set {
-    display: flex;
-    gap: 4px;
-    padding: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 6px;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
 }
 ```
 
 **Integration in MobileRenderer.js**:
+
 ```javascript
 // Add import
 import { PlayerRack } from "./components/PlayerRack.js";
@@ -502,6 +551,7 @@ onHandUpdated(data) {
 ```
 
 **Testing**:
+
 - ✅ Rack serves as backdrop with dark green background
 - ✅ Hand tiles render on top of rack container
 - ✅ Exposures display within rack (currently not implemented in PlayerRack - exposures show in hand area)
@@ -515,30 +565,33 @@ onHandUpdated(data) {
 ## Gameplay Improvements
 
 ### 1B. Center Player Rack and Hand
+
 **Status**: ✅ CSS Fix | **Priority**: P1 | **Complexity**: Low
 
 **Current Analysis**: **VERIFIED**: HandRenderer uses CSS grid with `justify-content: center` on line 26 in `mobile/styles/HandRenderer.css`.
 
 **Implementation**:
+
 ```css
 /* Update mobile/styles/HandRenderer.css */
 .hand-container {
-    display: grid;
-    gap: 6px;
-    grid-auto-rows: minmax(60px, auto);
-    justify-content: center;
-    width: 100%;
+  display: grid;
+  gap: 6px;
+  grid-auto-rows: minmax(60px, auto);
+  justify-content: center;
+  width: 100%;
 }
 
 .hand-grid {
-    grid-template-columns: repeat(7, minmax(40px, 45px));
-    padding: 8px;
-    margin: 0 auto; /* Add this for explicit centering */
-    max-width: fit-content;
+  grid-template-columns: repeat(7, minmax(40px, 45px));
+  padding: 8px;
+  margin: 0 auto; /* Add this for explicit centering */
+  max-width: fit-content;
 }
 ```
 
 **Testing**:
+
 - Hand appears centered on various screen sizes (320px, 375px, 414px, 768px)
 - Grid maintains proper proportions
 - Tiles don't stretch or compress unnaturally
@@ -546,32 +599,35 @@ onHandUpdated(data) {
 ---
 
 ### 1D. Adjust Discard Pile Tile Size
+
 **Status**: ✅ CSS Fix | **Priority**: P1 | **Complexity**: Medium
 
 **Current Analysis**: **VERIFIED**: DiscardPile has `updateTileSizing()` method (lines 187-199) that calculates tile width. Current values: gap=4, padding=8, min=26px.
 
 **Implementation**:
+
 ```css
 /* Update mobile/styles/MobileGame.css */
 .discard-pile {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    gap: var(--discard-gap, 2px); /* Reduced from 4px */
-    padding: var(--discard-padding, 6px); /* Reduced from 8px */
-    max-height: 200px;
-    overflow-y: auto;
-    background-color: rgba(0, 0, 0, 0.15);
-    border-radius: 4px;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: var(--discard-gap, 2px); /* Reduced from 4px */
+  padding: var(--discard-padding, 6px); /* Reduced from 8px */
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
 }
 
 .discard-tile {
-    width: var(--discard-tile-width, 30px); /* Reduced default from 32px */
-    height: calc(var(--discard-tile-width, 30px) * 1.33);
-    font-size: 10px;
+  width: var(--discard-tile-width, 30px); /* Reduced default from 32px */
+  height: calc(var(--discard-tile-width, 30px) * 1.33);
+  font-size: 10px;
 }
 ```
 
 **Update DiscardPile.js sizing calculation**:
+
 ```javascript
 // In mobile/components/DiscardPile.js, modify updateTileSizing() lines 187-199:
 updateTileSizing() {
@@ -590,6 +646,7 @@ updateTileSizing() {
 ```
 
 **Testing**:
+
 - Discard pile fits 9+ tiles comfortably per row
 - No tile overlap with adequate padding
 - Maintains legibility at smaller size (test with screen widths: 320px, 375px, 414px)
@@ -598,38 +655,45 @@ updateTileSizing() {
 ---
 
 ### 2A. Add Discard Recommendation Glow
-**Status**:  ✅ Visual Enhancement | **Priority**: P2 | **Complexity**: Medium
+
+**Status**: ✅ Visual Enhancement | **Priority**: P2 | **Complexity**: Medium
 
 **Note**: This feature requires AI engine integration. If AI recommendations aren't available, this enhancement can be deferred.
 
 **Implementation Plan**: ✅ **DONE**
+
 1. Add CSS for red pulsing glow
 2. Update HandRenderer to apply glow to recommended tiles
 3. Integrate with AI engine recommendation system
 
 **CSS Update in mobile/styles/tiles.css**:
+
 ```css
 /* Add after existing pulse-blue animation (line 68) */
 @keyframes pulse-red {
-    0%, 100% {
-        box-shadow: 0 0 8px rgba(244, 67, 54, 0.6);
-    }
-    50% {
-        box-shadow: 0 0 20px rgba(244, 67, 54, 1);
-    }
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(244, 67, 54, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(244, 67, 54, 1);
+  }
 }
 
 .tile--recommended-discard {
-    animation: pulse-red 2s infinite;
+  animation: pulse-red 2s infinite;
 }
 
 /* For tiles with both blue and red glow, alternate */
 .tile--newly-drawn.tile--recommended-discard {
-    animation: pulse-blue 1s infinite, pulse-red 1s infinite 0.5s;
+  animation:
+    pulse-blue 1s infinite,
+    pulse-red 1s infinite 0.5s;
 }
 ```
 
 **HandRenderer Integration**:
+
 ```javascript
 // Add method to mobile/renderers/HandRenderer.js:
 setDiscardRecommendations(recommendedIndices) {
@@ -650,6 +714,7 @@ setDiscardRecommendations(recommendedIndices) {
 ```
 
 **MobileRenderer Integration**:
+
 ```javascript
 // Add to onHandUpdated() in mobile/MobileRenderer.js:
 onHandUpdated(data) {
@@ -671,6 +736,7 @@ onHandUpdated(data) {
 ```
 
 **Testing**:
+
 - AI-recommended tiles show red pulsing glow (if AI engine available)
 - Glow removed when recommendation changes or tile discarded
 - Visual effect doesn't interfere with selection states
@@ -679,17 +745,20 @@ onHandUpdated(data) {
 ---
 
 ### 2B. Enhance Tile Interaction
+
 **Status**: 🎯 Core UX | **Priority**: P0 | **Complexity**: Medium
 
 **Current Analysis**: **VERIFIED**: HandRenderer handles tile clicks via `handleTileClick()` method (lines 305-332). TouchHandler exists at `mobile/gestures/TouchHandler.js` with events: tap, swipeup, swipedown, swipeleft, swiperight, longpress.
 
 **Implementation Strategy**:
+
 1. Import TouchHandler into HandRenderer
 2. Wire TouchHandler events for enhanced touch interactions
 3. Add visual feedback for tile selection/deselection
 4. Implement swipe-to-discard functionality
 
 **Enhanced HandRenderer Integration**:
+
 ```javascript
 // In mobile/renderers/HandRenderer.js, add import at top:
 import { TouchHandler } from "../gestures/TouchHandler.js";
@@ -780,54 +849,57 @@ emitSelectionChange() {
 ```
 
 **CSS Updates in mobile/styles/HandRenderer.css**:
+
 ```css
 /* Add to file */
 .tile-btn.tile--raised {
-    transform: translateY(-20px);
-    z-index: 10;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-    border-color: #ff9800;
+  transform: translateY(-20px);
+  z-index: 10;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  border-color: #ff9800;
 }
 
 .tile-btn.tile--swipe-discard {
-    animation: swipe-discard-animation 0.3s ease-out forwards;
+  animation: swipe-discard-animation 0.3s ease-out forwards;
 }
 
 @keyframes swipe-discard-animation {
-    0% {
-        transform: translateY(0) rotate(0deg);
-        opacity: 1;
-    }
-    50% {
-        transform: translateY(-50px) rotate(-10deg);
-        opacity: 0.7;
-    }
-    100% {
-        transform: translateY(-100px) rotate(-20deg);
-        opacity: 0;
-    }
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-50px) rotate(-10deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(-100px) rotate(-20deg);
+    opacity: 0;
+  }
 }
 ```
 
 **MobileRenderer Integration**:
+
 ```javascript
 // In mobile/MobileRenderer.js, add listener in constructor:
 document.addEventListener("tile-discard-requested", (event) => {
-    const { tile, index } = event.detail;
-    // Trigger discard through game controller
-    if (this.pendingPrompt && this.pendingPrompt.callback) {
-        this.pendingPrompt.callback(tile);
-        this.resetHandSelection();
-    }
+  const { tile, index } = event.detail;
+  // Trigger discard through game controller
+  if (this.pendingPrompt && this.pendingPrompt.callback) {
+    this.pendingPrompt.callback(tile);
+    this.resetHandSelection();
+  }
 });
 
 // Call initTouchHandler after HandRenderer is created:
 if (this.handRenderer) {
-    this.handRenderer.initTouchHandler();
+  this.handRenderer.initTouchHandler();
 }
 ```
 
 **Testing**:
+
 - Tap raises/deselects tiles with visual feedback
 - Swipe up immediately triggers discard animation
 - Gestures work responsively across different screen sizes (320px, 375px, 414px, 768px)
@@ -837,6 +909,7 @@ if (this.handRenderer) {
 ---
 
 ### 2C. Animate Discard
+
 **Status**: ✨ Animation | **Priority**: P2 | **Complexity**: Medium
 
 **Current Analysis**: **VERIFIED**: AnimationController has `animateTileDiscard()` method (lines 111-139) in `mobile/animations/AnimationController.js`. MobileRenderer already calls it on line 326.
@@ -845,6 +918,7 @@ if (this.handRenderer) {
 The discard animation is already partially implemented. We just need to ensure it's called with proper parameters.
 
 **Enhanced Implementation**:
+
 ```javascript
 // Update mobile/MobileRenderer.js onTileDiscarded() method:
 onTileDiscarded(data) {
@@ -881,6 +955,7 @@ onTileDiscarded(data) {
 **Note**: The existing `animateTileDiscard()` in AnimationController already handles the animation using CSS variables and the `tile-discarding` class (defined in `animations.css` lines 17-39).
 
 **Testing**:
+
 - Discard animation smooth from hand to discard pile
 - Animation path includes slight arc (parabolic trajectory)
 - Animation doesn't interfere with game flow
@@ -889,46 +964,52 @@ onTileDiscarded(data) {
 ---
 
 ### 2D. Add New Tile Glow
+
 **Status**: ✅ Already Implemented | **Priority**: P2 | **Complexity**: Low
 
 **Current Analysis**: **VERIFIED**:
+
 - HandRenderer already tracks newly drawn tiles via `newlyDrawnTileIndex` (lines 119, 127, 175 in `mobile/renderers/HandRenderer.js`)
 - `.tile--newly-drawn` class applied on line 176
 - Blue pulse animation **already exists** in `mobile/styles/tiles.css` lines 57-68
 
 **Current Implementation**:
+
 ```css
 /* From mobile/styles/tiles.css lines 56-68 */
 @keyframes pulse-blue {
-    0%, 100% {
-        box-shadow: 0 0 8px rgba(0, 150, 255, 0.6);
-    }
-    50% {
-        box-shadow: 0 0 20px rgba(0, 150, 255, 1);
-    }
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(0, 150, 255, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 150, 255, 1);
+  }
 }
 
 .tile--newly-drawn {
-    animation: pulse-blue 2s infinite;
+  animation: pulse-blue 2s infinite;
 }
 ```
 
 **Enhancement** (optional - to clear glow on discard):
+
 ```javascript
 // In mobile/renderers/HandRenderer.js, enhance the tile discard handler:
 const handleTileDiscarded = (data = {}) => {
-    if (data.player === 0) {
-        // Clear newly drawn tile index
-        this.newlyDrawnTileIndex = null;
+  if (data.player === 0) {
+    // Clear newly drawn tile index
+    this.newlyDrawnTileIndex = null;
 
-        // Remove glow from all tiles
-        const tiles = this.handContainer.querySelectorAll(".tile--newly-drawn");
-        tiles.forEach(tile => tile.classList.remove("tile--newly-drawn"));
-    }
+    // Remove glow from all tiles
+    const tiles = this.handContainer.querySelectorAll(".tile--newly-drawn");
+    tiles.forEach((tile) => tile.classList.remove("tile--newly-drawn"));
+  }
 };
 ```
 
 **Testing**:
+
 - ✅ Newly drawn tile gets blue pulsing glow (already working)
 - Glow remains until player discards
 - Glow properly cleared between turns
@@ -937,33 +1018,37 @@ const handleTileDiscarded = (data = {}) => {
 ---
 
 ### 3A. Enhance Latest Discard
+
 **Status**: ✨ Visual Enhancement | **Priority**: P2 | **Complexity**: Medium
 
 **Current Analysis**: **VERIFIED**: DiscardPile has `highlightLatest()` method (lines 139-147) and `removeLatestDiscard()` method (lines 152-159).
 
 **Implementation**:
+
 ```css
 /* Add to mobile/styles/MobileGame.css */
 .discard-tile.latest {
-    border: 3px solid #2196f3;
-    transform: scale(1.15);
-    z-index: 10;
-    position: relative;
-    animation: pulse-blue 2s infinite;
+  border: 3px solid #2196f3;
+  transform: scale(1.15);
+  z-index: 10;
+  position: relative;
+  animation: pulse-blue 2s infinite;
 }
 
 /* Reuse pulse-blue from tiles.css or define locally if needed */
 @keyframes pulse-blue {
-    0%, 100% {
-        box-shadow: 0 0 8px rgba(33, 150, 243, 0.6);
-    }
-    50% {
-        box-shadow: 0 0 20px rgba(33, 150, 243, 1);
-    }
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(33, 150, 243, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(33, 150, 243, 1);
+  }
 }
 ```
 
 **Enhanced DiscardPile.js**:
+
 ```javascript
 // Update highlightLatest() method in mobile/components/DiscardPile.js:
 highlightLatest(tileElement) {
@@ -996,6 +1081,7 @@ scrollToLatest(tileElement) {
 ```
 
 **Testing**:
+
 - Latest tile is larger (1.15x) with blue glow and border
 - Auto-scroll keeps latest tile in view
 - Effect transfers correctly to next discard
@@ -1007,11 +1093,13 @@ scrollToLatest(tileElement) {
 ## Missing Features & Bugs
 
 ### 4. Blank Swap Functionality
+
 **Status**: 🔧 Game Feature | **Priority**: P1 | **Complexity**: High
 
 **Current Analysis**: **VERIFIED**: GameController has `exchangeBlankWithDiscard(blankTileInput, discardTileInput)` method (lines 886-950 in `core/GameController.js`). Method signature confirmed.
 
 **Mobile Implementation**:
+
 ```javascript
 // Add to mobile/MobileRenderer.js:
 async handleBlankSwap() {
@@ -1091,18 +1179,28 @@ showDiscardSelection(options) {
 ```
 
 **UI Integration in mobile/index.html**:
+
 ```html
 <!-- Add to bottom menu in mobile/index.html (line 65-70) -->
 <div class="bottom-menu">
-    <button id="swap-blank-btn" class="menu-btn" style="display: none;">SWAP</button>
-    <button id="draw-btn" class="menu-btn menu-btn--primary" style="display: none;">DRAW</button>
-    <button id="sort-btn" class="menu-btn">SORT</button>
-    <button id="new-game-btn" class="menu-btn">Start</button>
-    <button id="mobile-settings-btn" class="menu-btn">⚙️</button>
+  <button id="swap-blank-btn" class="menu-btn" style="display: none;">
+    SWAP
+  </button>
+  <button
+    id="draw-btn"
+    class="menu-btn menu-btn--primary"
+    style="display: none;"
+  >
+    DRAW
+  </button>
+  <button id="sort-btn" class="menu-btn">SORT</button>
+  <button id="new-game-btn" class="menu-btn">Start</button>
+  <button id="mobile-settings-btn" class="menu-btn">⚙️</button>
 </div>
 ```
 
 **Button Visibility Logic**:
+
 ```javascript
 // In mobile/MobileRenderer.js, add method:
 updateBlankSwapButton() {
@@ -1139,6 +1237,7 @@ if (swapBlankBtn) {
 ```
 
 **Testing**:
+
 - Blank swap button appears only when player has blank tiles and game is in valid state
 - Button hidden when no blanks in hand
 - Button hidden when no discards available
@@ -1148,6 +1247,7 @@ if (swapBlankBtn) {
 - Error messages display for invalid swaps
 
 **Note**: The `showDiscardSelection()` method needs UX design decision on how to present discard pile for selection. Options:
+
 1. Overlay with clickable discard tiles
 2. Modal with grid of available discards
 3. Transform discard pile into selection mode
@@ -1155,6 +1255,7 @@ if (swapBlankBtn) {
 ---
 
 ### 5. Joker Swap Functionality
+
 **Status**: 🔧 Game Feature | **Priority**: P1 | **Complexity**: High
 
 **Current Analysis**: **VERIFIED**: GameController has `onExchangeJoker()` method (lines 1169-1276 in `core/GameController.js`). Method takes no parameters and auto-selects first available exchange.
@@ -1162,6 +1263,7 @@ if (swapBlankBtn) {
 **Important**: The current implementation auto-selects the first available joker exchange. For better UX, this should be enhanced to let user choose, but that's beyond current scope.
 
 **Mobile Implementation**:
+
 ```javascript
 // Add to mobile/MobileRenderer.js:
 async handleJokerSwap() {
@@ -1209,17 +1311,29 @@ canSwapJoker() {
 ```
 
 **UI Integration in mobile/index.html**:
+
 ```html
 <!-- Add to bottom menu -->
 <div class="bottom-menu">
-    <button id="swap-blank-btn" class="menu-btn" style="display: none;">SWAP</button>
-    <button id="exchange-joker-btn" class="menu-btn" style="display: none;">JOKER</button>
-    <button id="draw-btn" class="menu-btn menu-btn--primary" style="display: none;">DRAW</button>
-    <!-- ...existing buttons -->
+  <button id="swap-blank-btn" class="menu-btn" style="display: none;">
+    SWAP
+  </button>
+  <button id="exchange-joker-btn" class="menu-btn" style="display: none;">
+    JOKER
+  </button>
+  <button
+    id="draw-btn"
+    class="menu-btn menu-btn--primary"
+    style="display: none;"
+  >
+    DRAW
+  </button>
+  <!-- ...existing buttons -->
 </div>
 ```
 
 **Button Visibility Logic**:
+
 ```javascript
 // In mobile/MobileRenderer.js, add method:
 updateJokerSwapButton() {
@@ -1258,6 +1372,7 @@ if (jokerBtn) {
 ```
 
 **Testing**:
+
 - Joker swap button appears when exchanges are possible
 - Button hidden when no exposed jokers exist
 - Button hidden when player has no matching tiles
@@ -1272,6 +1387,7 @@ Allow user to choose which joker to swap when multiple options exist. This would
 ---
 
 ### 6. Verify Wall Tile Randomness
+
 **Status**: 🔍 Validation | **Priority**: P0 | **Complexity**: Medium
 
 **Current Analysis**: **VERIFIED**: GameController uses Fisher-Yates shuffle in `shuffleTileArray()` function (lines 1400-1406).
@@ -1279,6 +1395,7 @@ Allow user to choose which joker to swap when multiple options exist. This would
 **Note**: This is a debugging/testing feature, not a user-facing feature. It should be accessible via developer console or debug mode.
 
 **Implementation**:
+
 ```javascript
 // Add to mobile/MobileRenderer.js (for debugging purposes):
 validateWallRandomness(iterations = 1000) {
@@ -1395,20 +1512,22 @@ generateDefaultWall() {
 ```
 
 **Usage**:
+
 ```javascript
 // In browser console:
 mobileRenderer.validateWallRandomness(1000);
 
 // Or add a debug button (only in development):
-if (process.env.NODE_ENV === 'development') {
-    const debugBtn = document.createElement('button');
-    debugBtn.textContent = 'Test Randomness';
-    debugBtn.onclick = () => mobileRenderer.validateWallRandomness(1000);
-    document.body.appendChild(debugBtn);
+if (process.env.NODE_ENV === "development") {
+  const debugBtn = document.createElement("button");
+  debugBtn.textContent = "Test Randomness";
+  debugBtn.onclick = () => mobileRenderer.validateWallRandomness(1000);
+  document.body.appendChild(debugBtn);
 }
 ```
 
 **Testing**:
+
 - Statistical analysis shows uniform distribution
 - Chi-square test passes for randomness (p > 0.05)
 - Entropy score indicates high randomness (>0.95)
@@ -1416,6 +1535,7 @@ if (process.env.NODE_ENV === 'development') {
 - Test completes in reasonable time (<5 seconds for 1000 iterations)
 
 **Acceptance Criteria**:
+
 - Chi-square test: isRandom = true
 - Entropy randomness: >95%
 - Positional bias: isUniform = true
@@ -1426,33 +1546,38 @@ if (process.env.NODE_ENV === 'development') {
 ## Testing Procedures
 
 ### Unit Tests
+
 Each component should include:
+
 - DOM manipulation tests
 - Event handling tests
 - Animation tests
 - Game state integration tests
 
 ### Integration Tests
+
 - Test complete game flows with new UX improvements
 - Verify touch interactions work across different devices
 - Validate performance with animation improvements
 - Test on real devices (iOS Safari, Android Chrome)
 
 ### Visual Tests
+
 - Screenshot comparison for layout improvements
 - Animation smoothness verification (target 60fps)
 - Accessibility compliance for touch targets (minimum 44x44px)
 - Color contrast ratios meet WCAG AA standards
 
 ### Device Testing Matrix
-| Device Type | Screen Size | Browsers | Priority |
-|-------------|-------------|----------|----------|
-| iPhone SE | 320x568 | Safari | High |
-| iPhone 12/13 | 375x812 | Safari | High |
-| iPhone 14 Pro Max | 414x896 | Safari | Medium |
-| Samsung Galaxy | 360x740 | Chrome | High |
-| iPad Mini | 768x1024 | Safari | Medium |
-| Desktop | 1920x1080 | Chrome, Edge | Low |
+
+| Device Type       | Screen Size | Browsers     | Priority |
+| ----------------- | ----------- | ------------ | -------- |
+| iPhone SE         | 320x568     | Safari       | High     |
+| iPhone 12/13      | 375x812     | Safari       | High     |
+| iPhone 14 Pro Max | 414x896     | Safari       | Medium   |
+| Samsung Galaxy    | 360x740     | Chrome       | High     |
+| iPad Mini         | 768x1024    | Safari       | Medium   |
+| Desktop           | 1920x1080   | Chrome, Edge | Low      |
 
 ---
 
@@ -1461,10 +1586,12 @@ Each component should include:
 ### File Dependencies
 
 **New Files to Create**:
+
 - `mobile/components/HomePageTiles.js`
 - `mobile/components/PlayerRack.js`
 
 **Files to Modify**:
+
 - `mobile/MobileRenderer.js` - Main integration point
 - `mobile/renderers/HandRenderer.js` - Touch interactions
 - `mobile/components/DiscardPile.js` - Tile sizing
@@ -1472,6 +1599,7 @@ Each component should include:
 - `mobile/index.html` - Add HTML containers
 
 **CSS Files to Modify**:
+
 - `mobile/styles/OpponentBar.css` - Solid bar styling
 - `mobile/styles/HandRenderer.css` - Centering, raised tiles
 - `mobile/styles/MobileGame.css` - Discard pile, player rack
@@ -1479,6 +1607,7 @@ Each component should include:
 - `mobile/styles/tiles.css` - Discard recommendations (optional)
 
 **Existing Dependencies (Verified)**:
+
 - `mobile/utils/tileSprites.js` - Exported singleton ✅
 - `mobile/gestures/TouchHandler.js` - Event-based touch handling ✅
 - `mobile/animations/AnimationController.js` - CSS animation management ✅
@@ -1487,6 +1616,7 @@ Each component should include:
 ### Event Integration
 
 All improvements integrate with existing GameController event system:
+
 - `GAME_STARTED`, `GAME_ENDED`
 - `HAND_UPDATED`, `TILE_DISCARDED`, `TILE_DRAWN`
 - `TURN_CHANGED`, `STATE_CHANGED`
@@ -1517,6 +1647,7 @@ All improvements integrate with existing GameController event system:
 ## Success Criteria
 
 Each implementation must:
+
 1. **Function correctly** in all intended scenarios
 2. **Integrate seamlessly** with existing codebase
 3. **Maintain performance** on mobile devices (60fps animations, <100ms touch response)
@@ -1551,11 +1682,11 @@ Each implementation must:
 
 ## Revision History
 
-| Date | Version | Changes |
-|------|---------|---------|
-| 2025-11-20 | 1.0 | Initial implementation guide |
-| 2025-11-20 | 2.0 | Validated all file paths, methods, and integration points |
-| 2025-11-22 | 3.0 | **Updated with completion status**: 13/15 tasks complete (86%). Corrected PlayerRack architecture - hand-container is CHILD of player-rack-container (not sibling). Fixed CSS to match actual implementation. Added progress tracking section. |
+| Date       | Version | Changes                                                                                                                                                                                                                                        |
+| ---------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2025-11-20 | 1.0     | Initial implementation guide                                                                                                                                                                                                                   |
+| 2025-11-20 | 2.0     | Validated all file paths, methods, and integration points                                                                                                                                                                                      |
+| 2025-11-22 | 3.0     | **Updated with completion status**: 13/15 tasks complete (86%). Corrected PlayerRack architecture - hand-container is CHILD of player-rack-container (not sibling). Fixed CSS to match actual implementation. Added progress tracking section. |
 
 ---
 

@@ -1,267 +1,303 @@
 import * as Phaser from "phaser";
 import { Tile, gTileGroups } from "../gameObjects/gameObjects.js";
-import { SUIT, SPRITE_WIDTH, SPRITE_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT } from "../../constants.js";
-import {debugPrint} from "../../utils.js";
+import {
+  SUIT,
+  SPRITE_WIDTH,
+  SPRITE_HEIGHT,
+  WINDOW_WIDTH,
+  WINDOW_HEIGHT,
+} from "../../constants.js";
+import { debugPrint } from "../../utils.js";
 
 export class HomePageTileManager {
-    constructor(scene, wall) {
-        this.scene = scene;
-        this.wall = wall;
-        this.tileArray = [];
-        this.animationState = "idle";
-        this.isAnimating = false;
-        this.onAnimationComplete = null;
-    }
+  constructor(scene, wall) {
+    this.scene = scene;
+    this.wall = wall;
+    this.tileArray = [];
+    this.animationState = "idle";
+    this.isAnimating = false;
+    this.onAnimationComplete = null;
+  }
 
-    createScatteredTiles() {
-        // Create all tiles (152 base + 8 blanks if enabled)
-        const useBlankTiles = window.settingsManager ? window.settingsManager.getUseBlankTiles() : false;
-        let index = 0;
-        for (const group of gTileGroups) {
-            // Skip blank tiles if not enabled
-            if (group.suit === SUIT.BLANK && !useBlankTiles) {
-                continue;
+  createScatteredTiles() {
+    // Create all tiles (152 base + 8 blanks if enabled)
+    const useBlankTiles = window.settingsManager
+      ? window.settingsManager.getUseBlankTiles()
+      : false;
+    let index = 0;
+    for (const group of gTileGroups) {
+      // Skip blank tiles if not enabled
+      if (group.suit === SUIT.BLANK && !useBlankTiles) {
+        continue;
+      }
+      for (const prefix of group.prefix) {
+        for (let num = 1; num <= group.maxNum; num++) {
+          let number = num;
+          if (group.maxNum === 1) {
+            if (group.suit === SUIT.FLOWER) {
+              // Number is irrelevant for flowers
+              number = 0;
+            } else {
+              number = group.prefix.indexOf(prefix);
             }
-            for (const prefix of group.prefix) {
-                for (let num = 1; num <= group.maxNum; num++) {
-                    let number = num;
-                    if (group.maxNum === 1) {
-                        if (group.suit === SUIT.FLOWER) {
-                            // Number is irrelevant for flowers
-                            number = 0;
-                        } else {
-                            number = group.prefix.indexOf(prefix);
-                        }
-                    }
-                    let spriteName = prefix;
-                    if (group.maxNum !== 1) {
-                        spriteName = num + spriteName;
-                    }
-                    spriteName += ".png";
+          }
+          let spriteName = prefix;
+          if (group.maxNum !== 1) {
+            spriteName = num + spriteName;
+          }
+          spriteName += ".png";
 
-                    // Create duplicate tiles
-                    for (let j = 0; j < group.count; j++) {
-                        const tile = new Tile(this.scene, group.suit, number, spriteName);
-                        tile.create();
-                        tile.index = index++;  // Assign unique index
-                        this.tileArray.push(tile);
-                    }
-                }
-            }
+          // Create duplicate tiles
+          for (let j = 0; j < group.count; j++) {
+            const tile = new Tile(this.scene, group.suit, number, spriteName);
+            tile.create();
+            tile.index = index++; // Assign unique index
+            this.tileArray.push(tile);
+          }
         }
-
-        // Now, position them randomly
-        for (let i = 0; i < this.tileArray.length; i++) {
-            const tile = this.tileArray[i];
-            const { x, y, scale, angle } = this.generateRandomPosition();
-            tile.x = x;
-            tile.y = y;
-            tile.scale = scale;
-            tile.angle = angle;
-            tile.sprite.setDepth(i); // Use index for z-depth
-            tile.showTile(true, false); // Show face down
-            if (Math.random() < 0.7) {
-                tile.showTile(true, true);
-            }
-        }
+      }
     }
 
-    generateRandomPosition() {
-        // The goal is a "dumped pile" look, clustered in the center.
-        // We can use a Gaussian distribution to achieve this.
-        const centerX = this.scene.sys.game.config.width / 2;
-        const centerY = this.scene.sys.game.config.height / 2;
-        const spreadX = 200; // Standard deviation for X
-        const spreadY = 100; // Standard deviation for Y
-
-        // Basic Box-Muller transform for a normal distribution.
-        let u = 0, v = 0;
-        while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
-        while(v === 0) v = Math.random();
-        let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
-
-        const x = centerX + (num * spreadX);
-
-        u = 0;
-        v = 0;
-        while(u === 0) u = Math.random();
-        while(v === 0) v = Math.random();
-        num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
-
-        const y = centerY + (num * spreadY);
-
-
-        const scale = Phaser.Math.FloatBetween(0.55, 0.65);
-        const angle = Phaser.Math.Between(-90, 90);
-
-        return { x, y, scale, angle };
+    // Now, position them randomly
+    for (let i = 0; i < this.tileArray.length; i++) {
+      const tile = this.tileArray[i];
+      const { x, y, scale, angle } = this.generateRandomPosition();
+      tile.x = x;
+      tile.y = y;
+      tile.scale = scale;
+      tile.angle = angle;
+      tile.sprite.setDepth(i); // Use index for z-depth
+      tile.showTile(true, false); // Show face down
+      if (Math.random() < 0.7) {
+        tile.showTile(true, true);
+      }
     }
+  }
 
+  generateRandomPosition() {
+    // The goal is a "dumped pile" look, clustered in the center.
+    // We can use a Gaussian distribution to achieve this.
+    const centerX = this.scene.sys.game.config.width / 2;
+    const centerY = this.scene.sys.game.config.height / 2;
+    const spreadX = 200; // Standard deviation for X
+    const spreadY = 100; // Standard deviation for Y
 
+    // Basic Box-Muller transform for a normal distribution.
+    let u = 0,
+      v = 0;
+    while (u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+    while (v === 0) v = Math.random();
+    let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 
-    async animateToPileAndStartGame() {
-        this.isAnimating = true;
-        this.animationState = "gathering";
+    const x = centerX + num * spreadX;
 
-        await this.animateJumpAndFlip();
-        await this.animateFlyOffScreen();
+    u = 0;
+    v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 
-        this.isAnimating = false;
-        this.animationState = "complete";
-        if (this.onAnimationComplete) {
-            this.onAnimationComplete();
-        }
+    const y = centerY + num * spreadY;
+
+    const scale = Phaser.Math.FloatBetween(0.55, 0.65);
+    const angle = Phaser.Math.Between(-90, 90);
+
+    return { x, y, scale, angle };
+  }
+
+  async animateToPileAndStartGame() {
+    this.isAnimating = true;
+    this.animationState = "gathering";
+
+    await this.animateJumpAndFlip();
+    await this.animateFlyOffScreen();
+
+    this.isAnimating = false;
+    this.animationState = "complete";
+    if (this.onAnimationComplete) {
+      this.onAnimationComplete();
     }
+  }
 
-    animateJumpAndFlip() {
-        const promises = [];
-        this.tileArray.forEach((tile) => {
-            promises.push(new Promise(resolve => {
-                const initialY = tile.y;
-                const jumpHeight = Phaser.Math.Between(5, 15);
-                const delay = Phaser.Math.Between(0, 75);
+  animateJumpAndFlip() {
+    const promises = [];
+    this.tileArray.forEach((tile) => {
+      promises.push(
+        new Promise((resolve) => {
+          const initialY = tile.y;
+          const jumpHeight = Phaser.Math.Between(5, 15);
+          const delay = Phaser.Math.Between(0, 75);
 
-                tile.withRaisedDepth(() => {
-                    const dummyTween = this.scene.tweens.add({
-                        targets: {},
-                        duration: 400 + delay,
-                        onComplete: () => {
-                            // Depth will be lowered here
-                        }
-                    });
+          tile.withRaisedDepth(() => {
+            const dummyTween = this.scene.tweens.add({
+              targets: {},
+              duration: 400 + delay,
+              onComplete: () => {
+                // Depth will be lowered here
+              },
+            });
 
-                    // Jump up
-                    this.scene.tweens.add({
-                        targets: tile,
-                        y: initialY - jumpHeight,
-                        scale: 0.65,
-                        duration: 200,
-                        ease: Phaser.Math.Easing.Cubic.Out,
-                        delay: delay
-                    });
+            // Jump up
+            this.scene.tweens.add({
+              targets: tile,
+              y: initialY - jumpHeight,
+              scale: 0.65,
+              duration: 200,
+              ease: Phaser.Math.Easing.Cubic.Out,
+              delay: delay,
+            });
 
-                    // Jump down
-                    this.scene.tweens.add({
-                        targets: tile,
-                        y: initialY,
-                        scale: 0.6,
-                        duration: 200,
-                        ease: Phaser.Math.Easing.Cubic.In,
-                        delay: delay + 200
-                    });
+            // Jump down
+            this.scene.tweens.add({
+              targets: tile,
+              y: initialY,
+              scale: 0.6,
+              duration: 200,
+              ease: Phaser.Math.Easing.Cubic.In,
+              delay: delay + 200,
+            });
 
-                    return dummyTween;
-                });
+            return dummyTween;
+          });
 
-                // Flip to 0
-                this.scene.tweens.add({
-                    targets: { scaleY: tile.sprite.scaleY },
-                    scaleY: 0,
-                    duration: 200,
-                    ease: Phaser.Math.Easing.Cubic.In,
-                    delay: delay,
-                    onUpdate: (tween) => {
-                        tile.sprite.scaleY = tween.targets[0].scaleY;
-                        tile.spriteBack.scaleY = tween.targets[0].scaleY;
+          // Flip to 0
+          this.scene.tweens.add({
+            targets: { scaleY: tile.sprite.scaleY },
+            scaleY: 0,
+            duration: 200,
+            ease: Phaser.Math.Easing.Cubic.In,
+            delay: delay,
+            onUpdate: (tween) => {
+              tile.sprite.scaleY = tween.targets[0].scaleY;
+              tile.spriteBack.scaleY = tween.targets[0].scaleY;
+            },
+            onComplete: () => {
+              tile.showTile(true, false);
+
+              // Flip back
+              this.scene.tweens.add({
+                targets: { scaleY: 0 },
+                scaleY: 0.6,
+                duration: 200,
+                ease: Phaser.Math.Easing.Cubic.Out,
+                onUpdate: (tween) => {
+                  tile.sprite.scaleY = tween.targets[0].scaleY;
+                  tile.spriteBack.scaleY = tween.targets[0].scaleY;
+                },
+                onComplete: () => {
+                  resolve();
+                },
+              });
+            },
+          });
+        }),
+      );
+    });
+    return Promise.all(promises);
+  }
+
+  animateFlyOffScreen() {
+    const promises = [];
+    const batchSize = 20;
+    const batchDelay = 75;
+
+    for (let i = 0; i < this.tileArray.length; i += batchSize) {
+      const batch = this.tileArray.slice(i, i + batchSize);
+      promises.push(
+        new Promise((resolveBatch) => {
+          this.scene.time.delayedCall((i / batchSize) * batchDelay, () => {
+            const batchPromises = batch.map(
+              (tile) =>
+                new Promise((resolveTile) => {
+                  const duration = Phaser.Math.Between(600, 1000);
+                  const endX = Phaser.Math.Between(-200, -50);
+                  const endY = Phaser.Math.Between(-200, -50);
+
+                  const controlX = Phaser.Math.Between(
+                    tile.x - 100,
+                    tile.x + 100,
+                  );
+                  const controlY = Phaser.Math.Between(tile.y - 200, tile.y);
+
+                  const curve = new Phaser.Curves.QuadraticBezier(
+                    new Phaser.Math.Vector2(tile.x, tile.y),
+                    new Phaser.Math.Vector2(controlX, controlY),
+                    new Phaser.Math.Vector2(endX, endY),
+                  );
+
+                  const path = { t: 0, vec: new Phaser.Math.Vector2() };
+
+                  this.scene.tweens.add({
+                    targets: path,
+                    t: 1,
+                    duration: duration,
+                    ease: "Cubic.In",
+                    onUpdate: () => {
+                      curve.getPoint(path.t, path.vec);
+                      tile.x = path.vec.x;
+                      tile.y = path.vec.y;
                     },
                     onComplete: () => {
-                        tile.showTile(true, false);
-
-                        // Flip back
-                        this.scene.tweens.add({
-                            targets: { scaleY: 0 },
-                            scaleY: 0.6,
-                            duration: 200,
-                            ease: Phaser.Math.Easing.Cubic.Out,
-                            onUpdate: (tween) => {
-                                tile.sprite.scaleY = tween.targets[0].scaleY;
-                                tile.spriteBack.scaleY = tween.targets[0].scaleY;
-                            },
-                            onComplete: () => {
-                                resolve();
-                            }
-                        });
-                    }
-                });
-            }));
-        });
-        return Promise.all(promises);
+                      tile.showTile(false, false);
+                      resolveTile();
+                    },
+                  });
+                }),
+            );
+            Promise.all(batchPromises).then(resolveBatch);
+          });
+        }),
+      );
     }
 
-    animateFlyOffScreen() {
-        const promises = [];
-        const batchSize = 20;
-        const batchDelay = 75;
+    return Promise.all(promises);
+  }
 
-        for (let i = 0; i < this.tileArray.length; i += batchSize) {
-            const batch = this.tileArray.slice(i, i + batchSize);
-            promises.push(new Promise(resolveBatch => {
-                this.scene.time.delayedCall(i / batchSize * batchDelay, () => {
-                    const batchPromises = batch.map(tile => new Promise(resolveTile => {
-                        const duration = Phaser.Math.Between(600, 1000);
-                        const endX = Phaser.Math.Between(-200, -50);
-                        const endY = Phaser.Math.Between(-200, -50);
+  async transitionToWallSystem() {
+    await this.wall.receiveOrganizedTilesFromHomePage(this.tileArray);
+  }
 
-                        const controlX = Phaser.Math.Between(tile.x - 100, tile.x + 100);
-                        const controlY = Phaser.Math.Between(tile.y - 200, tile.y);
+  cleanup() {
+    // We no longer destroy the tiles, as they have been handed off to the Wall.
+    // We just clear the array to release the HomePageTileManager's reference to them.
+    this.tileArray = [];
+    debugPrint("HomePageTileManager cleaned up.");
+  }
 
-                        const curve = new Phaser.Curves.QuadraticBezier(
-                            new Phaser.Math.Vector2(tile.x, tile.y),
-                            new Phaser.Math.Vector2(controlX, controlY),
-                            new Phaser.Math.Vector2(endX, endY)
-                        );
-
-                        const path = { t: 0, vec: new Phaser.Math.Vector2() };
-
-                        this.scene.tweens.add({
-                            targets: path,
-                            t: 1,
-                            duration: duration,
-                            ease: "Cubic.In",
-                            onUpdate: () => {
-                                curve.getPoint(path.t, path.vec);
-                                tile.x = path.vec.x;
-                                tile.y = path.vec.y;
-                            },
-                            onComplete: () => {
-                                tile.showTile(false, false);
-                                resolveTile();
-                            }
-                        });
-                    }));
-                    Promise.all(batchPromises).then(resolveBatch);
-                });
-            }));
-        }
-
-        return Promise.all(promises);
-    }
-
-    async transitionToWallSystem() {
-        await this.wall.receiveOrganizedTilesFromHomePage(this.tileArray);
-    }
-
-    cleanup() {
-        // We no longer destroy the tiles, as they have been handed off to the Wall.
-        // We just clear the array to release the HomePageTileManager's reference to them.
-        this.tileArray = [];
-        debugPrint("HomePageTileManager cleaned up.");
-    }
-
-    // Add this new method at the end of the file
-    calculatePlayerHandPositions() {
-      const positions = [];
-      const HAND_SCALE = 0.6;
-      const TILE_W = SPRITE_WIDTH * HAND_SCALE;
-      const TILE_H = SPRITE_HEIGHT * HAND_SCALE;
-      // Bottom
-      for (let i = 0; i < 13; i++) positions.push({x: (WINDOW_WIDTH / 2) - (6.5 * TILE_W) + (i * TILE_W), y: WINDOW_HEIGHT - TILE_H - 10, angle: 0});
-      // Top
-      for (let i = 0; i < 13; i++) positions.push({x: (WINDOW_WIDTH / 2) - (6.5 * TILE_W) + (i * TILE_W), y: TILE_H + 10, angle: 180});
-      // Left
-      for (let i = 0; i < 13; i++) positions.push({x: TILE_H + 10, y: (WINDOW_HEIGHT / 2) - (6.5 * TILE_W) + (i * TILE_W), angle: -90});
-      // Right
-      for (let i = 0; i < 13; i++) positions.push({x: WINDOW_WIDTH - TILE_H - 10, y: (WINDOW_HEIGHT / 2) - (6.5 * TILE_W) + (i * TILE_W), angle: 90});
-      return positions;
-    }
+  // Add this new method at the end of the file
+  calculatePlayerHandPositions() {
+    const positions = [];
+    const HAND_SCALE = 0.6;
+    const TILE_W = SPRITE_WIDTH * HAND_SCALE;
+    const TILE_H = SPRITE_HEIGHT * HAND_SCALE;
+    // Bottom
+    for (let i = 0; i < 13; i++)
+      positions.push({
+        x: WINDOW_WIDTH / 2 - 6.5 * TILE_W + i * TILE_W,
+        y: WINDOW_HEIGHT - TILE_H - 10,
+        angle: 0,
+      });
+    // Top
+    for (let i = 0; i < 13; i++)
+      positions.push({
+        x: WINDOW_WIDTH / 2 - 6.5 * TILE_W + i * TILE_W,
+        y: TILE_H + 10,
+        angle: 180,
+      });
+    // Left
+    for (let i = 0; i < 13; i++)
+      positions.push({
+        x: TILE_H + 10,
+        y: WINDOW_HEIGHT / 2 - 6.5 * TILE_W + i * TILE_W,
+        angle: -90,
+      });
+    // Right
+    for (let i = 0; i < 13; i++)
+      positions.push({
+        x: WINDOW_WIDTH - TILE_H - 10,
+        y: WINDOW_HEIGHT / 2 - 6.5 * TILE_W + i * TILE_W,
+        angle: 90,
+      });
+    return positions;
+  }
 }

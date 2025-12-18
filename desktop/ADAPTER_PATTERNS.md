@@ -175,11 +175,11 @@ handleCourtesyVotePrompt(callback) {
 
 ## Pattern Comparison
 
-| Pattern | Tile Selection? | Button Panel? | Modal Overlay? | Example |
-|---------|----------------|---------------|----------------|---------|
-| **Pattern A** | ✅ Yes | ✅ Yes | ❌ No | Charleston pass |
-| **Pattern B** | ❌ No | ✅ Yes | ❌ No | Claim discard |
-| **Pattern C** | ❌ No | ❌ No | ✅ Yes | Courtesy vote |
+| Pattern       | Tile Selection? | Button Panel? | Modal Overlay? | Example         |
+| ------------- | --------------- | ------------- | -------------- | --------------- |
+| **Pattern A** | ✅ Yes          | ✅ Yes        | ❌ No          | Charleston pass |
+| **Pattern B** | ❌ No           | ✅ Yes        | ❌ No          | Claim discard   |
+| **Pattern C** | ❌ No           | ❌ No         | ✅ Yes         | Courtesy vote   |
 
 ---
 

@@ -12,16 +12,17 @@
 
 ### Phase 1A: Foundation (COMPLETE ✅)
 
-| Task | Status | Owner | Lines | Files | Commit |
-|------|--------|-------|-------|-------|--------|
-| 1A.1 Create HandSelectionManager.js | 🟢 Complete | Haiku | 307 | 1 new | [d9cf9b2] |
-| 1A.2 Create HandEventCoordinator.js | 🟢 Complete | Haiku | 234 | 1 new | [d9cf9b2] |
-| 1A.3 Refactor HandRenderer.js | 🟢 Complete | Haiku | 717→445 | 1 modified | [d9cf9b2] |
-| 1A.4 Create AnimationSequencer.js | 🟢 Complete | Sonnet | 162 | 1 new | [af73155] |
+| Task                                   | Status      | Owner  | Lines   | Files      | Commit    |
+| -------------------------------------- | ----------- | ------ | ------- | ---------- | --------- |
+| 1A.1 Create HandSelectionManager.js    | 🟢 Complete | Haiku  | 307     | 1 new      | [d9cf9b2] |
+| 1A.2 Create HandEventCoordinator.js    | 🟢 Complete | Haiku  | 234     | 1 new      | [d9cf9b2] |
+| 1A.3 Refactor HandRenderer.js          | 🟢 Complete | Haiku  | 717→445 | 1 modified | [d9cf9b2] |
+| 1A.4 Create AnimationSequencer.js      | 🟢 Complete | Sonnet | 162     | 1 new      | [af73155] |
 | 1A.5 Update MobileRenderer integration | 🟢 Complete | Sonnet | +30/-13 | 1 modified | [8c3e8f5] |
-| 1A.6 Fix selection registration | 🟢 Complete | Sonnet | +23 | 1 modified | [5dd4f53] |
+| 1A.6 Fix selection registration        | 🟢 Complete | Sonnet | +23     | 1 modified | [5dd4f53] |
 
 **Deliverables Achieved:**
+
 - ✅ HandRenderer reduced from 717 → 445 lines (38% reduction)
 - ✅ Selection logic extracted into HandSelectionManager (307 lines)
 - ✅ Event coordination extracted into HandEventCoordinator (234 lines)
@@ -32,20 +33,21 @@
 
 ### Phase 1B: Charleston Animations (COMPLETE ✅)
 
-| Task | Status | Owner | Lines | Files | Commit |
-|------|--------|-------|-------|-------|--------|
-| 1B.1 Create CharlestonAnimationSequencer.js | 🟢 Complete | Sonnet | 298 | 1 new | [af73155] |
-| 1B.2 Add CSS animations (pass/receive) | 🟢 Complete | Haiku | +97 | 1 modified | [d7022d6] |
-| 1B.3 Update GameController events | 🟢 Complete | Sonnet | +24/-1 | 1 modified | [0ba7aad] |
-| 1B.4 Wire MobileRenderer → Sequencer | 🟢 Complete | Sonnet | +77 | 1 modified | [bcb0241] |
-| 1B.5 Implement FLIP sort animation | 🟢 Complete | Haiku | (in 1B.1) | - | [af73155] |
-| 1B.6 Integration testing (3 directions) | 🟢 Complete | Sonnet | +303/+346 | 2 new | [f42adda]/[11e0e83] |
-| 1B.7 Animation timing refinement | 🟢 Complete | Sonnet | (tuned) | - | (in 1B.1-1B.4) |
-| 1B.8 Glow persistence validation | 🟢 Complete | Sonnet | (verified) | - | (in 1B.1) |
+| Task                                        | Status      | Owner  | Lines      | Files      | Commit              |
+| ------------------------------------------- | ----------- | ------ | ---------- | ---------- | ------------------- |
+| 1B.1 Create CharlestonAnimationSequencer.js | 🟢 Complete | Sonnet | 298        | 1 new      | [af73155]           |
+| 1B.2 Add CSS animations (pass/receive)      | 🟢 Complete | Haiku  | +97        | 1 modified | [d7022d6]           |
+| 1B.3 Update GameController events           | 🟢 Complete | Sonnet | +24/-1     | 1 modified | [0ba7aad]           |
+| 1B.4 Wire MobileRenderer → Sequencer        | 🟢 Complete | Sonnet | +77        | 1 modified | [bcb0241]           |
+| 1B.5 Implement FLIP sort animation          | 🟢 Complete | Haiku  | (in 1B.1)  | -          | [af73155]           |
+| 1B.6 Integration testing (3 directions)     | 🟢 Complete | Sonnet | +303/+346  | 2 new      | [f42adda]/[11e0e83] |
+| 1B.7 Animation timing refinement            | 🟢 Complete | Sonnet | (tuned)    | -          | (in 1B.1-1B.4)      |
+| 1B.8 Glow persistence validation            | 🟢 Complete | Sonnet | (verified) | -          | (in 1B.1)           |
 
 **Legend:** ⚪ Not Started | 🟡 In Progress | 🟢 Complete | 🔴 Blocked
 
 **Deliverables Achieved:**
+
 - ✅ Complete Charleston animation sequence (pass → receive → glow → sort)
 - ✅ CSS keyframe animations for all 3 directions (right, across, left)
 - ✅ FLIP sort animation preserves blue glow
@@ -64,15 +66,18 @@
 ## 🎯 Executive Summary
 
 ### The Problem
+
 - HandRenderer is a 717-line "God Object" handling rendering, selection, events, hints, and sorting
 - Charleston animations are missing entirely (tiles just disappear/reappear)
 - No architectural pattern for orchestrating complex multi-step animations
 - Future animations (dealing, discarding, claiming) will face the same problems
 
 ### The Solution
+
 **Refactor HandRenderer** into focused components (rendering, selection, events) and create **AnimationSequencer pattern** for orchestrating complex animation flows. Start with Charleston as proof-of-concept.
 
 ### Success Criteria
+
 1. ✅ Beautiful Charleston animations (pass out → travel → receive with glow → slow sort)
 2. ✅ HandRenderer reduced to <300 lines, single responsibility
 3. ✅ Clear extension pattern for future animations
@@ -88,7 +93,9 @@
 ### What Already Exists
 
 #### ✅ HandRenderer (mobile/renderers/HandRenderer.js) - 717 lines
+
 **Current Methods:**
+
 - ✅ `render(handData)` - Renders hand tiles
 - ✅ `renderExposures(exposures)` - Renders exposed tile sets
 - ✅ `clearTiles()` - Clears all tiles
@@ -99,6 +106,7 @@
 - ✅ `destroy()` - Cleanup
 
 **Selection Methods (MOVE to HandSelectionManager):**
+
 - ✅ `setSelectionBehavior(behavior)` - Lines 316-321
 - ✅ `setSelectionListener(callback)` - Lines 323-325
 - ✅ `selectTile(index, options)` - Lines 362-409
@@ -112,11 +120,13 @@
 - ✅ `notifySelectionChange()` - Lines 501-505
 
 **Event Handling (MOVE to HandEventCoordinator):**
+
 - ✅ `setupEventListeners()` - Lines 76-155
   - Subscribes to: HAND_UPDATED, TILE_SELECTED, TILE_DRAWN, TILE_DISCARDED, HINT_DISCARD_RECOMMENDATIONS
 - ✅ `applyHintRecommendations()` - Lines 411-424
 
 **Helper Methods (KEEP in HandRenderer):**
+
 - ✅ `sortHand(mode)` - Lines 507-550
 - ✅ `setInteractive(enabled)` - Lines 552-557
 - ✅ `cloneHandData(handData)` - Lines 638-659
@@ -126,6 +136,7 @@
 - ✅ `getDataNumber(tile)` - Lines 586-591
 
 **Properties:**
+
 - ✅ `container` - DOM container
 - ✅ `handContainer` - Hand tiles container
 - ✅ `exposedSection` - Exposed tiles container
@@ -144,7 +155,9 @@
 ---
 
 #### ✅ AnimationController (mobile/animations/AnimationController.js) - 510 lines
+
 **Existing Animation Methods:**
+
 - ✅ `animateTileDraw(tileElement, startPos, endPos)` - Lines 84-123
 - ✅ `animateTileDiscard(tileElement, targetPos)` - Lines 131-171
 - ✅ `animateTileClaim(tileElement, sourcePlayer, targetPos, targetContainer)` - Lines 181-224
@@ -158,6 +171,7 @@
 - ✅ `removeReceivedTileGlowFromAll(elements)` - Lines 333-335
 
 **Helper Methods:**
+
 - ✅ `_runSimpleAnimation(element, className, duration)` - Lines 345-370
 - ✅ `_resetElementAnimation(element, classes)` - Lines 378-385
 - ✅ `_setCssVariables(element, variables)` - Lines 393-404
@@ -169,12 +183,14 @@
 - ✅ `_cancelTimers(element)` - Lines 497-507
 
 **Properties:**
+
 - ✅ `duration` - Default animation duration
 - ✅ `easing` - Default easing function
 - ✅ `prefersReducedMotion` - Accessibility flag
 - ✅ `_elementTimers` - WeakMap for timer tracking
 
 **Constants:**
+
 - ✅ `TILE_ANIMATION_CLASSES` - Array of tile animation class names
 - ✅ `TURN_ANIMATION_CLASSES` - Turn animation class names
 - ✅ `DEFAULT_PULSE_DURATION` = 500ms
@@ -189,7 +205,9 @@
 ---
 
 #### ✅ MobileRenderer (mobile/MobileRenderer.js) - 1,384 lines
+
 **Event Handlers (Already exists):**
+
 - ✅ `registerEventListeners()` - Lines 106-133
   - Subscribes to: STATE_CHANGED, GAME_STARTED, GAME_ENDED, HAND_UPDATED, TILE_DRAWN, TILE_DISCARDED, TURN_CHANGED, DISCARD_CLAIMED, TILES_EXPOSED, JOKER_SWAPPED, BLANK_EXCHANGED, MESSAGE
   - ✅ Subscribes to `CHARLESTON_PHASE` - Line 124 (just updates status)
@@ -198,16 +216,19 @@
   - ❌ **MISSING:** Subscription to `CHARLESTON_PASS` event for animation
 
 **UI Prompt Handling:**
+
 - ✅ `handleUIPrompt(data)` - Lines 962-1073
   - Handles: CHOOSE_DISCARD, CHARLESTON_PASS, CHARLESTON_CONTINUE, CLAIM, COURTESY_VOTE, COURTESY_PASS, JOKER_SWAP, BLANK_SWAP
   - ✅ `CHARLESTON_PASS` handled - Lines 981-993 (selection prompt, no animation)
 
 **Other Methods:**
+
 - ✅ `startTileSelectionPrompt(options)` - Lines 1075-1127
 - ✅ `onHandUpdated(data)` - Lines 567-637 (includes `_findNewlyReceivedTiles` for courtesy)
 - ✅ `_findNewlyReceivedTiles(previousHand, currentHand)` - Lines 646-690
 
 **Properties:**
+
 - ✅ `gameController` - GameController instance
 - ✅ `handRenderer` - HandRenderer instance
 - ✅ `animationController` - AnimationController instance ⭐ **Already injected!**
@@ -218,7 +239,9 @@
 ---
 
 #### ✅ GameController Events (core/events/GameEvents.js)
+
 **Existing Event Factories:**
+
 - ✅ `createStateChangedEvent(oldState, newState)` - Line 21
 - ✅ `createGameStartedEvent(players)` - Line 34
 - ✅ `createTilesDealtEvent(sequence)` - Line 47
@@ -247,9 +270,11 @@
 ### What We Need to Create
 
 #### ❌ HandSelectionManager (NEW - ~200 lines)
+
 **Responsibility:** Extract selection logic from HandRenderer
 
 **Methods to Extract:**
+
 - `setSelectionBehavior(behavior)` ← from HandRenderer:316-321
 - `setSelectionListener(callback)` ← from HandRenderer:323-325
 - `selectTile(index, options)` ← from HandRenderer:362-409
@@ -258,10 +283,11 @@
 - `getSelectedTiles(handData)` ← from HandRenderer:451-471 (need handData param)
 - `getSelectionState()` ← from HandRenderer:473-480
 - `isSelected(index)` ← NEW helper
-- `canSelectTile(tile, mode)` ← from HandRenderer:_validateTileForMode:678-714 (refactored)
+- `canSelectTile(tile, mode)` ← from HandRenderer:\_validateTileForMode:678-714 (refactored)
 - `validateSelection(count, rules)` ← NEW
 
 **Properties to Extract:**
+
 - `selectedIndices` ← from HandRenderer
 - `selectionKeyByIndex` ← from HandRenderer
 - `selectionBehavior` ← from HandRenderer
@@ -270,9 +296,11 @@
 ---
 
 #### ❌ HandEventCoordinator (NEW - ~150 lines)
+
 **Responsibility:** Extract event subscriptions from HandRenderer
 
 **Methods to Extract:**
+
 - `setupEventListeners()` ← from HandRenderer:76-155
 - `onHandUpdated(data)` ← from HandRenderer event handler
 - `onTileDrawn(data)` ← from HandRenderer event handler
@@ -283,11 +311,13 @@
 - `destroy()` ← unsubscribe logic
 
 **Properties to Extract:**
+
 - `unsubscribeFns` ← from HandRenderer
 - `hintRecommendationKeys` ← from HandRenderer
 - `newlyDrawnTileIndex` ← from HandRenderer
 
 **Dependencies:**
+
 - Needs `gameController` reference
 - Needs `handRenderer` reference
 - Needs `selectionManager` reference
@@ -295,9 +325,11 @@
 ---
 
 #### ❌ AnimationSequencer (NEW Base Class - ~150 lines)
+
 **Responsibility:** Base class for orchestrating multi-step animations
 
 **Methods:**
+
 ```javascript
 async executeSequence(steps)  // Run sequence of animation functions
 async delay(ms)                // Promise-based delay
@@ -311,20 +343,23 @@ async onSequenceError(error)   // Hook (override in subclass)
 ```
 
 **Properties:**
+
 ```javascript
-gameController          // GameController reference
-handRenderer           // HandRenderer reference
-animationController    // AnimationController reference
-isAnimating           // Boolean flag
-currentSequence       // Current sequence data
+gameController; // GameController reference
+handRenderer; // HandRenderer reference
+animationController; // AnimationController reference
+isAnimating; // Boolean flag
+currentSequence; // Current sequence data
 ```
 
 ---
 
 #### ❌ CharlestonAnimationSequencer (NEW - ~300 lines)
+
 **Responsibility:** Charleston-specific animation orchestration
 
 **Methods:**
+
 ```javascript
 async animateCharlestonPass(data)           // Main entry point
 async animateTilesLeaving(tiles, direction) // Exit animation
@@ -339,6 +374,7 @@ calculateEntryPoint(tile, direction)        // Calculate entry coords
 **Extends:** AnimationSequencer
 
 **Subscribes to Events:**
+
 - `CHARLESTON_PASS` (from GameController)
 - `TILES_RECEIVED` (from GameController)
 
@@ -347,29 +383,35 @@ calculateEntryPoint(tile, direction)        // Calculate entry coords
 ### What We Need to Modify
 
 #### 🔧 HandRenderer (REFACTOR - 717 → ~250 lines)
+
 **Remove:**
+
 - All selection methods → HandSelectionManager
 - All event subscription logic → HandEventCoordinator
 - Selection-related properties
 
 **Keep:**
+
 - DOM creation and rendering
 - Layout helpers
 - Sorting logic (sortHand)
 - Utility methods (formatTileText, etc.)
 
 **Add:**
+
 ```javascript
-renderWithGlow(handData, glowIndices)     // NEW: Render with specific tiles glowing
-getTileElementsByIndices(indices)         // NEW: Get multiple tile elements
-hideTemporarily(indices)                  // NEW: For animation coordination
-showWithAnimation(indices, animationClass) // NEW: Show with CSS animation
+renderWithGlow(handData, glowIndices); // NEW: Render with specific tiles glowing
+getTileElementsByIndices(indices); // NEW: Get multiple tile elements
+hideTemporarily(indices); // NEW: For animation coordination
+showWithAnimation(indices, animationClass); // NEW: Show with CSS animation
 ```
 
 ---
 
 #### 🔧 MobileRenderer (ADD ~80 lines)
+
 **Add Event Subscriptions:**
+
 ```javascript
 // In registerEventListeners()
 gc.on("CHARLESTON_PASS", (data) => this.onCharlestonPass(data));
@@ -377,6 +419,7 @@ gc.on("TILES_RECEIVED", (data) => this.onTilesReceived(data));
 ```
 
 **Add Methods:**
+
 ```javascript
 onCharlestonPass(data) {
   // Route to CharlestonAnimationSequencer
@@ -392,24 +435,28 @@ onTilesReceived(data) {
 ```
 
 **Add Property:**
+
 ```javascript
 this.charlestonSequencer = new CharlestonAnimationSequencer(
   this.gameController,
   this.handRenderer,
-  this.animationController
+  this.animationController,
 );
 ```
 
 ---
 
 #### 🔧 GameController (MODIFY ~50 lines)
+
 **Current Charleston Code (core/GameController.js:338-495):**
+
 - ✅ Emits `CHARLESTON_PHASE` event (Line 383)
 - ❌ **MISSING:** Emit `CHARLESTON_PASS` event when tiles passed
 - ❌ **MISSING:** Emit `TILES_RECEIVED` event when tiles received
 - ❌ **MISSING:** Add animation metadata (exitVector, entryVector, direction)
 
 **Need to Add:**
+
 ```javascript
 // After collecting tiles from player (around line 407)
 const passEvent = GameEvents.createCharlestonPassEvent(
@@ -420,8 +467,8 @@ const passEvent = GameEvents.createCharlestonPassEvent(
   {
     exitVector: calculateExitVector(directionName),
     duration: 600,
-    easing: "ease-in-out"
-  }
+    easing: "ease-in-out",
+  },
 );
 this.emit("CHARLESTON_PASS", passEvent);
 
@@ -433,8 +480,8 @@ const receiveEvent = GameEvents.createTilesReceivedEvent(
   {
     entryVector: calculateEntryVector(directionName),
     duration: 600,
-    glow: { persist: true, color: 0x1e90ff }
-  }
+    glow: { persist: true, color: 0x1e90ff },
+  },
 );
 this.emit("TILES_RECEIVED", receiveEvent);
 ```
@@ -442,7 +489,9 @@ this.emit("TILES_RECEIVED", receiveEvent);
 ---
 
 #### 🔧 CSS Animations (ADD ~100 lines to animations.css)
+
 **New Keyframes:**
+
 ```css
 @keyframes charleston-pass-out { ... }
 .tile-charleston-leaving { ... }
@@ -454,24 +503,25 @@ this.emit("TILES_RECEIVED", receiveEvent);
 ```
 
 **Already Exists:**
+
 - `.tile--newly-drawn` with blue glow animation ✅
 
 ---
 
 ### Summary
 
-| Component | Status | Action | Lines |
-|-----------|--------|--------|-------|
-| HandRenderer | ✅ Exists | Refactor (slim down) | 717 → 250 |
-| HandSelectionManager | ❌ Missing | Create (extract from HandRenderer) | +200 |
-| HandEventCoordinator | ❌ Missing | Create (extract from HandRenderer) | +150 |
-| AnimationController | ✅ Exists | **Keep as-is** ✅ | 510 |
-| AnimationSequencer | ❌ Missing | Create (base class) | +150 |
-| CharlestonAnimationSequencer | ❌ Missing | Create | +300 |
-| MobileRenderer | ✅ Exists | Modify (add event handlers) | +80 |
-| GameController | ✅ Exists | Modify (emit events) | +50 |
-| GameEvents.js | ✅ Exists | **Already has events!** ✅ | 0 |
-| animations.css | ✅ Exists | Add keyframes | +100 |
+| Component                    | Status     | Action                             | Lines     |
+| ---------------------------- | ---------- | ---------------------------------- | --------- |
+| HandRenderer                 | ✅ Exists  | Refactor (slim down)               | 717 → 250 |
+| HandSelectionManager         | ❌ Missing | Create (extract from HandRenderer) | +200      |
+| HandEventCoordinator         | ❌ Missing | Create (extract from HandRenderer) | +150      |
+| AnimationController          | ✅ Exists  | **Keep as-is** ✅                  | 510       |
+| AnimationSequencer           | ❌ Missing | Create (base class)                | +150      |
+| CharlestonAnimationSequencer | ❌ Missing | Create                             | +300      |
+| MobileRenderer               | ✅ Exists  | Modify (add event handlers)        | +80       |
+| GameController               | ✅ Exists  | Modify (emit events)               | +50       |
+| GameEvents.js                | ✅ Exists  | **Already has events!** ✅         | 0         |
+| animations.css               | ✅ Exists  | Add keyframes                      | +100      |
 
 **Total New Code:** ~980 lines
 **Total Refactored:** ~467 lines (HandRenderer split)
@@ -479,11 +529,13 @@ this.emit("TILES_RECEIVED", receiveEvent);
 **Net Change:** ~1,110 lines
 
 **✅ Good News:**
+
 - AnimationController is solid - no changes needed!
 - Events already exist - just need to emit them!
 - Blue glow CSS already exists!
 
 **🔧 Main Work:**
+
 1. Split HandRenderer into 3 files
 2. Create 2 new sequencer classes
 3. Wire up event emissions in GameController
@@ -598,31 +650,33 @@ this.emit("TILES_RECEIVED", receiveEvent);
 **Responsibility:** DOM creation, rendering, and layout
 
 #### Interface
+
 ```javascript
 class HandRenderer {
-  constructor(container, gameController) { }
+  constructor(container, gameController) {}
 
   // Core rendering
-  render(handData) { }
-  renderExposures(exposures) { }
-  clearTiles() { }
+  render(handData) {}
+  renderExposures(exposures) {}
+  clearTiles() {}
 
   // Layout helpers
-  getTileElementByIndex(index) { }
-  getLastTileElement() { }
+  getTileElementByIndex(index) {}
+  getLastTileElement() {}
 
   // Animation support (NEW)
-  renderWithGlow(handData, glowIndices) { }
-  getTileElementsByIndices(indices) { }
-  hideTemporarily(indices) { } // For animation coordination
-  showWithAnimation(indices, animationClass) { }
+  renderWithGlow(handData, glowIndices) {}
+  getTileElementsByIndices(indices) {}
+  hideTemporarily(indices) {} // For animation coordination
+  showWithAnimation(indices, animationClass) {}
 
   // Lifecycle
-  destroy() { }
+  destroy() {}
 }
 ```
 
 #### What It Does
+
 - Creates tile DOM elements with sprites
 - Manages hand-container and exposed-section
 - Applies CSS classes for visual states
@@ -630,6 +684,7 @@ class HandRenderer {
 - **Does NOT** handle selection, events, or logic
 
 #### What It Does NOT Do
+
 - ❌ Selection management (moved to HandSelectionManager)
 - ❌ Event subscriptions (moved to HandEventCoordinator)
 - ❌ Hint logic (moved to HandEventCoordinator)
@@ -644,32 +699,34 @@ class HandRenderer {
 **Responsibility:** Tile selection state and validation
 
 #### Interface
+
 ```javascript
 class HandSelectionManager {
-  constructor() { }
+  constructor() {}
 
   // Configuration
-  setSelectionBehavior(behavior) { }
-  setValidationMode(mode) { } // charleston, courtesy, play, blank-only
-  setSelectionListener(callback) { }
+  setSelectionBehavior(behavior) {}
+  setValidationMode(mode) {} // charleston, courtesy, play, blank-only
+  setSelectionListener(callback) {}
 
   // Selection operations
-  selectTile(index, options) { }
-  clearSelection(silent) { }
-  getSelectedTileIndices() { }
-  getSelectedTiles(handData) { }
-  isSelected(index) { }
+  selectTile(index, options) {}
+  clearSelection(silent) {}
+  getSelectedTileIndices() {}
+  getSelectedTiles(handData) {}
+  isSelected(index) {}
 
   // Validation
-  canSelectTile(tile, mode) { }
-  validateSelection(count, rules) { }
+  canSelectTile(tile, mode) {}
+  validateSelection(count, rules) {}
 
   // State
-  getSelectionState() { } // {count, indices, tiles}
+  getSelectionState() {} // {count, indices, tiles}
 }
 ```
 
 #### What It Does
+
 - Tracks selected tile indices (Set-based)
 - Validates selection rules (max count, tile types)
 - Enforces validation modes (charleston = no jokers)
@@ -685,26 +742,28 @@ class HandSelectionManager {
 **Responsibility:** Event subscriptions and routing
 
 #### Interface
+
 ```javascript
 class HandEventCoordinator {
-  constructor(gameController, handRenderer, selectionManager) { }
+  constructor(gameController, handRenderer, selectionManager) {}
 
   // Setup
-  setupEventListeners() { }
+  setupEventListeners() {}
 
   // Event handlers
-  onHandUpdated(data) { }
-  onTileDrawn(data) { }
-  onTileDiscarded(data) { }
-  onTileSelected(data) { }
-  onHintRecommendations(data) { }
+  onHandUpdated(data) {}
+  onTileDrawn(data) {}
+  onTileDiscarded(data) {}
+  onTileSelected(data) {}
+  onHintRecommendations(data) {}
 
   // Cleanup
-  destroy() { }
+  destroy() {}
 }
 ```
 
 #### What It Does
+
 - Subscribes to GameController events
 - Routes events to appropriate handlers
 - Coordinates between HandRenderer and HandSelectionManager
@@ -721,30 +780,32 @@ class HandEventCoordinator {
 **Responsibility:** Base class for complex animation flows
 
 #### Interface
+
 ```javascript
 class AnimationSequencer {
-  constructor(gameController, handRenderer, animationController) { }
+  constructor(gameController, handRenderer, animationController) {}
 
   // Core flow control
-  async executeSequence(steps) { }
-  async delay(ms) { }
+  async executeSequence(steps) {}
+  async delay(ms) {}
 
   // State management
-  isRunning() { }
-  cancel() { }
+  isRunning() {}
+  cancel() {}
 
   // Helpers
-  getTileElements(indices) { }
-  calculateDirection(from, to) { }
+  getTileElements(indices) {}
+  calculateDirection(from, to) {}
 
   // Hooks (override in subclasses)
-  async onSequenceStart() { }
-  async onSequenceComplete() { }
-  async onSequenceError(error) { }
+  async onSequenceStart() {}
+  async onSequenceComplete() {}
+  async onSequenceError(error) {}
 }
 ```
 
 #### What It Does
+
 - Provides promise-based animation flow
 - Manages animation state (running, cancelled)
 - Offers timing and coordination helpers
@@ -760,27 +821,29 @@ class AnimationSequencer {
 **Responsibility:** Charleston pass/receive animation orchestration
 
 #### Interface
+
 ```javascript
 class CharlestonAnimationSequencer extends AnimationSequencer {
-  constructor(gameController, handRenderer, animationController) { }
+  constructor(gameController, handRenderer, animationController) {}
 
   // Main flow
-  async animateCharlestonPass(data) { }
+  async animateCharlestonPass(data) {}
 
   // Sub-sequences
-  async animateTilesLeaving(tiles, direction) { }
-  async animateTilesArriving(tiles, direction) { }
-  async applyGlowToTiles(tileIndices) { }
-  async animateSortWithGlow(handData, glowIndices) { }
+  async animateTilesLeaving(tiles, direction) {}
+  async animateTilesArriving(tiles, direction) {}
+  async applyGlowToTiles(tileIndices) {}
+  async animateSortWithGlow(handData, glowIndices) {}
 
   // Utilities
-  getDirectionVector(direction) { } // "left" → {x: -200, y: -100}
-  calculateExitPoint(tile, direction) { }
-  calculateEntryPoint(tile, direction) { }
+  getDirectionVector(direction) {} // "left" → {x: -200, y: -100}
+  calculateExitPoint(tile, direction) {}
+  calculateEntryPoint(tile, direction) {}
 }
 ```
 
 #### Animation Flow
+
 ```
 1. User confirms pass (3 tiles selected)
    ↓
@@ -813,11 +876,12 @@ class CharlestonAnimationSequencer extends AnimationSequencer {
 ```
 
 #### Direction Vectors
+
 ```javascript
 const DIRECTION_VECTORS = {
-  "right":   { exit: { x:  300, y: -100 }, entry: { x: -300, y:  100 } },
-  "across":  { exit: { x:    0, y: -300 }, entry: { x:    0, y:  300 } },
-  "left":    { exit: { x: -300, y: -100 }, entry: { x:  300, y:  100 } }
+  right: { exit: { x: 300, y: -100 }, entry: { x: -300, y: 100 } },
+  across: { exit: { x: 0, y: -300 }, entry: { x: 0, y: 300 } },
+  left: { exit: { x: -300, y: -100 }, entry: { x: 300, y: 100 } },
 };
 ```
 
@@ -831,6 +895,7 @@ const DIRECTION_VECTORS = {
 **Location:** `core/events/GameEvents.js:246`
 
 **Enhanced Schema:**
+
 ```javascript
 {
   type: "TILES_RECEIVED",
@@ -856,6 +921,7 @@ const DIRECTION_VECTORS = {
 **Location:** Emitted in `core/GameController.js`
 
 **Enhanced Schema:**
+
 ```javascript
 {
   type: "CHARLESTON_PASS",
@@ -876,6 +942,7 @@ const DIRECTION_VECTORS = {
 ### HAND_UPDATED Event (Coordination Flag)
 
 **Add flag to suppress auto-render during animation:**
+
 ```javascript
 {
   type: "HAND_UPDATED",
@@ -904,15 +971,16 @@ const DIRECTION_VECTORS = {
   }
   30% {
     transform: translate3d(
-      calc(var(--exit-x, 0) * 0.3),
-      calc(var(--exit-y, 0) * 0.3),
-      0
-    ) rotate(5deg) scale(1.05);
+        calc(var(--exit-x, 0) * 0.3),
+        calc(var(--exit-y, 0) * 0.3),
+        0
+      )
+      rotate(5deg) scale(1.05);
     opacity: 0.9;
   }
   100% {
-    transform: translate3d(var(--exit-x, 0), var(--exit-y, 0), 0)
-               rotate(15deg) scale(0.5);
+    transform: translate3d(var(--exit-x, 0), var(--exit-y, 0), 0) rotate(15deg)
+      scale(0.5);
     opacity: 0;
   }
 }
@@ -926,15 +994,16 @@ const DIRECTION_VECTORS = {
 @keyframes charleston-receive {
   0% {
     transform: translate3d(var(--entry-x, 0), var(--entry-y, 0), 0)
-               rotate(-15deg) scale(0.5);
+      rotate(-15deg) scale(0.5);
     opacity: 0;
   }
   60% {
     transform: translate3d(
-      calc(var(--entry-x, 0) * 0.2),
-      calc(var(--entry-y, 0) * 0.2),
-      0
-    ) rotate(-5deg) scale(1.1);
+        calc(var(--entry-x, 0) * 0.2),
+        calc(var(--entry-y, 0) * 0.2),
+        0
+      )
+      rotate(-5deg) scale(1.1);
     opacity: 0.8;
   }
   100% {
@@ -950,7 +1019,7 @@ const DIRECTION_VECTORS = {
 
 /* Slow Sort Animation (FLIP technique) */
 .tile-sorting {
-  transition: transform 800ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  transition: transform 800ms cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
 }
 ```
@@ -1081,16 +1150,19 @@ async animateSortWithGlow(handData, glowIndices) {
 ### Unit Tests
 
 **HandSelectionManager.test.js**
+
 - Selection rules enforcement
 - Validation mode behavior
 - State consistency
 
 **HandEventCoordinator.test.js**
+
 - Event routing correctness
 - Cleanup on destroy
 - Hint system integration
 
 **CharlestonAnimationSequencer.test.js**
+
 - Direction vector calculations
 - Sequence flow control
 - Error handling
@@ -1098,6 +1170,7 @@ async animateSortWithGlow(handData, glowIndices) {
 ### Integration Tests
 
 **Charleston Flow Tests (Playwright)**
+
 ```javascript
 test("Charleston pass animates tiles correctly", async ({ page }) => {
   // 1. Start game
@@ -1169,6 +1242,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
    - `handleTileClick()` needs tile data passed in (not accessed via `this.currentHandData`)
 
 5. **Add new helper methods:**
+
    ```javascript
    isSelected(index) {
      const key = this.selectionKeyByIndex.get(index);
@@ -1187,6 +1261,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
    ```
 
 6. **Class structure:**
+
    ```javascript
    export class HandSelectionManager {
      constructor() {
@@ -1195,7 +1270,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
        this.selectionBehavior = {
          mode: "multiple",
          maxSelectable: Infinity,
-         allowToggle: true
+         allowToggle: true,
        };
        this.selectionListener = null;
      }
@@ -1205,6 +1280,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
    ```
 
 **Acceptance Criteria:**
+
 - [ ] File exports `HandSelectionManager` class
 - [ ] All 11 methods extracted correctly
 - [ ] All 4 properties initialized in constructor
@@ -1242,6 +1318,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
    - `newlyDrawnTileIndex` (number)
 
 5. **Class structure:**
+
    ```javascript
    export class HandEventCoordinator {
      constructor(gameController, handRenderer, selectionManager) {
@@ -1259,7 +1336,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
        const gc = this.gameController;
 
        this.unsubscribeFns.push(
-         gc.on("HAND_UPDATED", (data) => this.onHandUpdated(data))
+         gc.on("HAND_UPDATED", (data) => this.onHandUpdated(data)),
        );
        // ... other subscriptions
      }
@@ -1274,16 +1351,18 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
      // ... other handlers
 
      destroy() {
-       this.unsubscribeFns.forEach(unsub => unsub());
+       this.unsubscribeFns.forEach((unsub) => unsub());
        this.unsubscribeFns = [];
      }
    }
    ```
 
 **Dependencies:**
+
 - Import `HandData` from `../../core/models/HandData.js`
 
 **Acceptance Criteria:**
+
 - [ ] File exports `HandEventCoordinator` class
 - [ ] Subscribes to 5 events (HAND_UPDATED, TILE_SELECTED, TILE_DRAWN, TILE_DISCARDED, HINT_DISCARD_RECOMMENDATIONS)
 - [ ] Routes events to HandRenderer and SelectionManager
@@ -1335,12 +1414,14 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
    - `newlyDrawnTileIndex`
 
 4. **Add new properties to constructor:**
+
    ```javascript
    this.selectionManager = null; // Will be injected
    this.eventCoordinator = null; // Will be injected
    ```
 
 5. **Modify constructor signature:**
+
    ```javascript
    constructor(container) {
      // Remove gameController parameter
@@ -1349,6 +1430,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
    ```
 
 6. **Add dependency injection methods:**
+
    ```javascript
    setSelectionManager(selectionManager) {
      this.selectionManager = selectionManager;
@@ -1360,6 +1442,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
    ```
 
 7. **Add new animation helper methods:**
+
    ```javascript
    renderWithGlow(handData, glowIndices) {
      // Same as render(), but apply glow to specific indices
@@ -1397,6 +1480,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
    ```
 
 8. **Update createTileButton() to use selectionManager:**
+
    ```javascript
    createTileButton(tileData, index, selectionKey) {
      // ... existing code ...
@@ -1417,6 +1501,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
    ```
 
 9. **Update render() to use selectionManager:**
+
    ```javascript
    render(handData) {
      // ... existing code ...
@@ -1440,6 +1525,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
    ```
 
 10. **Update destroy() method:**
+
     ```javascript
     destroy() {
       // Remove event coordinator cleanup (now external)
@@ -1460,6 +1546,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
     ```
 
 **Acceptance Criteria:**
+
 - [ ] File reduced from 717 to ~250-300 lines
 - [ ] All selection logic removed
 - [ ] All event subscription logic removed
@@ -1483,6 +1570,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
 1. **Create new file:** `mobile/animations/AnimationSequencer.js`
 
 2. **Implement base class:**
+
    ```javascript
    export class AnimationSequencer {
      constructor(gameController, handRenderer, animationController) {
@@ -1521,7 +1609,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
      }
 
      async delay(ms) {
-       return new Promise(resolve => setTimeout(resolve, ms));
+       return new Promise((resolve) => setTimeout(resolve, ms));
      }
 
      isRunning() {
@@ -1541,9 +1629,8 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
          dx: to.x - from.x,
          dy: to.y - from.y,
          distance: Math.sqrt(
-           Math.pow(to.x - from.x, 2) +
-           Math.pow(to.y - from.y, 2)
-         )
+           Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2),
+         ),
        };
      }
 
@@ -1563,6 +1650,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
    ```
 
 **Acceptance Criteria:**
+
 - [ ] File exports `AnimationSequencer` class
 - [ ] Promise-based animation flow
 - [ ] Cancellation support
@@ -1584,15 +1672,20 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
 **Step-by-Step Instructions:**
 
 1. **Add imports at top of file:**
+
    ```javascript
    import { HandSelectionManager } from "./renderers/HandSelectionManager.js";
    import { HandEventCoordinator } from "./renderers/HandEventCoordinator.js";
    ```
 
 2. **Modify HandRenderer initialization in constructor (around line 46):**
+
    ```javascript
    // OLD:
-   this.handRenderer = new HandRenderer(options.handContainer, options.gameController);
+   this.handRenderer = new HandRenderer(
+     options.handContainer,
+     options.gameController,
+   );
 
    // NEW:
    this.handRenderer = new HandRenderer(options.handContainer);
@@ -1600,7 +1693,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
    this.eventCoordinator = new HandEventCoordinator(
      options.gameController,
      this.handRenderer,
-     this.selectionManager
+     this.selectionManager,
    );
 
    // Inject dependencies
@@ -1609,6 +1702,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
    ```
 
 3. **Update destroy() method (around line 92):**
+
    ```javascript
    destroy() {
      this.subscriptions.forEach(unsub => unsub?.());
@@ -1631,6 +1725,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
 5. **Find and update all occurrences** (approximately 10-15 places in the file)
 
 **Acceptance Criteria:**
+
 - [ ] New components properly instantiated
 - [ ] Dependency injection wired correctly
 - [ ] All references to moved methods updated
@@ -1645,6 +1740,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
 **Owner:** Haiku
 **Estimated Time:** 4 hours
 **Files:**
+
 - `tests/unit/mobile/HandSelectionManager.test.js` (NEW)
 - `tests/unit/mobile/HandEventCoordinator.test.js` (NEW)
 - `tests/unit/mobile/AnimationSequencer.test.js` (NEW)
@@ -1654,6 +1750,7 @@ test("Charleston Phase 1 → Phase 2 transition", async ({ page }) => {
 **Test Coverage Requirements:**
 
 **HandSelectionManager.test.js:**
+
 ```javascript
 describe("HandSelectionManager", () => {
   test("initializes with empty selection", () => { ... });
@@ -1667,6 +1764,7 @@ describe("HandSelectionManager", () => {
 ```
 
 **HandEventCoordinator.test.js:**
+
 ```javascript
 describe("HandEventCoordinator", () => {
   test("subscribes to all required events", () => { ... });
@@ -1678,6 +1776,7 @@ describe("HandEventCoordinator", () => {
 ```
 
 **AnimationSequencer.test.js:**
+
 ```javascript
 describe("AnimationSequencer", () => {
   test("executeSequence runs steps in order", () => { ... });
@@ -1689,6 +1788,7 @@ describe("AnimationSequencer", () => {
 ```
 
 **Acceptance Criteria:**
+
 - [ ] All 3 test files created
 - [ ] Minimum 80% code coverage
 - [ ] All tests pass
@@ -1712,11 +1812,13 @@ describe("AnimationSequencer", () => {
 - [ ] No console errors (except expected functionality loss)
 
 **Expected Issues (Temporary):**
+
 - Tile selection might not work (wiring in progress)
 - Hints might not appear (will fix in integration)
 - Blue glow on draw might not work (OK for now)
 
 **NOT Expected:**
+
 - Game crashes on load
 - Tiles don't render at all
 - Major console errors
@@ -1730,14 +1832,14 @@ describe("AnimationSequencer", () => {
 
 **Goal:** Refactor HandRenderer, create base classes
 
-| Task | Owner | Est. Hours | Files |
-|------|-------|------------|-------|
-| Create HandSelectionManager.js | Haiku | 4h | 1 new |
-| Create HandEventCoordinator.js | Haiku | 3h | 1 new |
-| Refactor HandRenderer.js | Haiku | 6h | 1 modified |
-| Create AnimationSequencer.js base | Sonnet | 3h | 1 new |
-| Update MobileRenderer integration | Sonnet | 2h | 1 modified |
-| Write unit tests | Haiku | 4h | 3 new |
+| Task                              | Owner  | Est. Hours | Files      |
+| --------------------------------- | ------ | ---------- | ---------- |
+| Create HandSelectionManager.js    | Haiku  | 4h         | 1 new      |
+| Create HandEventCoordinator.js    | Haiku  | 3h         | 1 new      |
+| Refactor HandRenderer.js          | Haiku  | 6h         | 1 modified |
+| Create AnimationSequencer.js base | Sonnet | 3h         | 1 new      |
+| Update MobileRenderer integration | Sonnet | 2h         | 1 modified |
+| Write unit tests                  | Haiku  | 4h         | 3 new      |
 
 **Deliverable:** Refactored components with tests, no functionality changes
 
@@ -1749,19 +1851,20 @@ describe("AnimationSequencer", () => {
 
 **Goal:** Implement full Charleston animation flow
 
-| Task | Owner | Est. Hours | Files |
-|------|-------|------------|-------|
-| Create CharlestonAnimationSequencer.js | Sonnet | 6h | 1 new |
-| Add CSS animations (pass/receive) | Haiku | 2h | 1 modified |
-| Update GameController events | Sonnet | 2h | 2 modified |
-| Wire MobileRenderer → Sequencer | Sonnet | 2h | 1 modified |
-| Implement FLIP sort animation | Haiku | 3h | 2 modified |
-| Integration testing | Sonnet | 4h | - |
-| Timing and UX polish | Sonnet | 3h | - |
+| Task                                   | Owner  | Est. Hours | Files      |
+| -------------------------------------- | ------ | ---------- | ---------- |
+| Create CharlestonAnimationSequencer.js | Sonnet | 6h         | 1 new      |
+| Add CSS animations (pass/receive)      | Haiku  | 2h         | 1 modified |
+| Update GameController events           | Sonnet | 2h         | 2 modified |
+| Wire MobileRenderer → Sequencer        | Sonnet | 2h         | 1 modified |
+| Implement FLIP sort animation          | Haiku  | 3h         | 2 modified |
+| Integration testing                    | Sonnet | 4h         | -          |
+| Timing and UX polish                   | Sonnet | 3h         | -          |
 
 **Deliverable:** Beautiful Charleston animations on mobile
 
 **Validation:**
+
 - All 3 directions animate smoothly
 - Blue glow persists correctly
 - Sort animation feels natural
@@ -1773,15 +1876,16 @@ describe("AnimationSequencer", () => {
 
 **Goal:** Document pattern for future animations
 
-| Task | Status | Owner | Lines | Files | Commit |
-|------|--------|-------|-------|-------|--------|
-| Write DealingAnimationSequencer spec | 🟢 Complete | Sonnet | 653 | 1 doc | [c9f4bdf] |
-| Write DiscardAnimationSequencer spec | 🟢 Complete | Sonnet | 542 | 1 doc | [c9f4bdf] |
-| Create FUTURE_REFACTORS.md | 🟢 Complete | Sonnet | 485 | 1 new | [c9f4bdf] |
-| Create animation timing reference | 🟢 Complete | Sonnet | 702 | 1 doc | [c9f4bdf] |
-| Performance benchmarks & optimization | 🟢 Complete | Sonnet | 776 | 1 doc | [c9f4bdf] |
+| Task                                  | Status      | Owner  | Lines | Files | Commit    |
+| ------------------------------------- | ----------- | ------ | ----- | ----- | --------- |
+| Write DealingAnimationSequencer spec  | 🟢 Complete | Sonnet | 653   | 1 doc | [c9f4bdf] |
+| Write DiscardAnimationSequencer spec  | 🟢 Complete | Sonnet | 542   | 1 doc | [c9f4bdf] |
+| Create FUTURE_REFACTORS.md            | 🟢 Complete | Sonnet | 485   | 1 new | [c9f4bdf] |
+| Create animation timing reference     | 🟢 Complete | Sonnet | 702   | 1 doc | [c9f4bdf] |
+| Performance benchmarks & optimization | 🟢 Complete | Sonnet | 776   | 1 doc | [c9f4bdf] |
 
 **Deliverables Achieved:**
+
 - ✅ Comprehensive DealingAnimationSequencer specification with bezier curves and wall mechanics
 - ✅ Complete DiscardAnimationSequencer spec with parabolic arcs and bounce physics
 - ✅ FUTURE_REFACTORS.md roadmap with priority matrix and effort estimates
@@ -1796,6 +1900,7 @@ describe("AnimationSequencer", () => {
 ### How to Add New Animation Sequencers
 
 **Pattern:**
+
 1. Extend `AnimationSequencer` base class
 2. Implement specific animation flow
 3. Register in MobileRenderer event handlers
@@ -1803,6 +1908,7 @@ describe("AnimationSequencer", () => {
 5. Write tests
 
 **Example: DealingAnimationSequencer**
+
 ```javascript
 class DealingAnimationSequencer extends AnimationSequencer {
   async animateDeal(dealSequence) {
@@ -1822,15 +1928,16 @@ class DealingAnimationSequencer extends AnimationSequencer {
 ```
 
 **Register in MobileRenderer:**
+
 ```javascript
 this.dealingSequencer = new DealingAnimationSequencer(
   this.gameController,
   this.handRenderer,
-  this.animationController
+  this.animationController,
 );
 
 this.subscriptions.push(
-  gc.on("TILES_DEALT", (data) => this.dealingSequencer.animateDeal(data))
+  gc.on("TILES_DEALT", (data) => this.dealingSequencer.animateDeal(data)),
 );
 ```
 
@@ -1875,6 +1982,7 @@ this.subscriptions.push(
 - **Very slow** (sort, reorganize): 800-1200ms
 
 **Why Charleston is slow:**
+
 - Educational: Players need to understand what's happening
 - Directional clarity: Show where tiles are going/coming from
 - Anticipation: Build excitement for received tiles
@@ -1883,6 +1991,7 @@ this.subscriptions.push(
 ### Easing Functions
 
 **Use cubic-bezier for personality:**
+
 - **ease-in-out**: Gentle start/end (Charleston pass)
 - **ease-out**: Quick start, gentle end (receive tiles)
 - **ease-in**: Gentle start, quick end (discard)
@@ -1891,12 +2000,14 @@ this.subscriptions.push(
 ### Glow Color Rationale
 
 **Blue (#1e90ff)** for received tiles:
+
 - ✅ Distinct from selection yellow
 - ✅ Calm, informative (not alarming)
 - ✅ High contrast on dark tiles
 - ✅ Accessible (WCAG AA compliant)
 
 **Red** for hint recommendations:
+
 - ✅ Action-oriented
 - ✅ Draws attention without alarm
 - ✅ Distinct from blue received tiles
@@ -1949,11 +2060,13 @@ this.subscriptions.push(
 ## 📚 References
 
 ### Existing Architecture Docs
+
 - [ADAPTER_PATTERNS.md](ADAPTER_PATTERNS.md) - Event-driven UI patterns
 - [FUTURE_REFACTORS.md](FUTURE_REFACTORS.md) - Planned improvements
 - [CLAUDE.md](CLAUDE.md) - Project overview
 
 ### External Resources
+
 - [FLIP Animations](https://aerotwist.com/blog/flip-your-animations/) - Paul Lewis
 - [CSS Animation Performance](https://web.dev/animations-guide/) - web.dev
 - [Orchestrating Complex Animations](https://css-tricks.com/orchestrating-complexity-with-web-animations-api/) - CSS Tricks
@@ -1965,6 +2078,7 @@ this.subscriptions.push(
 ### When to Use Haiku
 
 **Ideal for:**
+
 - Mechanical refactoring (splitting files)
 - Writing tests with clear specs
 - CSS animation implementation
@@ -1972,6 +2086,7 @@ this.subscriptions.push(
 - Documentation formatting
 
 **Instructions format:**
+
 ```
 Task: Extract selection logic from HandRenderer into HandSelectionManager
 
@@ -1988,6 +2103,7 @@ Output: Complete file contents for review
 ### When to Use Sonnet (You)
 
 **Ideal for:**
+
 - Architectural decisions
 - Event flow design
 - Animation orchestration logic
@@ -1999,9 +2115,9 @@ Output: Complete file contents for review
 
 ## 📝 Change Log
 
-| Date | Version | Changes | Author |
-|------|---------|---------|--------|
-| 2025-01-23 | 0.1 | Initial document creation | Sonnet |
+| Date       | Version | Changes                   | Author |
+| ---------- | ------- | ------------------------- | ------ |
+| 2025-01-23 | 0.1     | Initial document creation | Sonnet |
 
 ---
 

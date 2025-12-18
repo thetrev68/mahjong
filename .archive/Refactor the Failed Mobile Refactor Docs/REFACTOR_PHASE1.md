@@ -3,6 +3,7 @@
 ## Overview
 
 Make GameController a self-contained game engine that:
+
 - Manages ALL game state (no duplication with GameLogic)
 - Works with actual Phaser Tile objects from the shared wall
 - Emits comprehensive events with animation data
@@ -33,12 +34,14 @@ Make GameController a self-contained game engine that:
 **Input**: Review current `gameLogic.js`
 
 **Deliverables**:
+
 - Document listing all GameLogic methods and their responsibilities
 - Identify which methods are pure logic vs rendering
 - Identify GameLogic methods that emit events or update UI
 - List all properties GameLogic maintains
 
 **Key Methods to Review**:
+
 - `deal()` - sequence of dealing tiles
 - `charleston()` - Charleston phase management
 - `courtesy()` - Courtesy pass phase
@@ -57,17 +60,20 @@ Make GameController a self-contained game engine that:
 **Goal**: Make GameController work directly with Phaser tiles (no wrapper hack)
 
 **Current Problem**:
+
 - WallDataWrapper tries to bridge TileData and Phaser Tiles
 - `findTileInWall()` fails because Phaser Tiles don't have index
 - Tiles are being created instead of found
 
 **Solution**:
+
 1. Remove WallDataWrapper from GameController
 2. Make GameController accept sharedTable and use its wall directly
 3. Fix findTileInWall() to match Phaser Tile structure
 4. GameController.dealTiles() should work with actual Phaser Tile objects
 
 **Changes**:
+
 - `core/GameController.js`: Remove WallDataWrapper
 - `core/GameController.js`: Update createWall() to use sharedTable directly
 - `core/GameController.js`: Update dealTiles() to pop Phaser tiles, not TileData
@@ -75,6 +81,7 @@ Make GameController a self-contained game engine that:
 - `desktop/adapters/PhaserAdapter.js`: Update to expect Phaser tiles in events
 
 **Testing**:
+
 - Start game → Deal phase executes without "Creating new tile" warnings
 - Console shows no errors
 - Tiles appear in players' hands (no animation yet, just placement)
@@ -88,12 +95,14 @@ Make GameController a self-contained game engine that:
 **Goal**: GameController emits events that include animation parameters
 
 **Current State**:
+
 - Events are bare-bones: `{player, tile}`
 - No animation data
 - No timing information
 - No rendering hints
 
 **Desired State**:
+
 - Events include animation parameters
 - PhaserAdapter can render directly from event data
 - Events are self-documenting
@@ -146,6 +155,7 @@ Make GameController a self-contained game engine that:
 ```
 
 **Changes**:
+
 1. Create new file: `core/events/GameEvents.js` with event structure definitions
 2. Update `core/GameController.js`:
    - Import event definitions
@@ -154,6 +164,7 @@ Make GameController a self-contained game engine that:
    - Include timing and easing data
 
 **Testing**:
+
 - Emit events from GameController
 - Console.log events and verify structure
 - PhaserAdapter can read event data without modification
@@ -167,17 +178,20 @@ Make GameController a self-contained game engine that:
 **Goal**: GameController manages the deal sequence (not GameLogic)
 
 **Current**:
+
 - GameLogic.deal() calls sequentialDealTiles()
 - GameController.dealTiles() emits individual TILE_DRAWN events
 - Deal sequence is implemented in GameLogic, not GameController
 
 **Desired**:
+
 - GameController.deal() orchestrates the dealing
 - Emits appropriate events
 - Works with Phaser tiles
 - Handles timing and sequencing
 
 **Implementation**:
+
 1. In GameController, create `deal()` method that:
    - Sets state to STATE.DEAL
    - Emits STATE_CHANGED event
@@ -194,6 +208,7 @@ Make GameController a self-contained game engine that:
 3. Delete or disable GameLogic.deal() call
 
 **Testing**:
+
 - Start game → reach STATE.DEAL
 - Tiles are dealt to all players
 - Events are emitted in correct order
@@ -208,15 +223,18 @@ Make GameController a self-contained game engine that:
 **Goal**: GameController manages Charleston logic (not GameLogic)
 
 **Current**:
+
 - GameLogic.charleston() implements Charleston phase
 - GameLogic.charlestonPass() handles tile passing
 
 **Desired**:
+
 - GameController manages Charleston state machine
 - Emits events for UI to respond
 - Handles all three phases and decisions
 
 **Implementation**:
+
 1. Move Charleston logic from GameLogic to GameController:
    - charlestonPhase() - main orchestrator
    - charlestonPass() - handle pass logic
@@ -233,6 +251,7 @@ Make GameController a self-contained game engine that:
    - Handle callbacks
 
 **Testing**:
+
 - Start game → reach Charleston phase
 - Can select and pass tiles
 - Can choose to continue or end Charleston
@@ -249,6 +268,7 @@ Make GameController a self-contained game engine that:
 **Similar to Task 1.5 but for courtesy phase**
 
 **Implementation**:
+
 1. Move courtesy logic from GameLogic:
    - courtesyQuery() - ask how many tiles
    - courtesy() - handle pass
@@ -262,6 +282,7 @@ Make GameController a self-contained game engine that:
 3. Wire UI prompts for selections
 
 **Testing**:
+
 - Reach courtesy phase
 - Can vote on number of tiles
 - Courtesy passes work correctly
@@ -275,10 +296,12 @@ Make GameController a self-contained game engine that:
 **Goal**: GameController manages main game loop
 
 **Current**:
+
 - GameLogic.loop() implements main loop
 - Handles pick, discard, claim, expose phases
 
 **Implementation**:
+
 1. Move main loop logic from GameLogic:
    - pickFromWall() - draw tile from wall
    - chooseDiscard() - get discard selection
@@ -300,6 +323,7 @@ Make GameController a self-contained game engine that:
    - UI_PROMPT for exposure selection
 
 **Testing**:
+
 - Play through multiple turns
 - Can discard tiles
 - Can claim discards
@@ -315,15 +339,18 @@ Make GameController a self-contained game engine that:
 **Goal**: GameController doesn't reference GameLogic
 
 **Current**:
+
 - GameController may have leftover GameLogic references
 - May be calling GameLogic methods
 
 **Changes**:
+
 1. Search for all GameLogic references in GameController
 2. Remove or refactor them
 3. Ensure all functionality is self-contained
 
 **Testing**:
+
 - `npm run lint` - no undefined references
 - GameController works standalone
 
@@ -336,17 +363,20 @@ Make GameController a self-contained game engine that:
 **Goal**: GameScene properly initializes GameController without wrapper hacks
 
 **Current**:
+
 - GameScene passes sharedTable to GameController
 - GameController tries to use WallDataWrapper
 - Wall synchronization is broken
 
 **Changes**:
+
 1. Remove WallDataWrapper usage
 2. Ensure sharedTable is passed correctly
 3. Ensure wall is created before GameController uses it
 4. Remove any stale code from wrapper attempt
 
 **Testing**:
+
 - `npm run lint`
 - Start game without errors
 - Deal phase completes

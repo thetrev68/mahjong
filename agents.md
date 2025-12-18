@@ -28,10 +28,10 @@ Mobile Stack
 
    ```javascript
    await gameController.init({
-       aiEngine: new AIEngine(card, null, "medium"),
-       cardValidator: card,
-       wallGenerator: () => captureWallTiles(),
-       settings: { year: 2025, skipCharleston: false, difficulty: "medium" }
+     aiEngine: new AIEngine(card, null, "medium"),
+     cardValidator: card,
+     wallGenerator: () => captureWallTiles(),
+     settings: { year: 2025, skipCharleston: false, difficulty: "medium" },
    });
    ```
 
@@ -92,7 +92,7 @@ Mobile Stack
 - `PhaserAdapter` bridges controller events into managers:
   - **TileManager** registers sprites, handles drag/drop, and animations.
   - **SelectionManager** enforces prompts (`min/max` selection) for Charleston, courtesy, exposures, discards.
-  - **DialogManager` renders modal prompts (e.g., "Claim discards?").
+  - \*\*DialogManager` renders modal prompts (e.g., "Claim discards?").
   - **HandRenderer/ButtonManager** sync UI state with controller states.
 - Desktop exposes `window.gameController` for debugging/tests; Playwright asserts controller state changes and event emissions.
 
@@ -108,12 +108,12 @@ Mobile Stack
 
 ## 5. Configuration & Extension
 
-| Area | How to Customize |
-|------|------------------|
-| **AI Difficulty** | Pass `difficulty: "easy" \| "medium" \| "hard"` in `gameController.init`. Adjust configs in `AIEngine.getDifficultyConfig`. |
-| **Card Years** | Instantiate `Card(year)` with any supported year, pass to controller. Patterns auto-load from `core/card/<year>/`. |
-| **Training Mode** | Settings manager toggles `skipCharleston`, fixed hands via `trainingHand`, tile counts, etc., and controller honors those values. |
-| **Platform Hooks** | Subscribe to `GameController` events to add overlays, analytics, or sound. All events are plain JS objects. |
+| Area               | How to Customize                                                                                                                   |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **AI Difficulty**  | Pass `difficulty: "easy" \| "medium" \| "hard"` in `gameController.init`. Adjust configs in `AIEngine.getDifficultyConfig`.        |
+| **Card Years**     | Instantiate `Card(year)` with any supported year, pass to controller. Patterns auto-load from `core/card/<year>/`.                 |
+| **Training Mode**  | Settings manager toggles `skipCharleston`, fixed hands via `trainingHand`, tile counts, etc., and controller honors those values.  |
+| **Platform Hooks** | Subscribe to `GameController` events to add overlays, analytics, or sound. All events are plain JS objects.                        |
 | **AI Experiments** | Extend `AIEngine` with new heuristics (e.g., Monte Carlo search) while keeping interface (`chooseDiscard`, `courtesyVote`) intact. |
 
 ## 6. Testing & Validation
@@ -220,7 +220,7 @@ class PhaserAdapter extends BaseAdapter {
     this.setupManagers();
     this.registerEventHandlers({
       TILE_DRAWN: (data) => this.onTileDrawn(data),
-      HAND_UPDATED: (data) => this.onHandUpdated(data)
+      HAND_UPDATED: (data) => this.onHandUpdated(data),
     });
   }
 

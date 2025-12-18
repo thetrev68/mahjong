@@ -21,6 +21,7 @@ Update existing Playwright tests to ensure desktop game works correctly after Ga
 **Existing test file:** `tests/e2e.spec.js`
 
 Current tests cover:
+
 - Game loads and shows tiles
 - Start button works
 - Charleston phase
@@ -46,6 +47,7 @@ npm test
 If any selectors changed during refactoring, update them:
 
 **Example:**
+
 ```javascript
 // OLD
 await page.click('#gamediv .tile[data-index="0"]');
@@ -61,12 +63,13 @@ await page.click('.game-scene .mobile-tile[data-index="0"]');
 GameController may have different timing than GameLogic. Update waits if needed:
 
 **Example:**
+
 ```javascript
 // OLD
 await page.waitForTimeout(1000);
 
 // NEW (wait for specific event)
-await page.waitForSelector('.tile-drawn', { timeout: 2000 });
+await page.waitForSelector(".tile-drawn", { timeout: 2000 });
 ```
 
 ---
@@ -76,19 +79,19 @@ await page.waitForSelector('.tile-drawn', { timeout: 2000 });
 Add a test to verify no console errors during gameplay:
 
 ```javascript
-test('desktop game has no console errors', async ({ page }) => {
-    const errors = [];
-    page.on('console', msg => {
-        if (msg.type() === 'error') {
-            errors.push(msg.text());
-        }
-    });
+test("desktop game has no console errors", async ({ page }) => {
+  const errors = [];
+  page.on("console", (msg) => {
+    if (msg.type() === "error") {
+      errors.push(msg.text());
+    }
+  });
 
-    await page.goto('/mahjong/');
-    await page.click('#start');
-    await page.waitForTimeout(5000);  // Let game run
+  await page.goto("/mahjong/");
+  await page.click("#start");
+  await page.waitForTimeout(5000); // Let game run
 
-    expect(errors).toEqual([]);
+  expect(errors).toEqual([]);
 });
 ```
 
@@ -99,26 +102,26 @@ test('desktop game has no console errors', async ({ page }) => {
 Verify GameController events are being emitted:
 
 ```javascript
-test('GameController emits events', async ({ page }) => {
-    const events = [];
+test("GameController emits events", async ({ page }) => {
+  const events = [];
 
-    // Capture console.log from GameController
-    page.on('console', msg => {
-        if (msg.text().includes('[GameController]')) {
-            events.push(msg.text());
-        }
-    });
+  // Capture console.log from GameController
+  page.on("console", (msg) => {
+    if (msg.text().includes("[GameController]")) {
+      events.push(msg.text());
+    }
+  });
 
-    await page.goto('/mahjong/');
-    await page.click('#start');
-    await page.waitForTimeout(3000);
+  await page.goto("/mahjong/");
+  await page.click("#start");
+  await page.waitForTimeout(3000);
 
-    // Verify key events were emitted
-    const hasGameStarted = events.some(e => e.includes('GAME_STARTED'));
-    const hasTilesDealt = events.some(e => e.includes('TILES_DEALT'));
+  // Verify key events were emitted
+  const hasGameStarted = events.some((e) => e.includes("GAME_STARTED"));
+  const hasTilesDealt = events.some((e) => e.includes("TILES_DEALT"));
 
-    expect(hasGameStarted).toBe(true);
-    expect(hasTilesDealt).toBe(true);
+  expect(hasGameStarted).toBe(true);
+  expect(hasTilesDealt).toBe(true);
 });
 ```
 
@@ -129,23 +132,23 @@ test('GameController emits events', async ({ page }) => {
 Ensure game can be completed without errors:
 
 ```javascript
-test('complete full game (wall game)', async ({ page }) => {
-    await page.goto('/mahjong/');
+test("complete full game (wall game)", async ({ page }) => {
+  await page.goto("/mahjong/");
 
-    // Start game
-    await page.click('#start');
+  // Start game
+  await page.click("#start");
 
-    // Wait for game to end (set short wall for faster test)
-    // This may require modifying game settings temporarily
+  // Wait for game to end (set short wall for faster test)
+  // This may require modifying game settings temporarily
 
-    // Verify game ends properly
-    await page.waitForSelector('#start', { visible: true, timeout: 120000 });
+  // Verify game ends properly
+  await page.waitForSelector("#start", { visible: true, timeout: 120000 });
 
-    // Verify no errors
-    const errors = await page.evaluate(() => {
-        return window.testErrors || [];
-    });
-    expect(errors).toEqual([]);
+  // Verify no errors
+  const errors = await page.evaluate(() => {
+    return window.testErrors || [];
+  });
+  expect(errors).toEqual([]);
 });
 ```
 
@@ -182,14 +185,14 @@ test('complete full game (wall game)', async ({ page }) => {
 
 ## Test Results
 
-| Test Name | Status | Notes |
-|-----------|--------|-------|
-| desktop game loads | ✅ Pass | |
-| start button works | ✅ Pass | |
-| charleston phase | ✅ Pass | Updated timing |
-| no console errors | ✅ Pass | |
-| GameController events | ✅ Pass | |
-| full game flow | ✅ Pass | |
+| Test Name             | Status  | Notes          |
+| --------------------- | ------- | -------------- |
+| desktop game loads    | ✅ Pass |                |
+| start button works    | ✅ Pass |                |
+| charleston phase      | ✅ Pass | Updated timing |
+| no console errors     | ✅ Pass |                |
+| GameController events | ✅ Pass |                |
+| full game flow        | ✅ Pass |                |
 
 ## Changes Made
 

@@ -12,6 +12,7 @@
 Implement a custom "Add to Home Screen" install prompt that appears after the user has played 2 games. This provides a better user experience than the browser's default install prompt and allows us to control when users are prompted to install the PWA.
 
 **Key Behavior:**
+
 - Intercept the browser's default install prompt
 - Show custom UI after user plays 2+ games
 - Save install state to localStorage (don't re-prompt)
@@ -40,130 +41,130 @@ Create a module that manages the PWA install prompt lifecycle:
  */
 
 class InstallPrompt {
-    constructor() {
-        this.deferredPrompt = null;
-        this.installBanner = null;
+  constructor() {
+    this.deferredPrompt = null;
+    this.installBanner = null;
 
-        this.init();
+    this.init();
+  }
+
+  init() {
+    // Listen for the beforeinstallprompt event
+    window.addEventListener("beforeinstallprompt", (e) => {
+      // Prevent the default browser prompt
+      e.preventDefault();
+
+      // Store the event for later use
+      this.deferredPrompt = e;
+
+      console.log("PWA install prompt captured");
+
+      // Check if we should show the prompt
+      this.checkShouldShowPrompt();
+    });
+
+    // Listen for successful installation
+    window.addEventListener("appinstalled", () => {
+      console.log("PWA installed successfully");
+      this.markAsInstalled();
+      this.hidePrompt();
+    });
+
+    // Create the install banner UI
+    this.createBannerUI();
+  }
+
+  /**
+   * Check if conditions are met to show install prompt
+   */
+  checkShouldShowPrompt() {
+    // Don't show if already installed
+    if (this.isAlreadyInstalled()) {
+      console.log("App already installed, skipping prompt");
+      return;
     }
 
-    init() {
-        // Listen for the beforeinstallprompt event
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent the default browser prompt
-            e.preventDefault();
-
-            // Store the event for later use
-            this.deferredPrompt = e;
-
-            console.log('PWA install prompt captured');
-
-            // Check if we should show the prompt
-            this.checkShouldShowPrompt();
-        });
-
-        // Listen for successful installation
-        window.addEventListener('appinstalled', () => {
-            console.log('PWA installed successfully');
-            this.markAsInstalled();
-            this.hidePrompt();
-        });
-
-        // Create the install banner UI
-        this.createBannerUI();
+    // Don't show if user dismissed recently
+    if (this.wasRecentlyDismissed()) {
+      console.log("User dismissed prompt recently, skipping");
+      return;
     }
 
-    /**
-     * Check if conditions are met to show install prompt
-     */
-    checkShouldShowPrompt() {
-        // Don't show if already installed
-        if (this.isAlreadyInstalled()) {
-            console.log('App already installed, skipping prompt');
-            return;
-        }
+    // Check game count
+    const gamesPlayed = this.getGamesPlayed();
+    console.log(`Games played: ${gamesPlayed}`);
 
-        // Don't show if user dismissed recently
-        if (this.wasRecentlyDismissed()) {
-            console.log('User dismissed prompt recently, skipping');
-            return;
-        }
+    if (gamesPlayed >= 2) {
+      // Wait a bit before showing (don't interrupt immediately)
+      setTimeout(() => {
+        this.showPrompt();
+      }, 2000); // 2 second delay
+    }
+  }
 
-        // Check game count
-        const gamesPlayed = this.getGamesPlayed();
-        console.log(`Games played: ${gamesPlayed}`);
+  /**
+   * Get number of games played from localStorage
+   */
+  getGamesPlayed() {
+    return parseInt(localStorage.getItem("gamesPlayed") || "0", 10);
+  }
 
-        if (gamesPlayed >= 2) {
-            // Wait a bit before showing (don't interrupt immediately)
-            setTimeout(() => {
-                this.showPrompt();
-            }, 2000); // 2 second delay
-        }
+  /**
+   * Increment games played counter
+   * Call this from mobile/main.js when a game ends
+   */
+  static incrementGamesPlayed() {
+    const current = parseInt(localStorage.getItem("gamesPlayed") || "0", 10);
+    localStorage.setItem("gamesPlayed", (current + 1).toString());
+    console.log(`Games played: ${current + 1}`);
+  }
+
+  /**
+   * Check if app is already installed
+   */
+  isAlreadyInstalled() {
+    // Check if running in standalone mode (installed)
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      return true;
     }
 
-    /**
-     * Get number of games played from localStorage
-     */
-    getGamesPlayed() {
-        return parseInt(localStorage.getItem('gamesPlayed') || '0', 10);
-    }
+    // Check localStorage flag
+    return localStorage.getItem("appInstalled") === "true";
+  }
 
-    /**
-     * Increment games played counter
-     * Call this from mobile/main.js when a game ends
-     */
-    static incrementGamesPlayed() {
-        const current = parseInt(localStorage.getItem('gamesPlayed') || '0', 10);
-        localStorage.setItem('gamesPlayed', (current + 1).toString());
-        console.log(`Games played: ${current + 1}`);
-    }
+  /**
+   * Check if user dismissed the prompt recently
+   */
+  wasRecentlyDismissed() {
+    const dismissedAt = localStorage.getItem("installPromptDismissedAt");
+    if (!dismissedAt) return false;
 
-    /**
-     * Check if app is already installed
-     */
-    isAlreadyInstalled() {
-        // Check if running in standalone mode (installed)
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            return true;
-        }
+    // Don't show again for 7 days after dismissal
+    const dismissedTime = parseInt(dismissedAt, 10);
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
 
-        // Check localStorage flag
-        return localStorage.getItem('appInstalled') === 'true';
-    }
+    return now - dismissedTime < sevenDaysMs;
+  }
 
-    /**
-     * Check if user dismissed the prompt recently
-     */
-    wasRecentlyDismissed() {
-        const dismissedAt = localStorage.getItem('installPromptDismissedAt');
-        if (!dismissedAt) return false;
+  /**
+   * Mark app as installed
+   */
+  markAsInstalled() {
+    localStorage.setItem("appInstalled", "true");
+  }
 
-        // Don't show again for 7 days after dismissal
-        const dismissedTime = parseInt(dismissedAt, 10);
-        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-        const now = Date.now();
+  /**
+   * Create the install banner HTML and CSS
+   */
+  createBannerUI() {
+    // Create banner element
+    this.installBanner = document.createElement("div");
+    this.installBanner.id = "install-banner";
+    this.installBanner.className = "install-banner";
+    this.installBanner.style.display = "none";
 
-        return (now - dismissedTime) < sevenDaysMs;
-    }
-
-    /**
-     * Mark app as installed
-     */
-    markAsInstalled() {
-        localStorage.setItem('appInstalled', 'true');
-    }
-
-    /**
-     * Create the install banner HTML and CSS
-     */
-    createBannerUI() {
-        // Create banner element
-        this.installBanner = document.createElement('div');
-        this.installBanner.id = 'install-banner';
-        this.installBanner.className = 'install-banner';
-        this.installBanner.style.display = 'none';
-
-        this.installBanner.innerHTML = `
+    this.installBanner.innerHTML = `
             <div class="install-banner__content">
                 <div class="install-banner__icon">
                     <svg width="48" height="48" viewBox="0 0 64 64">
@@ -187,26 +188,26 @@ class InstallPrompt {
             </div>
         `;
 
-        // Add to DOM
-        document.body.appendChild(this.installBanner);
+    // Add to DOM
+    document.body.appendChild(this.installBanner);
 
-        // Add event listeners
-        const installBtn = this.installBanner.querySelector('#install-btn');
-        const dismissBtn = this.installBanner.querySelector('#dismiss-btn');
+    // Add event listeners
+    const installBtn = this.installBanner.querySelector("#install-btn");
+    const dismissBtn = this.installBanner.querySelector("#dismiss-btn");
 
-        installBtn.addEventListener('click', () => this.handleInstall());
-        dismissBtn.addEventListener('click', () => this.handleDismiss());
+    installBtn.addEventListener("click", () => this.handleInstall());
+    dismissBtn.addEventListener("click", () => this.handleDismiss());
 
-        // Add CSS
-        this.injectStyles();
-    }
+    // Add CSS
+    this.injectStyles();
+  }
 
-    /**
-     * Inject CSS styles for install banner
-     */
-    injectStyles() {
-        const style = document.createElement('style');
-        style.textContent = `
+  /**
+   * Inject CSS styles for install banner
+   */
+  injectStyles() {
+    const style = document.createElement("style");
+    style.textContent = `
             .install-banner {
                 position: fixed;
                 bottom: 0;
@@ -319,73 +320,73 @@ class InstallPrompt {
                 }
             }
         `;
-        document.head.appendChild(style);
+    document.head.appendChild(style);
+  }
+
+  /**
+   * Show the install prompt
+   */
+  showPrompt() {
+    if (!this.deferredPrompt) {
+      console.log("No deferred prompt available");
+      return;
     }
 
-    /**
-     * Show the install prompt
-     */
-    showPrompt() {
-        if (!this.deferredPrompt) {
-            console.log('No deferred prompt available');
-            return;
-        }
+    this.installBanner.style.display = "block";
+    console.log("Install banner shown");
+  }
 
-        this.installBanner.style.display = 'block';
-        console.log('Install banner shown');
+  /**
+   * Hide the install prompt
+   */
+  hidePrompt() {
+    if (this.installBanner) {
+      this.installBanner.style.display = "none";
+    }
+  }
+
+  /**
+   * Handle install button click
+   */
+  async handleInstall() {
+    if (!this.deferredPrompt) {
+      console.error("No deferred prompt available");
+      return;
     }
 
-    /**
-     * Hide the install prompt
-     */
-    hidePrompt() {
-        if (this.installBanner) {
-            this.installBanner.style.display = 'none';
-        }
+    // Show the browser's install prompt
+    this.deferredPrompt.prompt();
+
+    // Wait for user choice
+    const { outcome } = await this.deferredPrompt.userChoice;
+    console.log(`Install prompt outcome: ${outcome}`);
+
+    if (outcome === "accepted") {
+      console.log("User accepted install");
+      this.markAsInstalled();
+    } else {
+      console.log("User dismissed install");
+      this.handleDismiss();
     }
 
-    /**
-     * Handle install button click
-     */
-    async handleInstall() {
-        if (!this.deferredPrompt) {
-            console.error('No deferred prompt available');
-            return;
-        }
+    // Clear the deferred prompt
+    this.deferredPrompt = null;
 
-        // Show the browser's install prompt
-        this.deferredPrompt.prompt();
+    // Hide the banner
+    this.hidePrompt();
+  }
 
-        // Wait for user choice
-        const { outcome } = await this.deferredPrompt.userChoice;
-        console.log(`Install prompt outcome: ${outcome}`);
+  /**
+   * Handle dismiss button click
+   */
+  handleDismiss() {
+    // Record dismissal time
+    localStorage.setItem("installPromptDismissedAt", Date.now().toString());
+    console.log("Install prompt dismissed by user");
 
-        if (outcome === 'accepted') {
-            console.log('User accepted install');
-            this.markAsInstalled();
-        } else {
-            console.log('User dismissed install');
-            this.handleDismiss();
-        }
-
-        // Clear the deferred prompt
-        this.deferredPrompt = null;
-
-        // Hide the banner
-        this.hidePrompt();
-    }
-
-    /**
-     * Handle dismiss button click
-     */
-    handleDismiss() {
-        // Record dismissal time
-        localStorage.setItem('installPromptDismissedAt', Date.now().toString());
-        console.log('Install prompt dismissed by user');
-
-        // Hide the banner
-        this.hidePrompt();
-    }
+    // Hide the banner
+    this.hidePrompt();
+  }
 }
 
 // Export for use in mobile/main.js
@@ -401,7 +402,7 @@ export default InstallPrompt;
 Add the following code:
 
 ```javascript
-import InstallPrompt from './components/InstallPrompt.js';
+import InstallPrompt from "./components/InstallPrompt.js";
 
 // Initialize install prompt manager
 const installPrompt = new InstallPrompt();
@@ -409,16 +410,17 @@ const installPrompt = new InstallPrompt();
 // TODO: Call this when a game ends
 // Example integration point:
 function onGameEnd() {
-    // Existing game end logic...
+  // Existing game end logic...
 
-    // Increment games played counter
-    InstallPrompt.incrementGamesPlayed();
+  // Increment games played counter
+  InstallPrompt.incrementGamesPlayed();
 
-    // The InstallPrompt will automatically check and show prompt if conditions are met
+  // The InstallPrompt will automatically check and show prompt if conditions are met
 }
 ```
 
 **Integration Requirements:**
+
 - Find where the game detects "game over" state
 - Call `InstallPrompt.incrementGamesPlayed()` when a game completes
 - The install prompt will automatically handle showing/hiding based on conditions
@@ -430,6 +432,7 @@ function onGameEnd() {
 ### When to Show Prompt
 
 The prompt should show when **ALL** of these conditions are met:
+
 1. ✅ User has played 2 or more games (`gamesPlayed >= 2`)
 2. ✅ App is not already installed (not in standalone mode)
 3. ✅ User hasn't dismissed the prompt in the last 7 days
@@ -488,6 +491,7 @@ The following keys are used:
 ### Browser Testing
 
 Test in:
+
 - [ ] Chrome Mobile (Android)
 - [ ] Safari (iOS 15+)
 - [ ] Chrome Desktop (with device emulation)
@@ -506,15 +510,19 @@ Since iOS doesn't support `beforeinstallprompt`, consider adding iOS detection a
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
 
 if (isIOS && !this.isAlreadyInstalled() && gamesPlayed >= 2) {
-    // Show iOS-specific instructions
-    this.showIOSInstructions();
+  // Show iOS-specific instructions
+  this.showIOSInstructions();
 }
 ```
 
 **iOS Instructions Banner (Optional Enhancement):**
+
 ```html
 <div class="ios-install-instructions">
-    <p>To install: Tap the Share button <svg>...</svg> and select "Add to Home Screen"</p>
+  <p>
+    To install: Tap the Share button <svg>...</svg> and select "Add to Home
+    Screen"
+  </p>
 </div>
 ```
 

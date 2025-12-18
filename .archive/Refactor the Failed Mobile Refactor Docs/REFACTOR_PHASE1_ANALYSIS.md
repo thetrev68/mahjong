@@ -7,14 +7,17 @@ GameLogic is a large class (~1911 lines) that currently orchestrates all game ph
 ## GameLogic Class Structure
 
 ### Constructor & Initialization
+
 - **constructor()** - Initializes GameLogic with Phaser scene reference
 - **init()** - Sets up Card validator, GameAI, HintAnimationManager, and training form
 - **start()** - Resets game state and creates wall with 152/160 tiles
 
 ### Core Game Flow Methods (Pure Logic)
+
 These handle game state transitions and should move to GameController:
 
 #### Deal Phase
+
 - **deal()** [313-344] - Orchestrates dealing sequence
   - Sets state to STATE.DEAL
   - Calls sequentialDealTiles() with optional training hand
@@ -30,6 +33,7 @@ These handle game state transitions and should move to GameController:
   - **Dependencies:** Uses actual Phaser table, emits events, calls updateUI()
 
 #### Charleston Phase (Complex)
+
 - **charleston()** [346-497] - Charleston phase orchestrator
   - Manages 3 Charleston passes per phase (right, across, left)
   - Queries continue to phase 2
@@ -52,6 +56,7 @@ These handle game state transitions and should move to GameController:
   - **Implementation:** DOM-based dialog
 
 #### Courtesy Phase
+
 - **courtesyQuery()** [1109-1154] - Courtesy voting
   - Prompts human for tile count (0-3)
   - Gets AI votes in parallel
@@ -67,6 +72,7 @@ These handle game state transitions and should move to GameController:
   - **Dependencies:** yesNoQuery(), gameAI.courtesyPass(), updateUI()
 
 #### Main Game Loop
+
 - **loop()** [504-663] - Main game loop orchestrator
   - Cycles through 4 players
   - Handles pick → discard → claim → expose flow
@@ -115,6 +121,7 @@ These handle game state transitions and should move to GameController:
   - **Note:** Very UI-heavy, move to PhaserAdapter
 
 ### UI/Rendering Methods (Should NOT move to GameController)
+
 These are specific to Phaser UI and should stay in PhaserAdapter:
 
 - **updateUI()** [1175-1476] - Massive method (~300 lines)
@@ -135,6 +142,7 @@ These are specific to Phaser UI and should stay in PhaserAdapter:
 - **highlightInvalidMahjongTiles()** [1774-1784] - Validation highlighting
 
 ### Training Mode Methods (Can move with refactoring)
+
 - **enableTrainingForm()** - Shows training UI
 - **disableTrainingForm()** - Hides training UI
 - **getTrainingInfo()** - Gets training settings
@@ -144,6 +152,7 @@ These are specific to Phaser UI and should stay in PhaserAdapter:
 - **swapBlankForDiscard()** [1573-1658] - Blank swap logic
 
 ### Hint Animation Manager
+
 - Used by GameLogic for highlighting recommended tiles
 - Needs to move or be refactored for GameController
 - Currently tightly coupled to Phaser sprites
@@ -151,6 +160,7 @@ These are specific to Phaser UI and should stay in PhaserAdapter:
 ## Current State (Phase 2B)
 
 The codebase is in a hybrid state:
+
 - GameLogic still exists and orchestrates game flow
 - GameController was created but is incomplete
 - WallDataWrapper hack attempts to bridge Phaser tiles and GameController
@@ -159,39 +169,49 @@ The codebase is in a hybrid state:
 ## Tasks for Phase 1
 
 ### 1.2 Remove WallDataWrapper
+
 **Problem:** WallDataWrapper tries to convert Phaser Wall to TileData-based wall
 **Solution:**
+
 - GameController should work with real Phaser Tile objects
 - dealTiles() should pop Phaser tiles, NOT convert to TileData
 - PlayerData.hand should accept Phaser Tile objects
 
 ### 1.3 Create Rich Event System
+
 **Current:** Basic events like TILE_DRAWN {player, tile}
 **Desired:** Events include animation parameters
+
 - TILE_DRAWN: add animation {type, fromPos, toPos, duration, easing}
 - TILE_DISCARDED: add animation with discard pile target
 - CHARLESTON_PASS: add animation with pass direction
 - COURTESY_PASS: add animation with exchange direction
 
 ### 1.4-1.7 Move Game Logic to GameController
+
 **Core logic to move:**
+
 1. Deal phase (deal(), sequentialDealTiles())
 2. Charleston phase (charleston(), charlestonPass())
 3. Courtesy phase (courtesyQuery(), courtesyPass())
 4. Main loop (loop(), pickFromWall(), chooseDiscard(), claimDiscard(), exposeTiles())
 
 **Not to move:**
+
 - updateUI() → stays in PhaserAdapter
 - Button management → stays in PhaserAdapter
 - Dialog/prompt creation → stays in PhaserAdapter (but GameController defines interface)
 
 ### 1.8 Remove GameLogic Dependencies
+
 **Currently GameController depends on:**
+
 - GameLogic exists but shouldn't be referenced
 - gameAI is passed in (keep)
 - Card validator is passed in (keep)
 
 ### 1.9 Clean GameScene
+
 - Remove WallDataWrapper references
 - Ensure sharedTable is passed correctly
 - Ensure wall is created before GameController uses it
@@ -199,49 +219,54 @@ The codebase is in a hybrid state:
 ## Key Implementation Notes
 
 ### Wall Management
+
 - GameLogic creates wall with Phaser Wall class
 - GameLogic.table.wall is a Phaser Wall object with remove() method
 - GameController should use sharedTable.wall.remove() directly, not WallDataWrapper
 
 ### PlayerData vs Phaser Player
+
 - GameController has PlayerData objects (game state)
 - Phaser scene has gameObjects_player.js Player objects (rendering)
 - These are separate - GameController doesn't interact with Phaser players
 
 ### Event Emission Pattern
+
 - GameController emits events via EventEmitter
 - PhaserAdapter subscribes to GameController events
 - PhaserAdapter handles all Phaser-specific rendering/UI
 
 ### AI Integration
+
 - gameAI object is passed to GameController.init()
 - GameController calls aiEngine.charlestonPass(), aiEngine.chooseDiscard(), etc.
 - AI returns tile selections and decisions
 
 ### Card Validation
+
 - Card validator is passed to GameController.init()
 - Used for hand validation (winning patterns)
 - Called from checkMahjong() and claim validation
 
 ## Summary Table
 
-| Method | Current Location | Should Move To | Notes |
-|--------|------------------|-----------------|--------|
-| deal() | GameLogic | GameController | Minor - calls sequentialDealTiles |
-| sequentialDealTiles() | GameLogic | GameController | Core deal logic |
-| charleston() | GameLogic | GameController | Complex - multiple passes |
-| charlestonPass() | GameLogic | GameController | Single pass logic |
-| courtesyQuery() | GameLogic | GameController | Voting logic |
-| courtesyPass() | GameLogic | GameController | Pass execution |
-| loop() | GameLogic | GameController | Main loop orchestrator |
-| pickFromWall() | GameLogic | GameController | Draw logic |
-| chooseDiscard() | GameLogic | GameController | Discard selection |
-| claimDiscard() | GameLogic | GameController | Claim validation |
-| exposeTiles() | GameLogic | GameController | Exposure creation |
-| updateUI() | GameLogic | PhaserAdapter | UI rendering |
-| yesNoQuery() | GameLogic | PhaserAdapter | Dialog creation |
-| enableSortButtons() | GameLogic | PhaserAdapter | Button management |
-| start() | GameLogic | Stay in GameLogic | For now - creates initial wall |
+| Method                | Current Location | Should Move To    | Notes                             |
+| --------------------- | ---------------- | ----------------- | --------------------------------- |
+| deal()                | GameLogic        | GameController    | Minor - calls sequentialDealTiles |
+| sequentialDealTiles() | GameLogic        | GameController    | Core deal logic                   |
+| charleston()          | GameLogic        | GameController    | Complex - multiple passes         |
+| charlestonPass()      | GameLogic        | GameController    | Single pass logic                 |
+| courtesyQuery()       | GameLogic        | GameController    | Voting logic                      |
+| courtesyPass()        | GameLogic        | GameController    | Pass execution                    |
+| loop()                | GameLogic        | GameController    | Main loop orchestrator            |
+| pickFromWall()        | GameLogic        | GameController    | Draw logic                        |
+| chooseDiscard()       | GameLogic        | GameController    | Discard selection                 |
+| claimDiscard()        | GameLogic        | GameController    | Claim validation                  |
+| exposeTiles()         | GameLogic        | GameController    | Exposure creation                 |
+| updateUI()            | GameLogic        | PhaserAdapter     | UI rendering                      |
+| yesNoQuery()          | GameLogic        | PhaserAdapter     | Dialog creation                   |
+| enableSortButtons()   | GameLogic        | PhaserAdapter     | Button management                 |
+| start()               | GameLogic        | Stay in GameLogic | For now - creates initial wall    |
 
 ## GameController Issues to Fix
 

@@ -12,21 +12,21 @@
  * Minimal TileSet for card validator
  */
 class CardTileSet {
-    constructor() {
-        this.tileArray = [];
-    }
+  constructor() {
+    this.tileArray = [];
+  }
 
-    insert(tile) {
-        this.tileArray.push(tile);
-    }
+  insert(tile) {
+    this.tileArray.push(tile);
+  }
 
-    getLength() {
-        return this.tileArray.length;
-    }
+  getLength() {
+    return this.tileArray.length;
+  }
 
-    getTileArray() {
-        return [...this.tileArray];
-    }
+  getTileArray() {
+    return [...this.tileArray];
+  }
 }
 
 /**
@@ -34,37 +34,39 @@ class CardTileSet {
  * Supports only the methods needed by card.js and test files
  */
 export class CardHand {
-    constructor() {
-        this.hiddenTileSet = new CardTileSet();
-        this.exposedTileSetArray = [];
-        this.even = false;  // Used by generateHand() for pattern matching
-    }
+  constructor() {
+    this.hiddenTileSet = new CardTileSet();
+    this.exposedTileSetArray = [];
+    this.even = false; // Used by generateHand() for pattern matching
+  }
 
-    insertHidden(tile) {
-        this.hiddenTileSet.insert(tile);
-    }
+  insertHidden(tile) {
+    this.hiddenTileSet.insert(tile);
+  }
 
-    getHiddenTileArray() {
-        return this.hiddenTileSet.getTileArray();
-    }
+  getHiddenTileArray() {
+    return this.hiddenTileSet.getTileArray();
+  }
 
-    getLength() {
-        return this.hiddenTileSet.getLength() +
-               this.exposedTileSetArray.reduce((sum, ts) => sum + ts.getLength(), 0);
-    }
+  getLength() {
+    return (
+      this.hiddenTileSet.getLength() +
+      this.exposedTileSetArray.reduce((sum, ts) => sum + ts.getLength(), 0)
+    );
+  }
 
-    getTileArray() {
-        const allTiles = [];
-        allTiles.push(...this.getHiddenTileArray());
-        for (const tileSet of this.exposedTileSetArray) {
-            allTiles.push(...tileSet.getTileArray());
-        }
-        return allTiles;
+  getTileArray() {
+    const allTiles = [];
+    allTiles.push(...this.getHiddenTileArray());
+    for (const tileSet of this.exposedTileSetArray) {
+      allTiles.push(...tileSet.getTileArray());
     }
+    return allTiles;
+  }
 
-    isAllHidden() {
-        // Returns true if all tiles are hidden (no exposures)
-        // Safe for empty hands (returns true)
-        return this.exposedTileSetArray.length === 0;
-    }
+  isAllHidden() {
+    // Returns true if all tiles are hidden (no exposures)
+    // Safe for empty hands (returns true)
+    return this.exposedTileSetArray.length === 0;
+  }
 }

@@ -17,6 +17,7 @@ Audit and optimize mobile bundle size and runtime performance. Target metrics: J
 ## Performance Targets
 
 ### Load Performance
+
 - **First Contentful Paint (FCP):** < 1.5 seconds
 - **Time to Interactive (TTI):** < 3 seconds
 - **Total Blocking Time (TBT):** < 200ms
@@ -24,6 +25,7 @@ Audit and optimize mobile bundle size and runtime performance. Target metrics: J
 - **Cumulative Layout Shift (CLS):** < 0.1
 
 ### Bundle Size
+
 - **JavaScript (gzipped):** < 200KB
 - **CSS (gzipped):** < 20KB
 - **HTML:** < 10KB
@@ -31,6 +33,7 @@ Audit and optimize mobile bundle size and runtime performance. Target metrics: J
 - **Asset cache size:** < 1MB
 
 ### Runtime Performance
+
 - **Animation frame rate:** 60 FPS
 - **Touch response time:** < 100ms
 - **State update time:** < 16ms (60 FPS budget)
@@ -52,29 +55,29 @@ npm install --save-dev rollup-plugin-visualizer
 Add visualizer plugin to `vite.config.js`:
 
 ```javascript
-import { defineConfig } from 'vite';
-import { visualizer } from 'rollup-plugin-visualizer';
-import { resolve } from 'path';
+import { defineConfig } from "vite";
+import { visualizer } from "rollup-plugin-visualizer";
+import { resolve } from "path";
 
 export default defineConfig({
-    build: {
-        rollupOptions: {
-            input: {
-                desktop: resolve(__dirname, 'desktop/index.html'),
-                mobile: resolve(__dirname, 'mobile/index.html'),
-            },
-        },
-        // Generate source maps for analysis
-        sourcemap: true,
+  build: {
+    rollupOptions: {
+      input: {
+        desktop: resolve(__dirname, "desktop/index.html"),
+        mobile: resolve(__dirname, "mobile/index.html"),
+      },
     },
-    plugins: [
-        visualizer({
-            filename: './dist/stats.html',
-            open: true,
-            gzipSize: true,
-            brotliSize: true,
-        }),
-    ],
+    // Generate source maps for analysis
+    sourcemap: true,
+  },
+  plugins: [
+    visualizer({
+      filename: "./dist/stats.html",
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+    }),
+  ],
 });
 ```
 
@@ -88,6 +91,7 @@ npm run build
 ### 1.4 Identify Large Dependencies
 
 Look for:
+
 - Large libraries (> 50KB)
 - Duplicate code between mobile/desktop bundles
 - Unused exports from libraries
@@ -99,23 +103,26 @@ Look for:
 ## Bundle Analysis Results
 
 ### Mobile Bundle Breakdown (before optimization)
+
 - Total size: 450KB (uncompressed), 180KB (gzipped)
 - Largest modules:
   1. core/GameController.js - 85KB (35%)
   2. core/AIEngine.js - 120KB (40%)
-  3. core/card/* - 60KB (20%)
-  4. mobile/renderers/* - 30KB (10%)
+  3. core/card/\* - 60KB (20%)
+  4. mobile/renderers/\* - 30KB (10%)
   5. shared/SettingsManager.js - 8KB (2%)
 
 ### Desktop Bundle Breakdown (before optimization)
+
 - Total size: 850KB (uncompressed), 320KB (gzipped)
 - Largest modules:
   1. Phaser library - 600KB (70%)
   2. core/GameController.js - 85KB (10%)
   3. core/AIEngine.js - 120KB (14%)
-  4. desktop/adapters/* - 45KB (5%)
+  4. desktop/adapters/\* - 45KB (5%)
 
 ### Issues Found
+
 - ❌ AIEngine loaded on initial page load (should be lazy)
 - ❌ All card patterns (2017-2025) bundled (should load year dynamically)
 - ❌ Desktop bundle includes mobile code (tree-shaking not working)
@@ -136,29 +143,29 @@ Look for:
 
 ```javascript
 // BEFORE
-import {AIEngine} from '../core/AIEngine.js';
-import {GameController} from '../core/GameController.js';
+import { AIEngine } from "../core/AIEngine.js";
+import { GameController } from "../core/GameController.js";
 
 const gameController = new GameController();
 const aiEngine = new AIEngine();
 gameController.setAI(aiEngine);
 
 // AFTER
-import {GameController} from '../core/GameController.js';
+import { GameController } from "../core/GameController.js";
 
 const gameController = new GameController();
 let aiEngineLoaded = false;
 
-document.getElementById('start').addEventListener('click', async () => {
-    if (!aiEngineLoaded) {
-        // Lazy load AI engine
-        const { AIEngine } = await import('../core/AIEngine.js');
-        const aiEngine = new AIEngine();
-        gameController.setAI(aiEngine);
-        aiEngineLoaded = true;
-    }
+document.getElementById("start").addEventListener("click", async () => {
+  if (!aiEngineLoaded) {
+    // Lazy load AI engine
+    const { AIEngine } = await import("../core/AIEngine.js");
+    const aiEngine = new AIEngine();
+    gameController.setAI(aiEngine);
+    aiEngineLoaded = true;
+  }
 
-    gameController.startGame();
+  gameController.startGame();
 });
 ```
 
@@ -174,51 +181,51 @@ document.getElementById('start').addEventListener('click', async () => {
 
 ```javascript
 // BEFORE
-import {hands2017} from './2017/card2017.js';
-import {hands2018} from './2018/card2018.js';
-import {hands2019} from './2019/card2019.js';
-import {hands2020} from './2020/card2020.js';
-import {hands2025} from './2025/card2025.js';
+import { hands2017 } from "./2017/card2017.js";
+import { hands2018 } from "./2018/card2018.js";
+import { hands2019 } from "./2019/card2019.js";
+import { hands2020 } from "./2020/card2020.js";
+import { hands2025 } from "./2025/card2025.js";
 
 const allHands = {
-    2017: hands2017,
-    2018: hands2018,
-    2019: hands2019,
-    2020: hands2020,
-    2025: hands2025,
+  2017: hands2017,
+  2018: hands2018,
+  2019: hands2019,
+  2020: hands2020,
+  2025: hands2025,
 };
 
 // AFTER
 const allHands = {};
 
 async function loadCardYear(year) {
-    if (allHands[year]) {
-        return allHands[year]; // Already loaded
-    }
+  if (allHands[year]) {
+    return allHands[year]; // Already loaded
+  }
 
-    let hands;
-    switch (year) {
-        case 2017:
-            hands = (await import('./2017/card2017.js')).hands2017;
-            break;
-        case 2018:
-            hands = (await import('./2018/card2018.js')).hands2018;
-            break;
-        case 2019:
-            hands = (await import('./2019/card2019.js')).hands2019;
-            break;
-        case 2020:
-            hands = (await import('./2020/card2020.js')).hands2020;
-            break;
-        case 2025:
-            hands = (await import('./2025/card2025.js')).hands2025;
-            break;
-        default:
-            hands = (await import('./2025/card2025.js')).hands2025;
-    }
+  let hands;
+  switch (year) {
+    case 2017:
+      hands = (await import("./2017/card2017.js")).hands2017;
+      break;
+    case 2018:
+      hands = (await import("./2018/card2018.js")).hands2018;
+      break;
+    case 2019:
+      hands = (await import("./2019/card2019.js")).hands2019;
+      break;
+    case 2020:
+      hands = (await import("./2020/card2020.js")).hands2020;
+      break;
+    case 2025:
+      hands = (await import("./2025/card2025.js")).hands2025;
+      break;
+    default:
+      hands = (await import("./2025/card2025.js")).hands2025;
+  }
 
-    allHands[year] = hands;
-    return hands;
+  allHands[year] = hands;
+  return hands;
 }
 
 export { loadCardYear };
@@ -247,40 +254,40 @@ async init(year = 2025) {
 
 ```javascript
 export default defineConfig({
-    build: {
-        rollupOptions: {
-            input: {
-                desktop: resolve(__dirname, 'desktop/index.html'),
-                mobile: resolve(__dirname, 'mobile/index.html'),
-            },
-            output: {
-                manualChunks: {
-                    // Separate AI engine chunk (lazy loaded)
-                    'ai-engine': ['./core/AIEngine.js'],
+  build: {
+    rollupOptions: {
+      input: {
+        desktop: resolve(__dirname, "desktop/index.html"),
+        mobile: resolve(__dirname, "mobile/index.html"),
+      },
+      output: {
+        manualChunks: {
+          // Separate AI engine chunk (lazy loaded)
+          "ai-engine": ["./core/AIEngine.js"],
 
-                    // Card validation (lazy loaded)
-                    'card-core': ['./core/card/card.js'],
+          // Card validation (lazy loaded)
+          "card-core": ["./core/card/card.js"],
 
-                    // Mobile renderers (only for mobile bundle)
-                    'mobile-ui': [
-                        './mobile/renderers/HandRenderer.js',
-                        './mobile/renderers/OpponentBar.js',
-                        './mobile/renderers/DiscardPile.js',
-                        './mobile/components/MobileTile.js',
-                    ],
+          // Mobile renderers (only for mobile bundle)
+          "mobile-ui": [
+            "./mobile/renderers/HandRenderer.js",
+            "./mobile/renderers/OpponentBar.js",
+            "./mobile/renderers/DiscardPile.js",
+            "./mobile/components/MobileTile.js",
+          ],
 
-                    // Desktop Phaser code (only for desktop bundle)
-                    'desktop-phaser': [
-                        './desktop/adapters/PhaserAdapter.js',
-                        './desktop/gameObjects.js',
-                        './desktop/gameObjects_hand.js',
-                        './desktop/gameObjects_table.js',
-                        './desktop/gameObjects_player.js',
-                    ],
-                },
-            },
+          // Desktop Phaser code (only for desktop bundle)
+          "desktop-phaser": [
+            "./desktop/adapters/PhaserAdapter.js",
+            "./desktop/gameObjects.js",
+            "./desktop/gameObjects_hand.js",
+            "./desktop/gameObjects_table.js",
+            "./desktop/gameObjects_player.js",
+          ],
         },
+      },
     },
+  },
 });
 ```
 
@@ -306,36 +313,36 @@ npm install --save-dev @squoosh/lib
 
 ```javascript
 // scripts/optimize-images.js
-import { ImagePool } from '@squoosh/lib';
-import { readdir, readFile, writeFile } from 'fs/promises';
-import { join } from 'path';
+import { ImagePool } from "@squoosh/lib";
+import { readdir, readFile, writeFile } from "fs/promises";
+import { join } from "path";
 
 async function optimizeImages(inputDir, outputDir) {
-    const imagePool = new ImagePool();
-    const files = await readdir(inputDir);
+  const imagePool = new ImagePool();
+  const files = await readdir(inputDir);
 
-    for (const file of files) {
-        if (!file.endsWith('.png')) continue;
+  for (const file of files) {
+    if (!file.endsWith(".png")) continue;
 
-        const inputPath = join(inputDir, file);
-        const image = imagePool.ingestImage(await readFile(inputPath));
+    const inputPath = join(inputDir, file);
+    const image = imagePool.ingestImage(await readFile(inputPath));
 
-        await image.encode({
-            webp: { quality: 80 },
-        });
+    await image.encode({
+      webp: { quality: 80 },
+    });
 
-        const { binary } = await image.encodedWith.webp;
-        const outputPath = join(outputDir, file.replace('.png', '.webp'));
-        await writeFile(outputPath, binary);
+    const { binary } = await image.encodedWith.webp;
+    const outputPath = join(outputDir, file.replace(".png", ".webp"));
+    await writeFile(outputPath, binary);
 
-        console.log(`Optimized: ${file} -> ${file.replace('.png', '.webp')}`);
-    }
+    console.log(`Optimized: ${file} -> ${file.replace(".png", ".webp")}`);
+  }
 
-    await imagePool.close();
+  await imagePool.close();
 }
 
 // Run optimization
-optimizeImages('./assets/tiles', './assets/tiles-optimized');
+optimizeImages("./assets/tiles", "./assets/tiles-optimized");
 ```
 
 **Update image references:**
@@ -359,7 +366,7 @@ optimizeImages('./assets/tiles', './assets/tiles-optimized');
 
 ```html
 <!-- mobile/components/MobileTile.js -->
-<img src="/assets/tiles/crack5.webp" alt="Crack 5" loading="lazy">
+<img src="/assets/tiles/crack5.webp" alt="Crack 5" loading="lazy" />
 ```
 
 ### 3.3 Preload Critical Assets
@@ -371,10 +378,10 @@ optimizeImages('./assets/tiles', './assets/tiles-optimized');
 ```html
 <!-- mobile/index.html -->
 <head>
-    <!-- Preload critical assets -->
-    <link rel="preload" href="/mobile/main.js" as="script">
-    <link rel="preload" href="/mobile/styles.css" as="style">
-    <link rel="preload" href="/assets/tiles/joker.webp" as="image">
+  <!-- Preload critical assets -->
+  <link rel="preload" href="/mobile/main.js" as="script" />
+  <link rel="preload" href="/mobile/styles.css" as="style" />
+  <link rel="preload" href="/assets/tiles/joker.webp" as="image" />
 </head>
 ```
 
@@ -388,19 +395,19 @@ optimizeImages('./assets/tiles', './assets/tiles-optimized');
 
 ```javascript
 export default defineConfig({
-    build: {
-        minify: 'terser',
-        terserOptions: {
-            compress: {
-                drop_console: true, // Remove console.log in production
-                drop_debugger: true,
-                pure_funcs: ['console.info', 'console.debug'],
-            },
-            mangle: {
-                safari10: true, // Safari 10 compatibility
-            },
-        },
+  build: {
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.log in production
+        drop_debugger: true,
+        pure_funcs: ["console.info", "console.debug"],
+      },
+      mangle: {
+        safari10: true, // Safari 10 compatibility
+      },
     },
+  },
 });
 ```
 
@@ -412,9 +419,9 @@ Vite already minifies CSS by default, but ensure:
 
 ```javascript
 export default defineConfig({
-    build: {
-        cssMinify: true,
-    },
+  build: {
+    cssMinify: true,
+  },
 });
 ```
 
@@ -423,19 +430,19 @@ export default defineConfig({
 **File:** `vite.config.js`
 
 ```javascript
-import compression from 'vite-plugin-compression';
+import compression from "vite-plugin-compression";
 
 export default defineConfig({
-    plugins: [
-        compression({
-            algorithm: 'gzip',
-            ext: '.gz',
-        }),
-        compression({
-            algorithm: 'brotliCompress',
-            ext: '.br',
-        }),
-    ],
+  plugins: [
+    compression({
+      algorithm: "gzip",
+      ext: ".gz",
+    }),
+    compression({
+      algorithm: "brotliCompress",
+      ext: ".br",
+    }),
+  ],
 });
 ```
 
@@ -460,20 +467,30 @@ npm install --save-dev vite-plugin-compression
 
 /* ❌ BAD: Causes layout recalculation */
 @keyframes tile-draw-bad {
-    from { top: -200px; }
-    to { top: 0; }
+  from {
+    top: -200px;
+  }
+  to {
+    top: 0;
+  }
 }
 
 /* ✅ GOOD: GPU-accelerated */
 @keyframes tile-draw {
-    from { transform: translateY(-200px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-200px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .tile-drawing {
-    animation: tile-draw 300ms ease-out;
-    /* Force GPU acceleration */
-    will-change: transform, opacity;
+  animation: tile-draw 300ms ease-out;
+  /* Force GPU acceleration */
+  will-change: transform, opacity;
 }
 ```
 
@@ -487,38 +504,41 @@ npm install --save-dev vite-plugin-compression
 // mobile/gestures/TouchHandler.js
 
 class TouchHandler {
-    constructor(element, callbacks) {
-        this.callbacks = callbacks;
-        this.touchStartTime = 0;
-        this.touchStartPos = { x: 0, y: 0 };
+  constructor(element, callbacks) {
+    this.callbacks = callbacks;
+    this.touchStartTime = 0;
+    this.touchStartPos = { x: 0, y: 0 };
 
-        // Debounced handlers
-        this.handleTouchStart = this.debounce(this._handleTouchStart.bind(this), 16);
-        this.handleTouchMove = this.debounce(this._handleTouchMove.bind(this), 16);
+    // Debounced handlers
+    this.handleTouchStart = this.debounce(
+      this._handleTouchStart.bind(this),
+      16,
+    );
+    this.handleTouchMove = this.debounce(this._handleTouchMove.bind(this), 16);
 
-        element.addEventListener('touchstart', this.handleTouchStart);
-        element.addEventListener('touchmove', this.handleTouchMove);
-    }
+    element.addEventListener("touchstart", this.handleTouchStart);
+    element.addEventListener("touchmove", this.handleTouchMove);
+  }
 
-    debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
+  debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
 
-    _handleTouchStart(e) {
-        // Original implementation
-    }
+  _handleTouchStart(e) {
+    // Original implementation
+  }
 
-    _handleTouchMove(e) {
-        // Original implementation
-    }
+  _handleTouchMove(e) {
+    // Original implementation
+  }
 }
 ```
 
@@ -534,28 +554,28 @@ class TouchHandler {
 // mobile/renderers/HandRenderer.js
 
 class HandRenderer {
-    constructor(container, gameController) {
-        this.container = container;
-        this.pendingUpdate = false;
-        this.latestHandData = null;
+  constructor(container, gameController) {
+    this.container = container;
+    this.pendingUpdate = false;
+    this.latestHandData = null;
 
-        gameController.on('HAND_UPDATED', (data) => {
-            this.latestHandData = data.hand;
+    gameController.on("HAND_UPDATED", (data) => {
+      this.latestHandData = data.hand;
 
-            if (!this.pendingUpdate) {
-                this.pendingUpdate = true;
-                requestAnimationFrame(() => {
-                    this.render(this.latestHandData);
-                    this.pendingUpdate = false;
-                });
-            }
+      if (!this.pendingUpdate) {
+        this.pendingUpdate = true;
+        requestAnimationFrame(() => {
+          this.render(this.latestHandData);
+          this.pendingUpdate = false;
         });
-    }
+      }
+    });
+  }
 
-    render(handData) {
-        // Batch all DOM updates here
-        // Only called once per frame
-    }
+  render(handData) {
+    // Batch all DOM updates here
+    // Only called once per frame
+  }
 }
 ```
 
@@ -572,65 +592,65 @@ class HandRenderer {
 **File:** `pwa/service-worker.js`
 
 ```javascript
-const CACHE_NAME = 'mahjong-v2';
+const CACHE_NAME = "mahjong-v2";
 const CRITICAL_CACHE = [
-    '/mobile/',
-    '/mobile/main.js',
-    '/mobile/styles.css',
-    '/pwa/manifest.json',
+  "/mobile/",
+  "/mobile/main.js",
+  "/mobile/styles.css",
+  "/pwa/manifest.json",
 ];
 
 // Install: Cache critical assets only
-self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(CRITICAL_CACHE);
-        })
-    );
-    self.skipWaiting();
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(CRITICAL_CACHE);
+    }),
+  );
+  self.skipWaiting();
 });
 
 // Fetch: Cache-first for assets, network-first for HTML
-self.addEventListener('fetch', (event) => {
-    const { request } = event;
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
 
-    // Network-first for HTML
-    if (request.mode === 'navigate') {
-        event.respondWith(
-            fetch(request)
-                .then((response) => {
-                    return caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(request, response.clone());
-                        return response;
-                    });
-                })
-                .catch(() => caches.match(request))
-        );
-        return;
-    }
-
-    // Cache-first for assets
+  // Network-first for HTML
+  if (request.mode === "navigate") {
     event.respondWith(
-        caches.match(request).then((cachedResponse) => {
-            if (cachedResponse) {
-                // Return cached, but fetch and update cache in background
-                fetch(request).then((response) => {
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(request, response);
-                    });
-                });
-                return cachedResponse;
-            }
-
-            // Not in cache, fetch and cache
-            return fetch(request).then((response) => {
-                return caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(request, response.clone());
-                    return response;
-                });
-            });
+      fetch(request)
+        .then((response) => {
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, response.clone());
+            return response;
+          });
         })
+        .catch(() => caches.match(request)),
     );
+    return;
+  }
+
+  // Cache-first for assets
+  event.respondWith(
+    caches.match(request).then((cachedResponse) => {
+      if (cachedResponse) {
+        // Return cached, but fetch and update cache in background
+        fetch(request).then((response) => {
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, response);
+          });
+        });
+        return cachedResponse;
+      }
+
+      // Not in cache, fetch and cache
+      return fetch(request).then((response) => {
+        return caches.open(CACHE_NAME).then((cache) => {
+          cache.put(request, response.clone());
+          return response;
+        });
+      });
+    }),
+  );
 });
 ```
 
@@ -653,6 +673,7 @@ npm run preview
 ```
 
 **Target Scores:**
+
 - Performance: ≥ 90
 - Accessibility: ≥ 90
 - Best Practices: ≥ 90
@@ -665,26 +686,28 @@ Create a comparison table:
 ```markdown
 ## Performance Metrics
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| FCP | 2.1s | 1.2s | 43% faster |
-| TTI | 4.5s | 2.8s | 38% faster |
-| LCP | 3.2s | 1.9s | 41% faster |
-| TBT | 450ms | 180ms | 60% reduction |
-| CLS | 0.15 | 0.08 | 47% better |
-| JS Bundle (gzipped) | 320KB | 185KB | 42% smaller |
-| Total Page Weight | 1.2MB | 680KB | 43% smaller |
-| Lighthouse Score | 72 | 94 | +22 points |
+| Metric              | Before | After | Improvement   |
+| ------------------- | ------ | ----- | ------------- |
+| FCP                 | 2.1s   | 1.2s  | 43% faster    |
+| TTI                 | 4.5s   | 2.8s  | 38% faster    |
+| LCP                 | 3.2s   | 1.9s  | 41% faster    |
+| TBT                 | 450ms  | 180ms | 60% reduction |
+| CLS                 | 0.15   | 0.08  | 47% better    |
+| JS Bundle (gzipped) | 320KB  | 185KB | 42% smaller   |
+| Total Page Weight   | 1.2MB  | 680KB | 43% smaller   |
+| Lighthouse Score    | 72     | 94    | +22 points    |
 ```
 
 ### 7.3 Real Device Testing
 
 Test on actual devices:
+
 - iPhone 12 (iOS Safari)
 - Samsung Galaxy S21 (Chrome Android)
 - iPhone SE (slower device)
 
 **Measure:**
+
 - Load time
 - Animation smoothness
 - Touch responsiveness
@@ -699,20 +722,21 @@ Test on actual devices:
 ```javascript
 // Add to mobile/main.js for development
 if (window.performance && window.performance.memory) {
-    setInterval(() => {
-        const mem = performance.memory;
-        console.log('Memory:', {
-            used: (mem.usedJSHeapSize / 1048576).toFixed(2) + ' MB',
-            total: (mem.totalJSHeapSize / 1048576).toFixed(2) + ' MB',
-            limit: (mem.jsHeapSizeLimit / 1048576).toFixed(2) + ' MB',
-        });
-    }, 5000);
+  setInterval(() => {
+    const mem = performance.memory;
+    console.log("Memory:", {
+      used: (mem.usedJSHeapSize / 1048576).toFixed(2) + " MB",
+      total: (mem.totalJSHeapSize / 1048576).toFixed(2) + " MB",
+      limit: (mem.jsHeapSizeLimit / 1048576).toFixed(2) + " MB",
+    });
+  }, 5000);
 }
 ```
 
 ### 8.2 Fix Memory Leaks
 
 **Common leaks to check:**
+
 - Event listeners not removed (use `removeEventListener`)
 - Timers not cleared (use `clearTimeout`, `clearInterval`)
 - DOM references held after removal
@@ -723,23 +747,23 @@ if (window.performance && window.performance.memory) {
 ```javascript
 // mobile/renderers/HandRenderer.js
 class HandRenderer {
-    constructor(container, gameController) {
-        this.container = container;
-        this.gameController = gameController;
+  constructor(container, gameController) {
+    this.container = container;
+    this.gameController = gameController;
 
-        // Store handler reference for cleanup
-        this.handUpdateHandler = (data) => this.render(data.hand);
-        gameController.on('HAND_UPDATED', this.handUpdateHandler);
-    }
+    // Store handler reference for cleanup
+    this.handUpdateHandler = (data) => this.render(data.hand);
+    gameController.on("HAND_UPDATED", this.handUpdateHandler);
+  }
 
-    destroy() {
-        // Clean up event listener
-        this.gameController.off('HAND_UPDATED', this.handUpdateHandler);
+  destroy() {
+    // Clean up event listener
+    this.gameController.off("HAND_UPDATED", this.handUpdateHandler);
 
-        // Clear DOM references
-        this.container = null;
-        this.gameController = null;
-    }
+    // Clear DOM references
+    this.container = null;
+    this.gameController = null;
+  }
 }
 ```
 
@@ -748,9 +772,11 @@ class HandRenderer {
 ## Deliverables
 
 ### 1. Performance Report
+
 **Filename:** `PHASE_7C_PERFORMANCE_REPORT.md`
 
 Include:
+
 - Bundle analysis (before/after sizes)
 - Lighthouse scores (before/after)
 - Real device test results
@@ -759,11 +785,13 @@ Include:
 - Remaining optimization opportunities
 
 ### 2. Optimized Build Configuration
+
 - Updated `vite.config.js` with code splitting
 - Image optimization script
 - Service worker cache strategy
 
 ### 3. Code Changes
+
 - Lazy loading implementations
 - Animation optimizations
 - Memory leak fixes
@@ -794,15 +822,19 @@ Include:
 If time permits:
 
 ### Prerendering
+
 Use vite-plugin-ssr to prerender mobile/index.html for faster initial load.
 
 ### HTTP/2 Server Push
+
 Configure server to push critical assets before browser requests them.
 
 ### Resource Hints
+
 Add `rel="prefetch"` for likely next navigation (e.g., settings page).
 
 ### Code Coverage Analysis
+
 Use Istanbul to identify unused code that can be removed.
 
 ---

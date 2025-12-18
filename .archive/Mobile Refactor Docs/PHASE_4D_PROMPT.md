@@ -37,179 +37,182 @@ Your implementation MUST match this exact interface:
  * - Use CSS transitions or Web Animations API (no heavy libraries)
  */
 export class AnimationController {
-    /**
-     * @param {Object} options - Configuration options
-     * @param {number} options.duration - Default animation duration (ms)
-     * @param {string} options.easing - Default easing function
-     */
-    constructor(options = {}) {
-        this.duration = options.duration || 300;
-        this.easing = options.easing || 'ease-out';
-    }
+  /**
+   * @param {Object} options - Configuration options
+   * @param {number} options.duration - Default animation duration (ms)
+   * @param {string} options.easing - Default easing function
+   */
+  constructor(options = {}) {
+    this.duration = options.duration || 300;
+    this.easing = options.easing || "ease-out";
+  }
 
-    /**
-     * Animate a tile being drawn from wall to hand
-     * @param {HTMLElement} tileElement - The tile DOM element
-     * @param {Object} startPos - {x, y} start position
-     * @param {Object} endPos - {x, y} end position
-     * @returns {Promise} Resolves when animation completes
-     */
-    animateTileDraw(tileElement, startPos, endPos) {
-        return new Promise(resolve => {
-            // Add animation class
-            tileElement.classList.add('tile-drawing');
+  /**
+   * Animate a tile being drawn from wall to hand
+   * @param {HTMLElement} tileElement - The tile DOM element
+   * @param {Object} startPos - {x, y} start position
+   * @param {Object} endPos - {x, y} end position
+   * @returns {Promise} Resolves when animation completes
+   */
+  animateTileDraw(tileElement, startPos, endPos) {
+    return new Promise((resolve) => {
+      // Add animation class
+      tileElement.classList.add("tile-drawing");
 
-            // Set CSS custom properties for positions
-            tileElement.style.setProperty('--start-x', `${startPos.x}px`);
-            tileElement.style.setProperty('--start-y', `${startPos.y}px`);
-            tileElement.style.setProperty('--end-x', `${endPos.x}px`);
-            tileElement.style.setProperty('--end-y', `${endPos.y}px`);
+      // Set CSS custom properties for positions
+      tileElement.style.setProperty("--start-x", `${startPos.x}px`);
+      tileElement.style.setProperty("--start-y", `${startPos.y}px`);
+      tileElement.style.setProperty("--end-x", `${endPos.x}px`);
+      tileElement.style.setProperty("--end-y", `${endPos.y}px`);
 
-            // Remove animation class after duration
-            setTimeout(() => {
-                tileElement.classList.remove('tile-drawing');
-                resolve();
-            }, this.duration);
-        });
-    }
+      // Remove animation class after duration
+      setTimeout(() => {
+        tileElement.classList.remove("tile-drawing");
+        resolve();
+      }, this.duration);
+    });
+  }
 
-    /**
-     * Animate a tile being discarded from hand to discard pile
-     * @param {HTMLElement} tileElement - The tile DOM element
-     * @param {Object} targetPos - {x, y} target position in discard pile
-     * @returns {Promise} Resolves when animation completes
-     */
-    animateTileDiscard(tileElement, targetPos) {
-        return new Promise(resolve => {
-            // Add animation class
-            tileElement.classList.add('tile-discarding');
+  /**
+   * Animate a tile being discarded from hand to discard pile
+   * @param {HTMLElement} tileElement - The tile DOM element
+   * @param {Object} targetPos - {x, y} target position in discard pile
+   * @returns {Promise} Resolves when animation completes
+   */
+  animateTileDiscard(tileElement, targetPos) {
+    return new Promise((resolve) => {
+      // Add animation class
+      tileElement.classList.add("tile-discarding");
 
-            // Set target position
-            tileElement.style.setProperty('--target-x', `${targetPos.x}px`);
-            tileElement.style.setProperty('--target-y', `${targetPos.y}px`);
+      // Set target position
+      tileElement.style.setProperty("--target-x", `${targetPos.x}px`);
+      tileElement.style.setProperty("--target-y", `${targetPos.y}px`);
 
-            // Remove after animation + fade
-            setTimeout(() => {
-                tileElement.classList.remove('tile-discarding');
-                resolve();
-            }, this.duration + 100);
-        });
-    }
+      // Remove after animation + fade
+      setTimeout(() => {
+        tileElement.classList.remove("tile-discarding");
+        resolve();
+      }, this.duration + 100);
+    });
+  }
 
-    /**
-     * Animate a tile being claimed from discard pile to hand
-     * @param {HTMLElement} tileElement - The tile DOM element
-     * @param {number} sourcePlayer - Player who discarded (0-3)
-     * @param {Object} targetPos - {x, y} target position in hand
-     * @returns {Promise} Resolves when animation completes
-     */
-    animateTileClaim(tileElement, sourcePlayer, targetPos) {
-        return new Promise(resolve => {
-            // Add pulse effect first
-            tileElement.classList.add('tile-claiming-pulse');
+  /**
+   * Animate a tile being claimed from discard pile to hand
+   * @param {HTMLElement} tileElement - The tile DOM element
+   * @param {number} sourcePlayer - Player who discarded (0-3)
+   * @param {Object} targetPos - {x, y} target position in hand
+   * @returns {Promise} Resolves when animation completes
+   */
+  animateTileClaim(tileElement, sourcePlayer, targetPos) {
+    return new Promise((resolve) => {
+      // Add pulse effect first
+      tileElement.classList.add("tile-claiming-pulse");
 
-            setTimeout(() => {
-                // Then move to hand
-                tileElement.classList.remove('tile-claiming-pulse');
-                tileElement.classList.add('tile-claiming-move');
+      setTimeout(() => {
+        // Then move to hand
+        tileElement.classList.remove("tile-claiming-pulse");
+        tileElement.classList.add("tile-claiming-move");
 
-                tileElement.style.setProperty('--target-x', `${targetPos.x}px`);
-                tileElement.style.setProperty('--target-y', `${targetPos.y}px`);
+        tileElement.style.setProperty("--target-x", `${targetPos.x}px`);
+        tileElement.style.setProperty("--target-y", `${targetPos.y}px`);
 
-                setTimeout(() => {
-                    tileElement.classList.remove('tile-claiming-move');
-                    resolve();
-                }, this.duration);
-            }, 500); // Pulse for 500ms, then move
-        });
-    }
+        setTimeout(() => {
+          tileElement.classList.remove("tile-claiming-move");
+          resolve();
+        }, this.duration);
+      }, 500); // Pulse for 500ms, then move
+    });
+  }
 
-    /**
-     * Animate turn indicator appearing on player
-     * @param {HTMLElement} playerElement - Player/opponent bar element
-     * @returns {Promise} Resolves when animation completes
-     */
-    animateTurnStart(playerElement) {
-        return new Promise(resolve => {
-            playerElement.classList.add('turn-starting');
+  /**
+   * Animate turn indicator appearing on player
+   * @param {HTMLElement} playerElement - Player/opponent bar element
+   * @returns {Promise} Resolves when animation completes
+   */
+  animateTurnStart(playerElement) {
+    return new Promise((resolve) => {
+      playerElement.classList.add("turn-starting");
 
-            setTimeout(() => {
-                playerElement.classList.remove('turn-starting');
-                resolve();
-            }, 600);
-        });
-    }
+      setTimeout(() => {
+        playerElement.classList.remove("turn-starting");
+        resolve();
+      }, 600);
+    });
+  }
 
-    /**
-     * Animate turn indicator disappearing from player
-     * @param {HTMLElement} playerElement - Player/opponent bar element
-     * @returns {Promise} Resolves when animation completes
-     */
-    animateTurnEnd(playerElement) {
-        return new Promise(resolve => {
-            playerElement.classList.add('turn-ending');
+  /**
+   * Animate turn indicator disappearing from player
+   * @param {HTMLElement} playerElement - Player/opponent bar element
+   * @returns {Promise} Resolves when animation completes
+   */
+  animateTurnEnd(playerElement) {
+    return new Promise((resolve) => {
+      playerElement.classList.add("turn-ending");
 
-            setTimeout(() => {
-                playerElement.classList.remove('turn-ending');
-                resolve();
-            }, 300);
-        });
-    }
+      setTimeout(() => {
+        playerElement.classList.remove("turn-ending");
+        resolve();
+      }, 300);
+    });
+  }
 
-    /**
-     * Animate hand sorting (tiles rearranging)
-     * @param {HTMLElement} handContainer - Hand container element
-     * @returns {Promise} Resolves when animation completes
-     */
-    animateHandSort(handContainer) {
-        return new Promise(resolve => {
-            handContainer.classList.add('hand-sorting');
+  /**
+   * Animate hand sorting (tiles rearranging)
+   * @param {HTMLElement} handContainer - Hand container element
+   * @returns {Promise} Resolves when animation completes
+   */
+  animateHandSort(handContainer) {
+    return new Promise((resolve) => {
+      handContainer.classList.add("hand-sorting");
 
-            setTimeout(() => {
-                handContainer.classList.remove('hand-sorting');
-                resolve();
-            }, 400);
-        });
-    }
+      setTimeout(() => {
+        handContainer.classList.remove("hand-sorting");
+        resolve();
+      }, 400);
+    });
+  }
 
-    /**
-     * Animate exposure creation (tiles moving to exposure area)
-     * @param {HTMLElement[]} tileElements - Array of tile elements
-     * @param {Object} targetPos - {x, y} target position
-     * @returns {Promise} Resolves when animation completes
-     */
-    animateExposure(tileElements, targetPos) {
-        return new Promise(resolve => {
-            tileElements.forEach((tile, index) => {
-                tile.classList.add('tile-exposing');
-                tile.style.animationDelay = `${index * 50}ms`; // Stagger animation
-            });
+  /**
+   * Animate exposure creation (tiles moving to exposure area)
+   * @param {HTMLElement[]} tileElements - Array of tile elements
+   * @param {Object} targetPos - {x, y} target position
+   * @returns {Promise} Resolves when animation completes
+   */
+  animateExposure(tileElements, targetPos) {
+    return new Promise((resolve) => {
+      tileElements.forEach((tile, index) => {
+        tile.classList.add("tile-exposing");
+        tile.style.animationDelay = `${index * 50}ms`; // Stagger animation
+      });
 
-            setTimeout(() => {
-                tileElements.forEach(tile => {
-                    tile.classList.remove('tile-exposing');
-                    tile.style.animationDelay = '';
-                });
-                resolve();
-            }, this.duration + (tileElements.length * 50));
-        });
-    }
+      setTimeout(
+        () => {
+          tileElements.forEach((tile) => {
+            tile.classList.remove("tile-exposing");
+            tile.style.animationDelay = "";
+          });
+          resolve();
+        },
+        this.duration + tileElements.length * 50,
+      );
+    });
+  }
 
-    /**
-     * Shake animation for invalid action
-     * @param {HTMLElement} element - Element to shake
-     * @returns {Promise} Resolves when animation completes
-     */
-    animateInvalidAction(element) {
-        return new Promise(resolve => {
-            element.classList.add('invalid-action');
+  /**
+   * Shake animation for invalid action
+   * @param {HTMLElement} element - Element to shake
+   * @returns {Promise} Resolves when animation completes
+   */
+  animateInvalidAction(element) {
+    return new Promise((resolve) => {
+      element.classList.add("invalid-action");
 
-            setTimeout(() => {
-                element.classList.remove('invalid-action');
-                resolve();
-            }, 500);
-        });
-    }
+      setTimeout(() => {
+        element.classList.remove("invalid-action");
+        resolve();
+      }, 500);
+    });
+  }
 }
 ```
 
@@ -222,150 +225,166 @@ Create `mobile/styles/animations.css`:
 ```css
 /* ===== Tile Draw Animation ===== */
 @keyframes tile-draw {
-    from {
-        transform: translateY(-200px) scale(0.5);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-    }
+  from {
+    transform: translateY(-200px) scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 
 .tile-drawing {
-    animation: tile-draw 300ms ease-out;
+  animation: tile-draw 300ms ease-out;
 }
 
 /* ===== Tile Discard Animation ===== */
 @keyframes tile-discard {
-    0% {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: translateY(-30px) scale(1.1);
-        opacity: 0.8;
-    }
-    100% {
-        transform: translateY(100px) scale(0.8);
-        opacity: 0;
-    }
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-30px) scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(100px) scale(0.8);
+    opacity: 0;
+  }
 }
 
 .tile-discarding {
-    animation: tile-discard 400ms ease-in;
+  animation: tile-discard 400ms ease-in;
 }
 
 /* ===== Tile Claim Animations ===== */
 @keyframes claim-pulse {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
-    }
-    50% {
-        transform: scale(1.2);
-        box-shadow: 0 0 20px rgba(255, 215, 0, 1);
-    }
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+  }
+  50% {
+    transform: scale(1.2);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 1);
+  }
 }
 
 .tile-claiming-pulse {
-    animation: claim-pulse 500ms ease-in-out;
+  animation: claim-pulse 500ms ease-in-out;
 }
 
 @keyframes claim-move {
-    from {
-        transform: translateY(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateY(-200px);
-        opacity: 0.3;
-    }
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-200px);
+    opacity: 0.3;
+  }
 }
 
 .tile-claiming-move {
-    animation: claim-move 300ms ease-out;
+  animation: claim-move 300ms ease-out;
 }
 
 /* ===== Turn Indicator Animations ===== */
 @keyframes turn-start {
-    0% {
-        border-left-width: 0;
-        box-shadow: none;
-    }
-    50% {
-        border-left-width: 8px;
-        box-shadow: 0 0 24px rgba(255, 215, 0, 1);
-    }
-    100% {
-        border-left-width: 4px;
-        box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
-    }
+  0% {
+    border-left-width: 0;
+    box-shadow: none;
+  }
+  50% {
+    border-left-width: 8px;
+    box-shadow: 0 0 24px rgba(255, 215, 0, 1);
+  }
+  100% {
+    border-left-width: 4px;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+  }
 }
 
 .turn-starting {
-    animation: turn-start 600ms ease-out;
+  animation: turn-start 600ms ease-out;
 }
 
 @keyframes turn-end {
-    from {
-        border-left-width: 4px;
-        box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
-    }
-    to {
-        border-left-width: 0;
-        box-shadow: none;
-    }
+  from {
+    border-left-width: 4px;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+  }
+  to {
+    border-left-width: 0;
+    box-shadow: none;
+  }
 }
 
 .turn-ending {
-    animation: turn-end 300ms ease-in;
+  animation: turn-end 300ms ease-in;
 }
 
 /* ===== Hand Sort Animation ===== */
 @keyframes hand-sort {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .hand-sorting .mobile-tile {
-    animation: hand-sort 400ms ease-in-out;
+  animation: hand-sort 400ms ease-in-out;
 }
 
 /* ===== Exposure Animation ===== */
 @keyframes tile-expose {
-    0% {
-        transform: translateY(0) rotate(0deg);
-        opacity: 1;
-    }
-    50% {
-        transform: translateY(-40px) rotate(5deg);
-        opacity: 0.8;
-    }
-    100% {
-        transform: translateY(0) rotate(0deg);
-        opacity: 1;
-    }
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-40px) rotate(5deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
 }
 
 .tile-exposing {
-    animation: tile-expose 300ms ease-out;
+  animation: tile-expose 300ms ease-out;
 }
 
 /* ===== Invalid Action Animation ===== */
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-    20%, 40%, 60%, 80% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
 }
 
 .invalid-action {
-    animation: shake 500ms ease-in-out;
-    border-color: #f44336 !important;
+  animation: shake 500ms ease-in-out;
+  border-color: #f44336 !important;
 }
 
 /* ===== Performance Optimization ===== */
@@ -375,12 +394,12 @@ Create `mobile/styles/animations.css`:
 .tile-claiming-pulse,
 .tile-claiming-move,
 .tile-exposing {
-    will-change: transform, opacity;
+  will-change: transform, opacity;
 }
 
 .turn-starting,
 .turn-ending {
-    will-change: border-left-width, box-shadow;
+  will-change: border-left-width, box-shadow;
 }
 
 /* Force hardware acceleration */
@@ -388,7 +407,7 @@ Create `mobile/styles/animations.css`:
 .tile-discarding,
 .tile-claiming-pulse,
 .tile-claiming-move {
-    transform: translateZ(0);
+  transform: translateZ(0);
 }
 ```
 
@@ -399,18 +418,18 @@ Create `mobile/styles/animations.css`:
 ### Example 1: Animate Tile Draw
 
 ```javascript
-import { AnimationController } from './animations/AnimationController.js';
+import { AnimationController } from "./animations/AnimationController.js";
 
 const animator = new AnimationController();
 
 // When tile is drawn from wall
-gameController.on('TILE_DRAWN', async (data) => {
-    const tileElement = document.querySelector(`[data-index="${data.index}"]`);
-    const wallPos = { x: 200, y: -100 }; // Top of screen
-    const handPos = { x: 200, y: 600 }; // Bottom (hand area)
+gameController.on("TILE_DRAWN", async (data) => {
+  const tileElement = document.querySelector(`[data-index="${data.index}"]`);
+  const wallPos = { x: 200, y: -100 }; // Top of screen
+  const handPos = { x: 200, y: 600 }; // Bottom (hand area)
 
-    await animator.animateTileDraw(tileElement, wallPos, handPos);
-    // Animation complete - tile is now in hand
+  await animator.animateTileDraw(tileElement, wallPos, handPos);
+  // Animation complete - tile is now in hand
 });
 ```
 
@@ -419,10 +438,10 @@ gameController.on('TILE_DRAWN', async (data) => {
 ```javascript
 // When player discards a tile
 async function discardTile(tileElement) {
-    const discardPilePos = { x: 200, y: 300 }; // Center area
+  const discardPilePos = { x: 200, y: 300 }; // Center area
 
-    await animator.animateTileDiscard(tileElement, discardPilePos);
-    // Animation complete - remove tile from hand, add to discard pile
+  await animator.animateTileDiscard(tileElement, discardPilePos);
+  // Animation complete - remove tile from hand, add to discard pile
 }
 ```
 
@@ -430,12 +449,12 @@ async function discardTile(tileElement) {
 
 ```javascript
 // When opponent discards and player claims
-gameController.on('TILE_CLAIMED', async (data) => {
-    const tileElement = document.querySelector('.discard-tile.latest');
-    const handPos = { x: 200, y: 600 };
+gameController.on("TILE_CLAIMED", async (data) => {
+  const tileElement = document.querySelector(".discard-tile.latest");
+  const handPos = { x: 200, y: 600 };
 
-    await animator.animateTileClaim(tileElement, data.sourcePlayer, handPos);
-    // Animation complete - tile moved to hand
+  await animator.animateTileClaim(tileElement, data.sourcePlayer, handPos);
+  // Animation complete - tile moved to hand
 });
 ```
 
@@ -443,13 +462,17 @@ gameController.on('TILE_CLAIMED', async (data) => {
 
 ```javascript
 // When turn changes
-gameController.on('TURN_CHANGED', async (data) => {
-    const prevPlayerBar = document.querySelector(`[data-player="${data.prevPlayer}"]`);
-    const newPlayerBar = document.querySelector(`[data-player="${data.currentPlayer}"]`);
+gameController.on("TURN_CHANGED", async (data) => {
+  const prevPlayerBar = document.querySelector(
+    `[data-player="${data.prevPlayer}"]`,
+  );
+  const newPlayerBar = document.querySelector(
+    `[data-player="${data.currentPlayer}"]`,
+  );
 
-    await animator.animateTurnEnd(prevPlayerBar);
-    await animator.animateTurnStart(newPlayerBar);
-    // Turn indicator updated
+  await animator.animateTurnEnd(prevPlayerBar);
+  await animator.animateTurnStart(newPlayerBar);
+  // Turn indicator updated
 });
 ```
 
@@ -458,6 +481,7 @@ gameController.on('TURN_CHANGED', async (data) => {
 ## Animation Specifications
 
 ### 1. Tile Draw
+
 - **Duration:** 300ms
 - **Effect:** Slide from top with scale + fade in
 - **Start:** Off-screen top, scale 0.5, opacity 0
@@ -465,12 +489,14 @@ gameController.on('TURN_CHANGED', async (data) => {
 - **Easing:** ease-out
 
 ### 2. Tile Discard
+
 - **Duration:** 400ms
 - **Effect:** Arc up then fade down to center
 - **Keyframes:** 0% normal, 50% raised +30px, 100% lowered +100px with fade
 - **Easing:** ease-in
 
 ### 3. Tile Claim
+
 - **Duration:** 500ms pulse + 300ms move
 - **Effect:** Pulse/glow, then move to hand
 - **Step 1:** Pulse with yellow glow (500ms)
@@ -478,6 +504,7 @@ gameController.on('TURN_CHANGED', async (data) => {
 - **Easing:** ease-in-out (pulse), ease-out (move)
 
 ### 4. Turn Indicator
+
 - **Start Duration:** 600ms
 - **End Duration:** 300ms
 - **Effect:** Glowing border expands/contracts
@@ -486,18 +513,21 @@ gameController.on('TURN_CHANGED', async (data) => {
 - **Easing:** ease-out (start), ease-in (end)
 
 ### 5. Hand Sort
+
 - **Duration:** 400ms
 - **Effect:** All tiles bounce slightly while rearranging
 - **Keyframes:** 0% normal, 50% raised -10px, 100% normal
 - **Easing:** ease-in-out
 
 ### 6. Exposure
+
 - **Duration:** 300ms per tile
 - **Effect:** Tiles lift and rotate slightly, staggered
 - **Stagger:** 50ms delay between each tile
 - **Easing:** ease-out
 
 ### 7. Invalid Action
+
 - **Duration:** 500ms
 - **Effect:** Shake left-right, red border flash
 - **Keyframes:** Shake ±5px horizontally
@@ -549,19 +579,19 @@ Add support for users who prefer reduced motion:
 
 ```css
 @media (prefers-reduced-motion: reduce) {
-    .tile-drawing,
-    .tile-discarding,
-    .tile-claiming-pulse,
-    .tile-claiming-move,
-    .tile-exposing,
-    .turn-starting,
-    .turn-ending,
-    .hand-sorting .mobile-tile,
-    .invalid-action {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
+  .tile-drawing,
+  .tile-discarding,
+  .tile-claiming-pulse,
+  .tile-claiming-move,
+  .tile-exposing,
+  .turn-starting,
+  .turn-ending,
+  .hand-sorting .mobile-tile,
+  .invalid-action {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 ```
 
@@ -577,28 +607,29 @@ Your AnimationController will be used by:
 - **MobileGameController** (Phase 3B): Exposure animations
 
 Example integration:
+
 ```javascript
 // mobile/MobileGameController.js
-import { AnimationController } from './animations/AnimationController.js';
+import { AnimationController } from "./animations/AnimationController.js";
 
 export class MobileGameController {
-    constructor() {
-        this.animator = new AnimationController({
-            duration: 300,
-            easing: 'ease-out'
-        });
+  constructor() {
+    this.animator = new AnimationController({
+      duration: 300,
+      easing: "ease-out",
+    });
 
-        this.setupAnimations();
-    }
+    this.setupAnimations();
+  }
 
-    setupAnimations() {
-        this.gameController.on('TILE_DRAWN', async (data) => {
-            const tile = this.findTileElement(data.index);
-            await this.animator.animateTileDraw(tile, wallPos, handPos);
-        });
+  setupAnimations() {
+    this.gameController.on("TILE_DRAWN", async (data) => {
+      const tile = this.findTileElement(data.index);
+      await this.animator.animateTileDraw(tile, wallPos, handPos);
+    });
 
-        // ... more animation subscriptions
-    }
+    // ... more animation subscriptions
+  }
 }
 ```
 
@@ -607,9 +638,11 @@ export class MobileGameController {
 ## Allowed Imports
 
 ✅ **Allowed:**
+
 - No imports needed (pure CSS + vanilla JS)
 
 ❌ **Forbidden:**
+
 - `gsap` or any animation library
 - `anime.js` or similar
 - `phaser` (no Phaser on mobile)
@@ -660,6 +693,7 @@ Use Chrome DevTools to verify:
 ## Questions?
 
 If anything is unclear:
+
 1. Check MDN docs for Web Animations API
 2. Review CSS transform/transition documentation
 3. Test animations on real mobile device (not just desktop)

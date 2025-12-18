@@ -5,12 +5,14 @@ Use this checklist to track progress through all four phases.
 ## Phase 1: Extend GameController to Be Complete
 
 ### Task 1.1: Analyze GameLogic
+
 - [x] Review gameLogic.js methods
 - [x] Document all responsibilities
 - [x] Identify pure logic vs rendering
 - [x] Create REFACTOR_PHASE1_ANALYSIS.md
 
 ### Task 1.2: Remove WallDataWrapper & Fix Wall Synchronization
+
 - [x] Remove WallDataWrapper class from GameController.js
 - [x] Update GameController.createWall() to use sharedTable
 - [x] Fix findTileInWall() for Phaser Tiles
@@ -20,6 +22,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Remove WallDataWrapper, use shared wall directly"
 
 ### Task 1.3: Create Rich Event System
+
 - [x] Create core/events/GameEvents.js
 - [x] Define event structure with animation parameters
 - [x] Update GameController to emit rich events
@@ -29,6 +32,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Add rich event system with animation parameters"
 
 ### Task 1.4: Implement GameController.deal()
+
 - [x] Create GameController.deal() method (delegated to dealTiles)
 - [x] Move deal logic from GameLogic
 - [x] Implement sequential tile dealing
@@ -38,6 +42,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Implement phases with rich events"
 
 ### Task 1.5: Implement GameController Charleston Phase
+
 - [x] Move Charleston logic from GameLogic
 - [x] Create charlestonPhase() method
 - [x] Create executeCharlestonPasses() method
@@ -48,6 +53,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Implement phases with rich events"
 
 ### Task 1.6: Implement GameController Courtesy Phase
+
 - [x] Move courtesy logic from GameLogic
 - [x] Create courtesyPhase() method
 - [x] Create courtesy voting
@@ -58,6 +64,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Implement phases with rich events"
 
 ### Task 1.7: Implement GameController Main Loop
+
 - [x] Move main loop from GameLogic
 - [x] Implement pickFromWall()
 - [x] Implement chooseDiscard()
@@ -73,6 +80,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Implement phases with rich events"
 
 ### Task 1.8: Remove GameLogic Dependencies
+
 - [x] Search for all GameLogic references in GameController
 - [x] Verify only comments reference GameLogic
 - [x] Verify GameController is self-contained
@@ -80,6 +88,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Verify GameController has no GameLogic dependencies"
 
 ### Task 1.9: Update GameScene
+
 - [x] Remove WallDataWrapper usage
 - [x] Clean up GameScene initialization
 - [x] Remove stale code from wrapper attempt
@@ -88,6 +97,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Clean GameScene initialization"
 
 ### Phase 1 Final Checks
+
 - [x] `npm run lint` passes (no GameController errors)
 - [x] `npm run build` succeeds
 - [x] Manual test: Deal phase completes (through rich events)
@@ -103,6 +113,7 @@ Use this checklist to track progress through all four phases.
 ## Phase 2: Complete PhaserAdapter Implementation
 
 ### Task 2.1: Create Animation Library
+
 - [x] Create desktop/animations/AnimationLibrary.js
 - [x] Implement tile movement animations
 - [x] Implement group animations
@@ -111,6 +122,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Create animation library"
 
 ### Task 2.2: Implement Tile/Hand Management
+
 - [x] Create desktop/managers/TileManager.js
 - [x] Implement tile sprite creation/destruction
 - [x] Implement hand layout for all positions
@@ -120,6 +132,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Create TileManager"
 
 ### Task 2.3: Implement State-Based Button Management
+
 - [x] Create desktop/managers/ButtonManager.js
 - [x] Create button configuration by state
 - [x] Implement updateForState() method
@@ -129,6 +142,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Create ButtonManager"
 
 ### Task 2.4: Implement Hand Selection & Interaction
+
 - [x] Extend TileManager for selection
 - [x] Implement selectTile() method
 - [x] Implement tile raising on selection
@@ -139,6 +153,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Implement tile selection"
 
 ### Task 2.5: Implement Dialog/Prompt System
+
 - [x] Create desktop/managers/DialogManager.js
 - [x] Implement yes/no dialogs
 - [x] Implement pass selection dialogs
@@ -150,6 +165,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Create DialogManager"
 
 ### Task 2.6: Implement Event Handlers
+
 - [x] Implement onStateChanged()
 - [x] Implement onGameStarted()
 - [x] Implement onGameEnded()
@@ -170,17 +186,20 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Implement PhaserAdapter event handlers"
 
 ### Task 2.7: Implement Hand Sorting
+
 - [x] Wire sort buttons to callbacks
 - [x] Implement sort animations
 - [x] Test: Sort buttons work
 - [x] Commit: "refactor: Implement hand sorting"
 
 ### Task 2.8: Implement Audio Integration
+
 - [x] Implement audio triggers in animations
 - [x] Test: Audio plays at correct times
 - [x] Commit: "refactor: Integrate audio"
 
 ### Task 2.9: Remove GameLogic Dependency
+
 - [x] Remove gameLogic.updateUI() calls
 - [x] Remove gameLogic.state assignments
 - [x] Update PhaserAdapter constructor
@@ -189,6 +208,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Remove GameLogic dependency from PhaserAdapter"
 
 ### Phase 2 Final Checks
+
 - [x] `npm run lint` passes
 - [x] `npm run build` succeeds
 - [x] Deal phase animates correctly
@@ -206,6 +226,7 @@ Use this checklist to track progress through all four phases.
 ## Phase 3: Remove GameLogic Completely
 
 ### Task 3.1: Identify Unique GameLogic Code
+
 - [x] Review GameLogic for unique code
 - [x] Identify HintAnimationManager usage
 - [x] Identify utility functions
@@ -213,6 +234,7 @@ Use this checklist to track progress through all four phases.
 - [x] Create list of code to migrate
 
 ### Task 3.2: Move Unique Functionality
+
 - [x] Move HintAnimationManager (if used) → Created hintAnimationManager.js
 - [x] Move utility functions to utils.js
 - [x] Migrate custom logic
@@ -220,6 +242,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Remove GameLogic completely"
 
 ### Task 3.3: Delete GameLogic Files
+
 - [x] Delete gameLogic.js (1,943 lines removed)
 - [x] Delete GameLogic-specific files
 - [x] Run `npm run lint` to find broken references
@@ -229,6 +252,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Remove GameLogic completely"
 
 ### Task 3.4: Update GameScene Initialization
+
 - [x] Remove gGameLogic references from imports
 - [x] Simplify table creation
 - [x] Create GameLogicStub with minimal interface
@@ -237,6 +261,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Remove GameLogic completely"
 
 ### Task 3.5: Remove Adapter Band-Aid References
+
 - [x] Remove gameLogic param from PhaserAdapter constructor
 - [x] Update PhaserAdapter references to use scene.gGameLogic
 - [x] Remove remaining gameLogic references
@@ -244,6 +269,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Remove GameLogic completely"
 
 ### Task 3.6: Final Cleanup
+
 - [x] Remove GameLogic imports from all files
 - [x] Update Table constructor to not require gameLogic
 - [x] Update Player constructor to not require gameLogic
@@ -253,6 +279,7 @@ Use this checklist to track progress through all four phases.
 - [x] Commit: "refactor: Remove GameLogic completely"
 
 ### Phase 3 Final Checks
+
 - [x] `npm run lint` passes (0 errors from our changes)
 - [x] `npm run build` succeeds (1,525 KB chunk size)
 - [x] Game plays without errors
@@ -266,23 +293,27 @@ Use this checklist to track progress through all four phases.
 ## Phase 3.5: Eliminate GameLogicStub and Refactor Legacy Dependencies
 
 ### Task 3.5.1: Analyze Hand/TileSet Dependencies
+
 - [x] Document all gameLogic references
 - [x] Identify usage patterns
 - [x] Create dependency analysis
 
 ### Task 3.5.2: Move HintAnimationManager to Desktop
+
 - [x] Move to `desktop/managers/HintAnimationManager.js`
 - [x] Update imports in GameScene.js
 - [x] Update HintAnimationManager constructor
 - [x] Test: npm run lint passes
 
 ### Task 3.5.3: Refactor Hand/TileSet Error Display
+
 - [x] Remove gameLogic parameter from Hand constructor
 - [x] Update error display to use scene.errorText directly
 - [x] Replace all displayErrorText() calls
 - [x] Test: Error messages still display
 
 ### Task 3.5.4: Refactor Hand/TileSet State Checks
+
 - [x] Add validation mode to Hand/TileSet
 - [x] Add setValidationMode() method
 - [x] Replace state checks with mode checks
@@ -290,6 +321,7 @@ Use this checklist to track progress through all four phases.
 - [x] Test: Selection validation works
 
 ### Task 3.5.5: Refactor Hand/TileSet discardTile Access
+
 - [x] Add discardTile field to Hand
 - [x] Add setDiscardTile() method
 - [x] Replace gameLogic.discardTile references
@@ -297,29 +329,34 @@ Use this checklist to track progress through all four phases.
 - [x] Test: Exposure validation works
 
 ### Task 3.5.6: Clean Up Table Reference
+
 - [x] Verify direct table access
 - [x] Update Hand constructor as needed
 - [x] Test: Hand can access data
 
 ### Task 3.5.7: Update HintAnimationManager Dependencies
+
 - [x] Update constructor to accept scene, table, aiEngine, card directly
 - [x] Replace all gameLogic references
 - [x] Update GameScene initialization
 - [x] Test: Hints still work
 
 ### Task 3.5.8: Delete gameLogicStub.js
+
 - [x] Verify no references remain
 - [x] Delete file
 - [x] Remove import from GameScene
 - [x] Test: npm run lint passes, npm run build succeeds
 
 ### Task 3.5.9: Update References Throughout
+
 - [x] Search for all gameLogicStub references
 - [x] Remove imports and initialization
 - [x] Test: Game plays without errors
 - [x] Commit: "refactor: Remove gameLogicStub completely"
 
 ### Phase 3.5 Final Checks
+
 - [x] `npm run lint` passes
 - [x] `npm run build` succeeds
 - [x] Game plays without errors
@@ -333,12 +370,14 @@ Use this checklist to track progress through all four phases.
 ## Phase 4: Wire Mobile Renderer to GameController
 
 ### Task 4.1: Connect GameController to Mobile main.js
+
 - [x] Create GameController instance in mobile/main.js
 - [x] Wire initialization with same options as desktop
 - [x] Test: GameController initializes without Phaser
 - [x] Implement UI_PROMPT handlers for all interaction types
 
 ### Task 4.2: Wire Opponent Bars
+
 - [x] Create OpponentBar elements for 3 AI players
 - [x] Subscribe to HAND_UPDATED events
 - [x] Subscribe to TILE_DRAWN events
@@ -346,6 +385,7 @@ Use this checklist to track progress through all four phases.
 - [x] Test: Opponent bars display and update
 
 ### Task 4.3: Wire Hand Renderer for Human Player
+
 - [x] Connect HandRenderer to GameController
 - [x] Subscribe to HAND_UPDATED events
 - [x] Subscribe to TILE_DRAWN events
@@ -355,12 +395,14 @@ Use this checklist to track progress through all four phases.
 - [x] Test: Can select/deselect tiles
 
 ### Task 4.4: Wire Discard Pile Display
+
 - [x] Connect DiscardPile component
 - [x] Subscribe to TILE_DISCARDED events
 - [x] Display recent discards
 - [x] Test: Discards display and update
 
 ### Task 4.5: Implement Charleston Phase UI
+
 - [x] Handle UI_PROMPT for CHARLESTON_PASS
 - [x] Implement tile selection with validation (exactly 3 tiles)
 - [x] Handle UI_PROMPT for CHARLESTON_CONTINUE
@@ -368,6 +410,7 @@ Use this checklist to track progress through all four phases.
 - [x] Test: Charleston phase playable on mobile
 
 ### Task 4.6: Implement Main Loop Interaction
+
 - [x] Handle UI_PROMPT for CHOOSE_DISCARD
 - [x] Handle UI_PROMPT for CLAIM_DISCARD
 - [x] Handle UI_PROMPT for SELECT_TILES (exposures)
@@ -375,6 +418,7 @@ Use this checklist to track progress through all four phases.
 - [x] Test: Main loop playable on mobile
 
 ### Task 4.7: Wire Audio (Optional - Deferred)
+
 - [ ] Create audio player for mobile
 - [ ] Subscribe to tile events
 - [ ] Play sounds for pickup, discard, drop
@@ -382,6 +426,7 @@ Use this checklist to track progress through all four phases.
 - Note: Skipped for Phase 4 - can be added later without GameController changes
 
 ### Task 4.8: Document Mobile Renderer Integration
+
 - [x] Create MOBILE_RENDERER_INTEGRATION.md
 - [x] Document architecture pattern
 - [x] Document event subscription pattern
@@ -392,6 +437,7 @@ Use this checklist to track progress through all four phases.
 - [x] Include guide for building new renderers
 
 ### Task 4.9: Test Mobile with Same GameController as Desktop
+
 - [x] Lint and build pass
 - [x] All components initialized without errors
 - [x] Game logic integration confirmed
@@ -400,6 +446,7 @@ Use this checklist to track progress through all four phases.
 - [ ] Manual play-through test (manual verification step)
 
 ### Phase 4 Final Checks
+
 - [x] GameController runs in mobile context
 - [x] All components connected and working
 - [x] Charleston phase handlers implemented
@@ -417,6 +464,7 @@ Use this checklist to track progress through all four phases.
 ## Final Verification
 
 ### Code Quality
+
 - [ ] `npm run lint` passes with no warnings
 - [ ] `npm run build` succeeds
 - [ ] No TODO/FIXME comments left
@@ -424,6 +472,7 @@ Use this checklist to track progress through all four phases.
 - [ ] Architectural decisions documented
 
 ### Functionality
+
 - [ ] Deal phase works with animations
 - [ ] Charleston phase works with UI
 - [ ] Courtesy phase works with UI
@@ -438,12 +487,14 @@ Use this checklist to track progress through all four phases.
 - [ ] Exposure system works
 
 ### Testing
+
 - [ ] All unit tests pass
 - [ ] Manual play-through successful
 - [ ] No console errors
 - [ ] Performance acceptable
 
 ### Documentation
+
 - [ ] REFACTOR.md complete
 - [ ] REFACTOR_PHASE1.md complete
 - [ ] REFACTOR_PHASE2.md complete
@@ -453,6 +504,7 @@ Use this checklist to track progress through all four phases.
 - [ ] Architecture documented
 
 ### Separation of Concerns
+
 - [ ] GameController has zero Phaser imports ✅
 - [ ] GameController has zero UI logic ✅
 - [ ] PhaserAdapter has zero game rule logic ✅
@@ -463,20 +515,21 @@ Use this checklist to track progress through all four phases.
 
 ## Overall Status
 
-| Phase | Status | Start Date | End Date |
-|-------|--------|-----------|----------|
-| 1: GameController | ✅ Complete | 2024-11-xx | 2024-11-xx |
-| 2: PhaserAdapter | ✅ Complete | 2024-11-14 | 2024-11-14 |
-| 3: Remove GameLogic | ✅ Complete | 2024-11-14 | 2024-11-14 |
-| 3.5: Eliminate Stub | ✅ Complete | 2024-11-14 | 2024-11-14 |
-| 4: Wire Mobile | ✅ Complete | 2024-11-14 | 2024-11-14 |
-| **TOTAL** | ✅ 100% Complete (5/5) | 2024-11-xx | 2024-11-14 |
+| Phase               | Status                 | Start Date | End Date   |
+| ------------------- | ---------------------- | ---------- | ---------- |
+| 1: GameController   | ✅ Complete            | 2024-11-xx | 2024-11-xx |
+| 2: PhaserAdapter    | ✅ Complete            | 2024-11-14 | 2024-11-14 |
+| 3: Remove GameLogic | ✅ Complete            | 2024-11-14 | 2024-11-14 |
+| 3.5: Eliminate Stub | ✅ Complete            | 2024-11-14 | 2024-11-14 |
+| 4: Wire Mobile      | ✅ Complete            | 2024-11-14 | 2024-11-14 |
+| **TOTAL**           | ✅ 100% Complete (5/5) | 2024-11-xx | 2024-11-14 |
 
 ---
 
 ## Notes & Observations
 
 **Phase 2 Completion (2024-11-14)**:
+
 - AnimationLibrary: 12 reusable animation functions, all return Promises
 - TileManager: Complete tile lifecycle with intelligent layout for 4 positions
 - ButtonManager: State-driven button management (10+ states covered)
@@ -489,6 +542,7 @@ Use this checklist to track progress through all four phases.
 **Key Achievement**: PhaserAdapter now handles 100% of rendering via clean event subscription pattern. GameController is pure logic with zero rendering dependencies.
 
 **Phase 3 Completion (2024-11-14)**:
+
 - GameLogic.js deleted (1,943 lines removed)
 - GameLogicStub created as minimal bridge for legacy code
 - HintAnimationManager extracted as standalone module
@@ -502,6 +556,7 @@ Use this checklist to track progress through all four phases.
 **Key Achievement (Phase 3)**: Complete separation achieved. GameLogic monolithic class removed. GameController is the sole source of game logic. PhaserAdapter is pure rendering. Legacy Hand/TileSet code has minimal dependencies via GameLogicStub.
 
 **Phase 3.5 Completion (2024-11-14)**:
+
 - GameLogicStub completely eliminated
 - Hand/TileSet refactored to not require gameLogic
 - HintAnimationManager moved to desktop/managers
@@ -509,6 +564,7 @@ Use this checklist to track progress through all four phases.
 - npm run lint ✅ PASS, npm run build ✅ PASS
 
 **Phase 4 Completion (2024-11-14)**:
+
 - **Architecture Proven**: Mobile renderer uses identical GameController as desktop
 - **Zero Game Logic Changes**: All rendering differences handled via events only
 - **Full Game Flow**: Charleston → Courtesy → Main Loop all playable on mobile
@@ -532,6 +588,7 @@ Use this checklist to track progress through all four phases.
 ## Refactor Complete! 🎉
 
 All phases successfully completed. GameController is now:
+
 - ✅ Pure game logic (no Phaser, no rendering knowledge)
 - ✅ Event-driven architecture (20+ documented events)
 - ✅ Proven platform-agnostic (works with Phaser and HTML/CSS)
@@ -540,6 +597,7 @@ All phases successfully completed. GameController is now:
 - ✅ Production-ready code quality
 
 The codebase is now ready for:
+
 - Mobile app development (native, React Native, Flutter)
 - Alternative web renderers (terminal, VR, AI analysis)
 - Team development (clear separation of concerns)

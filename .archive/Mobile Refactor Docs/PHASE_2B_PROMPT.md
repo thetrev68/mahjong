@@ -13,6 +13,7 @@
 ## Current State
 
 ### ✅ Phase 2A Complete
+
 - GameController + PhaserAdapter integrated into GameScene.js
 - Both GameController and GameLogic run in parallel
 - PhaserAdapter listens to GameController events
@@ -20,6 +21,7 @@
 - Linting passes, dev server runs
 
 ### ❌ Phase 2B Tasks
+
 1. **Complete GameController implementation** - Move game flow from GameLogic to GameController
 2. **Wall/tile synchronization** - GameController tracks existing Phaser wall tiles
 3. **Full UI prompt integration** - Complete PhaserAdapter callback system
@@ -34,7 +36,9 @@
 **File:** `core/GameController.js`
 
 #### 1.1 Complete `createWall()`
+
 **Current code (line ~149):**
+
 ```javascript
 createWall() {
     this.wall = [];
@@ -44,12 +48,14 @@ createWall() {
 ```
 
 **Requirements:**
+
 - Create TileData objects matching Phaser wall tiles
 - Use existing gTileGroups from gameObjects.js
 - Assign unique index to each tile (0-151 or 0-159)
 - Match order of Phaser wall creation
 
 **Implementation approach:**
+
 ```javascript
 createWall() {
     this.wall = [];
@@ -99,7 +105,9 @@ shuffleWall() {
 ---
 
 #### 1.2 Complete `dealTiles()`
+
 **Current code (line ~166):**
+
 ```javascript
 async dealTiles() {
     this.setState(STATE.DEAL);
@@ -109,6 +117,7 @@ async dealTiles() {
 ```
 
 **Requirements:**
+
 - Deal 13 tiles to each player (52 total)
 - Update PlayerData.hand for each player
 - Remove tiles from wall
@@ -116,6 +125,7 @@ async dealTiles() {
 - Emit TILES_DEALT when complete
 
 **Implementation approach:**
+
 ```javascript
 async dealTiles() {
     this.setState(STATE.DEAL);
@@ -154,7 +164,9 @@ async dealTiles() {
 ---
 
 #### 1.3 Uncomment and complete `charlestonPhase()`
+
 **Current code (line ~188):**
+
 ```javascript
 async charlestonPhase() {
     // Charleston Phase 1 (required)
@@ -166,6 +178,7 @@ async charlestonPhase() {
 ```
 
 **Requirements:**
+
 - Charleston Phase 1 (required): 3 passes (right, across, left)
 - Query for Phase 2 continuation
 - Charleston Phase 2 (optional): 3 passes
@@ -178,9 +191,11 @@ Keep existing structure but ensure it emits events properly. Reference existing 
 ---
 
 #### 1.4 Implement `gameLoop()`
+
 **Current code:** Not implemented
 
 **Requirements:**
+
 - Main game loop (draw → discard → claim check)
 - Handle player turns
 - Check for Mahjong after each discard
@@ -188,6 +203,7 @@ Keep existing structure but ensure it emits events properly. Reference existing 
 - Emit events for all actions
 
 **Implementation approach:**
+
 ```javascript
 async gameLoop() {
     this.setState(STATE.LOOP_PICK_FROM_WALL);
@@ -232,6 +248,7 @@ async gameLoop() {
 ## Task 2: Wall/Tile Synchronization
 
 ### Problem
+
 GameController creates TileData objects, but Phaser wall has actual Tile sprites. Need to synchronize indices.
 
 ### Solution: Sync Phaser Wall Tiles with GameController
@@ -240,6 +257,7 @@ GameController creates TileData objects, but Phaser wall has actual Tile sprites
 When GameScene creates the Phaser wall, assign indices to match GameController:
 
 **File:** `GameScene.js`
+
 ```javascript
 // After wall.create()
 await this.gTable.wall.create(false);  // Create Phaser tiles
@@ -273,6 +291,7 @@ Modify Wall.create() to assign indices during tile creation (already done - tile
 ### 3.1 Fix `setupDiscardPrompt()` - Add Tile Selection Callback
 
 **Current code (line ~353):**
+
 ```javascript
 setupDiscardPrompt(options) {
     // Phase 2A: Use existing GameLogic drag-and-drop
@@ -282,11 +301,13 @@ setupDiscardPrompt(options) {
 ```
 
 **Requirements:**
+
 - Enable tile selection in hand
 - When tile is clicked/dragged, call `this.pendingPromptCallback(tileData)`
 - Disable other tiles during selection
 
 **Implementation approach:**
+
 ```javascript
 setupDiscardPrompt(options) {
     const player = this.table.players[PLAYER.BOTTOM];
@@ -308,6 +329,7 @@ setupDiscardPrompt(options) {
 ```
 
 **Add to Hand class (gameObjects_hand.js):**
+
 ```javascript
 enableTileSelection(callback) {
     const tileArray = this.hidden.tileArray;
@@ -334,6 +356,7 @@ disableTileSelection() {
 ### 3.2 Complete `setupClaimPrompt()` - Enable Buttons
 
 **Current code (line ~365):**
+
 ```javascript
 setupClaimPrompt(options) {
     const {tile: tileData, options: claimOptions} = options;
@@ -342,11 +365,13 @@ setupClaimPrompt(options) {
 ```
 
 **Requirements:**
+
 - Show only available claim options (from `claimOptions` array)
 - Disable buttons that aren't valid
 - Pass back claim choice to GameController
 
 **Implementation approach:**
+
 ```javascript
 setupClaimPrompt(options) {
     const {tile: tileData, options: claimOptions} = options;
@@ -381,6 +406,7 @@ setupClaimPrompt(options) {
 ### 4.1 Update Start Button to Use GameController Only
 
 **Current code (GameScene.js:124-138):**
+
 ```javascript
 // Phase 2A: Call GameController.startGame() to test event system
 await this.gameController.startGame();
@@ -390,6 +416,7 @@ this.gGameLogic.start();
 ```
 
 **Phase 2B: Remove GameLogic.start()**
+
 ```javascript
 // Phase 2B: GameController now handles game flow
 await this.gameController.startGame();
@@ -404,6 +431,7 @@ await this.gameController.startGame();
 **File:** `desktop/adapters/PhaserAdapter.js`
 
 **Current code (line ~143):**
+
 ```javascript
 onStateChanged(data) {
     const {oldState, newState} = data;
@@ -416,6 +444,7 @@ onStateChanged(data) {
 ```
 
 **Phase 2B: Remove updateUI() call**
+
 ```javascript
 onStateChanged(data) {
     const {oldState, newState} = data;
@@ -440,6 +469,7 @@ updateButtonState(state) {
 ### 4.3 Keep GameLogic for AI and Card Validation (Phase 2B)
 
 **Don't remove:**
+
 - `this.gGameLogic.gameAI` - Still needed by GameController
 - `this.gGameLogic.card` - Still needed for hand validation
 
@@ -452,36 +482,42 @@ updateButtonState(state) {
 ### Manual Test Plan
 
 **Test 1: Game Start**
+
 - [ ] Click "Start Game" button
 - [ ] Verify tiles are dealt via GameController
 - [ ] Check console for event logs
 - [ ] Confirm no errors
 
 **Test 2: Tile Draw & Discard**
+
 - [ ] Human player draws tile (GameController emits TILE_DRAWN)
 - [ ] Select tile to discard (callback works)
 - [ ] Verify tile moves to discard pile
 - [ ] Check wall counter updates
 
 **Test 3: Charleston**
+
 - [ ] Select 3 tiles to pass
 - [ ] Verify tiles pass correctly (3 rounds)
 - [ ] Check Phase 2 query works
 - [ ] Confirm courtesy pass voting
 
 **Test 4: Discard Claims**
+
 - [ ] AI discards a tile
 - [ ] Human has Pung/Kong available
 - [ ] Verify claim buttons appear
 - [ ] Test claiming tile
 
 **Test 5: Mahjong**
+
 - [ ] Complete a winning hand
 - [ ] Verify Mahjong detection
 - [ ] Check fireworks animation
 - [ ] Confirm game ends properly
 
 **Test 6: Wall Game**
+
 - [ ] Reduce wall size artificially (for faster testing)
 - [ ] Let game run until wall empty
 - [ ] Verify "wall game - no winner" message
@@ -491,28 +527,33 @@ updateButtonState(state) {
 ## Success Criteria
 
 ✅ **GameController fully handles game flow**
+
 - createWall() populates wall with TileData
 - dealTiles() deals 13 tiles to each player
 - charlestonPhase() handles all Charleston logic
 - gameLoop() manages draw/discard/claim cycle
 
 ✅ **Wall/tile synchronization works**
+
 - Phaser wall tiles have correct indices
 - PhaserAdapter finds tiles by index
 - No "creating new tile" warnings in console
 
 ✅ **PhaserAdapter UI prompts work**
+
 - setupDiscardPrompt() enables tile selection with callback
 - setupClaimPrompt() shows correct buttons
 - All prompts return data to GameController
 
 ✅ **GameLogic phased out**
+
 - GameController.startGame() is only entry point
 - GameLogic.start() removed
 - GameLogic.updateUI() disabled
 - Desktop game works identically to Phase 2A
 
 ✅ **Testing**
+
 - All manual tests pass
 - No console errors
 - Linting passes
@@ -533,14 +574,17 @@ updateButtonState(state) {
 ## Known Risks
 
 **Risk 1: Wall synchronization fails**
+
 - Mitigation: Test createWall() logic separately, verify indices match
 - Fallback: PhaserAdapter.createPhaserTile() already has fallback creation
 
 **Risk 2: UI prompts break existing flow**
+
 - Mitigation: Keep GameLogic methods temporarily, test incrementally
 - Fallback: Can revert setupDiscardPrompt() to Phase 2A version
 
 **Risk 3: Charleston logic differs from GameLogic**
+
 - Mitigation: Copy charleston logic from GameLogic.charleston() exactly
 - Fallback: Keep both systems running until verified identical
 

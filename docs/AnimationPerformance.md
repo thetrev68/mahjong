@@ -10,12 +10,12 @@
 
 ### Frame Rate Goals
 
-| Device Category | Target FPS | Min Acceptable | Notes |
-|-----------------|------------|----------------|-------|
-| Modern Mobile (2020+) | 60fps | 55fps | iPhone 12+, Galaxy S20+ |
-| Mid-Range Mobile (2018-2020) | 60fps | 50fps | iPhone X, Galaxy S10 |
-| Budget Mobile (2016-2018) | 60fps | 45fps | Acceptable degradation |
-| Desktop (All) | 60fps | 60fps | No excuses on desktop |
+| Device Category              | Target FPS | Min Acceptable | Notes                   |
+| ---------------------------- | ---------- | -------------- | ----------------------- |
+| Modern Mobile (2020+)        | 60fps      | 55fps          | iPhone 12+, Galaxy S20+ |
+| Mid-Range Mobile (2018-2020) | 60fps      | 50fps          | iPhone X, Galaxy S10    |
+| Budget Mobile (2016-2018)    | 60fps      | 45fps          | Acceptable degradation  |
+| Desktop (All)                | 60fps      | 60fps          | No excuses on desktop   |
 
 **Critical:** Must never drop below 30fps (perceived as "janky")
 
@@ -27,36 +27,36 @@
 
 **Test Device:** iPhone 12 Pro (iOS 17)
 
-| Metric | Target | Actual | Status |
-|--------|--------|--------|--------|
-| Average FPS | 60 | 59.8 | ✅ Pass |
-| Min FPS | 55 | 57.2 | ✅ Pass |
-| Frame drops | < 5 | 2 | ✅ Pass |
-| Total duration | 2500ms | 2480ms | ✅ Pass |
-| Memory increase | < 5MB | 2.1MB | ✅ Pass |
-| CPU usage peak | < 30% | 18% | ✅ Pass |
+| Metric          | Target | Actual | Status  |
+| --------------- | ------ | ------ | ------- |
+| Average FPS     | 60     | 59.8   | ✅ Pass |
+| Min FPS         | 55     | 57.2   | ✅ Pass |
+| Frame drops     | < 5    | 2      | ✅ Pass |
+| Total duration  | 2500ms | 2480ms | ✅ Pass |
+| Memory increase | < 5MB  | 2.1MB  | ✅ Pass |
+| CPU usage peak  | < 30%  | 18%    | ✅ Pass |
 
 **Test Device:** Samsung Galaxy A52 (Android 13, Mid-Range)
 
-| Metric | Target | Actual | Status |
-|--------|--------|--------|--------|
-| Average FPS | 60 | 56.4 | ✅ Pass |
-| Min FPS | 50 | 51.8 | ✅ Pass |
-| Frame drops | < 10 | 7 | ✅ Pass |
-| Total duration | 2500ms | 2490ms | ✅ Pass |
-| Memory increase | < 5MB | 3.4MB | ✅ Pass |
-| CPU usage peak | < 40% | 28% | ✅ Pass |
+| Metric          | Target | Actual | Status  |
+| --------------- | ------ | ------ | ------- |
+| Average FPS     | 60     | 56.4   | ✅ Pass |
+| Min FPS         | 50     | 51.8   | ✅ Pass |
+| Frame drops     | < 10   | 7      | ✅ Pass |
+| Total duration  | 2500ms | 2490ms | ✅ Pass |
+| Memory increase | < 5MB  | 3.4MB  | ✅ Pass |
+| CPU usage peak  | < 40%  | 28%    | ✅ Pass |
 
 **Test Device:** iPhone 8 (iOS 16, Budget 2017 Device)
 
-| Metric | Target | Actual | Status |
-|--------|--------|--------|--------|
-| Average FPS | 60 | 48.2 | ⚠️ Below target |
-| Min FPS | 45 | 46.1 | ✅ Pass |
-| Frame drops | < 15 | 12 | ✅ Pass |
-| Total duration | 2500ms | 2510ms | ✅ Pass |
-| Memory increase | < 5MB | 4.2MB | ✅ Pass |
-| CPU usage peak | < 50% | 42% | ✅ Pass |
+| Metric          | Target | Actual | Status          |
+| --------------- | ------ | ------ | --------------- |
+| Average FPS     | 60     | 48.2   | ⚠️ Below target |
+| Min FPS         | 45     | 46.1   | ✅ Pass         |
+| Frame drops     | < 15   | 12     | ✅ Pass         |
+| Total duration  | 2500ms | 2510ms | ✅ Pass         |
+| Memory increase | < 5MB  | 4.2MB  | ✅ Pass         |
+| CPU usage peak  | < 50%  | 42%    | ✅ Pass         |
 
 **Analysis:**
 
@@ -152,56 +152,56 @@ Main Thread:
 ```javascript
 // mobile/utils/PerformanceMonitor.js
 export class PerformanceMonitor {
-    constructor() {
-        this.fps = 60;
-        this.frameCount = 0;
-        this.lastTime = performance.now();
-        this.frameDrops = 0;
-        this.active = false;
+  constructor() {
+    this.fps = 60;
+    this.frameCount = 0;
+    this.lastTime = performance.now();
+    this.frameDrops = 0;
+    this.active = false;
+  }
+
+  start() {
+    this.active = true;
+    this.measure();
+  }
+
+  stop() {
+    this.active = false;
+  }
+
+  measure() {
+    if (!this.active) return;
+
+    const now = performance.now();
+    const delta = now - this.lastTime;
+
+    this.fps = 1000 / delta;
+    this.frameCount++;
+
+    // Track frame drops (< 55fps)
+    if (this.fps < 55) {
+      this.frameDrops++;
+      console.warn(`Frame drop: ${this.fps.toFixed(1)} fps`);
     }
 
-    start() {
-        this.active = true;
-        this.measure();
-    }
+    this.lastTime = now;
+    requestAnimationFrame(() => this.measure());
+  }
 
-    stop() {
-        this.active = false;
-    }
+  getMetrics() {
+    return {
+      avgFPS: this.fps,
+      frameCount: this.frameCount,
+      frameDrops: this.frameDrops,
+      dropRate: (this.frameDrops / this.frameCount) * 100,
+    };
+  }
 
-    measure() {
-        if (!this.active) return;
-
-        const now = performance.now();
-        const delta = now - this.lastTime;
-
-        this.fps = 1000 / delta;
-        this.frameCount++;
-
-        // Track frame drops (< 55fps)
-        if (this.fps < 55) {
-            this.frameDrops++;
-            console.warn(`Frame drop: ${this.fps.toFixed(1)} fps`);
-        }
-
-        this.lastTime = now;
-        requestAnimationFrame(() => this.measure());
-    }
-
-    getMetrics() {
-        return {
-            avgFPS: this.fps,
-            frameCount: this.frameCount,
-            frameDrops: this.frameDrops,
-            dropRate: (this.frameDrops / this.frameCount) * 100
-        };
-    }
-
-    reset() {
-        this.frameCount = 0;
-        this.frameDrops = 0;
-        this.fps = 60;
-    }
+  reset() {
+    this.frameCount = 0;
+    this.frameDrops = 0;
+    this.fps = 60;
+  }
 }
 
 // Usage
@@ -211,7 +211,7 @@ monitor.start();
 // ... perform animation ...
 
 monitor.stop();
-console.log('Animation metrics:', monitor.getMetrics());
+console.log("Animation metrics:", monitor.getMetrics());
 ```
 
 ---
@@ -235,7 +235,7 @@ console.log(`Memory increase: ${increase.toFixed(2)} MB`);
 
 // Should be < 5MB for any single animation
 if (increase > 5) {
-    console.error('Potential memory leak!');
+  console.error("Potential memory leak!");
 }
 ```
 
@@ -251,8 +251,8 @@ if (increase > 5) {
 
 ```css
 .tile {
-    transform: translate3d(100px, 50px, 0); /* Use translate3d, not translate */
-    opacity: 0.5;
+  transform: translate3d(100px, 50px, 0); /* Use translate3d, not translate */
+  opacity: 0.5;
 }
 ```
 
@@ -260,9 +260,9 @@ if (increase > 5) {
 
 ```css
 .tile {
-    left: 100px;  /* Triggers layout */
-    top: 50px;    /* Triggers layout */
-    width: 120px; /* Triggers layout */
+  left: 100px; /* Triggers layout */
+  top: 50px; /* Triggers layout */
+  width: 120px; /* Triggers layout */
 }
 ```
 
@@ -270,21 +270,21 @@ if (increase > 5) {
 
 ```css
 .tile-animating {
-    will-change: transform, opacity;
-    /* Remove after animation! */
+  will-change: transform, opacity;
+  /* Remove after animation! */
 }
 ```
 
 **Cleanup:**
 
 ```javascript
-element.classList.add('tile-animating');
-element.style.willChange = 'transform, opacity';
+element.classList.add("tile-animating");
+element.style.willChange = "transform, opacity";
 
 await this.delay(duration);
 
-element.classList.remove('tile-animating');
-element.style.willChange = 'auto'; // Release GPU memory
+element.classList.remove("tile-animating");
+element.style.willChange = "auto"; // Release GPU memory
 ```
 
 ---
@@ -296,8 +296,8 @@ element.style.willChange = 'auto'; // Release GPU memory
 ```javascript
 // Causes multiple reflows (slow!)
 for (let i = 0; i < tiles.length; i++) {
-    tiles[i].style.left = `${i * 50}px`; // Write
-    const width = tiles[i].offsetWidth;   // Read (forces layout!)
+  tiles[i].style.left = `${i * 50}px`; // Write
+  const width = tiles[i].offsetWidth; // Read (forces layout!)
 }
 ```
 
@@ -305,11 +305,11 @@ for (let i = 0; i < tiles.length; i++) {
 
 ```javascript
 // Read all dimensions first
-const widths = tiles.map(tile => tile.offsetWidth);
+const widths = tiles.map((tile) => tile.offsetWidth);
 
 // Then write all positions
 tiles.forEach((tile, i) => {
-    tile.style.transform = `translateX(${i * widths[i]}px)`;
+  tile.style.transform = `translateX(${i * widths[i]}px)`;
 });
 ```
 
@@ -317,12 +317,12 @@ tiles.forEach((tile, i) => {
 
 ```javascript
 function updatePositions() {
-    requestAnimationFrame(() => {
-        // All DOM writes batched in single frame
-        tiles.forEach((tile, i) => {
-            tile.style.transform = `translateX(${positions[i]}px)`;
-        });
+  requestAnimationFrame(() => {
+    // All DOM writes batched in single frame
+    tiles.forEach((tile, i) => {
+      tile.style.transform = `translateX(${positions[i]}px)`;
     });
+  });
 }
 ```
 
@@ -384,13 +384,13 @@ async animateSortWithGlow(handData, glowIndices) {
 
 ```css
 .hand-container {
-    /* Isolate layout, style, and paint */
-    contain: layout style paint;
+  /* Isolate layout, style, and paint */
+  contain: layout style paint;
 }
 
 .tile {
-    /* Each tile is a compositing layer */
-    transform: translateZ(0);
+  /* Each tile is a compositing layer */
+  transform: translateZ(0);
 }
 ```
 
@@ -449,33 +449,33 @@ class CharlestonAnimationSequencer {
 ```javascript
 // Detect device performance
 function getDevicePerformance() {
-    const memory = navigator.deviceMemory; // GB (Chrome only)
-    const cores = navigator.hardwareConcurrency;
+  const memory = navigator.deviceMemory; // GB (Chrome only)
+  const cores = navigator.hardwareConcurrency;
 
-    if (memory >= 8 && cores >= 8) return 'high';
-    if (memory >= 4 && cores >= 4) return 'medium';
-    return 'low';
+  if (memory >= 8 && cores >= 8) return "high";
+  if (memory >= 4 && cores >= 4) return "medium";
+  return "low";
 }
 
 const performance = getDevicePerformance();
 
 // Adjust animation quality
 const config = {
-    high: {
-        particleEffects: true,
-        shadowQuality: 'high',
-        maxSimultaneousAnimations: 20
-    },
-    medium: {
-        particleEffects: false,
-        shadowQuality: 'medium',
-        maxSimultaneousAnimations: 10
-    },
-    low: {
-        particleEffects: false,
-        shadowQuality: 'low',
-        maxSimultaneousAnimations: 4
-    }
+  high: {
+    particleEffects: true,
+    shadowQuality: "high",
+    maxSimultaneousAnimations: 20,
+  },
+  medium: {
+    particleEffects: false,
+    shadowQuality: "medium",
+    maxSimultaneousAnimations: 10,
+  },
+  low: {
+    particleEffects: false,
+    shadowQuality: "low",
+    maxSimultaneousAnimations: 4,
+  },
 }[performance];
 ```
 
@@ -502,37 +502,37 @@ const config = {
 
 ```javascript
 // tests/performance/charleston-performance.spec.js
-test('Charleston animation maintains 55fps minimum', async ({ page }) => {
-    await page.goto('/mobile/');
+test("Charleston animation maintains 55fps minimum", async ({ page }) => {
+  await page.goto("/mobile/");
 
-    // Start performance monitoring
-    await page.evaluate(() => {
-        window.performanceMonitor = new window.PerformanceMonitor();
-        window.performanceMonitor.start();
-    });
+  // Start performance monitoring
+  await page.evaluate(() => {
+    window.performanceMonitor = new window.PerformanceMonitor();
+    window.performanceMonitor.start();
+  });
 
-    // Trigger Charleston animation
-    await page.click('#new-game-btn');
-    await page.waitForTimeout(2000);
+  // Trigger Charleston animation
+  await page.click("#new-game-btn");
+  await page.waitForTimeout(2000);
 
-    const tiles = page.locator('.hand-container .tile');
-    await tiles.nth(0).click();
-    await tiles.nth(1).click();
-    await tiles.nth(2).click();
-    await page.click('button:has-text("Pass")');
+  const tiles = page.locator(".hand-container .tile");
+  await tiles.nth(0).click();
+  await tiles.nth(1).click();
+  await tiles.nth(2).click();
+  await page.click('button:has-text("Pass")');
 
-    // Wait for animation to complete
-    await page.waitForTimeout(3000);
+  // Wait for animation to complete
+  await page.waitForTimeout(3000);
 
-    // Get performance metrics
-    const metrics = await page.evaluate(() => {
-        window.performanceMonitor.stop();
-        return window.performanceMonitor.getMetrics();
-    });
+  // Get performance metrics
+  const metrics = await page.evaluate(() => {
+    window.performanceMonitor.stop();
+    return window.performanceMonitor.getMetrics();
+  });
 
-    // Assert performance targets
-    expect(metrics.avgFPS).toBeGreaterThan(55);
-    expect(metrics.dropRate).toBeLessThan(10); // < 10% frame drops
+  // Assert performance targets
+  expect(metrics.avgFPS).toBeGreaterThan(55);
+  expect(metrics.dropRate).toBeLessThan(10); // < 10% frame drops
 });
 ```
 
@@ -556,16 +556,16 @@ const times = [];
 let last = performance.now();
 
 function measure() {
-    const now = performance.now();
-    times.push(now - last);
-    last = now;
-    requestAnimationFrame(measure);
+  const now = performance.now();
+  times.push(now - last);
+  last = now;
+  requestAnimationFrame(measure);
 }
 
 measure();
 
 // After animation, check for long frames
-const longFrames = times.filter(t => t > 20); // > 20ms (< 50fps)
+const longFrames = times.filter((t) => t > 20); // > 20ms (< 50fps)
 console.log(`Long frames: ${longFrames.length}/${times.length}`);
 ```
 
@@ -593,7 +593,7 @@ console.log(`Long frames: ${longFrames.length}/${times.length}`);
 const before = performance.memory.usedJSHeapSize;
 
 for (let i = 0; i < 10; i++) {
-    await animateCharleston();
+  await animateCharleston();
 }
 
 const after = performance.memory.usedJSHeapSize;
@@ -603,7 +603,7 @@ console.log(`Memory per animation: ${perAnimation.toFixed(2)} MB`);
 
 // Should be < 0.5MB per animation (with cleanup)
 if (perAnimation > 0.5) {
-    console.error('Potential memory leak!');
+  console.error("Potential memory leak!");
 }
 ```
 
@@ -644,24 +644,24 @@ if (perAnimation > 0.5) {
 
 ### Per-Animation Limits
 
-| Resource | Budget | Critical Threshold |
-|----------|--------|--------------------|
-| JavaScript execution | < 50ms total | 100ms |
-| DOM nodes created | < 10 | 50 |
-| CSS classes added | < 5 per element | 10 |
-| Event listeners | < 5 per animation | 20 |
-| Memory increase | < 5MB | 10MB |
-| Animation duration | See timing ref | N/A |
+| Resource             | Budget            | Critical Threshold |
+| -------------------- | ----------------- | ------------------ |
+| JavaScript execution | < 50ms total      | 100ms              |
+| DOM nodes created    | < 10              | 50                 |
+| CSS classes added    | < 5 per element   | 10                 |
+| Event listeners      | < 5 per animation | 20                 |
+| Memory increase      | < 5MB             | 10MB               |
+| Animation duration   | See timing ref    | N/A                |
 
 ### Per-Frame Limits (16.67ms budget)
 
-| Task | Budget | Notes |
-|------|--------|-------|
-| JavaScript | < 5ms | Includes event handlers |
-| Style recalc | < 3ms | CSS changes |
-| Layout | < 2ms | Reflows |
-| Paint | < 5ms | Rasterization |
-| Composite | < 1.67ms | GPU compositing |
+| Task         | Budget   | Notes                   |
+| ------------ | -------- | ----------------------- |
+| JavaScript   | < 5ms    | Includes event handlers |
+| Style recalc | < 3ms    | CSS changes             |
+| Layout       | < 2ms    | Reflows                 |
+| Paint        | < 5ms    | Rasterization           |
+| Composite    | < 1.67ms | GPU compositing         |
 
 ---
 
@@ -669,14 +669,14 @@ if (perAnimation > 0.5) {
 
 ### Minimum Test Coverage
 
-| Device | OS | Browser | Performance Tier | Priority |
-|--------|-----|---------|------------------|----------|
-| iPhone 14 Pro | iOS 17 | Safari | High | P1 |
-| iPhone 12 | iOS 16 | Safari | High | P1 |
-| iPhone 8 | iOS 16 | Safari | Low | P2 |
-| Galaxy S23 | Android 14 | Chrome | High | P1 |
-| Galaxy A52 | Android 13 | Chrome | Medium | P1 |
-| Pixel 7 | Android 14 | Chrome | High | P2 |
+| Device        | OS         | Browser | Performance Tier | Priority |
+| ------------- | ---------- | ------- | ---------------- | -------- |
+| iPhone 14 Pro | iOS 17     | Safari  | High             | P1       |
+| iPhone 12     | iOS 16     | Safari  | High             | P1       |
+| iPhone 8      | iOS 16     | Safari  | Low              | P2       |
+| Galaxy S23    | Android 14 | Chrome  | High             | P1       |
+| Galaxy A52    | Android 13 | Chrome  | Medium           | P1       |
+| Pixel 7       | Android 14 | Chrome  | High             | P2       |
 
 **Desktop Testing:**
 
@@ -714,6 +714,6 @@ if (perAnimation > 0.5) {
 
 ## Changelog
 
-| Date | Version | Changes | Author |
-|------|---------|---------|--------|
-| 2025-01-23 | 1.0 | Initial performance documentation | Sonnet |
+| Date       | Version | Changes                           | Author |
+| ---------- | ------- | --------------------------------- | ------ |
+| 2025-01-23 | 1.0     | Initial performance documentation | Sonnet |

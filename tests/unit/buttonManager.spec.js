@@ -1,4 +1,5 @@
 /** @vitest-environment jsdom */
+/* global MouseEvent */
 import { describe, it, expect, beforeEach } from "vitest";
 import { ButtonManager } from "../../desktop/managers/ButtonManager.js";
 
@@ -16,7 +17,9 @@ describe("ButtonManager", () => {
     const bm = new ButtonManager(null, null);
 
     let count = 0;
-    bm.registerCallback("button1", () => { count += 1; });
+    bm.registerCallback("button1", () => {
+      count += 1;
+    });
 
     // Click should trigger
     btn.dispatchEvent(new MouseEvent("click"));

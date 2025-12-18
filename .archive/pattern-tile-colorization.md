@@ -16,17 +16,20 @@ This notes how the American Mahjong Assistant renders AI pattern recommendations
 
 ```ts
 // packages/frontend/src/utils/pattern-color-utils.ts
-export function getColoredPatternParts(pattern: string, groups: PatternGroup[]) {
-  const patternParts = pattern.split(' ')
-  const groupSequence = groups.map(group => ({
-    baseName: String(group.Group).replace(/_\d+$/, ''),
-    color: group.display_color
-  }))
+export function getColoredPatternParts(
+  pattern: string,
+  groups: PatternGroup[],
+) {
+  const patternParts = pattern.split(" ");
+  const groupSequence = groups.map((group) => ({
+    baseName: String(group.Group).replace(/_\d+$/, ""),
+    color: group.display_color,
+  }));
 
   return patternParts.map((part, index) => ({
     text: part,
-    color: groupSequence[index]?.color || 'blue'
-  }))
+    color: groupSequence[index]?.color || "blue",
+  }));
 }
 ```
 
@@ -41,23 +44,32 @@ export function getColoredPatternParts(pattern: string, groups: PatternGroup[]) 
 // packages/frontend/src/utils/tile-display-utils.ts
 export function getTileDisplayChar(tileId: string): TileDisplayChar {
   if (tileId.match(/^[1-9][bcd]$/)) {
-    return { char: tileId[0], color: tileId[1] === 'b' ? 'green' : tileId[1] === 'c' ? 'red' : 'blue', tileId }
+    return {
+      char: tileId[0],
+      color: tileId[1] === "b" ? "green" : tileId[1] === "c" ? "red" : "blue",
+      tileId,
+    };
   }
   // Dragons, winds, flowers, jokers map to G/R/D/N/E/W/S/F/J with fallback
 }
 
-export function getPatternDisplayChars(patternTiles: string[], playerTiles: string[] = []) {
-  const playerCounts = tally(playerTiles)
-  const usedCounts = new Map<string, number>()
+export function getPatternDisplayChars(
+  patternTiles: string[],
+  playerTiles: string[] = [],
+) {
+  const playerCounts = tally(playerTiles);
+  const usedCounts = new Map<string, number>();
 
-  return patternTiles.map(tileId => {
-    const display = getTileDisplayChar(tileId)
-    const normalized = normalize(tileId)
-    const canMatch = (playerCounts.get(normalized) || 0) > (usedCounts.get(normalized) || 0)
+  return patternTiles.map((tileId) => {
+    const display = getTileDisplayChar(tileId);
+    const normalized = normalize(tileId);
+    const canMatch =
+      (playerCounts.get(normalized) || 0) > (usedCounts.get(normalized) || 0);
 
-    if (canMatch) usedCounts.set(normalized, (usedCounts.get(normalized) || 0) + 1)
-    return { ...display, isMatched: canMatch }
-  })
+    if (canMatch)
+      usedCounts.set(normalized, (usedCounts.get(normalized) || 0) + 1);
+    return { ...display, isMatched: canMatch };
+  });
 }
 ```
 
@@ -70,20 +82,26 @@ export function getPatternDisplayChars(patternTiles: string[], playerTiles: stri
 ```ts
 // packages/frontend/src/utils/tile-display-utils.ts
 export function getTileCharClasses(tileChar: TileDisplayChar, inverted = true) {
-  const base = 'font-mono text-sm font-bold px-1 rounded'
-  const shouldInvert = inverted && tileChar.isMatched
+  const base = "font-mono text-sm font-bold px-1 rounded";
+  const shouldInvert = inverted && tileChar.isMatched;
 
   if (shouldInvert) {
-    if (tileChar.color === 'green') return `${base} bg-green-600 text-white border border-green-700`
-    if (tileChar.color === 'red')   return `${base} bg-red-600 text-white border border-red-700`
-    if (tileChar.color === 'blue')  return `${base} bg-blue-600 text-white border border-blue-700`
-    return `${base} bg-gray-800 text-white border border-gray-900`
+    if (tileChar.color === "green")
+      return `${base} bg-green-600 text-white border border-green-700`;
+    if (tileChar.color === "red")
+      return `${base} bg-red-600 text-white border border-red-700`;
+    if (tileChar.color === "blue")
+      return `${base} bg-blue-600 text-white border border-blue-700`;
+    return `${base} bg-gray-800 text-white border border-gray-900`;
   }
 
-  if (tileChar.color === 'green') return `${base} bg-white text-green-600 border border-green-200`
-  if (tileChar.color === 'red')   return `${base} bg-white text-red-600 border border-red-200`
-  if (tileChar.color === 'blue')  return `${base} bg-white text-blue-600 border border-blue-200`
-  return `${base} bg-white text-gray-800 border border-gray-300`
+  if (tileChar.color === "green")
+    return `${base} bg-white text-green-600 border border-green-200`;
+  if (tileChar.color === "red")
+    return `${base} bg-white text-red-600 border border-red-200`;
+  if (tileChar.color === "blue")
+    return `${base} bg-white text-blue-600 border border-blue-200`;
+  return `${base} bg-white text-gray-800 border border-gray-300`;
 }
 ```
 
@@ -92,10 +110,17 @@ export function getTileCharClasses(tileChar: TileDisplayChar, inverted = true) {
 - Consumer components can disable inversion (`invertMatches={false}`) when they only want suit-colored text.
 
 ```ts
-export function renderPatternVariation(patternTiles: string[], playerTiles: string[], options) {
-  const chars = getPatternDisplayChars(patternTiles, options.showMatches ? playerTiles : [])
+export function renderPatternVariation(
+  patternTiles: string[],
+  playerTiles: string[],
+  options,
+) {
+  const chars = getPatternDisplayChars(
+    patternTiles,
+    options.showMatches ? playerTiles : [],
+  );
   // Adds spacing either from `handPattern`, explicit groups, or every four tiles by default
-  return applySpacing(chars, options)
+  return applySpacing(chars, options);
 }
 ```
 
@@ -110,19 +135,22 @@ const displayChars = renderPatternVariation(patternTiles, playerTiles, {
   invertMatches,
   spacing,
   patternGroups,
-  handPattern
-})
+  handPattern,
+});
 
 return (
   <div className="flex gap-1">
-    {displayChars.map(char =>
-      char.char === ' ' ? <span key={i} className="mx-1" /> :
-      <span key={i} className={getTileCharClasses(char, invertMatches)}>
-        {char.char}
-      </span>
+    {displayChars.map((char) =>
+      char.char === " " ? (
+        <span key={i} className="mx-1" />
+      ) : (
+        <span key={i} className={getTileCharClasses(char, invertMatches)}>
+          {char.char}
+        </span>
+      ),
     )}
   </div>
-)
+);
 ```
 
 - Handles scrollable layout, optional completion stats, and exposes knobs (`showMatches`, `invertMatches`, `spacing`) for different contexts (analysis card, gameplay panel, etc.).
@@ -138,17 +166,20 @@ return (
 ### Integration Example
 
 ```tsx
-import { renderPatternVariation, getTileCharClasses } from './tile-display-utils'
-import { getColoredPatternParts, getColorClasses } from './pattern-color-utils'
+import {
+  renderPatternVariation,
+  getTileCharClasses,
+} from "./tile-display-utils";
+import { getColoredPatternParts, getColorClasses } from "./pattern-color-utils";
 
 function PatternPreview({ pattern, playerTiles }) {
-  const coloredHeader = getColoredPatternParts(pattern.pattern, pattern.groups)
+  const coloredHeader = getColoredPatternParts(pattern.pattern, pattern.groups);
   const displayChars = renderPatternVariation(pattern.tiles, playerTiles, {
     showMatches: true,
     invertMatches: true,
     spacing: true,
-    handPattern: pattern.pattern
-  })
+    handPattern: pattern.pattern,
+  });
 
   return (
     <section className="space-y-2">
@@ -162,17 +193,18 @@ function PatternPreview({ pattern, playerTiles }) {
 
       <div className="flex flex-wrap gap-1">
         {displayChars.map((char, i) =>
-          char.char === ' '
-            ? <span key={i} className="w-2" />
-            : <span key={i} className={getTileCharClasses(char, true)}>
-                {char.char}
-              </span>
+          char.char === " " ? (
+            <span key={i} className="w-2" />
+          ) : (
+            <span key={i} className={getTileCharClasses(char, true)}>
+              {char.char}
+            </span>
+          ),
         )}
       </div>
     </section>
-  )
+  );
 }
 ```
 
 This snippet mirrors the production logic: it builds the colored header, renders the 14-tile strip, and automatically inverts suit colors for tiles that the player already holds. Porting these helpers ensures consistent behavior between projects and keeps the AI guidance visually aligned with the NMJL card.
-

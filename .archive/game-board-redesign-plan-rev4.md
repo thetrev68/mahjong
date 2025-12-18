@@ -1,9 +1,11 @@
 # Game Board Redesign Implementation Plan (Rev 4)
 
 ## Overview
+
 This revision (Rev4) builds on Rev3 by adding significantly more detail, including precise code snippets, line references, and error-handling notes. This ensures even a basic LLM can implement it step-by-step without ambiguity. Based on feedback, I've expanded sections with exact modifications, variable checks, and fallback logic to address potential implementation pitfalls. The plan remains focused on the Mahjong codebase, improving board structure, tile management, scene handling, and hand objects.
 
 ## Objectives
+
 - Remove all wall visuals completely.
 - Add a dynamic wall counter (progress bar).
 - Center and optimize discard pile.
@@ -12,15 +14,19 @@ This revision (Rev4) builds on Rev3 by adding significantly more detail, includi
 - Ensure smooth transitions and error-free execution.
 
 ## Changes
+
 Same as Rev3, with added granularity.
 
 ## Step-by-Step Implementation Steps
 
 ### Step 1: Remove Wall Display
+
 #### 1.1 Modify Home Page Animation
+
 - **File:** [`homePageTileManager.js`](homePageTileManager.js:141)
   - Replace `animatePileToWall()` entirely to distribute tiles to player positions. Cycle through positions for 4 players (13 tiles each), place remaining tiles off-screen or in a hidden pile.
   - New code:
+
     ```
     animatePileToWall() {
       this.animationState = "dealing";
@@ -59,6 +65,7 @@ Same as Rev3, with added granularity.
       return positions;
     }
     ```
+
 - **File:** [`gameObjects.js`](gameObjects.js:359)
   - Delete Wall class methods `showWall()` and `showWallBack()`. Simplify Wall to:
     ```
@@ -69,14 +76,17 @@ Same as Rev3, with added granularity.
     ```
 
 #### 1.2 Remove Wall Calls
+
 - **File:** [`gameLogic.js`](gameLogic.js:158) (approx)
   - Replace wall calls with nothing; ensure discards update independently.
 - **File:** [`gameObjects_table.js`](gameObjects_table.js:180)
   - Remove `this.wall.showWallBack()`.
 
 ### Step 2: Implement Wall Tile Counter
+
 - **File:** [`GameScene.js`](GameScene.js:44)
   - Add methods:
+
     ```
     createWallTileCounter() {
       const bar = this.add.graphics({x: WINDOW_WIDTH / 2 - 100, y: 30});
@@ -98,6 +108,7 @@ Same as Rev3, with added granularity.
       this.gGameLogic.wallCounter.bar.setVisible(true);
     }
     ```
+
   - In `create()`: `this.gGameLogic.wallCounter = this.createWallTileCounter();`.
 
 - **File:** [`gameLogic.js`](gameLogic.js)
@@ -105,10 +116,12 @@ Same as Rev3, with added granularity.
   - Add check: `if (count < 0) console.error('Negative wall count');`.
 
 ### Step 3: Reposition Discard Pile
+
 - **File:** [`gameObjects.js`](gameObjects.js:514)
   - Update as in Rev3, but add: if (this.tileArray.length === 0) return;.
 
 ### Step 4: Implement Hand Racks
+
 - **File:** [`gameObjects_hand.js`](gameObjects_hand.js:294)
   - Add to constructor: `this.rackGraphics = null;`.
   - Add `updateRack(playerInfo)`:
@@ -125,16 +138,20 @@ Same as Rev3, with added granularity.
   - In `showHand()`: call `this.updateRack(playerInfo)` before positioning tiles.
 
 ### Step 5: Exposed Tiles
+
 - As in Rev3, with added checks for empty sets.
 
 ### Step 6: Integration and Cleanup
+
 - Grep for "wall" and remove remnants.
 - Test: Run `npm run dev`, check console for errors.
 
 ## Potential Pitfalls
+
 - **Off-Screen Tiles:** If positions calculate negative, clamp to 0.
 - **Null Checks:** Add `if (!tile.sprite) return;` in animations.
 - **Infinite Loops:** Limit promise waits with timeouts.
 
 ## Testing Recommendations
+
 - Same as Rev3, plus: Log every position calculation; test with 0 tiles.

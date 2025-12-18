@@ -9,6 +9,7 @@
 ## Summary
 
 Phase 2B successfully completed the migration of desktop game flow from GameLogic to GameController. The GameController now fully handles:
+
 - Wall creation and shuffling
 - Tile dealing to all players
 - Charleston phase (3-pass system with optional phase 2)
@@ -23,7 +24,9 @@ The desktop game continues to work identically to Phase 2A, but now powered enti
 ## Files Modified
 
 ### Core Game Controller
+
 **[core/GameController.js](core/GameController.js)** - 658 lines
+
 - ✅ Implemented `createWall()` - Generates 152 tiles (or 160 with blanks) matching gameObjects.js logic
 - ✅ Implemented `shuffleWall()` - Fisher-Yates shuffle algorithm
 - ✅ Implemented `dealTiles()` - Deals 13 tiles to each of 4 players with optional animation
@@ -32,13 +35,16 @@ The desktop game continues to work identically to Phase 2A, but now powered enti
 - ✅ Updated `startGame()` - Now calls createWall(), dealTiles(), charlestonPhase(), gameLoop()
 
 **Key Implementation Details:**
+
 - Wall creation uses same tile group structure as gameObjects.js (CRACK, BAM, DOT, WIND, DRAGON, FLOWER, JOKER, BLANK)
 - Tiles assigned unique indices (0-151 or 0-159) for synchronization with Phaser wall
 - Charleston passes tiles between players based on direction (PLAYER.RIGHT, PLAYER.TOP, PLAYER.LEFT)
 - Game loop handles self-draw Mahjong, discard claims, exposures, and wall game
 
 ### Desktop Adapter
+
 **[desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js)** - 612 lines
+
 - ✅ Completed `setupDiscardPrompt()` - Uses Hand.enableTileSelection() with callback
 - ✅ Completed `setupClaimPrompt()` - Shows only available claim options (Mahjong/Pung/Kong/Pass)
 - ✅ Added `setupCharlestonPassPrompt()` - Enables multi-tile selection (3 tiles) with "Pass" button
@@ -47,24 +53,30 @@ The desktop game continues to work identically to Phase 2A, but now powered enti
 - ✅ Added `updateButtonState()` - Manages button visibility based on game state
 
 **Key Implementation Details:**
+
 - Discard prompt converts Phaser Tile → TileData via TileData.fromPhaserTile()
 - Charleston pass monitors selection count with window.setInterval(), enables button when 3 tiles selected
 - Claim prompt dynamically shows/hides buttons based on available options array
 - All prompts use pendingPromptCallback pattern to return data to GameController
 
 ### Hand Class
+
 **[gameObjects_hand.js](gameObjects_hand.js)** - 1487 lines
+
 - ✅ Added `enableTileSelection(callback)` - Adds one-time pointerup handler to all hidden tiles
 - ✅ Added `disableTileSelection()` - Removes all pointerup listeners from tiles
 
 **Key Implementation Details:**
+
 - enableTileSelection() sets up single-click handlers that call callback with selected Tile
 - Ignores tiles that were dragged (checks tile.drag flag)
 - Automatically disables selection after callback fires
 - Uses existing sprite.setInteractive() and sprite.once("pointerup") Phaser APIs
 
 ### Game Scene
+
 **[GameScene.js](GameScene.js)** - ~360 lines
+
 - ✅ Removed `this.gGameLogic.start()` calls (lines 129, 138)
 - ✅ Updated comments from "Phase 2A" to "Phase 2B"
 - ✅ GameController.startGame() is now the sole entry point
@@ -74,41 +86,48 @@ The desktop game continues to work identically to Phase 2A, but now powered enti
 ## Testing Results
 
 ### Lint Check
+
 ```bash
 npm run lint
 ```
+
 **Result:** ✅ Pass
+
 - 0 errors
 - 29 warnings (mostly unused variables, await in loops - acceptable for game logic)
 
 ### Dev Server
+
 ```bash
 npm run dev
 ```
+
 **Result:** ✅ Starts successfully
+
 - No runtime errors in console
 - Vite dev server runs on http://localhost:5173
 
 ### Manual Testing Checklist
 
-| Test | Status | Notes |
-|------|--------|-------|
-| Game loads without errors | ⚠️ Needs Testing | Requires manual verification |
-| Start button triggers game | ⚠️ Needs Testing | GameController.startGame() should be called |
-| Wall created with 152 tiles | ⚠️ Needs Testing | Check console for "Wall created" message |
-| Tiles dealt to all players | ⚠️ Needs Testing | Each player should receive 13 tiles |
-| Charleston Phase 1 (3 passes) | ⚠️ Needs Testing | Right → Across → Left |
-| Charleston Phase 2 query | ⚠️ Needs Testing | Yes/No buttons appear |
-| Charleston Phase 2 (optional) | ⚠️ Needs Testing | Left → Across → Right |
-| Courtesy pass voting | ⚠️ Needs Testing | Yes/No buttons for each player |
-| Tile draw from wall | ⚠️ Needs Testing | Current player draws tile |
-| Tile discard selection | ⚠️ Needs Testing | Click tile to discard |
-| Discard claim prompt | ⚠️ Needs Testing | Buttons show for available claims |
-| Pung/Kong exposures | ⚠️ Needs Testing | Tiles move to exposed area |
-| Mahjong detection | ⚠️ Needs Testing | Fireworks animation on win |
-| Wall game (no tiles left) | ⚠️ Needs Testing | "Wall game - no winner" message |
+| Test                          | Status           | Notes                                       |
+| ----------------------------- | ---------------- | ------------------------------------------- |
+| Game loads without errors     | ⚠️ Needs Testing | Requires manual verification                |
+| Start button triggers game    | ⚠️ Needs Testing | GameController.startGame() should be called |
+| Wall created with 152 tiles   | ⚠️ Needs Testing | Check console for "Wall created" message    |
+| Tiles dealt to all players    | ⚠️ Needs Testing | Each player should receive 13 tiles         |
+| Charleston Phase 1 (3 passes) | ⚠️ Needs Testing | Right → Across → Left                       |
+| Charleston Phase 2 query      | ⚠️ Needs Testing | Yes/No buttons appear                       |
+| Charleston Phase 2 (optional) | ⚠️ Needs Testing | Left → Across → Right                       |
+| Courtesy pass voting          | ⚠️ Needs Testing | Yes/No buttons for each player              |
+| Tile draw from wall           | ⚠️ Needs Testing | Current player draws tile                   |
+| Tile discard selection        | ⚠️ Needs Testing | Click tile to discard                       |
+| Discard claim prompt          | ⚠️ Needs Testing | Buttons show for available claims           |
+| Pung/Kong exposures           | ⚠️ Needs Testing | Tiles move to exposed area                  |
+| Mahjong detection             | ⚠️ Needs Testing | Fireworks animation on win                  |
+| Wall game (no tiles left)     | ⚠️ Needs Testing | "Wall game - no winner" message             |
 
 **Testing Notes:**
+
 - All core functionality implemented
 - Manual testing required to verify complete game flow
 - Expected behavior: identical to Phase 2A (GameLogic) but powered by GameController
@@ -118,6 +137,7 @@ npm run dev
 ## Architecture Changes
 
 ### Before Phase 2B (Phase 2A State)
+
 ```
 GameScene.js
 ├─> GameController.startGame() (placeholder - only emits GAME_STARTED)
@@ -126,6 +146,7 @@ GameScene.js
 ```
 
 ### After Phase 2B (Current State)
+
 ```
 GameScene.js
 └─> GameController.startGame() (full game flow)
@@ -156,6 +177,7 @@ GameLogic (retained for AI/Card validation)
 ## Known Issues & Future Work
 
 ### Minor Issues (Non-Blocking)
+
 1. **Unused imports in GameController.js**
    - `VNUMBER` and `HandData` imported but not used
    - **Impact:** ESLint warnings only, no runtime issues
@@ -172,6 +194,7 @@ GameLogic (retained for AI/Card validation)
    - **Alternative:** Event-based approach in future refactor
 
 ### Testing Gaps
+
 1. **No automated tests for Phase 2B**
    - All testing is manual
    - **Future:** Add Playwright tests for full game flow
@@ -181,6 +204,7 @@ GameLogic (retained for AI/Card validation)
    - **Future:** Test AI opponent behavior, hand ranking
 
 ### Phase 2C/3A Preparation
+
 1. **GameLogic still present**
    - Kept for AI (gameAI) and card validation (card)
    - **Phase 6A:** Refactor into core/AIEngine.js
@@ -194,6 +218,7 @@ GameLogic (retained for AI/Card validation)
 ## Success Criteria
 
 ### ✅ Completed
+
 - [x] GameController.createWall() populates wall with TileData
 - [x] GameController.dealTiles() deals 13 tiles to each player
 - [x] GameController.charlestonPhase() handles all Charleston logic
@@ -205,6 +230,7 @@ GameLogic (retained for AI/Card validation)
 - [x] Linting passes (0 errors)
 
 ### ⏸️ Pending Manual Verification
+
 - [ ] All manual tests pass
 - [ ] No console errors during gameplay
 - [ ] Game playable start to finish
@@ -239,6 +265,7 @@ GameLogic (retained for AI/Card validation)
 ## Next Steps (Phase 2C/3A)
 
 ### Immediate (Phase 2C)
+
 1. **Manual Testing**
    - Run `npm run dev`
    - Click "Start Game"
@@ -250,6 +277,7 @@ GameLogic (retained for AI/Card validation)
    - Fix edge cases (empty wall, invalid tiles, etc.)
 
 ### Future (Phase 3A)
+
 1. **Mobile Architecture**
    - Design mobile UI mockups (portrait layout)
    - Define mobile component interfaces
@@ -292,6 +320,7 @@ GameLogic (retained for AI/Card validation)
 **Remaining Budget:** ~97K tokens (65% remaining)
 
 **Breakdown:**
+
 - GameController implementation: ~15K
 - PhaserAdapter updates: ~12K
 - Hand class modifications: ~5K

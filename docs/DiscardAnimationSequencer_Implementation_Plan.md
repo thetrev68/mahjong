@@ -38,14 +38,14 @@ this.discards.push(tileToDiscard);
 
 // 3. Emit TILE_DISCARDED event
 this.emit("TILE_DISCARDED", {
-    type: "TILE_DISCARDED",
-    player: this.currentPlayer,
-    tile: tileData,
-    animation: {
-        type: "discard-slide",
-        duration: 300,
-        easing: "Power2.easeInOut"
-    }
+  type: "TILE_DISCARDED",
+  player: this.currentPlayer,
+  tile: tileData,
+  animation: {
+    type: "discard-slide",
+    duration: 300,
+    easing: "Power2.easeInOut",
+  },
 });
 
 // 4. Emit HAND_UPDATED event
@@ -163,76 +163,87 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
 
 /* Preparation lift */
 .tile-discarding-prep {
-    animation: tile-discard-prep 100ms ease-out forwards;
+  animation: tile-discard-prep 100ms ease-out forwards;
 }
 
 @keyframes tile-discard-prep {
-    from { transform: translateY(0); }
-    to { transform: translateY(-8px); }
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-8px);
+  }
 }
 
 /* Arc throw animation with rotation */
 .tile-discard-throw {
-    animation: tile-discard-throw var(--duration, 300ms) var(--easing, ease-out) forwards;
+  animation: tile-discard-throw var(--duration, 300ms) var(--easing, ease-out)
+    forwards;
 }
 
 @keyframes tile-discard-throw {
-    0% {
-        transform: translate(var(--start-x), var(--start-y)) rotate(0deg);
-        opacity: 1;
-    }
-    50% {
-        transform: translate(var(--control-x), var(--control-y))
-                   rotate(calc(var(--rotation, 360deg) * 0.5));
-        opacity: 1;
-    }
-    100% {
-        transform: translate(var(--end-x), var(--end-y))
-                   rotate(var(--rotation, 360deg));
-        opacity: 0.9;
-    }
+  0% {
+    transform: translate(var(--start-x), var(--start-y)) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(var(--control-x), var(--control-y))
+      rotate(calc(var(--rotation, 360deg) * 0.5));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y))
+      rotate(var(--rotation, 360deg));
+    opacity: 0.9;
+  }
 }
 
 /* Settle bounce in discard pile */
 .tile-settle-bounce {
-    animation: tile-settle 200ms cubic-bezier(0.5, 1.5, 0.5, 1);
+  animation: tile-settle 200ms cubic-bezier(0.5, 1.5, 0.5, 1);
 }
 
 @keyframes tile-settle {
-    0% { transform: scale(1.1) translateY(-5px); }
-    50% { transform: scale(0.95) translateY(2px); }
-    100% { transform: scale(1) translateY(0); }
+  0% {
+    transform: scale(1.1) translateY(-5px);
+  }
+  50% {
+    transform: scale(0.95) translateY(2px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* Claim interrupt animation */
 .tile-claim-interrupt {
-    animation: tile-claim-travel var(--duration, 400ms) ease-in-out forwards;
+  animation: tile-claim-travel var(--duration, 400ms) ease-in-out forwards;
 }
 
 @keyframes tile-claim-travel {
-    0% {
-        transform: translate(var(--start-x), var(--start-y)) rotate(0deg) scale(1);
-    }
-    50% {
-        transform: translate(var(--control-x), var(--control-y))
-                   rotate(calc(var(--rotation, 180deg) * 0.5)) scale(1.1);
-    }
-    100% {
-        transform: translate(var(--end-x), var(--end-y))
-                   rotate(var(--rotation, 180deg)) scale(1);
-    }
+  0% {
+    transform: translate(var(--start-x), var(--start-y)) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate(var(--control-x), var(--control-y))
+      rotate(calc(var(--rotation, 180deg) * 0.5)) scale(1.1);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y))
+      rotate(var(--rotation, 180deg)) scale(1);
+  }
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-    .tile-discard-throw,
-    .tile-claim-interrupt {
-        animation-duration: 50ms;
-    }
+  .tile-discard-throw,
+  .tile-claim-interrupt {
+    animation-duration: 50ms;
+  }
 
-    .tile-settle-bounce {
-        animation: none;
-    }
+  .tile-settle-bounce {
+    animation: none;
+  }
 }
 ```
 
@@ -354,23 +365,31 @@ animateTileDiscard(tileElement, targetPos = null) {
 **Current Code**:
 
 ```javascript
-const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, tileData, {
+const discardEvent = GameEvents.createTileDiscardedEvent(
+  this.currentPlayer,
+  tileData,
+  {
     type: "discard-slide",
     duration: 300,
-    easing: "Power2.easeInOut"
-});
+    easing: "Power2.easeInOut",
+  },
+);
 ```
 
 **Enhanced Code**:
 
 ```javascript
-const discardEvent = GameEvents.createTileDiscardedEvent(this.currentPlayer, tileData, {
-    type: "discard-arc",  // NEW: Signal enhanced animation
-    duration: this.currentPlayer === 0 ? 300 : 200,  // Human vs AI
+const discardEvent = GameEvents.createTileDiscardedEvent(
+  this.currentPlayer,
+  tileData,
+  {
+    type: "discard-arc", // NEW: Signal enhanced animation
+    duration: this.currentPlayer === 0 ? 300 : 200, // Human vs AI
     easing: "ease-out",
-    rotation: this.currentPlayer === 0 ? 360 : 180,  // NEW: Full spin for human
-    tileIndex: tileIndex  // NEW: Original index in hand for DOM lookup
-});
+    rotation: this.currentPlayer === 0 ? 360 : 180, // NEW: Full spin for human
+    tileIndex: tileIndex, // NEW: Original index in hand for DOM lookup
+  },
+);
 ```
 
 **Impact**:
@@ -503,22 +522,22 @@ getTileElementByIndex(index) {
 **Test Cases**:
 
 ```javascript
-describe('DiscardAnimationSequencer', () => {
-    test('calculates correct trajectory for human player', () => {
-        // Verify 360° rotation, higher arc
-    });
+describe("DiscardAnimationSequencer", () => {
+  test("calculates correct trajectory for human player", () => {
+    // Verify 360° rotation, higher arc
+  });
 
-    test('calculates faster trajectory for AI', () => {
-        // Verify 180° rotation, lower arc
-    });
+  test("calculates faster trajectory for AI", () => {
+    // Verify 180° rotation, lower arc
+  });
 
-    test('creates tile clone with correct styles', () => {
-        // Verify position: fixed, z-index: 9999
-    });
+  test("creates tile clone with correct styles", () => {
+    // Verify position: fixed, z-index: 9999
+  });
 
-    test('falls back gracefully if tile element not found', () => {
-        // Verify skipAnimation() called
-    });
+  test("falls back gracefully if tile element not found", () => {
+    // Verify skipAnimation() called
+  });
 });
 ```
 
@@ -570,16 +589,16 @@ If critical issues arise post-deployment:
 
 ### Files Modified
 
-| File | Lines | Risk | Change Description |
-|------|-------|------|-------------------|
-| `mobile/animations/DiscardAnimationSequencer.js` | +330 | LOW | New file following Charleston pattern |
-| `mobile/styles/animations.css` | +80/-40 | LOW | Replace old keyframes with arc animations |
-| `mobile/MobileRenderer.js` | +5/-20 | MEDIUM | Replace animation code with sequencer |
-| `mobile/animations/AnimationController.js` | -41 | MEDIUM | Remove `animateTileDiscard()` method |
-| `mobile/components/DiscardPile.js` | +30 | LOW | Add position helper methods |
-| `mobile/renderers/HandRenderer.js` | +10 | LOW | Add `getTileElementByIndex()` if missing |
-| `core/GameController.js` | ~5 | LOW | Add tileIndex + rotation to event |
-| `core/events/GameEvents.js` | ~3 | LOW | Documentation update |
+| File                                             | Lines   | Risk   | Change Description                        |
+| ------------------------------------------------ | ------- | ------ | ----------------------------------------- |
+| `mobile/animations/DiscardAnimationSequencer.js` | +330    | LOW    | New file following Charleston pattern     |
+| `mobile/styles/animations.css`                   | +80/-40 | LOW    | Replace old keyframes with arc animations |
+| `mobile/MobileRenderer.js`                       | +5/-20  | MEDIUM | Replace animation code with sequencer     |
+| `mobile/animations/AnimationController.js`       | -41     | MEDIUM | Remove `animateTileDiscard()` method      |
+| `mobile/components/DiscardPile.js`               | +30     | LOW    | Add position helper methods               |
+| `mobile/renderers/HandRenderer.js`               | +10     | LOW    | Add `getTileElementByIndex()` if missing  |
+| `core/GameController.js`                         | ~5      | LOW    | Add tileIndex + rotation to event         |
+| `core/events/GameEvents.js`                      | ~3      | LOW    | Documentation update                      |
 
 **Total LOC**: ~370 new lines, ~25 modified lines, ~41 deleted lines
 

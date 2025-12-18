@@ -20,11 +20,13 @@ Implement **TouchHandler.js** that detects mobile gestures and emits standardize
 ## Context
 
 ### What You Have
+
 1. **Interface specification:** [mobile/MOBILE_INTERFACES.md](mobile/MOBILE_INTERFACES.md) - Read the TouchHandler section
 2. **Mockup reference:** [mobile/mockup.html](mobile/mockup.html) - See what needs to be tappable
 3. **Target devices:** iPhone 12 (iOS Safari), Android mid-range (Chrome Mobile)
 
 ### What You're Building
+
 A single JavaScript class that wraps the Touch Events API (or Pointer Events API) and provides a clean, high-level gesture detection interface.
 
 ---
@@ -32,9 +34,11 @@ A single JavaScript class that wraps the Touch Events API (or Pointer Events API
 ## Required Gestures
 
 ### 1. Tap (Single Touch)
+
 **Definition:** Touch start → Touch end within 300ms, no movement > 10px
 
 **Parameters:**
+
 ```javascript
 {
     type: 'tap',
@@ -46,6 +50,7 @@ A single JavaScript class that wraps the Touch Events API (or Pointer Events API
 ```
 
 **Use Cases:**
+
 - Select a tile in hand
 - Tap DRAW button
 - Tap SORT button
@@ -55,9 +60,11 @@ A single JavaScript class that wraps the Touch Events API (or Pointer Events API
 ---
 
 ### 2. Double-Tap (Future Enhancement - Implement but Don't Wire Up)
+
 **Definition:** Two taps within 500ms, same location (±20px tolerance)
 
 **Parameters:**
+
 ```javascript
 {
     type: 'doubletap',
@@ -68,6 +75,7 @@ A single JavaScript class that wraps the Touch Events API (or Pointer Events API
 ```
 
 **Use Cases:**
+
 - Quick discard (bypass confirmation popup)
 - Quick expose tiles
 
@@ -76,9 +84,11 @@ A single JavaScript class that wraps the Touch Events API (or Pointer Events API
 ---
 
 ### 3. Long-Press (Future Enhancement - Implement but Don't Wire Up)
+
 **Definition:** Touch start → Hold for 500ms without moving > 10px
 
 **Parameters:**
+
 ```javascript
 {
     type: 'longpress',
@@ -89,6 +99,7 @@ A single JavaScript class that wraps the Touch Events API (or Pointer Events API
 ```
 
 **Use Cases:**
+
 - Show tile details
 - Context menu for tile actions
 
@@ -97,11 +108,13 @@ A single JavaScript class that wraps the Touch Events API (or Pointer Events API
 ---
 
 ### 4. Swipe-Up (Future Enhancement - Not Required)
+
 **Definition:** Touch start → Move vertically > 50px → Touch end within 300ms
 
 **Status:** Spec this interface, but implementation optional. Low priority for initial release.
 
 **Parameters:**
+
 ```javascript
 {
     type: 'swipeup',
@@ -115,6 +128,7 @@ A single JavaScript class that wraps the Touch Events API (or Pointer Events API
 ```
 
 **Use Cases:**
+
 - Expose tiles (future alternative to button press)
 
 ---
@@ -129,57 +143,57 @@ A single JavaScript class that wraps the Touch Events API (or Pointer Events API
  * Platform-agnostic wrapper around Touch Events API.
  */
 class TouchHandler {
-    /**
-     * @param {HTMLElement} rootElement - The container to attach listeners to
-     * @param {Object} options - Configuration options
-     * @param {number} options.tapMaxDuration - Max ms for tap (default: 300)
-     * @param {number} options.tapMaxMovement - Max px movement for tap (default: 10)
-     * @param {number} options.doubleTapWindow - Max ms between taps for double-tap (default: 500)
-     * @param {number} options.doubleTapDistance - Max px between taps for double-tap (default: 20)
-     * @param {number} options.longPressDuration - Min ms for long press (default: 500)
-     * @param {number} options.swipeMinDistance - Min px for swipe (default: 50)
-     * @param {boolean} options.enableDoubleTap - Enable double-tap detection (default: false)
-     * @param {boolean} options.enableLongPress - Enable long-press detection (default: false)
-     * @param {boolean} options.enableSwipe - Enable swipe detection (default: false)
-     */
-    constructor(rootElement, options = {}) {}
+  /**
+   * @param {HTMLElement} rootElement - The container to attach listeners to
+   * @param {Object} options - Configuration options
+   * @param {number} options.tapMaxDuration - Max ms for tap (default: 300)
+   * @param {number} options.tapMaxMovement - Max px movement for tap (default: 10)
+   * @param {number} options.doubleTapWindow - Max ms between taps for double-tap (default: 500)
+   * @param {number} options.doubleTapDistance - Max px between taps for double-tap (default: 20)
+   * @param {number} options.longPressDuration - Min ms for long press (default: 500)
+   * @param {number} options.swipeMinDistance - Min px for swipe (default: 50)
+   * @param {boolean} options.enableDoubleTap - Enable double-tap detection (default: false)
+   * @param {boolean} options.enableLongPress - Enable long-press detection (default: false)
+   * @param {boolean} options.enableSwipe - Enable swipe detection (default: false)
+   */
+  constructor(rootElement, options = {}) {}
 
-    /**
-     * Initialize touch listeners
-     */
-    init() {
-        // Attach touchstart, touchmove, touchend listeners
-        // OR attach pointerdown, pointermove, pointerup listeners
-    }
+  /**
+   * Initialize touch listeners
+   */
+  init() {
+    // Attach touchstart, touchmove, touchend listeners
+    // OR attach pointerdown, pointermove, pointerup listeners
+  }
 
-    /**
-     * Register a callback for a gesture type
-     * @param {string} gestureType - 'tap' | 'doubletap' | 'longpress' | 'swipeup'
-     * @param {Function} callback - Called with gesture data
-     */
-    on(gestureType, callback) {}
+  /**
+   * Register a callback for a gesture type
+   * @param {string} gestureType - 'tap' | 'doubletap' | 'longpress' | 'swipeup'
+   * @param {Function} callback - Called with gesture data
+   */
+  on(gestureType, callback) {}
 
-    /**
-     * Unregister a callback
-     * @param {string} gestureType
-     * @param {Function} callback
-     */
-    off(gestureType, callback) {}
+  /**
+   * Unregister a callback
+   * @param {string} gestureType
+   * @param {Function} callback
+   */
+  off(gestureType, callback) {}
 
-    /**
-     * Clean up listeners
-     */
-    destroy() {}
+  /**
+   * Clean up listeners
+   */
+  destroy() {}
 
-    /**
-     * Get the element at touch coordinates
-     * @param {number} x - X coordinate
-     * @param {number} y - Y coordinate
-     * @returns {HTMLElement}
-     */
-    getElementAtPoint(x, y) {
-        return document.elementFromPoint(x, y);
-    }
+  /**
+   * Get the element at touch coordinates
+   * @param {number} x - X coordinate
+   * @param {number} y - Y coordinate
+   * @returns {HTMLElement}
+   */
+  getElementAtPoint(x, y) {
+    return document.elementFromPoint(x, y);
+  }
 }
 ```
 
@@ -192,11 +206,13 @@ class TouchHandler {
 **Decision:** Choose Touch Events API for better iOS Safari support.
 
 **Rationale:**
+
 - Touch Events have better iOS Safari support (v3.2+)
 - Pointer Events have better cross-device support but require polyfill for older iOS
 - Target audience: Modern iOS (95%+) and Android (99%+)
 
 **Implementation:**
+
 ```javascript
 init() {
     this.rootElement.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
@@ -217,29 +233,30 @@ Track touch state through a simple state machine:
 ```javascript
 // Touch states
 const TOUCH_STATE = {
-    IDLE: 'idle',
-    TOUCHING: 'touching',
-    MOVED: 'moved',
-    ENDED: 'ended'
+  IDLE: "idle",
+  TOUCHING: "touching",
+  MOVED: "moved",
+  ENDED: "ended",
 };
 
 // Internal state
 this.state = {
-    current: TOUCH_STATE.IDLE,
-    startTime: null,
-    startX: null,
-    startY: null,
-    currentX: null,
-    currentY: null,
-    element: null,
-    lastTapTime: null,
-    lastTapX: null,
-    lastTapY: null,
-    longPressTimer: null
+  current: TOUCH_STATE.IDLE,
+  startTime: null,
+  startX: null,
+  startY: null,
+  currentX: null,
+  currentY: null,
+  element: null,
+  lastTapTime: null,
+  lastTapX: null,
+  lastTapY: null,
+  longPressTimer: null,
 };
 ```
 
 **State Transitions:**
+
 ```
 IDLE → (touchstart) → TOUCHING
 TOUCHING → (touchmove, movement > threshold) → MOVED
@@ -375,45 +392,47 @@ handleTouchStart(event) {
 
 ```javascript
 class TouchHandler {
-    constructor(rootElement, options = {}) {
-        this.rootElement = rootElement;
-        this.options = {
-            tapMaxDuration: 300,
-            tapMaxMovement: 10,
-            doubleTapWindow: 500,
-            doubleTapDistance: 20,
-            longPressDuration: 500,
-            swipeMinDistance: 50,
-            enableDoubleTap: false,
-            enableLongPress: false,
-            enableSwipe: false,
-            ...options
-        };
-        this.listeners = {
-            tap: [],
-            doubletap: [],
-            longpress: [],
-            swipeup: []
-        };
-        this.state = this.createInitialState();
-    }
+  constructor(rootElement, options = {}) {
+    this.rootElement = rootElement;
+    this.options = {
+      tapMaxDuration: 300,
+      tapMaxMovement: 10,
+      doubleTapWindow: 500,
+      doubleTapDistance: 20,
+      longPressDuration: 500,
+      swipeMinDistance: 50,
+      enableDoubleTap: false,
+      enableLongPress: false,
+      enableSwipe: false,
+      ...options,
+    };
+    this.listeners = {
+      tap: [],
+      doubletap: [],
+      longpress: [],
+      swipeup: [],
+    };
+    this.state = this.createInitialState();
+  }
 
-    on(gestureType, callback) {
-        if (!this.listeners[gestureType]) {
-            throw new Error(`Unknown gesture type: ${gestureType}`);
-        }
-        this.listeners[gestureType].push(callback);
+  on(gestureType, callback) {
+    if (!this.listeners[gestureType]) {
+      throw new Error(`Unknown gesture type: ${gestureType}`);
     }
+    this.listeners[gestureType].push(callback);
+  }
 
-    off(gestureType, callback) {
-        if (!this.listeners[gestureType]) return;
-        this.listeners[gestureType] = this.listeners[gestureType].filter(cb => cb !== callback);
-    }
+  off(gestureType, callback) {
+    if (!this.listeners[gestureType]) return;
+    this.listeners[gestureType] = this.listeners[gestureType].filter(
+      (cb) => cb !== callback,
+    );
+  }
 
-    emit(gestureType, data) {
-        if (!this.listeners[gestureType]) return;
-        this.listeners[gestureType].forEach(callback => callback(data));
-    }
+  emit(gestureType, data) {
+    if (!this.listeners[gestureType]) return;
+    this.listeners[gestureType].forEach((callback) => callback(data));
+  }
 }
 ```
 
@@ -422,107 +441,116 @@ class TouchHandler {
 ## Testing Specification
 
 ### Test 1: Basic Tap Detection
+
 ```javascript
-describe('TouchHandler', () => {
-    it('should detect a tap gesture', (done) => {
-        const handler = new TouchHandler(document.body);
-        handler.init();
+describe("TouchHandler", () => {
+  it("should detect a tap gesture", (done) => {
+    const handler = new TouchHandler(document.body);
+    handler.init();
 
-        handler.on('tap', (data) => {
-            expect(data.type).toBe('tap');
-            expect(data.coordinates.x).toBeGreaterThan(0);
-            expect(data.timestamp).toBeDefined();
-            done();
-        });
-
-        // Simulate touch
-        const element = document.querySelector('.tile-btn');
-        simulateTouchSequence(element, [
-            { event: 'touchstart', x: 100, y: 100, delay: 0 },
-            { event: 'touchend', x: 100, y: 100, delay: 100 }
-        ]);
+    handler.on("tap", (data) => {
+      expect(data.type).toBe("tap");
+      expect(data.coordinates.x).toBeGreaterThan(0);
+      expect(data.timestamp).toBeDefined();
+      done();
     });
+
+    // Simulate touch
+    const element = document.querySelector(".tile-btn");
+    simulateTouchSequence(element, [
+      { event: "touchstart", x: 100, y: 100, delay: 0 },
+      { event: "touchend", x: 100, y: 100, delay: 100 },
+    ]);
+  });
 });
 ```
 
 ### Test 2: Tap vs Movement
+
 ```javascript
-it('should not emit tap if user moves > threshold', (done) => {
-    const handler = new TouchHandler(document.body);
-    handler.init();
+it("should not emit tap if user moves > threshold", (done) => {
+  const handler = new TouchHandler(document.body);
+  handler.init();
 
-    let tapEmitted = false;
-    handler.on('tap', () => { tapEmitted = true; });
+  let tapEmitted = false;
+  handler.on("tap", () => {
+    tapEmitted = true;
+  });
 
-    simulateTouchSequence(element, [
-        { event: 'touchstart', x: 100, y: 100, delay: 0 },
-        { event: 'touchmove', x: 120, y: 100, delay: 50 },  // Moved 20px
-        { event: 'touchend', x: 120, y: 100, delay: 100 }
-    ]);
+  simulateTouchSequence(element, [
+    { event: "touchstart", x: 100, y: 100, delay: 0 },
+    { event: "touchmove", x: 120, y: 100, delay: 50 }, // Moved 20px
+    { event: "touchend", x: 120, y: 100, delay: 100 },
+  ]);
 
-    setTimeout(() => {
-        expect(tapEmitted).toBe(false);
-        done();
-    }, 200);
+  setTimeout(() => {
+    expect(tapEmitted).toBe(false);
+    done();
+  }, 200);
 });
 ```
 
 ### Test 3: Tap vs Long Duration
+
 ```javascript
-it('should not emit tap if duration > threshold', (done) => {
-    const handler = new TouchHandler(document.body);
-    handler.init();
+it("should not emit tap if duration > threshold", (done) => {
+  const handler = new TouchHandler(document.body);
+  handler.init();
 
-    let tapEmitted = false;
-    handler.on('tap', () => { tapEmitted = true; });
+  let tapEmitted = false;
+  handler.on("tap", () => {
+    tapEmitted = true;
+  });
 
-    simulateTouchSequence(element, [
-        { event: 'touchstart', x: 100, y: 100, delay: 0 },
-        { event: 'touchend', x: 100, y: 100, delay: 400 }  // 400ms > 300ms threshold
-    ]);
+  simulateTouchSequence(element, [
+    { event: "touchstart", x: 100, y: 100, delay: 0 },
+    { event: "touchend", x: 100, y: 100, delay: 400 }, // 400ms > 300ms threshold
+  ]);
 
-    setTimeout(() => {
-        expect(tapEmitted).toBe(false);
-        done();
-    }, 500);
+  setTimeout(() => {
+    expect(tapEmitted).toBe(false);
+    done();
+  }, 500);
 });
 ```
 
 ### Test 4: Double-Tap Detection
+
 ```javascript
-it('should detect double-tap when enabled', (done) => {
-    const handler = new TouchHandler(document.body, { enableDoubleTap: true });
-    handler.init();
+it("should detect double-tap when enabled", (done) => {
+  const handler = new TouchHandler(document.body, { enableDoubleTap: true });
+  handler.init();
 
-    handler.on('doubletap', (data) => {
-        expect(data.type).toBe('doubletap');
-        done();
-    });
+  handler.on("doubletap", (data) => {
+    expect(data.type).toBe("doubletap");
+    done();
+  });
 
-    simulateTouchSequence(element, [
-        { event: 'touchstart', x: 100, y: 100, delay: 0 },
-        { event: 'touchend', x: 100, y: 100, delay: 100 },
-        { event: 'touchstart', x: 102, y: 102, delay: 150 },  // 2px difference OK
-        { event: 'touchend', x: 102, y: 102, delay: 250 }
-    ]);
+  simulateTouchSequence(element, [
+    { event: "touchstart", x: 100, y: 100, delay: 0 },
+    { event: "touchend", x: 100, y: 100, delay: 100 },
+    { event: "touchstart", x: 102, y: 102, delay: 150 }, // 2px difference OK
+    { event: "touchend", x: 102, y: 102, delay: 250 },
+  ]);
 });
 ```
 
 ### Test 5: Long-Press Detection
+
 ```javascript
-it('should detect long-press when enabled', (done) => {
-    const handler = new TouchHandler(document.body, { enableLongPress: true });
-    handler.init();
+it("should detect long-press when enabled", (done) => {
+  const handler = new TouchHandler(document.body, { enableLongPress: true });
+  handler.init();
 
-    handler.on('longpress', (data) => {
-        expect(data.type).toBe('longpress');
-        done();
-    });
+  handler.on("longpress", (data) => {
+    expect(data.type).toBe("longpress");
+    done();
+  });
 
-    simulateTouchSequence(element, [
-        { event: 'touchstart', x: 100, y: 100, delay: 0 },
-        { event: 'touchend', x: 100, y: 100, delay: 600 }  // 600ms > 500ms threshold
-    ]);
+  simulateTouchSequence(element, [
+    { event: "touchstart", x: 100, y: 100, delay: 0 },
+    { event: "touchend", x: 100, y: 100, delay: 600 }, // 600ms > 500ms threshold
+  ]);
 });
 ```
 
@@ -531,9 +559,11 @@ it('should detect long-press when enabled', (done) => {
 ## Edge Cases to Handle
 
 ### 1. Multi-Touch
+
 **Problem:** User accidentally touches screen with multiple fingers.
 
 **Solution:**
+
 ```javascript
 handleTouchStart(event) {
     // Only track first touch, ignore additional touches
@@ -546,9 +576,11 @@ handleTouchStart(event) {
 ```
 
 ### 2. Touch Cancel
+
 **Problem:** Browser cancels touch (e.g., system gesture, scroll).
 
 **Solution:**
+
 ```javascript
 handleTouchCancel(event) {
     // Clean up timers
@@ -559,17 +591,21 @@ handleTouchCancel(event) {
 ```
 
 ### 3. Rapid Taps
+
 **Problem:** User taps very quickly, events overlap.
 
 **Solution:**
+
 - Reset state completely after each gesture
 - Use timestamp checks to prevent event duplication
 - Clear all timers before starting new gesture
 
 ### 4. Element Removed During Touch
+
 **Problem:** User starts touching a tile, but it's removed from DOM before touchend.
 
 **Solution:**
+
 ```javascript
 emit(gestureType, data) {
     // Check if element still exists
@@ -586,24 +622,32 @@ emit(gestureType, data) {
 ## Browser Compatibility
 
 ### iOS Safari
+
 - Test on iOS 14+ (primary target)
 - Handle `-webkit-` prefixes if needed
 - Prevent default scroll behavior during game interactions
 
 ### Chrome Mobile (Android)
+
 - Test on Android 10+ (Chrome 90+)
 - Handle Pointer Events fallback if Touch Events unavailable
 
 ### Prevent Zoom on Double-Tap
+
 ```html
 <!-- In mobile/index.html -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+/>
 ```
 
 ```css
 /* In mobile.css */
-.tile-btn, .menu-btn, .exposed-tile {
-    touch-action: manipulation; /* Prevents double-tap zoom */
+.tile-btn,
+.menu-btn,
+.exposed-tile {
+  touch-action: manipulation; /* Prevents double-tap zoom */
 }
 ```
 
@@ -628,35 +672,35 @@ emit(gestureType, data) {
 
 ```javascript
 // In HandRenderer.js
-import { TouchHandler } from './gestures/TouchHandler.js';
+import { TouchHandler } from "./gestures/TouchHandler.js";
 
 class HandRenderer {
-    constructor(container, gameController) {
-        this.container = container;
-        this.gameController = gameController;
-        this.touchHandler = new TouchHandler(this.container);
-    }
+  constructor(container, gameController) {
+    this.container = container;
+    this.gameController = gameController;
+    this.touchHandler = new TouchHandler(this.container);
+  }
 
-    init() {
-        this.touchHandler.init();
+  init() {
+    this.touchHandler.init();
 
-        this.touchHandler.on('tap', (data) => {
-            // Check if tapped element is a tile
-            if (data.element.classList.contains('tile-btn')) {
-                this.handleTileTap(data);
-            }
-        });
-    }
+    this.touchHandler.on("tap", (data) => {
+      // Check if tapped element is a tile
+      if (data.element.classList.contains("tile-btn")) {
+        this.handleTileTap(data);
+      }
+    });
+  }
 
-    handleTileTap(data) {
-        const tileIndex = data.element.dataset.index;
-        // Toggle selection
-        // Show confirmation popup
-    }
+  handleTileTap(data) {
+    const tileIndex = data.element.dataset.index;
+    // Toggle selection
+    // Show confirmation popup
+  }
 
-    destroy() {
-        this.touchHandler.destroy();
-    }
+  destroy() {
+    this.touchHandler.destroy();
+  }
 }
 ```
 

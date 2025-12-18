@@ -13,12 +13,14 @@ This document orchestrates the refactor as a series of discrete, testable phases
 ## Why This Matters
 
 Current state is broken because:
+
 1. GameLogic and GameController duplicate functionality
 2. PhaserAdapter is incomplete/stubbed
 3. Wall synchronization fails
 4. Hard to debug/extend (unclear which layer does what)
 
 After refactor:
+
 1. Single source of truth for game logic (GameController)
 2. All rendering centralized (PhaserAdapter)
 3. Easy to add new renderers (mobile, web, etc.)
@@ -53,6 +55,7 @@ Future: Mobile renderer would replace PhaserAdapter
 ## Phases
 
 ### [Phase 1](REFACTOR_PHASE1.md): Extend GameController to Be Complete
+
 **Goal**: GameController becomes a self-contained game engine
 
 - Move player/hand data management into GameController
@@ -61,6 +64,7 @@ Future: Mobile renderer would replace PhaserAdapter
 - Implement all game state flows (Charleston, courtesy, claims, loop)
 
 ### [Phase 2](REFACTOR_PHASE2.md): Complete PhaserAdapter Implementation
+
 **Goal**: PhaserAdapter handles 100% of rendering and UI
 
 - Implement animation/render handlers for every GameController event
@@ -69,6 +73,7 @@ Future: Mobile renderer would replace PhaserAdapter
 - Create complete animation library
 
 ### [Phase 3](REFACTOR_PHASE3.md): Remove GameLogic Completely
+
 **Goal**: Delete obsolete code, clean up dependencies
 
 - Identify unique GameLogic functionality
@@ -77,6 +82,7 @@ Future: Mobile renderer would replace PhaserAdapter
 - Update GameScene to remove GameLogic
 
 ### [Phase 4](REFACTOR_PHASE4.md): Create Mobile Renderer (Proof of Concept)
+
 **Goal**: Prove separation works with alternative renderer
 
 - Create non-Phaser renderer listening to GameController events
@@ -86,6 +92,7 @@ Future: Mobile renderer would replace PhaserAdapter
 ## Testing Strategy
 
 After each phase:
+
 1. Run `npm run lint` - no errors
 2. Run `npm run build` - compiles successfully
 3. Run `npm run test` - all tests pass
@@ -98,6 +105,7 @@ After each phase:
 ## Key Design Principles
 
 ### GameController (Model Layer)
+
 - Manages game state machine
 - Holds player data, hands, tile pools
 - Enforces game rules
@@ -107,6 +115,7 @@ After each phase:
 - Never directly manipulates UI
 
 ### PhaserAdapter (View/Controller Layer)
+
 - Listens to ALL GameController events
 - Creates/destroys Phaser objects
 - Handles ALL animations and timing
@@ -117,6 +126,7 @@ After each phase:
 - Stateless about game rules
 
 ### Events Should Include
+
 ```javascript
 {
   // What changed

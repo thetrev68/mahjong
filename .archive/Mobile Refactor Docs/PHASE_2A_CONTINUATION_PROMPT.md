@@ -12,12 +12,14 @@
 ## Current State
 
 ### ✅ Phase 1B Complete
+
 - `core/GameController.js` - Event-driven state machine (380 lines)
 - `core/models/` - TileData, HandData, PlayerData (reviewed by Haiku)
 - `core/events/EventEmitter.js` - Pub/sub system
 - `MOBILE_INTERFACES.md` - Complete specifications
 
 ### ✅ Phase 2A Started
+
 - `desktop/adapters/PhaserAdapter.js` - Core adapter created (400+ lines)
   - Listens to 20+ GameController events
   - Converts TileData ↔ Phaser Tiles
@@ -25,6 +27,7 @@
   - Maps to existing printMessage/printInfo
 
 ### ❌ Phase 2A Remaining Tasks
+
 1. **Test PhaserAdapter** - Verify event handling works
 2. **Integrate with desktop** - Wire up GameController in existing codebase
 3. **Fix any integration issues** - Adapt as needed
@@ -38,10 +41,12 @@
 
 **1. Tile Selection Integration**
 The adapter calls `player.hand.enableSelection()` but the current Hand class doesn't have this method. Need to either:
+
 - Add `enableSelection(callback)` to Hand class, OR
 - Use existing button-based selection from GameLogic
 
 **Current code (line ~267):**
+
 ```javascript
 setupDiscardPrompt(options) {
     const player = this.table.players[PLAYER.BOTTOM];
@@ -57,6 +62,7 @@ setupDiscardPrompt(options) {
 ```
 
 **Solution Options:**
+
 - **Option A:** Keep existing GameLogic tile selection, adapt PhaserAdapter to use it
 - **Option B:** Add selection method to Hand class (requires more changes)
 
@@ -68,6 +74,7 @@ setupDiscardPrompt(options) {
 `getTileSpriteName()` returns placeholder. Need to match actual sprite atlas naming.
 
 **Current code (line ~115):**
+
 ```javascript
 getTileSpriteName(tileData) {
     // TODO: This should match the sprite naming in gameObjects.js Wall.create()
@@ -78,6 +85,7 @@ getTileSpriteName(tileData) {
 **Check:** Look at `assets/tiles.json` to see actual sprite names.
 
 **Example from gameObjects.js Wall.create():**
+
 ```javascript
 // Cracks, Bams, Dots: "C1", "C2", ... "B1", "B2", ... "D1", "D2", ...
 // Winds: "N", "S", "W", "E"
@@ -94,6 +102,7 @@ getTileSpriteName(tileData) {
 TileData.js now imports from `../tileDefinitions.js` (Haiku moved gTileGroups).
 
 **Check if this file exists:**
+
 ```bash
 ls core/tileDefinitions.js
 ```
@@ -105,11 +114,13 @@ ls core/tileDefinitions.js
 ## Task 2: Integrate GameController into Desktop
 
 ### Current Desktop Flow
+
 ```
 main.js → GameScene.create() → new GameLogic() → GameLogic.start()
 ```
 
 ### Target Desktop Flow
+
 ```
 main.js → GameScene.create() → new GameController() → new PhaserAdapter() → GameController.startGame()
 ```
@@ -117,6 +128,7 @@ main.js → GameScene.create() → new GameController() → new PhaserAdapter() 
 ### Integration Steps
 
 **Step 1: Create desktop/ folder structure**
+
 ```bash
 mkdir -p desktop/adapters
 # PhaserAdapter.js already created in desktop/adapters/
@@ -127,6 +139,7 @@ mkdir -p desktop/adapters
 **Step 2: Modify GameScene.js to use GameController**
 
 **Current code (GameScene.js:60-66):**
+
 ```javascript
 // Create game objects
 this.gGameLogic = new GameLogic(this);
@@ -137,9 +150,10 @@ this.gGameLogic.gameAI.table = this.gTable;
 ```
 
 **New code:**
+
 ```javascript
-import {GameController} from "./core/GameController.js";
-import {PhaserAdapter} from "./desktop/adapters/PhaserAdapter.js";
+import { GameController } from "./core/GameController.js";
+import { PhaserAdapter } from "./desktop/adapters/PhaserAdapter.js";
 
 // Create game objects (keep existing Table/GameLogic for now)
 this.gGameLogic = new GameLogic(this);
@@ -150,33 +164,35 @@ await this.gGameLogic.init();
 // NEW: Create GameController + Adapter
 this.gameController = new GameController();
 await this.gameController.init({
-    aiEngine: this.gGameLogic.gameAI,
-    cardValidator: this.gGameLogic.card,
-    settings: {
-        year: window.settingsManager.getCardYear(),
-        difficulty: window.settingsManager.getDifficulty(),
-        useBlankTiles: window.settingsManager.getUseBlankTiles(),
-        skipCharleston: false
-    }
+  aiEngine: this.gGameLogic.gameAI,
+  cardValidator: this.gGameLogic.card,
+  settings: {
+    year: window.settingsManager.getCardYear(),
+    difficulty: window.settingsManager.getDifficulty(),
+    useBlankTiles: window.settingsManager.getUseBlankTiles(),
+    skipCharleston: false,
+  },
 });
 
 // Create adapter
 this.adapter = new PhaserAdapter(
-    this.gameController,
-    this,  // scene
-    this.gTable,
-    this.gGameLogic
+  this.gameController,
+  this, // scene
+  this.gTable,
+  this.gGameLogic,
 );
 ```
 
 **Step 3: Update Start Button Handler**
 
 **Current code (GameScene.js:101):**
+
 ```javascript
 this.gGameLogic.start();
 ```
 
 **New code:**
+
 ```javascript
 // Use GameController instead of GameLogic
 await this.gameController.startGame();
@@ -189,26 +205,31 @@ await this.gameController.startGame();
 ### Minimal Test Plan
 
 **Test 1: Game Starts**
+
 - Click "Start Game" button
 - Verify tiles are dealt
 - Check console for GameController events
 - Confirm no errors
 
 **Test 2: Tile Draw**
+
 - Wait for first tile draw
 - Check if tile appears in hand
 - Verify wall counter updates
 
 **Test 3: Discard**
+
 - Select a tile
 - Click discard (or existing button)
 - Verify tile moves to discard pile
 
 **Test 4: Charleston (if enabled)**
+
 - Select 3 tiles to pass
 - Verify tiles exchange between players
 
 **Test 5: Full Game**
+
 - Play through entire game
 - Verify no crashes
 - Check that game ends properly
@@ -216,6 +237,7 @@ await this.gameController.startGame();
 ### Debugging Tips
 
 **Enable GameController debug logging:**
+
 ```javascript
 // In GameController.js, add console.log to emit()
 emit(eventType, data) {
@@ -225,11 +247,12 @@ emit(eventType, data) {
 ```
 
 **Check PhaserAdapter is receiving events:**
+
 ```javascript
 // In PhaserAdapter setupEventListeners(), add logging
 gc.on("TILE_DRAWN", (data) => {
-    console.log("[PhaserAdapter] TILE_DRAWN:", data);
-    this.onTileDrawn(data);
+  console.log("[PhaserAdapter] TILE_DRAWN:", data);
+  this.onTileDrawn(data);
 });
 ```
 
@@ -244,6 +267,7 @@ gc.on("TILE_DRAWN", (data) => {
 **Fix:** Use existing `this.gTable.wall` (Phaser wall), don't recreate
 
 **Solution:**
+
 ```javascript
 // In GameScene.create(), keep existing wall:
 this.gTable.create(skipTileCreation);
@@ -259,6 +283,7 @@ this.gTable.create(skipTileCreation);
 **Fix:** Use `this.gTable.wall.getTile()` instead of creating new tiles
 
 **Solution:**
+
 ```javascript
 // In PhaserAdapter:
 createPhaserTile(tileData) {
@@ -291,6 +316,7 @@ findTileInWall(index) {
 **Fix:** Coordinate button state between old and new systems
 
 **Solution:**
+
 ```javascript
 // In PhaserAdapter, disable GameLogic.updateUI() temporarily:
 onStateChanged(data) {
@@ -308,19 +334,23 @@ onStateChanged(data) {
 **File:** `PHASE_2A_RESULTS.md`
 
 **Contents:**
+
 ```markdown
 # Phase 2A Integration Results
 
 ## Changes Made
+
 - [ ] PhaserAdapter fixes: (list what was changed)
 - [ ] GameScene.js integration: (list modifications)
 - [ ] Testing results: (pass/fail for each test)
 
 ## Known Issues
+
 - Issue 1: ...
 - Issue 2: ...
 
 ## Next Steps for Phase 2B
+
 - Complete wall/tile synchronization
 - Full UI prompt integration
 - Remove GameLogic dependency (make GameController fully replace it)
@@ -352,12 +382,14 @@ onStateChanged(data) {
 ## Reference Files
 
 **Key files to review:**
+
 - `gameLogic.js` - Understand existing game flow
 - `gameObjects_table.js` - See how Table/Wall work
 - `gameObjects_hand.js` - Understand tile selection
 - `MOBILE_INTERFACES.md` - GameController event reference
 
 **Existing architecture:**
+
 ```
 GameLogic.start()
   → GameLogic.deal()
@@ -369,6 +401,7 @@ GameLogic.start()
 ```
 
 **New architecture (Phase 2A):**
+
 ```
 GameController.startGame()
   → emits GAME_STARTED

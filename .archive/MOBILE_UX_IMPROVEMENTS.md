@@ -7,6 +7,7 @@
 This document outlines the implementation plan for mobile UX improvements based on user testing feedback.
 
 **Recent updates (mobile-ux-improvements branch):**
+
 - Desktop font stack applied across mobile styles.
 - Opponent winds fixed (East/North/West/South), bars ordered top-left-right, tile counts no longer show undefined.
 - Layout reordered: opponents → discard → hand → hints → bottom menu; hand centered.
@@ -35,6 +36,7 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Priority**: P2 (Medium)
 
 **Requirements**:
+
 - Apply desktop font stack to mobile CSS
 - Desktop font variables:
   ```css
@@ -43,9 +45,11 @@ This document outlines the implementation plan for mobile UX improvements based 
   ```
 
 **Files to modify**:
+
 - [mobile/styles/base.css](mobile/styles/base.css)
 
 **Testing**:
+
 - Verify fonts match desktop version across all screens
 - Check readability on various mobile devices
 
@@ -64,15 +68,18 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Expected behavior**: Player 0 (human) = East, opponents = North/West/South in correct order
 
 **Requirements**:
+
 - Update wind assignment in [core/GameController.js](core/GameController.js)
 - Ensure Player 0 is always East wind
 - Map opponents correctly: RIGHT=North, TOP=West, LEFT=South
 
 **Files to modify**:
+
 - [core/GameController.js](core/GameController.js) - Wind assignment logic
 - [mobile/components/OpponentBar.js](mobile/components/OpponentBar.js) - Display logic
 
 **Testing**:
+
 - Verify Player 0 shows "East" wind indicator
 - Check opponent winds are correctly displayed as North/West/South
 - Validate wind rotation across multiple games
@@ -89,13 +96,16 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Current code location**: [mobile/components/OpponentBar.js:60](mobile/components/OpponentBar.js#L60)
 
 **Requirements**:
+
 - Remove or fix the undefined tiles message
 - Ensure tile count displays correctly or shows nothing if unavailable
 
 **Files to modify**:
+
 - [mobile/components/OpponentBar.js](mobile/components/OpponentBar.js)
 
 **Testing**:
+
 - Verify no "undefined" messages appear
 - Check tile count displays correctly throughout game
 
@@ -109,14 +119,17 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Priority**: P2 (Medium)
 
 **Requirements**:
+
 - Remove border/background from inner elements
 - Make opponent bar appear as single cohesive element
 - Maintain padding/spacing for readability
 
 **Files to modify**:
+
 - [mobile/styles/OpponentBar.css](mobile/styles/OpponentBar.css)
 
 **Testing**:
+
 - Visual inspection across devices
 - Verify readability is maintained
 
@@ -133,15 +146,18 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Expected order**: top, left, right → representing North, West, South
 
 **Requirements**:
+
 - Reorder opponent bar containers in HTML or rendering logic
 - Map positions: Top=North, Left=West, Right=South
 - Update any hardcoded position references
 
 **Files to modify**:
+
 - [mobile/index.html](mobile/index.html) - Container order
 - [mobile/MobileRenderer.js](mobile/MobileRenderer.js) - Mapping logic
 
 **Testing**:
+
 - Verify spatial layout matches expected opponent positions
 - Check across multiple game states
 
@@ -157,15 +173,18 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Priority**: P1 (High)
 
 **Requirements**:
+
 - Change button text from "NEW" to "Start" before game begins
 - Update status message to match
 - Button should change to different function once game starts
 
 **Files to modify**:
+
 - [mobile/index.html](mobile/index.html) - Button text
 - [mobile/MobileRenderer.js](mobile/MobileRenderer.js) - Status messages
 
 **Testing**:
+
 - Verify button says "Start" on page load
 - Check message displays correctly
 
@@ -181,27 +200,32 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Desktop reference**: [desktop/managers/HomePageTileManager.js](desktop/managers/HomePageTileManager.js)
 
 **Requirements**:
+
 - Create HTML/CSS version of scattered tile deck
 - Tiles should be smaller than desktop (mobile-appropriate)
 - Animation: tiles jump/flip to back, then fly off top-left of screen on game start
 - Match desktop animation feel but optimize for mobile performance
 
 **New files to create**:
+
 - `mobile/components/HomePageTiles.js` - Component for scattered tiles
 - `mobile/animations/HomePageAnimation.js` - Animation controller
 
 **Files to modify**:
+
 - [mobile/MobileRenderer.js](mobile/MobileRenderer.js) - Integrate home page tiles
 - [mobile/index.html](mobile/index.html) - Add container for home tiles
 - [mobile/styles/animations.css](mobile/styles/animations.css) - CSS animations
 
 **Technical considerations**:
+
 - Use CSS transforms for performance (GPU acceleration)
 - Stagger animations for visual effect
 - Clean up DOM elements after animation completes
 - Consider using requestAnimationFrame for smooth 60fps
 
 **Testing**:
+
 - Performance testing on lower-end devices
 - Visual consistency with desktop version
 - Verify tiles clean up properly after animation
@@ -216,15 +240,18 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Priority**: P2 (Medium)
 
 **Requirements**:
+
 - Hide entire hints panel container before game starts
 - Show hints panel only during active gameplay
 - Use `display: none` not `visibility: hidden`
 
 **Files to modify**:
+
 - [mobile/components/HintsPanel.js](mobile/components/HintsPanel.js)
 - [mobile/MobileRenderer.js](mobile/MobileRenderer.js) - Show/hide logic based on game state
 
 **Testing**:
+
 - Verify hints completely invisible pre-game
 - Check hints appear when gameplay begins
 
@@ -238,6 +265,7 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Priority**: P2 (Medium)
 
 **Requirements**:
+
 - Create empty tile rack panel for Player 0
 - Panel similar to opponent bars but larger
 - Layout: 7x2 grid for 'normal size' tiles + 3rd row for small exposed tiles
@@ -245,24 +273,31 @@ This document outlines the implementation plan for mobile UX improvements based 
 - Rack should be centered horizontally
 
 **New component needed**:
+
 - `mobile/components/PlayerRack.js` - Empty rack with grid layout
 
 **Files to modify**:
+
 - [mobile/index.html](mobile/index.html) - Add player rack container
 - [mobile/MobileRenderer.js](mobile/MobileRenderer.js) - Integrate rack component
 - [mobile/styles/MobileGame.css](mobile/styles/MobileGame.css) - Rack styling
 
 **CSS Grid requirements**:
+
 ```css
 .player-rack {
   display: grid;
-  grid-template-rows: repeat(3, auto); /* 2 rows normal tiles + 1 row exposures */
+  grid-template-rows: repeat(
+    3,
+    auto
+  ); /* 2 rows normal tiles + 1 row exposures */
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
 }
 ```
 
 **Testing**:
+
 - Visual layout on various screen sizes
 - Verify rack is centered
 - Check rack integrates with hand tiles when game starts
@@ -281,15 +316,18 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Current logic**: [MobileRenderer.js:252-256](mobile/MobileRenderer.js#L252-L256)
 
 **Requirements**:
+
 - Hide sort button on page load
 - Show sort button only during main game loop states
 - Current logic already exists, verify it's working correctly
 
 **Files to modify**:
+
 - Verify existing logic in [mobile/MobileRenderer.js](mobile/MobileRenderer.js)
 - May need initial state fix in [mobile/index.html](mobile/index.html)
 
 **Testing**:
+
 - Verify sort hidden on page load
 - Check sort appears during gameplay
 
@@ -303,10 +341,12 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Priority**: P1 (High)
 
 **Requirements**:
+
 - Ensure all references to "NEW" button change to "Start"
 - Button functionality should transition to "Discard" during gameplay (see 1G below)
 
 **Files to modify**:
+
 - [mobile/index.html](mobile/index.html) - Button HTML
 
 ---
@@ -321,21 +361,25 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Current implementation**: Full button with gear emoji
 
 **Requirements**:
+
 - Increase icon size (suggest 32px or larger)
 - Remove button styling (no background, border)
 - Keep clickable area reasonable (min 44x44px for touch target)
 - Consider using SVG icon instead of emoji for better control
 
 **Files to modify**:
+
 - [mobile/index.html](mobile/index.html) - Button markup
 - [mobile/styles/MobileGame.css](mobile/styles/MobileGame.css) - Icon styling
 
 **Suggested HTML**:
+
 ```html
 <button class="menu-icon" aria-label="Settings">⚙️</button>
 ```
 
 **Testing**:
+
 - Visual comparison with desktop settings button
 - Touch target accessibility (min 44x44px)
 
@@ -351,18 +395,21 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Desktop reference**: Yellow buttons with dark green text, rounded corners
 
 **Requirements**:
+
 - Border radius: suggest `border-radius: 8px` or `border-radius: 50%` (oval)
 - Background: Yellow (`#F4D03F` or similar)
 - Text: Dark green (`#0c6d3a` or similar)
 - Match desktop side panel button styling
 
 **Files to modify**:
+
 - [mobile/styles/MobileGame.css](mobile/styles/MobileGame.css) - Button styles
 
 **CSS to add**:
+
 ```css
 .menu-btn {
-  background-color: #F4D03F;
+  background-color: #f4d03f;
   color: #0c6d3a;
   border-radius: 8px; /* or 24px for more rounded */
   border: 2px solid #0c6d3a;
@@ -370,6 +417,7 @@ This document outlines the implementation plan for mobile UX improvements based 
 ```
 
 **Testing**:
+
 - Visual comparison with desktop buttons
 - Check contrast ratios for accessibility
 
@@ -387,6 +435,7 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Priority**: P1 (High)
 
 **Expected order** (top to bottom):
+
 1. Opponents (North, West, South)
 2. Discard Pile
 3. Player 0 Hand (in rack)
@@ -394,19 +443,23 @@ This document outlines the implementation plan for mobile UX improvements based 
 5. Menu Buttons
 
 **Current issues**:
+
 - Hand area contains both hand and menu buttons
 - Layout order not optimal
 
 **Requirements**:
+
 - Restructure HTML/CSS to enforce proper layout order
 - Use CSS Flexbox or Grid for main layout
 - Ensure responsive behavior
 
 **Files to modify**:
+
 - [mobile/index.html](mobile/index.html) - DOM structure
 - [mobile/styles/MobileGame.css](mobile/styles/MobileGame.css) - Layout styles
 
 **Suggested CSS**:
+
 ```css
 #mobile-app {
   display: flex;
@@ -414,14 +467,25 @@ This document outlines the implementation plan for mobile UX improvements based 
   height: 100vh;
 }
 
-.opponents-container { order: 1; }
-.discard-container { order: 2; }
-.player-rack { order: 3; }
-.hints-panel { order: 4; }
-.bottom-menu { order: 5; }
+.opponents-container {
+  order: 1;
+}
+.discard-container {
+  order: 2;
+}
+.player-rack {
+  order: 3;
+}
+.hints-panel {
+  order: 4;
+}
+.bottom-menu {
+  order: 5;
+}
 ```
 
 **Testing**:
+
 - Visual inspection on various screen sizes
 - Verify no layout shifts during gameplay
 
@@ -435,15 +499,18 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Priority**: P1 (High)
 
 **Requirements**:
+
 - Center player rack horizontally
 - Center tile array within rack
 - Use `margin: 0 auto` or Flexbox centering
 
 **Files to modify**:
+
 - [mobile/styles/HandRenderer.css](mobile/styles/HandRenderer.css)
 - [mobile/styles/MobileGame.css](mobile/styles/MobileGame.css)
 
 **CSS to add**:
+
 ```css
 .player-rack,
 .hand-container {
@@ -453,6 +520,7 @@ This document outlines the implementation plan for mobile UX improvements based 
 ```
 
 **Testing**:
+
 - Visual centering on various screen widths
 - Verify no overflow issues
 
@@ -468,6 +536,7 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Current implementation**: [mobile/components/HintsPanel.js:128-144](mobile/components/HintsPanel.js#L128-L144)
 
 **Requirements**:
+
 - Reduce pattern description length
 - New format: `[Card Year] - [groupDescription] - [Description]`
 - Remove parenthetical notes from description
@@ -476,10 +545,12 @@ This document outlines the implementation plan for mobile UX improvements based 
 - Use CSS `text-overflow: ellipsis` for truncation
 
 **Files to modify**:
+
 - [mobile/components/HintsPanel.js](mobile/components/HintsPanel.js) - Pattern formatting
 - [mobile/styles/MobileGame.css](mobile/styles/MobileGame.css) - Hint styling
 
 **CSS to add**:
+
 ```css
 .hint-pattern {
   display: -webkit-box;
@@ -501,6 +572,7 @@ This document outlines the implementation plan for mobile UX improvements based 
 ```
 
 **Testing**:
+
 - Verify max 2 rows per pattern
 - Check badge displays correctly
 - Ensure readability not compromised
@@ -515,20 +587,24 @@ This document outlines the implementation plan for mobile UX improvements based 
 **Priority**: P1 (High)
 
 **Requirements**:
+
 - Calculate tile size to fit exactly 9 tiles in viewport width
 - Account for gaps between tiles
 - Ensure tiles remain fully visible (no cropping)
 
 **Formula**:
+
 ```javascript
-const tileWidth = (viewportWidth - (8 * gapSize) - (2 * containerPadding)) / 9;
+const tileWidth = (viewportWidth - 8 * gapSize - 2 * containerPadding) / 9;
 ```
 
 **Files to modify**:
+
 - [mobile/components/DiscardPile.js](mobile/components/DiscardPile.js)
 - [mobile/styles/MobileGame.css](mobile/styles/MobileGame.css)
 
 **Testing**:
+
 - Verify exactly 9 tiles fit horizontally
 - Check various screen widths (320px - 768px)
 - Ensure no horizontal scrollbar unless > 9 tiles
@@ -543,14 +619,17 @@ const tileWidth = (viewportWidth - (8 * gapSize) - (2 * containerPadding)) / 9;
 **Priority**: P1 (High)
 
 **Requirements**:
+
 - Automatically scroll to latest tile when new discard added
 - Smooth scroll animation
 - Ensure latest tile is visible after scroll
 
 **Files to modify**:
+
 - [mobile/components/DiscardPile.js](mobile/components/DiscardPile.js)
 
 **JavaScript to add**:
+
 ```javascript
 addDiscard(tile) {
   // ... existing code ...
@@ -564,6 +643,7 @@ addDiscard(tile) {
 ```
 
 **Testing**:
+
 - Verify smooth scroll to latest tile
 - Check scroll behavior when pile < 9 tiles
 - Test rapid discard sequences
@@ -578,14 +658,17 @@ addDiscard(tile) {
 **Priority**: P2 (Medium)
 
 **Requirements**:
+
 - Keep status message on game board
 - Remove duplicate from bottom of screen
 - Verify message updates correctly
 
 **Files to modify**:
+
 - [mobile/MobileRenderer.js](mobile/MobileRenderer.js) - Status message logic
 
 **Testing**:
+
 - Verify only one message appears
 - Check message updates during game flow
 
@@ -599,15 +682,18 @@ addDiscard(tile) {
 **Priority**: P1 (High)
 
 **Requirements**:
+
 - Button text: "Start" pre-game, "Discard" during gameplay
 - Button function: Start game → Discard selected tile
 - Hide when not applicable (e.g., during opponent turn)
 
 **Files to modify**:
+
 - [mobile/index.html](mobile/index.html) - Button HTML
 - [mobile/MobileRenderer.js](mobile/MobileRenderer.js) - Button logic
 
 **Implementation**:
+
 ```javascript
 // In MobileRenderer
 onStateChanged(state) {
@@ -623,6 +709,7 @@ onStateChanged(state) {
 ```
 
 **Testing**:
+
 - Verify button text changes correctly
 - Check button functionality in each state
 
@@ -636,26 +723,31 @@ onStateChanged(state) {
 **Priority**: P1 (High)
 
 **Current references**:
+
 - [mobile/MobileRenderer.js:378](mobile/MobileRenderer.js#L378) - "Auto Discard" cancel label
 
 **Requirements**:
+
 - Remove "Auto Discard" button from UI prompts
 - Remove auto-discard logic from GameController (if any)
 - Remove fallback discard behavior
 - Ensure player must explicitly select and discard
 
 **Files to modify**:
+
 - [mobile/MobileRenderer.js](mobile/MobileRenderer.js) - Remove auto-discard references
 - [core/GameController.js](core/GameController.js) - Check for auto-discard logic
 - Search codebase for "auto" + "discard" references
 
 **Search command**:
+
 ```bash
 # Find all auto-discard references
 grep -r "auto.*discard" --include="*.js" --ignore-case
 ```
 
 **Testing**:
+
 - Verify no auto-discard button appears
 - Check player cannot proceed without explicit discard selection
 
@@ -671,29 +763,38 @@ grep -r "auto.*discard" --include="*.js" --ignore-case
 **Priority**: P2 (Medium)
 
 **Requirements**:
+
 - Get discard recommendations from AIEngine
 - Apply pulsing red glow to recommended tiles
 - Use CSS animation for pulsing effect
 - Remove glow when tile selected or discarded
 
 **Files to modify**:
+
 - [mobile/renderers/HandRenderer.js](mobile/renderers/HandRenderer.js) - Apply glow
 - [mobile/styles/animations.css](mobile/styles/animations.css) - Pulsing animation
 - [mobile/MobileRenderer.js](mobile/MobileRenderer.js) - Get recommendations
 
 **CSS to add**:
+
 ```css
 .tile--discard-recommended {
   animation: pulse-red 2s infinite;
 }
 
 @keyframes pulse-red {
-  0%, 100% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(255, 0, 0, 1); }
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 0, 0, 1);
+  }
 }
 ```
 
 **Implementation**:
+
 ```javascript
 // In MobileRenderer or HandRenderer
 updateDiscardHints() {
@@ -703,6 +804,7 @@ updateDiscardHints() {
 ```
 
 **Testing**:
+
 - Verify red glow appears on correct tiles
 - Check animation performance
 - Ensure glow removes when tile selected
@@ -719,17 +821,20 @@ updateDiscardHints() {
 **Current behavior**: Tap toggles selection, no swipe gesture
 
 **Requirements**:
+
 - Tap tile: Select (raise position by 1/3 tile height, remove yellow glow)
 - Tap selected tile: Deselect (lower to normal position)
 - Swipe up on tile: Immediate discard (bypass "Discard" button)
 - Visual feedback: Raised position instead of/in addition to glow
 
 **Files to modify**:
+
 - [mobile/renderers/HandRenderer.js](mobile/renderers/HandRenderer.js) - Selection behavior
 - [mobile/gestures/TouchHandler.js](mobile/gestures/TouchHandler.js) - Swipe detection
 - [mobile/styles/HandRenderer.css](mobile/styles/HandRenderer.css) - Raised state
 
 **CSS for raised state**:
+
 ```css
 .tile--selected {
   transform: translateY(-33%); /* Raise by 1/3 tile height */
@@ -738,6 +843,7 @@ updateDiscardHints() {
 ```
 
 **Swipe detection**:
+
 ```javascript
 // In TouchHandler
 detectSwipe(startY, endY, element) {
@@ -750,6 +856,7 @@ detectSwipe(startY, endY, element) {
 ```
 
 **Testing**:
+
 - Tap/select interaction feels responsive
 - Swipe up reliably triggers discard
 - No accidental discards from scroll gestures
@@ -764,6 +871,7 @@ detectSwipe(startY, endY, element) {
 **Priority**: P2 (Medium)
 
 **Requirements**:
+
 - Clone tile element at discard moment
 - Animate clone from hand position to discard pile position
 - Use CSS transforms or Web Animations API
@@ -771,10 +879,12 @@ detectSwipe(startY, endY, element) {
 - Real tile appears in discard pile
 
 **Files to modify**:
+
 - [mobile/animations/AnimationController.js](mobile/animations/AnimationController.js)
 - [mobile/MobileRenderer.js](mobile/MobileRenderer.js) - Trigger animation
 
 **Implementation approach**:
+
 ```javascript
 animateTileToDiscardPile(tileElement, targetPosition) {
   const clone = tileElement.cloneNode(true);
@@ -794,6 +904,7 @@ animateTileToDiscardPile(tileElement, targetPosition) {
 ```
 
 **Testing**:
+
 - Animation smooth and performant
 - Clone removes after animation
 - No visual glitches
@@ -808,27 +919,36 @@ animateTileToDiscardPile(tileElement, targetPosition) {
 **Priority**: P2 (Medium)
 
 **Requirements**:
+
 - Apply blue pulsing glow to last tile in hand after draw
 - Glow persists until next discard or major state change
 - Similar animation to red glow but blue color
 
 **Files to modify**:
+
 - [mobile/renderers/HandRenderer.js](mobile/renderers/HandRenderer.js)
 - [mobile/styles/animations.css](mobile/styles/animations.css)
 
 **CSS to add**:
+
 ```css
 .tile--newly-drawn {
   animation: pulse-blue 2s infinite;
 }
 
 @keyframes pulse-blue {
-  0%, 100% { box-shadow: 0 0 5px rgba(0, 100, 255, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(0, 100, 255, 1); }
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(0, 100, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 100, 255, 1);
+  }
 }
 ```
 
 **Implementation**:
+
 ```javascript
 // In HandRenderer or MobileRenderer
 onTileDrawn(data) {
@@ -845,6 +965,7 @@ onTileDiscarded() {
 ```
 
 **Testing**:
+
 - Blue glow appears on newly drawn tile
 - Glow removes on next discard
 - No performance issues with animation
@@ -861,11 +982,13 @@ onTileDiscarded() {
 **Priority**: P2 (Medium)
 
 **Requirements**:
+
 - Sort tiles by suit/rank when new tile added
 - Maintain chronological order within same tile type
 - Smooth sorting animation (optional)
 
 **Sort order**:
+
 1. Bamboo (1-9)
 2. Characters (1-9)
 3. Dots (1-9)
@@ -875,9 +998,11 @@ onTileDiscarded() {
 7. Jokers
 
 **Files to modify**:
+
 - [mobile/components/DiscardPile.js](mobile/components/DiscardPile.js)
 
 **Implementation**:
+
 ```javascript
 addDiscard(tile, player) {
   this.discards.push({ tile, player, timestamp: Date.now() });
@@ -895,6 +1020,7 @@ sortDiscards() {
 ```
 
 **Testing**:
+
 - Verify tiles sort correctly by suit/rank
 - Check chronological order within same tile type
 - Performance with many tiles
@@ -909,6 +1035,7 @@ sortDiscards() {
 **Priority**: P2 (Medium)
 
 **Requirements**:
+
 - Latest tile gets `.tile--latest` class
 - Blue pulsing glow animation
 - Tile scaled larger (e.g., 1.2x)
@@ -916,10 +1043,12 @@ sortDiscards() {
 - Glow and size revert when next tile arrives
 
 **Files to modify**:
+
 - [mobile/components/DiscardPile.js](mobile/components/DiscardPile.js)
 - [mobile/styles/animations.css](mobile/styles/animations.css)
 
 **CSS to add**:
+
 ```css
 .discard-tile--latest {
   transform: scale(1.2);
@@ -929,6 +1058,7 @@ sortDiscards() {
 ```
 
 **Implementation**:
+
 ```javascript
 addDiscard(tile) {
   // Remove .tile--latest from previous tile
@@ -945,6 +1075,7 @@ addDiscard(tile) {
 ```
 
 **Testing**:
+
 - Latest tile is larger and glows blue
 - Previous tile returns to normal size
 - Scroll ensures latest tile visible
@@ -961,17 +1092,20 @@ addDiscard(tile) {
 **Priority**: P1 (High)
 
 **Requirements**:
+
 - Implement blank tile swap logic in GameController
 - Create UI prompt for selecting tiles to swap
 - Add animation for swap action
 - Validate swap rules (blank tiles can be swapped for any exposed tile)
 
 **Files to create/modify**:
+
 - [core/GameController.js](core/GameController.js) - Swap logic
 - [mobile/MobileRenderer.js](mobile/MobileRenderer.js) - Swap UI prompt
 - [mobile/animations/AnimationController.js](mobile/animations/AnimationController.js) - Swap animation
 
 **Implementation steps**:
+
 1. Add blank tile detection in hand
 2. Create UI prompt for selecting exposed tile to swap
 3. Implement swap logic in GameController
@@ -979,6 +1113,7 @@ addDiscard(tile) {
 5. Update game state
 
 **Testing**:
+
 - Blank tiles can swap with any exposed tile
 - Animation is smooth
 - Game state updates correctly
@@ -993,17 +1128,20 @@ addDiscard(tile) {
 **Priority**: P1 (High)
 
 **Requirements**:
+
 - Detect when player has tile matching joker in their own exposure
 - Prompt player to swap joker with matching tile
 - Implement swap logic and animation
 - Validate swap rules per American Mahjong rules
 
 **Files to create/modify**:
+
 - [core/GameController.js](core/GameController.js) - Joker swap logic
 - [mobile/MobileRenderer.js](mobile/MobileRenderer.js) - Swap UI prompt
 - [mobile/animations/AnimationController.js](mobile/animations/AnimationController.js)
 
 **Implementation steps**:
+
 1. Check for joker swap opportunities after each tile drawn
 2. Prompt player with swap option
 3. Execute swap (tile from hand → exposure, joker → hand)
@@ -1011,6 +1149,7 @@ addDiscard(tile) {
 5. Update game state
 
 **Testing**:
+
 - Joker swaps only with valid matching tiles
 - Swap prompt appears at correct times
 - Animation and state updates work correctly
@@ -1025,15 +1164,18 @@ addDiscard(tile) {
 **Priority**: P0 (Critical)
 
 **Requirements**:
+
 - Verify wall shuffling algorithm in GameController
 - Ensure tiles are properly randomized at game start
 - Test randomness distribution over multiple games
 - Consider using crypto.getRandomValues() for better randomness
 
 **Files to check**:
+
 - [core/GameController.js](core/GameController.js) - Wall creation/shuffling
 
 **Testing approach**:
+
 ```javascript
 // Statistical test for randomness
 function testWallRandomness(iterations = 1000) {
@@ -1052,6 +1194,7 @@ function testWallRandomness(iterations = 1000) {
 ```
 
 **Testing**:
+
 - Run statistical tests on wall randomness
 - Play multiple games and verify tile distribution feels random
 - No patterns in tile draws
@@ -1066,27 +1209,31 @@ function testWallRandomness(iterations = 1000) {
 **Priority**: P0 (Critical)
 
 **Requirements**:
+
 - Debug tile drawing logic in GameController
 - Verify wall is properly managed (tiles removed after draw)
 - Check tile index tracking and assignment
 - Ensure drawn tile is actually from wall, not cached
 
 **Files to check**:
+
 - [core/GameController.js](core/GameController.js) - drawTile() and pickTileFromWall()
 - [mobile/MobileRenderer.js](mobile/MobileRenderer.js) - onTileDrawn() event handling
 
 **Debug approach**:
+
 ```javascript
 // In GameController.drawTile()
-console.log('Drawing tile from wall:', {
+console.log("Drawing tile from wall:", {
   wallLength: this.wallTiles.length,
   tileIndex: this.wallTiles[0].index,
   tileSuit: this.wallTiles[0].suit,
-  tileRank: this.wallTiles[0].rank
+  tileRank: this.wallTiles[0].rank,
 });
 ```
 
 **Testing**:
+
 - Log every tile drawn over multiple rounds
 - Verify tiles are unique and from wall
 - Check wall length decreases after each draw
@@ -1103,6 +1250,7 @@ console.log('Drawing tile from wall:', {
 - **P3 (Low)**: Nice-to-have enhancements
 
 ### Phase 1: Critical Fixes (P0)
+
 **Estimated effort**: 2-3 days
 
 1. **Wind Assignment Logic** (1A) - Fix game state representation
@@ -1111,6 +1259,7 @@ console.log('Drawing tile from wall:', {
 4. **Validate Tile Drawing** (7) - Bug fix
 
 **Success criteria**:
+
 - Winds assigned correctly
 - Touch selection works reliably
 - Wall tiles are provably random
@@ -1119,6 +1268,7 @@ console.log('Drawing tile from wall:', {
 ---
 
 ### Phase 2: High Priority UX (P1)
+
 **Estimated effort**: 3-4 days
 
 1. **Opponent Bar Fixes** (1B, 1D) - Remove undefined messages, sort correctly
@@ -1132,6 +1282,7 @@ console.log('Drawing tile from wall:', {
 9. **Joker Swap** (5) - Implement feature
 
 **Success criteria**:
+
 - Opponent bars display correctly
 - Layout is organized and centered
 - Hints panel is compact
@@ -1141,6 +1292,7 @@ console.log('Drawing tile from wall:', {
 ---
 
 ### Phase 3: Visual Polish (P2)
+
 **Estimated effort**: 2-3 days
 
 1. **Typography** (0) - Match desktop fonts
@@ -1157,6 +1309,7 @@ console.log('Drawing tile from wall:', {
 12. **Remove Duplicate Messages** (1F) - Status message cleanup
 
 **Success criteria**:
+
 - Visual consistency with desktop
 - Animations are smooth
 - UI feels polished
@@ -1164,6 +1317,7 @@ console.log('Drawing tile from wall:', {
 ---
 
 ### Phase 4: Future Enhancements (P3)
+
 **Not currently scoped**
 
 - Haptic feedback on tile selection
@@ -1180,10 +1334,12 @@ console.log('Drawing tile from wall:', {
 ### Key Files Reference
 
 **Core Game Logic**:
+
 - [core/GameController.js](core/GameController.js) - Game state machine, wind assignment, tile drawing
 - [core/AIEngine.js](core/AIEngine.js) - AI decisions, tile recommendations
 
 **Mobile Rendering**:
+
 - [mobile/MobileRenderer.js](mobile/MobileRenderer.js) - Event routing, UI prompts
 - [mobile/renderers/HandRenderer.js](mobile/renderers/HandRenderer.js) - Hand tile rendering, selection
 - [mobile/components/OpponentBar.js](mobile/components/OpponentBar.js) - Opponent display
@@ -1191,13 +1347,16 @@ console.log('Drawing tile from wall:', {
 - [mobile/components/HintsPanel.js](mobile/components/HintsPanel.js) - Hints display
 
 **Animations**:
+
 - [mobile/animations/AnimationController.js](mobile/animations/AnimationController.js) - Animation orchestration
 - [mobile/styles/animations.css](mobile/styles/animations.css) - CSS animations
 
 **Touch Handling**:
+
 - [mobile/gestures/TouchHandler.js](mobile/gestures/TouchHandler.js) - Touch and swipe detection
 
 **Styling**:
+
 - [mobile/styles/base.css](mobile/styles/base.css) - Base styles, typography
 - [mobile/styles/MobileGame.css](mobile/styles/MobileGame.css) - Layout, buttons, general styling
 - [mobile/styles/HandRenderer.css](mobile/styles/HandRenderer.css) - Hand-specific styling
@@ -1208,22 +1367,26 @@ console.log('Drawing tile from wall:', {
 ### Testing Strategy
 
 **Unit Tests** (via Playwright):
+
 - Test GameController wind assignment
 - Test tile shuffling randomness
 - Test discard pile sorting
 - Test joker/blank swap logic
 
 **Integration Tests**:
+
 - Full game flow from start to mahjong
 - Charleston phase tile selection
 - Discard claim interactions
 - Exposure creation
 
 **Visual Regression Tests**:
+
 - Screenshot comparisons for UI changes
 - Layout consistency across devices
 
 **Manual Testing Checklist**:
+
 - [ ] Play full game on mobile device
 - [ ] Test all touch gestures (tap, swipe, long-press)
 - [ ] Verify animations are smooth (60fps)
@@ -1276,12 +1439,14 @@ console.log('Drawing tile from wall:', {
 This implementation plan provides a structured approach to addressing all user testing feedback. By organizing tasks into priority phases, we can deliver the most critical fixes first while maintaining a clear roadmap for polish and enhancements.
 
 **Next steps**:
+
 1. Review and approve this plan
 2. Begin Phase 1 (Critical Fixes)
 3. Test and iterate on each phase
 4. Gather additional user feedback after Phase 2
 
 **Questions for review**:
+
 - Are priority levels correctly assigned?
 - Any missing requirements?
 - Suggested adjustments to scope or timeline?

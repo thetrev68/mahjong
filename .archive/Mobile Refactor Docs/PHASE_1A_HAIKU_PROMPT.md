@@ -22,6 +22,7 @@ Review and refine the data model classes in `core/models/`. These classes repres
 **Your Task:** Review and validate
 
 **Requirements:**
+
 - ✅ Plain JavaScript class (no Phaser imports)
 - ✅ Properties: `suit`, `number`, `index`
 - ✅ Methods:
@@ -37,9 +38,10 @@ Review and refine the data model classes in `core/models/`. These classes repres
   - `fromJSON(json)` / `toJSON()` - Serialization
 
 **Validation Tests:**
+
 ```javascript
-import {TileData} from './core/models/TileData.js';
-import {SUIT} from './constants.js';
+import { TileData } from "./core/models/TileData.js";
+import { SUIT } from "./constants.js";
 
 // Test 1: Basic creation and getText()
 const tile = new TileData(SUIT.CRACK, 5, 0);
@@ -49,13 +51,19 @@ console.assert(tile.getText() === "Crack 5", "getText() failed");
 const tile1 = new TileData(SUIT.CRACK, 5, 0);
 const tile2 = new TileData(SUIT.CRACK, 5, 1);
 console.assert(tile1.equals(tile2) === true, "equals() should be true");
-console.assert(tile1.isSameTile(tile2) === false, "isSameTile() should be false");
+console.assert(
+  tile1.isSameTile(tile2) === false,
+  "isSameTile() should be false",
+);
 
 // Test 3: clone() creates independent copy
 const original = new TileData(SUIT.BAM, 3, 10);
 const cloned = original.clone();
 cloned.suit = SUIT.DOT;
-console.assert(original.suit === SUIT.BAM, "clone() should not affect original");
+console.assert(
+  original.suit === SUIT.BAM,
+  "clone() should not affect original",
+);
 
 // Test 4: Type checks
 const joker = new TileData(SUIT.JOKER, 0, 50);
@@ -68,7 +76,10 @@ console.assert(wind.isWind() === true, "isWind() failed");
 const tile3 = new TileData(SUIT.DOT, 7, 42);
 const json = tile3.toJSON();
 const restored = TileData.fromJSON(json);
-console.assert(restored.equals(tile3) && restored.isSameTile(tile3), "JSON roundtrip failed");
+console.assert(
+  restored.equals(tile3) && restored.isSameTile(tile3),
+  "JSON roundtrip failed",
+);
 ```
 
 **If Tests Pass:** ✅ File is good, move to next file
@@ -82,6 +93,7 @@ console.assert(restored.equals(tile3) && restored.isSameTile(tile3), "JSON round
 **Your Task:** Review and validate
 
 **Requirements:**
+
 - ✅ Plain JavaScript class (no Phaser imports)
 - ✅ Properties:
   - `tiles` - Array of TileData (hidden tiles)
@@ -100,14 +112,16 @@ console.assert(restored.equals(tile3) && restored.isSameTile(tile3), "JSON round
   - `fromJSON(json)` / `toJSON()` - Serialization
 
 **Nested Class: ExposureData**
+
 - Properties: `type` ("PUNG"/"KONG"/"QUINT"), `tiles` (array)
 - Methods: `clone()`, `toJSON()`, `fromJSON()`
 
 **Validation Tests:**
+
 ```javascript
-import {HandData, ExposureData} from './core/models/HandData.js';
-import {TileData} from './core/models/TileData.js';
-import {SUIT} from './constants.js';
+import { HandData, ExposureData } from "./core/models/HandData.js";
+import { TileData } from "./core/models/TileData.js";
+import { SUIT } from "./constants.js";
 
 // Test 1: Add/remove tiles
 const hand = new HandData();
@@ -130,9 +144,9 @@ console.assert(hand.countTile(SUIT.BAM, 5) === 2, "countTile() failed");
 const exposure = new ExposureData();
 exposure.type = "PUNG";
 exposure.tiles = [
-    new TileData(SUIT.DOT, 3, 20),
-    new TileData(SUIT.DOT, 3, 21),
-    new TileData(SUIT.DOT, 3, 22)
+  new TileData(SUIT.DOT, 3, 20),
+  new TileData(SUIT.DOT, 3, 21),
+  new TileData(SUIT.DOT, 3, 22),
 ];
 hand.addExposure(exposure);
 console.assert(hand.getLength() === 4, "Exposure not counted in length"); // 1 hidden + 3 exposed
@@ -148,12 +162,18 @@ console.assert(hand2.tiles[0].suit === SUIT.CRACK, "sortBySuit() failed");
 // Test 5: Clone
 const clonedHand = hand.clone();
 clonedHand.addTile(new TileData(SUIT.JOKER, 0, 100));
-console.assert(hand.getLength() === 4 && clonedHand.getLength() === 5, "clone() not independent");
+console.assert(
+  hand.getLength() === 4 && clonedHand.getLength() === 5,
+  "clone() not independent",
+);
 
 // Test 6: JSON serialization
 const json = hand.toJSON();
 const restored = HandData.fromJSON(json);
-console.assert(restored.getLength() === hand.getLength(), "JSON roundtrip failed");
+console.assert(
+  restored.getLength() === hand.getLength(),
+  "JSON roundtrip failed",
+);
 ```
 
 **If Tests Pass:** ✅ File is good, move to next file
@@ -167,6 +187,7 @@ console.assert(restored.getLength() === hand.getLength(), "JSON roundtrip failed
 **Your Task:** Review and validate
 
 **Requirements:**
+
 - ✅ Plain JavaScript class (no Phaser imports)
 - ✅ Properties:
   - `position` - Player index (0=BOTTOM, 1=RIGHT, 2=TOP, 3=LEFT)
@@ -183,10 +204,11 @@ console.assert(restored.getLength() === hand.getLength(), "JSON roundtrip failed
   - `fromJSON(json)` / `toJSON()` - Serialization
 
 **Validation Tests:**
+
 ```javascript
-import {PlayerData} from './core/models/PlayerData.js';
-import {HandData} from './core/models/HandData.js';
-import {PLAYER} from './constants.js';
+import { PlayerData } from "./core/models/PlayerData.js";
+import { HandData } from "./core/models/HandData.js";
+import { PLAYER } from "./constants.js";
 
 // Test 1: Default names
 const player0 = new PlayerData(PLAYER.BOTTOM);
@@ -197,8 +219,14 @@ console.assert(player0.isHuman === true, "isHuman should be true for BOTTOM");
 console.assert(player1.isHuman === false, "isHuman should be false for others");
 
 // Test 2: Hand integration
-console.assert(player0.hand instanceof HandData, "hand should be HandData instance");
-console.assert(player0.hand.getLength() === 0, "New player should have empty hand");
+console.assert(
+  player0.hand instanceof HandData,
+  "hand should be HandData instance",
+);
+console.assert(
+  player0.hand.getLength() === 0,
+  "New player should have empty hand",
+);
 
 // Test 3: Wind assignment
 player0.wind = "E";
@@ -224,22 +252,26 @@ console.assert(restored.name === player0.name, "JSON name not preserved");
 ## Additional Guidelines
 
 ### Import Rules
+
 **ALLOWED:**
+
 ```javascript
-import {SUIT, PLAYER, WIND, DRAGON, VNUMBER} from '../../constants.js';
-import {gTileGroups} from '../../gameObjects.js'; // Only for tile text generation
-import {TileData} from './TileData.js';
-import {HandData} from './HandData.js';
+import { SUIT, PLAYER, WIND, DRAGON, VNUMBER } from "../../constants.js";
+import { gTileGroups } from "../../gameObjects.js"; // Only for tile text generation
+import { TileData } from "./TileData.js";
+import { HandData } from "./HandData.js";
 ```
 
 **FORBIDDEN:**
+
 ```javascript
-import * as Phaser from 'phaser';  // ❌ NO PHASER IN core/
-import {Tile, Wall} from '../../gameObjects.js';  // ❌ These are Phaser classes
-import {GameScene} from '../../GameScene.js';  // ❌ UI layer
+import * as Phaser from "phaser"; // ❌ NO PHASER IN core/
+import { Tile, Wall } from "../../gameObjects.js"; // ❌ These are Phaser classes
+import { GameScene } from "../../GameScene.js"; // ❌ UI layer
 ```
 
 ### Code Style (from CLAUDE.md)
+
 - Use double quotes for strings
 - Semicolons required
 - `const`/`let` only (no `var`)
@@ -247,6 +279,7 @@ import {GameScene} from '../../GameScene.js';  // ❌ UI layer
 - JSDoc comments for public methods
 
 ### Migration Helpers
+
 The `fromPhaserTile()`, `fromPhaserHand()`, `fromPhaserPlayer()` methods are temporary bridges. They convert old Phaser objects → new data models. These will be used in Phase 2A (PhaserAdapter) but are NOT needed for mobile.
 
 ---
@@ -299,6 +332,7 @@ node core/models/test-data-models.js
 ## Questions?
 
 If anything is unclear:
+
 1. Check [MOBILE_INTERFACES.md](MOBILE_INTERFACES.md) for complete data model specifications
 2. Reference existing [gameObjects.js](gameObjects.js) Tile class for comparison
 3. See [constants.js](constants.js) for SUIT/PLAYER enums
@@ -310,6 +344,7 @@ If anything is unclear:
 Once Haiku confirms Phase 1A is complete and all tests pass, **you (Sonnet 4.5)** will proceed with:
 
 **Phase 2A:** Implement PhaserAdapter
+
 - Bridge GameController → existing Phaser desktop code
 - Keep desktop fully functional
 - Use the refined data models from Phase 1A

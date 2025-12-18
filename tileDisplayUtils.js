@@ -15,12 +15,17 @@ const SUIT_COLORS = {
   [SUIT.JOKER]: "gray", // Added for jokers
   [SUIT.CRACK]: "red", // Assuming mappings for actual suits
   [SUIT.BAM]: "green",
-  [SUIT.DOT]: "blue"
+  [SUIT.DOT]: "blue",
 };
 
 // Map tile to display character and color
 /* knip-ignore */
-export function getTileDisplayChar(tile, isEvenHand = false, vsuitArray = null, dragonMapping = null) {
+export function getTileDisplayChar(
+  tile,
+  isEvenHand = false,
+  vsuitArray = null,
+  dragonMapping = null,
+) {
   if (tile.suit === SUIT.JOKER) {
     return { char: "J", color: SUIT_COLORS[SUIT.JOKER], tile };
   }
@@ -28,10 +33,22 @@ export function getTileDisplayChar(tile, isEvenHand = false, vsuitArray = null, 
     return { char: "F", color: SUIT_COLORS[SUIT.FLOWER], tile };
   }
   if (tile.suit === SUIT.WIND) {
-    const windChars = { [WIND.NORTH]: "N", [WIND.EAST]: "E", [WIND.SOUTH]: "S", [WIND.WEST]: "W" };
-    return { char: windChars[tile.number] || "?", color: SUIT_COLORS[SUIT.WIND], tile };
+    const windChars = {
+      [WIND.NORTH]: "N",
+      [WIND.EAST]: "E",
+      [WIND.SOUTH]: "S",
+      [WIND.WEST]: "W",
+    };
+    return {
+      char: windChars[tile.number] || "?",
+      color: SUIT_COLORS[SUIT.WIND],
+      tile,
+    };
   }
-  if (tile.suit === SUIT.DRAGON || tile.suit >= SUIT.VSUIT1_DRAGON && tile.suit <= SUIT.VSUIT3_DRAGON) {
+  if (
+    tile.suit === SUIT.DRAGON ||
+    (tile.suit >= SUIT.VSUIT1_DRAGON && tile.suit <= SUIT.VSUIT3_DRAGON)
+  ) {
     // White dragon as "0" (soap): Only when suit is SUIT.DRAGON and number is DRAGON.WHITE
     if (tile.suit === SUIT.DRAGON && tile.number === DRAGON.WHITE) {
       return { char: "0", color: "blue", tile };
@@ -46,24 +63,31 @@ export function getTileDisplayChar(tile, isEvenHand = false, vsuitArray = null, 
       // Regular dragon - color depends on the dragon type (number)
       // RED (0) = red, GREEN (1) = green, WHITE (2) = blue (though WHITE is handled above as "0")
       // Check if this is a translated VSUIT*_DRAGON placeholder (has _originalVsuit)
-      if (tile._originalVsuit !== undefined && dragonMapping && dragonMapping.has(tile._originalVsuit)) {
+      if (
+        tile._originalVsuit !== undefined &&
+        dragonMapping &&
+        dragonMapping.has(tile._originalVsuit)
+      ) {
         // Use the color from the dragon mapping for this virtual suit
         const mappedNumber = dragonMapping.get(tile._originalVsuit);
         const dragonColors = {
           [DRAGON.RED]: "red",
           [DRAGON.GREEN]: "green",
-          [DRAGON.WHITE]: "blue"
+          [DRAGON.WHITE]: "blue",
         };
         dragonColor = dragonColors[mappedNumber] || "blue";
       } else {
         const dragonColors = {
           [DRAGON.RED]: "red",
           [DRAGON.GREEN]: "green",
-          [DRAGON.WHITE]: "blue"
+          [DRAGON.WHITE]: "blue",
         };
         dragonColor = dragonColors[tile.number] || "blue";
       }
-    } else if (tile.suit >= SUIT.VSUIT1_DRAGON && tile.suit <= SUIT.VSUIT3_DRAGON) {
+    } else if (
+      tile.suit >= SUIT.VSUIT1_DRAGON &&
+      tile.suit <= SUIT.VSUIT3_DRAGON
+    ) {
       // Virtual suit dragons - determine color from dragonMapping
       // dragonMapping should always be populated by renderPatternVariation()
       if (dragonMapping && dragonMapping.has(tile.suit)) {
@@ -71,7 +95,7 @@ export function getTileDisplayChar(tile, isEvenHand = false, vsuitArray = null, 
         const dragonColors = {
           [DRAGON.RED]: "red",
           [DRAGON.GREEN]: "green",
-          [DRAGON.WHITE]: "blue"
+          [DRAGON.WHITE]: "blue",
         };
         dragonColor = dragonColors[dragonNumber] || "blue";
       } else if (vsuitArray) {
@@ -83,7 +107,7 @@ export function getTileDisplayChar(tile, isEvenHand = false, vsuitArray = null, 
           const dragonColors = {
             [DRAGON.RED]: "red",
             [DRAGON.GREEN]: "green",
-            [DRAGON.WHITE]: "blue"
+            [DRAGON.WHITE]: "blue",
           };
           dragonColor = dragonColors[dragonNumber] || "blue";
         } else {
@@ -110,13 +134,20 @@ export function getTileDisplayChar(tile, isEvenHand = false, vsuitArray = null, 
       const realSuitColor = SUIT_COLORS[realSuit] || "blue";
       return { char: tile.number.toString(), color: realSuitColor, tile };
     }
-    return { char: tile.number.toString(), color: SUIT_COLORS[tile.suit] || "blue", tile };
+    return {
+      char: tile.number.toString(),
+      color: SUIT_COLORS[tile.suit] || "blue",
+      tile,
+    };
   }
   // Virtual numbers (consecutive) - adjust for even/odd hand
-  if (tile.number >= VNUMBER.CONSECUTIVE1 && tile.number <= VNUMBER.CONSECUTIVE7) {
+  if (
+    tile.number >= VNUMBER.CONSECUTIVE1 &&
+    tile.number <= VNUMBER.CONSECUTIVE7
+  ) {
     const index = tile.number - VNUMBER.CONSECUTIVE1;
     const num = isEvenHand ? 2 + index * 2 : 1 + index * 2;
-    
+
     // Handle virtual suits with dynamic color mapping
     if (vsuitArray && tile.suit >= SUIT.VSUIT1 && tile.suit <= SUIT.VSUIT3) {
       // Map virtual suit to real suit using vsuitArray
@@ -124,7 +155,11 @@ export function getTileDisplayChar(tile, isEvenHand = false, vsuitArray = null, 
       const realSuitColor = SUIT_COLORS[realSuit] || "blue";
       return { char: num.toString(), color: realSuitColor, tile };
     }
-    return { char: num.toString(), color: SUIT_COLORS[tile.suit] || "blue", tile };
+    return {
+      char: num.toString(),
+      color: SUIT_COLORS[tile.suit] || "blue",
+      tile,
+    };
   }
   if (tile.number === 0) {
     return { char: "0", color: SUIT_COLORS[tile.suit] || "gray", tile }; // Handle zero as soap/blank
@@ -135,7 +170,7 @@ export function getTileDisplayChar(tile, isEvenHand = false, vsuitArray = null, 
 // Tally tile counts in player's hand (normalized)
 function tally(tiles) {
   const counts = new Map();
-  tiles.forEach(tile => {
+  tiles.forEach((tile) => {
     const key = `${tile.suit}-${tile.number}`;
     counts.set(key, (counts.get(key) || 0) + 1);
   });
@@ -145,7 +180,16 @@ function tally(tiles) {
 // Get display chars for pattern tiles, with matching against player's hand
 // Supports joker substitution only for components with count >=3
 /* knip-ignore */
-export function getPatternDisplayChars(patternTiles, playerTiles, componentCounts, isEvenHand, vsuitArray = null, hiddenTiles = null, consecutiveMapping = null, dragonMapping = null) {
+export function getPatternDisplayChars(
+  patternTiles,
+  playerTiles,
+  componentCounts,
+  isEvenHand,
+  vsuitArray = null,
+  hiddenTiles = null,
+  consecutiveMapping = null,
+  dragonMapping = null,
+) {
   const playerCounts = tally(playerTiles);
   const usedCounts = new Map();
 
@@ -153,21 +197,36 @@ export function getPatternDisplayChars(patternTiles, playerTiles, componentCount
   // Use ALL jokers (both hidden and exposed) when checking if tiles match the pattern
   // Only hidden jokers can be used for substitution (exposed jokers are already committed)
   const hiddenCounts = hiddenTiles ? tally(hiddenTiles) : playerCounts;
-  const availableJokersForSubstitution = hiddenCounts.get(`${SUIT.JOKER}-0`) || 0;
-  let actualJokersUsed = 0;  // Track actual joker tiles matched from pattern
-  let substitutedJokers = 0;  // Track jokers used for substitution
+  const availableJokersForSubstitution =
+    hiddenCounts.get(`${SUIT.JOKER}-0`) || 0;
+  let actualJokersUsed = 0; // Track actual joker tiles matched from pattern
+  let substitutedJokers = 0; // Track jokers used for substitution
 
   return patternTiles.map((tile, index) => {
     let display;
 
     // Use the consistent consecutive mapping for display if provided
-    if (consecutiveMapping && tile.number >= VNUMBER.CONSECUTIVE1 && tile.number <= VNUMBER.CONSECUTIVE7) {
+    if (
+      consecutiveMapping &&
+      tile.number >= VNUMBER.CONSECUTIVE1 &&
+      tile.number <= VNUMBER.CONSECUTIVE7
+    ) {
       const mappedNumber = consecutiveMapping.get(tile.number);
       if (mappedNumber !== undefined) {
         const modifiedTile = { ...tile, number: mappedNumber };
-        display = getTileDisplayChar(modifiedTile, isEvenHand, vsuitArray, dragonMapping);
+        display = getTileDisplayChar(
+          modifiedTile,
+          isEvenHand,
+          vsuitArray,
+          dragonMapping,
+        );
       } else {
-        display = getTileDisplayChar(tile, isEvenHand, vsuitArray, dragonMapping);
+        display = getTileDisplayChar(
+          tile,
+          isEvenHand,
+          vsuitArray,
+          dragonMapping,
+        );
       }
     } else {
       display = getTileDisplayChar(tile, isEvenHand, vsuitArray, dragonMapping);
@@ -215,7 +274,7 @@ const COLOR_CLASS_MAP = {
     green: "bg-green-600 text-white border border-green-700",
     blue: "bg-blue-600 text-white border border-blue-700",
     black: "bg-black text-white border border-gray-800",
-    gray: "bg-gray-600 text-white border border-gray-700"
+    gray: "bg-gray-600 text-white border border-gray-700",
   },
   // Non-inverted (unmatched tiles): white background with colored text
   normal: {
@@ -223,8 +282,8 @@ const COLOR_CLASS_MAP = {
     green: "bg-white text-green-600 border border-green-200",
     blue: "bg-white text-blue-600 border border-blue-200",
     black: "bg-white text-black border border-gray-300",
-    gray: "bg-white text-gray-700 border border-gray-300"
-  }
+    gray: "bg-white text-gray-700 border border-gray-300",
+  },
 };
 
 export function getTileCharClasses(displayChar, invert = true) {
@@ -233,7 +292,9 @@ export function getTileCharClasses(displayChar, invert = true) {
   const color = displayChar.color;
 
   // Select the appropriate color map
-  const colorMap = shouldInvert ? COLOR_CLASS_MAP.inverted : COLOR_CLASS_MAP.normal;
+  const colorMap = shouldInvert
+    ? COLOR_CLASS_MAP.inverted
+    : COLOR_CLASS_MAP.normal;
 
   // Get the color classes from the map, with gray as fallback
   const colorClasses = colorMap[color] || colorMap.gray;
@@ -242,7 +303,11 @@ export function getTileCharClasses(displayChar, invert = true) {
 }
 
 // Render the pattern with spacing per component
-export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = null) {
+export function renderPatternVariation(
+  rankedHand,
+  playerTiles,
+  hiddenTiles = null,
+) {
   const patternTiles = [];
   const componentCounts = [];
   const isEvenHand = rankedHand.hand.even || false;
@@ -260,14 +325,19 @@ export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = nu
   const dragonMapping = new Map();
 
   // First pass: Build dragon mapping from matched dragon tiles in componentInfoArray
-  rankedHand.componentInfoArray.forEach(component => {
+  rankedHand.componentInfoArray.forEach((component) => {
     const componentSuit = component.component.suit;
 
     // Check if this component is a virtual dragon suit
-    if (componentSuit >= SUIT.VSUIT1_DRAGON && componentSuit <= SUIT.VSUIT3_DRAGON) {
+    if (
+      componentSuit >= SUIT.VSUIT1_DRAGON &&
+      componentSuit <= SUIT.VSUIT3_DRAGON
+    ) {
       // Find the actual dragon tile that was matched (if any)
       if (component.tileArray && component.tileArray.length > 0) {
-        const dragonTile = component.tileArray.find(tile => tile.suit === SUIT.DRAGON);
+        const dragonTile = component.tileArray.find(
+          (tile) => tile.suit === SUIT.DRAGON,
+        );
         if (dragonTile) {
           // Map this virtual dragon suit to the actual dragon number that was matched
           dragonMapping.set(componentSuit, dragonTile.number);
@@ -279,9 +349,12 @@ export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = nu
   // Second pass: Fill in missing dragon mappings with default distinct values
   // This ensures all VSUIT*_DRAGON components get a color even when not matched
   const virtualDragonSuits = [];
-  rankedHand.componentInfoArray.forEach(component => {
+  rankedHand.componentInfoArray.forEach((component) => {
     const componentSuit = component.component.suit;
-    if (componentSuit >= SUIT.VSUIT1_DRAGON && componentSuit <= SUIT.VSUIT3_DRAGON) {
+    if (
+      componentSuit >= SUIT.VSUIT1_DRAGON &&
+      componentSuit <= SUIT.VSUIT3_DRAGON
+    ) {
       if (!virtualDragonSuits.includes(componentSuit)) {
         virtualDragonSuits.push(componentSuit);
       }
@@ -291,10 +364,10 @@ export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = nu
   // Assign default dragon numbers to unmapped virtual suits
   const usedDragons = new Set(dragonMapping.values());
   const allDragons = [DRAGON.RED, DRAGON.GREEN, DRAGON.WHITE];
-  const availableDragons = allDragons.filter(d => !usedDragons.has(d));
+  const availableDragons = allDragons.filter((d) => !usedDragons.has(d));
   let availableIndex = 0;
 
-  virtualDragonSuits.forEach(vsuit => {
+  virtualDragonSuits.forEach((vsuit) => {
     if (!dragonMapping.has(vsuit)) {
       // Assign next available dragon, or cycle through if exhausted
       if (availableIndex < availableDragons.length) {
@@ -308,13 +381,18 @@ export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = nu
     }
   });
 
-  rankedHand.componentInfoArray.forEach(component => {
+  rankedHand.componentInfoArray.forEach((component) => {
     if (component.tileArray && component.tileArray.length > 0) {
       // Check if this component uses a consecutive number
       const componentNumber = component.component.number;
-      if (componentNumber >= VNUMBER.CONSECUTIVE1 && componentNumber <= VNUMBER.CONSECUTIVE7) {
+      if (
+        componentNumber >= VNUMBER.CONSECUTIVE1 &&
+        componentNumber <= VNUMBER.CONSECUTIVE7
+      ) {
         // Find the actual number from the matched tiles (excluding jokers)
-        const actualTile = component.tileArray.find(tile => tile.suit !== SUIT.JOKER);
+        const actualTile = component.tileArray.find(
+          (tile) => tile.suit !== SUIT.JOKER,
+        );
         if (actualTile && consecutiveMapping.size === 0) {
           // Found the first consecutive number - use it to map ALL consecutive numbers
           const consecutiveIndex = componentNumber - VNUMBER.CONSECUTIVE1; // 0-6
@@ -332,11 +410,13 @@ export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = nu
   // Use original component order
   rankedHand.componentInfoArray.forEach((component, compIndex) => {
     const expectedCount = component.component.count;
-    const actualTileCount = component.tileArray ? component.tileArray.length : 0;
+    const actualTileCount = component.tileArray
+      ? component.tileArray.length
+      : 0;
 
     // Add all the actual matched tiles
     if (component.tileArray && component.tileArray.length > 0) {
-      component.tileArray.forEach(tile => {
+      component.tileArray.forEach((tile) => {
         patternTiles.push(tile);
         componentCounts.push(expectedCount);
       });
@@ -346,24 +426,27 @@ export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = nu
     if (actualTileCount < expectedCount) {
       let placeholderTile;
       const componentSuit = component.component.suit;
-      
+
       // For VSUIT*_DRAGON components, translate to actual DRAGON suit with mapped number
       // This allows matching against player's dragon tiles
-      if (componentSuit >= SUIT.VSUIT1_DRAGON && componentSuit <= SUIT.VSUIT3_DRAGON) {
+      if (
+        componentSuit >= SUIT.VSUIT1_DRAGON &&
+        componentSuit <= SUIT.VSUIT3_DRAGON
+      ) {
         const dragonNumber = dragonMapping.get(componentSuit);
         placeholderTile = {
           suit: SUIT.DRAGON,
           number: dragonNumber !== undefined ? dragonNumber : 0,
           // Store original virtual suit for color determination in getTileDisplayChar
-          _originalVsuit: componentSuit
+          _originalVsuit: componentSuit,
         };
       } else {
         placeholderTile = {
           suit: componentSuit || SUIT.INVALID,
-          number: component.component.number || 0
+          number: component.component.number || 0,
         };
       }
-      
+
       for (let i = actualTileCount; i < expectedCount; i++) {
         patternTiles.push(placeholderTile);
         componentCounts.push(expectedCount);
@@ -373,7 +456,11 @@ export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = nu
     // Add spacer only if not between two singles
     if (compIndex < rankedHand.componentInfoArray.length - 1) {
       const nextComponent = rankedHand.componentInfoArray[compIndex + 1];
-      if (!(component.component.count === 1 && nextComponent.component.count === 1)) {
+      if (
+        !(
+          component.component.count === 1 && nextComponent.component.count === 1
+        )
+      ) {
         patternTiles.push({ isSpacer: true });
         componentCounts.push(0);
       }
@@ -381,14 +468,25 @@ export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = nu
   });
 
   // Only pass actual tiles to getPatternDisplayChars
-  const actualTiles = patternTiles.filter(t => !t.isSpacer);
-  const actualCounts = componentCounts.filter((_, i) => !patternTiles[i].isSpacer);
-  const displayChars = getPatternDisplayChars(actualTiles, playerTiles, actualCounts, isEvenHand, rankedHand.vsuitArray, hiddenTiles, consecutiveMapping, dragonMapping);
+  const actualTiles = patternTiles.filter((t) => !t.isSpacer);
+  const actualCounts = componentCounts.filter(
+    (_, i) => !patternTiles[i].isSpacer,
+  );
+  const displayChars = getPatternDisplayChars(
+    actualTiles,
+    playerTiles,
+    actualCounts,
+    isEvenHand,
+    rankedHand.vsuitArray,
+    hiddenTiles,
+    consecutiveMapping,
+    dragonMapping,
+  );
 
   // Reinsert spacers into displayChars
   const finalDisplay = [];
   let tileIndex = 0;
-  patternTiles.forEach(item => {
+  patternTiles.forEach((item) => {
     if (item.isSpacer) {
       finalDisplay.push({ isSpacer: true });
     } else {
@@ -396,10 +494,10 @@ export function renderPatternVariation(rankedHand, playerTiles, hiddenTiles = nu
     }
   });
 
-  let html = "<div class=\"pattern-row\">";
-  finalDisplay.forEach(item => {
+  let html = '<div class="pattern-row">';
+  finalDisplay.forEach((item) => {
     if (item.isSpacer) {
-      html += "<span class=\"component-spacer\"></span>";
+      html += '<span class="component-spacer"></span>';
     } else {
       html += `<span class="${getTileCharClasses(item)}">${item.char}</span>`;
     }

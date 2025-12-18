@@ -20,12 +20,14 @@ Define the **architectural interfaces and event flows** for all mobile component
 ## Context
 
 ### What You Have
+
 1. **Completed mockup:** [mobile/mockup.html](mobile/mockup.html) and [mobile/mockup.css](mobile/mockup.css)
 2. **Core system:** [core/GameController.js](core/GameController.js) - event-driven game state machine
 3. **Data models:** TileData, HandData, PlayerData (from Phase 1A)
 4. **Desktop reference:** See how PhaserAdapter works in [desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js)
 
 ### What You're Creating
+
 1. **MOBILE_INTERFACES.md** - Complete interface specifications for all mobile components
 2. **Example event flows** - Show how components interact during gameplay
 3. **Component hierarchy** - Define parent/child relationships
@@ -42,6 +44,7 @@ This document must include:
 #### A. Component Interface Definitions
 
 For each component, specify:
+
 - **Purpose:** What this component does
 - **Constructor parameters:** What data it needs to initialize
 - **Public methods:** What operations it exposes
@@ -54,6 +57,7 @@ For each component, specify:
 #### B. Components to Define
 
 **Core Rendering Components:**
+
 1. **MobileGameController** - Main orchestrator
 2. **HandRenderer** - Player's 2-row hand display
 3. **ExposedTilesRenderer** - Player's exposed tiles (Pung/Kong/Quint)
@@ -63,15 +67,14 @@ For each component, specify:
 7. **WallCounter** - Floating counter display
 8. **BottomMenu** - DRAW and SORT buttons
 
-**Interaction Components:**
-9. **TouchHandler** - Gesture detection (defined in Phase 3C)
-10. **TileComponent** - Individual tile representation (defined in Phase 3D)
+**Interaction Components:** 9. **TouchHandler** - Gesture detection (defined in Phase 3C) 10. **TileComponent** - Individual tile representation (defined in Phase 3D)
 
 #### C. Event Flow Diagrams
 
 Document these key gameplay scenarios:
 
 **Scenario 1: Player Draws a Tile**
+
 ```
 GameController fires 'TILE_DRAWN' event
   ↓
@@ -87,6 +90,7 @@ WallCounter updates count (-1)
 ```
 
 **Scenario 2: Player Discards a Tile**
+
 ```
 User taps tile → TouchHandler fires 'tap' event
   ↓
@@ -108,6 +112,7 @@ HintsPanel updates (dangerous discard marked red)
 ```
 
 **Scenario 3: Opponent Exposes Tiles**
+
 ```
 GameController fires 'TILES_EXPOSED' event
   ↓
@@ -121,6 +126,7 @@ OpponentBar re-renders exposed tiles section
 ```
 
 **Scenario 4: Hand Changes (Hint Update)**
+
 ```
 Any hand change (draw/discard/expose)
   ↓
@@ -141,11 +147,13 @@ HintsPanel marks dangerous discards (red border)
 How does the mobile UI stay in sync with GameController state?
 
 **Options to Consider:**
+
 1. **Event-driven (recommended):** Components subscribe to GameController events and update themselves
 2. **Polling:** Components periodically query GameController state (not recommended)
 3. **Hybrid:** Critical updates via events, non-critical via polling
 
 **Specify:**
+
 - Which components hold their own state vs. query GameController?
 - How do we handle race conditions (e.g., multiple tile discards)?
 - What happens if a component misses an event?
@@ -178,6 +186,7 @@ How does the mobile UI stay in sync with GameController state?
 ```
 
 **Specify:**
+
 - Who creates each component?
 - Who owns the lifecycle (destroy on game end)?
 - How do components communicate with each other?
@@ -196,83 +205,83 @@ How does the mobile UI stay in sync with GameController state?
  * Handles tile selection, sorting, and drag-and-drop (future).
  */
 class HandRenderer {
-    /**
-     * @param {HTMLElement} container - DOM element to render into
-     * @param {GameController} gameController - Core game state machine
-     * @param {TouchHandler} touchHandler - Gesture detection system
-     */
-    constructor(container, gameController, touchHandler) {}
+  /**
+   * @param {HTMLElement} container - DOM element to render into
+   * @param {GameController} gameController - Core game state machine
+   * @param {TouchHandler} touchHandler - Gesture detection system
+   */
+  constructor(container, gameController, touchHandler) {}
 
-    /**
-     * Initialize the component and subscribe to events
-     */
-    init() {
-        // Subscribe to GameController events
-        this.gameController.on('HAND_UPDATED', this.handleHandUpdate.bind(this));
-        this.gameController.on('TILE_DRAWN', this.handleTileDraw.bind(this));
+  /**
+   * Initialize the component and subscribe to events
+   */
+  init() {
+    // Subscribe to GameController events
+    this.gameController.on("HAND_UPDATED", this.handleHandUpdate.bind(this));
+    this.gameController.on("TILE_DRAWN", this.handleTileDraw.bind(this));
 
-        // Set up touch handlers
-        this.touchHandler.on('tap', this.handleTileTap.bind(this));
+    // Set up touch handlers
+    this.touchHandler.on("tap", this.handleTileTap.bind(this));
 
-        // Render initial state
-        this.render();
-    }
+    // Render initial state
+    this.render();
+  }
 
-    /**
-     * Render the hand based on current GameController state
-     */
-    render() {
-        const handData = this.gameController.getPlayerHand(0); // Bottom player
-        // Clear container
-        // Create 2-row grid
-        // Populate with TileComponent instances
-    }
+  /**
+   * Render the hand based on current GameController state
+   */
+  render() {
+    const handData = this.gameController.getPlayerHand(0); // Bottom player
+    // Clear container
+    // Create 2-row grid
+    // Populate with TileComponent instances
+  }
 
-    /**
-     * Handle hand update event from GameController
-     * @param {Object} data - { player: 0, hand: HandData, reason: 'draw'|'discard'|'sort' }
-     */
-    handleHandUpdate(data) {
-        if (data.player !== 0) return; // Only render bottom player
-        this.render();
-    }
+  /**
+   * Handle hand update event from GameController
+   * @param {Object} data - { player: 0, hand: HandData, reason: 'draw'|'discard'|'sort' }
+   */
+  handleHandUpdate(data) {
+    if (data.player !== 0) return; // Only render bottom player
+    this.render();
+  }
 
-    /**
-     * Handle tile draw event
-     * @param {Object} data - { player: 0, tile: TileData, position: 'end'|'sorted' }
-     */
-    handleTileDraw(data) {
-        // Animate tile drawing
-        // Add to hand with animation
-    }
+  /**
+   * Handle tile draw event
+   * @param {Object} data - { player: 0, tile: TileData, position: 'end'|'sorted' }
+   */
+  handleTileDraw(data) {
+    // Animate tile drawing
+    // Add to hand with animation
+  }
 
-    /**
-     * Handle tile tap gesture
-     * @param {Object} data - { element: HTMLElement, tileData: TileData, coordinates: {x, y} }
-     */
-    handleTileTap(data) {
-        // Toggle selection
-        // Show confirmation popup if appropriate
-    }
+  /**
+   * Handle tile tap gesture
+   * @param {Object} data - { element: HTMLElement, tileData: TileData, coordinates: {x, y} }
+   */
+  handleTileTap(data) {
+    // Toggle selection
+    // Show confirmation popup if appropriate
+  }
 
-    /**
-     * Sort hand by suit or rank
-     * @param {'suit'|'rank'} sortMode
-     */
-    sort(sortMode) {
-        this.gameController.sortHand(0, sortMode);
-        // Animate tiles rearranging
-    }
+  /**
+   * Sort hand by suit or rank
+   * @param {'suit'|'rank'} sortMode
+   */
+  sort(sortMode) {
+    this.gameController.sortHand(0, sortMode);
+    // Animate tiles rearranging
+  }
 
-    /**
-     * Clean up event listeners and DOM
-     */
-    destroy() {
-        this.gameController.off('HAND_UPDATED', this.handleHandUpdate);
-        this.gameController.off('TILE_DRAWN', this.handleTileDraw);
-        this.touchHandler.off('tap', this.handleTileTap);
-        this.container.innerHTML = '';
-    }
+  /**
+   * Clean up event listeners and DOM
+   */
+  destroy() {
+    this.gameController.off("HAND_UPDATED", this.handleHandUpdate);
+    this.gameController.off("TILE_DRAWN", this.handleTileDraw);
+    this.touchHandler.off("tap", this.handleTileTap);
+    this.container.innerHTML = "";
+  }
 }
 ```
 
@@ -330,30 +339,32 @@ class HandRenderer {
 **Question:** Should MobileGameController create all components upfront, or lazily?
 
 **Option A: Eager Creation**
+
 ```javascript
 class MobileGameController {
-    constructor() {
-        this.handRenderer = new HandRenderer(/* ... */);
-        this.discardPile = new DiscardPileRenderer(/* ... */);
-        this.hintsPanel = new HintsPanel(/* ... */);
-        // ... create all 8 components
-    }
+  constructor() {
+    this.handRenderer = new HandRenderer(/* ... */);
+    this.discardPile = new DiscardPileRenderer(/* ... */);
+    this.hintsPanel = new HintsPanel(/* ... */);
+    // ... create all 8 components
+  }
 }
 ```
 
 **Option B: Lazy Creation**
+
 ```javascript
 class MobileGameController {
-    constructor() {
-        this.components = {};
-    }
+  constructor() {
+    this.components = {};
+  }
 
-    getHandRenderer() {
-        if (!this.components.handRenderer) {
-            this.components.handRenderer = new HandRenderer(/* ... */);
-        }
-        return this.components.handRenderer;
+  getHandRenderer() {
+    if (!this.components.handRenderer) {
+      this.components.handRenderer = new HandRenderer(/* ... */);
     }
+    return this.components.handRenderer;
+  }
 }
 ```
 
@@ -367,12 +378,14 @@ Choose one and document why. Consider memory usage, initialization time, and com
 **Question:** What happens when GameController fires an event but a component isn't ready?
 
 **Scenarios:**
+
 - DiscardPileRenderer is still rendering when TILE_DISCARDED fires
 - HandRenderer DOM not yet created when HAND_UPDATED fires
 - Component is in middle of animation when new event arrives
 
 **Your Solution:**
 Define an error handling strategy. Options:
+
 - Queue events until component ready
 - Ignore events during component lifecycle transitions
 - Component always queries latest state from GameController
@@ -385,12 +398,14 @@ Define an error handling strategy. Options:
 **Question:** How do we prevent animation conflicts?
 
 **Example Problem:**
+
 1. User discards tile → HandRenderer animates tile removal (300ms)
 2. During animation, GameController fires HAND_UPDATED
 3. HandRenderer re-renders, breaking the animation
 
 **Your Solution:**
 Define how components coordinate animations. Options:
+
 - Lock UI during animations (disable inputs)
 - Queue state changes until animations complete
 - Cancel in-progress animations on new state
@@ -403,12 +418,14 @@ Define how components coordinate animations. Options:
 **Question:** What happens when touch targets overlap?
 
 **Example Problem:**
+
 - Player's exposed tiles are above the hand
 - User taps an exposed tile
 - Both ExposedTilesRenderer and HandRenderer receive tap event
 
 **Your Solution:**
 Define event propagation rules. Options:
+
 - Use z-index to determine priority
 - TouchHandler tracks which component element was clicked
 - Components check event.target before handling
@@ -458,6 +475,7 @@ Define event propagation rules. Options:
 Include **test scenarios** in MOBILE_INTERFACES.md so future test writers know what to validate:
 
 ### Test: HandRenderer handles rapid state changes
+
 ```
 Given: HandRenderer is initialized
 When: GameController fires 3 HAND_UPDATED events within 100ms
@@ -466,6 +484,7 @@ And: No visual glitches or duplicate tiles
 ```
 
 ### Test: DiscardPileRenderer handles 100+ tiles
+
 ```
 Given: DiscardPileRenderer with 108 tiles (full grid)
 When: GameController fires TILE_DISCARDED event
@@ -475,6 +494,7 @@ And: Performance should remain smooth (no lag)
 ```
 
 ### Test: Touch interactions don't interfere
+
 ```
 Given: Player has exposed tiles and hidden hand
 When: User taps an exposed tile
@@ -491,19 +511,19 @@ Include example code showing how to use the interfaces:
 ```javascript
 // mobile/main.js - Example bootstrap code
 
-import { MobileGameController } from './MobileGameController.js';
-import { GameController } from '../core/GameController.js';
+import { MobileGameController } from "./MobileGameController.js";
+import { GameController } from "../core/GameController.js";
 
 async function initMobileGame() {
-    // Initialize core game engine
-    const gameController = new GameController();
+  // Initialize core game engine
+  const gameController = new GameController();
 
-    // Initialize mobile UI
-    const mobileUI = new MobileGameController(document.body, gameController);
-    await mobileUI.init();
+  // Initialize mobile UI
+  const mobileUI = new MobileGameController(document.body, gameController);
+  await mobileUI.init();
 
-    // Start a new game
-    gameController.startGame();
+  // Start a new game
+  gameController.startGame();
 }
 
 initMobileGame();
@@ -516,6 +536,7 @@ initMobileGame();
 ### Desktop Adapter Pattern
 
 See how [desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js) handles similar problems:
+
 - Event subscription pattern
 - State synchronization
 - Component lifecycle
@@ -523,6 +544,7 @@ See how [desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js) h
 ### Mockup Reference
 
 See [mobile/mockup.html](mobile/mockup.html) for:
+
 - DOM structure
 - CSS classes
 - Data attributes
@@ -531,6 +553,7 @@ See [mobile/mockup.html](mobile/mockup.html) for:
 ### Core Events
 
 See [core/GameController.js](core/GameController.js) for:
+
 - Available events
 - Event data structures
 - State machine flow

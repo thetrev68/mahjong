@@ -11,7 +11,7 @@ describe("BaseAdapter teardown", () => {
         super(gc);
         this.registerEventHandlers({
           GAME_STARTED: () => {},
-          TILES_DEALT: () => {}
+          TILES_DEALT: () => {},
         });
       }
     }

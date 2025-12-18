@@ -7,12 +7,15 @@ GameLogic was refactored to use the new `AIEngine` class instead of `gameAI`. Th
 ## Method Signature Mismatches
 
 ### 1. charlestonPass()
+
 **Current GameController call:**
+
 ```javascript
 tilesToPass = await this.aiEngine.charlestonPass(player.hand, direction);
 ```
 
 **AIEngine signature:**
+
 ```javascript
 charlestonPass(handData) {
     // Only takes handData, not direction
@@ -25,12 +28,15 @@ charlestonPass(handData) {
 ---
 
 ### 2. courtesyVote()
+
 **Current GameController call:**
+
 ```javascript
 vote = await this.aiEngine.courtesyVote(player.hand);
 ```
 
 **AIEngine signature:**
+
 ```javascript
 courtesyVote(handData) {
     // Correctly takes handData
@@ -43,12 +49,15 @@ courtesyVote(handData) {
 ---
 
 ### 3. courtesyPass()
+
 **Current GameController call:**
+
 ```javascript
 selectedTiles = await this.aiEngine.courtesyPass(player.hand, maxTiles);
 ```
 
 **AIEngine signature:**
+
 ```javascript
 courtesyPass(handData, maxCount) {
     // Correctly takes handData and maxCount
@@ -61,12 +70,15 @@ courtesyPass(handData, maxCount) {
 ---
 
 ### 4. chooseDiscard()
+
 **Current GameController call:**
+
 ```javascript
 tileToDiscard = await this.aiEngine.chooseDiscard(player.hand);
 ```
 
 **AIEngine signature:**
+
 ```javascript
 chooseDiscard(handData) {
     // Correctly takes handData
@@ -79,12 +91,19 @@ chooseDiscard(handData) {
 ---
 
 ### 5. claimDiscard()
+
 **Current GameController call:**
+
 ```javascript
-const aiDecision = await this.aiEngine.claimDiscard(lastDiscard, playerIndex, player.hand);
+const aiDecision = await this.aiEngine.claimDiscard(
+  lastDiscard,
+  playerIndex,
+  player.hand,
+);
 ```
 
 **AIEngine signature:**
+
 ```javascript
 claimDiscard(tileThrown, playerThrowing, handData, ignoreRank = false) {
     // Takes: tile, player index, handData, optional ignoreRank
@@ -97,14 +116,17 @@ claimDiscard(tileThrown, playerThrowing, handData, ignoreRank = false) {
 ---
 
 ### 6. charlestonContinueVote() [NEW]
+
 **Current GameController call:**
+
 ```javascript
 const aiVotes = this.players
-    .filter(p => !p.isHuman)
-    .map(() => this.aiEngine.charlestonContinueVote());
+  .filter((p) => !p.isHuman)
+  .map(() => this.aiEngine.charlestonContinueVote());
 ```
 
 **AIEngine signature:**
+
 ```javascript
 // NOT FOUND IN AIEngine
 ```
@@ -120,11 +142,13 @@ const aiVotes = this.players
 **File:** core/GameController.js (line 302)
 
 **Current:**
+
 ```javascript
 tilesToPass = await this.aiEngine.charlestonPass(player.hand, direction);
 ```
 
 **Fixed:**
+
 ```javascript
 tilesToPass = await this.aiEngine.charlestonPass(player.hand);
 ```
@@ -138,15 +162,17 @@ tilesToPass = await this.aiEngine.charlestonPass(player.hand);
 **File:** core/GameController.js (line 358)
 
 **Current Problem:**
+
 ```javascript
 const aiVotes = this.players
-    .filter(p => !p.isHuman)
-    .map(() => this.aiEngine.charlestonContinueVote());
+  .filter((p) => !p.isHuman)
+  .map(() => this.aiEngine.charlestonContinueVote());
 ```
 
 **Options:**
 
 **Option A: Implement in AIEngine**
+
 ```javascript
 // Add to AIEngine class:
 charlestonContinueVote() {
@@ -165,8 +191,9 @@ charlestonContinueVote() {
 ```
 
 **Option B: Use hard-coded logic in GameController**
+
 ```javascript
-const aiVotes = [true, true, true];  // AI always votes yes
+const aiVotes = [true, true, true]; // AI always votes yes
 // Or: randomly 50/50
 ```
 
@@ -177,15 +204,18 @@ const aiVotes = [true, true, true];  // AI always votes yes
 ## Implementation Plan
 
 ### Step 1: Fix charlestonPass() call
+
 - Remove `direction` parameter from GameController.charlestonPass() call
 - This is a simple 1-line fix
 
 ### Step 2: Implement charlestonContinueVote() in AIEngine
+
 - Add method to AIEngine class
 - Implement logic similar to courtesyVote()
 - Use hand rank to determine vote
 
 ### Step 3: Test
+
 - Verify all AI method calls work correctly
 - Test Charleston Phase 1→2 transition
 - Test courtesy voting and passing
@@ -196,12 +226,14 @@ const aiVotes = [true, true, true];  // AI always votes yes
 ## Code Changes Required
 
 ### core/GameController.js (Line ~302)
+
 ```diff
 - tilesToPass = await this.aiEngine.charlestonPass(player.hand, direction);
 + tilesToPass = await this.aiEngine.charlestonPass(player.hand);
 ```
 
 ### core/AIEngine.js (New method, add after courtesyVote)
+
 ```javascript
 charlestonContinueVote() {
     // Implement vote logic for continuing to Phase 2
@@ -213,6 +245,7 @@ charlestonContinueVote() {
 ## Why This Matters
 
 The AIEngine refactoring is an improvement because:
+
 1. ✅ Consolidates all AI logic in one place
 2. ✅ Uses modern GameController dependency injection pattern
 3. ✅ Removes GameAI from GameLogic (cleaner separation)

@@ -323,8 +323,8 @@ registerEventHandlers({
   TILE_DRAWN: (data) => this.onTileDrawn(data),
   HAND_UPDATED: (data) => this.onHandUpdated(data),
   TILES_DEALT: (data) => this.dealingSequencer.execute(data),
-  UI_PROMPT: (event) => this.handleUIPrompt(event)
-})
+  UI_PROMPT: (event) => this.handleUIPrompt(event),
+});
 ```
 
 ### Desktop Animation Sequencers
@@ -421,8 +421,8 @@ registerEventHandlers({
   TILE_DRAWN: (data) => this.onTileDrawn(data),
   HAND_UPDATED: (data) => this.onHandUpdated(data),
   TILES_DEALT: (data) => this.dealingSequencer.execute(data),
-  UI_PROMPT: (event) => this.handleUIPrompt(event)
-})
+  UI_PROMPT: (event) => this.handleUIPrompt(event),
+});
 ```
 
 ### Mobile Animation Sequencers
@@ -478,10 +478,17 @@ registerEventHandlers({
 
 ```html
 <div id="mobile-app">
-  <div id="opponents-container">    <!-- Top: opponent bars -->
-  <div id="game-center">            <!-- Center: discard pile -->
-  <div id="hand-area">              <!-- Bottom: player hand -->
-  <div class="bottom-menu">         <!-- Action buttons -->
+  <div id="opponents-container">
+    <!-- Top: opponent bars -->
+    <div id="game-center">
+      <!-- Center: discard pile -->
+      <div id="hand-area">
+        <!-- Bottom: player hand -->
+        <div class="bottom-menu"><!-- Action buttons --></div>
+      </div>
+    </div>
+  </div>
+</div>
 ```
 
 ## Data Models (Platform-Agnostic)
@@ -543,7 +550,7 @@ onTileDrawn(data) {
 class GameController extends EventEmitter {
   async dealTiles() {
     // ... game logic ...
-    this.emit("TILES_DEALT", {sequence: dealSequence});
+    this.emit("TILES_DEALT", { sequence: dealSequence });
   }
 }
 
@@ -699,7 +706,7 @@ class PhaserAdapter extends BaseAdapter {
     this.setupManagers();
     this.registerEventHandlers({
       TILE_DRAWN: (data) => this.onTileDrawn(data),
-      HAND_UPDATED: (data) => this.onHandUpdated(data)
+      HAND_UPDATED: (data) => this.onHandUpdated(data),
     });
   }
 
@@ -775,6 +782,6 @@ Run `npm run lint` before committing to catch issues.
 6. **Animation sequencers** - Both platforms use sequencer architecture (consistent as of Dec 2025)
 7. **Memory management required** - All adapters/managers must implement destroy() method
 8. **Callback-based prompts** - UI prompts use callbacks, not promises
-9. **Legacy objects exist** - gameObjects_*.js files being phased out, use core/models/ instead
+9. **Legacy objects exist** - gameObjects\_\*.js files being phased out, use core/models/ instead
 10. **State machine is strict** - All state transitions managed by GameController
 11. **AI is platform-agnostic** - AIEngine works on plain data models

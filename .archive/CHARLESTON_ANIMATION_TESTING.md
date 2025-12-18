@@ -15,6 +15,7 @@ This guide provides step-by-step instructions for manually testing the Charlesto
 ## Prerequisites
 
 1. **Start Dev Server:**
+
    ```bash
    npm run dev
    ```
@@ -35,14 +36,16 @@ This guide provides step-by-step instructions for manually testing the Charlesto
 ### ✅ Test 1: Charleston Pass RIGHT (First Pass)
 
 **Steps:**
+
 1. Click **"Start"** button
 2. Wait for tiles to be dealt (~2-3 seconds)
-3. Charleston prompt appears: *"Select 3 tiles to pass right"*
+3. Charleston prompt appears: _"Select 3 tiles to pass right"_
 4. Click any 3 tiles in your hand
 5. Verify tiles show `.selected` class (highlighted)
 6. Click **"Pass Right"** button
 
 **Expected Behavior:**
+
 - [ ] **Pass Out Animation** (600ms):
   - Selected tiles get `.tile-charleston-leaving` class
   - CSS variable `--exit-x` is positive (~300px)
@@ -75,6 +78,7 @@ This guide provides step-by-step instructions for manually testing the Charlesto
   - Glow continues pulsing until next action
 
 **Console Check:**
+
 - [ ] No errors in Console
 - [ ] No warnings about missing CSS properties
 
@@ -83,11 +87,13 @@ This guide provides step-by-step instructions for manually testing the Charlesto
 ### ✅ Test 2: Charleston Pass ACROSS (Second Pass)
 
 **Steps:**
-1. After first pass completes, prompt appears: *"Select 3 tiles to pass across"*
+
+1. After first pass completes, prompt appears: _"Select 3 tiles to pass across"_
 2. Select 3 different tiles
 3. Click **"Pass Across"** button
 
 **Expected Behavior:**
+
 - [ ] **Pass Out Animation**:
   - CSS variable `--exit-x` is ~0px
   - CSS variable `--exit-y` is negative (~-300px)
@@ -108,11 +114,13 @@ This guide provides step-by-step instructions for manually testing the Charlesto
 ### ✅ Test 3: Charleston Pass LEFT (Third Pass)
 
 **Steps:**
-1. After second pass completes, prompt appears: *"Select 3 tiles to pass left"*
+
+1. After second pass completes, prompt appears: _"Select 3 tiles to pass left"_
 2. Select 3 tiles
 3. Click **"Pass Left"** button
 
 **Expected Behavior:**
+
 - [ ] **Pass Out Animation**:
   - CSS variable `--exit-x` is negative (~-300px)
   - CSS variable `--exit-y` is negative (~-100px)
@@ -133,20 +141,22 @@ This guide provides step-by-step instructions for manually testing the Charlesto
 ### ✅ Test 4: Glow Persistence Through Game
 
 **Steps:**
+
 1. Complete Charleston Phase 1 (all 3 passes)
 2. Vote **"No"** when prompted to continue to Phase 2
 3. Game proceeds to main play loop
 4. **Do NOT discard** a glowing tile yet
 
 **Expected Behavior:**
+
 - [ ] Blue glow **persists** after Charleston completes
 - [ ] Glow remains on tiles during main game loop
 - [ ] Glow continues pulsing animation
 
-**Steps (continued):**
-5. Discard one of the glowing tiles
+**Steps (continued):** 5. Discard one of the glowing tiles
 
 **Expected Behavior:**
+
 - [ ] Glow is **removed** when tile is discarded
 - [ ] Other glowing tiles keep their glow
 - [ ] No console errors
@@ -156,12 +166,14 @@ This guide provides step-by-step instructions for manually testing the Charlesto
 ### ✅ Test 5: Animation Performance
 
 **Observe during all tests:**
+
 - [ ] All animations run **smoothly** at 60fps
 - [ ] No jank or stuttering during transitions
 - [ ] FLIP sort doesn't cause layout thrashing
 - [ ] Blue glow CSS animation is smooth
 
 **DevTools Performance Check:**
+
 1. Open **Performance** tab in DevTools
 2. Click **Record** button
 3. Perform one Charleston pass
@@ -176,19 +188,23 @@ This guide provides step-by-step instructions for manually testing the Charlesto
 ### ✅ Test 6: Error Handling
 
 **Test Invalid Selection:**
+
 1. During Charleston prompt, select only 2 tiles
 2. Click "Pass" button
 
 **Expected Behavior:**
+
 - [ ] Error message or visual feedback
 - [ ] Animation does not start
 - [ ] No console errors
 
 **Test Joker Validation:**
+
 1. Select 3 tiles including a Joker
 2. Click "Pass" button
 
 **Expected Behavior:**
+
 - [ ] Error preventing joker selection OR
 - [ ] Visual feedback that jokers can't be passed
 - [ ] No crashes
@@ -198,19 +214,21 @@ This guide provides step-by-step instructions for manually testing the Charlesto
 ### ✅ Test 7: Accessibility - Reduced Motion
 
 **Steps:**
+
 1. Open DevTools → **Console**
 2. Run:
    ```javascript
    // Simulate prefers-reduced-motion
    window.matchMedia = () => ({
      matches: true,
-     media: '(prefers-reduced-motion: reduce)'
+     media: "(prefers-reduced-motion: reduce)",
    });
    ```
 3. Reload page and start game
 4. Perform Charleston pass
 
 **Expected Behavior:**
+
 - [ ] Animations complete **instantly** (< 10ms)
 - [ ] No visible animation transitions
 - [ ] Glow still applied
@@ -221,19 +239,23 @@ This guide provides step-by-step instructions for manually testing the Charlesto
 ### ✅ Test 8: Edge Cases
 
 **Test: Fast Clicking**
+
 1. During Charleston prompt, rapidly click "Pass" button multiple times
 
 **Expected Behavior:**
+
 - [ ] Only one animation sequence runs
 - [ ] Subsequent clicks ignored while animating
 - [ ] No duplicate animations
 - [ ] No crashes
 
 **Test: Window Resize During Animation**
+
 1. Start Charleston pass
 2. Quickly resize browser window during animation
 
 **Expected Behavior:**
+
 - [ ] Animation completes without errors
 - [ ] Layout adapts correctly
 - [ ] No visual artifacts
@@ -245,25 +267,26 @@ This guide provides step-by-step instructions for manually testing the Charlesto
 ### Inspect CSS Variables
 
 In DevTools Console:
+
 ```javascript
 // Get a leaving tile
-const tile = document.querySelector('.tile-charleston-leaving');
-console.log('Exit X:', getComputedStyle(tile).getPropertyValue('--exit-x'));
-console.log('Exit Y:', getComputedStyle(tile).getPropertyValue('--exit-y'));
+const tile = document.querySelector(".tile-charleston-leaving");
+console.log("Exit X:", getComputedStyle(tile).getPropertyValue("--exit-x"));
+console.log("Exit Y:", getComputedStyle(tile).getPropertyValue("--exit-y"));
 
 // Check if sequencer is animating
 const renderer = window.__mobileRenderer;
 const sequencer = renderer?.charlestonSequencer;
-console.log('Is Animating:', sequencer?.isRunning());
+console.log("Is Animating:", sequencer?.isRunning());
 ```
 
 ### Force Glow on Tiles
 
 ```javascript
 // Manually add glow to first 3 tiles
-const tiles = document.querySelectorAll('.hand-container .tile');
+const tiles = document.querySelectorAll(".hand-container .tile");
 for (let i = 0; i < 3; i++) {
-  tiles[i].classList.add('tile--newly-drawn');
+  tiles[i].classList.add("tile--newly-drawn");
 }
 ```
 
@@ -272,8 +295,8 @@ for (let i = 0; i < 3; i++) {
 ```javascript
 // Log all Charleston events
 const gc = window.__gameController;
-gc.on('CHARLESTON_PASS', (data) => console.log('CHARLESTON_PASS:', data));
-gc.on('TILES_RECEIVED', (data) => console.log('TILES_RECEIVED:', data));
+gc.on("CHARLESTON_PASS", (data) => console.log("CHARLESTON_PASS:", data));
+gc.on("TILES_RECEIVED", (data) => console.log("TILES_RECEIVED:", data));
 ```
 
 ---
@@ -281,11 +304,13 @@ gc.on('TILES_RECEIVED', (data) => console.log('TILES_RECEIVED:', data));
 ## Known Issues / Expected Behavior
 
 ### ✅ Normal Behavior
+
 - **Selection cleared after pass**: Expected - selection resets after tiles passed
 - **Glow count changes**: Expected - only **newly received** tiles glow (3 tiles per pass)
 - **Sort happens automatically**: Expected - hand auto-sorts after receiving tiles
 
 ### ❌ Report These Issues
+
 - Animation freezes mid-sequence
 - Tiles disappear permanently
 - Glow applies to wrong tiles
@@ -297,34 +322,36 @@ gc.on('TILES_RECEIVED', (data) => console.log('TILES_RECEIVED:', data));
 
 ## Test Results Template
 
-**Tester:** _________________
-**Date:** _________________
-**Browser:** _________________
-**OS:** _________________
+**Tester:** **\*\*\*\***\_**\*\*\*\***
+**Date:** **\*\*\*\***\_**\*\*\*\***
+**Browser:** **\*\*\*\***\_**\*\*\*\***
+**OS:** **\*\*\*\***\_**\*\*\*\***
 
-| Test | Pass | Fail | Notes |
-|------|------|------|-------|
-| 1. Pass RIGHT | ☐ | ☐ | |
-| 2. Pass ACROSS | ☐ | ☐ | |
-| 3. Pass LEFT | ☐ | ☐ | |
-| 4. Glow Persistence | ☐ | ☐ | |
-| 5. Performance | ☐ | ☐ | |
-| 6. Error Handling | ☐ | ☐ | |
-| 7. Reduced Motion | ☐ | ☐ | |
-| 8. Edge Cases | ☐ | ☐ | |
+| Test                | Pass | Fail | Notes |
+| ------------------- | ---- | ---- | ----- |
+| 1. Pass RIGHT       | ☐    | ☐    |       |
+| 2. Pass ACROSS      | ☐    | ☐    |       |
+| 3. Pass LEFT        | ☐    | ☐    |       |
+| 4. Glow Persistence | ☐    | ☐    |       |
+| 5. Performance      | ☐    | ☐    |       |
+| 6. Error Handling   | ☐    | ☐    |       |
+| 7. Reduced Motion   | ☐    | ☐    |       |
+| 8. Edge Cases       | ☐    | ☐    |       |
 
 **Overall Status:** ☐ Pass ☐ Fail
 
 **Issues Found:**
-- [ ] Issue 1: _________________________________
-- [ ] Issue 2: _________________________________
-- [ ] Issue 3: _________________________________
+
+- [ ] Issue 1: ******\*\*\*\*******\_******\*\*\*\*******
+- [ ] Issue 2: ******\*\*\*\*******\_******\*\*\*\*******
+- [ ] Issue 3: ******\*\*\*\*******\_******\*\*\*\*******
 
 ---
 
 ## Next Steps
 
 After completing manual testing:
+
 1. ✅ Verify all checkboxes above
 2. 📝 Document any issues found
 3. 🐛 Create GitHub issues for bugs
@@ -336,9 +363,11 @@ After completing manual testing:
 ## Automated Testing
 
 For automated Playwright tests, see:
+
 - `tests/e2e/charleston-animations.spec.js`
 
 Run with:
+
 ```bash
 npm test -- charleston-animations
 ```

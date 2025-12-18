@@ -11,11 +11,13 @@ During Phase 1 implementation, `gameAI.js` was refactored into `core/AIEngine.js
 **Location**: Task 3.3 "Delete GameLogic Files"
 
 **Change**:
+
 - Updated file list to reference `core/AIEngine.js` instead of `gameAI.js`
 - Added note that AIEngine was refactored from gameAI.js
 - Updated GameScene initialization examples to show AIEngine created by GameController, not GameLogic
 
 **Reason**:
+
 - AIEngine is now the canonical location for AI logic
 - GameController uses dependency injection to get AIEngine
 - Phase 3 needs to reflect that AIEngine is the file to keep (in core/)
@@ -25,26 +27,31 @@ During Phase 1 implementation, `gameAI.js` was refactored into `core/AIEngine.js
 **Location**: "Kept/Enhanced" section
 
 **Change**:
+
 - Updated row to show `core/AIEngine.js` instead of `gameAI.js`
 - Added note about refactoring from gameAI.js
 
 **Reason**:
+
 - Keeps summary document accurate with current architecture
 - Makes it clear AIEngine is the replacement AI solution
 
 ## What This Means for Future Phases
 
 ### Phase 2 - PhaserAdapter
+
 - No changes needed - Phase 2 doesn't directly reference AI engine
 - PhaserAdapter receives AI decisions through GameController events
 - No direct PhaserAdapter → AIEngine dependencies
 
 ### Phase 3 - Remove GameLogic
+
 - When deleting `gameLogic.js`, note that AIEngine is now independent
 - AIEngine should remain in `core/AIEngine.js`
 - GameLogic's references to `gameAI` can be removed since GameController is now the AI client
 
 ### Phase 4 - Mobile Renderer
+
 - No changes needed - Mobile renderer works through GameController events
 - AIEngine remains platform-agnostic
 - Mobile renderer doesn't need to know about AIEngine implementation
@@ -52,6 +59,7 @@ During Phase 1 implementation, `gameAI.js` was refactored into `core/AIEngine.js
 ## Implementation Details
 
 ### AIEngine Method Signatures
+
 All AIEngine methods have been verified to work with GameController:
 
 ✅ `charlestonPass(handData)` - Returns tiles to pass
@@ -62,7 +70,9 @@ All AIEngine methods have been verified to work with GameController:
 ✅ `courtesyPass(handData, maxCount)` - Returns tiles to pass
 
 ### AIEngine Configuration
+
 Added `charlestonContinueThreshold` to difficulty configs:
+
 - **easy**: 0.8 (80% chance to vote yes)
 - **medium**: 0.65 (65% chance to vote yes)
 - **hard**: 0.6 (60% chance to vote yes)
@@ -76,6 +86,7 @@ Added `charlestonContinueThreshold` to difficulty configs:
 ## Verification
 
 All changes maintain:
+
 - ✅ GameController compatibility with AIEngine
 - ✅ Phase 1 completion status (lint and build pass)
 - ✅ Phase 2, 3, 4 planning accuracy
@@ -84,6 +95,7 @@ All changes maintain:
 ## Migration Path
 
 When Phase 3 begins:
+
 1. Verify AIEngine.js is fully independent in `core/`
 2. Remove GameLogic.js
 3. Remove old gameAI.js (if it still exists in root)

@@ -1,9 +1,11 @@
 # Game Board Redesign Implementation Plan (Final)
 
 ## Instructions for Implementation
+
 You are an expert JavaScript and Phaser.js developer tasked with implementing this redesign plan for the Mahjong game. Your goal is to update the codebase step-by-step as detailed below, ensuring no regressions and maintaining existing functionality. Use the provided code snippets exactly where specified, adapting only for variable names or constants from the existing code (e.g., reference [`constants.js`](constants.js) for values like `WINDOW_WIDTH`).
 
 **Key Rules:**
+
 - Work on one step at a time.
 - After each change, commit your work with a message like "Completed Step X: [Brief Description]".
 - Do not proceed to the next step without user confirmation.
@@ -13,6 +15,7 @@ You are an expert JavaScript and Phaser.js developer tasked with implementing th
 - Preserve code style (e.g., use `debugPrint` for logging).
 
 Proceed as follows:
+
 1. Read the entire plan.
 2. Implement Step 1.
 3. Reach Checkpoint 1 and pause for user feedback.
@@ -21,6 +24,7 @@ Proceed as follows:
 Now, begin implementation.
 
 ## Objectives
+
 - Remove visual wall grid, replace with counter.
 - Reposition discard pile to center.
 - Add translucent hand racks attached to hands.
@@ -30,10 +34,12 @@ Now, begin implementation.
 ## Step-by-Step Implementation
 
 ### Step 1: Remove Wall Display and Update Home Page Animation
+
 Focus: Eliminate wall visuals; redirect home page animation to player positions.
 
 - **File:** [`homePageTileManager.js`](homePageTileManager.js:141)
   - Replace the entire `animatePileToWall()` method with the following to animate tiles directly to approximated player hand positions (cycle for all 152 tiles, hide extras off-screen):
+
     ```
     animatePileToWall() {
       this.animationState = "dealing";
@@ -73,6 +79,7 @@ Focus: Eliminate wall visuals; redirect home page animation to player positions.
       return positions;
     }
     ```
+
 - **File:** [`gameObjects.js`](gameObjects.js:359)
   - Delete the `showWall()` and `showWallBack()` methods from the Wall class. Simplify Wall to manage only the tile array (no visual code).
 - **File:** [`gameLogic.js`](gameLogic.js:158) (approx)
@@ -82,15 +89,17 @@ Focus: Eliminate wall visuals; redirect home page animation to player positions.
 
 **Checkpoint 1:** Test the home page: Click "Start Game". Verify tiles animate to player areas without forming a wall. Check console for errors. Confirm with user: "Step 1 complete. Animation works? No wall visible? Proceed?"
 
-<!-- 
--[Trevor] notes after 1st attempt: some wall tiles hiding behind player tiles. 
+<!--
+-[Trevor] notes after 1st attempt: some wall tiles hiding behind player tiles.
 -->
 
 ### Step 2: Implement Wall Tile Counter
+
 Focus: Add graphical progress bar that updates dynamically.
 
 - **File:** [`GameScene.js`](GameScene.js:44)
   - Add the following methods after `create()`:
+
     ```
     createWallTileCounter() {
       const bar = this.add.graphics({x: WINDOW_WIDTH / 2 - 100, y: 30});
@@ -116,14 +125,16 @@ Focus: Add graphical progress bar that updates dynamically.
       this.gGameLogic.wallCounter.bar.setVisible(true);
     }
     ```
+
   - In `create()`, add: `this.gGameLogic.wallCounter = this.createWallTileCounter();`.
+
 - **File:** [`gameLogic.js`](gameLogic.js)
   - After every wall modification (e.g., in `deal()`, `pickFromWall()`): `this.scene.updateWallTileCounter(this.table.wall.getCount());`.
 
 **Checkpoint 2:** Start a game and perform actions that change wall count (e.g., deal tiles). Verify the progress bar appears and updates correctly (shrinks as tiles are picked). Check for errors on invalid counts. Confirm with user: "Step 2 complete. Counter works? Updates correctly? Proceed?"
 
-<!-- 
-- [Trevor] Wall tiles still stuck behind player tiles. No wall tile counter. 
+<!--
+- [Trevor] Wall tiles still stuck behind player tiles. No wall tile counter.
 - [Trevor] Wall tiles exist for all players, no player tiles exist. Hints did not run. Console clean.
 - [Trevor] Vite error - game won't load due to parsing error.
 - [Trevor] Code reverted to checkpoint 1. Wall tiles still under player tiles.
@@ -135,10 +146,11 @@ Focus: Add graphical progress bar that updates dynamically.
 - [Trevor] Center tile is still there.
 - [Trevor] Center tile is still there. Console is clean.
 - [Trevor] Center tile is still there. Provided console logs.
-- [Trevor] LLM Steam stopped (rate limiting) 
+- [Trevor] LLM Steam stopped (rate limiting)
 -->
 
 ### Step 3: Reposition Discard Pile
+
 - **File:** [`gameObjects.js`](gameObjects.js:514)
   - Replace `showDiscards()` with:
     ```
@@ -171,6 +183,7 @@ Focus: Add graphical progress bar that updates dynamically.
 **Checkpoint 3:** Play until discards occur. Verify pile is centered, scales correctly, and wraps rows. No overlaps or off-screen issues? Confirm with user: "Step 3 complete. Discards centered? Proceed?"
 
 ### Step 4: Implement Hand Racks and Exposed Tiles
+
 - **File:** [`gameObjects_hand.js`](gameObjects_hand.js:294)
   - Add to constructor: `this.rackGraphics = null;`.
   - Add method:
@@ -191,6 +204,7 @@ Focus: Add graphical progress bar that updates dynamically.
 **Checkpoint 4:** Start game, expose tiles. Verify racks appear translucent, attached to hands, with exposed on top row. Test dragging/animations. Confirm with user: "Step 4 complete. Racks work? Proceed?"
 
 ### Step 5: Final Integration and Cleanup
+
 - Grep codebase for "wall" and remove any remnants.
 - Update all references to use new methods.
 

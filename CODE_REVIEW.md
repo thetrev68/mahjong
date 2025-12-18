@@ -422,6 +422,7 @@ export const PLAYER_POSITIONS = {
    - Replaced hardcoded discard durations (300/200) with `ANIMATION_TIMINGS.DISCARD_ANIMATION_HUMAN/AI`
 
 **Benefits:**
+
 - Single source of truth for all animation timings
 - Easy to adjust animation speeds globally
 - Self-documenting code with descriptive constant names
@@ -1134,7 +1135,7 @@ npm run jsdoc:check  # New script to verify coverage
 **Changes Made:**
 
 - Added comprehensive "Legacy Files Being Phased Out" section
-- Lists all gameObjects_*.js files that should not be used for new code
+- Lists all gameObjects\_\*.js files that should not be used for new code
 - Documents migration status (TileManager fully migrated, HandRenderer partially migrated)
 - Provides clear guidance: use core/models/ classes instead
 - Added Memory Management section with BaseAdapter pattern and destroy() requirements
@@ -1978,17 +1979,17 @@ getSelectionManager() {
 **Severity:** 🟡 **MEDIUM** → ✅ **RESOLVED**
 **Impact:** Desktop and mobile now have consistent animation architecture
 
-| Feature                  | Desktop                        | Mobile                       | Parity | Status                         |
-| ------------------------ | ------------------------------ | ---------------------------- | ------ | ------------------------------ |
-| **Charleston Animation** | CharlestonAnimationSequencer   | CharlestonAnimationSequencer | ✅ Yes | Extracted to sequencer         |
-| **Dealing Animation**    | DealingAnimationSequencer      | DealingAnimationSequencer    | ✅ Yes | Extracted to sequencer         |
-| **Discard Animation**    | DiscardAnimationSequencer      | DiscardAnimationSequencer    | ✅ Yes | Extracted to sequencer         |
-| **Blank Tile Swap**      | ✓ Animated                     | ✗ Missing (TODO)             | ❌ No  | Mobile needs implementation    |
-| **Event Cleanup**        | ✓ destroy() method             | ✓ destroy() method           | ✅ Yes | Completed in Section 5.1       |
-| **Audio Manager**        | audioManager.js                | MobileAudioManager.js        | ✓ OK   | Both platforms supported       |
-| **Hints Panel**          | HintAnimationManager           | HintsPanel component         | ✓ OK   | Both have implementation       |
-| **Settings UI**          | DesktopSettingsManager         | SettingsSheet component      | ✓ OK   | Both supported                 |
-| **Touch Support**        | ✗ Mouse only                   | ✓ Full touch gestures        | ✓ OK   | Appropriate for platforms      |
+| Feature                  | Desktop                      | Mobile                       | Parity | Status                      |
+| ------------------------ | ---------------------------- | ---------------------------- | ------ | --------------------------- |
+| **Charleston Animation** | CharlestonAnimationSequencer | CharlestonAnimationSequencer | ✅ Yes | Extracted to sequencer      |
+| **Dealing Animation**    | DealingAnimationSequencer    | DealingAnimationSequencer    | ✅ Yes | Extracted to sequencer      |
+| **Discard Animation**    | DiscardAnimationSequencer    | DiscardAnimationSequencer    | ✅ Yes | Extracted to sequencer      |
+| **Blank Tile Swap**      | ✓ Animated                   | ✗ Missing (TODO)             | ❌ No  | Mobile needs implementation |
+| **Event Cleanup**        | ✓ destroy() method           | ✓ destroy() method           | ✅ Yes | Completed in Section 5.1    |
+| **Audio Manager**        | audioManager.js              | MobileAudioManager.js        | ✓ OK   | Both platforms supported    |
+| **Hints Panel**          | HintAnimationManager         | HintsPanel component         | ✓ OK   | Both have implementation    |
+| **Settings UI**          | DesktopSettingsManager       | SettingsSheet component      | ✓ OK   | Both supported              |
+| **Touch Support**        | ✗ Mouse only                 | ✓ Full touch gestures        | ✓ OK   | Appropriate for platforms   |
 
 #### Implementation Summary
 
@@ -2199,37 +2200,37 @@ December 17, 2025**
    - **Impact:** Medium - complexity reduction
 
 3. **Create Shared Animation Configuration** (Section 4.3)
-    - Consolidate timing constants
-    - **Effort:** 1 hour
-    - **Impact:** Low - DRY principle
+   - Consolidate timing constants
+   - **Effort:** 1 hour
+   - **Impact:** Low - DRY principle
 
 4. **Fix Unit Tests or Remove Them** (Section 2.1)
-    - 3 unused test files
-    - **Effort:** 1 hour
-    - **Impact:** Low - test hygiene
+   - 3 unused test files
+   - **Effort:** 1 hour
+   - **Impact:** Low - test hygiene
 
 5. **Implement Mobile Blank Swap Animation** (Section 6.1)
-    - Feature parity with desktop
-    - **Effort:** 2 hours
-    - **Impact:** Medium - consistent user experience
+   - Feature parity with desktop
+   - **Effort:** 2 hours
+   - **Impact:** Medium - consistent user experience
 
 ### 🟢 Low Priority (Nice to Have)
 
 1. **TypeScript Migration** (Section 7.2)
-    - Enhanced type safety
-    - **Effort:** 20+ hours
-    - **Impact:** High long-term, medium immediate
+   - Enhanced type safety
+   - **Effort:** 20+ hours
+   - **Impact:** High long-term, medium immediate
 
 2. ~~**Extract Base Adapter Class** (Section 2.5)~~ ✅ **COMPLETED: December 17, 2025**
-    - `shared/BaseAdapter.js` added and in use by desktop and mobile adapters.
+   - `shared/BaseAdapter.js` added and in use by desktop and mobile adapters.
 
 3. ~~**Update CLAUDE.md** (Section 3.2)~~ ✅ **COMPLETED: December 17, 2025**
-    - Updated directory structure with animations/ and shared/BaseAdapter.js
-    - Added Desktop/Mobile Animation Sequencers sections
-    - Added Cross-Platform Utilities section
-    - Added Legacy Files Being Phased Out section
-    - Added Memory Management section
-    - Updated Critical Knowledge section (11 items)
+   - Updated directory structure with animations/ and shared/BaseAdapter.js
+   - Added Desktop/Mobile Animation Sequencers sections
+   - Added Cross-Platform Utilities section
+   - Added Legacy Files Being Phased Out section
+   - Added Memory Management section
+   - Updated Critical Knowledge section (11 items)
 
 ---
 

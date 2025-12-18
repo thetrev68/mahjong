@@ -16,102 +16,104 @@ Create a Progressive Web App (PWA) manifest file and generate app icons to enabl
 ## Deliverables
 
 ### 1. PWA Manifest File
+
 **File:** `pwa/manifest.json`
 
 Create a complete PWA manifest with the following specifications:
 
 ```json
 {
-    "name": "American Mahjong",
-    "short_name": "Mahjong",
-    "description": "American Mahjong game with AI opponents. Play authentic American Mahjong with Charleston, courtesy passes, and smart AI opponents.",
-    "start_url": "/mahjong/mobile/",
-    "scope": "/mahjong/",
-    "display": "standalone",
-    "orientation": "portrait-primary",
-    "theme_color": "#0c6d3a",
-    "background_color": "#0c6d3a",
-    "categories": ["games", "entertainment"],
-    "icons": [
+  "name": "American Mahjong",
+  "short_name": "Mahjong",
+  "description": "American Mahjong game with AI opponents. Play authentic American Mahjong with Charleston, courtesy passes, and smart AI opponents.",
+  "start_url": "/mahjong/mobile/",
+  "scope": "/mahjong/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0c6d3a",
+  "background_color": "#0c6d3a",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "/mahjong/pwa/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mahjong/pwa/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mahjong/pwa/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mahjong/pwa/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mahjong/pwa/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mahjong/pwa/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mahjong/pwa/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mahjong/pwa/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mahjong/pwa/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/mahjong/pwa/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Game",
+      "short_name": "New Game",
+      "description": "Start a new game immediately",
+      "url": "/mahjong/mobile/?action=new",
+      "icons": [
         {
-            "src": "/mahjong/pwa/icons/icon-72.png",
-            "sizes": "72x72",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "/mahjong/pwa/icons/icon-96.png",
-            "sizes": "96x96",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "/mahjong/pwa/icons/icon-128.png",
-            "sizes": "128x128",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "/mahjong/pwa/icons/icon-144.png",
-            "sizes": "144x144",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "/mahjong/pwa/icons/icon-152.png",
-            "sizes": "152x152",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "/mahjong/pwa/icons/icon-192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "/mahjong/pwa/icons/icon-384.png",
-            "sizes": "384x384",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "/mahjong/pwa/icons/icon-512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "/mahjong/pwa/icons/icon-maskable-192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "maskable"
-        },
-        {
-            "src": "/mahjong/pwa/icons/icon-maskable-512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "maskable"
+          "src": "/mahjong/pwa/icons/icon-96.png",
+          "sizes": "96x96"
         }
-    ],
-    "shortcuts": [
-        {
-            "name": "New Game",
-            "short_name": "New Game",
-            "description": "Start a new game immediately",
-            "url": "/mahjong/mobile/?action=new",
-            "icons": [
-                {
-                    "src": "/mahjong/pwa/icons/icon-96.png",
-                    "sizes": "96x96"
-                }
-            ]
-        }
-    ]
+      ]
+    }
+  ]
 }
 ```
 
 **Key Requirements:**
+
 - `start_url` and `scope` must match the GitHub Pages deployment path (`/mahjong/`)
 - `orientation` locked to `portrait-primary` (mobile is portrait-only)
 - `display: standalone` to hide browser UI
@@ -125,6 +127,7 @@ Create a complete PWA manifest with the following specifications:
 
 **Required Icon Sizes:**
 Generate PNG icons from `favicon.svg` in the following sizes:
+
 - 72x72
 - 96x96
 - 128x128
@@ -136,10 +139,12 @@ Generate PNG icons from `favicon.svg` in the following sizes:
 
 **Additional Maskable Icons:**
 Create "maskable" versions for adaptive icons on Android:
+
 - 192x192 (maskable)
 - 512x512 (maskable)
 
 **Maskable Icon Requirements:**
+
 - Add 10% safe zone padding around the existing design
 - Ensure all important visual elements are within the safe zone
 - Background should extend to full canvas (no transparency in corners)
@@ -147,57 +152,60 @@ Create "maskable" versions for adaptive icons on Android:
 **Output Location:** `pwa/icons/`
 
 **Naming Convention:**
+
 - Regular icons: `icon-{size}.png` (e.g., `icon-192.png`)
 - Maskable icons: `icon-maskable-{size}.png` (e.g., `icon-maskable-512.png`)
 
 **Icon Generation Method:**
 You can use one of these approaches:
+
 1. **Automated (Preferred):** Use a tool like `sharp` (Node.js) or ImageMagick to convert SVG to PNG
 2. **Manual:** Use an online tool like https://realfavicongenerator.net/ or https://maskable.app/
 3. **Code-based:** Write a Node.js script using the `sharp` library
 
 **Example Node.js Script (if using sharp):**
+
 ```javascript
 // scripts/generate-icons.js
-import sharp from 'sharp';
-import { readFileSync } from 'fs';
+import sharp from "sharp";
+import { readFileSync } from "fs";
 
 const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
-const svgBuffer = readFileSync('favicon.svg');
+const svgBuffer = readFileSync("favicon.svg");
 
 for (const size of sizes) {
-    await sharp(svgBuffer)
-        .resize(size, size)
-        .png()
-        .toFile(`pwa/icons/icon-${size}.png`);
+  await sharp(svgBuffer)
+    .resize(size, size)
+    .png()
+    .toFile(`pwa/icons/icon-${size}.png`);
 }
 
 // Generate maskable icons with safe zone
 for (const size of [192, 512]) {
-    const canvas = sharp({
-        create: {
-            width: size,
-            height: size,
-            channels: 4,
-            background: { r: 12, g: 109, b: 58, alpha: 1 } // #0c6d3a
-        }
-    });
+  const canvas = sharp({
+    create: {
+      width: size,
+      height: size,
+      channels: 4,
+      background: { r: 12, g: 109, b: 58, alpha: 1 }, // #0c6d3a
+    },
+  });
 
-    const iconSize = Math.floor(size * 0.8); // 80% of canvas (20% safe zone)
-    const offset = Math.floor((size - iconSize) / 2);
+  const iconSize = Math.floor(size * 0.8); // 80% of canvas (20% safe zone)
+  const offset = Math.floor((size - iconSize) / 2);
 
-    const icon = await sharp(svgBuffer)
-        .resize(iconSize, iconSize)
-        .png()
-        .toBuffer();
+  const icon = await sharp(svgBuffer)
+    .resize(iconSize, iconSize)
+    .png()
+    .toBuffer();
 
-    await canvas
-        .composite([{ input: icon, top: offset, left: offset }])
-        .png()
-        .toFile(`pwa/icons/icon-maskable-${size}.png`);
+  await canvas
+    .composite([{ input: icon, top: offset, left: offset }])
+    .png()
+    .toFile(`pwa/icons/icon-maskable-${size}.png`);
 }
 
-console.log('✅ Icons generated successfully');
+console.log("✅ Icons generated successfully");
 ```
 
 ---
@@ -210,16 +218,19 @@ Add the following to the `<head>` section:
 
 ```html
 <!-- PWA Manifest -->
-<link rel="manifest" href="/mahjong/pwa/manifest.json">
+<link rel="manifest" href="/mahjong/pwa/manifest.json" />
 
 <!-- iOS-specific meta tags -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Mahjong">
-<link rel="apple-touch-icon" href="/mahjong/pwa/icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta
+  name="apple-mobile-web-app-status-bar-style"
+  content="black-translucent"
+/>
+<meta name="apple-mobile-web-app-title" content="Mahjong" />
+<link rel="apple-touch-icon" href="/mahjong/pwa/icons/icon-180.png" />
 
 <!-- Theme color for browsers -->
-<meta name="theme-color" content="#0c6d3a">
+<meta name="theme-color" content="#0c6d3a" />
 ```
 
 **Note:** If `mobile/index.html` doesn't exist yet, create a TODO note to add these lines when the file is created.
@@ -231,7 +242,9 @@ Add the following to the `<head>` section:
 iOS requires special handling for PWA icons:
 
 ### Additional Icon for iOS (180x180)
+
 Generate one additional icon specifically for iOS:
+
 - Size: 180x180
 - Filename: `icon-180.png`
 - Location: `pwa/icons/`
@@ -294,6 +307,7 @@ mobile/
 ## Expected Output
 
 When complete, provide:
+
 1. ✅ `pwa/manifest.json` created
 2. ✅ 11 icon files generated in `pwa/icons/`
 3. ✅ Manifest validation report (screenshot or URL)

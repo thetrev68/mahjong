@@ -24,328 +24,341 @@ let _hintsPanel; // Initialized for side effects (event listener registration)
  * This function should be called by GameController when emitting GAME_ENDED event
  */
 export function onGameEnd() {
-    // Increment games played counter for install prompt
-    InstallPrompt.incrementGamesPlayed();
+  // Increment games played counter for install prompt
+  InstallPrompt.incrementGamesPlayed();
 
-    // The InstallPrompt will automatically check and show prompt if conditions are met
+  // The InstallPrompt will automatically check and show prompt if conditions are met
 }
 
 /**
  * Create bottom menu element if it doesn't exist
  */
 function createBottomMenu() {
-    const bottomMenu = document.createElement("div");
-    bottomMenu.className = "bottom-menu";
-    document.body.appendChild(bottomMenu);
-    return bottomMenu;
+  const bottomMenu = document.createElement("div");
+  bottomMenu.className = "bottom-menu";
+  document.body.appendChild(bottomMenu);
+  return bottomMenu;
 }
 
 // Placeholder for mobile app initialization
 document.addEventListener("DOMContentLoaded", () => {
+  // Hide loading message
+  const loading = document.getElementById("loading");
+  if (loading) {
+    loading.style.display = "none";
+  }
 
-    // Hide loading message
-    const loading = document.getElementById("loading");
-    if (loading) {
-        loading.style.display = "none";
+  // Initialize settings sheet
+  // settingsSheet = new SettingsSheet();
+
+  // Add settings button to bottom menu if it doesn't exist yet
+  if (!document.getElementById("mobile-settings-btn")) {
+    const bottomMenu =
+      document.querySelector(".bottom-menu") || createBottomMenu();
+    const settingsBtn = document.createElement("button");
+    settingsBtn.id = "mobile-settings-btn";
+    settingsBtn.className = "menu-btn";
+    settingsBtn.innerHTML = "⚙️ SETTINGS";
+    bottomMenu.appendChild(settingsBtn);
+  }
+
+  // Initialize mobile game components
+  initializeGame().catch((error) => {
+    console.error("Failed to initialize mobile game:", error);
+    const statusEl = document.getElementById("game-status");
+    if (statusEl) {
+      statusEl.textContent = `ERROR: ${error.message}`;
+      statusEl.style.color = "#ff6b6b";
     }
+  });
 
-    // Initialize settings sheet
-    // settingsSheet = new SettingsSheet();
-
-    // Add settings button to bottom menu if it doesn't exist yet
-    if (!document.getElementById("mobile-settings-btn")) {
-        const bottomMenu = document.querySelector(".bottom-menu") || createBottomMenu();
-        const settingsBtn = document.createElement("button");
-        settingsBtn.id = "mobile-settings-btn";
-        settingsBtn.className = "menu-btn";
-        settingsBtn.innerHTML = "⚙️ SETTINGS";
-        bottomMenu.appendChild(settingsBtn);
-    }
-
-    // Initialize mobile game components
-    initializeGame().catch(error => {
-        console.error("Failed to initialize mobile game:", error);
-        const statusEl = document.getElementById("game-status");
-        if (statusEl) {
-            statusEl.textContent = `ERROR: ${error.message}`;
-            statusEl.style.color = "#ff6b6b";
-        }
-    });
-
-    // Register Service Worker
-    registerServiceWorker();
+  // Register Service Worker
+  registerServiceWorker();
 });
 
 /**
  * Initialize the mobile game
  */
 async function initializeGame() {
-    console.log("Initializing mobile game...");
+  console.log("Initializing mobile game...");
 
-    // Get DOM containers
-    const handContainer = document.getElementById("hand-container");
-    const playerRackContainer = document.getElementById("player-rack-container");
-    const discardContainer = document.getElementById("discard-container");
-    const statusElement = document.getElementById("game-status");
-    const opponentLeftContainer = document.getElementById("opponent-left");
-    const opponentTopContainer = document.getElementById("opponent-top");
-    const opponentRightContainer = document.getElementById("opponent-right");
+  // Get DOM containers
+  const handContainer = document.getElementById("hand-container");
+  const playerRackContainer = document.getElementById("player-rack-container");
+  const discardContainer = document.getElementById("discard-container");
+  const statusElement = document.getElementById("game-status");
+  const opponentLeftContainer = document.getElementById("opponent-left");
+  const opponentTopContainer = document.getElementById("opponent-top");
+  const opponentRightContainer = document.getElementById("opponent-right");
 
-    // Load settings from SettingsManager
-    const settings = SettingsManager.load();
-    console.log("Loaded settings:", settings);
+  // Load settings from SettingsManager
+  const settings = SettingsManager.load();
+  console.log("Loaded settings:", settings);
 
-    // Initialize Card validator with year from settings
-    const card = new Card(settings.cardYear);
-    await card.init();
+  // Initialize Card validator with year from settings
+  const card = new Card(settings.cardYear);
+  await card.init();
 
-    // Initialize AI Engine with card validator and difficulty from settings
-    aiEngine = new AIEngine(card, null, settings.difficulty);
+  // Initialize AI Engine with card validator and difficulty from settings
+  aiEngine = new AIEngine(card, null, settings.difficulty);
 
-    // Parse URL parameters for configuration (can override settings)
-    const urlParams = new URLSearchParams(window.location.search);
-    const skipCharlestonParam = urlParams.get("skipCharleston");
-    const skipCharleston = skipCharlestonParam !== null ? skipCharlestonParam === "true" : settings.skipCharleston;
+  // Parse URL parameters for configuration (can override settings)
+  const urlParams = new URLSearchParams(window.location.search);
+  const skipCharlestonParam = urlParams.get("skipCharleston");
+  const skipCharleston =
+    skipCharlestonParam !== null
+      ? skipCharlestonParam === "true"
+      : settings.skipCharleston;
 
-    // Initialize Game Controller
-    gameController = new GameController();
-    await gameController.init({
-        aiEngine: aiEngine,
-        cardValidator: card,
-        settings: {
-            year: settings.cardYear,
-            difficulty: settings.difficulty,
-            skipCharleston: skipCharleston,
-            trainingMode: settings.trainingMode,
-            trainingHand: settings.trainingHand,
-            trainingTileCount: settings.trainingTileCount,
-            useBlankTiles: settings.useBlankTiles
-        }
-    });
+  // Initialize Game Controller
+  gameController = new GameController();
+  await gameController.init({
+    aiEngine: aiEngine,
+    cardValidator: card,
+    settings: {
+      year: settings.cardYear,
+      difficulty: settings.difficulty,
+      skipCharleston: skipCharleston,
+      trainingMode: settings.trainingMode,
+      trainingHand: settings.trainingHand,
+      trainingTileCount: settings.trainingTileCount,
+      useBlankTiles: settings.useBlankTiles,
+    },
+  });
 
-    mobileRenderer = new MobileRenderer({
-        gameController,
-        handContainer,
-        discardContainer,
-        statusElement,
-        opponentContainers: {
-            left: opponentLeftContainer,
-            top: opponentTopContainer,
-            right: opponentRightContainer
-        },
-        playerRackContainer,
-        promptRoot: document.body
-    });
+  mobileRenderer = new MobileRenderer({
+    gameController,
+    handContainer,
+    discardContainer,
+    statusElement,
+    opponentContainers: {
+      left: opponentLeftContainer,
+      top: opponentTopContainer,
+      right: opponentRightContainer,
+    },
+    playerRackContainer,
+    promptRoot: document.body,
+  });
 
-    // Initialize TouchHandler
-    const touchHandler = new TouchHandler(document.body, {
-        enableSwipe: true,
-        swipeMinDistance: 30
-    });
-    touchHandler.init();
+  // Initialize TouchHandler
+  const touchHandler = new TouchHandler(document.body, {
+    enableSwipe: true,
+    swipeMinDistance: 30,
+  });
+  touchHandler.init();
 
-    // Wire TouchHandler to GameController/Renderer
-    // Let the built-in click handler on each tile manage selection; avoid double-triggering via tap.
+  // Wire TouchHandler to GameController/Renderer
+  // Let the built-in click handler on each tile manage selection; avoid double-triggering via tap.
 
-    touchHandler.on("swipeup", (data) => {
-        // Swipe up on a tile to quickly discard it
-        if (data.element && data.element.classList.contains("tile")) {
-            const tileIndex = parseInt(data.element.dataset.index, 10);
+  touchHandler.on("swipeup", (data) => {
+    // Swipe up on a tile to quickly discard it
+    if (data.element && data.element.classList.contains("tile")) {
+      const tileIndex = parseInt(data.element.dataset.index, 10);
 
-            // Select the tile and trigger discard prompt if possible
-            if (!isNaN(tileIndex) && mobileRenderer.handRenderer) {
-                // Select the tile first
-                mobileRenderer.handRenderer.handleTileClick(tileIndex);
+      // Select the tile and trigger discard prompt if possible
+      if (!isNaN(tileIndex) && mobileRenderer.handRenderer) {
+        // Select the tile first
+        mobileRenderer.handRenderer.handleTileClick(tileIndex);
 
-                // If in discard phase, could potentially auto-trigger discard
-                // For now, just select it - user can use DISCARD button
-            }
-        }
-    });
-
-    // Initialize WallCounter component
-    const wallCounterContainer = document.getElementById("wall-counter");
-    if (wallCounterContainer) {
-        _wallCounter = new WallCounter(wallCounterContainer, gameController);
-        console.log("WallCounter initialized");
+        // If in discard phase, could potentially auto-trigger discard
+        // For now, just select it - user can use DISCARD button
+      }
     }
+  });
 
-    // Initialize HintsPanel component
-    const hintsPanelContainer = document.getElementById("hints-panel");
-    if (hintsPanelContainer) {
-        _hintsPanel = new HintsPanel(hintsPanelContainer, gameController, aiEngine);
+  // Initialize WallCounter component
+  const wallCounterContainer = document.getElementById("wall-counter");
+  if (wallCounterContainer) {
+    _wallCounter = new WallCounter(wallCounterContainer, gameController);
+    console.log("WallCounter initialized");
+  }
+
+  // Initialize HintsPanel component
+  const hintsPanelContainer = document.getElementById("hints-panel");
+  if (hintsPanelContainer) {
+    _hintsPanel = new HintsPanel(hintsPanelContainer, gameController, aiEngine);
+  }
+
+  // Track games played for install prompt
+  gameController.on("GAME_ENDED", () => onGameEnd());
+
+  // Show hints panel and player rack when game starts
+  gameController.on("GAME_STARTED", () => {
+    const hintsPanel = document.getElementById("hints-panel");
+    const playerRackEl = document.getElementById("player-rack-container");
+    if (hintsPanel) {
+      hintsPanel.classList.remove("hide-on-home");
     }
-
-    // Track games played for install prompt
-    gameController.on("GAME_ENDED", () => onGameEnd());
-
-    // Show hints panel and player rack when game starts
-    gameController.on("GAME_STARTED", () => {
-        const hintsPanel = document.getElementById("hints-panel");
-        const playerRackEl = document.getElementById("player-rack-container");
-        if (hintsPanel) {
-            hintsPanel.classList.remove("hide-on-home");
-        }
-        if (playerRackEl) {
-            playerRackEl.classList.remove("hide-on-home");
-        }
-    });
-
-    // Wire up Start Game button
-    const newGameBtn = document.getElementById("new-game-btn");
-    if (newGameBtn) {
-        newGameBtn.onclick = async () => {
-            console.log("Start button clicked!");
-            try {
-                console.log("Starting game...", gameController);
-                mobileRenderer?.updateStatus("Starting game...");
-
-                // Reload settings before starting game (for training mode, skip charleston, etc.)
-                const currentSettings = SettingsManager.load();
-                gameController.settings = {
-                    ...gameController.settings,
-                    skipCharleston: currentSettings.skipCharleston,
-                    trainingMode: currentSettings.trainingMode,
-                    trainingHand: currentSettings.trainingHand,
-                    trainingTileCount: currentSettings.trainingTileCount
-                };
-
-                await gameController.startGame();
-                console.log("Game started successfully");
-            } catch (error) {
-                console.error("Error starting game:", error);
-                mobileRenderer?.updateStatus(`Error: ${error.message}`);
-            }
-        };
+    if (playerRackEl) {
+      playerRackEl.classList.remove("hide-on-home");
     }
+  });
 
-    // Wire up Settings button
-    const settingsBtn = document.getElementById("mobile-settings-btn");
-    if (settingsBtn && !settingsSheet) {
-        settingsSheet = new SettingsSheet();
-        settingsBtn.onclick = () => {
-            settingsSheet.open();
+  // Wire up Start Game button
+  const newGameBtn = document.getElementById("new-game-btn");
+  if (newGameBtn) {
+    newGameBtn.onclick = async () => {
+      console.log("Start button clicked!");
+      try {
+        console.log("Starting game...", gameController);
+        mobileRenderer?.updateStatus("Starting game...");
+
+        // Reload settings before starting game (for training mode, skip charleston, etc.)
+        const currentSettings = SettingsManager.load();
+        gameController.settings = {
+          ...gameController.settings,
+          skipCharleston: currentSettings.skipCharleston,
+          trainingMode: currentSettings.trainingMode,
+          trainingHand: currentSettings.trainingHand,
+          trainingTileCount: currentSettings.trainingTileCount,
         };
 
-        // Populate hand selector with card patterns
+        await gameController.startGame();
+        console.log("Game started successfully");
+      } catch (error) {
+        console.error("Error starting game:", error);
+        mobileRenderer?.updateStatus(`Error: ${error.message}`);
+      }
+    };
+  }
+
+  // Wire up Settings button
+  const settingsBtn = document.getElementById("mobile-settings-btn");
+  if (settingsBtn && !settingsSheet) {
+    settingsSheet = new SettingsSheet();
+    settingsBtn.onclick = () => {
+      settingsSheet.open();
+    };
+
+    // Populate hand selector with card patterns
+    settingsSheet.populateHandSelector(card);
+  }
+
+  // Listen for settings changes
+  window.addEventListener("settingsChanged", async (event) => {
+    console.log("Settings changed:", event.detail);
+
+    // Show message to user
+    mobileRenderer?.updateStatus("Settings saved!");
+
+    // Update AI difficulty if changed (can be done immediately)
+    if (event.detail.difficulty && aiEngine) {
+      aiEngine.difficulty = event.detail.difficulty;
+      console.log("AI difficulty updated to:", event.detail.difficulty);
+    }
+
+    // If card year changed, reinitialize card and repopulate hand selector
+    if (event.detail.cardYear && event.detail.cardYear !== card.year) {
+      console.log(
+        "Card year changed from",
+        card.year,
+        "to",
+        event.detail.cardYear,
+      );
+      card.year = event.detail.cardYear;
+      await card.init();
+
+      // Repopulate hand selector with new year's patterns
+      if (settingsSheet) {
         settingsSheet.populateHandSelector(card);
+      }
+
+      // Update card validator in AI and GameController
+      if (aiEngine) {
+        aiEngine.cardValidator = card;
+      }
+      if (gameController) {
+        gameController.cardValidator = card;
+      }
     }
 
-    // Listen for settings changes
-    window.addEventListener("settingsChanged", async (event) => {
-        console.log("Settings changed:", event.detail);
-
-        // Show message to user
-        mobileRenderer?.updateStatus("Settings saved!");
-
-        // Update AI difficulty if changed (can be done immediately)
-        if (event.detail.difficulty && aiEngine) {
-            aiEngine.difficulty = event.detail.difficulty;
-            console.log("AI difficulty updated to:", event.detail.difficulty);
-        }
-
-        // If card year changed, reinitialize card and repopulate hand selector
-        if (event.detail.cardYear && event.detail.cardYear !== card.year) {
-            console.log("Card year changed from", card.year, "to", event.detail.cardYear);
-            card.year = event.detail.cardYear;
-            await card.init();
-
-            // Repopulate hand selector with new year's patterns
-            if (settingsSheet) {
-                settingsSheet.populateHandSelector(card);
-            }
-
-            // Update card validator in AI and GameController
-            if (aiEngine) {
-                aiEngine.cardValidator = card;
-            }
-            if (gameController) {
-                gameController.cardValidator = card;
-            }
-        }
-
-        // Update GameController settings for next game
-        if (gameController && gameController.settings) {
-            gameController.settings.year = event.detail.cardYear;
-            gameController.settings.difficulty = event.detail.difficulty;
-            gameController.settings.skipCharleston = event.detail.skipCharleston;
-            gameController.settings.trainingMode = event.detail.trainingMode;
-            gameController.settings.trainingHand = event.detail.trainingHand;
-            gameController.settings.trainingTileCount = event.detail.trainingTileCount;
-            gameController.settings.useBlankTiles = event.detail.useBlankTiles;
-            console.log("GameController settings updated:", gameController.settings);
-        }
-    });
-
-    // Clear status - board will be blank pre-game (until tile animation is added)
-    mobileRenderer?.updateStatus("Ready");
-
-    // Expose to window for testing
-    if (window.location.search.includes("playwright=true")) {
-        window.gameController = gameController;
-        window.aiEngine = aiEngine;
-        window.mobileRenderer = mobileRenderer;
+    // Update GameController settings for next game
+    if (gameController && gameController.settings) {
+      gameController.settings.year = event.detail.cardYear;
+      gameController.settings.difficulty = event.detail.difficulty;
+      gameController.settings.skipCharleston = event.detail.skipCharleston;
+      gameController.settings.trainingMode = event.detail.trainingMode;
+      gameController.settings.trainingHand = event.detail.trainingHand;
+      gameController.settings.trainingTileCount =
+        event.detail.trainingTileCount;
+      gameController.settings.useBlankTiles = event.detail.useBlankTiles;
+      console.log("GameController settings updated:", gameController.settings);
     }
+  });
 
-    console.log("Mobile game initialized successfully");
+  // Clear status - board will be blank pre-game (until tile animation is added)
+  mobileRenderer?.updateStatus("Ready");
+
+  // Expose to window for testing
+  if (window.location.search.includes("playwright=true")) {
+    window.gameController = gameController;
+    window.aiEngine = aiEngine;
+    window.mobileRenderer = mobileRenderer;
+  }
+
+  console.log("Mobile game initialized successfully");
 }
-
 
 /**
  * Register Service Worker
  */
 async function registerServiceWorker() {
-    // Check if service workers are supported
-    if (!("serviceWorker" in navigator)) {
-        console.log("Service workers not supported");
-        return;
-    }
+  // Check if service workers are supported
+  if (!("serviceWorker" in navigator)) {
+    console.log("Service workers not supported");
+    return;
+  }
 
-    // Skip service worker in development mode
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-        console.log("Skipping service worker registration in development mode");
-        return;
-    }
+  // Skip service worker in development mode
+  if (
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1"
+  ) {
+    console.log("Skipping service worker registration in development mode");
+    return;
+  }
 
-    try {
-        // Register the service worker (must be at root or higher than scope)
-        const registration = await navigator.serviceWorker.register(
-            "/mahjong/service-worker.js",
-            { scope: "/mahjong/" }
-        );
+  try {
+    // Register the service worker (must be at root or higher than scope)
+    const registration = await navigator.serviceWorker.register(
+      "/mahjong/service-worker.js",
+      { scope: "/mahjong/" },
+    );
 
-        console.log("Service worker registered:", registration);
+    console.log("Service worker registered:", registration);
 
-        // Check for updates on page load
-        registration.update();
+    // Check for updates on page load
+    registration.update();
 
-        // Listen for updates
-        registration.addEventListener("updatefound", () => {
-            const newWorker = registration.installing;
-            console.log("Service worker update found");
+    // Listen for updates
+    registration.addEventListener("updatefound", () => {
+      const newWorker = registration.installing;
+      console.log("Service worker update found");
 
-            newWorker.addEventListener("statechange", () => {
-                if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-                    // New service worker available
-                    console.log("New service worker installed, ready to activate");
-                    showUpdateNotification(registration);
-                }
-            });
-        });
-
-    } catch (error) {
-        console.error("Service worker registration failed:", error);
-    }
+      newWorker.addEventListener("statechange", () => {
+        if (
+          newWorker.state === "installed" &&
+          navigator.serviceWorker.controller
+        ) {
+          // New service worker available
+          console.log("New service worker installed, ready to activate");
+          showUpdateNotification(registration);
+        }
+      });
+    });
+  } catch (error) {
+    console.error("Service worker registration failed:", error);
+  }
 }
 
 /**
  * Show notification when update is available
  */
 function showUpdateNotification(registration) {
-    // Create update banner
-    const banner = document.createElement("div");
-    banner.id = "update-banner";
-    banner.innerHTML = `
+  // Create update banner
+  const banner = document.createElement("div");
+  banner.id = "update-banner";
+  banner.innerHTML = `
         <div style="
             position: fixed;
             top: 0;
@@ -372,10 +385,10 @@ function showUpdateNotification(registration) {
             ">Reload to Update</button>
         </div>
     `;
-    document.body.appendChild(banner);
+  document.body.appendChild(banner);
 
-    // Tell the waiting service worker to skip waiting
-    if (registration.waiting) {
-        registration.waiting.postMessage({ type: "SKIP_WAITING" });
-    }
+  // Tell the waiting service worker to skip waiting
+  if (registration.waiting) {
+    registration.waiting.postMessage({ type: "SKIP_WAITING" });
+  }
 }

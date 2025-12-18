@@ -7,18 +7,18 @@
 
 ## Test Results
 
-| Test Name | Status | Notes |
-|-----------|--------|-------|
-| should load the game page successfully | ✅ Pass | |
-| should show game controls | ✅ Pass | |
-| should start a new game when Start Game is clicked | ✅ Pass | |
-| should open and close settings overlay | ✅ Pass | |
-| should toggle training mode | ✅ Pass | |
-| should display game log area | ✅ Pass | |
-| should display hint section | ✅ Pass | |
-| desktop game has no console errors | ✅ Pass | New test added. |
-| GameController emits events | ✅ Pass | New test added. Enabled `gdebug` flag. |
-| game progresses through states | ✅ Pass | New test added. Verifies game state progression. |
+| Test Name                                          | Status  | Notes                                            |
+| -------------------------------------------------- | ------- | ------------------------------------------------ |
+| should load the game page successfully             | ✅ Pass |                                                  |
+| should show game controls                          | ✅ Pass |                                                  |
+| should start a new game when Start Game is clicked | ✅ Pass |                                                  |
+| should open and close settings overlay             | ✅ Pass |                                                  |
+| should toggle training mode                        | ✅ Pass |                                                  |
+| should display game log area                       | ✅ Pass |                                                  |
+| should display hint section                        | ✅ Pass |                                                  |
+| desktop game has no console errors                 | ✅ Pass | New test added.                                  |
+| GameController emits events                        | ✅ Pass | New test added. Enabled `gdebug` flag.           |
+| game progresses through states                     | ✅ Pass | New test added. Verifies game state progression. |
 
 ## Changes Made
 

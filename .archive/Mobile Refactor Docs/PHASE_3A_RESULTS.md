@@ -11,31 +11,42 @@
 Fixed 8 major issues identified in initial mockup review:
 
 ### 1. ✅ Starburst Gradient Background
+
 - **Issue:** Plain green background (`#0c6d3a`)
 - **Fixed:** Implemented desktop's radial gradient starburst
 - **Implementation:**
   ```css
-  --gradient-table: radial-gradient(circle at 35% 18%, var(--color-table-highlight) 0%,
-    var(--color-table-base) 45%, var(--color-table-dark) 98%), ...
+  --gradient-table:
+    radial-gradient(
+      circle at 35% 18%,
+      var(--color-table-highlight) 0%,
+      var(--color-table-base) 45%,
+      var(--color-table-dark) 98%
+    ),
+    ...;
   ```
 
 ### 2. ⏸️ Sprite Integration (Deferred to Phase 3B)
+
 - **Issue:** Text tiles instead of sprite images
 - **Plan:** Will integrate `assets/tiles.png` in Phase 3B component implementation
 - **Note:** Mockup continues to use text for rapid prototyping; 45px size matches 1/2 desktop sprite scale
 
 ### 3. ✅ Opponent Exposed Tiles Always Visible
+
 - **Issue:** Opponent bars only showed P/K/Q badges
 - **Fixed:** Now displays actual exposed tiles (32×42px) using same styling as player's exposed tiles
 - **Example:** Opponent 2 shows `[3C][3C][3C]` Pung
 
 ### 4. ✅ Discard Pile Grid Recalculated
+
 - **Issue:** 6-column grid insufficient for 100+ tiles
 - **Fixed:** Changed to **9×12 grid** (108 total capacity)
 - **Tile Size:** 32px height (down from 35px) to fit 9 columns in 390px width
 - **Layout:** Vertical scrolling for overflow
 
 ### 5. ✅ Bottom Menu Added
+
 - **Issue:** Missing action buttons
 - **Fixed:** Added 2-button action menu
   - **DRAW** (primary button, green accent) - Draw tile from wall
@@ -44,12 +55,14 @@ Fixed 8 major issues identified in initial mockup review:
 - **Layout:** Full-width buttons, no icons/emojis, text-only labels
 
 ### 6. ✅ Wall Counter Added
+
 - **Issue:** No way to track remaining tiles in wall
 - **Fixed:** Added floating counter in top-right corner
 - **Display:** "Wall: 48" with accent color (#ffd166)
 - **Positioning:** Absolute positioned overlay, z-index: 100
 
 ### 7. ✅ Opponent Bar Styling Updated
+
 - **Issue:** White background, no desktop theme consistency
 - **Fixed:** Applied desktop color scheme:
   - Background: `rgba(4, 36, 21, 0.88)` (dark green with transparency)
@@ -59,6 +72,7 @@ Fixed 8 major issues identified in initial mockup review:
   - Backdrop blur for depth
 
 ### 8. ✅ AI Hints/Recommendations Panel Added
+
 - **Issue:** Missing AI pattern recommendations
 - **Fixed:** Added collapsible hints panel above bottom menu
   - **Toggle Button:** "HINTS" in gold accent color
@@ -103,12 +117,12 @@ Fixed 8 major issues identified in initial mockup review:
 
 ## Tile Sizes Summary
 
-| Component | Size | Notes |
-|-----------|------|-------|
-| **Hand tiles** | 45×60px | Main interaction, sprite-compatible |
-| **Player exposed** | 32×42px | Smaller than hand, still tappable |
-| **Opponent exposed** | 32×42px | Same as player exposed |
-| **Discard tiles** | 32px height | 9 columns fit in 390px width |
+| Component            | Size        | Notes                               |
+| -------------------- | ----------- | ----------------------------------- |
+| **Hand tiles**       | 45×60px     | Main interaction, sprite-compatible |
+| **Player exposed**   | 32×42px     | Smaller than hand, still tappable   |
+| **Opponent exposed** | 32×42px     | Same as player exposed              |
+| **Discard tiles**    | 32px height | 9 columns fit in 390px width        |
 
 **Consistency:** All exposed tiles (player + opponents) are identical 32×42px size as requested.
 
@@ -117,16 +131,19 @@ Fixed 8 major issues identified in initial mockup review:
 ## Responsive Breakpoints
 
 ### Small phones (<375px)
+
 - Hand tiles: 42×56px
 - Exposed/opponent tiles: 30×40px
 - Discard tiles: 30px height
 
 ### Standard phones (375-767px)
+
 - Hand tiles: 45×60px (base)
 - Exposed/opponent tiles: 32×42px
 - Discard tiles: 32px height
 
 ### Tablets (≥768px)
+
 - Hand tiles: 60×80px
 - Exposed/opponent tiles: 40×54px
 - Discard tiles: 38px height
@@ -137,23 +154,27 @@ Fixed 8 major issues identified in initial mockup review:
 ## Color Scheme (Desktop Match)
 
 ### Background
+
 - Gradient starburst: `--gradient-table`
 - Base green: `#0c6d3a`
 - Dark green: `#044328`
 - Highlight green: `#178c4e`
 
 ### UI Elements
+
 - Panel dark: `rgba(4, 24, 14, 0.92)`
 - Panel elevated: `rgba(4, 36, 21, 0.88)`
 - Border subtle: `rgba(255, 255, 255, 0.15)`
 - Border strong: `rgba(255, 255, 255, 0.2)`
 
 ### Accent Colors
+
 - Primary accent: `#ffd166` (gold)
 - Selected tile: `#ffeb3b` (yellow)
 - Active turn border: `#ffd166` with glow
 
 ### Text Colors
+
 - Primary: `#f5fbf7` (light)
 - Secondary: `rgba(237, 244, 239, 0.65)`
 - Muted: `rgba(237, 244, 239, 0.7)`

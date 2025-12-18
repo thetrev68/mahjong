@@ -7,26 +7,30 @@ This plan provides detailed implementation specifications for the game board red
 ## 1. Wall Progress Bar Implementation
 
 ### Integration Points
+
 - **Primary File**: `GameScene.js`
 - **Secondary Files**: `gameObjects_table.js`, `constants.js`
 
 ### Modified Classes/Functions
 
 #### GameScene.js Modifications
+
 **Current Code (lines 44-52)**:
+
 ```javascript
 this.gGameLogic.wallText = this.add.text(190, 160, "", {
-    fontSize: "16px",
-    fontFamily: "Arial",
-    fill: "#ffffff",
-    align: "left",
-    resolution: 2
+  fontSize: "16px",
+  fontFamily: "Arial",
+  fill: "#ffffff",
+  align: "left",
+  resolution: 2,
 });
 this.gGameLogic.wallText.setOrigin(0, 0);
 this.gGameLogic.wallText.visible = false;
 ```
 
 **New Code Stub**:
+
 ```javascript
 // Replace wall text with progress bar component
 this.wallProgressBar = this.createWallProgressBar();
@@ -35,6 +39,7 @@ this.wallProgressBar.setVisible(false);
 ```
 
 #### New WallProgressBar Component
+
 **File**: `GameScene.js` (add new method)
 
 ```javascript
@@ -85,46 +90,53 @@ updateWallProgressBar(remainingTiles) {
 ```
 
 #### Table.js Modifications
+
 **File**: `gameObjects_table.js`
 
 **Current Code (lines 269-274)**:
+
 ```javascript
 if (numDiscard === 4) {
-    // If no-one wants the discard, add to discard pile
-    this.discards.insertDiscard(discardTile);
-    const {offsetX, offsetY} = this.wall.showWall();
-    this.discards.showDiscards(offsetX, offsetY);
-    // ...
+  // If no-one wants the discard, add to discard pile
+  this.discards.insertDiscard(discardTile);
+  const { offsetX, offsetY } = this.wall.showWall();
+  this.discards.showDiscards(offsetX, offsetY);
+  // ...
 }
 ```
 
 **New Code Stub**:
+
 ```javascript
 if (numDiscard === 4) {
-    // If no-one wants the discard, add to discard pile
-    this.discards.insertDiscard(discardTile);
-    this.discards.showDiscards(400, 250); // Fixed central position
-    this.scene.updateWallProgressBar(this.wall.getCount()); // Update progress bar
-    // ...
+  // If no-one wants the discard, add to discard pile
+  this.discards.insertDiscard(discardTile);
+  this.discards.showDiscards(400, 250); // Fixed central position
+  this.scene.updateWallProgressBar(this.wall.getCount()); // Update progress bar
+  // ...
 }
 ```
 
 ### Dependencies
+
 - Phaser 3 Graphics and Container APIs
 - Access to `this.scene` from Table class (already available)
 
 ## 2. Discard Pile Repositioning
 
 ### Integration Points
+
 - **Primary File**: `gameObjects.js` (Discards class)
 - **Secondary Files**: `gameObjects_table.js`
 
 ### Modified Classes/Functions
 
 #### Discards.showDiscards() Modifications
+
 **File**: `gameObjects.js`
 
 **Current Code (lines 523-544)**:
+
 ```javascript
 showDiscards(offsetX, offsetY) {
     // Calculate positions for all discarded tiles
@@ -152,6 +164,7 @@ showDiscards(offsetX, offsetY) {
 ```
 
 **New Code Stub**:
+
 ```javascript
 showDiscards(centerX, centerY) {
     const DISCARD_SCALE = 0.6;
@@ -188,52 +201,59 @@ showDiscards(centerX, centerY) {
 ```
 
 #### Table.processClaimArray() Modifications
+
 **File**: `gameObjects_table.js`
 
 **Current Code (lines 269-278)**:
+
 ```javascript
 if (numDiscard === 4) {
-    // If no-one wants the discard, add to discard pile
-    this.discards.insertDiscard(discardTile);
-    const {offsetX, offsetY} = this.wall.showWall();
-    this.discards.showDiscards(offsetX, offsetY);
+  // If no-one wants the discard, add to discard pile
+  this.discards.insertDiscard(discardTile);
+  const { offsetX, offsetY } = this.wall.showWall();
+  this.discards.showDiscards(offsetX, offsetY);
 
-    return {
-        playerOption: PLAYER_OPTION.DISCARD_TILE,
-        winningPlayer: 0
-    };
+  return {
+    playerOption: PLAYER_OPTION.DISCARD_TILE,
+    winningPlayer: 0,
+  };
 }
 ```
 
 **New Code Stub**:
+
 ```javascript
 if (numDiscard === 4) {
-    // If no-one wants the discard, add to discard pile
-    this.discards.insertDiscard(discardTile);
-    this.discards.showDiscards(400, 250); // Fixed central position below progress bar
+  // If no-one wants the discard, add to discard pile
+  this.discards.insertDiscard(discardTile);
+  this.discards.showDiscards(400, 250); // Fixed central position below progress bar
 
-    return {
-        playerOption: PLAYER_OPTION.DISCARD_TILE,
-        winningPlayer: 0
-    };
+  return {
+    playerOption: PLAYER_OPTION.DISCARD_TILE,
+    winningPlayer: 0,
+  };
 }
 ```
 
 ### Dependencies
+
 - Constants from `constants.js` (SPRITE_WIDTH, SPRITE_HEIGHT, TILE_GAP)
 
 ## 3. Exposed Tiles Repositioning
 
 ### Integration Points
+
 - **Primary File**: `gameObjects_hand.js` (Hand.showHand method)
 - **Secondary Files**: `gameObjects_table.js`, `constants.js`
 
 ### Modified Classes/Functions
 
 #### Hand.showHand() Modifications
+
 **File**: `gameObjects_hand.js`
 
 **Current Code (lines 433-489)**:
+
 ```javascript
 showHand(playerInfo, forceFaceup) {
     debugPrint("Hand.showHand called. playerInfo:", playerInfo, "forceFaceup:", forceFaceup);
@@ -295,6 +315,7 @@ showHand(playerInfo, forceFaceup) {
 ```
 
 **New Code Stub**:
+
 ```javascript
 showHand(playerInfo, forceFaceup) {
     debugPrint("Hand.showHand called. playerInfo:", playerInfo, "forceFaceup:", forceFaceup);
@@ -370,6 +391,7 @@ showHand(playerInfo, forceFaceup) {
 ```
 
 #### New Helper Methods for Hand Class
+
 **File**: `gameObjects_hand.js` (add to Hand class)
 
 ```javascript
@@ -474,20 +496,24 @@ getRackHeight(playerInfo) {
 ```
 
 ### Dependencies
+
 - Constants from `constants.js` (WINDOW_WIDTH, WINDOW_HEIGHT, SPRITE_HEIGHT, SPRITE_SCALE, TILE_GAP, PLAYER)
 
 ## 4. Hand Rack Visual Elements
 
 ### Integration Points
+
 - **Primary File**: `gameObjects_table.js` (Table class)
 - **Secondary Files**: `gameObjects_hand.js`, `constants.js`
 
 ### Modified Classes/Functions
 
 #### Table.create() Modifications
+
 **File**: `gameObjects_table.js`
 
 **Current Code (lines 85-96)**:
+
 ```javascript
 create(skipTileCreation = false) {
 
@@ -504,6 +530,7 @@ create(skipTileCreation = false) {
 ```
 
 **New Code Stub**:
+
 ```javascript
 create(skipTileCreation = false) {
 
@@ -523,6 +550,7 @@ create(skipTileCreation = false) {
 ```
 
 #### New Hand Rack Creation Method
+
 **File**: `gameObjects_table.js` (add to Table class)
 
 ```javascript
@@ -575,6 +603,7 @@ createHandRack(playerId) {
 ```
 
 ### Dependencies
+
 - Phaser 3 Graphics API
 - Constants from `constants.js`
 - gPlayerInfo array from `gameObjects_table.js`
@@ -582,6 +611,7 @@ createHandRack(playerId) {
 ## 5. Integration and Testing Plan
 
 ### Integration Sequence
+
 1. **Phase 1**: Implement wall progress bar
    - Add progress bar component to GameScene
    - Update wall tile counting logic
@@ -602,6 +632,7 @@ createHandRack(playerId) {
    - Test all player positions
 
 ### Testing Checklist
+
 - [ ] Wall progress bar updates correctly as tiles are drawn
 - [ ] Discard pile centers properly below progress bar
 - [ ] Hand racks appear translucent and positioned correctly for all players
@@ -612,6 +643,7 @@ createHandRack(playerId) {
 - [ ] Responsive layout on different screen sizes
 
 ### Potential Issues and Mitigations
+
 1. **Animation Conflicts**: New positioning might conflict with existing animations
    - **Mitigation**: Test all animation sequences thoroughly
 

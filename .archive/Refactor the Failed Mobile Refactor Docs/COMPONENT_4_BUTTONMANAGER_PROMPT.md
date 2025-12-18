@@ -13,6 +13,7 @@
 ### Already Implemented ✅
 
 The [ButtonManager.js](desktop/managers/ButtonManager.js) class has:
+
 - ✅ State-based button visibility (`updateForState()` with all STATE cases)
 - ✅ Button text updates for each game phase
 - ✅ Enable/disable button logic
@@ -53,19 +54,19 @@ The game has **8 buttons** defined in [index.html](index.html):
 
 ### Button Behavior by Game State
 
-| State | Visible Buttons | Button Text | Enabled Conditions |
-|-------|----------------|-------------|-------------------|
-| **INIT/START** | start, settings | "Start Game", "⚙" | Always enabled |
-| **DEAL** | sort1, sort2 | "Sort by Suit", "Sort by Rank" | Always enabled |
-| **CHARLESTON1/2** | button1 | "Pass Tiles" | Enabled when 3 tiles selected |
-| **CHARLESTON_QUERY** | button1, button2 | "No", "Yes" | Always enabled |
-| **COURTESY_QUERY** | button1-4 | "0 Tiles", "1 Tile", "2 Tiles", "3 Tiles" | Always enabled |
-| **COURTESY** | button1 | "Exchange Tiles" | Enabled when tiles selected |
-| **LOOP_PICK_FROM_WALL** | (none) | - | Auto-proceeds |
-| **LOOP_CHOOSE_DISCARD** | button1, button2, button3, sort1, sort2 | "Discard", "Exchange Joker", "Mahjong!" | Conditional |
-| **LOOP_QUERY_CLAIM_DISCARD** | button1-4 | "Claim", "Pung", "Kong", "Pass" | Context-dependent |
-| **LOOP_EXPOSE_TILES** | button1, button2 | "Select Exposure", "Skip" | Always enabled |
-| **END** | start, button1 | "Start New Game", "View Results" | Always enabled |
+| State                        | Visible Buttons                         | Button Text                               | Enabled Conditions            |
+| ---------------------------- | --------------------------------------- | ----------------------------------------- | ----------------------------- |
+| **INIT/START**               | start, settings                         | "Start Game", "⚙"                         | Always enabled                |
+| **DEAL**                     | sort1, sort2                            | "Sort by Suit", "Sort by Rank"            | Always enabled                |
+| **CHARLESTON1/2**            | button1                                 | "Pass Tiles"                              | Enabled when 3 tiles selected |
+| **CHARLESTON_QUERY**         | button1, button2                        | "No", "Yes"                               | Always enabled                |
+| **COURTESY_QUERY**           | button1-4                               | "0 Tiles", "1 Tile", "2 Tiles", "3 Tiles" | Always enabled                |
+| **COURTESY**                 | button1                                 | "Exchange Tiles"                          | Enabled when tiles selected   |
+| **LOOP_PICK_FROM_WALL**      | (none)                                  | -                                         | Auto-proceeds                 |
+| **LOOP_CHOOSE_DISCARD**      | button1, button2, button3, sort1, sort2 | "Discard", "Exchange Joker", "Mahjong!"   | Conditional                   |
+| **LOOP_QUERY_CLAIM_DISCARD** | button1-4                               | "Claim", "Pung", "Kong", "Pass"           | Context-dependent             |
+| **LOOP_EXPOSE_TILES**        | button1, button2                        | "Select Exposure", "Skip"                 | Always enabled                |
+| **END**                      | start, button1                          | "Start New Game", "View Results"          | Always enabled                |
 
 ---
 
@@ -93,6 +94,7 @@ In PhaserAdapter, ensure `onStateChanged` event calls ButtonManager:
 **Location**: [PhaserAdapter.js](desktop/adapters/PhaserAdapter.js) `onStateChanged()` method
 
 **Current (likely stub)**:
+
 ```javascript
 onStateChanged(data) {
     const {newState} = data;
@@ -101,6 +103,7 @@ onStateChanged(data) {
 ```
 
 **Should be**:
+
 ```javascript
 onStateChanged(data) {
     const {newState} = data;
@@ -130,6 +133,7 @@ setupButtonListeners() {
 **Verify**: Check browser console that buttons are clickable and `onButtonClicked` fires.
 
 **Test**:
+
 ```javascript
 // In browser console during game:
 document.getElementById("button1").click();
@@ -210,6 +214,7 @@ During discard phase, "Discard" button enabled when tile selected.
 **Location**: Hand tile click handlers in [gameObjects_hand.js](desktop/gameObjects/gameObjects_hand.js)
 
 **Pattern from 07c41b9**:
+
 ```javascript
 // When human player clicks a tile to discard
 onTileClickedForDiscard(tile) {
@@ -240,15 +245,16 @@ The "Mahjong!" button (button3) should be enabled only when player has a winning
 **Location**: [PhaserAdapter.js](desktop/adapters/PhaserAdapter.js) `onTileDrawn()` or hand update methods
 
 **After tile drawn or hand updated**:
+
 ```javascript
 // Check if human player can mahjong
 const humanPlayer = this.table.players[PLAYER.BOTTOM];
 const canMahjong = this.gameController.canMahjong(humanPlayer);
 
 if (canMahjong) {
-    this.buttonManager.enableButton("button3");
+  this.buttonManager.enableButton("button3");
 } else {
-    this.buttonManager.disableButton("button3");
+  this.buttonManager.disableButton("button3");
 }
 ```
 
@@ -279,6 +285,7 @@ gameController.onSkipExposure()
 **Check**: Do these methods exist in [GameController.js](core/controllers/GameController.js)?
 
 **If not**: Some may need to be added or renamed. Most critical:
+
 - `startGame()` - should already exist
 - `onCharlestonPass()` - may need to trigger dialog/selection flow
 - `onChooseDiscard()` - may need to get selected tile and emit TILE_DISCARDED
@@ -288,6 +295,7 @@ gameController.onSkipExposure()
 ### 3b. Pattern for Button Callbacks
 
 Button callbacks should typically:
+
 1. Get current state from game (selected tiles, player hand, etc.)
 2. Call appropriate GameController method
 3. GameController emits events back to PhaserAdapter
@@ -298,13 +306,13 @@ Button callbacks should typically:
 ```javascript
 // In ButtonManager.showCharlestonPassButtons():
 this.buttonCallbacks.set("button1", () => {
-    // Get selected tiles from SelectionManager
-    const selectedTiles = this.selectionManager.getSelection();
+  // Get selected tiles from SelectionManager
+  const selectedTiles = this.selectionManager.getSelection();
 
-    // Call GameController with selected tiles
-    this.gameController.charlestonPass(selectedTiles);
+  // Call GameController with selected tiles
+  this.gameController.charlestonPass(selectedTiles);
 
-    // ButtonManager will auto-update when state changes
+  // ButtonManager will auto-update when state changes
 });
 ```
 
@@ -348,7 +356,11 @@ showCharlestonPassButtons() {
 this.selectionManager = new SelectionManager(scene, table);
 
 // Then create ButtonManager with SelectionManager reference
-this.buttonManager = new ButtonManager(scene, gameController, this.selectionManager);
+this.buttonManager = new ButtonManager(
+  scene,
+  gameController,
+  this.selectionManager,
+);
 
 // Then pass ButtonManager to SelectionManager
 this.selectionManager.setButtonManager(this.buttonManager);
@@ -361,11 +373,13 @@ this.selectionManager.setButtonManager(this.buttonManager);
 ### Test 4.1: State Transitions Update Buttons (10 min)
 
 **Test Procedure**:
+
 1. Start game
 2. Observe button changes at each state transition
 3. Verify correct buttons visible for each state
 
 **Expected Behavior**:
+
 - ✅ START state: "Start Game" and "Settings" visible
 - ✅ DEAL state: "Sort by Suit" and "Sort by Rank" visible
 - ✅ CHARLESTON1: "Pass Tiles" visible but disabled
@@ -374,12 +388,16 @@ this.selectionManager.setButtonManager(this.buttonManager);
 - ✅ And so on for all states...
 
 **Debug**:
+
 ```javascript
 // In browser console:
 console.log("Current state:", gameController.state);
-console.log("Visible buttons:", Array.from(document.querySelectorAll("button"))
-    .filter(b => b.style.display !== "none")
-    .map(b => b.id));
+console.log(
+  "Visible buttons:",
+  Array.from(document.querySelectorAll("button"))
+    .filter((b) => b.style.display !== "none")
+    .map((b) => b.id),
+);
 ```
 
 ---
@@ -387,10 +405,12 @@ console.log("Visible buttons:", Array.from(document.querySelectorAll("button"))
 ### Test 4.2: Selection Enables/Disables Buttons (10 min)
 
 **Test Procedure**:
+
 1. During Charleston, click tiles to select them
 2. Observe "Pass Tiles" button enable state
 
 **Expected Behavior**:
+
 - ✅ 0 tiles selected: "Pass Tiles" disabled
 - ✅ 1 tile selected: "Pass Tiles" disabled
 - ✅ 2 tiles selected: "Pass Tiles" disabled
@@ -398,6 +418,7 @@ console.log("Visible buttons:", Array.from(document.querySelectorAll("button"))
 - ✅ Deselecting a tile: "Pass Tiles" disabled again
 
 **Debug**:
+
 ```javascript
 // Check button state:
 console.log("Button1 disabled:", document.getElementById("button1").disabled);
@@ -409,23 +430,26 @@ console.log("Selected count:", selectionManager.getSelectionCount());
 ### Test 4.3: Button Clicks Trigger Actions (10 min)
 
 **Test Procedure**:
+
 1. Click "Pass Tiles" button after selecting 3 tiles
 2. Verify tiles are passed and game progresses
 3. Click "No" at Charleston query
 4. Verify Charleston phase ends
 
 **Expected Behavior**:
+
 - ✅ "Pass Tiles" click → tiles animate away, new tiles received
 - ✅ "No" click → skip to next phase
 - ✅ "Yes" click → continue Charleston
 - ✅ "Discard" click → tile moves to discard pile
 
 **Debug**:
+
 ```javascript
 // Add logging to button callbacks:
 this.buttonCallbacks.set("button1", () => {
-    console.log("Button1 clicked, callback fired");
-    // ... rest of callback
+  console.log("Button1 clicked, callback fired");
+  // ... rest of callback
 });
 ```
 
@@ -434,18 +458,21 @@ this.buttonCallbacks.set("button1", () => {
 ## Implementation Checklist
 
 ### Phase 1: Basic Integration (30 min)
+
 - [ ] Verify ButtonManager instantiated in PhaserAdapter constructor
 - [ ] Add `buttonManager.updateForState(newState)` to `onStateChanged()`
 - [ ] Test that buttons change visibility when state changes
 - [ ] Verify button click events fire (check browser console)
 
 ### Phase 2: Selection Integration (30 min)
+
 - [ ] Pass ButtonManager to SelectionManager constructor
 - [ ] Add `updateButtonState()` method to SelectionManager
 - [ ] Call `updateButtonState()` after tile selection changes
 - [ ] Test "Pass Tiles" button enables when 3 tiles selected
 
 ### Phase 3: Callback Wiring (30 min)
+
 - [ ] Pass SelectionManager to ButtonManager constructor
 - [ ] Update Charleston button callback to get selected tiles
 - [ ] Update Discard button callback to get selected tile
@@ -453,6 +480,7 @@ this.buttonCallbacks.set("button1", () => {
 - [ ] Verify all callbacks route to correct GameController methods
 
 ### Phase 4: Testing (30 min)
+
 - [ ] Test state transitions update buttons correctly
 - [ ] Test selection count enables/disables buttons
 - [ ] Test button clicks trigger game actions
@@ -520,7 +548,7 @@ toggleTile(tile) {
 ```javascript
 // WRONG - selectionManager might be null
 this.buttonCallbacks.set("button1", () => {
-    const tiles = this.selectionManager.getSelection(); // Crash!
+  const tiles = this.selectionManager.getSelection(); // Crash!
 });
 ```
 
@@ -529,10 +557,10 @@ this.buttonCallbacks.set("button1", () => {
 ```javascript
 // CORRECT - Defensive check
 this.buttonCallbacks.set("button1", () => {
-    if (this.selectionManager) {
-        const tiles = this.selectionManager.getSelection();
-        this.gameController.charlestonPass(tiles);
-    }
+  if (this.selectionManager) {
+    const tiles = this.selectionManager.getSelection();
+    this.gameController.charlestonPass(tiles);
+  }
 });
 ```
 
@@ -599,7 +627,7 @@ buttonManager.disableButton("button1");
 
 // Register custom callback
 buttonManager.registerCallback("button1", () => {
-    console.log("Custom action");
+  console.log("Custom action");
 });
 ```
 

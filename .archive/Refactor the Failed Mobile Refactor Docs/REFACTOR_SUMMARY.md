@@ -11,6 +11,7 @@ Converting the mahjong game from a hybrid architecture (broken GameLogic + incom
 ## Why This Matters
 
 **Current Problems**:
+
 - GameLogic and GameController duplicate functionality
 - PhaserAdapter is incomplete (band-aid with gameLogic.updateUI() calls)
 - Hard to understand which layer does what
@@ -18,6 +19,7 @@ Converting the mahjong game from a hybrid architecture (broken GameLogic + incom
 - Can't build mobile version without massive code duplication
 
 **After Refactor**:
+
 - Single source of truth for game logic
 - All rendering centralized in one place
 - Clear responsibility boundaries
@@ -28,38 +30,39 @@ Converting the mahjong game from a hybrid architecture (broken GameLogic + incom
 
 ### Removed/Moved
 
-| Code | Current Location | Future |
-|------|------------------|--------|
-| GameLogic.js | gameLogic.js | **DELETED** |
-| GameLogic.deal() | gameLogic.js | Move to GameController |
-| GameLogic.charleston() | gameLogic.js | Move to GameController |
-| GameLogic.loop() | gameLogic.js | Move to GameController |
-| GameLogic.updateUI() | gameLogic.js | Move to PhaserAdapter |
-| Game state management | GameLogic | **Move to GameController** |
+| Code                   | Current Location | Future                     |
+| ---------------------- | ---------------- | -------------------------- |
+| GameLogic.js           | gameLogic.js     | **DELETED**                |
+| GameLogic.deal()       | gameLogic.js     | Move to GameController     |
+| GameLogic.charleston() | gameLogic.js     | Move to GameController     |
+| GameLogic.loop()       | gameLogic.js     | Move to GameController     |
+| GameLogic.updateUI()   | gameLogic.js     | Move to PhaserAdapter      |
+| Game state management  | GameLogic        | **Move to GameController** |
 
 ### Kept/Enhanced
 
-| Code | Current Location | Future |
-|------|------------------|--------|
-| Tile, Hand, Table, Player classes | gameObjects*.js | **Keep, use from GameController** |
-| AI Engine | core/AIEngine.js | **Keep, use from GameController** (refactored from gameAI.js) |
-| Card validation | card/ | **Keep, use from GameController** |
+| Code                              | Current Location | Future                                                        |
+| --------------------------------- | ---------------- | ------------------------------------------------------------- |
+| Tile, Hand, Table, Player classes | gameObjects\*.js | **Keep, use from GameController**                             |
+| AI Engine                         | core/AIEngine.js | **Keep, use from GameController** (refactored from gameAI.js) |
+| Card validation                   | card/            | **Keep, use from GameController**                             |
 
 ### Created/Enhanced
 
-| Code | Location | Purpose |
-|------|----------|---------|
-| GameController (enhanced) | core/GameController.js | **Complete game engine** |
-| PhaserAdapter (enhanced) | desktop/adapters/PhaserAdapter.js | **Complete rendering layer** |
-| AnimationLibrary | desktop/animations/ | **NEW: Reusable animations** |
-| TileManager | desktop/managers/ | **NEW: Tile sprite management** |
-| ButtonManager | desktop/managers/ | **NEW: Button state management** |
-| DialogManager | desktop/managers/ | **NEW: Dialog/prompt system** |
-| MobileRenderer | mobile/renderers/ | **NEW: Mobile non-Phaser renderer** |
+| Code                      | Location                          | Purpose                             |
+| ------------------------- | --------------------------------- | ----------------------------------- |
+| GameController (enhanced) | core/GameController.js            | **Complete game engine**            |
+| PhaserAdapter (enhanced)  | desktop/adapters/PhaserAdapter.js | **Complete rendering layer**        |
+| AnimationLibrary          | desktop/animations/               | **NEW: Reusable animations**        |
+| TileManager               | desktop/managers/                 | **NEW: Tile sprite management**     |
+| ButtonManager             | desktop/managers/                 | **NEW: Button state management**    |
+| DialogManager             | desktop/managers/                 | **NEW: Dialog/prompt system**       |
+| MobileRenderer            | mobile/renderers/                 | **NEW: Mobile non-Phaser renderer** |
 
 ## Four Phases
 
 ### Phase 1: Extend GameController (2-3 days)
+
 **Goal**: GameController becomes self-contained game engine
 
 - [ ] Fix wall synchronization (remove WallDataWrapper hack)
@@ -72,6 +75,7 @@ Converting the mahjong game from a hybrid architecture (broken GameLogic + incom
 **Success**: Game flows through all phases with events, no animations yet
 
 ### Phase 2: Complete PhaserAdapter (3-4 days)
+
 **Goal**: PhaserAdapter handles 100% of rendering
 
 - [ ] Create animation library
@@ -85,6 +89,7 @@ Converting the mahjong game from a hybrid architecture (broken GameLogic + incom
 **Success**: Full game plays with all animations and UI working
 
 ### Phase 3: Remove GameLogic (1 day)
+
 **Goal**: Delete obsolete code
 
 - [ ] Identify any unique GameLogic code
@@ -95,6 +100,7 @@ Converting the mahjong game from a hybrid architecture (broken GameLogic + incom
 **Success**: Clean codebase, no GameLogic
 
 ### Phase 4: Mobile Renderer POC (2-3 days)
+
 **Goal**: Prove separation works for multiple platforms
 
 - [ ] Create MobileRenderer base
@@ -108,6 +114,7 @@ Converting the mahjong game from a hybrid architecture (broken GameLogic + incom
 ## Key Deliverables
 
 ### Code Changes
+
 - GameController: ~500 lines of new logic from GameLogic
 - PhaserAdapter: ~800 lines of rendering handlers
 - AnimationLibrary: ~300 lines of animation functions
@@ -115,6 +122,7 @@ Converting the mahjong game from a hybrid architecture (broken GameLogic + incom
 - MobileRenderer: ~400 lines (proof of concept)
 
 ### Documentation
+
 - REFACTOR.md (this orchestration document)
 - REFACTOR_PHASE1.md (detailed Phase 1 tasks)
 - REFACTOR_PHASE2.md (detailed Phase 2 tasks)
@@ -123,6 +131,7 @@ Converting the mahjong game from a hybrid architecture (broken GameLogic + incom
 - MOBILE_RENDERER_PATTERN.md (how to create renderers)
 
 ### Testing Artifacts
+
 - test-harness.html (mobile renderer testing)
 - Updated unit tests
 - Manual testing scenarios
@@ -146,6 +155,7 @@ Converting the mahjong game from a hybrid architecture (broken GameLogic + incom
 ## Success Criteria
 
 When complete, you should be able to:
+
 - ✅ Play full game with all animations
 - ✅ All buttons work in correct states
 - ✅ All audio plays at correct times

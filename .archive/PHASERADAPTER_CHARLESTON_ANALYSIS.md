@@ -7,7 +7,9 @@ Charleston UI is empty because the wrong handler is being called.
 ## Two Different Events (Different Purposes)
 
 ### Event 1: STATE_CHANGED to CHARLESTON_PHASE
+
 **Current handler:**
+
 ```javascript
 onCharlestonPhase(data) {
     const {phase, passCount, direction} = data;
@@ -17,6 +19,7 @@ onCharlestonPhase(data) {
 ```
 
 **What it should do:**
+
 - Announce the Charleston phase (✅ does this)
 - Maybe set up the UI for selection
 - But NOT show the dialog
@@ -26,7 +29,9 @@ onCharlestonPhase(data) {
 ---
 
 ### Event 2: UI_PROMPT with promptType="CHARLESTON_PASS"
+
 **Current handler:**
+
 ```javascript
 handleCharlestonPassPrompt(options, callback) {
     const {direction, requiredCount} = options;
@@ -52,11 +57,13 @@ handleCharlestonPassPrompt(options, callback) {
 ```
 
 **What it does:**
+
 - ✅ Shows the dialog
 - ✅ Calls DialogManager correctly
 - ✅ Handles the callback
 
 **But has a problem:**
+
 - ❌ Calls `player.hand.hiddenTileSet.getSelection()` - assumes this method exists and tracks selection
 - ❌ But if tiles aren't being selected (just clicked), this will return empty array
 - ❌ So even if dialog appears, passing won't work
@@ -66,12 +73,15 @@ handleCharlestonPassPrompt(options, callback) {
 ## The Real Issue Chain
 
 ### Issue #1: Charleston Dialog Not Appearing
+
 **Why**: GameController might not be emitting the UI_PROMPT event for Charleston.
 
 **Check needed**: Look at GameController to see what events it emits during Charleston phase.
 
 ### Issue #2: Tile Selection Not Working
+
 **Why**: Clicking a tile either:
+
 - A) Doesn't update any selection tracker
 - B) Updates the old Hand.js selection system, not something DialogManager can read
 - C) Discards immediately instead of selecting
@@ -85,16 +95,18 @@ handleCharlestonPassPrompt(options, callback) {
 ## What Should Happen (Correct Flow)
 
 ### Step 1: GameController Announces Charleston Phase
+
 ```javascript
 // GameController emits:
 emit("CHARLESTON_PHASE", {
-    phase: 1,
-    direction: "RIGHT",
-    description: "Choose 3 tiles to pass right"
-})
+  phase: 1,
+  direction: "RIGHT",
+  description: "Choose 3 tiles to pass right",
+});
 ```
 
 ### Step 2: PhaserAdapter Enables Tile Selection
+
 ```javascript
 // PhaserAdapter.onCharlestonPhase():
 onCharlestonPhase(data) {
@@ -110,6 +122,7 @@ onCharlestonPhase(data) {
 ```
 
 ### Step 3: GameController Requests Selection via UI_PROMPT
+
 ```javascript
 // GameController emits:
 emit("UI_PROMPT", {
@@ -120,6 +133,7 @@ emit("UI_PROMPT", {
 ```
 
 ### Step 4: PhaserAdapter Shows Dialog
+
 ```javascript
 // PhaserAdapter.onUIPrompt() routes to handler:
 handleCharlestonPassPrompt(options, callback) {
@@ -137,6 +151,7 @@ handleCharlestonPassPrompt(options, callback) {
 ```
 
 ### Step 5: User Clicks Pass Button in Dialog
+
 ```javascript
 // DialogManager callback fires with "pass"
 // handleCharlestonPassPrompt gets the selected tiles
@@ -149,13 +164,15 @@ handleCharlestonPassPrompt(options, callback) {
 ## The Missing Link: SelectionManager
 
 **Current code tries**:
+
 ```javascript
-const selection = player.hand.hiddenTileSet.getSelection()
+const selection = player.hand.hiddenTileSet.getSelection();
 ```
 
 **Problem**: This might not exist or might not work correctly.
 
 **What we need**:
+
 ```javascript
 // A SelectionManager that tracks:
 // - Which tiles are selected
@@ -163,7 +180,7 @@ const selection = player.hand.hiddenTileSet.getSelection()
 // - Validates min/max counts
 // - Provides getSelection() method
 
-const selection = this.selectionManager.getSelection()
+const selection = this.selectionManager.getSelection();
 ```
 
 ---
@@ -171,20 +188,25 @@ const selection = this.selectionManager.getSelection()
 ## Tile Selection Mechanisms (Need to Choose One)
 
 ### Option A: Reuse Old Hand System
+
 If `hand.hiddenTileSet.getSelection()` works:
+
 - Modify it to track selected tiles properly
 - Tile clicks add/remove from selection
 - Visual state (raising tile) handled by hand
 - **PhaserAdapter just reads the selection**
 
 ### Option B: New SelectionManager
+
 Create separate manager:
+
 - Tracks selection independently
 - Tile clicks call selectionManager.toggle(tileIndex)
 - Visual feedback handled by TileRenderer
 - **PhaserAdapter and Hand sync to SelectionManager**
 
 ### Option C: Hybrid
+
 - Hand manages old visual state (raising tiles)
 - SelectionManager tracks which tiles are selected
 - Hand and SelectionManager stay in sync
@@ -219,12 +241,12 @@ Create separate manager:
 
 ## Charleston Dialog Appearance Summary
 
-| Condition | Currently | Should Be |
-|-----------|-----------|-----------|
-| Phase announced | ✅ (prints) | ✅ (works) |
-| Dialog shows | ❌ (handler not called?) | ✅ (call dialogManager) |
-| Tiles selectable | ❌ (clicks discard) | ✅ (raise position 575) |
-| Pass button works | ❌ (no selection) | ✅ (send selected tiles) |
+| Condition         | Currently                | Should Be                |
+| ----------------- | ------------------------ | ------------------------ |
+| Phase announced   | ✅ (prints)              | ✅ (works)               |
+| Dialog shows      | ❌ (handler not called?) | ✅ (call dialogManager)  |
+| Tiles selectable  | ❌ (clicks discard)      | ✅ (raise position 575)  |
+| Pass button works | ❌ (no selection)        | ✅ (send selected tiles) |
 
 ---
 
@@ -250,11 +272,13 @@ Before we can implement SelectionManager, we need to know:
 ## For Trevor
 
 **Key insight**: DialogManager is perfectly fine. The problem is:
+
 1. Either GameController isn't emitting the right event
 2. Or PhaserAdapter isn't wired to receive it
 3. Or the tile selection system is completely broken
 
 **Next step**: We need to trace the Charleston flow in GameController to see:
+
 - What events are being emitted
 - In what order
 - With what data

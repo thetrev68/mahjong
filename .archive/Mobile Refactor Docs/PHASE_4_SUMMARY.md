@@ -14,6 +14,7 @@ Phase 4 implements the mobile UI rendering layer. All tasks follow the **approve
 ## Key Design Decisions (FROM MOCKUP)
 
 ### ✅ Hand Layout
+
 - **7-column grid with 2 rows** (NOT horizontal scrolling)
 - Tiles: 45px × 60px
 - Row 1: 7 tiles, Row 2: 6-7 tiles (depending on hand size)
@@ -21,18 +22,21 @@ Phase 4 implements the mobile UI rendering layer. All tasks follow the **approve
 - Exposed tiles (Pung/Kong/Quint) display above hand
 
 ### ✅ Discard Pile
+
 - **9-column grid** (NOT 4 columns)
 - Tiles: 32px height (small to fit many tiles)
 - Vertical scroll when >108 tiles (9×12 rows)
 - Latest discard: yellow border + pulse animation
 
 ### ✅ Opponent Bars
+
 - Dark green background: `rgba(4, 36, 21, 0.88)`
 - Current turn indicator: Yellow/gold border (`#ffd166`)
 - Exposed tiles shown as small buttons (32px × 42px)
 - 3 bars stacked at top
 
 ### ✅ Styling
+
 - **Use mockup.css exactly** - DO NOT create custom CSS
 - Text-in-box tile rendering (like tileDisplayUtils.js)
 - Suit colors: Red (Crack), Green (Bam), Blue (Dot), Black (Wind/Joker)
@@ -42,6 +46,7 @@ Phase 4 implements the mobile UI rendering layer. All tasks follow the **approve
 ## Task Distribution
 
 ### 📄 PHASE_4A_PROMPT.md - Hand Renderer
+
 **Assignee:** Gemini Pro 2.5
 **Tokens:** 10K
 **Complexity:** Medium
@@ -49,6 +54,7 @@ Phase 4 implements the mobile UI rendering layer. All tasks follow the **approve
 **Deliverable:** `mobile/renderers/HandRenderer.js`
 
 **Key Requirements:**
+
 - 7-column grid layout (repeat(7, 1fr))
 - Tiles 45px × 60px
 - Exposed tiles section above hand
@@ -61,6 +67,7 @@ Phase 4 implements the mobile UI rendering layer. All tasks follow the **approve
 ---
 
 ### 📄 PHASE_4B_PROMPT.md - Opponent Bars
+
 **Assignee:** Claude Haiku
 **Tokens:** 4K
 **Complexity:** Low
@@ -68,6 +75,7 @@ Phase 4 implements the mobile UI rendering layer. All tasks follow the **approve
 **Deliverable:** `mobile/components/OpponentBar.js`
 
 **Key Requirements:**
+
 - Dark green background with backdrop blur
 - Yellow border when current turn
 - Show name, position, tile count
@@ -79,6 +87,7 @@ Phase 4 implements the mobile UI rendering layer. All tasks follow the **approve
 ---
 
 ### 📄 PHASE_4C_PROMPT.md - Discard Pile
+
 **Assignee:** Gemini Flash 2.0
 **Tokens:** 3K
 **Complexity:** Low
@@ -86,6 +95,7 @@ Phase 4 implements the mobile UI rendering layer. All tasks follow the **approve
 **Deliverable:** `mobile/components/DiscardPile.js`
 
 **Key Requirements:**
+
 - 9-column grid layout (repeat(9, 1fr))
 - Tiles 32px height (small)
 - Latest discard: yellow border + pulse
@@ -97,6 +107,7 @@ Phase 4 implements the mobile UI rendering layer. All tasks follow the **approve
 ---
 
 ### 📄 PHASE_4D_PROMPT.md - Mobile Animations
+
 **Assignee:** Gemini Pro 2.5
 **Tokens:** 7K
 **Complexity:** Medium
@@ -104,6 +115,7 @@ Phase 4 implements the mobile UI rendering layer. All tasks follow the **approve
 **Deliverable:** `mobile/animations/AnimationController.js`
 
 **Key Requirements:**
+
 - Pure CSS animations (NO libraries)
 - 60 FPS performance (use transform/opacity only)
 - 7 animation types: draw, discard, claim, turn, sort, exposure, invalid
@@ -159,6 +171,7 @@ Before accepting any Phase 4 deliverable:
 ## Common Pitfalls to Watch For
 
 ### ❌ WRONG: Hand Renderer with Horizontal Scrolling
+
 ```javascript
 // DON'T DO THIS
 .hand-container {
@@ -168,6 +181,7 @@ Before accepting any Phase 4 deliverable:
 ```
 
 ### ✅ CORRECT: Hand Renderer with 7-Column Grid
+
 ```javascript
 // DO THIS
 .hand-container {
@@ -177,32 +191,36 @@ Before accepting any Phase 4 deliverable:
 ```
 
 ### ❌ WRONG: Discard Pile with 4 Columns
+
 ```javascript
 // DON'T DO THIS
 grid-template-columns: repeat(4, 1fr);  // WRONG!
 ```
 
 ### ✅ CORRECT: Discard Pile with 9 Columns
+
 ```javascript
 // DO THIS
 grid-template-columns: repeat(9, 1fr);  // CORRECT!
 ```
 
 ### ❌ WRONG: Large Tiles (150px)
+
 ```css
 /* DON'T DO THIS */
 .tile-btn {
-    width: 150px;  /* TOO BIG! */
-    height: 200px;
+  width: 150px; /* TOO BIG! */
+  height: 200px;
 }
 ```
 
 ### ✅ CORRECT: Touch-Friendly Tiles (45px)
+
 ```css
 /* DO THIS */
 .tile-btn {
-    width: 45px;  /* Fits 7 per row */
-    height: 60px;
+  width: 45px; /* Fits 7 per row */
+  height: 60px;
 }
 ```
 
@@ -226,6 +244,7 @@ After all Phase 4 tasks complete:
 ## Questions?
 
 If assignees have questions:
+
 1. **Read mockup files first** (answers 90% of questions)
 2. Check `MOBILE_INTERFACES.md` for events
 3. Review `tileDisplayUtils.js` for tile rendering

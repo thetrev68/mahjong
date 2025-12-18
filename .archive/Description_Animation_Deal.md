@@ -12,24 +12,27 @@
 The dealing process occurs in three distinct phases, executed sequentially.
 
 **Phase 1: Main Deal (Chunks of 4)**
-*This phase repeats three times.*
+_This phase repeats three times._
+
 1.  **Player 0 (East):**
-    *   **Visual:** Four tiles fly from the top-left of the screen to Player 0's rack. The tiles are **face down**. They arrive with a slight stagger, not all at once.
-    *   **SFX:** `rack_tile.mp3` plays for *each* tile as it lands in the rack, creating four distinct sounds.
+    - **Visual:** Four tiles fly from the top-left of the screen to Player 0's rack. The tiles are **face down**. They arrive with a slight stagger, not all at once.
+    - **SFX:** `rack_tile.mp3` plays for _each_ tile as it lands in the rack, creating four distinct sounds.
 2.  **Player 1 (South):** The sequence above is repeated for Player 1.
 3.  **Player 2 (West):** The sequence is repeated for Player 2.
 4.  **Player 3 (North):** The sequence is repeated for Player 3.
-*After three full rotations, each player has 12 tiles.*
+    _After three full rotations, each player has 12 tiles._
 
 **Phase 2: Single Tile Draw**
-*This phase occurs once.*
+_This phase occurs once._
+
 1.  One tile is dealt to Player 0, then Player 1, then Player 2, and finally Player 3.
 2.  Each deal follows the same animation and SFX logic as in Phase 1 (a single tile flies in and makes a sound upon landing).
-*At the end of this phase, each player has 13 tiles.*
+    _At the end of this phase, each player has 13 tiles._
 
 **Phase 3: Final Dealer Tile**
+
 1.  One final tile is dealt to **Player 0**.
-*Player 0 now has 14 tiles.*
+    _Player 0 now has 14 tiles._
 
 ---
 
@@ -42,10 +45,10 @@ The dealing process occurs in three distinct phases, executed sequentially.
 
 #### **Final State**
 
-*   **Tile Distribution:**
-    *   **Player 0:** 14 tiles, face up, and sorted.
-    *   **Players 1, 2, 3:** 13 tiles each, face down.
-*   **Game State:** The game is now waiting for Player 0 to make the first discard.
+- **Tile Distribution:**
+  - **Player 0:** 14 tiles, face up, and sorted.
+  - **Players 1, 2, 3:** 13 tiles each, face down.
+- **Game State:** The game is now waiting for Player 0 to make the first discard.
 
 ---
 
@@ -95,5 +98,6 @@ The dealing process occurs in three distinct phases, executed sequentially.
    - Con: Less authentic to real mahjong dealing
 
 **Reference Implementation:**
+
 - Desktop version: [desktop/adapters/PhaserAdapter.js:262-386](desktop/adapters/PhaserAdapter.js#L262-L386)
 - Key difference: Phaser sprites don't auto-clear like HTML elements do

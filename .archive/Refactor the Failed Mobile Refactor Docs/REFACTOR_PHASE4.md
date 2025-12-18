@@ -17,6 +17,7 @@ Mobile renderer infrastructure is already built (AnimationController, HandRender
 ## Mobile Infrastructure Already Built
 
 ### Existing Files
+
 - `mobile/main.js` - Entry point (partially complete)
 - `mobile/renderers/HandRenderer.js` - Renders player hand
 - `mobile/components/DiscardPile.js` - Shows discard pile
@@ -31,6 +32,7 @@ Mobile renderer infrastructure is already built (AnimationController, HandRender
 ### What Needs to Happen
 
 Mobile main.js needs to:
+
 1. Create GameController (same way desktop does)
 2. Create mobile renderer components
 3. Subscribe to GameController events
@@ -60,18 +62,19 @@ GameController
 **Current State**: mobile/main.js has skeleton structure but doesn't create GameController
 
 **Actions**:
+
 1. In mobile/main.js DOMContentLoaded handler:
    ```javascript
    // Create GameController
    gameController = new GameController();
    await gameController.init({
-       sharedTable: null,  // Mobile creates its own data structures
-       settings: {
-           year: window.settingsManager.getCardYear(),
-           difficulty: window.settingsManager.getDifficulty(),
-           useBlankTiles: window.settingsManager.getUseBlankTiles(),
-           skipCharleston: false
-       }
+     sharedTable: null, // Mobile creates its own data structures
+     settings: {
+       year: window.settingsManager.getCardYear(),
+       difficulty: window.settingsManager.getDifficulty(),
+       useBlankTiles: window.settingsManager.getUseBlankTiles(),
+       skipCharleston: false,
+     },
    });
    ```
 2. Verify GameController initializes without Phaser
@@ -88,6 +91,7 @@ GameController
 **Current State**: OpponentBar components exist but not connected
 
 **Actions**:
+
 1. Create 3 opponent bar elements (Right, Top, Left players)
 2. Subscribe to GameController events:
    - STATE_CHANGED - update button availability
@@ -96,21 +100,23 @@ GameController
    - TURN_CHANGED - highlight current player
 
 3. Implement event handlers:
+
    ```javascript
    gameController.on("TURN_CHANGED", (data) => {
-       const {currentPlayer} = data;
-       opponentBars.forEach((bar, i) => {
-           bar.setActive(i === currentPlayer - 1); // Adjust for player indexing
-       });
+     const { currentPlayer } = data;
+     opponentBars.forEach((bar, i) => {
+       bar.setActive(i === currentPlayer - 1); // Adjust for player indexing
+     });
    });
 
    gameController.on("TILE_DRAWN", (data) => {
-       const {player, tile} = data;
-       if (player !== PLAYER.BOTTOM) {
-           opponentBars[player - 1].addTile(tile);
-       }
+     const { player, tile } = data;
+     if (player !== PLAYER.BOTTOM) {
+       opponentBars[player - 1].addTile(tile);
+     }
    });
    ```
+
 4. Test: Opponent bars update during game
 
 **Output**: Opponent display working
@@ -124,12 +130,13 @@ GameController
 **Current State**: HandRenderer exists but not connected to GameController
 
 **Actions**:
+
 1. In mobile/main.js:
    ```javascript
    const handRenderer = new HandRenderer(
-       document.getElementById("player-hand-container"),
-       gameController,
-       table  // or null, HandRenderer creates its own?
+     document.getElementById("player-hand-container"),
+     gameController,
+     table, // or null, HandRenderer creates its own?
    );
    ```
 2. Subscribe to hand-related events:
@@ -144,6 +151,7 @@ GameController
    - Sort button → request sort
 
 4. HandRenderer converts user actions to GameController callbacks:
+
    ```javascript
    onTileSelected(tile) {
        // This should trigger a callback in the current UI prompt
@@ -164,6 +172,7 @@ GameController
 **Current State**: DiscardPile component exists
 
 **Actions**:
+
 1. Subscribe to TILE_DISCARDED events
 2. Add tile to discard pile display
 3. Show discard pile in easy-to-read format (maybe last 5 tiles?)
@@ -178,37 +187,41 @@ GameController
 **Goal**: First interactive phase in mobile
 
 **Current Implementation Details**:
+
 - Charleston requires selecting 3 tiles
 - "Pass" button confirms selection
 - Need to prevent invalid selections (jokers, blanks during pass)
 
 **Actions**:
+
 1. GameController emits UI_PROMPT for Charleston
 2. Mobile receives prompt, identifies it as "select_tiles" with count=3
 3. DialogManager equivalent in mobile:
+
    ```javascript
    gameController.on("UI_PROMPT", async (data) => {
-       if (data.type === "select_tiles") {
-           const {minTiles, maxTiles} = data;
+     if (data.type === "select_tiles") {
+       const { minTiles, maxTiles } = data;
 
-           // Hand is now in selection mode
-           handRenderer.setSelectionMode({
-               minTiles,
-               maxTiles,
-               validation: 'charleston'  // Prevents joker/blank selection
-           });
+       // Hand is now in selection mode
+       handRenderer.setSelectionMode({
+         minTiles,
+         maxTiles,
+         validation: "charleston", // Prevents joker/blank selection
+       });
 
-           // User selects tiles
-           // Hand renderer calls resolve callback when done
-           const selectedTiles = await new Promise(resolve => {
-               handRenderer.onSelectionComplete = resolve;
-           });
+       // User selects tiles
+       // Hand renderer calls resolve callback when done
+       const selectedTiles = await new Promise((resolve) => {
+         handRenderer.onSelectionComplete = resolve;
+       });
 
-           // Return to GameController
-           return selectedTiles;
-       }
+       // Return to GameController
+       return selectedTiles;
+     }
    });
    ```
+
 4. Test: Can play through Charleston phase on mobile
 
 **Output**: Charleston phase playable on mobile
@@ -220,6 +233,7 @@ GameController
 **Goal**: Play basic main loop on mobile (discard, claim, expose)
 
 **Actions**:
+
 1. Handle LOOP_CHOOSE_DISCARD state:
    - Highlight hand, require selection of 1 tile
    - "Discard" button confirms
@@ -246,6 +260,7 @@ GameController
 **Goal**: Play same audio as desktop during events
 
 **Actions**:
+
 1. Create simple audio player manager for mobile
 2. Subscribe to audio events (from PhaserAdapter pattern)
 3. Play sounds for:
@@ -267,6 +282,7 @@ GameController
 **Create**: `MOBILE_RENDERER_INTEGRATION.md`
 
 **Contents**:
+
 1. How GameController events work
 2. How to subscribe to events
 3. How to convert UI prompts to mobile dialogs
@@ -283,6 +299,7 @@ GameController
 **Goal**: Prove both use identical GameController
 
 **Test Plan**:
+
 1. Start desktop (Phaser) - play one game
 2. Open mobile (HTML/CSS) - play same game with same seed/settings
 3. Both should:
@@ -329,6 +346,7 @@ When you can:
 ## Future Enhancements (Post-Phase 4)
 
 Once wiring is complete:
+
 1. Add mobile-specific touches (swipe for select/discard)
 2. Add mobile-specific styling (responsive design)
 3. Add proper PWA setup for app installation

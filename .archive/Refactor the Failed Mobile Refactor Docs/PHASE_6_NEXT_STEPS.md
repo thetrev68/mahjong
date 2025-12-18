@@ -1,9 +1,11 @@
 # Phase 6 - Remaining Steps
 
 ## Summary
+
 We've made excellent progress! HandRenderer is now clean, and most references are fixed. The remaining work is primarily **SelectionManager refactoring** and cleanup.
 
 ## Already Complete ✅
+
 1. ✅ Created clean HandRenderer (no table dependency)
 2. ✅ Created CardHand for card validator
 3. ✅ Replaced old HandRenderer with new version
@@ -27,11 +29,13 @@ We've made excellent progress! HandRenderer is now clean, and most references ar
 **Problem**: SelectionManager constructor receives legacy `hand` object and calls `hand.hiddenTileSet.getTileArray()` in 4 places.
 
 **Solution**:
+
 1. Change constructor to receive `handRenderer` instead of `hand`
 2. Change `this.hand` to `this.handRenderer`
 3. Update 4 calls from `this.hand.hiddenTileSet.getTileArray()` to `this.handRenderer.getHiddenTiles(0)`
 
 **Files to update**:
+
 - [desktop/managers/SelectionManager.js](desktop/managers/SelectionManager.js#L22) - Constructor signature
 - [desktop/managers/SelectionManager.js](desktop/managers/SelectionManager.js#L311) - getTileArray() call 1
 - [desktop/managers/SelectionManager.js](desktop/managers/SelectionManager.js#L354) - getTileArray() call 2
@@ -73,6 +77,7 @@ this.selectionManager = new SelectionManager(this.handRenderer, playerAngle, thi
 ### Fix Remaining table.players References
 
 **Line 343** (onTileDrawn):
+
 ```javascript
 // OLD
 const player = this.table.players[playerIndex];
@@ -84,6 +89,7 @@ const playerInfo = PLAYER_LAYOUT[playerIndex];
 ```
 
 **Line 442** (onDiscard):
+
 ```javascript
 // OLD
 const humanHand = this.table.players[PLAYER.BOTTOM].hand;
@@ -94,6 +100,7 @@ const humanHand = this.table.players[PLAYER.BOTTOM].hand;
 ```
 
 **Line 492** (onTilesExposed):
+
 ```javascript
 // OLD
 const claimingPlayerData = this.table.players[claimingPlayer];
@@ -104,6 +111,7 @@ const playerInfo = PLAYER_LAYOUT[claimingPlayer];
 ```
 
 **Line 514** (onTilesExposed):
+
 ```javascript
 // OLD
 const player = this.table.players[playerIndex];
@@ -113,6 +121,7 @@ const playerInfo = PLAYER_LAYOUT[playerIndex];
 ```
 
 **Line 978, 987** (onSortRequest):
+
 ```javascript
 // Line 978 - validation check
 // OLD
@@ -129,6 +138,7 @@ const player = this.table.players[playerIndex];
 ```
 
 **Line 1006** (onSortRequest):
+
 ```javascript
 // OLD
 const humanPlayer = this.table.players[PLAYER.BOTTOM];
@@ -142,11 +152,13 @@ humanPlayer.hand.sortSuitHidden();
 ### Fix table.reset() and table.switchPlayer()
 
 **table.reset()** (line 216):
+
 - Check what gameObjects_table.reset() does
 - Extract tile management to TileManager if needed
 - Or keep minimal table structure
 
 **table.switchPlayer()** (line 612):
+
 - This just logs messages
 - Replace with direct `printMessage()` call
 - DELETE table.switchPlayer() method
@@ -212,12 +224,14 @@ Remaining: ~118K (59%)
 ## Decision Point
 
 **Option A**: Continue in this session
+
 - ✅ Clear roadmap
 - ✅ Momentum established
 - ✅ Sufficient context window
 - ⚠️ 6-9 hours remaining work
 
 **Option B**: Hand off to fresh session with this document
+
 - ✅ Clean starting point
 - ✅ Full context window
 - ❌ Need to rebuild mental model

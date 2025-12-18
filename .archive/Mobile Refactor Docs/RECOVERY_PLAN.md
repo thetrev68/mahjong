@@ -3,6 +3,7 @@
 ## The Fundamental Problem
 
 The codebase went through an **incomplete architectural refactor**:
+
 - **Old (commit 07c41b9)**: Used `GameLogic` - worked but tightly coupled
 - **New (current)**: Tried to split into GameController (logic) + PhaserAdapter (rendering)
 - **Result**: Broken - the refactor left many pieces incomplete
@@ -10,6 +11,7 @@ The codebase went through an **incomplete architectural refactor**:
 ## Current State
 
 ### What's Broken
+
 1. ❌ Tile dealing animation doesn't run (tiles appear in hands without animation)
 2. ❌ Charleston UI shows no buttons/text (action panel is empty)
 3. ❌ Tile selection doesn't work properly (clicking tile discards instead of selecting)
@@ -17,7 +19,9 @@ The codebase went through an **incomplete architectural refactor**:
 5. ❌ Hint panel crashes
 
 ### Root Cause
+
 The new GameController + PhaserAdapter architecture is **incomplete**:
+
 - GameController emits events but lacks proper tile/animation handling
 - PhaserAdapter has stub implementations
 - Original GameLogic methods weren't properly migrated
@@ -28,8 +32,10 @@ The new GameController + PhaserAdapter architecture is **incomplete**:
 ## Two Options
 
 ### Option A: Complete the Refactor (Long-term, risky)
+
 **Timeline**: 1-2 days
 **Work**:
+
 - Fix PhaserAdapter to handle all game events properly
 - Implement missing UI event handlers
 - Fix tile selection and Charleston flow
@@ -41,8 +47,10 @@ The new GameController + PhaserAdapter architecture is **incomplete**:
 ---
 
 ### Option B: Revert to GameLogic (Immediate fix, pragmatic)
+
 **Timeline**: 1-2 hours
 **Work**:
+
 - Revert GameScene.js to use GameLogic directly (commit 07c41b9)
 - Keep the AIEngine/Card initialization fix
 - Keep tile index improvements
@@ -56,6 +64,7 @@ The new GameController + PhaserAdapter architecture is **incomplete**:
 ## Recommendation: Hybrid Approach
 
 **Do this first (15 minutes)**:
+
 ```bash
 # Get the old working GameScene.js
 git show 07c41b9:GameScene.js > GameScene.js.old
@@ -68,6 +77,7 @@ git show 07c41b9:gameLogic.js > gameLogic.js.old
 ```
 
 **Then decide**:
+
 1. If you want game to work NOW: Revert to old GameLogic (Option B)
 2. If you want to complete the refactor: Take the broken pieces and fix them systematically (Option A)
 
@@ -76,6 +86,7 @@ git show 07c41b9:gameLogic.js > gameLogic.js.old
 ## Files That Need Attention
 
 ### Core Files Changed Since commit 07c41b9
+
 ```
 GameScene.js          ← Completely rewritten (was simple, now complex)
 gameLogic.js          ← Might still exist or might be replaced?
@@ -85,6 +96,7 @@ gameObjects_player.js ← New file, might be incomplete
 ```
 
 ### New Files Added (Part of Refactor)
+
 ```
 core/GameController.js         ← New, incomplete
 desktop/adapters/PhaserAdapter.js ← New, incomplete
@@ -100,6 +112,7 @@ core/models/PlayerData.js      ← New, might be incomplete
 Tell me which approach you want:
 
 **A) Revert to GameLogic immediately** (game will work in ~1hr)
+
 ```bash
 git show 07c41b9:GameLogic.js > gameLogic.js
 git show 07c41b9:GameScene.js > GameScene.js
@@ -107,6 +120,7 @@ git show 07c41b9:GameScene.js > GameScene.js
 ```
 
 **B) Fix the new architecture** (proper but slower)
+
 ```bash
 # Take the GameController events and wire them properly
 # Re-implement Charleston UI
@@ -116,6 +130,7 @@ git show 07c41b9:GameScene.js > GameScene.js
 ```
 
 **C) Hybrid** (fix specific pieces)
+
 ```bash
 # Keep new structure but cherry-pick working code from old GameLogic
 # For example: copy Charleston implementation, tile selection handlers

@@ -23,6 +23,7 @@ Addressed all remaining TODO items found in the codebase to complete MVP gamepla
 - Sorts hands after exchange
 
 **Key Features:**
+
 - Calculates `player02Vote` and `player13Vote` based on opposing player agreement
 - Human player prompted via UI to select tiles
 - AI uses `aiEngine.courtesyPass()` method
@@ -41,6 +42,7 @@ Addressed all remaining TODO items found in the codebase to complete MVP gamepla
 - Refreshes hand display to show exposures properly positioned
 
 **Integration:**
+
 - Works with existing `Hand.showHand()` layout system
 - Exposed tiles positioned in separate row/column based on player position
 - Face-up display for all exposed tiles
@@ -58,6 +60,7 @@ Addressed all remaining TODO items found in the codebase to complete MVP gamepla
 - Refreshes hand display after animation completes
 
 **Visual Effect:**
+
 - Smooth slide from center to hand position
 - Fade-in effect for visual polish
 - Non-blocking animation
@@ -75,6 +78,7 @@ Addressed all remaining TODO items found in the codebase to complete MVP gamepla
 - 250ms duration with Power2 easing
 
 **Visual Effect:**
+
 - Smooth slide from hand to discard pile
 - Maintains tile orientation
 - Non-blocking animation
@@ -91,6 +95,7 @@ Addressed all remaining TODO items found in the codebase to complete MVP gamepla
 - Auto-scrolls to show latest hints
 
 **Integration:**
+
 - Works with existing hint toggle in index.html
 - Uses existing sidebar styling
 - Supports multiple hints displayed sequentially
@@ -106,6 +111,7 @@ Addressed all remaining TODO items found in the codebase to complete MVP gamepla
 - Removed TODO comments in favor of descriptive notes
 
 **Changes:**
+
 - `onGameEnd()` now properly exported for GameController integration
 - Clear documentation for when to call the function
 - Future phase notes instead of TODO comments
@@ -117,6 +123,7 @@ Addressed all remaining TODO items found in the codebase to complete MVP gamepla
 **Result:** ✅ 0 Errors, 40 Warnings
 
 All warnings are intentional or benign:
+
 - `no-await-in-loop`: Necessary for sequential user interaction (Charleston, courtesy pass)
 - `no-unused-vars`: Variables used indirectly or reserved for future use
 - `require-await`: Async methods that may gain awaits in future
@@ -172,11 +179,13 @@ npm run test:headed   # Visual verification
 ## Next Steps
 
 ### Immediate
+
 - Test courtesy pass with multiple voting scenarios
 - Verify exposure display with all tile combinations
 - Check animations on different screen sizes
 
 ### Future Phases
+
 - Mobile UI complete implementation (GameController integration)
 - Enhanced hint system with AI recommendations
 - Animation speed settings in preferences

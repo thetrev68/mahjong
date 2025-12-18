@@ -12,6 +12,7 @@
 Create the `OpponentBar.js` component that displays opponent information compactly at the top of the mobile screen. This matches the design in [mobile/mockup.html](mobile/mockup.html) and [mobile/mockup.css](mobile/mockup.css).
 
 Each bar shows:
+
 - Player name and position (e.g., "Opponent 1 (East)")
 - Tile count (e.g., "13 tiles")
 - Exposed sets as small tile buttons (32px × 42px)
@@ -40,28 +41,28 @@ Your implementation MUST match this exact interface:
  * - Update dynamically when player state changes
  */
 export class OpponentBar {
-    /**
-     * @param {HTMLElement} container - DOM element to render into
-     * @param {PlayerData} playerData - Initial player data
-     */
-    constructor(container, playerData) {
-        this.container = container;
-        this.playerData = playerData;
-        this.element = null;
+  /**
+   * @param {HTMLElement} container - DOM element to render into
+   * @param {PlayerData} playerData - Initial player data
+   */
+  constructor(container, playerData) {
+    this.container = container;
+    this.playerData = playerData;
+    this.element = null;
 
-        this.render();
-    }
+    this.render();
+  }
 
-    /**
-     * Initial render of the opponent bar
-     */
-    render() {
-        this.element = document.createElement('div');
-        this.element.className = 'opponent-bar';
-        this.element.dataset.player = this.playerData.position;
+  /**
+   * Initial render of the opponent bar
+   */
+  render() {
+    this.element = document.createElement("div");
+    this.element.className = "opponent-bar";
+    this.element.dataset.player = this.playerData.position;
 
-        // Create inner HTML structure
-        this.element.innerHTML = `
+    // Create inner HTML structure
+    this.element.innerHTML = `
             <div class="opponent-info">
                 <span class="opponent-name"></span>
                 <span class="tile-count"></span>
@@ -69,109 +70,109 @@ export class OpponentBar {
             <div class="exposures"></div>
         `;
 
-        this.container.appendChild(this.element);
-        this.update(this.playerData);
+    this.container.appendChild(this.element);
+    this.update(this.playerData);
+  }
+
+  /**
+   * Update the bar with new player data
+   * @param {PlayerData} playerData - Updated player data
+   */
+  update(playerData) {
+    this.playerData = playerData;
+
+    // Update name and position
+    const nameElement = this.element.querySelector(".opponent-name");
+    nameElement.textContent = `${playerData.name} (${this.getPositionName(playerData.position)})`;
+
+    // Update tile count
+    const countElement = this.element.querySelector(".tile-count");
+    const count = playerData.tileCount;
+    countElement.textContent = `${count} tile${count !== 1 ? "s" : ""}`;
+
+    // Update exposures
+    this.updateExposures(playerData.exposures);
+
+    // Update turn indicator
+    this.setCurrentTurn(playerData.isCurrentTurn);
+  }
+
+  /**
+   * Get human-readable position name
+   * @param {number} position - Player position (1=Right, 2=Top, 3=Left)
+   * @returns {string} Position name
+   */
+  getPositionName(position) {
+    const positions = ["Bottom", "East", "North", "West"];
+    return positions[position] || "Unknown";
+  }
+
+  /**
+   * Update exposed sets display
+   * @param {Array} exposures - Array of {type, tiles} objects
+   */
+  updateExposures(exposures) {
+    const exposuresContainer = this.element.querySelector(".exposures");
+    exposuresContainer.innerHTML = "";
+
+    if (!exposures || exposures.length === 0) {
+      return; // No exposures to display
     }
 
-    /**
-     * Update the bar with new player data
-     * @param {PlayerData} playerData - Updated player data
-     */
-    update(playerData) {
-        this.playerData = playerData;
+    exposures.forEach((exposure) => {
+      const icon = document.createElement("span");
+      icon.className = `exposure-icon ${exposure.type.toLowerCase()}`;
+      icon.textContent = this.getExposureLabel(exposure.type);
+      icon.title = this.getExposureTooltip(exposure);
+      exposuresContainer.appendChild(icon);
+    });
+  }
 
-        // Update name and position
-        const nameElement = this.element.querySelector('.opponent-name');
-        nameElement.textContent = `${playerData.name} (${this.getPositionName(playerData.position)})`;
+  /**
+   * Get short label for exposure type
+   * @param {string} type - Exposure type (PUNG, KONG, QUINT)
+   * @returns {string} Short label
+   */
+  getExposureLabel(type) {
+    const labels = {
+      PUNG: "P",
+      KONG: "K",
+      QUINT: "Q",
+    };
+    return labels[type] || "?";
+  }
 
-        // Update tile count
-        const countElement = this.element.querySelector('.tile-count');
-        const count = playerData.tileCount;
-        countElement.textContent = `${count} tile${count !== 1 ? 's' : ''}`;
+  /**
+   * Get tooltip text for exposure
+   * @param {Object} exposure - Exposure object with type and tiles
+   * @returns {string} Tooltip text
+   */
+  getExposureTooltip(exposure) {
+    const tileNames = exposure.tiles.map((t) => t.getText()).join(", ");
+    return `${exposure.type}: ${tileNames}`;
+  }
 
-        // Update exposures
-        this.updateExposures(playerData.exposures);
-
-        // Update turn indicator
-        this.setCurrentTurn(playerData.isCurrentTurn);
+  /**
+   * Set current turn indicator
+   * @param {boolean} isCurrent - Is this player's turn?
+   */
+  setCurrentTurn(isCurrent) {
+    if (isCurrent) {
+      this.element.classList.add("current-turn");
+    } else {
+      this.element.classList.remove("current-turn");
     }
+  }
 
-    /**
-     * Get human-readable position name
-     * @param {number} position - Player position (1=Right, 2=Top, 3=Left)
-     * @returns {string} Position name
-     */
-    getPositionName(position) {
-        const positions = ['Bottom', 'East', 'North', 'West'];
-        return positions[position] || 'Unknown';
+  /**
+   * Destroy this component
+   */
+  destroy() {
+    if (this.element && this.element.parentNode) {
+      this.element.parentNode.removeChild(this.element);
     }
-
-    /**
-     * Update exposed sets display
-     * @param {Array} exposures - Array of {type, tiles} objects
-     */
-    updateExposures(exposures) {
-        const exposuresContainer = this.element.querySelector('.exposures');
-        exposuresContainer.innerHTML = '';
-
-        if (!exposures || exposures.length === 0) {
-            return; // No exposures to display
-        }
-
-        exposures.forEach(exposure => {
-            const icon = document.createElement('span');
-            icon.className = `exposure-icon ${exposure.type.toLowerCase()}`;
-            icon.textContent = this.getExposureLabel(exposure.type);
-            icon.title = this.getExposureTooltip(exposure);
-            exposuresContainer.appendChild(icon);
-        });
-    }
-
-    /**
-     * Get short label for exposure type
-     * @param {string} type - Exposure type (PUNG, KONG, QUINT)
-     * @returns {string} Short label
-     */
-    getExposureLabel(type) {
-        const labels = {
-            'PUNG': 'P',
-            'KONG': 'K',
-            'QUINT': 'Q'
-        };
-        return labels[type] || '?';
-    }
-
-    /**
-     * Get tooltip text for exposure
-     * @param {Object} exposure - Exposure object with type and tiles
-     * @returns {string} Tooltip text
-     */
-    getExposureTooltip(exposure) {
-        const tileNames = exposure.tiles.map(t => t.getText()).join(', ');
-        return `${exposure.type}: ${tileNames}`;
-    }
-
-    /**
-     * Set current turn indicator
-     * @param {boolean} isCurrent - Is this player's turn?
-     */
-    setCurrentTurn(isCurrent) {
-        if (isCurrent) {
-            this.element.classList.add('current-turn');
-        } else {
-            this.element.classList.remove('current-turn');
-        }
-    }
-
-    /**
-     * Destroy this component
-     */
-    destroy() {
-        if (this.element && this.element.parentNode) {
-            this.element.parentNode.removeChild(this.element);
-        }
-        this.element = null;
-    }
+    this.element = null;
+  }
 }
 ```
 
@@ -202,6 +203,7 @@ Your component will receive `PlayerData` objects with this structure:
 ```
 
 **TileData structure** (from `core/models/TileData.js`):
+
 ```javascript
 {
     suit: 0,        // SUIT enum from constants.js
@@ -219,14 +221,18 @@ Your component should create this DOM structure:
 
 ```html
 <div class="opponent-bar" data-player="1">
-    <div class="opponent-info">
-        <span class="opponent-name">Opponent 1 (East)</span>
-        <span class="tile-count">13 tiles</span>
-    </div>
-    <div class="exposures">
-        <span class="exposure-icon pung" title="PUNG: Crack 5, Crack 5, Crack 5">P</span>
-        <span class="exposure-icon kong" title="KONG: Bam 2, Bam 2, Bam 2, Bam 2">K</span>
-    </div>
+  <div class="opponent-info">
+    <span class="opponent-name">Opponent 1 (East)</span>
+    <span class="tile-count">13 tiles</span>
+  </div>
+  <div class="exposures">
+    <span class="exposure-icon pung" title="PUNG: Crack 5, Crack 5, Crack 5"
+      >P</span
+    >
+    <span class="exposure-icon kong" title="KONG: Bam 2, Bam 2, Bam 2, Bam 2"
+      >K</span
+    >
+  </div>
 </div>
 ```
 
@@ -238,99 +244,99 @@ Your component should create this DOM structure:
 
 ```css
 .opponent-bar {
-    background: rgba(4, 36, 21, 0.88);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    padding: 6px 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    min-height: 48px;
-    backdrop-filter: blur(4px);
+  background: rgba(4, 36, 21, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  backdrop-filter: blur(4px);
 }
 
 /* Current turn indicator - yellow/gold glowing border */
 .opponent-bar[data-current-turn="true"] {
-    border: 2px solid #ffd166;
-    box-shadow: 0 0 12px rgba(255, 209, 102, 0.4);
-    background: rgba(4, 36, 21, 0.95);
+  border: 2px solid #ffd166;
+  box-shadow: 0 0 12px rgba(255, 209, 102, 0.4);
+  background: rgba(4, 36, 21, 0.95);
 }
 
 /* Opponent info section */
 .opponent-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .opponent-name {
-    font-weight: bold;
-    font-size: 16px;
-    color: #333;
+  font-weight: bold;
+  font-size: 16px;
+  color: #333;
 }
 
 .tile-count {
-    font-size: 14px;
-    color: #666;
+  font-size: 14px;
+  color: #666;
 }
 
 /* Exposures section */
 .exposures {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .exposure-icon {
-    display: inline-block;
-    width: 28px;
-    height: 28px;
-    line-height: 28px;
-    text-align: center;
-    font-weight: bold;
-    font-size: 14px;
-    border-radius: 4px;
-    background: #e0e0e0;
-    color: #333;
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  border-radius: 4px;
+  background: #e0e0e0;
+  color: #333;
 }
 
 /* Type-specific colors */
 .exposure-icon.pung {
-    background: #90caf9; /* Light blue */
-    color: #0d47a1;
+  background: #90caf9; /* Light blue */
+  color: #0d47a1;
 }
 
 .exposure-icon.kong {
-    background: #ffab91; /* Light orange */
-    color: #bf360c;
+  background: #ffab91; /* Light orange */
+  color: #bf360c;
 }
 
 .exposure-icon.quint {
-    background: #ce93d8; /* Light purple */
-    color: #4a148c;
+  background: #ce93d8; /* Light purple */
+  color: #4a148c;
 }
 
 /* Responsive adjustments */
 @media (max-width: 360px) {
-    .opponent-bar {
-        padding: 8px 12px;
-    }
+  .opponent-bar {
+    padding: 8px 12px;
+  }
 
-    .opponent-name {
-        font-size: 14px;
-    }
+  .opponent-name {
+    font-size: 14px;
+  }
 
-    .tile-count {
-        font-size: 12px;
-    }
+  .tile-count {
+    font-size: 12px;
+  }
 
-    .exposure-icon {
-        width: 24px;
-        height: 24px;
-        line-height: 24px;
-        font-size: 12px;
-    }
+  .exposure-icon {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    font-size: 12px;
+  }
 }
 ```
 
@@ -343,20 +349,24 @@ The mobile screen layout should have 3 opponent bars stacked at the top:
 ```html
 <!-- mobile/index.html -->
 <div id="opponents-container">
-    <div id="opponent-1"></div>  <!-- Right/East -->
-    <div id="opponent-2"></div>  <!-- Top/North -->
-    <div id="opponent-3"></div>  <!-- Left/West -->
+  <div id="opponent-1"></div>
+  <!-- Right/East -->
+  <div id="opponent-2"></div>
+  <!-- Top/North -->
+  <div id="opponent-3"></div>
+  <!-- Left/West -->
 </div>
 ```
 
 Usage:
+
 ```javascript
 // mobile/MobileGameController.js
-import { OpponentBar } from './components/OpponentBar.js';
+import { OpponentBar } from "./components/OpponentBar.js";
 
 const opponent1Bar = new OpponentBar(
-    document.getElementById('opponent-1'),
-    playerData1
+  document.getElementById("opponent-1"),
+  playerData1,
 );
 
 // Later, when player state changes:
@@ -396,41 +406,39 @@ Before submitting, verify:
 ```javascript
 // Step 1: Create opponent bar at game start
 const playerData = {
-    name: "Opponent 1",
-    position: 1,
-    tileCount: 13,
-    exposures: [],
-    isCurrentTurn: false
+  name: "Opponent 1",
+  position: 1,
+  tileCount: 13,
+  exposures: [],
+  isCurrentTurn: false,
 };
 const opponentBar = new OpponentBar(container, playerData);
 
 // Step 2: Opponent makes a Pung exposure
 opponentBar.update({
-    ...playerData,
-    tileCount: 13,
-    exposures: [
-        { type: 'PUNG', tiles: [tile1, tile2, tile3] }
-    ]
+  ...playerData,
+  tileCount: 13,
+  exposures: [{ type: "PUNG", tiles: [tile1, tile2, tile3] }],
 });
 
 // Step 3: Opponent's turn begins
 opponentBar.update({
-    ...playerData,
-    isCurrentTurn: true
+  ...playerData,
+  isCurrentTurn: true,
 });
 
 // Step 4: Opponent draws a tile
 opponentBar.update({
-    ...playerData,
-    tileCount: 14,
-    isCurrentTurn: true
+  ...playerData,
+  tileCount: 14,
+  isCurrentTurn: true,
 });
 
 // Step 5: Opponent's turn ends
 opponentBar.update({
-    ...playerData,
-    tileCount: 13,
-    isCurrentTurn: false
+  ...playerData,
+  tileCount: 13,
+  isCurrentTurn: false,
 });
 ```
 
@@ -439,11 +447,13 @@ opponentBar.update({
 ## Allowed Imports
 
 ✅ **Allowed:**
+
 - `core/models/PlayerData.js` (for type reference)
 - `core/models/TileData.js` (for type reference)
 - `core/constants.js` (if needed for SUIT enums)
 
 ❌ **Forbidden:**
+
 - `gameObjects.js` (Phaser-specific)
 - `phaser` (no Phaser on mobile)
 - Any files from `desktop/`
@@ -477,6 +487,7 @@ Before submitting your implementation, ensure:
 ## Questions?
 
 If anything is unclear:
+
 1. Check `core/models/PlayerData.js` for data structure
 2. Review `MOBILE_INTERFACES.md` for component guidelines
 3. Look at CSS animation examples in existing codebase

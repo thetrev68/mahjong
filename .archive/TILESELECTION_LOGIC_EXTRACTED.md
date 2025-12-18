@@ -56,6 +56,7 @@ Each `Tile` has these relevant properties:
 **Purpose**: Clear all selections in this tileset, reset visual state to normal
 
 **Behavior**:
+
 ```javascript
 resetSelection() {
     if (this.selectCount === 0) {
@@ -85,6 +86,7 @@ resetSelection() {
 ```
 
 **Key Details**:
+
 - Iterates through ALL tiles, checking `tile.selected`
 - Only modifies tiles where `tile.selected === true`
 - Decrements counter for each deselected tile
@@ -95,6 +97,7 @@ resetSelection() {
 **Purpose**: Return array of all currently selected tiles (copies, not references)
 
 **Behavior**:
+
 ```javascript
 getSelection() {
     const temp = [];
@@ -110,6 +113,7 @@ getSelection() {
 **Returns**: Array of `Tile` objects that have `selected === true`
 
 **Usage**:
+
 - Called when user clicks "Confirm" button to get their selection
 - Example: `const discardTile = hand.getSelection()[0];`
 
@@ -118,6 +122,7 @@ getSelection() {
 **Purpose**: Return count of currently selected tiles (by iterating and counting)
 
 **Behavior**:
+
 ```javascript
 getSelectionCount() {
     let count = 0;
@@ -131,6 +136,7 @@ getSelectionCount() {
 ```
 
 **Key Detail**: This method recounts from scratch each time (doesn't use `selectCount` directly)
+
 - This is actually redundant with the `selectCount` property
 - But provides a validation mechanism
 
@@ -144,73 +150,79 @@ The click handler for tiles is attached in the `insertHidden()` method, which is
 
 ```javascript
 tile.sprite.on("pointerup", () => {
-    if (tile.drag) {
-        return; // Ignore click if tile was dragged
-    }
+  if (tile.drag) {
+    return; // Ignore click if tile was dragged
+  }
 
-    // Get min/max based on game state
-    let minSelect = 1;
-    let maxSelect = 3;
-    // ... (logic to determine min/max per game state)
+  // Get min/max based on game state
+  let minSelect = 1;
+  let maxSelect = 3;
+  // ... (logic to determine min/max per game state)
 
-    debugPrint(`Tile clicked. State: ${this.gameLogic.state}, selectCount: ${tileSet.selectCount}, min: ${minSelect}, max: ${maxSelect}`);
+  debugPrint(
+    `Tile clicked. State: ${this.gameLogic.state}, selectCount: ${tileSet.selectCount}, min: ${minSelect}, max: ${maxSelect}`,
+  );
 
-    if (maxSelect) {
-        if (tile.selected) {
-            // CASE 1: DESELECT (tile is already selected)
-            tile.selected = false;
-            tile.sprite.setDepth(0);
-            if (tile.spriteBack) tile.spriteBack.setDepth(0);
-            tile.animate(tile.origX, 600, playerObject.playerInfo.angle);
-            tileSet.selectCount--;
-        } else {
-            // CASE 2: SELECT (tile is not selected)
+  if (maxSelect) {
+    if (tile.selected) {
+      // CASE 1: DESELECT (tile is already selected)
+      tile.selected = false;
+      tile.sprite.setDepth(0);
+      if (tile.spriteBack) tile.spriteBack.setDepth(0);
+      tile.animate(tile.origX, 600, playerObject.playerInfo.angle);
+      tileSet.selectCount--;
+    } else {
+      // CASE 2: SELECT (tile is not selected)
 
-            // Special handling for maxSelect === 1: deselect other tiles first
-            if (maxSelect === 1) {
-                tileSet.resetSelection();
-            }
+      // Special handling for maxSelect === 1: deselect other tiles first
+      if (maxSelect === 1) {
+        tileSet.resetSelection();
+      }
 
-            // Check if we can add more selections
-            if (tileSet.selectCount < maxSelect) {
-                // Perform game-state-specific validation
-                let bSelectOk = true;
-                if (this.gameLogic.state === STATE.LOOP_EXPOSE_TILES) {
-                    // Must match discard tile or be a joker
-                    if (tile.suit !== SUIT.JOKER &&
-                        (tile.suit !== this.gameLogic.discardTile.suit ||
-                         tile.number !== this.gameLogic.discardTile.number)) {
-                        bSelectOk = false;
-                        this.gameLogic.displayErrorText("Select same tile or joker...");
-                    }
-                }
-                if (this.gameLogic.state === STATE.CHARLESTON1 ||
-                    this.gameLogic.state === STATE.CHARLESTON2 ||
-                    this.gameLogic.state === STATE.COURTESY) {
-                    // Cannot select jokers or blanks
-                    if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
-                        bSelectOk = false;
-                        this.gameLogic.displayErrorText("Cannot select jokers/blanks...");
-                    }
-                }
-
-                if (bSelectOk) {
-                    tile.selected = true;
-                    tile.sprite.setDepth(150);
-                    if (tile.spriteBack) tile.spriteBack.setDepth(150);
-                    tile.animate(tile.origX, 575, playerObject.playerInfo.angle);
-                    tileSet.selectCount++;
-                }
-            }
+      // Check if we can add more selections
+      if (tileSet.selectCount < maxSelect) {
+        // Perform game-state-specific validation
+        let bSelectOk = true;
+        if (this.gameLogic.state === STATE.LOOP_EXPOSE_TILES) {
+          // Must match discard tile or be a joker
+          if (
+            tile.suit !== SUIT.JOKER &&
+            (tile.suit !== this.gameLogic.discardTile.suit ||
+              tile.number !== this.gameLogic.discardTile.number)
+          ) {
+            bSelectOk = false;
+            this.gameLogic.displayErrorText("Select same tile or joker...");
+          }
+        }
+        if (
+          this.gameLogic.state === STATE.CHARLESTON1 ||
+          this.gameLogic.state === STATE.CHARLESTON2 ||
+          this.gameLogic.state === STATE.COURTESY
+        ) {
+          // Cannot select jokers or blanks
+          if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
+            bSelectOk = false;
+            this.gameLogic.displayErrorText("Cannot select jokers/blanks...");
+          }
         }
 
-        // Enable/disable button based on valid range
-        if (tileSet.selectCount >= minSelect && tileSet.selectCount <= maxSelect) {
-            window.document.getElementById("button1").disabled = false;
-        } else {
-            window.document.getElementById("button1").disabled = true;
+        if (bSelectOk) {
+          tile.selected = true;
+          tile.sprite.setDepth(150);
+          if (tile.spriteBack) tile.spriteBack.setDepth(150);
+          tile.animate(tile.origX, 575, playerObject.playerInfo.angle);
+          tileSet.selectCount++;
         }
+      }
     }
+
+    // Enable/disable button based on valid range
+    if (tileSet.selectCount >= minSelect && tileSet.selectCount <= maxSelect) {
+      window.document.getElementById("button1").disabled = false;
+    } else {
+      window.document.getElementById("button1").disabled = true;
+    }
+  }
 });
 ```
 
@@ -241,9 +253,11 @@ Selection also affects rendering order:
 ### Animation
 
 The `animate()` method smoothly transitions the tile:
+
 ```javascript
-tile.animate(x, y, angle, duration)
+tile.animate(x, y, angle, duration);
 ```
+
 - Takes current position and animates to new (x, y)
 - Preserves smooth UX - not a jarring snap
 
@@ -310,9 +324,9 @@ Validation happens **during** the click handler, before selection state is modif
 
 ```javascript
 if (tileSet.selectCount >= minSelect && tileSet.selectCount <= maxSelect) {
-    window.document.getElementById("button1").disabled = false; // Enable
+  window.document.getElementById("button1").disabled = false; // Enable
 } else {
-    window.document.getElementById("button1").disabled = true;  // Disable
+  window.document.getElementById("button1").disabled = true; // Disable
 }
 ```
 
@@ -330,7 +344,7 @@ The system distinguishes between clicks and drags:
 
 ```javascript
 if (tile.drag) {
-    return; // Ignore the click if this was a drag operation
+  return; // Ignore the click if this was a drag operation
 }
 ```
 
@@ -344,12 +358,12 @@ When a tile is dragged and dropped:
 
 ```javascript
 if (tile.selected) {
-    tile.selected = false;
-    tile.sprite.setDepth(0);
-    if (tile.spriteBack) {
-        tile.spriteBack.setDepth(0);
-    }
-    tileSet.selectCount--;
+  tile.selected = false;
+  tile.sprite.setDepth(0);
+  if (tile.spriteBack) {
+    tile.spriteBack.setDepth(0);
+  }
+  tileSet.selectCount--;
 }
 // Position is updated during drag/drop repositioning
 ```
@@ -366,37 +380,43 @@ if (tile.selected) {
 ### 1. maxSelect === 1 Special Case
 
 When only one tile can be selected (discard phase):
+
 ```javascript
 if (maxSelect === 1) {
-    tileSet.resetSelection(); // Clear all before selecting new one
+  tileSet.resetSelection(); // Clear all before selecting new one
 }
 ```
 
 ### 2. Exposure Tile Matching
 
 Cannot select arbitrary tiles during exposure - must match the discard:
+
 ```javascript
 if (this.gameLogic.state === STATE.LOOP_EXPOSE_TILES) {
-    if (tile.suit !== SUIT.JOKER &&
-        (tile.suit !== this.gameLogic.discardTile.suit ||
-         tile.number !== this.gameLogic.discardTile.number)) {
-        bSelectOk = false;
-    }
+  if (
+    tile.suit !== SUIT.JOKER &&
+    (tile.suit !== this.gameLogic.discardTile.suit ||
+      tile.number !== this.gameLogic.discardTile.number)
+  ) {
+    bSelectOk = false;
+  }
 }
 ```
 
 ### 3. Charleston/Courtesy Restrictions
 
 Cannot pass or trade jokers and blanks:
+
 ```javascript
 if (tile.suit === SUIT.JOKER || tile.suit === SUIT.BLANK) {
-    bSelectOk = false;
+  bSelectOk = false;
 }
 ```
 
 ### 4. Mixed TileSets
 
 The `Hand` object has TWO tilesets:
+
 - **`tileSet`**: Exposed (visible) tiles
 - **`hiddenTileSet`**: Hidden (face-down) tiles
 
@@ -409,6 +429,7 @@ Each maintains its own `selectCount`, `tileArray`, and selection state. They're 
 ### `removeDiscard()` (Hidden TileSet only)
 
 Called when user confirms a discard:
+
 ```javascript
 removeDiscard() {
     if (this.hiddenTileSet.inputEnabled) {
@@ -425,13 +446,13 @@ removeDiscard() {
 
 ## Summary Table
 
-| Property | Type | Purpose | When Changed |
-|----------|------|---------|--------------|
-| `tile.selected` | boolean | Is this tile selected? | On click, drag, or reset |
-| `tile.sprite.y` | number | Visual Y position | Animate to 575 (selected) or 600 (deselected) |
-| `tile.sprite.depth` | number | Z-order for rendering | Set to 150 (selected) or 0 (deselected) |
-| `tileSet.selectCount` | number | Count of selected tiles | Increment on select, decrement on deselect |
-| Button enable state | boolean | Can user confirm? | Based on `selectCount >= min && <= max` |
+| Property              | Type    | Purpose                 | When Changed                                  |
+| --------------------- | ------- | ----------------------- | --------------------------------------------- |
+| `tile.selected`       | boolean | Is this tile selected?  | On click, drag, or reset                      |
+| `tile.sprite.y`       | number  | Visual Y position       | Animate to 575 (selected) or 600 (deselected) |
+| `tile.sprite.depth`   | number  | Z-order for rendering   | Set to 150 (selected) or 0 (deselected)       |
+| `tileSet.selectCount` | number  | Count of selected tiles | Increment on select, decrement on deselect    |
+| Button enable state   | boolean | Can user confirm?       | Based on `selectCount >= min && <= max`       |
 
 ---
 

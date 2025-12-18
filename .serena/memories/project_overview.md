@@ -1,9 +1,11 @@
 # Mahjong Game Project Overview
 
 ## Purpose
+
 American Mahjong game built with Phaser.IO and modern JavaScript (ES6 modules). Features 4-player gameplay with intelligent AI opponents, authentic American Mahjong rules including Charleston phases, courtesy passes, and exposures.
 
 ## Tech Stack
+
 - **Framework:** Phaser.IO (game engine)
 - **Language:** TypeScript/JavaScript (ES6 modules)
 - **Build Tool:** Vite
@@ -12,6 +14,7 @@ American Mahjong game built with Phaser.IO and modern JavaScript (ES6 modules). 
 - **Styling:** CSS (custom styles for UI)
 
 ## Project Structure
+
 ```
 src/
 ├── main.js              # Phaser game initialization
@@ -51,3 +54,4 @@ GameLogic class manages transitions between states. Each state has corresponding
 - ✅ Section 5: Swap UI button
 - ✅ Section 6: Blank swap functionality
 - ⏳ Section 7: Game state & turn management (IN PROGRESS)
+```

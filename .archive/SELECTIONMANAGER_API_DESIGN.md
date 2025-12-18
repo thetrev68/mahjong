@@ -54,6 +54,7 @@ export class SelectionManager {
 **Purpose**: Activate tile selection for a game phase with specified constraints
 
 **Parameters**:
+
 - `minCount` (number): Minimum tiles that must be selected to confirm (1-3)
 - `maxCount` (number): Maximum tiles allowed to be selected (1-3)
 - `mode` (string): Selection mode - one of: `"charleston"`, `"courtesy"`, `"play"`, `"expose"`
@@ -61,6 +62,7 @@ export class SelectionManager {
 **Returns**: `undefined`
 
 **Side Effects**:
+
 - Sets `this.isEnabled = true`
 - Sets `this.minCount = minCount`
 - Sets `this.maxCount = maxCount`
@@ -70,6 +72,7 @@ export class SelectionManager {
 - Updates UI button state based on initial conditions
 
 **Usage Example**:
+
 ```javascript
 // Charleston phase: must select exactly 3 tiles, no jokers/blanks
 selectionManager.enableTileSelection(3, 3, "charleston");
@@ -103,6 +106,7 @@ selectionManager.enableTileSelection(1, 3, "courtesy");
 **Returns**: `undefined`
 
 **Side Effects**:
+
 - Sets `this.isEnabled = false`
 - Calls `this.clearSelection()` to deselect all tiles
 - Removes all click event listeners from tiles
@@ -111,6 +115,7 @@ selectionManager.enableTileSelection(1, 3, "courtesy");
 - Sets `this.minCount` and `this.maxCount` to neutral values (e.g., 1, 3)
 
 **Usage Example**:
+
 ```javascript
 // After user confirms their selection
 selectionManager.disableTileSelection();
@@ -127,11 +132,13 @@ selectionManager.disableTileSelection();
 **Purpose**: Toggle a tile between selected and deselected state
 
 **Parameters**:
+
 - `tile` (Tile): The tile object to toggle
 
 **Returns**: `boolean` - `true` if tile is now selected, `false` if now deselected
 
 **Side Effects**:
+
 - If tile is currently deselected:
   - Validates that we haven't exceeded `maxCount` and that tile passes mode-specific checks
   - Sets `tile.selected = true`
@@ -145,6 +152,7 @@ selectionManager.disableTileSelection();
 - Updates button UI state based on new selection count
 
 **Usage Example**:
+
 ```javascript
 // User clicks a tile - toggle it
 selectionManager.toggleTile(clickedTile);
@@ -153,6 +161,7 @@ selectionManager.toggleTile(clickedTile);
 ```
 
 **Validation Performed**:
+
 - Capacity check: `this.getSelectionCount() < maxCount`
 - Mode-specific validation:
   - **Charleston/Courtesy**: Reject jokers and blanks
@@ -166,11 +175,13 @@ selectionManager.toggleTile(clickedTile);
 **Purpose**: Unconditionally select a tile (bypass toggle logic)
 
 **Parameters**:
+
 - `tile` (Tile): The tile object to select
 
 **Returns**: `boolean` - `true` if selection succeeded, `false` if rejected
 
 **Side Effects**:
+
 - If tile is not already selected:
   - Validates selection constraints
   - Sets `tile.selected = true`
@@ -181,6 +192,7 @@ selectionManager.toggleTile(clickedTile);
   - No change (idempotent)
 
 **Usage Example**:
+
 ```javascript
 // Programmatically select the first tile
 const firstTile = hand.getTileArray()[0];
@@ -196,11 +208,13 @@ selectionManager.selectTile(firstTile);
 **Purpose**: Unconditionally deselect a tile
 
 **Parameters**:
+
 - `tile` (Tile): The tile object to deselect
 
 **Returns**: `boolean` - `true` if deselection succeeded, `false` if tile wasn't selected
 
 **Side Effects**:
+
 - If tile is currently selected:
   - Sets `tile.selected = false`
   - Decrements selection count
@@ -210,6 +224,7 @@ selectionManager.selectTile(firstTile);
   - No change (idempotent)
 
 **Usage Example**:
+
 ```javascript
 // Remove a tile from selection
 selectionManager.deselectTile(currentSelection[0]);
@@ -226,6 +241,7 @@ selectionManager.deselectTile(currentSelection[0]);
 **Returns**: `undefined`
 
 **Side Effects**:
+
 - Iterates through all selected tiles
 - For each: sets `tile.selected = false`, calls `visualizeTile(tile, false)`
 - Resets `this.selectedTiles` count to 0
@@ -233,6 +249,7 @@ selectionManager.deselectTile(currentSelection[0]);
 - Disables UI confirmation button
 
 **Usage Example**:
+
 ```javascript
 // Clear selection when entering a new phase
 selectionManager.clearSelection();
@@ -253,6 +270,7 @@ selectionManager.clearSelection();
 **Side Effects**: None (read-only)
 
 **Usage Example**:
+
 ```javascript
 // Get the selected tiles when user confirms
 const selectedTiles = selectionManager.getSelection();
@@ -275,9 +293,10 @@ gameLogic.handleDiscard(discardTile);
 **Side Effects**: None (read-only)
 
 **Usage Example**:
+
 ```javascript
 if (selectionManager.getSelectionCount() === 0) {
-    console.log("No tiles selected");
+  console.log("No tiles selected");
 }
 ```
 
@@ -294,6 +313,7 @@ if (selectionManager.getSelectionCount() === 0) {
 **Side Effects**: None (read-only)
 
 **Usage Example**:
+
 ```javascript
 // For debugging: show which tiles (by position) are selected
 const indices = selectionManager.getSelectedTileIndices();
@@ -317,16 +337,18 @@ console.log("Selected tile positions:", indices); // [0, 3, 5]
 **Side Effects**: None (read-only)
 
 **Usage Example**:
+
 ```javascript
 // Enable/disable confirmation button
 if (selectionManager.isValidSelection()) {
-    confirmButton.enable();
+  confirmButton.enable();
 } else {
-    confirmButton.disable();
+  confirmButton.disable();
 }
 ```
 
 **Logic**:
+
 ```javascript
 const count = this.getSelectionCount();
 return count >= this.minCount && count <= this.maxCount;
@@ -345,10 +367,11 @@ return count >= this.minCount && count <= this.maxCount;
 **Side Effects**: None (read-only)
 
 **Usage Example**:
+
 ```javascript
 // Only show selection UI feedback if more tiles can be selected
 if (selectionManager.canSelectMore()) {
-    showSelectionCursor();
+  showSelectionCursor();
 }
 ```
 
@@ -365,12 +388,13 @@ if (selectionManager.canSelectMore()) {
 **Side Effects**: None (read-only)
 
 **Usage Example**:
+
 ```javascript
 // Allow deselection only if we have buffer above minimum
 if (selectionManager.canDeselectMore()) {
-    // Allow clicking selected tile to deselect
+  // Allow clicking selected tile to deselect
 } else {
-    // Block deselection - user must keep minimum
+  // Block deselection - user must keep minimum
 }
 ```
 
@@ -383,12 +407,14 @@ if (selectionManager.canDeselectMore()) {
 **Purpose**: Apply or remove visual feedback to a tile to show selection state
 
 **Parameters**:
+
 - `tile` (Tile): The tile to update visually
 - `isSelected` (boolean): `true` = show selected feedback, `false` = show deselected
 
 **Returns**: `undefined`
 
 **Side Effects**:
+
 - If `isSelected === true`:
   - Sets `tile.sprite.depth = 150` (render on top)
   - If `tile.spriteBack` exists: sets `tile.spriteBack.depth = 150`
@@ -401,13 +427,15 @@ if (selectionManager.canDeselectMore()) {
   - Sets internal flag `tile._isVisuallySelected = false`
 
 **Usage Example**:
+
 ```javascript
 // Called internally by toggleTile/selectTile/deselectTile
-visualizeTile(tile, true);  // Raise tile, increase depth
+visualizeTile(tile, true); // Raise tile, increase depth
 visualizeTile(tile, false); // Lower tile, reset depth
 ```
 
 **Visual Behavior**:
+
 - Selected tiles appear "raised" (Y=575) and on top (depth=150)
 - Deselected tiles appear "lowered" (Y=600) and at normal level (depth=0)
 - Animation is smooth, not jarring - uses the tile's `animate()` method
@@ -423,11 +451,13 @@ visualizeTile(tile, false); // Lower tile, reset depth
 **Returns**: `undefined`
 
 **Side Effects**:
+
 - Iterates through `this.getSelection()`
 - For each selected tile: calls `visualizeTile(tile, true)`
 - May apply additional visual effects (color tint, glow, etc.) if implemented
 
 **Usage Example**:
+
 ```javascript
 // Called after enabling selection to show any pre-selected tiles
 selectionManager.highlightSelectedTiles();
@@ -444,11 +474,13 @@ selectionManager.highlightSelectedTiles();
 **Returns**: `undefined`
 
 **Side Effects**:
+
 - Iterates through all tiles in hand
 - For each tile: calls `visualizeTile(tile, false)` to reset Y-position and depth
 - Clears any additional visual effects (color tint, glow, etc.)
 
 **Usage Example**:
+
 ```javascript
 // Called in clearSelection() to reset all visual state
 selectionManager.unhighlightTiles();
@@ -469,9 +501,10 @@ selectionManager.unhighlightTiles();
 **Side Effects**: None (read-only)
 
 **Usage Example**:
+
 ```javascript
 if (selectionManager.isEnabled()) {
-    // Selection is active, clicks on tiles will be processed
+  // Selection is active, clicks on tiles will be processed
 }
 ```
 
@@ -488,9 +521,10 @@ if (selectionManager.isEnabled()) {
 **Side Effects**: None (read-only)
 
 **Usage Example**:
+
 ```javascript
 if (selectionManager.getCurrentMode() === "expose") {
-    // Show special validation for exposure selections
+  // Show special validation for exposure selections
 }
 ```
 
@@ -551,10 +585,12 @@ _validateTileForMode(tile) {
 ### Visual Feedback Strategy
 
 Y-position change is the primary visual signal:
+
 - Selected: Y=575 (25 pixels higher)
 - Deselected: Y=600 (normal level)
 
 Depth change ensures selected tiles aren't obscured:
+
 - Selected: depth=150 (on top)
 - Deselected: depth=0 (normal level)
 
@@ -563,6 +599,7 @@ Animation makes it smooth and clear. Tile must have an `animate(x, y, angle, dur
 ### Button UI Integration
 
 The SelectionManager should update UI button state:
+
 ```javascript
 _updateButtonState() {
     const isValid = this.isValidSelection();
@@ -637,6 +674,7 @@ disableTileSelection()
 ## Error Handling
 
 When validation fails during selection:
+
 1. Don't change `tile.selected`
 2. Don't call `visualizeTile()`
 3. Don't update selection count
@@ -644,12 +682,15 @@ When validation fails during selection:
 5. Return `false` to indicate failure
 
 Example from old code:
+
 ```javascript
 if (this.gameLogic.state === STATE.LOOP_EXPOSE_TILES) {
-    if (invalid) {
-        this.gameLogic.displayErrorText("Select same tile or joker to form pung/kong/quint");
-        return false; // Selection rejected
-    }
+  if (invalid) {
+    this.gameLogic.displayErrorText(
+      "Select same tile or joker to form pung/kong/quint",
+    );
+    return false; // Selection rejected
+  }
 }
 ```
 
@@ -658,6 +699,7 @@ if (this.gameLogic.state === STATE.LOOP_EXPOSE_TILES) {
 ## Future Extensions
 
 The API is designed to support:
+
 - Adding more game modes (add to mode parameter)
 - Different selection styles (e.g., drag-to-select, marquee selection)
 - Multi-selection patterns (e.g., "select all jokers")

@@ -1,13 +1,16 @@
 # Commit 07c41b9 Investigation Checklist
 
 ## Purpose
+
 The last working commit (07c41b9) had fully functional:
+
 - Tile selection during Charleston
 - Tile visual feedback (raising to position 575)
 - Discard selection
 - All game phases working
 
 We need to understand HOW it worked so we can:
+
 1. Understand the architecture we should follow
 2. Extract usable code patterns
 3. Fix the current broken version
@@ -17,6 +20,7 @@ We need to understand HOW it worked so we can:
 ## Investigation Checklist
 
 ### 1. Tile Selection System
+
 ```
 [ ] Look for class/object that tracked selected tiles
     - Name: ? (TileSet? Hand? SelectionManager?)
@@ -47,6 +51,7 @@ We need to understand HOW it worked so we can:
 ```
 
 ### 2. Charleston Phase Flow
+
 ```
 [ ] Look at GameLogic.charlestonPhase() method
     - Location: gameLogic.js
@@ -71,6 +76,7 @@ We need to understand HOW it worked so we can:
 ```
 
 ### 3. Button/UI Integration
+
 ```
 [ ] Look at what buttons appeared during Charleston
     - Button 1: ?
@@ -90,6 +96,7 @@ We need to understand HOW it worked so we can:
 ```
 
 ### 4. Hand Display
+
 ```
 [ ] Look at Hand.showHand() method
     - How were tiles positioned: ?
@@ -106,6 +113,7 @@ We need to understand HOW it worked so we can:
 ```
 
 ### 5. Input Handling
+
 ```
 [ ] Look at how user input was processed
     - Did Phaser handle clicks directly: ?
@@ -123,6 +131,7 @@ We need to understand HOW it worked so we can:
 ```
 
 ### 6. Game Flow Control
+
 ```
 [ ] Look at state machine
     - States enum: where defined?
@@ -164,12 +173,14 @@ git show 07c41b9:gameLogic.js > gameLogic.old.js
 ## Key Methods to Find
 
 ### In GameLogic.js (commit 07c41b9)
+
 - [ ] `charlestonPhase()` - main flow
 - [ ] `updateUI()` - button/message updates
 - [ ] How tile selection was enabled/disabled
 - [ ] How clicks were handled during Charleston
 
 ### In gameObjects_hand.js (commit 07c41b9)
+
 - [ ] `TileSet` class - tile grouping
 - [ ] `Hand` class - player hand management
 - [ ] `showHand()` method - tile positioning
@@ -177,6 +188,7 @@ git show 07c41b9:gameLogic.js > gameLogic.old.js
 - [ ] Selection tracking logic
 
 ### In gameObjects.js (commit 07c41b9)
+
 - [ ] `Tile` class - individual tile
 - [ ] Tile position properties
 - [ ] Tile visual state (selected vs not)
@@ -189,26 +201,31 @@ git show 07c41b9:gameLogic.js > gameLogic.old.js
 ### Based on Code Review, We Expect to Find:
 
 **1. SelectionManager-like behavior in Hand/TileSet**
+
 - Methods to track which tiles are selected
 - Methods to get the selection
 - Validation of selection count
 
 **2. Two types of click handling**
+
 - During Charleston: Click = select/deselect
 - During discard: Click = pick tile to discard
 - Differentiated by game state
 
 **3. Visual feedback on tiles**
+
 - Y-position changes (575 = selected, 600 = normal)
 - Possibly color/opacity changes
 - Possibly glow effect
 
 **4. Button-driven flow**
+
 - Buttons present options (Cancel, Pass, etc.)
 - Clicking button triggers validation and action
 - Game waited for button click, not individual tile clicks
 
 **5. Modal dialogs or overlays**
+
 - Maybe: "Select 3 tiles to pass" message
 - Maybe: instructions visible during selection
 - Maybe: tile selection highlighted visually
@@ -304,6 +321,7 @@ async charlestonPhase() {
 ```
 
 **Our job**: Understand this flow and recreate it using:
+
 - GameController for logic
 - PhaserAdapter for UI routing
 - DialogManager for dialogs

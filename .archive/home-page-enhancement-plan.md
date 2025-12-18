@@ -1,15 +1,19 @@
 # Home Page Enhancement Implementation Plan
 
 ## Overview
+
 This plan outlines the implementation of enhanced home page animations and game flow improvements for the American Mahjong application. The changes will create a more engaging user experience with sophisticated tile animations, realistic dealing sequences, and celebratory effects.
 
 ## Code Style and Conventions
+
 All JavaScript code should adhere to the existing style, which follows standard modern JavaScript (ES6+) conventions.
+
 - Use `const` and `let` appropriately. Avoid `var`.
 - Follow existing naming conventions (e.g., `gGameLogic` for global game logic instance, camelCase for functions and variables).
-- All new code should be commented where the logic is not immediately obvious, explaining the *why* behind the code.
+- All new code should be commented where the logic is not immediately obvious, explaining the _why_ behind the code.
 
 ## Current State Analysis
+
 - **Home Page**: Shows 152 scattered tiles, all face-down, in a clustered random distribution
 - **Start Animation**: Tiles gather to center, then disappear off-screen
 - **Wall Counter**: UI container is created hidden (`GameScene.createWallTileCounter()`), only becomes visible after gameplay code calls `scene.updateWallTileCounter(...)`
@@ -19,29 +23,35 @@ All JavaScript code should adhere to the existing style, which follows standard 
 ## Enhancement Objectives
 
 ### 1. Home Page Scattered Tiles Enhancement
+
 **Current**: All 152 tiles scattered face-down
 **Enhanced**: ~70% of tiles randomly face-up, creating visual interest
 **Status**: Implemented
 
 **Implementation**:
+
 - In `homePageTileManager.js`, modify the `createScatteredTiles` function. Inside the loop that creates tiles, after `tile.showTile(true, false);`, add `if (Math.random() < 0.7) { tile.showTile(true, true); }`.
 
 ### 2. Hide Empty Wall Counter
+
 **Current**: Counter container is already hidden until the game logic updates it
 **Enhanced**: Keep the default-hidden behavior and ensure the first `updateWallTileCounter` call happens exactly when gameplay begins so the UI never flashes stale state
 **Status**: Implemented
 
 **Implementation**:
+
 - Leave `GameScene.createWallTileCounter()`’s `setVisible(false)` intact and document the expectation in code comments to prevent regressions.
 - In `gameLogic.updateUI`, `case STATE.START`, ensure `this.scene.updateWallTileCounter(this.table.wall.getCount());` runs **before** any player controls unhide so the counter reveals with a real count.
 - Audit other `updateWallTileCounter` call sites to verify they are tied to tile-mutation events (deal completion, Charleston, wall picks). Add missing calls if new sequences consume tiles.
 
 ### 3. Z-Axis Management Fix
+
 **Current**: `createScatteredTiles` seeds depth via `tile.sprite.setDepth(i)` but the `Tile` class already keeps `sprite`, `spriteBack`, and glow masks in sync during `animate`
 **Enhanced**: Centralize temporary depth boosts so both front/back sprites and glow masks rise together whenever a tile animates
 **Status**: Implemented
 
 **Implementation**:
+
 - Extend `Tile.animate` (in `gameObjects.js`) with a helper like `withRaisedDepth(callback)` to raise `sprite.depth`, `spriteBack.depth`, and glow depth, then restore them after the tween completes. Avoid touching depth directly inside `homePageTileManager`.
 - When creating bespoke tweens (e.g., jump/flip), call that helper or set both `sprite` and `spriteBack` depth explicitly to the same high value and update the mask/glow depth as well. Document this requirement in the plan so future LLMs do not forget the backing sprite.
 - Depth contract:
@@ -49,6 +59,7 @@ All JavaScript code should adhere to the existing style, which follows standard 
   - Raised depth = `baseDepth + 100` (clamped >= 1) for the duration of the tween.
   - Multiple simultaneous animations stack by reusing the helper; it should track a `raiseCount` so overlapping tweens do not prematurely restore depth.
 - Reference snippet:
+
 ```javascript
 withRaisedDepth(tweenFactory) {
     const base = Math.max(1, this.sprite.depth);
@@ -73,28 +84,33 @@ withRaisedDepth(tweenFactory) {
 ```
 
 ### 4. Redesigned Start-Game Animation
+
 **Current**: Tiles gather to center, then disappear
 **Enhanced**: Sophisticated three-phase animation
 **Status**: Implemented
 
 **Phase 1: Jump and Flip**
+
 - Each tile performs a small jump (5-15px upward)
 - Simultaneously flips from current state to face-down
 - Duration: 800ms with easing
 - Scale bounce: 0.6 → 0.65 → 0.6
 
 **Phase 2: Fly to Top-Left**
+
 - Tiles animate to varied exit points near top-left corner
 - Speed variation: 1200-2000ms duration
 - Trajectory: Curved paths suggesting "table tipping"
 - No new pile formation - tiles disappear individually
 
 **Phase 3: Transition Complete**
+
 - All tiles hidden
 - Empty player racks become visible
 - Wall counter shows 152/152
 
 **Implementation**:
+
 - Complete rewrite of `homePageTileManager.animateToPileAndStartGame()` so it becomes an async pipeline that:
   1. Calls `await this.animateJumpAndFlip()` (Phase 1)
   2. Calls `await this.animateFlyOffScreen()` (Phase 2)
@@ -104,11 +120,13 @@ withRaisedDepth(tweenFactory) {
 - Update animation sequencing and promise chaining so `HomePageTileManager` never calls `onAnimationComplete` before the wall owns the tiles. `GameScene.create()` relies on this guarantee before invoking `gGameLogic.start()`.
 
 ### 5. Human-Like Dealing Sequence
+
 **Current**: `table.deal()` handles shuffling, applying training hands, inserting exposed sets, and immediately calling `players[i].showHand()` for all four seats
 **Enhanced**: Maintain `Table` as the single source of truth for tile ownership while introducing a sequence controller that animates tiles one-at-a-time without duplicating business logic
 **Status**: Implemented
 
 **Dealing Pattern**:
+
 1. **Initial Round**: 4 tiles to Player 0 (bottom) face-down
 2. **Wait**: 300ms for tiles to settle
 3. **Sequential Dealing**: 4 tiles to each player (1, 2, 3) in order
@@ -117,6 +135,7 @@ withRaisedDepth(tweenFactory) {
 6. **Wall Counter**: Decrement with each tile dealt
 
 **Implementation**:
+
 - Introduce `await sequentialDealTiles(initPlayerHandArray)` inside `GameLogic.deal()`. This function should:
   - Call into existing helpers on `Table` to apply training/exposed tiles **before** the animated phase begins (extract `applyTrainingHands(initPlayerHandArray)` + `applyExposedSets(initPlayerHandArray)` from `Table.deal()` so logic stays centralized).
   - Pull one tile at a time via `this.table.wall.remove()`, insert it with the existing `Hand.insertHidden`, and let `Hand.showHand()` update layout **only** for the player that just received a tile. This preserves validation logic and keeps `Hand` responsible for tile ordering.
@@ -125,6 +144,7 @@ withRaisedDepth(tweenFactory) {
   - Emit `scene.updateWallTileCounter(...)` after each tile removal and log the remaining count for debugging when `DEBUG_DEALING` flag is true.
 - Once sequential dealing completes, call a lightweight `Table.finalizeInitialHands()` (new helper) to sort/show all hands so training mode and auto-exposed sets still work.
 - Skeleton:
+
 ```javascript
 async sequentialDealTiles(initHands) {
     this.table.applyTrainingHands(initHands);
@@ -142,20 +162,24 @@ async sequentialDealTiles(initHands) {
 ```
 
 ### 6. Player 0 Tile Reveal and Analysis
+
 **Current**: `Table.deal()` ends by calling `showHand()` for every player, so Player 0 tiles already flip face-up and hints run immediately (gameLogic.js:300-307)
 **Enhanced**: Delay Player 0’s reveal until the sequential dealing animation completes, then trigger hints/menu visibility in a predictable order
 **Status**: Implemented
 
 **Implementation**:
+
 - Move the existing `hintAnimationManager.updateHintsForNewTiles()` invocation to the tail of `sequentialDealTiles`, after Player 0’s final flip animation resolves.
 - Ensure `showHand(true)` for Player 0 happens exactly once after the dealing phase; other players can remain face-down (`showHand(false)`) since their hands are hidden by default. Document this expectation so future contributors don’t reintroduce simultaneous reveals.
 
 ### 7. Victory Fireworks Display
+
 **Current**: No visual celebration for player 0 victory
 **Enhanced**: Fireworks animation over game board
 **Status**: Implemented
 
 **Implementation**:
+
 - In `GameScene.js`, create a new function `createFireworksDisplay`. This function will use Phaser's particle emitter (`this.add.particles(...)`). Create 5-7 emitters at random locations on the screen. Configure the emitters to create a burst of circular particles of different colors. The particles should have a lifespan of about 1-2 seconds and should fade out. Use a gravity setting to make the particles fall downwards after the explosion.
 - Trigger on: `gameResult.mahjong === true && gameResult.winner === 0`
 - Duration: 3-4 seconds
@@ -169,54 +193,63 @@ async sequentialDealTiles(initHands) {
 - Audio integration: preload `fireworks.mp3`, play via `this.sound.play("fireworks", { volume: 0.4 })`, stop when particles finish.
 
 ### 8. Preserve Existing Animations
+
 **Critical Requirement**: All in-game animations remain unchanged
+
 - Drag and drop mechanics
-- Discard animations  
+- Discard animations
 - Exposure sequences
 - Charleston pass animations
 - All existing game logic and timing
-**Status**: Implemented
+  **Status**: Implemented
 
 ## Technical Implementation Details
 
 ### File Modifications
 
 #### `homePageTileManager.js`
+
 - `createScatteredTiles()`: Add 70% face-up randomization
 - `animateToPileAndStartGame()`: Complete redesign for new animation sequence
 - `animateJumpAndFlip()`: New method for jump+flip animation
 - `animateFlyOffScreen()`: New method for varied speed exit animation
 
 #### `GameScene.js`
+
 - `createWallTileCounter()`: Hide by default, show on game start
 - `createFireworksDisplay()`: New method for victory celebration
 
 #### `gameLogic.js`
+
 - `deal()`: Integrate with new sequential dealing by calling `sequentialDealTiles` while still delegating training/exposed tile prep to `Table`.
 - `updateUI()`: Show wall counter on game start, handle tile reveal ordering.
 - HINT panel integration: Run analysis after sequential dealing completes.
 
 #### `gameObjects.js`
+
 - `Tile`: Review and enhance Z-axis depth management.
 
 #### `styles.css`
+
 - Fireworks animation keyframes (if needed)
 - Any additional visual enhancements
 
 ### Animation Architecture
 
 #### Promise Chain Management
+
 ```javascript
 // New animation flow
-await phase1JumpAndFlip()
-await phase2FlyOffScreen() 
-await showEmptyRacks()
-await sequentialDealTiles()
-await revealPlayer0Tiles()
-await runHintAnalysis()
+await phase1JumpAndFlip();
+await phase2FlyOffScreen();
+await showEmptyRacks();
+await sequentialDealTiles();
+await revealPlayer0Tiles();
+await runHintAnalysis();
 ```
 
 ##### Interaction Lock & Error Handling
+
 - `GameScene` should expose `setInteractionLock(isLocked)` that disables pointer/touch listeners and command buttons while the promise chain runs.
 - Wrap the chain in `try { ... } catch (err) { ... } finally { ... }`:
   - On rejection, log via `console.error("[HomePage] Animation failed", err)`, unlock UI, call `transitionToWallSystem()` to keep gameplay unblocked, and surface a toast/error banner if available.
@@ -224,6 +257,7 @@ await runHintAnalysis()
 - Each tween phase must return a promise that rejects if Phaser fires `TWEEN_COMPLETE` with `tween.isDestroyed()` (interrupted) or `TWEEN_REMOVE_EVENT`; handle this by racing the tween promise with an `abortController` tied to scene shutdown.
 
 #### Timing Coordination
+
 - **Jump/Flip Phase**: 800ms (parallel for all tiles)
 - **Fly-off Phase**: 1200-2000ms (varied per tile, completion awaited before wall transfer)
 - **Rack Display**: Immediate
@@ -239,8 +273,8 @@ await runHintAnalysis()
   - Fly-off operates in staggered batches of 20 tiles (`batchDelay = 150ms`) to control GPU load.
   - Sequential dealing is fully serialized; the next tile tween starts only after the prior tween resolves.
 
-
 #### Performance Considerations
+
 - Efficient tile animation: Batch operations where possible
 - Memory management: Proper cleanup of animation objects
 - Frame rate: Maintain 60fps during complex animations
@@ -249,12 +283,14 @@ await runHintAnalysis()
 ### Testing Strategy
 
 #### Unit Testing
+
 - Individual animation components
 - Timing accuracy verification
 - Promise resolution validation
 - Interrupt handling: simulate `scene.events.emit(Phaser.Scenes.Events.SHUTDOWN)` mid-animation to ensure promises reject gracefully.
 
 #### Integration Testing
+
 - Complete start game flow
 - Dealing sequence accuracy
 - Wall counter synchronization
@@ -262,6 +298,7 @@ await runHintAnalysis()
 - Sequential dealing under artificial lag (insert `await delay(100)` hooks) to confirm UI lock persists and counters stay accurate.
 
 #### Validation Checkpoints
+
 - After Jump/Flip: verify all tiles face-down at angle 0 and raised-depth counter returns to 0.
 - After Fly-off: confirm `tileArray` empty on scene layer and wall receives 152 hidden tiles.
 - Before sequential dealing: assert `this.table.wall.getCount() === 152` and interaction lock still enabled.
@@ -270,6 +307,7 @@ await runHintAnalysis()
 - After victory fireworks: ensure particle emitters/audio instances destroyed (no lingering display list nodes).
 
 #### Visual Testing
+
 - Animation smoothness across browsers
 - Z-axis layering verification
 - Fireworks display performance
@@ -278,16 +316,19 @@ await runHintAnalysis()
 ## Risk Assessment
 
 ### Low Risk
+
 - Home page tile randomization
 - Wall counter visibility changes
 - HINT panel integration
 
-### Medium Risk  
+### Medium Risk
+
 - Complex animation sequence coordination
 - Dealing sequence timing accuracy
 - Performance impact of simultaneous animations
 
 ### High Risk
+
 - Z-axis management conflicts
 - Breaking existing game animations
 - Cross-browser animation consistency
@@ -295,18 +336,21 @@ await runHintAnalysis()
 ## Quality Assurance
 
 ### Animation Standards
+
 - Smooth 60fps performance
 - Consistent easing functions
 - Proper cleanup of animation objects
 - Error handling for animation failures
 
 ### User Experience
+
 - Clear visual feedback during transitions
 - Intuitive timing that feels natural
 - Accessibility considerations (reduced motion preferences)
 - Mobile device optimization
 
 ### Reliability Checks
+
 - Run back-to-back game starts (≥20 iterations) to monitor heap usage and ensure no emitter/tween leaks.
 - Verify `interactionLock` always reverts after failures.
 - Confirm audio sources stop when scenes change or players navigate away.
@@ -327,52 +371,57 @@ await runHintAnalysis()
 ## Implementation Timeline
 
 ### Phase 1: Foundation (Steps 1-3)
+
 - Home page tile randomization
-- Wall counter visibility management  
+- Wall counter visibility management
 - Z-axis depth management review
 
 ### Phase 2: Animation System (Step 4)
+
 - Complete start-game animation redesign
 - Jump and flip sequence
 - Fly-off screen with varied speeds
 
 ### Phase 3: Game Flow (Steps 5-6)
+
 - Sequential dealing implementation
 - Player 0 tile reveal and analysis
 - Wall counter integration
 
 ### Phase 4: Enhancement (Step 7)
+
 - Victory fireworks display
 - Performance optimization
 - Cross-browser testing
 
 ### Phase 5: Validation
+
 - Complete testing suite
 - Animation preservation verification
 - Performance benchmarking
 
 ## Phase Contracts
 
-| Phase | Entry Conditions | Responsibilities / Outputs | Required Interfaces |
-| --- | --- | --- | --- |
-| Phase 1 – Foundation | `GameScene` constructed, scattered tiles rendered, wall counter hidden | Apply face-up randomization, ensure wall counter stays hidden until first `updateWallTileCounter`, document depth expectations | `homePageTileManager.createScatteredTiles`, `GameScene.createWallTileCounter`, `Tile.showTile` |
-| Phase 2 – Animation System | Home page tiles idle, `HomePageTileManager.onAnimationComplete` unset | Provide `animateJumpAndFlip` + `animateFlyOffScreen`, guarantee `onAnimationComplete` fires **after** `transitionToWallSystem` and the wall owns all tiles | `HomePageTileManager`, `wall.receiveOrganizedTilesFromHomePage`, Phaser tween manager |
-| Phase 3 – Game Flow | Wall owns 152 tiles, `GameLogic.deal()` invoked | Sequentially distribute tiles while honoring training hands, emit wall counter updates per draw, reveal Player 0 last, trigger hints after reveal | `Table` hand insertion helpers, `scene.updateWallTileCounter`, `hintAnimationManager` |
-| Phase 4 – Enhancement | Core gameplay unaffected | Fireworks effect tied to `gameResult`, optional audio, ensure cleanup so future games can replay | `GameScene`, Phaser particle emitters, `gameLogic.end()` |
-| Phase 5 - Validation | All features implemented | Execute automated + visual checks, confirm plan invariants (depth sync, promise ordering, 60fps target) | Test harness (if any), manual QA checklist |
+| Phase                      | Entry Conditions                                                       | Responsibilities / Outputs                                                                                                                                 | Required Interfaces                                                                            |
+| -------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Phase 1 – Foundation       | `GameScene` constructed, scattered tiles rendered, wall counter hidden | Apply face-up randomization, ensure wall counter stays hidden until first `updateWallTileCounter`, document depth expectations                             | `homePageTileManager.createScatteredTiles`, `GameScene.createWallTileCounter`, `Tile.showTile` |
+| Phase 2 – Animation System | Home page tiles idle, `HomePageTileManager.onAnimationComplete` unset  | Provide `animateJumpAndFlip` + `animateFlyOffScreen`, guarantee `onAnimationComplete` fires **after** `transitionToWallSystem` and the wall owns all tiles | `HomePageTileManager`, `wall.receiveOrganizedTilesFromHomePage`, Phaser tween manager          |
+| Phase 3 – Game Flow        | Wall owns 152 tiles, `GameLogic.deal()` invoked                        | Sequentially distribute tiles while honoring training hands, emit wall counter updates per draw, reveal Player 0 last, trigger hints after reveal          | `Table` hand insertion helpers, `scene.updateWallTileCounter`, `hintAnimationManager`          |
+| Phase 4 – Enhancement      | Core gameplay unaffected                                               | Fireworks effect tied to `gameResult`, optional audio, ensure cleanup so future games can replay                                                           | `GameScene`, Phaser particle emitters, `gameLogic.end()`                                       |
+| Phase 5 - Validation       | All features implemented                                               | Execute automated + visual checks, confirm plan invariants (depth sync, promise ordering, 60fps target)                                                    | Test harness (if any), manual QA checklist                                                     |
 
 Documenting these contracts ensures separate contributors (human or LLM) share consistent assumptions about when each phase runs, which files they may touch, and which invariants (tile ownership, depth synchronization, promise timing) must remain intact.
 
 ### Method Contracts
 
-| Method | Inputs / Preconditions | Outputs / Side Effects | Error Handling |
-| --- | --- | --- | --- |
-| `Tile.withRaisedDepth(tweenFactory)` | Tile sprites created; `tweenFactory` returns a Phaser tween bound to the tile | Raises `sprite`, `spriteBack`, glow depth by +100 until tween resolves; returns tween for chaining | Rejects/cleans up if tween emits `TWEEN_REMOVE_EVENT`; reference counter prevents premature depth reset |
-| `HomePageTileManager.animateJumpAndFlip()` | `tileArray` contains scattered tiles; interaction lock enabled | Returns promise that resolves after all jump tweens complete; tiles end face-down at angle 0 | On tween failure, stops remaining tweens, hides affected tile, rejects so caller can fallback |
-| `HomePageTileManager.animateFlyOffScreen()` | Jump phase complete; tiles face-down | Returns promise when final tile exits viewport; hides tiles and prepares wall transfer | On failure, immediately toggles `showTile(false,false)` for unfinished tiles and rejects |
-| `GameLogic.sequentialDealTiles(initHands)` | Wall owns 152 tiles; training hands already applied | Deals tiles following defined sequence, updates counter per draw, awaits 200ms between tiles | If `wall.remove()` returns `null`, throws descriptive error and aborts game start |
-| `GameScene.createFireworksDisplay(result)` | `result` indicates Player 0 win; particle texture/audio preloaded | Spawns emitters, plays audio, auto-destroys after 3-4s | Wrap emitter creation in `try/catch`; on failure log warning and continue without effects |
-| `GameScene.setInteractionLock(isLocked)` | DOM elements exist | Adds/removes CSS class to disable pointer events and toggles Phaser input | Should be idempotent; log warning if DOM nodes missing |
+| Method                                      | Inputs / Preconditions                                                        | Outputs / Side Effects                                                                             | Error Handling                                                                                          |
+| ------------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `Tile.withRaisedDepth(tweenFactory)`        | Tile sprites created; `tweenFactory` returns a Phaser tween bound to the tile | Raises `sprite`, `spriteBack`, glow depth by +100 until tween resolves; returns tween for chaining | Rejects/cleans up if tween emits `TWEEN_REMOVE_EVENT`; reference counter prevents premature depth reset |
+| `HomePageTileManager.animateJumpAndFlip()`  | `tileArray` contains scattered tiles; interaction lock enabled                | Returns promise that resolves after all jump tweens complete; tiles end face-down at angle 0       | On tween failure, stops remaining tweens, hides affected tile, rejects so caller can fallback           |
+| `HomePageTileManager.animateFlyOffScreen()` | Jump phase complete; tiles face-down                                          | Returns promise when final tile exits viewport; hides tiles and prepares wall transfer             | On failure, immediately toggles `showTile(false,false)` for unfinished tiles and rejects                |
+| `GameLogic.sequentialDealTiles(initHands)`  | Wall owns 152 tiles; training hands already applied                           | Deals tiles following defined sequence, updates counter per draw, awaits 200ms between tiles       | If `wall.remove()` returns `null`, throws descriptive error and aborts game start                       |
+| `GameScene.createFireworksDisplay(result)`  | `result` indicates Player 0 win; particle texture/audio preloaded             | Spawns emitters, plays audio, auto-destroys after 3-4s                                             | Wrap emitter creation in `try/catch`; on failure log warning and continue without effects               |
+| `GameScene.setInteractionLock(isLocked)`    | DOM elements exist                                                            | Adds/removes CSS class to disable pointer events and toggles Phaser input                          | Should be idempotent; log warning if DOM nodes missing                                                  |
 
 ## Conclusion
 

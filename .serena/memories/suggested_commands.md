@@ -1,6 +1,7 @@
 # Suggested Commands for Mahjong Game Development
 
 ## Development
+
 ```bash
 npm run dev          # Start Vite dev server (http://localhost:5173)
 npm run build        # Build for production
@@ -8,6 +9,7 @@ npm run preview      # Preview production build
 ```
 
 ## Testing
+
 ```bash
 npm test             # Run Playwright tests (headless)
 npm run test:ui      # Run tests in interactive UI mode
@@ -16,12 +18,14 @@ npm run test:report  # View last test report
 ```
 
 ## Code Quality
+
 ```bash
 npm run lint         # Run ESLint
 npm run knip         # Find unused files/exports/dependencies
 ```
 
 ## Windows Shell Commands
+
 - `dir` - list directory contents
 - `cd` - change directory
 - `git status` - check git status
@@ -31,6 +35,7 @@ npm run knip         # Find unused files/exports/dependencies
 - `git push` - push changes
 
 ## Common Development Workflow
+
 1. `npm run dev` - start dev server
 2. Make code changes
 3. `npm run lint` - check for linting errors

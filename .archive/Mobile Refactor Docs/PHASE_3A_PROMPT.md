@@ -37,6 +37,7 @@ Design a portrait-mode mobile layout for American Mahjong that works on phones (
 ## Design Requirements
 
 ### Screen Size Targets
+
 - **Primary:** iPhone 12 (390x844px)
 - **Secondary:** Android mid-range (360x800px)
 - **Orientation:** Portrait only (no landscape support)
@@ -67,6 +68,7 @@ Design a portrait-mode mobile layout for American Mahjong that works on phones (
 ### 1. Opponent Info Bars (Top Section)
 
 **Requirements:**
+
 - 3 opponent bars stacked vertically
 - Each bar shows: Name, Position, Tile Count, Exposures
 - Current turn indicator (glowing border or icon)
@@ -74,20 +76,22 @@ Design a portrait-mode mobile layout for American Mahjong that works on phones (
 - **Exposures:** Show exposed tiles in compact form (e.g., "P:3C" for Pung of Crack 3, "K:J" for Kong of Jokers)
 
 **Example HTML:**
+
 ```html
 <div class="opponent-bar" data-position="right" data-current-turn="true">
-    <div class="opponent-name">Opponent 1 (East)</div>
-    <div class="opponent-stats">
-        <span class="tile-count">13</span>
-        <div class="exposures">
-            <span class="exposure pung">P</span>
-            <span class="exposure kong">K</span>
-        </div>
+  <div class="opponent-name">Opponent 1 (East)</div>
+  <div class="opponent-stats">
+    <span class="tile-count">13</span>
+    <div class="exposures">
+      <span class="exposure pung">P</span>
+      <span class="exposure kong">K</span>
     </div>
+  </div>
 </div>
 ```
 
 **Visual Design:**
+
 - Use East/South/West indicators
 - Show exposed sets as small colored badges (P=Pung, K=Kong, Q=Quint)
 - Current turn: Glow effect or chevron icon
@@ -97,25 +101,28 @@ Design a portrait-mode mobile layout for American Mahjong that works on phones (
 ### 2. Discard Pile Area (Center Section)
 
 **Requirements:**
+
 - 4-column grid of discarded tiles
 - Latest discard highlighted (yellow border + pulse animation)
 - Scrollable if more than 16 discards
 - Each tile ~60px wide (visible but not huge)
 
 **Example HTML:**
+
 ```html
 <div class="discard-pile">
-    <div class="discard-tile" data-suit="CRACK" data-number="5">
-        <span class="tile-text">5C</span>
-    </div>
-    <div class="discard-tile latest" data-suit="BAM" data-number="3">
-        <span class="tile-text">3B</span>
-    </div>
-    <!-- More tiles... -->
+  <div class="discard-tile" data-suit="CRACK" data-number="5">
+    <span class="tile-text">5C</span>
+  </div>
+  <div class="discard-tile latest" data-suit="BAM" data-number="3">
+    <span class="tile-text">3B</span>
+  </div>
+  <!-- More tiles... -->
 </div>
 ```
 
 **Visual Design:**
+
 - Use text-in-box tiles (like tileDisplayUtils.js colorized pattern viewer)
 - Color-coded by suit: Cracks (blue), Bams (green), Dots (red)
 - Latest tile: Yellow glow + subtle pulse animation
@@ -127,6 +134,7 @@ Design a portrait-mode mobile layout for American Mahjong that works on phones (
 **CRITICAL REQUIREMENT:** All 13-14 tiles MUST fit on a single line without horizontal scrolling. Use compact keyboard-style buttons.
 
 **Requirements:**
+
 - Horizontal row of 13-14 tiles (NO SCROLLING)
 - Each tile 22-28px wide (compact, like keyboard keys)
 - Single-character representation (1-2 chars max)
@@ -135,6 +143,7 @@ Design a portrait-mode mobile layout for American Mahjong that works on phones (
 - Support tile sorting (by suit, by number)
 
 **Keyboard-Style Layout:**
+
 ```
 Exposed: [P:3C] [K:J]           ← Your exposed sets (shown above hand)
 Hand:    [J][J][1C][2C][3C][4C][1B][2B][1D][2D][N][S][R]
@@ -144,45 +153,48 @@ Hand:    [J][J][1C][2C][3C][4C][1B][2B][1D][2D][N][S][R]
 **Note:** Player's exposed sets should be displayed ABOVE the hand in a separate row, also using compact representation (e.g., "P:3C" with tap-to-view-details).
 
 **Example HTML:**
+
 ```html
 <div class="hand-section">
-    <!-- Exposed tiles row (if player has any) -->
-    <div class="exposed-container">
-        <button class="exposed-set" data-type="PUNG" data-tile="3C">
-            P:3C
-        </button>
-        <button class="exposed-set" data-type="KONG" data-tile="J">
-            K:J
-        </button>
-    </div>
+  <!-- Exposed tiles row (if player has any) -->
+  <div class="exposed-container">
+    <button class="exposed-set" data-type="PUNG" data-tile="3C">P:3C</button>
+    <button class="exposed-set" data-type="KONG" data-tile="J">K:J</button>
+  </div>
 
-    <!-- Hidden hand (compact tile buttons) -->
-    <div class="hand-container">
-        <button class="tile-btn" data-suit="CRACK" data-number="1" data-index="5">
-            1C
-        </button>
-        <button class="tile-btn selected" data-suit="CRACK" data-number="2" data-index="8">
-            2C
-        </button>
-        <button class="tile-btn" data-suit="JOKER" data-number="0" data-index="12">
-            J
-        </button>
-        <!-- More tiles (13-14 total)... -->
-    </div>
+  <!-- Hidden hand (compact tile buttons) -->
+  <div class="hand-container">
+    <button class="tile-btn" data-suit="CRACK" data-number="1" data-index="5">
+      1C
+    </button>
+    <button
+      class="tile-btn selected"
+      data-suit="CRACK"
+      data-number="2"
+      data-index="8"
+    >
+      2C
+    </button>
+    <button class="tile-btn" data-suit="JOKER" data-number="0" data-index="12">
+      J
+    </button>
+    <!-- More tiles (13-14 total)... -->
+  </div>
 </div>
 
 <!-- Confirmation popup (shown on tap) -->
 <div class="tile-confirm-popup" style="display: none;">
-    <div class="popup-content">
-        <div class="tile-preview">3C</div>
-        <p>Crack 3 - Confirm discard?</p>
-        <button class="btn-confirm">✓ Discard</button>
-        <button class="btn-cancel">✗ Cancel</button>
-    </div>
+  <div class="popup-content">
+    <div class="tile-preview">3C</div>
+    <p>Crack 3 - Confirm discard?</p>
+    <button class="btn-confirm">✓ Discard</button>
+    <button class="btn-cancel">✗ Cancel</button>
+  </div>
 </div>
 ```
 
 **Visual Design:**
+
 - Compact buttons with minimal padding (2-3px)
 - Font size: 14-16px (readable but compact)
 - Selected state: Yellow background or thick border
@@ -194,31 +206,29 @@ Hand:    [J][J][1C][2C][3C][4C][1B][2B][1D][2D][N][S][R]
 ### 4. Action Buttons (Bottom Bar)
 
 **Requirements:**
+
 - 3-4 buttons max (don't overcrowd)
 - Large touch targets (min 44px height)
 - Primary action (Discard) should be prominent
 
 **Button Layout:**
+
 ```
 [🗑️ Discard] [↕️ Sort] [☰ Menu]
 ```
 
 **Example HTML:**
+
 ```html
 <div class="action-bar">
-    <button class="btn-primary" id="discardBtn">
-        🗑️ Discard
-    </button>
-    <button class="btn-secondary" id="sortBtn">
-        ↕️ Sort
-    </button>
-    <button class="btn-secondary" id="menuBtn">
-        ☰ Menu
-    </button>
+  <button class="btn-primary" id="discardBtn">🗑️ Discard</button>
+  <button class="btn-secondary" id="sortBtn">↕️ Sort</button>
+  <button class="btn-secondary" id="menuBtn">☰ Menu</button>
 </div>
 ```
 
 **Visual Design:**
+
 - btn-primary: Green background, white text
 - btn-secondary: Gray background, dark text
 - Disabled state: Gray + no pointer events
@@ -228,6 +238,7 @@ Hand:    [J][J][1C][2C][3C][4C][1B][2B][1D][2D][N][S][R]
 ## Color Scheme
 
 **Based on existing desktop colors:**
+
 - Background: `#0c6d3a` (dark green, like mahjong table)
 - Tiles: White background `#ffffff`, colored suits
 - Selected: `#ffeb3b` (yellow highlight)
@@ -235,6 +246,7 @@ Hand:    [J][J][1C][2C][3C][4C][1B][2B][1D][2D][N][S][R]
 - Text: Dark `#333333` on light backgrounds
 
 **Suit Colors (for text-in-box tiles):**
+
 - Cracks: `#ff0000` (red)
 - Bams: `#00aa00` (green)
 - Dots: `#0066ff` (blue)
@@ -265,59 +277,63 @@ Blanks:  BL                   (gray text)
 ```
 
 **Example CSS for compact tile buttons:**
+
 ```css
 .tile-btn {
-    width: 24px;
-    height: 32px;
-    font-size: 14px;
-    font-weight: bold;
-    font-family: 'Courier New', monospace;
-    padding: 2px;
-    margin: 1px;
-    border: 1px solid #333;
-    background: white;
-    border-radius: 3px;
+  width: 24px;
+  height: 32px;
+  font-size: 14px;
+  font-weight: bold;
+  font-family: "Courier New", monospace;
+  padding: 2px;
+  margin: 1px;
+  border: 1px solid #333;
+  background: white;
+  border-radius: 3px;
 }
 
 .tile-btn.selected {
-    background: #ffeb3b;
-    border: 2px solid #f57c00;
+  background: #ffeb3b;
+  border: 2px solid #f57c00;
 }
 
 /* Color by suit */
 .tile-btn[data-suit="CRACK"] {
-    color: #ff0000;
+  color: #ff0000;
 }
 
 .tile-btn[data-suit="BAM"] {
-    color: #00aa00;
+  color: #00aa00;
 }
 
 .tile-btn[data-suit="DOT"] {
-    color: #0066ff;
+  color: #0066ff;
 }
 
 .tile-btn[data-suit="WIND"],
 .tile-btn[data-suit="FLOWER"],
 .tile-btn[data-suit="JOKER"] {
-    color: #000000;
+  color: #000000;
 }
 
 /* Dragon colors match their suit equivalents */
-.tile-btn[data-suit="DRAGON"][data-number="0"] { /* Red Dragon */
-    color: #ff0000;
+.tile-btn[data-suit="DRAGON"][data-number="0"] {
+  /* Red Dragon */
+  color: #ff0000;
 }
 
-.tile-btn[data-suit="DRAGON"][data-number="1"] { /* Green Dragon */
-    color: #00aa00;
+.tile-btn[data-suit="DRAGON"][data-number="1"] {
+  /* Green Dragon */
+  color: #00aa00;
 }
 
-.tile-btn[data-suit="DRAGON"][data-number="2"] { /* White Dragon */
-    color: #0066ff;
+.tile-btn[data-suit="DRAGON"][data-number="2"] {
+  /* White Dragon */
+  color: #0066ff;
 }
 
 .tile-btn[data-suit="BLANK"] {
-    color: #888888;
+  color: #888888;
 }
 ```
 
@@ -326,6 +342,7 @@ Blanks:  BL                   (gray text)
 ## Interaction Patterns
 
 ### Gestures to Support
+
 1. **Tap tile** - Select tile (highlight it)
 2. **Double-tap tile** - Quick discard (if tile is selected)
 3. **Tap "Discard" button** - Discard selected tile
@@ -333,6 +350,7 @@ Blanks:  BL                   (gray text)
 5. **Tap discard pile tile** - Show info ("Opponent 2 discarded this")
 
 ### States to Design
+
 - **Idle** - Waiting for AI turns (tiles disabled/grayed)
 - **Your turn - draw phase** - Can't interact yet (just drew tile)
 - **Your turn - discard phase** - Can select tiles to discard
@@ -355,13 +373,17 @@ Blanks:  BL                   (gray text)
 Create the following files:
 
 ### 1. `mobile/mockup.html`
+
 Complete HTML mockup with sample data (13 tiles in hand, 12 tiles in discard pile, 3 opponent bars).
 
 ### 2. `mobile/mockup.css`
+
 Full CSS styling for all components. Should look polished and ready for screenshots.
 
 ### 3. `MOBILE_DESIGN_RATIONALE.md`
+
 Document explaining:
+
 - Why this layout works for mobile
 - Design decisions (colors, spacing, typography)
 - Accessibility considerations
@@ -372,82 +394,85 @@ Document explaining:
 ## Example Structure
 
 **File:** `mobile/mockup.html`
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mobile Mahjong - UI Mockup</title>
-    <link rel="stylesheet" href="mockup.css">
-</head>
-<body>
+    <link rel="stylesheet" href="mockup.css" />
+  </head>
+  <body>
     <!-- Opponent Bars -->
     <div class="opponents-section">
-        <div class="opponent-bar" data-position="right" data-current-turn="false">
-            <div class="opponent-name">Opponent 1 (East)</div>
-            <div class="opponent-stats">
-                <span class="tile-count">13</span>
-            </div>
+      <div class="opponent-bar" data-position="right" data-current-turn="false">
+        <div class="opponent-name">Opponent 1 (East)</div>
+        <div class="opponent-stats">
+          <span class="tile-count">13</span>
         </div>
-        <div class="opponent-bar" data-position="top" data-current-turn="true">
-            <div class="opponent-name">Opponent 2 (South)</div>
-            <div class="opponent-stats">
-                <span class="tile-count">12</span>
-                <div class="exposures">
-                    <span class="exposure pung">P</span>
-                </div>
-            </div>
+      </div>
+      <div class="opponent-bar" data-position="top" data-current-turn="true">
+        <div class="opponent-name">Opponent 2 (South)</div>
+        <div class="opponent-stats">
+          <span class="tile-count">12</span>
+          <div class="exposures">
+            <span class="exposure pung">P</span>
+          </div>
         </div>
-        <div class="opponent-bar" data-position="left" data-current-turn="false">
-            <div class="opponent-name">Opponent 3 (West)</div>
-            <div class="opponent-stats">
-                <span class="tile-count">13</span>
-            </div>
+      </div>
+      <div class="opponent-bar" data-position="left" data-current-turn="false">
+        <div class="opponent-name">Opponent 3 (West)</div>
+        <div class="opponent-stats">
+          <span class="tile-count">13</span>
         </div>
+      </div>
     </div>
 
     <!-- Discard Pile -->
     <div class="discard-section">
-        <div class="discard-pile">
-            <!-- Example tiles -->
-            <div class="discard-tile" data-suit="CRACK" data-number="5">
-                <span class="tile-text">5C</span>
-            </div>
-            <div class="discard-tile latest" data-suit="BAM" data-number="3">
-                <span class="tile-text">3B</span>
-            </div>
-            <!-- More tiles... -->
+      <div class="discard-pile">
+        <!-- Example tiles -->
+        <div class="discard-tile" data-suit="CRACK" data-number="5">
+          <span class="tile-text">5C</span>
         </div>
+        <div class="discard-tile latest" data-suit="BAM" data-number="3">
+          <span class="tile-text">3B</span>
+        </div>
+        <!-- More tiles... -->
+      </div>
     </div>
 
     <!-- Your Hand (Compact Keyboard-Style) -->
     <div class="hand-section">
-        <div class="hand-container">
-            <button class="tile-btn" data-suit="JOKER" data-number="0">J</button>
-            <button class="tile-btn" data-suit="JOKER" data-number="0">J</button>
-            <button class="tile-btn" data-suit="CRACK" data-number="1">1C</button>
-            <button class="tile-btn selected" data-suit="CRACK" data-number="2">2C</button>
-            <button class="tile-btn" data-suit="CRACK" data-number="3">3C</button>
-            <button class="tile-btn" data-suit="CRACK" data-number="4">4C</button>
-            <button class="tile-btn" data-suit="BAM" data-number="1">1B</button>
-            <button class="tile-btn" data-suit="BAM" data-number="2">2B</button>
-            <button class="tile-btn" data-suit="DOT" data-number="1">1D</button>
-            <button class="tile-btn" data-suit="DOT" data-number="2">2D</button>
-            <button class="tile-btn" data-suit="WIND" data-number="0">N</button>
-            <button class="tile-btn" data-suit="WIND" data-number="1">S</button>
-            <button class="tile-btn" data-suit="DRAGON" data-number="0">R</button>
-            <!-- 13 tiles total, all fit on one line -->
-        </div>
+      <div class="hand-container">
+        <button class="tile-btn" data-suit="JOKER" data-number="0">J</button>
+        <button class="tile-btn" data-suit="JOKER" data-number="0">J</button>
+        <button class="tile-btn" data-suit="CRACK" data-number="1">1C</button>
+        <button class="tile-btn selected" data-suit="CRACK" data-number="2">
+          2C
+        </button>
+        <button class="tile-btn" data-suit="CRACK" data-number="3">3C</button>
+        <button class="tile-btn" data-suit="CRACK" data-number="4">4C</button>
+        <button class="tile-btn" data-suit="BAM" data-number="1">1B</button>
+        <button class="tile-btn" data-suit="BAM" data-number="2">2B</button>
+        <button class="tile-btn" data-suit="DOT" data-number="1">1D</button>
+        <button class="tile-btn" data-suit="DOT" data-number="2">2D</button>
+        <button class="tile-btn" data-suit="WIND" data-number="0">N</button>
+        <button class="tile-btn" data-suit="WIND" data-number="1">S</button>
+        <button class="tile-btn" data-suit="DRAGON" data-number="0">R</button>
+        <!-- 13 tiles total, all fit on one line -->
+      </div>
     </div>
 
     <!-- Action Bar -->
     <div class="action-bar">
-        <button class="btn-primary" id="discardBtn">🗑️ Discard</button>
-        <button class="btn-secondary" id="sortBtn">↕️ Sort</button>
-        <button class="btn-secondary" id="menuBtn">☰ Menu</button>
+      <button class="btn-primary" id="discardBtn">🗑️ Discard</button>
+      <button class="btn-secondary" id="sortBtn">↕️ Sort</button>
+      <button class="btn-secondary" id="menuBtn">☰ Menu</button>
     </div>
-</body>
+  </body>
 </html>
 ```
 
@@ -468,6 +493,7 @@ Document explaining:
 ## Testing
 
 View mockup on:
+
 1. Chrome DevTools (Device Mode: iPhone 12)
 2. Firefox Responsive Design Mode (390x844px)
 3. Real iPhone (if available)

@@ -7,6 +7,7 @@
 **Status**: Phases 1-5 completed, but dependencies remain. Phase 5 eliminated table coupling in **managers**, but **PhaserAdapter** still accesses `table.players[].hand`.
 
 **Complexity**: MEDIUM-HIGH
+
 - 19 references to `this.table` in PhaserAdapter
 - 4 Hand methods still in use: `setValidationMode()`, `showHand()`, `hiddenTileSet.getTileArray()`, `calculateTilePosition()`
 - SelectionManager depends on `hand.hiddenTileSet.getTileArray()` (4 locations)
@@ -89,6 +90,7 @@ Validation mode managed by:
 **Action**: Replace entire file with HandRenderer.new.js content
 
 **Changes**:
+
 ```javascript
 // OLD constructor
 constructor(scene, table, tileManager) {
@@ -108,6 +110,7 @@ getExposedSets(playerIndex) { return this.playerHands[playerIndex].exposedSets; 
 ```
 
 **Impact**:
+
 - PhaserAdapter.constructor line 54 changes from `new HandRenderer(scene, table, tileManager)` to `new HandRenderer(scene, tileManager)`
 - All HandRenderer method calls work identically (syncAndRender, showHand)
 
@@ -118,11 +121,13 @@ getExposedSets(playerIndex) { return this.playerHands[playerIndex].exposedSets; 
 **File**: [desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js#L54)
 
 **Current**:
+
 ```javascript
 this.handRenderer = new HandRenderer(scene, table, this.tileManager);
 ```
 
 **New**:
+
 ```javascript
 this.handRenderer = new HandRenderer(scene, this.tileManager);
 ```
@@ -136,19 +141,21 @@ this.handRenderer = new HandRenderer(scene, this.tileManager);
 **Locations**: Lines 159-183 in `onStateChanged()`
 
 **Current**:
+
 ```javascript
 const humanHand = this.table.players[0].hand;
 switch (newState) {
-case "CHARLESTON1":
+  case "CHARLESTON1":
     humanHand.setValidationMode("charleston");
     break;
-// ... etc
+  // ... etc
 }
 ```
 
 **Solution**: Move validation mode to SelectionManager
 
 **New**:
+
 ```javascript
 // Validation mode is set when enableTileSelection() is called
 // No separate setValidationMode needed
@@ -164,13 +171,14 @@ case "CHARLESTON1":
 **File**: [desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js)
 
 **Location 1**: Line 249 (wall game - show all hands face-up)
+
 ```javascript
 // OLD
-this.table.players.forEach(player => player.showHand(true));
+this.table.players.forEach((player) => player.showHand(true));
 
 // NEW
 for (let i = 0; i < 4; i++) {
-    this.handRenderer.showHand(i, true);  // Force all face-up
+  this.handRenderer.showHand(i, true); // Force all face-up
 }
 ```
 
@@ -184,24 +192,26 @@ for (let i = 0; i < 4; i++) {
 **File**: [desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js)
 
 **Location 1**: Line 379 `player.hand.hiddenTileSet.getLength()`
+
 ```javascript
 // OLD
 const targetPos = player.hand.calculateTilePosition(
-    playerInfo.angle,
-    player.hand.hiddenTileSet.getLength() - 1
+  playerInfo.angle,
+  player.hand.hiddenTileSet.getLength() - 1,
 );
 
 // NEW
 const hiddenTiles = this.handRenderer.getHiddenTiles(playerIndex);
 const targetPos = this.calculateTilePosition(
-    playerInfo.angle,
-    hiddenTiles.length - 1
+  playerInfo.angle,
+  hiddenTiles.length - 1,
 );
 ```
 
 **Action**: Extract `calculateTilePosition()` to a utility or put in HandRenderer.
 
 **Location 2**: Line 589 `humanHand.hiddenTileSet.tileArray`
+
 ```javascript
 // OLD
 const tilesInHand = humanHand.hiddenTileSet.tileArray || [];
@@ -217,12 +227,14 @@ const tilesInHand = this.handRenderer.getHiddenTiles(PLAYER.BOTTOM);
 **File**: [desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js#L1018)
 
 **Current**:
+
 ```javascript
 humanPlayer.hand.sortSuitHidden();
 this.handRenderer.showHand(PLAYER.BOTTOM, true);
 ```
 
 **New**:
+
 ```javascript
 // Sorting already happens in HandRenderer.syncAndRender() for Player 0
 // Just re-render:
@@ -230,6 +242,7 @@ this.handRenderer.showHand(PLAYER.BOTTOM, true);
 ```
 
 **OR** (if manual sort needed):
+
 ```javascript
 const handData = this.gameController.players[PLAYER.BOTTOM].hand;
 handData.sortBySuit();
@@ -243,12 +256,14 @@ this.handRenderer.syncAndRender(PLAYER.BOTTOM, handData);
 **File**: [desktop/managers/SelectionManager.js](desktop/managers/SelectionManager.js#L22)
 
 **Current**:
+
 ```javascript
 constructor(hand, playerAngle, buttonManager = null) {
     this.hand = hand;  // ❌ Legacy Hand object
 ```
 
 **New**:
+
 ```javascript
 constructor(handRenderer, playerAngle, buttonManager = null) {
     this.handRenderer = handRenderer;
@@ -256,6 +271,7 @@ constructor(handRenderer, playerAngle, buttonManager = null) {
 ```
 
 **getTileArray() calls** (lines 311, 354, 507, 760):
+
 ```javascript
 // OLD
 const tiles = this.hand.hiddenTileSet.getTileArray();
@@ -265,12 +281,21 @@ const tiles = this.handRenderer.getHiddenTiles(this.playerIndex);
 ```
 
 **Update PhaserAdapter line 63**:
+
 ```javascript
 // OLD
-this.selectionManager = new SelectionManager(humanHand, PLAYER_LAYOUT[PLAYER.BOTTOM].angle, this.buttonManager);
+this.selectionManager = new SelectionManager(
+  humanHand,
+  PLAYER_LAYOUT[PLAYER.BOTTOM].angle,
+  this.buttonManager,
+);
 
 // NEW
-this.selectionManager = new SelectionManager(this.handRenderer, PLAYER_LAYOUT[PLAYER.BOTTOM].angle, this.buttonManager);
+this.selectionManager = new SelectionManager(
+  this.handRenderer,
+  PLAYER_LAYOUT[PLAYER.BOTTOM].angle,
+  this.buttonManager,
+);
 ```
 
 ---
@@ -280,12 +305,14 @@ this.selectionManager = new SelectionManager(this.handRenderer, PLAYER_LAYOUT[PL
 **File**: [desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js)
 
 **Location 1**: Line 216 `this.table.reset()`
+
 ```javascript
 // This calls table.reset() which calls player.hand.reset()
 // Solution: Call reset on each player's HandData instead
 ```
 
 **Check what table.reset() does**:
+
 ```javascript
 // In gameObjects_table.js:101-116
 reset() {
@@ -297,15 +324,17 @@ reset() {
 ```
 
 **New approach**:
+
 ```javascript
 // In PhaserAdapter.onGameReset():
 // GameController already resets PlayerData/HandData
 // Just need to reset wall sprites:
-this.table.reset();  // Keep for wall.tileArray management
+this.table.reset(); // Keep for wall.tileArray management
 // OR extract wall management to TileManager
 ```
 
 **Location 2**: Line 612 `this.table.switchPlayer(currentPlayer)`
+
 ```javascript
 // gameObjects_table.js:119-136 - just logs messages
 // SOLUTION: Delete this method entirely, replace with debug logging
@@ -365,12 +394,14 @@ calculateTilePosition(playerAngle, tileIndex) {
 ## Testing Checklist
 
 After each step, run:
+
 ```bash
 npm test                    # All Playwright tests
 npm run test:headed         # Visual verification
 ```
 
 **Critical test scenarios**:
+
 - [ ] Charleston phase (tile selection with min/max validation)
 - [ ] Discard tile (single selection)
 - [ ] Claim discard with exposure (tile selection for pung/kong)
@@ -385,6 +416,7 @@ npm run test:headed         # Visual verification
 ## Rollback Plan
 
 If issues arise:
+
 1. Git stash all changes
 2. Restore from last commit before Phase 6
 3. Review failures in test output
@@ -414,6 +446,7 @@ If issues arise:
 ## Decision Point
 
 **Execute now** (106K tokens remaining):
+
 - ✅ Clear plan documented
 - ✅ All preparatory files created
 - ✅ Scope well-understood
@@ -421,6 +454,7 @@ If issues arise:
 - ⚠️ Moderate complexity
 
 **Hand off to fresh session**:
+
 - ✅ This document provides complete roadmap
 - ✅ Fresh context window
 - ✅ Can reference this plan explicitly
@@ -446,6 +480,7 @@ If issues arise:
 ## Progress Update (Current Session)
 
 ### ✅ Completed Steps:
+
 1. ✅ Step 1: Replaced HandRenderer.js with clean version (no table dependency)
 2. ✅ Step 2: Updated PhaserAdapter constructor to use `new HandRenderer(scene, tileManager)`
 3. ✅ Step 3: Eliminated all setValidationMode() calls (lines 158-184 removed)
@@ -456,9 +491,11 @@ If issues arise:
    - Fixed onHandUpdated to use `handRenderer.getHiddenTiles()` for selection validation
 
 ### 🔨 In Progress:
+
 - Step 5: Still 9 references to `table.players` remaining in PhaserAdapter (lines 64, 65, 343, 442, 492, 514, 978, 987, 1006)
 
 ### ⏳ Remaining Work:
+
 - Complete Step 5 (fix remaining table.players references)
 - Step 6: Fix sortSuitHidden() call
 - Step 7: Fix SelectionManager constructor (needs handRenderer instead of hand)
@@ -468,6 +505,7 @@ If issues arise:
 - Step 11: Run full test suite
 
 ### Context Window Status:
+
 - Used: ~120K / 200K tokens (60%)
 - Remaining: ~80K tokens (40%)
 - **Recommendation**: Continue in this session. Plenty of headroom.

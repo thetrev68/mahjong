@@ -6,28 +6,28 @@
  * - Wall game announcement
  */
 export class GameEndModal {
-    /**
-     * @param {string} title - Modal title ("Mahjong!" or "Wall Game")
-     * @param {string} message - Game end message
-     * @param {Function} onClose - Callback when modal closed: () => void
-     */
-    constructor(title, message, onClose) {
-        this.title = title;
-        this.message = message;
-        this.onClose = onClose;
-        this.element = null;
-        this.isClosing = false;
-        this.render();
-    }
+  /**
+   * @param {string} title - Modal title ("Mahjong!" or "Wall Game")
+   * @param {string} message - Game end message
+   * @param {Function} onClose - Callback when modal closed: () => void
+   */
+  constructor(title, message, onClose) {
+    this.title = title;
+    this.message = message;
+    this.onClose = onClose;
+    this.element = null;
+    this.isClosing = false;
+    this.render();
+  }
 
-    /**
-     * Create and show the modal
-     */
-    render() {
-        // Create modal overlay
-        this.element = document.createElement("div");
-        this.element.className = "game-end-modal";
-        this.element.innerHTML = `
+  /**
+   * Create and show the modal
+   */
+  render() {
+    // Create modal overlay
+    this.element = document.createElement("div");
+    this.element.className = "game-end-modal";
+    this.element.innerHTML = `
             <div class="game-end-modal__backdrop"></div>
             <div class="game-end-modal__content">
                 <div class="game-end-modal__header">
@@ -42,55 +42,55 @@ export class GameEndModal {
             </div>
         `;
 
-        // Wire OK button
-        const okBtn = this.element.querySelector(".game-end-modal__ok");
-        okBtn.addEventListener("click", () => this.close());
+    // Wire OK button
+    const okBtn = this.element.querySelector(".game-end-modal__ok");
+    okBtn.addEventListener("click", () => this.close());
 
-        // Wire backdrop click to close
-        const backdrop = this.element.querySelector(".game-end-modal__backdrop");
-        backdrop.addEventListener("click", () => this.close());
+    // Wire backdrop click to close
+    const backdrop = this.element.querySelector(".game-end-modal__backdrop");
+    backdrop.addEventListener("click", () => this.close());
 
-        // Add to DOM
-        document.body.appendChild(this.element);
+    // Add to DOM
+    document.body.appendChild(this.element);
 
-        // Trigger animation
-        window.requestAnimationFrame(() => {
-            this.element.classList.add("game-end-modal--visible");
-        });
-    }
+    // Trigger animation
+    window.requestAnimationFrame(() => {
+      this.element.classList.add("game-end-modal--visible");
+    });
+  }
 
-    /**
-     * Close modal and invoke callback
-     */
-    close() {
-        // Prevent double-click duplicate callbacks
-        if (this.isClosing) return;
-        this.isClosing = true;
+  /**
+   * Close modal and invoke callback
+   */
+  close() {
+    // Prevent double-click duplicate callbacks
+    if (this.isClosing) return;
+    this.isClosing = true;
 
-        // Fade out animation
-        this.element.classList.remove("game-end-modal--visible");
+    // Fade out animation
+    this.element.classList.remove("game-end-modal--visible");
 
-        // Wait for animation, then remove from DOM
-        setTimeout(() => {
-            if (this.element && this.element.parentNode) {
-                this.element.parentNode.removeChild(this.element);
-            }
+    // Wait for animation, then remove from DOM
+    setTimeout(() => {
+      if (this.element && this.element.parentNode) {
+        this.element.parentNode.removeChild(this.element);
+      }
 
-            // Invoke callback
-            if (this.onClose) {
-                this.onClose();
-            }
-        }, 300); // Match CSS transition duration
-    }
+      // Invoke callback
+      if (this.onClose) {
+        this.onClose();
+      }
+    }, 300); // Match CSS transition duration
+  }
 
-    /**
-     * Escape HTML to prevent XSS
-     * @param {string} str - String to escape
-     * @returns {string} Escaped string
-     */
-    escapeHtml(str) {
-        const div = document.createElement("div");
-        div.textContent = str;
-        return div.innerHTML;
-    }
+  /**
+   * Escape HTML to prevent XSS
+   * @param {string} str - String to escape
+   * @returns {string} Escaped string
+   */
+  escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
 }

@@ -11,6 +11,7 @@
 **Current Status:** 🟢 **GOOD BASELINE** (16/36 passing = 44%, 8 skipped)
 
 **Progress Made:**
+
 - ✅ Reorganized test suite (unit vs E2E separation)
 - ✅ Fixed import paths for `core/card/` move
 - ✅ Exposed `window.gameController` for desktop testing
@@ -28,6 +29,7 @@
 ### ✅ Passing Tests (14 total)
 
 **Desktop (6 tests):**
+
 - ✅ Game Initialization › should load the game page successfully
 - ✅ Game Initialization › should show game controls
 - ✅ Settings Panel › should open and close settings overlay
@@ -36,17 +38,21 @@
 - ✅ UI Elements › should display hint section
 
 **Mobile (0 tests):**
+
 - None passing yet
 
 **Cross-Platform:**
+
 - ✅ 8 tests passing across both desktop/mobile configurations
 
 ### ❌ Failing Tests (30 total)
 
 #### Category 1: GameController Event Tests (4 failures)
+
 **Issue:** `window.gameController` undefined when tests try to access it
 
 **Tests:**
+
 - ❌ Desktop › Game Logic › GameController emits events
 - ❌ Desktop › Game Logic › game progresses through states
 - ❌ Mobile › Game Logic › GameController emits events
@@ -56,15 +62,18 @@
 Tests try to access `window.gameController` immediately after page load, but GameScene initialization is async. Need to wait for GameScene to complete.
 
 **Fix Required:**
+
 ```javascript
 // Wait for gameController to be available
 await page.waitForFunction(() => window.gameController !== undefined);
 ```
 
 #### Category 2: Desktop Game Start Test (2 failures)
+
 **Issue:** Action bar visibility check failing
 
 **Tests:**
+
 - ❌ Desktop › Game Start › should start a new game when Start Game is clicked
 - ❌ Mobile › Game Start › should start a new game when Start Game is clicked
 
@@ -75,13 +84,16 @@ Action bar (`#uicenterdiv`) starts hidden and may still have `command-bar--hidde
 Check for a more reliable indicator of game start (e.g., `#info` textarea content, or presence of tiles in scene).
 
 #### Category 3: Mobile Page Load Tests (2 failures)
+
 **Issue:** Element visibility checks failing
 
 **Tests:**
+
 - ❌ Mobile Interface › Test 1: Mobile Page Load › mobile game loads with correct viewport (desktop config)
 - ❌ Mobile Interface › Test 1: Mobile Page Load › mobile game loads with correct viewport (mobile config)
 
 **Possible Issues:**
+
 - Elements may require wait time to render
 - CSS may initially hide elements
 - Need to wait for MobileRenderer initialization
@@ -90,9 +102,11 @@ Check for a more reliable indicator of game start (e.g., `#info` textarea conten
 Add wait conditions or check for loading state completion.
 
 #### Category 4: Mobile Game Flow Tests (12 failures - timeouts)
+
 **Issue:** All timeout waiting for `#new-game-btn` to be clickable
 
 **Tests:**
+
 - ❌ Test 2: Tile Selection via Tap (2 configs)
 - ❌ Test 3: Tile Discard via Double-Tap (2 configs)
 - ❌ Test 4: Charleston Pass Flow (2 configs)
@@ -105,13 +119,16 @@ Add wait conditions or check for loading state completion.
 Button exists but may be disabled or page not fully loaded. Mobile initialization may be slower than expected.
 
 **Fix Required:**
+
 - Wait for `#game-status` to show "Ready" message
 - Or wait for MobileRenderer to complete initialization
 
 #### Category 5: Touch Handler Tests (8 failures - module import)
+
 **Issue:** Module loading timeouts in `beforeEach` hook
 
 **Tests:**
+
 - ❌ TouchHandler › should detect a tap gesture (2 configs)
 - ❌ TouchHandler › should not emit tap if user moves > threshold (2 configs)
 - ❌ TouchHandler › should detect a double-tap gesture (2 configs)
@@ -121,6 +138,7 @@ Button exists but may be disabled or page not fully loaded. Mobile initializatio
 Tests use `page.setContent()` to dynamically load TouchHandler ES module. Module import failing or timing out.
 
 **Fix Required:**
+
 - Rewrite as proper E2E test navigating to test page
 - Or create dedicated test HTML file for TouchHandler
 - Or move to unit tests with jsdom
@@ -130,9 +148,11 @@ Tests use `page.setContent()` to dynamically load TouchHandler ES module. Module
 ## Files Modified
 
 ### Code Changes:
+
 1. **[desktop/scenes/GameScene.js](desktop/scenes/GameScene.js#L105)** - Added `window.gameController = this.gameController;`
 
 ### Test Changes:
+
 2. **[tests/e2e/desktop/game-basic.spec.js](tests/e2e/desktop/game-basic.spec.js)**
    - Updated game start test to check action bar visibility
 
@@ -147,50 +167,67 @@ Tests use `page.setContent()` to dynamically load TouchHandler ES module. Module
 ## Next Steps to Reach Green Baseline
 
 ### Priority 1: Fix GameController Event Tests (Quick Win)
+
 **Estimated Time:** 10 minutes
 **Impact:** +4 tests passing (18/44 = 41%)
 
 ```javascript
 // Add before accessing window.gameController
-await page.waitForFunction(() => window.gameController !== undefined, { timeout: 10000 });
+await page.waitForFunction(() => window.gameController !== undefined, {
+  timeout: 10000,
+});
 ```
 
 ### Priority 2: Fix Desktop Game Start Test
+
 **Estimated Time:** 15 minutes
 **Impact:** +2 tests passing (20/44 = 45%)
 
 Change verification logic to check for actual game state instead of UI visibility:
+
 ```javascript
 // Wait for tiles to be dealt (more reliable)
-await page.waitForFunction(() => {
-  return window.gameController &&
-         window.gameController.currentState !== "INIT";
-}, { timeout: 5000 });
+await page.waitForFunction(
+  () => {
+    return (
+      window.gameController && window.gameController.currentState !== "INIT"
+    );
+  },
+  { timeout: 5000 },
+);
 ```
 
 ### Priority 3: Fix Mobile Page Load Tests
+
 **Estimated Time:** 20 minutes
 **Impact:** +2 tests passing (22/44 = 50%)
 
 Wait for mobile renderer initialization:
+
 ```javascript
-await page.waitForFunction(() => {
-  const status = document.getElementById("game-status");
-  return status && status.textContent.includes("Ready");
-}, { timeout: 10000 });
+await page.waitForFunction(
+  () => {
+    const status = document.getElementById("game-status");
+    return status && status.textContent.includes("Ready");
+  },
+  { timeout: 10000 },
+);
 ```
 
 ### Priority 4: Fix Mobile Game Flow Tests
+
 **Estimated Time:** 30 minutes
 **Impact:** +12 tests passing (34/44 = 77%)
 
 Add proper wait conditions before clicking new-game-btn:
+
 ```javascript
 // Wait for button to be enabled
 await page.waitForSelector("#new-game-btn:not([disabled])", { timeout: 10000 });
 ```
 
 ### Priority 5: Fix or Skip Touch Handler Tests
+
 **Estimated Time:** 45 minutes OR immediate (skip)
 **Impact:** +8 tests passing (42/44 = 95%) OR mark as pending
 
@@ -240,12 +277,14 @@ await page.waitForSelector("#new-game-btn:not([disabled])", { timeout: 10000 });
 ## Conclusion
 
 We've made significant progress establishing a test baseline:
+
 - ✅ Test suite reorganized and import paths fixed
 - ✅ 14 basic tests passing (UI visibility, settings, logs)
 - 🟡 30 tests failing due to timing/async issues (fixable)
 - 📋 Clear path to 77%+ passing with ~1.5 hours of focused work
 
 The failing tests are NOT due to broken functionality, but rather:
+
 - Async timing issues (gameController not ready)
 - Test expectations not updated for new architecture
 - Module loading issues in isolated Touch Handler tests
@@ -257,6 +296,7 @@ The failing tests are NOT due to broken functionality, but rather:
 ## Final Baseline Achievement
 
 **Test Fixes Applied (commit 61f6f6e):**
+
 1. ✅ Desktop GameController event tests - Added `waitForFunction(() => window.gameController !== undefined)`
 2. ✅ Desktop game start test - Changed to verify GameController state instead of UI visibility
 3. ✅ Mobile page load test - Added `waitForMobileReady()` helper
@@ -268,6 +308,7 @@ The failing tests are NOT due to broken functionality, but rather:
 
 **Remaining 20 Failures:**
 The remaining failures are NOT critical - they appear to be related to:
+
 - Mobile tile rendering (`.mobile-tile` selector may need to be `.tile` or specific class)
 - Game state progression timing (may need longer waits for Charleston/courtesy phases)
 - Settings panel selectors on mobile (may be different IDs)

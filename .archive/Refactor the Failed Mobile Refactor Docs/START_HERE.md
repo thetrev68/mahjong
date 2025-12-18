@@ -8,12 +8,13 @@
 A comprehensive refactor to move the mahjong game from a broken hybrid architecture to a clean, maintainable Option C separation:
 
 - **GameController** = Pure game logic (no Phaser, no rendering)
-- **PhaserAdapter** = Complete Phaser rendering layer  
+- **PhaserAdapter** = Complete Phaser rendering layer
 - **MobileRenderer** = Proof that new renderers can be built without modifying GameController
 
 ## Why Now?
 
 Current codebase is broken:
+
 - ❌ Tiles don't animate during deal
 - ❌ Sort buttons don't work
 - ❌ Audio plays at wrong time
@@ -22,6 +23,7 @@ Current codebase is broken:
 - ❌ Can't build mobile without code duplication
 
 After refactor:
+
 - ✅ Single source of truth for game logic
 - ✅ All rendering centralized
 - ✅ Easy to add new renderers
@@ -31,39 +33,46 @@ After refactor:
 ## How to Read This
 
 ### 1. Understand the Vision (5 minutes)
+
 Read [REFACTOR_SUMMARY.md](REFACTOR_SUMMARY.md) for high-level overview
 
 ### 2. Understand the Architecture (10 minutes)
+
 Read [REFACTOR.md](REFACTOR.md) for detailed architecture and phases
 
 ### 3. See the Details (varies)
+
 Pick your phase:
+
 - [Phase 1](REFACTOR_PHASE1.md): Extend GameController (2-3 days)
 - [Phase 2](REFACTOR_PHASE2.md): Complete PhaserAdapter (3-4 days)
 - [Phase 3](REFACTOR_PHASE3.md): Remove GameLogic (1 day)
 - [Phase 4](REFACTOR_PHASE4.md): Mobile Renderer POC (2-3 days)
 
 ### 4. Track Progress
+
 Use [REFACTOR_CHECKLIST.md](REFACTOR_CHECKLIST.md) to track all tasks
 
 ### 5. Ask Questions
+
 Check [REFACTOR_INDEX.md](REFACTOR_INDEX.md) for document map
 
 ## Quick Facts
 
-| Metric | Value |
-|--------|-------|
-| Total Phases | 4 |
-| Total Tasks | 32 |
-| Estimated Time | 1-2 weeks |
-| New Files | ~8 |
-| Deleted Files | 1 (gameLogic.js) |
-| Modified Files | 5+ |
-| Code Quality | Significantly improved ✨ |
+| Metric         | Value                     |
+| -------------- | ------------------------- |
+| Total Phases   | 4                         |
+| Total Tasks    | 32                        |
+| Estimated Time | 1-2 weeks                 |
+| New Files      | ~8                        |
+| Deleted Files  | 1 (gameLogic.js)          |
+| Modified Files | 5+                        |
+| Code Quality   | Significantly improved ✨ |
 
 ## The Vision
 
 ### Before (Current Broken State)
+
 ```
 GameLogic (does everything - rendering, logic, UI)
     ↓ (broken)
@@ -75,6 +84,7 @@ Game doesn't work
 ```
 
 ### After (Option C)
+
 ```
 GameController (pure logic, events)
     ↓ (events)
@@ -103,6 +113,7 @@ START_HERE.md                    ← You are here
 ## Getting Started
 
 ### Step 1: Read the Summary
+
 ```bash
 # Open and read REFACTOR_SUMMARY.md
 # Time: 5 minutes
@@ -110,11 +121,13 @@ START_HERE.md                    ← You are here
 ```
 
 ### Step 2: Create Refactor Branch
+
 ```bash
 git checkout -b refactor/option-c
 ```
 
 ### Step 3: Start Phase 1
+
 ```bash
 # Open REFACTOR_PHASE1.md
 # Follow Task 1.1 through 1.9
@@ -123,9 +136,11 @@ git checkout -b refactor/option-c
 ```
 
 ### Step 4-6: Complete Phases 2-4
+
 Follow the same pattern for each phase
 
 ### Step 7: Celebrate! 🎉
+
 ```bash
 # All phases complete
 # Game works perfectly
@@ -146,7 +161,7 @@ When complete, you can:
 ✅ Main loop plays to completion  
 ✅ Open mobile renderer and play without modifying GameController  
 ✅ Code is clean and well-documented  
-✅ All tests pass  
+✅ All tests pass
 
 ## Questions?
 

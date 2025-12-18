@@ -98,13 +98,13 @@ dealNextGroup() detects all batches complete:
 
 ## Timing Requirements
 
-| Phase | Timing | Critical Notes |
-|-------|--------|----------------|
-| Tile animation | 300ms each | Phaser tween duration |
-| Between tiles | 100ms | `tileIndexInBatch * 100` delay |
-| Between batches | 150ms | `delayedCall(150, dealNextGroup)` |
-| Total animation | ~6-12s | Varies by tile count |
-| Timeout fallback | 30000ms | Must be > animation time |
+| Phase            | Timing     | Critical Notes                    |
+| ---------------- | ---------- | --------------------------------- |
+| Tile animation   | 300ms each | Phaser tween duration             |
+| Between tiles    | 100ms      | `tileIndexInBatch * 100` delay    |
+| Between batches  | 150ms      | `delayedCall(150, dealNextGroup)` |
+| Total animation  | ~6-12s     | Varies by tile count              |
+| Timeout fallback | 30000ms    | Must be > animation time          |
 
 ## The dealAnimationHands Flag
 
@@ -115,7 +115,7 @@ dealNextGroup() detects all batches complete:
 - `!== null` during animation → syncAndRender SKIPPED
 - `=== null` after animation → syncAndRender ALLOWED
 
-**Critical**:  Must be set to `null` **BEFORE** emitting DEALING_COMPLETE!
+**Critical**: Must be set to `null` **BEFORE** emitting DEALING_COMPLETE!
 
 ## Why This Keeps Breaking
 
@@ -161,7 +161,7 @@ If tiles aren't clickable after dealing:
 - `core/GameController.js` - Timeout and DEALING_COMPLETE listener
 - `desktop/adapters/PhaserAdapter.js` - Dealing animation and dealAnimationHands flag
 - `desktop/renderers/HandRenderer.js` - syncAndRender() and playerHands array
-- `desktop/managers/SelectionManager.js` - _attachClickHandlers()
+- `desktop/managers/SelectionManager.js` - \_attachClickHandlers()
 
 ## Previous Issues
 

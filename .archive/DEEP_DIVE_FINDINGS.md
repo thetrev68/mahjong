@@ -5,6 +5,7 @@
 **Status**: DialogManager is **100% complete and functional**. No bugs found.
 
 **What it provides**:
+
 - 10+ specialized dialog methods (Charleston, courtesy, claim, exposure, etc.)
 - All use the same core pattern: `showModalDialog(content, buttons, callback)`
 - Handles both modal dialogs and toast notifications
@@ -13,6 +14,7 @@
 **Conclusion**: DialogManager is ready to use. It's not the problem.
 
 **Pattern it follows** (we should replicate for other managers):
+
 - Single responsibility: Just UI dialogs
 - Callback-based: Results via callback, not return value
 - No game logic: Doesn't decide anything, just collects user input
@@ -23,15 +25,18 @@
 ## Charleston Flow Analysis: ⚠️ PARTIALLY CONNECTED
 
 **What exists**:
+
 - ✅ `handleCharlestonPassPrompt()` - Calls DialogManager correctly
 - ✅ `onCharlestonPhase()` - Announces the phase
 
 **What's broken**:
+
 - ❌ `onCharlestonPhase()` only prints, doesn't prepare UI
 - ❌ `handleCharlestonPassPrompt()` assumes tile selection is tracked (`hand.hiddenTileSet.getSelection()`)
 - ❌ But tile selection probably isn't working (clicking tile discards instead of selecting)
 
 **The real problem chain**:
+
 1. GameController announces Charleston phase
 2. PhaserAdapter should enable tile selection → ❌ Doesn't happen
 3. GameController requests user selection via UI_PROMPT
@@ -46,35 +51,42 @@
 ## Two Key Discoveries
 
 ### Discovery #1: Two Different Charleston Events
+
 Charleston uses TWO different events:
 
 **CHARLESTON_PHASE** event:
+
 - Announces that Charleston phase started
 - Just informational
 - For UI preparation (not dialog)
 
 **UI_PROMPT** event (with promptType="CHARLESTON_PASS"):
+
 - Requests user to select tiles and pass
 - Is when DialogManager shows dialog
 - Includes callback for result
 
 **Problem**: Code is there for both, but:
+
 - onCharlestonPhase() does nothing special
 - handleCharlestonPassPrompt() assumes tile selection works
 
 ### Discovery #2: Tile Selection is Critical Missing Piece
 
 The entire Charleston flow depends on:
+
 ```javascript
-player.hand.hiddenTileSet.getSelection()
+player.hand.hiddenTileSet.getSelection();
 ```
 
 **This method either**:
+
 - Doesn't exist
 - Doesn't work correctly
 - Isn't tracking selections properly
 
 **Because**: When you click a tile, it should:
+
 1. Raise to position 575 (visual selection state)
 2. Add to a "selected" collection
 3. getSelection() should return that collection
@@ -86,12 +98,15 @@ player.hand.hiddenTileSet.getSelection()
 ## What This Means for Implementation
 
 ### For DialogManager
+
 **Action**: None. It works perfectly as-is.
 
 **Usage**: Just call it when appropriate event fires.
 
 ### For SelectionManager (Doesn't Exist)
+
 **Needed to create**:
+
 - Track selected tiles during Charleston/courtesy/discard
 - Validate selection (min/max tiles)
 - Highlight selected tiles visually
@@ -102,12 +117,16 @@ player.hand.hiddenTileSet.getSelection()
   - Dialog is closed
 
 ### For Tile Click Handlers
+
 **Need to change**:
+
 - Currently: Click → discard immediately
 - Should be: Click → check if in selection mode → if yes, toggle selection visual + track in SelectionManager
 
 ### For PhaserAdapter Handlers
+
 **Need to implement**:
+
 ```javascript
 onCharlestonPhase(data) {
     // Instead of just printing:
@@ -151,6 +170,7 @@ We're seeing a consistent pattern in what's broken:
 **Pattern**: Event emitted → Handler stub or missing logic → Manager not called
 
 **Examples**:
+
 - State changes → onStateChanged exists but minimal
 - Charleston phase → onCharlestonPhase exists but just prints
 - Tile drawn → onTileDrawn exists but animation missing
@@ -163,21 +183,25 @@ We're seeing a consistent pattern in what's broken:
 ## Next Steps We Should Take
 
 ### Phase 1: Verify Current State
+
 1. Add console.log to GameController to verify events are being emitted
 2. Add console.log to PhaserAdapter handlers to see if they're called
 3. Identify the exact point where Charleston flow stops
 
 ### Phase 2: Understand Old System
+
 1. Check commit 07c41b9 for how tile selection was done
 2. Extract that selection logic
 3. See if we can reuse or adapt it
 
 ### Phase 3: Design SelectionManager
+
 1. Based on what we learn from old system
 2. Design the API (what methods it needs)
 3. How it integrates with PhaserAdapter
 
 ### Phase 4: Implementation
+
 1. Create SelectionManager
 2. Wire up tile click handlers
 3. Wire up PhaserAdapter handlers
@@ -187,13 +211,13 @@ We're seeing a consistent pattern in what's broken:
 
 ## Confidence Levels
 
-| Component | Confidence | Why |
-|-----------|------------|-----|
-| DialogManager | 100% | Code is complete and correct |
-| handleCharlestonPassPrompt | 80% | Code looks right but depends on selection working |
-| onCharlestonPhase | 50% | Does exist but minimal implementation |
-| Tile selection system | 10% | Completely unclear how it works now |
-| GameController events | 30% | Unknown if UI_PROMPT is emitted |
+| Component                  | Confidence | Why                                               |
+| -------------------------- | ---------- | ------------------------------------------------- |
+| DialogManager              | 100%       | Code is complete and correct                      |
+| handleCharlestonPassPrompt | 80%        | Code looks right but depends on selection working |
+| onCharlestonPhase          | 50%        | Does exist but minimal implementation             |
+| Tile selection system      | 10%        | Completely unclear how it works now               |
+| GameController events      | 30%        | Unknown if UI_PROMPT is emitted                   |
 
 ---
 

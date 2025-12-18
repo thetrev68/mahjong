@@ -23,6 +23,7 @@ Every `Tile` object has a built-in `animate(x, y, angle, fixedDuration)` method 
 - ✅ Stops previous tween before starting new one
 
 **Example usage from 07c41b9**:
+
 ```javascript
 // Simple animation to position
 tile.animate(350, 420, 0);
@@ -30,7 +31,7 @@ tile.animate(350, 420, 0);
 // With callback on completion
 const tween = tile.animate(x, y, angle);
 tween.on("complete", () => {
-    // Do something after animation
+  // Do something after animation
 });
 
 // With fixed duration (for synchronized dealing)
@@ -133,48 +134,58 @@ withRaisedDepth(callback) {
 ### Handler 1: onTileDrawn (Lines 321-380)
 
 **Current (WRONG)**:
+
 ```javascript
 // Animate tile draw (slide from wall to hand)
-const targetPos = player.hand.calculateTilePosition(player.playerInfo, player.hand.hiddenTileSet.getLength() - 1);
+const targetPos = player.hand.calculateTilePosition(
+  player.playerInfo,
+  player.hand.hiddenTileSet.getLength() - 1,
+);
 this.scene.tweens.add({
-    targets: phaserTile.sprite,
-    x: targetPos.x,
-    y: targetPos.y,
-    alpha: 1,
-    duration: 200,
-    ease: "Power2",
-    onComplete: () => {
-        player.showHand(playerIndex === PLAYER.BOTTOM);
-    }
+  targets: phaserTile.sprite,
+  x: targetPos.x,
+  y: targetPos.y,
+  alpha: 1,
+  duration: 200,
+  ease: "Power2",
+  onComplete: () => {
+    player.showHand(playerIndex === PLAYER.BOTTOM);
+  },
 });
 ```
 
 **Replace with (CORRECT)**:
+
 ```javascript
 // Animate tile draw (slide from wall to hand)
 const targetPos = player.hand.calculateTilePosition(
-    player.playerInfo,
-    player.hand.hiddenTileSet.getLength() - 1
+  player.playerInfo,
+  player.hand.hiddenTileSet.getLength() - 1,
 );
 
 // Set initial position and visibility
 phaserTile.sprite.setAlpha(0);
 
 // Animate to hand with tile.animate() method
-const tween = phaserTile.animate(targetPos.x, targetPos.y, player.playerInfo.angle, 200);
+const tween = phaserTile.animate(
+  targetPos.x,
+  targetPos.y,
+  player.playerInfo.angle,
+  200,
+);
 
 // Fade in during animation
 this.scene.tweens.add({
-    targets: phaserTile.sprite,
-    alpha: 1,
-    duration: 200
+  targets: phaserTile.sprite,
+  alpha: 1,
+  duration: 200,
 });
 
 // Refresh hand after animation completes
 if (tween) {
-    tween.on("complete", () => {
-        player.showHand(playerIndex === PLAYER.BOTTOM);
-    });
+  tween.on("complete", () => {
+    player.showHand(playerIndex === PLAYER.BOTTOM);
+  });
 }
 ```
 
@@ -183,11 +194,13 @@ if (tween) {
 ### Handler 2: onTileDiscarded (Lines 385-417)
 
 **Current (WRONG)**:
+
 ```javascript
 // No animation, just moves to discard pile immediately
 ```
 
 **Replace with (CORRECT)**:
+
 ```javascript
 onTileDiscarded(data) {
     const {player: playerIndex, tile: tileData} = data;
@@ -230,12 +243,14 @@ onTileDiscarded(data) {
 From 07c41b9, the pattern for updating hands after tile movements:
 
 **In gameObjects_hand.js showHand() method** (lines 234, 294, 344):
+
 ```javascript
 // Each tile gets animated to its position
 tile.animate(x, y, playerInfo.angle);
 ```
 
 **Current PhaserAdapter** should let `player.showHand()` handle this:
+
 ```javascript
 // After any hand-changing operation:
 player.showHand(playerIndex === PLAYER.BOTTOM);
@@ -250,12 +265,14 @@ The `showHand()` method should already call `tile.animate()` for each tile. If i
 **DO NOT USE** [desktop/animations/AnimationLibrary.js](desktop/animations/AnimationLibrary.js)
 
 This library doesn't handle:
+
 - Tile spriteBack synchronization
 - Mask updates during animation
 - Glow effect positioning
 - Proper depth management
 
 **Action**: Remove any imports of AnimationLibrary from PhaserAdapter:
+
 ```javascript
 // DELETE THIS LINE if it exists:
 import * as AnimationLib from "../animations/AnimationLibrary.js";
@@ -268,6 +285,7 @@ import * as AnimationLib from "../animations/AnimationLibrary.js";
 Check [desktop/gameObjects/gameObjects_hand.js](desktop/gameObjects/gameObjects_hand.js) `showHand()` method:
 
 **Expected pattern from 07c41b9** (line 234):
+
 ```javascript
 showHand(faceUp) {
     this.hiddenTileSet.tileArray.forEach((tile, index) => {
@@ -287,24 +305,28 @@ showHand(faceUp) {
 ## Implementation Checklist
 
 ### Phase 1: Restore tile.animate() Method (30 min)
+
 - [ ] Check if `Tile.animate()` exists in current gameObjects.js
 - [ ] If missing, copy from commit 07c41b9
 - [ ] Copy `withRaisedDepth()` helper method
 - [ ] Test: Call `tile.animate(x, y, 0)` from console to verify it works
 
 ### Phase 2: Update PhaserAdapter Handlers (30 min)
+
 - [ ] Replace `onTileDrawn` inline tween with `tile.animate()`
 - [ ] Replace `onTileDiscarded` with animated version
 - [ ] Add tween complete callbacks for audio/visual feedback
 - [ ] Remove any AnimationLibrary imports
 
 ### Phase 3: Verify Hand Rendering (30 min)
+
 - [ ] Check `showHand()` uses `tile.animate()` for positioning
 - [ ] Check `calculateTilePosition()` returns correct {x, y}
 - [ ] Test hand reordering after tile movements
 - [ ] Verify exposed tiles animate into position
 
 ### Phase 4: Testing (30 min)
+
 - [ ] Test deal animation (tiles slide from wall to hand)
 - [ ] Test discard animation (tile moves to center)
 - [ ] Test hand reordering after selection
@@ -315,13 +337,13 @@ showHand(faceUp) {
 
 ## Animation Timing Reference (from 07c41b9)
 
-| Animation Type | Duration Calculation | Notes |
-|---------------|---------------------|-------|
-| Tile slide (general) | Distance × 1000 / 1500 | Auto-calculated by animate() |
-| Tile draw (dealing) | 200ms fixed | Pass fixedDuration param |
-| Tile discard | Auto | Distance-based to (350, 420) |
-| Hand reposition | Auto | Each tile animates independently |
-| Selection raise/lower | Auto | Small distance = quick animation |
+| Animation Type        | Duration Calculation   | Notes                            |
+| --------------------- | ---------------------- | -------------------------------- |
+| Tile slide (general)  | Distance × 1000 / 1500 | Auto-calculated by animate()     |
+| Tile draw (dealing)   | 200ms fixed            | Pass fixedDuration param         |
+| Tile discard          | Auto                   | Distance-based to (350, 420)     |
+| Hand reposition       | Auto                   | Each tile animates independently |
+| Selection raise/lower | Auto                   | Small distance = quick animation |
 
 **Speed constant**: 1500 pixels/second (from 07c41b9 Tile.animate())
 
@@ -330,6 +352,7 @@ showHand(faceUp) {
 ## Success Criteria
 
 ### Visual Quality
+
 - ✅ Tiles slide smoothly (not jump) to positions
 - ✅ SpriteBack stays synchronized during animation
 - ✅ Mask follows sprite during movement
@@ -337,6 +360,7 @@ showHand(faceUp) {
 - ✅ No flickering or visual glitches
 
 ### Code Quality
+
 - ✅ No inline Phaser tweens in PhaserAdapter
 - ✅ All tile movements use `tile.animate()`
 - ✅ AnimationLibrary not imported anywhere
@@ -344,6 +368,7 @@ showHand(faceUp) {
 - ✅ Build passes without errors
 
 ### Functionality
+
 - ✅ Tiles animate from wall to hand during deal
 - ✅ Tiles animate to discard pile when discarded
 - ✅ Hand repositions smoothly after tile removal
@@ -355,36 +380,42 @@ showHand(faceUp) {
 ## Common Pitfalls
 
 ### ❌ Don't: Use AnimationLibrary
+
 ```javascript
 // WRONG - doesn't handle spriteBack/mask
 await AnimationLib.animateTileSlide(sprite, from, to, 200);
 ```
 
 ### ✅ Do: Use tile.animate()
+
 ```javascript
 // CORRECT - handles everything
 tile.animate(targetX, targetY, angle, 200);
 ```
 
 ### ❌ Don't: Animate sprite directly
+
 ```javascript
 // WRONG - spriteBack won't follow
-this.scene.tweens.add({targets: tile.sprite, x: 100, y: 200});
+this.scene.tweens.add({ targets: tile.sprite, x: 100, y: 200 });
 ```
 
 ### ✅ Do: Use tile method
+
 ```javascript
 // CORRECT - tile handles all sprites
 tile.animate(100, 200, 0);
 ```
 
 ### ❌ Don't: Forget angle parameter
+
 ```javascript
 // WRONG - tile won't rotate properly
 tile.animate(x, y);
 ```
 
 ### ✅ Do: Pass player angle
+
 ```javascript
 // CORRECT - tile rotates to match player orientation
 tile.animate(x, y, player.playerInfo.angle);
@@ -442,11 +473,13 @@ After implementing Component 4:
 ## Quick Reference
 
 ### tile.animate() Signature
+
 ```javascript
-tile.animate(x, y, angle, fixedDuration = null)
+tile.animate(x, y, angle, (fixedDuration = null));
 ```
 
 **Parameters**:
+
 - `x` - Target X position (number)
 - `y` - Target Y position (number)
 - `angle` - Target rotation angle (number, usually from playerInfo.angle)
@@ -455,14 +488,16 @@ tile.animate(x, y, angle, fixedDuration = null)
 **Returns**: `Phaser.Tweens.Tween` object (can attach callbacks with `.on("complete", callback)`)
 
 ### Common Positions (from 07c41b9)
+
 ```javascript
-WALL_CENTER = {x: 640, y: 360}
-DISCARD_CENTER = {x: 350, y: 420}
-HUMAN_HAND_Y = 600
-HUMAN_HAND_Y_SELECTED = 575  // Raised for selection
+WALL_CENTER = { x: 640, y: 360 };
+DISCARD_CENTER = { x: 350, y: 420 };
+HUMAN_HAND_Y = 600;
+HUMAN_HAND_Y_SELECTED = 575; // Raised for selection
 ```
 
 ### Player Angles (from 07c41b9)
+
 ```javascript
 PLAYER.BOTTOM: angle = 0    (no rotation)
 PLAYER.RIGHT:  angle = 90   (rotated right)

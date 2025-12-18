@@ -1,4 +1,5 @@
 # AI Difficulty Implementation Guide
+
 ## For Junior Developers / AI Assistants
 
 This guide will walk you through implementing AI difficulty scaling (Easy, Medium, Hard) for the American Mahjong game. Follow each step carefully and in order.
@@ -12,6 +13,7 @@ This guide will walk you through implementing AI difficulty scaling (Easy, Mediu
 **Goal:** Create three difficulty levels that make the AI opponents play at different skill levels by adjusting how they make decisions throughout the game.
 
 **What Makes AI "Good"?**
+
 - Considering many winning patterns at once (flexibility)
 - Exposing tiles at the right time (not too early, not too late)
 - Optimizing joker and blank tile usage
@@ -19,6 +21,7 @@ This guide will walk you through implementing AI difficulty scaling (Easy, Mediu
 - Strategic tile passing during Charleston
 
 **How We'll Make It Easier/Harder:**
+
 - Easy AI: Considers fewer patterns (tunnel vision), makes random mistakes, plays conservatively
 - Medium AI: Balanced approach with occasional suboptimal choices
 - Hard AI: Current behavior (optimal play, no mistakes)
@@ -40,19 +43,22 @@ This guide will walk you through implementing AI difficulty scaling (Easy, Mediu
 
 ```html
 <section class="settings-section">
-    <h2 class="settings-section-title">AI Difficulty</h2>
-    <div class="setting-item">
-        <label for="difficultySelect" class="setting-label">Opponent Skill Level</label>
-        <select id="difficultySelect" class="setting-select">
-            <option value="easy">Easy - Beginner Friendly</option>
-            <option value="medium" selected>Medium - Balanced Challenge</option>
-            <option value="hard">Hard - Expert Opponent</option>
-        </select>
-    </div>
+  <h2 class="settings-section-title">AI Difficulty</h2>
+  <div class="setting-item">
+    <label for="difficultySelect" class="setting-label"
+      >Opponent Skill Level</label
+    >
+    <select id="difficultySelect" class="setting-select">
+      <option value="easy">Easy - Beginner Friendly</option>
+      <option value="medium" selected>Medium - Balanced Challenge</option>
+      <option value="hard">Hard - Expert Opponent</option>
+    </select>
+  </div>
 </section>
 ```
 
 **Why this works:**
+
 - The `id="difficultySelect"` allows JavaScript to find this element later
 - The `value` attribute (easy/medium/hard) is what gets saved to settings
 - The `selected` attribute on medium makes it the default choice
@@ -87,6 +93,7 @@ saveDifficultySettings() {
 ```
 
 **What this does:**
+
 - Gets the dropdown element by its ID
 - Checks if it exists (the `if` statement)
 - Saves the selected value ("easy", "medium", or "hard") to localStorage with key "aiDifficulty"
@@ -108,6 +115,7 @@ applyDifficultySettings(settings) {
 ```
 
 **What this does:**
+
 - Gets the dropdown element
 - Checks if we have a saved difficulty value in settings
 - Sets the dropdown to show the saved difficulty
@@ -126,6 +134,7 @@ getDifficulty() {
 ```
 
 **What this does:**
+
 - Returns the saved difficulty setting
 - If no difficulty is saved yet, returns "medium" as the default
 
@@ -142,6 +151,7 @@ this.saveDifficultySettings();
 ```
 
 **What this does:**
+
 - When user clicks "Save Settings" button, it now saves difficulty too
 
 ### Step 2E: Wire Up the Loading
@@ -157,9 +167,11 @@ this.applyDifficultySettings(settings);
 ```
 
 **What this does:**
+
 - When game loads, it now applies the saved difficulty setting to the dropdown
 
 **Verification:**
+
 1. Refresh the game
 2. Open Settings
 3. Change difficulty to "Easy"
@@ -193,6 +205,7 @@ constructor(card, table, difficulty = "medium") {
 ```
 
 **What changed:**
+
 - Added `difficulty = "medium"` parameter (defaults to medium if not provided)
 - Added `this.difficulty = difficulty;` to store the difficulty level
 - Added `this.config = this.getDifficultyConfig(difficulty);` to load the configuration
@@ -297,6 +310,7 @@ getDifficultyConfig(difficulty) {
 ```
 
 **What this does:**
+
 - Creates three complete configuration objects (one for each difficulty)
 - Each config has all the parameters that control AI decision-making
 - Comments explain what each parameter does
@@ -345,6 +359,7 @@ if (discardableCount >= this.config.minDiscardable) {
 ```
 
 **What this does:**
+
 - Easy AI: Looks at max 2 patterns, needs 5 discardable tiles (tunnel vision)
 - Medium AI: Looks at max 5 patterns, needs 4 discardable tiles (balanced)
 - Hard AI: Looks at all patterns dynamically, needs 3 discardable tiles (optimal)
@@ -371,34 +386,40 @@ let discardTile = null;
 
 // Get all discardable recommendations (excluding blanks)
 const discardableRecommendations = recommendations.filter(
-    (r) => r.recommendation === "DISCARD" && r.tile.suit !== SUIT.BLANK
+  (r) => r.recommendation === "DISCARD" && r.tile.suit !== SUIT.BLANK,
 );
 
 // Apply difficulty-based randomness
-if (this.config.discardRandomness > 0 && Math.random() < this.config.discardRandomness) {
-    // Easy/Medium: Sometimes make a suboptimal choice
-    // Pick one of the worst 3 tiles randomly instead of the absolute worst
-    const randomIndex = Math.floor(
-        Math.random() * Math.min(3, discardableRecommendations.length)
-    );
-    discardTile = discardableRecommendations[randomIndex].tile;
+if (
+  this.config.discardRandomness > 0 &&
+  Math.random() < this.config.discardRandomness
+) {
+  // Easy/Medium: Sometimes make a suboptimal choice
+  // Pick one of the worst 3 tiles randomly instead of the absolute worst
+  const randomIndex = Math.floor(
+    Math.random() * Math.min(3, discardableRecommendations.length),
+  );
+  discardTile = discardableRecommendations[randomIndex].tile;
 
-    if (gdebug) {
-        console.log(`[AI ${currPlayer.position}] Made suboptimal discard choice (difficulty: ${this.difficulty})`);
-    }
+  if (gdebug) {
+    console.log(
+      `[AI ${currPlayer.position}] Made suboptimal discard choice (difficulty: ${this.difficulty})`,
+    );
+  }
 } else {
-    // Hard: Always pick the optimal (worst-ranked) tile
-    for (let i = recommendations.length - 1; i >= 0; i--) {
-        const tile = recommendations[i].tile;
-        if (tile.suit !== SUIT.BLANK) {
-            discardTile = tile;
-            break;
-        }
+  // Hard: Always pick the optimal (worst-ranked) tile
+  for (let i = recommendations.length - 1; i >= 0; i--) {
+    const tile = recommendations[i].tile;
+    if (tile.suit !== SUIT.BLANK) {
+      discardTile = tile;
+      break;
     }
+  }
 }
 ```
 
 **What this does:**
+
 - Easy AI: 30% of the time, picks a random tile from the 3 worst options (visible mistakes)
 - Medium AI: 10% of the time, makes a suboptimal choice
 - Hard AI: Always picks the mathematically worst tile (optimal)
@@ -430,6 +451,7 @@ if (!copyHand.isAllHidden() || (!rankInfo.hand.concealed && rankInfo.rank > this
 ```
 
 **What this does:**
+
 - Easy AI: Only exposes when hand rank > 70 (very conservative, stays hidden longer)
 - Medium AI: Exposes when hand rank > 55 (balanced timing)
 - Hard AI: Exposes when hand rank > 45 (aggressive, current behavior)
@@ -452,13 +474,13 @@ if (!copyHand.isAllHidden() || (!rankInfo.hand.concealed && rankInfo.rank > this
 
 ```javascript
 if (rank < 45) {
-    return 3;
+  return 3;
 }
 if (rank < 55) {
-    return 2;
+  return 2;
 }
 if (rank < 65) {
-    return 1;
+  return 1;
 }
 return 0;
 ```
@@ -469,18 +491,19 @@ return 0;
 const thresholds = this.config.courtesyThresholds;
 
 if (rank < thresholds[0]) {
-    return 3;  // Vote to pass 3 tiles
+  return 3; // Vote to pass 3 tiles
 }
 if (rank < thresholds[1]) {
-    return 2;  // Vote to pass 2 tiles
+  return 2; // Vote to pass 2 tiles
 }
 if (rank < thresholds[2]) {
-    return 1;  // Vote to pass 1 tile
+  return 1; // Vote to pass 1 tile
 }
-return 0;  // Vote to pass 0 tiles (decline courtesy)
+return 0; // Vote to pass 0 tiles (decline courtesy)
 ```
 
 **What this does:**
+
 - Easy AI: Uses thresholds [55, 65, 75] (votes to pass tiles even with better hands - helps human player)
 - Medium AI: Uses thresholds [50, 60, 68] (balanced voting)
 - Hard AI: Uses thresholds [45, 55, 65] (optimal voting strategy)
@@ -503,7 +526,7 @@ return 0;  // Vote to pass 0 tiles (decline courtesy)
 
 ```javascript
 if (currentBestRank < this.config.blankExchangeRank) {
-    return false;
+  return false;
 }
 ```
 
@@ -515,6 +538,7 @@ let bestRankGain = this.config.blankExchangeGain;
 ```
 
 **What this does:**
+
 - Easy AI: Never exchanges blanks (thresholds set to 999 = impossible)
 - Medium AI: Only when rank > 85 and gain > 25 (very conservative)
 - Hard AI: When rank > 80 and gain > 20 (aggressive optimization)
@@ -564,6 +588,7 @@ scale = Math.min(topHand.rank * this.config.jokerScaling, 100);
 ```
 
 **What this does:**
+
 - Easy AI: Considers 1 pattern, threshold 60, scaling 0.8 (poor joker optimization)
 - Medium AI: Considers 2 patterns, threshold 55, scaling 0.9 (moderate optimization)
 - Hard AI: Considers 3 patterns, threshold 50, scaling 1.0 (maximum optimization)
@@ -588,7 +613,7 @@ scale = Math.min(topHand.rank * this.config.jokerScaling, 100);
 ```javascript
 // Helper function for AI decision delays
 function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 ```
 
@@ -663,6 +688,7 @@ async courtesyVote(currPlayer) {
 ```
 
 **What this does:**
+
 - Easy AI: Waits 800-1400ms before deciding (appears to be "thinking hard")
 - Medium AI: Waits 400-800ms (moderate pace)
 - Hard AI: Waits 200-400ms (quick, confident decisions)
@@ -686,11 +712,14 @@ async courtesyVote(currPlayer) {
 
 ```javascript
 // Get difficulty setting from SettingsManager
-const difficulty = window.settingsManager ? window.settingsManager.getDifficulty() : "medium";
+const difficulty = window.settingsManager
+  ? window.settingsManager.getDifficulty()
+  : "medium";
 this.gameAI = new GameAI(this.card, this.table, difficulty);
 ```
 
 **What this does:**
+
 - Reads the difficulty setting from the SettingsManager
 - Passes it to the GameAI constructor
 - Falls back to "medium" if SettingsManager isn't available for some reason
@@ -722,6 +751,7 @@ this.gameAI = new GameAI(this.card, this.table, difficulty);
 Search for `this.gameAI.chooseDiscard` in the file. You'll likely find it in a method like `stateLoopChooseDiscard()`.
 
 **Before:**
+
 ```javascript
 stateLoopChooseDiscard() {
     const discardTile = this.gameAI.chooseDiscard(this.table.currPlayer);
@@ -730,6 +760,7 @@ stateLoopChooseDiscard() {
 ```
 
 **After:**
+
 ```javascript
 async stateLoopChooseDiscard() {
     const discardTile = await this.gameAI.chooseDiscard(this.table.currPlayer);
@@ -742,6 +773,7 @@ async stateLoopChooseDiscard() {
 **Important:** When you make a method `async`, any method that CALLS it also needs to be `async` and use `await`. You may need to follow the chain upward through several methods.
 
 **Verification:**
+
 1. Load the game
 2. Check browser console for any errors
 3. Play a game - AI should make decisions with visible delays
@@ -754,6 +786,7 @@ async stateLoopChooseDiscard() {
 Test each difficulty level thoroughly:
 
 ### **Easy Mode Testing:**
+
 - [ ] AI takes 800-1400ms to make decisions (use browser dev tools to time)
 - [ ] AI sometimes makes obviously bad discards (about 30% of the time)
 - [ ] AI keeps tiles concealed (hidden) for a long time before exposing
@@ -762,6 +795,7 @@ Test each difficulty level thoroughly:
 - [ ] AI seems less strategic overall
 
 ### **Medium Mode Testing:**
+
 - [ ] AI takes 400-800ms to make decisions
 - [ ] AI occasionally makes suboptimal discards (about 10% of the time)
 - [ ] AI exposes tiles at moderate times (not too early, not too late)
@@ -770,6 +804,7 @@ Test each difficulty level thoroughly:
 - [ ] AI plays competently but not perfectly
 
 ### **Hard Mode Testing:**
+
 - [ ] AI takes 200-400ms to make decisions (quick)
 - [ ] AI never makes mistakes (always optimal discards)
 - [ ] AI exposes tiles aggressively when strategic
@@ -778,11 +813,13 @@ Test each difficulty level thoroughly:
 - [ ] AI plays at expert level (same as before implementation)
 
 ### **Settings Persistence Testing:**
+
 - [ ] Change difficulty to Easy, save, refresh browser - still shows Easy
 - [ ] Change difficulty to Hard, save, start new game - AI plays at Hard
 - [ ] Default for new users should be Medium
 
 ### **UI Testing:**
+
 - [ ] Difficulty dropdown appears in Settings overlay
 - [ ] All three options are visible and selectable
 - [ ] Save Settings button works with difficulty
@@ -797,6 +834,7 @@ Test each difficulty level thoroughly:
 **Solution:** You're using `await` in a method that isn't marked as `async`. Add `async` before the method name.
 
 **Example:**
+
 ```javascript
 // Wrong
 someMethod() {
@@ -814,6 +852,7 @@ async someMethod() {
 ### **Issue: AI decisions happen instantly (no delay)**
 
 **Solution:** Check that:
+
 1. The `sleep` function is defined at the top of `gameAI.js`
 2. The AI methods are marked as `async`
 3. The delay code is at the beginning of each method
@@ -824,6 +863,7 @@ async someMethod() {
 ### **Issue: Settings don't save/load**
 
 **Solution:** Check that:
+
 1. The difficultySelect element has the correct `id="difficultySelect"`
 2. The save/apply methods are being called in `settings.js`
 3. localStorage isn't blocked in your browser (check browser settings)
@@ -834,6 +874,7 @@ async someMethod() {
 ### **Issue: All difficulty levels play the same**
 
 **Solution:** Check that:
+
 1. The difficulty is being passed from GameLogic to GameAI constructor
 2. The `getDifficultyConfig()` method is returning different configs
 3. The AI methods are actually using `this.config.*` values
@@ -844,6 +885,7 @@ async someMethod() {
 ### **Issue: Easy AI still plays too well**
 
 **Solution:** You can adjust the config values to make Easy even easier:
+
 - Increase `discardRandomness` to 0.5 (50% mistakes)
 - Increase `exposureThreshold` to 80 (even more conservative)
 - Set `maxPatterns` to 1 (extreme tunnel vision)
@@ -855,12 +897,14 @@ async someMethod() {
 After implementation, you may want to adjust the difficulty parameters based on playtesting feedback.
 
 **To make Easy easier:**
+
 - Increase `discardRandomness` (more mistakes)
 - Increase `exposureThreshold` (more defensive)
 - Decrease `maxPatterns` (more tunnel vision)
 - Increase `minDiscardable` (more conservative)
 
 **To make Hard harder:**
+
 - Decrease `exposureThreshold` (more aggressive)
 - Decrease decision delays (faster decisions feel more intimidating)
 - Adjust `blankExchangeGain` downward (more willing to use blanks)

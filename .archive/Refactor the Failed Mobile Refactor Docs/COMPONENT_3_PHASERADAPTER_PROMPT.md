@@ -5,6 +5,7 @@
 You're implementing **PhaserAdapter handler wiring** for an American Mahjong game. This is part of a larger refactor to separate game logic (GameController) from rendering (PhaserAdapter).
 
 **What's Been Completed:**
+
 - ✅ Component 1: SelectionManager (fully implemented in [desktop/managers/SelectionManager.js](desktop/managers/SelectionManager.js))
 - ✅ Component 2: HandRenderer (fully implemented in [desktop/renderers/HandRenderer.js](desktop/renderers/HandRenderer.js))
 - ✅ DialogManager (fully functional, ready to use)
@@ -21,6 +22,7 @@ Build the connection layer between GameController events and the UI managers (Se
 **Location:** Enhance [desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js)
 
 **Time Estimate:** ~2 hours
+
 1. Analyze current PhaserAdapter handlers (30 min)
 2. Wire onCharlestonPhase → SelectionManager (30 min)
 3. Wire onUIPrompt → DialogManager (30 min)
@@ -36,22 +38,23 @@ Read [desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js) and 
 
 **Current State of Handlers:**
 
-| Handler Method | Current Implementation | What's Missing |
-|----------------|----------------------|----------------|
-| `onGameStarted` | ? | ? |
-| `onStateChanged` | ? | ? |
-| `onCharlestonPhase` | ? | ? |
-| `onUIPrompt` | ? | ? |
-| `handleCharlestonPassPrompt` | ? | ? |
-| `onTileDrawn` | ? | ? |
-| `onTileDiscarded` | ? | ? |
-| `onTurnChanged` | ? | ? |
-| `onHandUpdated` | ? | ? |
-| `onExposureCreated` | ? | ? |
+| Handler Method               | Current Implementation | What's Missing |
+| ---------------------------- | ---------------------- | -------------- |
+| `onGameStarted`              | ?                      | ?              |
+| `onStateChanged`             | ?                      | ?              |
+| `onCharlestonPhase`          | ?                      | ?              |
+| `onUIPrompt`                 | ?                      | ?              |
+| `handleCharlestonPassPrompt` | ?                      | ?              |
+| `onTileDrawn`                | ?                      | ?              |
+| `onTileDiscarded`            | ?                      | ?              |
+| `onTurnChanged`              | ?                      | ?              |
+| `onHandUpdated`              | ?                      | ?              |
+| `onExposureCreated`          | ?                      | ?              |
 
 **Manager Integrations:**
 
 Check which managers are currently instantiated:
+
 - `this.selectionManager` - Does it exist? Where is it created?
 - `this.handRenderer` - Does it exist? Where is it created?
 - `this.dialogManager` - Does it exist? Is it wired correctly?
@@ -68,6 +71,7 @@ git show 07c41b9:gameLogic.js | grep -A 20 "charlestonPass"
 ```
 
 Key patterns to extract:
+
 - How were buttons set up for user input?
 - How did promise-based async flow work?
 - How were tiles selected during Charleston?
@@ -78,23 +82,27 @@ Key patterns to extract:
 Create `PHASERADAPTER_CURRENT_STATE.md` with:
 
 **Section 1: Handler Inventory**
+
 - List all event handlers in PhaserAdapter
 - Note which are implemented vs stubs
 - Identify which managers they should call
 
 **Section 2: Manager Dependencies**
+
 - Which handlers need SelectionManager?
 - Which handlers need HandRenderer?
 - Which handlers need DialogManager?
 - Which handlers need ButtonManager?
 
 **Section 3: Event Flow Analysis**
+
 - What events come from GameController?
 - What order do they arrive in?
 - Which events require user input (promise-based)?
 - Which events are fire-and-forget?
 
 **Section 4: Patterns from 07c41b9**
+
 - How did old system handle Charleston tile selection?
 - How did old system handle discard selection?
 - How were dialogs shown and dismissed?
@@ -125,6 +133,7 @@ Charleston involves multiple events:
 ### 2b. Implement onCharlestonPhase
 
 **Event Data Structure:**
+
 ```javascript
 {
     phase: 1 | 2,  // Charleston phase number
@@ -134,6 +143,7 @@ Charleston involves multiple events:
 ```
 
 **Implementation:**
+
 ```javascript
 onCharlestonPhase(data) {
     const { phase, direction, player } = data;
@@ -162,6 +172,7 @@ onCharlestonPhase(data) {
 ### 2c. Wire onUIPrompt for Charleston
 
 **Event Data Structure:**
+
 ```javascript
 {
     type: "charleston" | "courtesy" | "discard" | "claim",
@@ -173,6 +184,7 @@ onCharlestonPhase(data) {
 ```
 
 **Implementation:**
+
 ```javascript
 onUIPrompt(data) {
     const { type, message, minSelect, maxSelect } = data;
@@ -232,6 +244,7 @@ onButton1Click() {
 ### 2e. Test Charleston flow
 
 Create a test checklist:
+
 - [ ] Charleston phase event triggers selection mode
 - [ ] Can select 3 tiles
 - [ ] Cannot select jokers or blanks
@@ -250,6 +263,7 @@ Create a test checklist:
 **Purpose:** Animate tile from wall to player's hand
 
 **Event Data:**
+
 ```javascript
 {
     playerIndex: 0-3,
@@ -259,6 +273,7 @@ Create a test checklist:
 ```
 
 **Implementation:**
+
 ```javascript
 onTileDrawn(data) {
     const { playerIndex, tile } = data;
@@ -312,6 +327,7 @@ onTileDrawn(data) {
 **Purpose:** Animate tile from player's hand to discard pile
 
 **Event Data:**
+
 ```javascript
 {
     playerIndex: 0-3,
@@ -320,6 +336,7 @@ onTileDrawn(data) {
 ```
 
 **Implementation:**
+
 ```javascript
 onTileDiscarded(data) {
     const { playerIndex, tile } = data;
@@ -360,6 +377,7 @@ onTileDiscarded(data) {
 **Purpose:** Re-render a player's hand when tiles change
 
 **Event Data:**
+
 ```javascript
 {
     playerIndex: 0-3,
@@ -368,6 +386,7 @@ onTileDiscarded(data) {
 ```
 
 **Implementation:**
+
 ```javascript
 onHandUpdated(data) {
     const { playerIndex, reason } = data;
@@ -390,6 +409,7 @@ onHandUpdated(data) {
 **Purpose:** Update UI when game state changes
 
 **Event Data:**
+
 ```javascript
 {
     oldState: STATE.DEAL,
@@ -399,6 +419,7 @@ onHandUpdated(data) {
 ```
 
 **Implementation:**
+
 ```javascript
 onStateChanged(data) {
     const { newState, stateName } = data;
@@ -440,6 +461,7 @@ onStateChanged(data) {
 **Purpose:** Show exposed tiles (pung/kong/quint) in player's rack
 
 **Event Data:**
+
 ```javascript
 {
     playerIndex: 0-3,
@@ -449,6 +471,7 @@ onStateChanged(data) {
 ```
 
 **Implementation:**
+
 ```javascript
 onExposureCreated(data) {
     const { playerIndex, exposureType, tiles } = data;
@@ -473,6 +496,7 @@ onExposureCreated(data) {
 ### 4a. Review ButtonManager current state
 
 Check [desktop/managers/ButtonManager.js](desktop/managers/ButtonManager.js):
+
 - What methods exist?
 - Is `updateForState()` implemented?
 - Are button click handlers wired?
@@ -535,6 +559,7 @@ updateForState(state) {
 ### 4c. Wire button clicks to GameController
 
 **In PhaserAdapter:**
+
 ```javascript
 setupButtonHandlers() {
     // Get button DOM elements
@@ -611,6 +636,7 @@ This can be triggered in `SelectionManager._updateButtonState()` which already e
 Create `PHASERADAPTER_TEST_PLAN.md` with test scenarios:
 
 **Test 1: Charleston Phase**
+
 1. Start game
 2. Deal completes
 3. Charleston phase 1 starts
@@ -622,6 +648,7 @@ Create `PHASERADAPTER_TEST_PLAN.md` with test scenarios:
 9. Repeat for phases 2-3
 
 **Test 2: Main Game Loop**
+
 1. Charleston complete
 2. Player turn starts
 3. Tile drawn from wall (animation plays)
@@ -631,6 +658,7 @@ Create `PHASERADAPTER_TEST_PLAN.md` with test scenarios:
 7. Claim prompt appears when applicable
 
 **Test 3: Exposure**
+
 1. Player has matching tiles
 2. Claim discard
 3. Exposure dialog appears

@@ -8,34 +8,34 @@
 import SettingsManager from "../../shared/SettingsManager.js";
 
 class SettingsSheet {
-    constructor() {
-        this.sheet = null;
-        this.settingsButton = null;
-        this.isOpen = false;
+  constructor() {
+    this.sheet = null;
+    this.settingsButton = null;
+    this.isOpen = false;
 
-        this.createUI();
-        this.loadSettings();
-        this.attachEventListeners();
-    }
+    this.createUI();
+    this.loadSettings();
+    this.attachEventListeners();
+  }
 
-    /**
-     * Create the bottom sheet HTML structure
-     */
-    createUI() {
-        // Get default values from SettingsManager
-        const defaults = SettingsManager.getDefaults();
+  /**
+   * Create the bottom sheet HTML structure
+   */
+  createUI() {
+    // Get default values from SettingsManager
+    const defaults = SettingsManager.getDefaults();
 
-        // Create overlay backdrop
-        const overlay = document.createElement("div");
-        overlay.id = "settings-overlay-mobile";
-        overlay.className = "settings-overlay-mobile";
+    // Create overlay backdrop
+    const overlay = document.createElement("div");
+    overlay.id = "settings-overlay-mobile";
+    overlay.className = "settings-overlay-mobile";
 
-        // Create bottom sheet
-        const sheet = document.createElement("div");
-        sheet.id = "settings-sheet";
-        sheet.className = "settings-sheet";
+    // Create bottom sheet
+    const sheet = document.createElement("div");
+    sheet.id = "settings-sheet";
+    sheet.className = "settings-sheet";
 
-        sheet.innerHTML = `
+    sheet.innerHTML = `
             <div class="settings-sheet__header">
                 <h2 class="settings-sheet__title">Settings</h2>
                 <button class="settings-sheet__close" aria-label="Close settings">×</button>
@@ -153,180 +153,233 @@ class SettingsSheet {
             </div>
         `;
 
-        overlay.appendChild(sheet);
-        document.body.appendChild(overlay);
+    overlay.appendChild(sheet);
+    document.body.appendChild(overlay);
 
-        this.sheet = sheet;
-        this.overlay = overlay;
+    this.sheet = sheet;
+    this.overlay = overlay;
+  }
+
+  /**
+   * Load current settings from SettingsManager
+   */
+  loadSettings() {
+    const settings = SettingsManager.load();
+
+    // Game settings
+    document.getElementById("mobile-year").value = settings.cardYear;
+    document.getElementById("mobile-difficulty").value = settings.difficulty;
+    document.getElementById("mobile-blank-tiles").checked =
+      settings.useBlankTiles;
+
+    // Audio settings
+    document.getElementById("mobile-bgm-volume").value = settings.bgmVolume;
+    document.getElementById("mobile-bgm-value").textContent =
+      settings.bgmVolume;
+    document.getElementById("mobile-bgm-mute").checked = settings.bgmMuted;
+
+    document.getElementById("mobile-sfx-volume").value = settings.sfxVolume;
+    document.getElementById("mobile-sfx-value").textContent =
+      settings.sfxVolume;
+    document.getElementById("mobile-sfx-mute").checked = settings.sfxMuted;
+
+    // Training mode
+    document.getElementById("mobile-training-mode").checked =
+      settings.trainingMode;
+    document.getElementById("mobile-training-hand").value =
+      settings.trainingHand;
+    document.getElementById("mobile-training-tiles").value =
+      settings.trainingTileCount;
+    document.getElementById("mobile-skip-charleston").checked =
+      settings.skipCharleston;
+
+    // Show/hide training controls
+    this.updateTrainingVisibility(settings.trainingMode);
+  }
+
+  /**
+   * Attach event listeners
+   */
+  attachEventListeners() {
+    // Open button (in mobile UI)
+    const openBtn = document.getElementById("mobile-settings-btn");
+    if (openBtn) {
+      openBtn.addEventListener("click", () => this.open());
     }
 
-    /**
-     * Load current settings from SettingsManager
-     */
-    loadSettings() {
-        const settings = SettingsManager.load();
+    // Close button
+    this.sheet
+      .querySelector(".settings-sheet__close")
+      .addEventListener("click", () => this.close());
 
-        // Game settings
-        document.getElementById("mobile-year").value = settings.cardYear;
-        document.getElementById("mobile-difficulty").value = settings.difficulty;
-        document.getElementById("mobile-blank-tiles").checked = settings.useBlankTiles;
+    // Overlay click (close on backdrop tap)
+    this.overlay.addEventListener("click", (e) => {
+      if (e.target === this.overlay) {
+        this.close();
+      }
+    });
 
-        // Audio settings
-        document.getElementById("mobile-bgm-volume").value = settings.bgmVolume;
-        document.getElementById("mobile-bgm-value").textContent = settings.bgmVolume;
-        document.getElementById("mobile-bgm-mute").checked = settings.bgmMuted;
+    // Volume sliders (update value display)
+    document
+      .getElementById("mobile-bgm-volume")
+      .addEventListener("input", (e) => {
+        document.getElementById("mobile-bgm-value").textContent =
+          e.target.value;
+      });
 
-        document.getElementById("mobile-sfx-volume").value = settings.sfxVolume;
-        document.getElementById("mobile-sfx-value").textContent = settings.sfxVolume;
-        document.getElementById("mobile-sfx-mute").checked = settings.sfxMuted;
+    document
+      .getElementById("mobile-sfx-volume")
+      .addEventListener("input", (e) => {
+        document.getElementById("mobile-sfx-value").textContent =
+          e.target.value;
+      });
 
-        // Training mode
-        document.getElementById("mobile-training-mode").checked = settings.trainingMode;
-        document.getElementById("mobile-training-hand").value = settings.trainingHand;
-        document.getElementById("mobile-training-tiles").value = settings.trainingTileCount;
-        document.getElementById("mobile-skip-charleston").checked = settings.skipCharleston;
+    // Training mode toggle (show/hide controls)
+    document
+      .getElementById("mobile-training-mode")
+      .addEventListener("change", (e) => {
+        this.updateTrainingVisibility(e.target.checked);
+      });
 
-        // Show/hide training controls
-        this.updateTrainingVisibility(settings.trainingMode);
-    }
+    // Save button
+    document
+      .getElementById("mobile-settings-save")
+      .addEventListener("click", () => {
+        this.saveSettings();
+        this.close();
+      });
 
-    /**
-     * Attach event listeners
-     */
-    attachEventListeners() {
-        // Open button (in mobile UI)
-        const openBtn = document.getElementById("mobile-settings-btn");
-        if (openBtn) {
-            openBtn.addEventListener("click", () => this.open());
+    // Reset button
+    document
+      .getElementById("mobile-settings-reset")
+      .addEventListener("click", () => {
+        if (window.confirm("Reset all settings to defaults?")) {
+          SettingsManager.reset();
+          this.loadSettings();
         }
+      });
+  }
 
-        // Close button
-        this.sheet.querySelector(".settings-sheet__close").addEventListener("click", () => this.close());
+  /**
+   * Save current UI values to SettingsManager
+   */
+  saveSettings() {
+    const settings = {
+      cardYear: parseInt(
+        document.getElementById("mobile-year")?.value ??
+          SettingsManager.getDefault("cardYear").toString(),
+      ),
+      difficulty:
+        document.getElementById("mobile-difficulty")?.value ??
+        SettingsManager.getDefault("difficulty"),
+      useBlankTiles:
+        document.getElementById("mobile-blank-tiles")?.checked ??
+        SettingsManager.getDefault("useBlankTiles"),
 
-        // Overlay click (close on backdrop tap)
-        this.overlay.addEventListener("click", (e) => {
-            if (e.target === this.overlay) {
-                this.close();
-            }
-        });
+      bgmVolume: parseInt(
+        document.getElementById("mobile-bgm-volume")?.value ??
+          SettingsManager.getDefault("bgmVolume").toString(),
+      ),
+      bgmMuted:
+        document.getElementById("mobile-bgm-mute")?.checked ??
+        SettingsManager.getDefault("bgmMuted"),
+      sfxVolume: parseInt(
+        document.getElementById("mobile-sfx-volume")?.value ??
+          SettingsManager.getDefault("sfxVolume").toString(),
+      ),
+      sfxMuted:
+        document.getElementById("mobile-sfx-mute")?.checked ??
+        SettingsManager.getDefault("sfxMuted"),
 
-        // Volume sliders (update value display)
-        document.getElementById("mobile-bgm-volume").addEventListener("input", (e) => {
-            document.getElementById("mobile-bgm-value").textContent = e.target.value;
-        });
+      trainingMode:
+        document.getElementById("mobile-training-mode")?.checked ??
+        SettingsManager.getDefault("trainingMode"),
+      trainingHand:
+        document.getElementById("mobile-training-hand")?.value ??
+        SettingsManager.getDefault("trainingHand"),
+      trainingTileCount: parseInt(
+        document.getElementById("mobile-training-tiles")?.value ??
+          SettingsManager.getDefault("trainingTileCount").toString(),
+      ),
+      skipCharleston:
+        document.getElementById("mobile-skip-charleston")?.checked ??
+        SettingsManager.getDefault("skipCharleston"),
+    };
 
-        document.getElementById("mobile-sfx-volume").addEventListener("input", (e) => {
-            document.getElementById("mobile-sfx-value").textContent = e.target.value;
-        });
+    SettingsManager.save(settings);
+    console.log("Settings saved:", settings);
 
-        // Training mode toggle (show/hide controls)
-        document.getElementById("mobile-training-mode").addEventListener("change", (e) => {
-            this.updateTrainingVisibility(e.target.checked);
-        });
+    // Dispatch event so game can react to settings changes
+    window.dispatchEvent(
+      new window.CustomEvent("settingsChanged", { detail: settings }),
+    );
+  }
 
-        // Save button
-        document.getElementById("mobile-settings-save").addEventListener("click", () => {
-            this.saveSettings();
-            this.close();
-        });
+  /**
+   * Show/hide training mode controls
+   */
+  updateTrainingVisibility(enabled) {
+    const controls = document.getElementById("mobile-training-controls");
 
-        // Reset button
-        document.getElementById("mobile-settings-reset").addEventListener("click", () => {
-            if (window.confirm("Reset all settings to defaults?")) {
-                SettingsManager.reset();
-                this.loadSettings();
-            }
-        });
+    if (controls) {
+      controls.style.display = enabled ? "block" : "none";
+    }
+  }
+
+  /**
+   * Populate training hand selector with card patterns
+   * Called by MobileRenderer after card is initialized
+   * @param {Card} card - Card instance with valid hands
+   */
+  populateHandSelector(card) {
+    const handSelect = document.getElementById("mobile-training-hand");
+    if (!handSelect || !card || !card.validHandGroups) {
+      return;
     }
 
-    /**
-     * Save current UI values to SettingsManager
-     */
-    saveSettings() {
-        const settings = {
-            cardYear: parseInt(document.getElementById("mobile-year")?.value ?? SettingsManager.getDefault("cardYear").toString()),
-            difficulty: document.getElementById("mobile-difficulty")?.value ?? SettingsManager.getDefault("difficulty"),
-            useBlankTiles: document.getElementById("mobile-blank-tiles")?.checked ?? SettingsManager.getDefault("useBlankTiles"),
+    // Clear existing options except the first one
+    handSelect.innerHTML = '<option value="">Select a hand...</option>';
 
-            bgmVolume: parseInt(document.getElementById("mobile-bgm-volume")?.value ?? SettingsManager.getDefault("bgmVolume").toString()),
-            bgmMuted: document.getElementById("mobile-bgm-mute")?.checked ?? SettingsManager.getDefault("bgmMuted"),
-            sfxVolume: parseInt(document.getElementById("mobile-sfx-volume")?.value ?? SettingsManager.getDefault("sfxVolume").toString()),
-            sfxMuted: document.getElementById("mobile-sfx-mute")?.checked ?? SettingsManager.getDefault("sfxMuted"),
+    // Add hand options from card
+    for (const group of card.validHandGroups) {
+      const optionGroup = document.createElement("optgroup");
+      optionGroup.label = group.groupDescription;
+      handSelect.appendChild(optionGroup);
 
-            trainingMode: document.getElementById("mobile-training-mode")?.checked ?? SettingsManager.getDefault("trainingMode"),
-            trainingHand: document.getElementById("mobile-training-hand")?.value ?? SettingsManager.getDefault("trainingHand"),
-            trainingTileCount: parseInt(document.getElementById("mobile-training-tiles")?.value ?? SettingsManager.getDefault("trainingTileCount").toString()),
-            skipCharleston: document.getElementById("mobile-skip-charleston")?.checked ?? SettingsManager.getDefault("skipCharleston")
-        };
-
-        SettingsManager.save(settings);
-        console.log("Settings saved:", settings);
-
-        // Dispatch event so game can react to settings changes
-        window.dispatchEvent(new window.CustomEvent("settingsChanged", { detail: settings }));
+      for (const validHand of group.hands) {
+        const option = document.createElement("option");
+        option.value = validHand.description;
+        option.text = validHand.description;
+        handSelect.appendChild(option);
+      }
     }
 
-    /**
-     * Show/hide training mode controls
-     */
-    updateTrainingVisibility(enabled) {
-        const controls = document.getElementById("mobile-training-controls");
+    console.log(
+      "Hand selector populated with",
+      card.validHandGroups.length,
+      "groups",
+    );
+  }
 
-        if (controls) {
-            controls.style.display = enabled ? "block" : "none";
-        }
-    }
+  /**
+   * Open settings sheet
+   */
+  open() {
+    this.isOpen = true;
+    this.overlay.classList.add("open");
+    this.sheet.classList.add("open");
+    document.body.style.overflow = "hidden"; // Prevent scrolling
+  }
 
-    /**
-     * Populate training hand selector with card patterns
-     * Called by MobileRenderer after card is initialized
-     * @param {Card} card - Card instance with valid hands
-     */
-    populateHandSelector(card) {
-        const handSelect = document.getElementById("mobile-training-hand");
-        if (!handSelect || !card || !card.validHandGroups) {
-            return;
-        }
-
-        // Clear existing options except the first one
-        handSelect.innerHTML = "<option value=\"\">Select a hand...</option>";
-
-        // Add hand options from card
-        for (const group of card.validHandGroups) {
-            const optionGroup = document.createElement("optgroup");
-            optionGroup.label = group.groupDescription;
-            handSelect.appendChild(optionGroup);
-
-            for (const validHand of group.hands) {
-                const option = document.createElement("option");
-                option.value = validHand.description;
-                option.text = validHand.description;
-                handSelect.appendChild(option);
-            }
-        }
-
-        console.log("Hand selector populated with", card.validHandGroups.length, "groups");
-    }
-
-    /**
-     * Open settings sheet
-     */
-    open() {
-        this.isOpen = true;
-        this.overlay.classList.add("open");
-        this.sheet.classList.add("open");
-        document.body.style.overflow = "hidden";  // Prevent scrolling
-    }
-
-    /**
-     * Close settings sheet
-     */
-    close() {
-        this.isOpen = false;
-        this.overlay.classList.remove("open");
-        this.sheet.classList.remove("open");
-        document.body.style.overflow = "";
-    }
+  /**
+   * Close settings sheet
+   */
+  close() {
+    this.isOpen = false;
+    this.overlay.classList.remove("open");
+    this.sheet.classList.remove("open");
+    document.body.style.overflow = "";
+  }
 }
 
 export default SettingsSheet;

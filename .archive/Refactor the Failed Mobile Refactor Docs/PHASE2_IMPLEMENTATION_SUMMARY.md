@@ -11,7 +11,9 @@ Phase 2 is complete! The PhaserAdapter now handles 100% of Phaser rendering and 
 ## What Was Implemented
 
 ### 1. ✅ AnimationLibrary (`desktop/animations/AnimationLibrary.js`)
+
 A centralized, reusable animation library with 12 animation functions:
+
 - `animateTileSlide()` - Slide tiles between positions
 - `animateTileDiscard()` - Tile discard with rotation
 - `animateTilePass()` - Multi-tile passing animations
@@ -27,7 +29,9 @@ A centralized, reusable animation library with 12 animation functions:
 **All animations return Promises** for easy chaining and sequencing.
 
 ### 2. ✅ TileManager (`desktop/managers/TileManager.js`)
+
 Complete tile sprite management system:
+
 - Tile sprite creation, registration, and lifecycle
 - Hand layout calculations for all 4 player positions
 - Tile position tracking and updates
@@ -40,7 +44,9 @@ Complete tile sprite management system:
 **Key Feature**: Intelligent layout system that handles bottom, right, top, and left player positions with proper spacing and formation.
 
 ### 3. ✅ ButtonManager (`desktop/managers/ButtonManager.js`)
+
 State-based button management:
+
 - Automatic button visibility based on game state
 - Dynamic button text updates
 - Button enable/disable management
@@ -54,7 +60,9 @@ State-based button management:
   - END: Results and New Game buttons
 
 ### 4. ✅ DialogManager (`desktop/managers/DialogManager.js`)
+
 Comprehensive dialog and prompt system:
+
 - Modal overlay dialogs
 - Yes/No dialogs
 - Charleston pass selection dialog
@@ -68,7 +76,9 @@ Comprehensive dialog and prompt system:
 **All dialogs block game input** and return results via callbacks.
 
 ### 5. ✅ PhaserAdapter Complete Refactor (`desktop/adapters/PhaserAdapter.js`)
+
 Total architectural refactor:
+
 - **Removed**: All calls to `gameLogic.updateUI()`
 - **Removed**: Old button management code
 - **Added**: Proper manager integration
@@ -76,6 +86,7 @@ Total architectural refactor:
 - **Added**: UI prompt routing to DialogManager
 
 **Event Handlers Implemented**:
+
 - Game flow: `onStateChanged()`, `onGameStarted()`, `onGameEnded()`
 - Tiles: `onTilesDealt()`, `onTileDrawn()`, `onTileDiscarded()`
 - Claims: `onDiscardClaimed()`, `onTilesExposed()`, `onJokerSwapped()`
@@ -134,27 +145,35 @@ PhaserAdapter (subscribes to ALL events)
 ## Key Design Decisions
 
 ### 1. Promise-based Animations
+
 All animations return Promises, allowing:
+
 ```javascript
 await AnimationLibrary.animateTileSlide(sprite, from, to);
 // Next action runs after animation completes
 ```
 
 ### 2. State-driven Button Management
+
 Buttons automatically manage visibility and callbacks based on game state:
+
 ```javascript
 buttonManager.updateForState(STATE.CHARLESTON1);
 // Buttons automatically set up with correct labels and handlers
 ```
 
 ### 3. Manager Composition
+
 PhaserAdapter delegates to specialized managers rather than handling everything:
+
 - Clean separation of concerns
 - Easy to test and maintain
 - Easy to extend with new managers
 
 ### 4. Dialog System Isolation
+
 Dialogs block input and handle all user interaction:
+
 ```javascript
 const result = await dialogManager.showYesNoDialog("Continue?", callback);
 ```
@@ -162,16 +181,19 @@ const result = await dialogManager.showYesNoDialog("Continue?", callback);
 ## Integration Points
 
 ### With GameController
+
 - PhaserAdapter subscribes to 20+ event types
 - Handles all rendering based on game events
 - Calls GameController callbacks from user input
 
 ### With Existing Phaser Code
+
 - Uses existing Table, Player, Hand, TileSet classes
 - Integrates with existing wall, discards, hand UI
 - Compatible with AudioManager
 
 ### With DOM
+
 - Manages buttons in HTML (button1-4, start, settings, sort1-2)
 - Creates modal dialogs for prompts
 - Manages message log and hint panel
@@ -179,6 +201,7 @@ const result = await dialogManager.showYesNoDialog("Continue?", callback);
 ## Next Steps (Phase 3)
 
 Phase 2 is complete and ready for Phase 3 work:
+
 1. Delete gameLogic.js (now redundant)
 2. Remove GameLogic references from GameScene
 3. Final cleanup and testing
@@ -186,6 +209,7 @@ Phase 2 is complete and ready for Phase 3 work:
 ## Testing Notes
 
 The implementation should now support:
+
 - ✅ Full game flow with all animations
 - ✅ Charleston phase with tile passing
 - ✅ Courtesy phase with voting and exchange
@@ -196,15 +220,15 @@ The implementation should now support:
 
 ## Metrics
 
-| Metric | Value |
-|--------|-------|
-| New Code | ~1,700 lines |
-| PhaserAdapter refactored | 699 lines |
-| Number of managers | 3 |
-| Animation functions | 12 |
-| Event handlers | 20+ |
-| Supported button states | 10+ |
-| Dialog types | 6 |
+| Metric                   | Value        |
+| ------------------------ | ------------ |
+| New Code                 | ~1,700 lines |
+| PhaserAdapter refactored | 699 lines    |
+| Number of managers       | 3            |
+| Animation functions      | 12           |
+| Event handlers           | 20+          |
+| Supported button states  | 10+          |
+| Dialog types             | 6            |
 
 ---
 

@@ -107,13 +107,13 @@ Multiple handlers duplicate the `TileData.fromPhaserTile()` conversion:
 
 ```javascript
 // Duplicated in handleCharlestonPassPrompt
-const tileDatas = selection.map(tile => TileData.fromPhaserTile(tile));
+const tileDatas = selection.map((tile) => TileData.fromPhaserTile(tile));
 
 // Duplicated in handleDiscardPrompt
 const tileData = TileData.fromPhaserTile(tile);
 
 // Duplicated in handleCourtesyPassPrompt
-const tileDatas = selection.map(tile => TileData.fromPhaserTile(tile));
+const tileDatas = selection.map((tile) => TileData.fromPhaserTile(tile));
 ```
 
 **Potential Future State:**
@@ -157,8 +157,8 @@ Some event handlers call `player.showHand()` directly, others use `this.handRend
 
 ```javascript
 // Mixed usage:
-player.showHand(playerIndex === PLAYER.BOTTOM);  // Direct call
-this.handRenderer.showHand(playerIndex, false);  // Via renderer
+player.showHand(playerIndex === PLAYER.BOTTOM); // Direct call
+this.handRenderer.showHand(playerIndex, false); // Via renderer
 ```
 
 **Potential Future State:**
@@ -287,7 +287,7 @@ Selection options passed as inline objects:
 ```javascript
 this.selectionManager.enableTileSelection(3, 3, "charleston");
 // vs
-this.selectionManager.requestSelection({min: 3, max: 3, mode: "charleston"});
+this.selectionManager.requestSelection({ min: 3, max: 3, mode: "charleston" });
 ```
 
 **Potential Future State:**
@@ -363,16 +363,16 @@ onHandUpdated(data) {
 
 ## Summary: Prioritization Matrix
 
-| Refactor | Risk | Benefit | Priority | Phase |
-|----------|------|---------|----------|-------|
-| 1. Unify Claim Prompt | HIGH | MEDIUM | LOW | Phase 3+ |
-| 2. Promise-Based Handlers | MEDIUM | HIGH | MEDIUM | Phase 3 |
-| 3. TileData Helper | LOW | LOW-MED | LOW | Phase 3 |
-| 4. HandRenderer Consolidation | LOW | MEDIUM | MEDIUM | Phase 2/3 |
-| 5. Centralize Messages | MEDIUM | HIGH | LOW-MED | Phase 3+ |
-| 6. Error Handling | MEDIUM | HIGH | MEDIUM | Phase 3 |
-| 7. SelectionConfig Type | NONE | MEDIUM | LOW | Phase 3 |
-| 8. Optimize Rendering | MEDIUM | MEDIUM | LOW | Phase 4+ |
+| Refactor                      | Risk   | Benefit | Priority | Phase     |
+| ----------------------------- | ------ | ------- | -------- | --------- |
+| 1. Unify Claim Prompt         | HIGH   | MEDIUM  | LOW      | Phase 3+  |
+| 2. Promise-Based Handlers     | MEDIUM | HIGH    | MEDIUM   | Phase 3   |
+| 3. TileData Helper            | LOW    | LOW-MED | LOW      | Phase 3   |
+| 4. HandRenderer Consolidation | LOW    | MEDIUM  | MEDIUM   | Phase 2/3 |
+| 5. Centralize Messages        | MEDIUM | HIGH    | LOW-MED  | Phase 3+  |
+| 6. Error Handling             | MEDIUM | HIGH    | MEDIUM   | Phase 3   |
+| 7. SelectionConfig Type       | NONE   | MEDIUM  | LOW      | Phase 3   |
+| 8. Optimize Rendering         | MEDIUM | MEDIUM  | LOW      | Phase 4+  |
 
 ---
 

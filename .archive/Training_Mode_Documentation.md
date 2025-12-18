@@ -7,6 +7,7 @@ Training Mode is a specialized feature in your American Mahjong game designed fo
 ## 🎯 Purpose and Use Cases
 
 ### Primary Functions
+
 - **Practice Specific Hands**: Study and practice winning hand patterns
 - **AI Testing**: Test AI decision-making with known hand configurations
 - **Strategy Learning**: Understand optimal discard and exposure decisions
@@ -14,6 +15,7 @@ Training Mode is a specialized feature in your American Mahjong game designed fo
 - **Teaching**: Demonstrate mahjong concepts with predictable outcomes
 
 ### When to Use Training Mode
+
 - Learning new hand patterns
 - Testing AI algorithms with specific scenarios
 - Practicing courtesy and Charleston decisions
@@ -27,8 +29,9 @@ Training Mode is a specialized feature in your American Mahjong game designed fo
 The training mode interface consists of two main sections:
 
 #### 1. Training Mode Toggle
+
 ```html
-<input id="trainCheckbox" type="checkbox">
+<input id="trainCheckbox" type="checkbox" />
 <label for="trainCheckbox">Training Mode</label>
 ```
 
@@ -39,29 +42,37 @@ The training mode interface consists of two main sections:
 #### 2. Training Configuration (Only visible when training mode is enabled)
 
 **Hand Selection Dropdown**
+
 ```html
 <select id="handSelect">
   <!-- Populated dynamically from card.validHandGroups -->
 </select>
 ```
+
 - **Content**: All valid hand patterns from the current card year (2020)
 - **Organization**: Grouped by hand categories (e.g., "Singles and Pairs", "Consecutive Numbers", etc.)
 - **Purpose**: Selects the specific hand pattern to generate
 
 **Tile Count Selector**
+
 ```html
 <select id="numTileSelect">
-  <option>1</option>...<option>14</option>
+  <option>1</option>
+  ...
+  <option>14</option>
 </select>
 ```
+
 - **Range**: 1-14 tiles
 - **Default**: 9 tiles
 - **Purpose**: Specifies how many tiles to generate for the selected hand pattern
 
 **Skip Charleston Checkbox**
+
 ```html
-<input id="skipCharlestonCheckbox" type="checkbox">
+<input id="skipCharlestonCheckbox" type="checkbox" />
 ```
+
 - **Default**: Checked (true)
 - **Purpose**: Bypasses Charleston and courtesy phases for faster testing
 
@@ -96,8 +107,11 @@ getTrainingInfo() {
 
 ```javascript
 if (trainInfo.trainCheckbox) {
-    // Player 0 (human) gets the training hand
-    initPlayerHandArray[0] = this.card.generateHand(trainInfo.handDescription, trainInfo.numTiles);
+  // Player 0 (human) gets the training hand
+  initPlayerHandArray[0] = this.card.generateHand(
+    trainInfo.handDescription,
+    trainInfo.numTiles,
+  );
 }
 ```
 
@@ -106,9 +120,9 @@ if (trainInfo.trainCheckbox) {
 ```javascript
 // debugging - skip charleston
 if (trainInfo.trainCheckbox && trainInfo.skipCharlestonCheckbox) {
-    this.loop();  // Skip directly to main game loop
+  this.loop(); // Skip directly to main game loop
 } else {
-    this.charleston();  // Normal Charleston phase
+  this.charleston(); // Normal Charleston phase
 }
 ```
 
@@ -117,12 +131,14 @@ if (trainInfo.trainCheckbox && trainInfo.skipCharlestonCheckbox) {
 ### Normal Game Flow vs Training Mode
 
 #### Standard Game
+
 1. Random tile deal (13 tiles each)
 2. Charleston phase (tile passing)
 3. Courtesy phase (additional tile exchange)
 4. Main game loop (pick, discard, claim)
 
 #### Training Mode Game
+
 1. **Player 0**: Gets specified training hand (1-14 tiles)
 2. **Players 1-3**: Get random hands (13 tiles each)
 3. **Optional**: Skip Charleston and courtesy phases
@@ -130,13 +146,13 @@ if (trainInfo.trainCheckbox && trainInfo.skipCharlestonCheckbox) {
 
 ### Key Differences
 
-| Aspect | Normal Game | Training Mode |
-|--------|-------------|---------------|
-| Player 0 Hand | Random 13 tiles | Specified pattern, custom tile count |
-| Players 1-3 Hands | Random 13 tiles | Random 13 tiles |
-| Charleston | Always played | Optional (can skip) |
-| Courtesy | Always played | Optional (can skip) |
-| Starting Tiles | All players start with 13 | Player 0 may start with fewer/more |
+| Aspect            | Normal Game               | Training Mode                        |
+| ----------------- | ------------------------- | ------------------------------------ |
+| Player 0 Hand     | Random 13 tiles           | Specified pattern, custom tile count |
+| Players 1-3 Hands | Random 13 tiles           | Random 13 tiles                      |
+| Charleston        | Always played             | Optional (can skip)                  |
+| Courtesy          | Always played             | Optional (can skip)                  |
+| Starting Tiles    | All players start with 13 | Player 0 may start with fewer/more   |
 
 ## 📚 Available Training Hands
 
@@ -145,24 +161,29 @@ Training mode provides access to all official mahjong hand patterns from the 202
 ### Hand Categories (Examples)
 
 #### Singles and Pairs
+
 - "One Dragon" - Single dragon tile
 - "Two Dragons" - Pair of dragons
 - "One Wind" - Single wind tile
 
 #### Consecutive Numbers
+
 - "111 222 3333 4444 (2 suits, 4 consecutive numbers)"
 - "123 456 789 (3 suits)"
 - "13579 (1 suit)"
 
 #### Like Numbers
+
 - "111 222 333 444 555 (5 like numbers, 1 suit)"
 - "369 (3 like numbers, 1 suit)"
 
 #### Winds and Dragons
+
 - "North Wind" - Single north wind
 - "Three Dragons" - Three different dragons
 
 #### Special Patterns
+
 - "Lucky 13" - 13 different tiles
 - "Quints" - Five of a kind
 - "Addition Hands" - Bonus scoring combinations
@@ -174,15 +195,15 @@ The dropdown is populated dynamically from `card.validHandGroups` in `gameLogic.
 ```javascript
 // Populate hand select
 for (const group of this.card.validHandGroups) {
-    const optionGroup = window.document.createElement("optgroup");
-    optionGroup.label = group.groupDescription;
-    handSelect.add(optionGroup);
+  const optionGroup = window.document.createElement("optgroup");
+  optionGroup.label = group.groupDescription;
+  handSelect.add(optionGroup);
 
-    for (const validHand of group.hands) {
-        const option = window.document.createElement("option");
-        option.text = validHand.description;
-        handSelect.add(option);
-    }
+  for (const validHand of group.hands) {
+    const option = window.document.createElement("option");
+    option.text = validHand.description;
+    handSelect.add(option);
+  }
 }
 ```
 
@@ -191,6 +212,7 @@ for (const group of this.card.validHandGroups) {
 ### Tile Count Selection
 
 The tile count selector (1-14) allows you to:
+
 - **1-8 tiles**: Practice early hand development
 - **9-12 tiles**: Study mid-game decisions
 - **13 tiles**: Practice pre-mahjong decisions
@@ -199,17 +221,20 @@ The tile count selector (1-14) allows you to:
 ### Charleston Skip Feature
 
 When enabled:
+
 - **Benefits**: Faster game setup, focus on main gameplay
 - **Use Cases**: Testing discard decisions, AI behavior, hand patterns
 - **Limitations**: Misses Charleston strategy practice
 
 When disabled:
+
 - **Benefits**: Full game experience, practice all phases
 - **Use Cases**: Complete training scenarios, strategy practice
 
 ## 🎯 Practical Usage Examples
 
 ### Example 1: Learning a New Hand Pattern
+
 1. Enable Training Mode
 2. Select "111 222 3333 4444 (2 suits, 4 consecutive numbers)"
 3. Set tile count to 13
@@ -217,6 +242,7 @@ When disabled:
 5. Start game and practice completing the hand
 
 ### Example 2: Testing AI Discard Logic
+
 1. Enable Training Mode
 2. Select a complex hand pattern
 3. Set tile count to 14
@@ -224,6 +250,7 @@ When disabled:
 5. Start game and observe AI decisions
 
 ### Example 3: Teaching Mahjong
+
 1. Enable Training Mode
 2. Select simple patterns (e.g., "Three Dragons")
 3. Set appropriate tile count
@@ -232,16 +259,19 @@ When disabled:
 ## 🐛 Debugging and Testing Features
 
 ### Hand Validation
+
 - Training hands are guaranteed valid (generated by `card.generateHand()`)
 - Invalid selections are prevented by dropdown population
 - AI can still make suboptimal decisions with training hands
 
 ### Tile Count Flexibility
+
 - Allows testing edge cases (very few or many tiles)
 - Helps understand AI behavior with incomplete hands
 - Useful for testing hand ranking algorithms
 
 ### Charleston Bypass
+
 - Speeds up testing cycles
 - Allows focus on specific game phases
 - Useful for automated testing scenarios
@@ -249,16 +279,19 @@ When disabled:
 ## 🔄 Integration with Game Systems
 
 ### AI Behavior
+
 - AI players (1-3) receive normal random hands
 - AI decision-making algorithms work identically
 - Training mode doesn't affect AI intelligence
 
 ### Hint System
+
 - Hint button works normally with training hands
 - Provides top 3 hand recommendations and discard suggestions
 - Useful for learning optimal play with specific hands
 
 ### Game Validation
+
 - All game rules apply normally
 - Training hands must still follow mahjong rules
 - Invalid mahjongs are still detected
@@ -266,12 +299,14 @@ When disabled:
 ## 📊 Benefits for Development
 
 ### For Game Developers
+
 - **Reproducible Testing**: Test specific scenarios consistently
 - **AI Validation**: Verify AI decisions with known inputs
 - **Bug Reproduction**: Recreate specific hand configurations
 - **Performance Testing**: Benchmark with controlled tile distributions
 
 ### For Players
+
 - **Skill Building**: Practice specific hand patterns
 - **Strategy Learning**: Understand optimal decisions
 - **Pattern Recognition**: Learn to identify winning combinations
@@ -280,6 +315,7 @@ When disabled:
 ## 🚀 Future Enhancements
 
 Potential improvements to training mode:
+
 - Save/load custom hand configurations
 - Multiple training scenarios per session
 - Hand progression tutorials

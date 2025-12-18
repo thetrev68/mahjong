@@ -5,6 +5,7 @@
 You're implementing the **HandRenderer** component for an American Mahjong game. This is part of a larger refactor to separate game logic (GameController) from rendering (PhaserAdapter).
 
 **What's Been Completed:**
+
 - ✅ Component 1: SelectionManager (fully implemented in `desktop/managers/SelectionManager.js`)
 - ✅ Codebase reorganization (desktop-specific files now in `desktop/` folder)
 
@@ -19,6 +20,7 @@ Build a class that renders player hands (tiles) for all 4 players using the prov
 **Location:** Create `desktop/renderers/HandRenderer.js`
 
 **Time Estimate:** ~1.5 hours
+
 1. Extract showHand() logic from 07c41b9 (30 min)
 2. Design HandRenderer class (30 min)
 3. Implement for all 4 player positions (30 min)
@@ -36,6 +38,7 @@ git show 07c41b9:gameObjects_hand.js > /tmp/gameObjects_hand.old.js
 ### 1b. Study the showHand() method
 
 Look for in `/tmp/gameObjects_hand.old.js`:
+
 - The `showHand()` method (around line 600+)
 - How it positions tiles for different players (BOTTOM, RIGHT, TOP, LEFT)
 - Layout calculations (X/Y positions, spacing, rotation)
@@ -43,6 +46,7 @@ Look for in `/tmp/gameObjects_hand.old.js`:
 - How exposed tiles are handled
 
 **Key things to extract:**
+
 - Positioning logic for each player (BOTTOM at bottom, RIGHT on right side, etc.)
 - Tile spacing and gaps
 - Rotation angles per player
@@ -52,6 +56,7 @@ Look for in `/tmp/gameObjects_hand.old.js`:
 ### 1c. Document findings
 
 Create `HANDRENDERER_EXTRACTED_LOGIC.md` with:
+
 - How tiles are positioned for PLAYER.BOTTOM (human player)
 - How tiles are positioned for PLAYER.RIGHT, TOP, LEFT (AI players)
 - Key constants used (SPRITE_WIDTH, SPRITE_HEIGHT, TILE_GAP, etc.)
@@ -90,6 +95,7 @@ class HandRenderer {
 ### 2b. Document each method
 
 For each method, write:
+
 - **Purpose**: What it does
 - **Parameters**: Inputs and types
 - **Returns**: What it returns
@@ -98,6 +104,7 @@ For each method, write:
 ### 2c. Design the rendering flow
 
 Document the sequence:
+
 1. `showHand(playerIndex)` called
 2. Get player object from table
 3. Calculate start position based on player position (bottom/right/top/left)
@@ -125,12 +132,12 @@ Create `desktop/renderers/HandRenderer.js`:
  * - PLAYER.LEFT (AI): Vertical column on left, face-down
  */
 export class HandRenderer {
-    constructor(scene, table) {
-        this.scene = scene;
-        this.table = table;
-    }
+  constructor(scene, table) {
+    this.scene = scene;
+    this.table = table;
+  }
 
-    // TODO: Implement methods
+  // TODO: Implement methods
 }
 ```
 
@@ -164,10 +171,17 @@ Implement in this order:
 ### 3c. Import and use existing classes
 
 ```javascript
-import {PLAYER, SPRITE_WIDTH, SPRITE_HEIGHT, TILE_GAP, SPRITE_SCALE} from "../../constants.js";
+import {
+  PLAYER,
+  SPRITE_WIDTH,
+  SPRITE_HEIGHT,
+  TILE_GAP,
+  SPRITE_SCALE,
+} from "../../constants.js";
 ```
 
 Use existing Tile methods:
+
 - `tile.animate(x, y, angle, duration)` - Move tile with animation
 - `tile.showTile(visible, exposed)` - Show/hide tile
 - `tile.sprite.setRotation(angle)` - Rotate sprite
@@ -191,6 +205,7 @@ LEFT│                     │RIGHT
 ### Tile Layout by Player
 
 **BOTTOM (human player):**
+
 - Horizontal row
 - Face-up
 - Y position: ~600px (near bottom)
@@ -198,6 +213,7 @@ LEFT│                     │RIGHT
 - Rotation: 0°
 
 **RIGHT (AI player):**
+
 - Vertical column
 - Face-down
 - X position: ~950px (near right edge)
@@ -205,6 +221,7 @@ LEFT│                     │RIGHT
 - Rotation: 90° (or -90°)
 
 **TOP (AI player):**
+
 - Horizontal row
 - Face-down
 - Y position: ~50px (near top)
@@ -212,6 +229,7 @@ LEFT│                     │RIGHT
 - Rotation: 180° (or 0° if faces away)
 
 **LEFT (AI player):**
+
 - Vertical column
 - Face-down
 - X position: ~50px (near left edge)
@@ -221,6 +239,7 @@ LEFT│                     │RIGHT
 ### Exposed Tiles
 
 Exposed tiles (pung/kong/quint) should be:
+
 - Positioned separately from hidden tiles
 - Face-up for all players
 - Grouped by set (3-5 tiles together)
@@ -242,15 +261,16 @@ const exposedSets = player.hand.exposedTileSetArray;
 
 // Position tiles
 for (let i = 0; i < hiddenTiles.length; i++) {
-    const tile = hiddenTiles[i];
-    const pos = this.getTilePosition(playerIndex, i);
-    tile.animate(pos.x, pos.y, angle);
+  const tile = hiddenTiles[i];
+  const pos = this.getTilePosition(playerIndex, i);
+  tile.animate(pos.x, pos.y, angle);
 }
 ```
 
 ### With SelectionManager
 
 HandRenderer should NOT handle selection - that's SelectionManager's job.
+
 - HandRenderer: Positions tiles
 - SelectionManager: Handles click interactions and visual selection feedback
 

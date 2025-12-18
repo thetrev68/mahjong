@@ -1,6 +1,7 @@
 # Implementation Roadmap: Completing Option B
 
 Based on deep investigation of:
+
 1. Current codebase (managers, PhaserAdapter, etc.)
 2. Commit 07c41b9 (last working version)
 3. DialogManager analysis
@@ -13,27 +14,32 @@ Based on deep investigation of:
 ### What We've Learned
 
 **DialogManager**: ✅ 100% Complete
+
 - All dialog types implemented
 - Perfect patterns
 - Ready to use immediately
 
 **PhaserAdapter**: ⚠️ Partially Connected
+
 - Some handlers call DialogManager correctly
 - But most handlers are stubs or don't route properly
 - Tile animation logic missing
 
 **Existing Managers**:
+
 - `ButtonManager` - exists, incomplete
 - `TileManager` - exists, incomplete
 - `HintAnimationManager` - exists, should work
 - `DialogManager` - exists, fully functional
 
 **Missing Components** (Must Create):
+
 - `SelectionManager` - track selected tiles
 - `HandRenderer` - render hands using showHand() logic
 - `AnimationLibrary` (may already partially exist)
 
 **Old System Insights** (from 07c41b9):
+
 - Promise-based async flow via button clicks
 - Tile selection via Y-position (575 = selected, 600 = normal)
 - State-based UI updates via updateUI()
@@ -49,32 +55,38 @@ Based on deep investigation of:
 **Purpose**: Track which tiles are selected and manage selection state
 
 **Methods Needed**:
+
 ```typescript
 interface SelectionManager {
-    // Enable/disable selection for current phase
-    enableTileSelection(minCount: number, maxCount: number, mode: "charleston"|"courtesy"|"play"|"expose")
-    disableTileSelection()
+  // Enable/disable selection for current phase
+  enableTileSelection(
+    minCount: number,
+    maxCount: number,
+    mode: "charleston" | "courtesy" | "play" | "expose",
+  );
+  disableTileSelection();
 
-    // Get current selection
-    getSelection(): Tile[]
-    getSelectionCount(): number
+  // Get current selection
+  getSelection(): Tile[];
+  getSelectionCount(): number;
 
-    // Manual selection control (called from tile click handlers)
-    toggleTile(tile: Tile): boolean  // Returns true if added, false if removed
-    selectTile(tile: Tile): boolean
-    deselectTile(tile: Tile): boolean
-    clearSelection()
+  // Manual selection control (called from tile click handlers)
+  toggleTile(tile: Tile): boolean; // Returns true if added, false if removed
+  selectTile(tile: Tile): boolean;
+  deselectTile(tile: Tile): boolean;
+  clearSelection();
 
-    // Validation
-    isValidSelection(): boolean  // Check min/max count
-    canSelectMore(): boolean
+  // Validation
+  isValidSelection(): boolean; // Check min/max count
+  canSelectMore(): boolean;
 
-    // Visual feedback
-    visualizeTile(tile: Tile, selected: boolean)  // Y-position 575 vs 600
+  // Visual feedback
+  visualizeTile(tile: Tile, selected: boolean); // Y-position 575 vs 600
 }
 ```
 
 **Based On** (from 07c41b9):
+
 ```javascript
 TileSet {
     selectCount = 0
@@ -84,6 +96,7 @@ TileSet {
 ```
 
 **Implementation Strategy**:
+
 1. Extend or refactor Hand.TileSet selection logic
 2. Create SelectionManager that wraps/coordinates this
 3. Wire up tile click handlers to call SelectionManager
@@ -94,26 +107,28 @@ TileSet {
 
 ### Current State of Key Handlers
 
-| Handler | Current | Needs |
-|---------|---------|-------|
-| onGameStarted | ✅ Implemented | Minor tweaks |
-| onStateChanged | ⚠️ Stub | Wire to ButtonManager |
-| onCharlestonPhase | ❌ Stub (just prints) | Enable tile selection |
-| onUIPrompt | ⚠️ Partially | Route to DialogManager calls |
-| handleCharlestonPassPrompt | ⚠️ Calls DialogManager | Depends on SelectionManager |
-| onTileDrawn | ❌ Missing animation | Create tile animation |
-| onTileDiscarded | ⚠️ Missing animation | Create discard animation |
-| onTurnChanged | ⚠️ Needs work | Update UI |
+| Handler                    | Current                | Needs                        |
+| -------------------------- | ---------------------- | ---------------------------- |
+| onGameStarted              | ✅ Implemented         | Minor tweaks                 |
+| onStateChanged             | ⚠️ Stub                | Wire to ButtonManager        |
+| onCharlestonPhase          | ❌ Stub (just prints)  | Enable tile selection        |
+| onUIPrompt                 | ⚠️ Partially           | Route to DialogManager calls |
+| handleCharlestonPassPrompt | ⚠️ Calls DialogManager | Depends on SelectionManager  |
+| onTileDrawn                | ❌ Missing animation   | Create tile animation        |
+| onTileDiscarded            | ⚠️ Missing animation   | Create discard animation     |
+| onTurnChanged              | ⚠️ Needs work          | Update UI                    |
 
 ### Required Implementation
 
 **For Each Event, PhaserAdapter Must**:
+
 1. Unpack event data
 2. Route to appropriate manager(s)
 3. For user input events: set up callbacks/promises
 4. Return results to GameController
 
 **Example: Charleston Phase**
+
 ```javascript
 // Current (broken)
 onCharlestonPhase(data) {
@@ -139,6 +154,7 @@ onCharlestonPhase(data) {
 ## Phase 4: Implement Tile Animations
 
 ### onTileDrawn Implementation
+
 ```javascript
 onTileDrawn(data) {
     const {player, tile} = data
@@ -161,6 +177,7 @@ onTileDrawn(data) {
 ```
 
 ### onTileDiscarded Implementation
+
 ```javascript
 onTileDiscarded(data) {
     const {player, tile} = data
@@ -189,17 +206,18 @@ onTileDiscarded(data) {
 **Purpose**: Render player hands using showHand() logic from old system
 
 **Methods Needed**:
+
 ```typescript
 interface HandRenderer {
-    showHand(player: Player, forceFaceup?: boolean)
+  showHand(player: Player, forceFaceup?: boolean);
 
-    getTargetPosition(playerIndex: number, tileIndex?: number): {x, y}
-    getTilePosition(playerIndex: number, tile: Tile): {x, y}
+  getTargetPosition(playerIndex: number, tileIndex?: number): { x; y };
+  getTilePosition(playerIndex: number, tile: Tile): { x; y };
 
-    setSelectionMode(mode: string)  // "charleston" | "courtesy" | "play" | "expose"
+  setSelectionMode(mode: string); // "charleston" | "courtesy" | "play" | "expose"
 
-    highlightSelectedTiles()
-    unhighlightTiles()
+  highlightSelectedTiles();
+  unhighlightTiles();
 }
 ```
 
@@ -212,6 +230,7 @@ interface HandRenderer {
 **Current**: ButtonManager exists but probably not fully connected
 
 **Needed**:
+
 1. ButtonManager.updateForState(newState) - show/hide buttons correctly
 2. Button text updates based on state
 3. Button disabled state based on selection validity
@@ -222,6 +241,7 @@ interface HandRenderer {
 ## Work Breakdown (Detailed)
 
 ### Component 1: SelectionManager (~2 hours)
+
 ```
 1. Analyze TileSet selection logic in 07c41b9 (1 hour)
 2. Design SelectionManager API (30 min)
@@ -233,6 +253,7 @@ interface HandRenderer {
 ```
 
 ### Component 2: HandRenderer (~1.5 hours)
+
 ```
 1. Extract showHand() logic from 07c41b9 (30 min)
 2. Design HandRenderer class (30 min)
@@ -241,6 +262,7 @@ interface HandRenderer {
 ```
 
 ### Component 3: PhaserAdapter Handlers (~2 hours)
+
 ```
 1. Wire onCharlestonPhase → SelectionManager (30 min)
 2. Wire onUIPrompt → DialogManager (30 min)
@@ -250,6 +272,7 @@ interface HandRenderer {
 ```
 
 ### Component 4: ButtonManager Integration (~1 hour)
+
 ```
 1. Review ButtonManager current implementation (15 min)
 2. Implement updateForState() (30 min)
@@ -257,6 +280,7 @@ interface HandRenderer {
 ```
 
 ### Component 5: Testing (~2 hours)
+
 ```
 1. Test deal and hand rendering (30 min)
 2. Test Charleston with tile selection (45 min)
@@ -297,6 +321,7 @@ ButtonManager
 ```
 
 **Critical Path**:
+
 1. SelectionManager (blocks PhaserAdapter implementation)
 2. HandRenderer (blocks animations)
 3. PhaserAdapter handlers (blocks overall flow)
@@ -306,6 +331,7 @@ ButtonManager
 ## Success Criteria
 
 ### Phase 2 Complete (SelectionManager)
+
 - [ ] Can select 3 tiles during Charleston
 - [ ] Selected tiles visually indicate selection (Y-position)
 - [ ] Can deselect tiles
@@ -313,27 +339,32 @@ ButtonManager
 - [ ] Validation works (min/max count)
 
 ### Phase 3 Complete (PhaserAdapter Wiring)
+
 - [ ] Charleston dialog appears when expected
 - [ ] Other dialogs (courtesy, claim) appear
 - [ ] Button text updates correctly
 - [ ] Buttons are hidden/shown appropriately
 
 ### Phase 4 Complete (Animations)
+
 - [ ] Tiles animate from wall to hand
 - [ ] Tiles animate to discard pile
 - [ ] Animations have correct duration/easing
 
 ### Phase 5 Complete (HandRenderer)
+
 - [ ] Hands display correctly for all 4 players
 - [ ] Tiles positioned correctly in each hand
 - [ ] Hand reorders when tiles removed
 
 ### Phase 6 Complete (ButtonManager)
+
 - [ ] Correct buttons shown for each state
 - [ ] Button text reflects current action
 - [ ] Buttons disabled when selection invalid
 
 ### Desktop MVP Complete
+
 - [ ] Deal completes without freezing
 - [ ] Charleston works (can select and pass tiles)
 - [ ] Courtesy works
@@ -346,6 +377,7 @@ ButtonManager
 ## Implementation Notes
 
 ### Reusable Code from 07c41b9
+
 ```
 - TileSet.selectCount logic
 - Hand.showHand() method (entire method)
@@ -356,6 +388,7 @@ ButtonManager
 ```
 
 ### Do NOT Reuse (Incompatible with New Architecture)
+
 ```
 - GameLogic class (refactored to GameController)
 - Direct button manipulation from game logic
@@ -363,6 +396,7 @@ ButtonManager
 ```
 
 ### Architectural Decisions Made
+
 ```
 ✅ Promise-based async (button click → resolve)
 ✅ Event-driven (GameController → PhaserAdapter)
@@ -376,18 +410,22 @@ ButtonManager
 ## Risk Mitigation
 
 ### Highest Risk: SelectionManager
+
 **Risk**: If selection system doesn't work, nothing works
 **Mitigation**: Test early with simple test case (5 tiles, select 3)
 
 ### High Risk: Tile Animations
+
 **Risk**: Animation timing or positioning wrong
 **Mitigation**: Use existing animation library, test with one animation type first
 
 ### Medium Risk: HandRenderer
+
 **Risk**: Position calculations wrong for different player positions
 **Mitigation**: Test each player position individually
 
 ### Low Risk: PhaserAdapter Wiring
+
 **Risk**: Wrong event handler called
 **Mitigation**: Add logging to verify events flow correctly
 

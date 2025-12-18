@@ -9,167 +9,172 @@ import { test, expect } from "@playwright/test";
 import { MobileTestHelpers } from "../../utils/mobile-helpers.js";
 
 test.describe("Phase 0: Testing Framework Setup", () => {
-    test("mobile site loads with correct viewport", async ({ page }) => {
-        await MobileTestHelpers.gotoMobileApp(page);
-        await MobileTestHelpers.waitForMobileReady(page);
+  test("mobile site loads with correct viewport", async ({ page }) => {
+    await MobileTestHelpers.gotoMobileApp(page);
+    await MobileTestHelpers.waitForMobileReady(page);
 
-        // Verify viewport is mobile-sized (from playwright.config.js)
-        const viewport = page.viewportSize();
-        expect(viewport.width).toBe(390); // iPhone 12/13 width
-        expect(viewport.height).toBe(844); // iPhone 12/13 height
+    // Verify viewport is mobile-sized (from playwright.config.js)
+    const viewport = page.viewportSize();
+    expect(viewport.width).toBe(390); // iPhone 12/13 width
+    expect(viewport.height).toBe(844); // iPhone 12/13 height
+  });
+
+  test("GameController initializes without errors", async ({ page }) => {
+    const consoleErrors = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "error") {
+        consoleErrors.push(msg.text());
+      }
     });
 
-    test("GameController initializes without errors", async ({ page }) => {
-        const consoleErrors = [];
-        page.on("console", msg => {
-            if (msg.type() === "error") {
-                consoleErrors.push(msg.text());
-            }
-        });
+    try {
+      await MobileTestHelpers.gotoMobileApp(page);
+      await MobileTestHelpers.waitForMobileReady(page);
+    } catch (error) {
+      console.log(
+        "Initialization failed. Captured Console Errors:",
+        consoleErrors,
+      );
+      throw error;
+    }
 
-        try {
-            await MobileTestHelpers.gotoMobileApp(page);
-            await MobileTestHelpers.waitForMobileReady(page);
-        } catch (error) {
-            console.log("Initialization failed. Captured Console Errors:", consoleErrors);
-            throw error;
-        }
-
-        // Verify GameController is available
-        const hasGameController = await page.evaluate(() => {
-            return window.gameController !== undefined &&
-                window.gameController !== null;
-        });
-
-        expect(hasGameController).toBe(true);
-
-        // No critical errors should have occurred
-        const criticalErrors = errors.filter(err =>
-            !err.includes("manifest") && // Ignore manifest warnings in dev
-            !err.includes("favicon")     // Ignore favicon warnings
-        );
-        expect(criticalErrors).toHaveLength(0);
+    // Verify GameController is available
+    const hasGameController = await page.evaluate(() => {
+      return (
+        window.gameController !== undefined && window.gameController !== null
+      );
     });
 
-    test("asset paths are accessible", async ({ page }) => {
-        await MobileTestHelpers.gotoMobileApp(page);
-        await page.waitForLoadState("networkidle");
+    expect(hasGameController).toBe(true);
 
-        // Verify tiles.png is accessible
-        const tilesImageLoaded = await page.evaluate(() => {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => resolve(true);
-                img.onerror = () => resolve(false);
-                img.src = "/mahjong/assets/tiles.png";
-            });
-        });
+    // No critical errors should have occurred
+    const criticalErrors = consoleErrors.filter(
+      (err) =>
+        !err.includes("manifest") && // Ignore manifest warnings in dev
+        !err.includes("favicon"), // Ignore favicon warnings
+    );
+    expect(criticalErrors).toHaveLength(0);
+  });
 
-        expect(tilesImageLoaded).toBe(true);
+  test("asset paths are accessible", async ({ page }) => {
+    await MobileTestHelpers.gotoMobileApp(page);
+    await page.waitForLoadState("networkidle");
 
-        // Verify tiles.json is accessible
-        const tilesJsonLoaded = await page.evaluate(async () => {
-            try {
-                const response = await fetch("/mahjong/assets/tiles.json");
-                return response.ok;
-            } catch {
-                return false;
-            }
-        });
-
-        expect(tilesJsonLoaded).toBe(true);
+    // Verify tiles.png is accessible
+    const tilesImageLoaded = await page.evaluate(() => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = "/mahjong/assets/tiles.png";
+      });
     });
 
-    test("all critical containers exist", async ({ page }) => {
-        await MobileTestHelpers.gotoMobileApp(page);
-        await MobileTestHelpers.waitForMobileReady(page);
+    expect(tilesImageLoaded).toBe(true);
 
-        // Verify critical containers exist (attached to DOM)
-        // Some may be hidden by hide-on-home class until game starts
-        await expect(page.locator("#opponents-container")).toBeAttached();
-        await expect(page.locator("#game-center")).toBeAttached();
-        await expect(page.locator("#hand-area")).toBeAttached();
-        await expect(page.locator("#player-rack-container")).toBeAttached();
-        await expect(page.locator("#hand-container")).toBeAttached();
-        await expect(page.locator(".bottom-menu")).toBeAttached();
-        await expect(page.locator("#discard-container")).toBeAttached();
-
-        // Verify visible containers are actually visible
-        await expect(page.locator("#opponents-container")).toBeVisible();
-        await expect(page.locator("#game-center")).toBeVisible();
-        await expect(page.locator("#hand-area")).toBeVisible();
-        await expect(page.locator(".bottom-menu")).toBeVisible();
+    // Verify tiles.json is accessible
+    const tilesJsonLoaded = await page.evaluate(async () => {
+      try {
+        const response = await fetch("/mahjong/assets/tiles.json");
+        return response.ok;
+      } catch {
+        return false;
+      }
     });
 
-    test("mobile renderer initializes", async ({ page }) => {
-        await MobileTestHelpers.gotoMobileApp(page);
-        await MobileTestHelpers.waitForMobileReady(page);
+    expect(tilesJsonLoaded).toBe(true);
+  });
 
-        // Verify MobileRenderer is initialized
-        const hasMobileRenderer = await page.evaluate(() => {
-            return window.mobileRenderer !== undefined &&
-                window.mobileRenderer !== null;
-        });
+  test("all critical containers exist", async ({ page }) => {
+    await MobileTestHelpers.gotoMobileApp(page);
+    await MobileTestHelpers.waitForMobileReady(page);
 
-        expect(hasMobileRenderer).toBe(true);
+    // Verify critical containers exist (attached to DOM)
+    // Some may be hidden by hide-on-home class until game starts
+    await expect(page.locator("#opponents-container")).toBeAttached();
+    await expect(page.locator("#game-center")).toBeAttached();
+    await expect(page.locator("#hand-area")).toBeAttached();
+    await expect(page.locator("#player-rack-container")).toBeAttached();
+    await expect(page.locator("#hand-container")).toBeAttached();
+    await expect(page.locator(".bottom-menu")).toBeAttached();
+    await expect(page.locator("#discard-container")).toBeAttached();
+
+    // Verify visible containers are actually visible
+    await expect(page.locator("#opponents-container")).toBeVisible();
+    await expect(page.locator("#game-center")).toBeVisible();
+    await expect(page.locator("#hand-area")).toBeVisible();
+    await expect(page.locator(".bottom-menu")).toBeVisible();
+  });
+
+  test("mobile renderer initializes", async ({ page }) => {
+    await MobileTestHelpers.gotoMobileApp(page);
+    await MobileTestHelpers.waitForMobileReady(page);
+
+    // Verify MobileRenderer is initialized
+    const hasMobileRenderer = await page.evaluate(() => {
+      return (
+        window.mobileRenderer !== undefined && window.mobileRenderer !== null
+      );
     });
 
-    test("AI engine initializes", async ({ page }) => {
-        await MobileTestHelpers.gotoMobileApp(page);
-        await MobileTestHelpers.waitForMobileReady(page);
+    expect(hasMobileRenderer).toBe(true);
+  });
 
-        // Verify AIEngine is available
-        const hasAIEngine = await page.evaluate(() => {
-            return window.aiEngine !== undefined &&
-                window.aiEngine !== null;
-        });
+  test("AI engine initializes", async ({ page }) => {
+    await MobileTestHelpers.gotoMobileApp(page);
+    await MobileTestHelpers.waitForMobileReady(page);
 
-        expect(hasAIEngine).toBe(true);
+    // Verify AIEngine is available
+    const hasAIEngine = await page.evaluate(() => {
+      return window.aiEngine !== undefined && window.aiEngine !== null;
     });
 
-    test("new game button is enabled and clickable", async ({ page }) => {
-        await MobileTestHelpers.gotoMobileApp(page);
-        await MobileTestHelpers.waitForMobileReady(page);
+    expect(hasAIEngine).toBe(true);
+  });
 
-        const newGameBtn = page.locator("#new-game-btn");
+  test("new game button is enabled and clickable", async ({ page }) => {
+    await MobileTestHelpers.gotoMobileApp(page);
+    await MobileTestHelpers.waitForMobileReady(page);
 
-        // Verify button is visible
-        await expect(newGameBtn).toBeVisible();
+    const newGameBtn = page.locator("#new-game-btn");
 
-        // Verify button is enabled
-        await expect(newGameBtn).toBeEnabled();
+    // Verify button is visible
+    await expect(newGameBtn).toBeVisible();
 
-        // Verify button is clickable (no overlays blocking it)
-        await expect(newGameBtn).not.toHaveAttribute("disabled");
-    });
+    // Verify button is enabled
+    await expect(newGameBtn).toBeEnabled();
 
-    test("game status displays correctly", async ({ page }) => {
-        await MobileTestHelpers.gotoMobileApp(page);
-        await MobileTestHelpers.waitForMobileReady(page);
+    // Verify button is clickable (no overlays blocking it)
+    await expect(newGameBtn).not.toHaveAttribute("disabled");
+  });
 
-        const statusText = await page.locator("#game-status").textContent();
+  test("game status displays correctly", async ({ page }) => {
+    await MobileTestHelpers.gotoMobileApp(page);
+    await MobileTestHelpers.waitForMobileReady(page);
 
-        // Should show "Ready" or similar status
-        expect(statusText).toContain("Ready");
-    });
+    const statusText = await page.locator("#game-status").textContent();
 
-    test("screenshot helper works", async ({ page }) => {
-        await MobileTestHelpers.gotoMobileApp(page);
-        await MobileTestHelpers.waitForMobileReady(page);
+    // Should show "Ready" or similar status
+    expect(statusText).toContain("Ready");
+  });
 
-        // Test screenshot functionality
-        await expect(async () => {
-            await MobileTestHelpers.takeSnapshot(page, "phase0-validation");
-        }).not.toThrow();
-    });
+  test("screenshot helper works", async ({ page }) => {
+    await MobileTestHelpers.gotoMobileApp(page);
+    await MobileTestHelpers.waitForMobileReady(page);
 
-    test("sprite loading helper detects when sprites load", async ({ page }) => {
-        await MobileTestHelpers.gotoMobileApp(page);
-        await MobileTestHelpers.waitForMobileReady(page);
+    // Test screenshot functionality
+    await expect(async () => {
+      await MobileTestHelpers.takeSnapshot(page, "phase0-validation");
+    }).not.toThrow();
+  });
 
-        // Wait for sprites to load
-        await expect(async () => {
-            await MobileTestHelpers.waitForSpriteLoad(page);
-        }).not.toThrow();
-    });
+  test("sprite loading helper detects when sprites load", async ({ page }) => {
+    await MobileTestHelpers.gotoMobileApp(page);
+    await MobileTestHelpers.waitForMobileReady(page);
+
+    // Wait for sprites to load
+    await expect(async () => {
+      await MobileTestHelpers.waitForSpriteLoad(page);
+    }).not.toThrow();
+  });
 });

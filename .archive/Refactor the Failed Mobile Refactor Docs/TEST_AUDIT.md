@@ -9,15 +9,16 @@
 
 ### Existing Tests (1,668 total lines)
 
-| File | Lines | Type | Status | Coverage |
-|------|-------|------|--------|----------|
-| `aiengine.test.js` | 289 | Unit (jsdom) | ⚠️ Needs Update | AIEngine only |
-| `game-basic.spec.js` | 175 | E2E (Playwright) | ⚠️ Pre-refactor | Desktop basics |
-| `mobile.spec.js` | 246 | E2E (Playwright) | ⚠️ Pre-refactor | Mobile basics |
-| `mobile-tile.test.js` | 411 | Unit (jsdom) | ✅ Component | MobileTile only |
-| `touch-handler.spec.js` | 63 | E2E (Playwright) | ✅ Gesture | TouchHandler only |
+| File                    | Lines | Type             | Status          | Coverage          |
+| ----------------------- | ----- | ---------------- | --------------- | ----------------- |
+| `aiengine.test.js`      | 289   | Unit (jsdom)     | ⚠️ Needs Update | AIEngine only     |
+| `game-basic.spec.js`    | 175   | E2E (Playwright) | ⚠️ Pre-refactor | Desktop basics    |
+| `mobile.spec.js`        | 246   | E2E (Playwright) | ⚠️ Pre-refactor | Mobile basics     |
+| `mobile-tile.test.js`   | 411   | Unit (jsdom)     | ✅ Component    | MobileTile only   |
+| `touch-handler.spec.js` | 63    | E2E (Playwright) | ✅ Gesture      | TouchHandler only |
 
 **Current Issues:**
+
 1. ❌ Tests fail on import (`window is not defined` for Phaser)
 2. ⚠️ Written before 2 major refactors:
    - Desktop: GameController + PhaserAdapter architecture
@@ -35,10 +36,12 @@
 ### 1. Unit Tests (Component Level)
 
 **Existing:**
+
 - ✅ AIEngine (difficulty configs, tile scoring, discard logic)
 - ✅ MobileTile (sprite rendering, creation)
 
 **Missing:**
+
 - ❌ **GameController** (state machine, event emission, game flow)
 - ❌ **TileData/HandData/PlayerData** (core models)
 - ❌ **Card validator** (hand validation, pattern matching)
@@ -57,6 +60,7 @@
 ### 2. Integration Tests (Cross-Component)
 
 **Missing:**
+
 - ❌ **GameController → Adapters:**
   - Events emitted correctly
   - Callbacks invoked properly
@@ -71,10 +75,12 @@
 ### 3. E2E Tests (Full Game Flows)
 
 **Existing (Pre-Refactor):**
+
 - ⚠️ Desktop: Game load, start, settings panel
 - ⚠️ Mobile: Page load, tile selection, Charleston
 
 **Missing:**
+
 - ❌ **Desktop Complete Flows:**
   - Full Charleston (3 passes + query + 2nd Charleston)
   - Courtesy vote & pass
@@ -95,6 +101,7 @@
 ### 4. Regression Tests
 
 **Missing:**
+
 - ❌ **Architectural Constraints:**
   - PhaserAdapter never directly manipulates Phaser objects
   - GameController has zero Phaser imports
@@ -123,6 +130,7 @@ Unit tests use jsdom to mock `window`/`document` (see `aiengine.test.js:15-20`)
 **Solutions:**
 
 1. **Separate Unit vs E2E test files** (RECOMMENDED)
+
    ```
    tests/
    ├── unit/           # jsdom-based, no Phaser
@@ -135,8 +143,9 @@ Unit tests use jsdom to mock `window`/`document` (see `aiengine.test.js:15-20`)
    ```
 
 2. **Update playwright.config.js** to exclude unit tests from browser runs
+
    ```js
-   testMatch: ["**/e2e/**/*.spec.js"]  // Only run E2E in browser
+   testMatch: ["**/e2e/**/*.spec.js"]; // Only run E2E in browser
    ```
 
 3. **Add Node.js test runner for unit tests**
@@ -158,6 +167,7 @@ Unit tests use jsdom to mock `window`/`document` (see `aiengine.test.js:15-20`)
 4. ✅ Run and verify all tests pass
 
 **Files to Update:**
+
 - `aiengine.test.js` → import from `../core/card/card.js`
 - `game-basic.spec.js` → verify selectors still exist
 - `mobile.spec.js` → verify mobile DOM structure
@@ -167,6 +177,7 @@ Unit tests use jsdom to mock `window`/`document` (see `aiengine.test.js:15-20`)
 **Goal:** Test platform-agnostic logic
 
 1. **GameController Tests** (NEW)
+
    ```js
    tests/unit/core/GameController.test.js
    - State machine transitions
@@ -178,6 +189,7 @@ Unit tests use jsdom to mock `window`/`document` (see `aiengine.test.js:15-20`)
    ```
 
 2. **Data Models Tests** (NEW)
+
    ```js
    tests/unit/core/models/TileData.test.js
    tests/unit/core/models/HandData.test.js
@@ -262,41 +274,36 @@ tests/regression/
 
 ## Test Metrics Goals
 
-| Metric | Current | Target (Phase 5) | Target (Phase 7) |
-|--------|---------|------------------|------------------|
-| Total Tests | ~15 | 100+ | 150+ |
-| Coverage (Core) | ~30% | 80% | 90% |
-| Coverage (Desktop) | ~10% | 60% | 75% |
-| Coverage (Mobile) | ~20% | 60% | 75% |
-| E2E Scenarios | 3 | 20 | 30 |
+| Metric             | Current | Target (Phase 5) | Target (Phase 7) |
+| ------------------ | ------- | ---------------- | ---------------- |
+| Total Tests        | ~15     | 100+             | 150+             |
+| Coverage (Core)    | ~30%    | 80%              | 90%              |
+| Coverage (Desktop) | ~10%    | 60%              | 75%              |
+| Coverage (Mobile)  | ~20%    | 60%              | 75%              |
+| E2E Scenarios      | 3       | 20               | 30               |
 
 ---
 
 ## Implementation Priority
 
 **Immediate (Week 1):**
+
 1. ✅ Fix existing tests (Phase 1)
 2. ✅ Add GameController unit tests (Phase 2)
 3. ✅ Add desktop Charleston E2E test (Phase 5)
 
-**Short-term (Week 2-3):**
-4. ✅ Add manager unit tests (Phase 3)
-5. ✅ Add mobile component tests (Phase 4)
-6. ✅ Add main game loop E2E tests (Phase 5)
+**Short-term (Week 2-3):** 4. ✅ Add manager unit tests (Phase 3) 5. ✅ Add mobile component tests (Phase 4) 6. ✅ Add main game loop E2E tests (Phase 5)
 
-**Medium-term (Month 1-2):**
-7. ✅ Complete E2E coverage (Phase 5)
-8. ✅ Add cross-platform tests (Phase 6)
+**Medium-term (Month 1-2):** 7. ✅ Complete E2E coverage (Phase 5) 8. ✅ Add cross-platform tests (Phase 6)
 
-**Long-term (Ongoing):**
-9. ✅ Add regression tests as bugs are found (Phase 7)
-10. ✅ Maintain 80%+ coverage
+**Long-term (Ongoing):** 9. ✅ Add regression tests as bugs are found (Phase 7) 10. ✅ Maintain 80%+ coverage
 
 ---
 
 ## Next Steps
 
 1. **Restructure test directory:**
+
    ```bash
    mkdir -p tests/unit/core tests/unit/desktop/managers tests/unit/mobile
    mkdir -p tests/e2e/desktop tests/e2e/mobile tests/e2e/cross-platform
@@ -320,16 +327,19 @@ tests/regression/
 ## Decision Log
 
 **Why separate unit vs E2E?**
+
 - Unit tests run faster (no browser startup)
 - Can run on CI without headless browser
 - Better isolation (test one component at a time)
 
 **Why prioritize GameController tests?**
+
 - Single source of truth for game logic
 - Most complex component (737 lines)
 - Bugs here affect both platforms
 
 **Why delay regression tests?**
+
 - Need baseline of working tests first
 - Better to add as bugs are discovered
 - Lower ROI than feature coverage

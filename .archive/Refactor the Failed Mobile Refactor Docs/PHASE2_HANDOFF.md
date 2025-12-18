@@ -5,6 +5,7 @@
 ✅ **Phase 1 is COMPLETE**
 
 GameController is now a fully functional, self-contained game engine that:
+
 - Manages all 4 game phases (deal, charleston, courtesy, main loop)
 - Emits rich events with animation parameters
 - Has zero Phaser/GameLogic dependencies
@@ -44,9 +45,11 @@ Phaser Scene & Managers
 ## Phase 2 Tasks Overview
 
 ### Task 2.1: Create Animation Library
+
 **File**: `desktop/animations/AnimationLibrary.js`
 
 Implement reusable animations that PhaserAdapter can call:
+
 - `animateTileDeal()` - Tile slides from wall to hand
 - `animateTileDiscard()` - Tile slides from hand to center
 - `animateTilePass()` - Tile passes between players (Charleston/courtesy)
@@ -55,6 +58,7 @@ Implement reusable animations that PhaserAdapter can call:
 - `animateClaimAnimation()` - Visual feedback for claiming
 
 Each animation should:
+
 - Take animation data from GameController event
 - Use Phaser tweens
 - Include optional audio callbacks
@@ -63,9 +67,11 @@ Each animation should:
 ---
 
 ### Task 2.2: Implement TileManager
+
 **File**: `desktop/managers/TileManager.js`
 
 Manage all tile sprites on the game board:
+
 - Create/destroy tile sprites
 - Position tiles for each player (hand, exposures)
 - Handle tile layout for all 4 positions (bottom, right, top, left)
@@ -76,15 +82,18 @@ Manage all tile sprites on the game board:
 ---
 
 ### Task 2.3: Implement ButtonManager
+
 **File**: `desktop/managers/ButtonManager.js`
 
 State-based button visibility and interaction:
+
 - Create buttons based on current game state (STATE enum)
 - Show/hide buttons per state (e.g., Charleston pass button only during CHARLESTON1)
 - Handle button clicks → call GameController callbacks
 - Manage disabled/enabled states
 
 Buttons to manage:
+
 - Start Game, Next, Pass (Charleston)
 - Continue Charleston (yes/no)
 - Courtesy Vote (0/1/2/3)
@@ -94,9 +103,11 @@ Buttons to manage:
 ---
 
 ### Task 2.4: Implement Hand Selection & Interaction
+
 **File**: Extend TileManager
 
 Handle player interactions with their hand:
+
 - Click tile to select (raise it up, highlight)
 - Drag tile to reorder within hand
 - Select tiles for Charleston pass (3 tiles, visual feedback)
@@ -106,9 +117,11 @@ Handle player interactions with their hand:
 ---
 
 ### Task 2.5: Implement DialogManager
+
 **File**: `desktop/managers/DialogManager.js`
 
 Handle all UI prompts and selections:
+
 - Yes/No dialogs (continue Charleston, etc.)
 - Pass tile selection (Charleston/courtesy)
 - Claim options (mahjong/pung/kong/pass)
@@ -117,6 +130,7 @@ Handle all UI prompts and selections:
 - Game end messages
 
 Each dialog should:
+
 - Modal overlay
 - Return Promise with user selection
 - Call GameController callback with result
@@ -124,16 +138,19 @@ Each dialog should:
 ---
 
 ### Task 2.6: Implement PhaserAdapter Event Handlers
+
 **File**: `desktop/adapters/PhaserAdapter.js`
 
 Subscribe to GameController events and render:
 
 **State Events**:
+
 - `STATE_CHANGED` → Update ButtonManager visible buttons
 - `GAME_STARTED` → Initialize board
 - `GAME_ENDED` → Show result, enable restart
 
 **Tile Events**:
+
 - `TILES_DEALT` → Use AnimationLibrary.animateTileDeal()
 - `TILE_DRAWN` → Use animateTileDeal() for main loop draws
 - `TILE_DISCARDED` → Use AnimationLibrary.animateTileDiscard()
@@ -141,16 +158,19 @@ Subscribe to GameController events and render:
 - `DISCARD_CLAIMED` → Visual feedback
 
 **Phase Events**:
+
 - `CHARLESTON_PHASE` → Update UI for pass selection
 - `CHARLESTON_PASS` → Animate tiles passing
 - `COURTESY_VOTE` → Handle vote display
 - `COURTESY_PASS` → Animate courtesy exchange
 
 **Turn Events**:
+
 - `TURN_CHANGED` → Update current player highlight
 - `HAND_UPDATED` → Update hand display and positions
 
 **UI Events**:
+
 - `UI_PROMPT` → Show dialog via DialogManager, call callback with result
 - `MESSAGE` → Display message to player
 
@@ -161,6 +181,7 @@ Subscribe to GameController events and render:
 Review these in [core/events/GameEvents.js](core/events/GameEvents.js):
 
 Each event includes:
+
 - `type`: Event type string
 - Game data (player, tile, etc.)
 - `animation`: Animation parameters with:
@@ -170,6 +191,7 @@ Each event includes:
   - `easing`: Phaser easing function name
 
 Example event:
+
 ```javascript
 {
   type: "TILE_DRAWN",
@@ -202,12 +224,14 @@ Example event:
 ## Testing Approach
 
 For each task:
+
 1. Implement the manager/library
 2. Wire into PhaserAdapter
 3. Test one event type end-to-end
 4. Verify animation plays, state updates, game continues
 
 Full game test:
+
 1. Start game → deal phase with animations
 2. Charleston phase → select and pass tiles
 3. Courtesy phase → vote and exchange
@@ -219,19 +243,23 @@ Full game test:
 ## Important Files
 
 ### GameController (Read-only, DO NOT MODIFY)
+
 - [core/GameController.js](core/GameController.js) - Game engine (complete, tested)
 - [core/events/GameEvents.js](core/events/GameEvents.js) - Event definitions
 
 ### Phaser Objects (Read-only, keep unchanged)
+
 - [gameObjects.js](gameObjects.js) - Tile class
 - [gameObjects_hand.js](gameObjects_hand.js) - Hand management
 - [gameObjects_table.js](gameObjects_table.js) - Table and players
 - [gameObjects_player.js](gameObjects_player.js) - Player state
 
 ### AIEngine (Read-only)
+
 - [core/AIEngine.js](core/AIEngine.js) - AI decisions (used by GameController)
 
 ### Existing PhaserAdapter (Read-only, reference only)
+
 - [desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js) - Incomplete, needs full implementation
 
 ---
@@ -270,18 +298,21 @@ Full game test:
 ## Handoff Information
 
 **Phase 1 Deliverables**:
+
 - GameController: Complete game engine (930 lines)
 - GameEvents: 20+ event builder functions
 - AIEngine: Compatible AI system
 - Documentation: 3 analysis documents
 
 **What You Have to Work With**:
+
 - Clean event stream from GameController
 - Existing Phaser infrastructure
 - gameObjects classes for rendering
 - AudioManager for sound effects
 
 **What to Create**:
+
 - AnimationLibrary (animations)
 - TileManager (sprites)
 - ButtonManager (UI state)
@@ -302,6 +333,7 @@ Full game test:
 ## Ready to Start?
 
 You have everything needed to implement Phase 2:
+
 1. Complete, tested GameController ✅
 2. Rich event system with animation data ✅
 3. Clear architectural separation ✅

@@ -1,4 +1,3 @@
-
 import { test, expect } from "@playwright/test";
 
 // TODO: Move these to unit tests or create dedicated test page
@@ -36,9 +35,13 @@ test.describe.skip("TouchHandler", () => {
 
   test("should not emit tap if user moves > threshold", async ({ page }) => {
     const testArea = await page.locator("#test-area");
-    await testArea.dispatchEvent("touchstart", { touches: [{ clientX: 100, clientY: 100 }] });
+    await testArea.dispatchEvent("touchstart", {
+      touches: [{ clientX: 100, clientY: 100 }],
+    });
     await page.mouse.move(120, 100);
-    await testArea.dispatchEvent("touchend", { changedTouches: [{ clientX: 120, clientY: 100 }] });
+    await testArea.dispatchEvent("touchend", {
+      changedTouches: [{ clientX: 120, clientY: 100 }],
+    });
     await page.waitForTimeout(200);
     const events = await page.evaluate(() => window.events);
     expect(events.length).toBe(0);
@@ -49,17 +52,21 @@ test.describe.skip("TouchHandler", () => {
     await page.tap("#test-area");
     await page.waitForTimeout(200);
     const events = await page.evaluate(() => window.events);
-    const doubleTapEvent = events.find(e => e.type === "doubletap");
+    const doubleTapEvent = events.find((e) => e.type === "doubletap");
     expect(doubleTapEvent).toBeDefined();
   });
 
   test("should detect a long-press gesture", async ({ page }) => {
     const testArea = await page.locator("#test-area");
-    await testArea.dispatchEvent("touchstart", { touches: [{ clientX: 100, clientY: 100 }] });
+    await testArea.dispatchEvent("touchstart", {
+      touches: [{ clientX: 100, clientY: 100 }],
+    });
     await page.waitForTimeout(600); // wait for long press
-    await testArea.dispatchEvent("touchend", { changedTouches: [{ clientX: 100, clientY: 100 }] });
+    await testArea.dispatchEvent("touchend", {
+      changedTouches: [{ clientX: 100, clientY: 100 }],
+    });
     const events = await page.evaluate(() => window.events);
-    const longPressEvent = events.find(e => e.type === "longpress");
+    const longPressEvent = events.find((e) => e.type === "longpress");
     expect(longPressEvent).toBeDefined();
   });
 });
