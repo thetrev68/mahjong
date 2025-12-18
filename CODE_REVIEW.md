@@ -696,12 +696,16 @@ test("dealTiles distributes exactly 108 tiles to 4 players", () => {
 
 ### 2.3 Deprecated Methods Still Present
 
-**Severity:** 🟢 **LOW-MEDIUM**
+**Severity:** 🟢 **LOW-MEDIUM** → ✅ **RESOLVED**
 **Impact:** Confusion, accidental usage of deprecated APIs
 
-#### Methods Marked Deprecated
+**Status:** ✅ **COMPLETED: December 18, 2025**
 
-**File: `desktop/managers/TileManager.js:127-136`**
+#### Methods That Were Deprecated
+
+**Previous State - File: `desktop/managers/TileManager.js`**
+
+The following deprecated methods existed but only logged errors:
 
 ```javascript
 insertTileIntoHand(_playerIndex, _tile) {
@@ -715,49 +719,20 @@ getTileAtHandPosition(...) {
 }
 ```
 
-**Problem:** Methods exist but throw errors
+**Problem:** Methods existed but didn't work
 
 - Confusing - method exists but doesn't work
 - Error logged instead of thrown (inconsistent with function name)
 - Takes code space
 
-#### Recommendations
+**Resolution:**
 
-1. **If migration complete - delete entirely:**
+- ✅ Verified no code calls these methods (comprehensive grep search)
+- ✅ Migration to HandData/HandRenderer event system is complete
+- ✅ Removed all three deprecated methods from TileManager.js
+- ✅ Reduced file size and eliminated confusion
 
-```javascript
-// Don't do this:
-insertTileIntoHand() {
-    throw new Error("Removed - use HAND_UPDATED events");
-}
-
-// Just delete the method
-```
-
-1. **If still migrating - use proper deprecation:**
-
-```javascript
-/**
- * @deprecated Use GameController.on("HAND_UPDATED", ...) instead
- * @throws {Error} Always throws - use event system
- */
-insertTileIntoHand(_playerIndex, _tile) {
-    throw new DeprecationError(
-        "insertTileIntoHand removed - subscribe to HAND_UPDATED events"
-    );
-}
-```
-
-1. **Add deprecation policy to CLAUDE.md:**
-
-```markdown
-## Deprecation Policy
-
-1. Mark method with @deprecated JSDoc
-2. Add console warning (not error) for 1 release
-3. Throw error for next release
-4. Remove in release after that
-```
+**Result:** TileManager is now cleaner with no confusing stub methods. All hand operations properly use the event-driven HandData/HandRenderer pattern.
 
 ---
 
