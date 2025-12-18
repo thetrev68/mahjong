@@ -1140,31 +1140,129 @@ export class MobileRenderer extends BaseAdapter {
    * This handler provides visual feedback for the swap
    * @param {Object} data - Blank exchange event data {player, blankTile, retrievedTile, discardIndex}
    */
-  onBlankExchanged(data) {
+  async onBlankExchanged(data) {
     const { player, blankTile, retrievedTile } = data;
 
-    // GameController has already updated HandData and emitted HAND_UPDATED events
-    // HandRenderer will handle the hand visual update automatically
+    // Only animate for human player
+    if (player !== HUMAN_PLAYER) {
+      return;
+    }
 
-    // Force re-render of discard pile to show the blank tile that was added
-    // GameController has already updated the discards array
-    if (this.discardPile.discards && this.discardPile.discards.length > 0) {
-      const lastDiscardObj =
-        this.discardPile.discards[this.discardPile.discards.length - 1];
-      this.discardPile.rerender(lastDiscardObj);
+    // GameController has already updated HandData and emitted HAND_UPDATED events
+    // We need to animate BEFORE the hand re-renders to get the correct tile positions
+
+    const blankData = TileData.fromJSON(blankTile);
+    const discardData = TileData.fromJSON(retrievedTile);
+
+    try {
+      // Find the blank tile element in the current hand display (before update)
+      const handContainer = this.playerRack?.container;
+      const handTiles = handContainer?.querySelectorAll(".tile");
+      let blankTileElement = null;
+
+      if (handTiles) {
+        for (const tile of handTiles) {
+          const tileIndex = parseInt(tile.dataset.tileIndex);
+          if (tileIndex === blankData.index) {
+            blankTileElement = tile;
+            break;
+          }
+        }
+      }
+
+      // Find the discard tile element in the discard pile
+      const discardPileElement = document.getElementById("discard-pile");
+      const discardTiles = discardPileElement?.querySelectorAll(".tile");
+      let discardTileElement = null;
+
+      if (discardTiles) {
+        for (const tile of discardTiles) {
+          const tileIndex = parseInt(tile.dataset.tileIndex);
+          if (tileIndex === discardData.index) {
+            discardTileElement = tile;
+            break;
+          }
+        }
+      }
+
+      // Create floating clones for animation if we found the tiles
+      let floatingBlankTile = null;
+      let floatingDiscardTile = null;
+
+      if (blankTileElement) {
+        const blankPos = getElementCenterPosition(blankTileElement);
+        floatingBlankTile = await this._createFloatingTile(blankData, blankPos);
+      }
+
+      if (discardTileElement) {
+        const discardPos = getElementCenterPosition(discardTileElement);
+        floatingDiscardTile = await this._createFloatingTile(
+          discardData,
+          discardPos,
+        );
+      }
+
+      // Hide the original tiles during animation
+      if (blankTileElement) {
+        blankTileElement.style.opacity = "0";
+      }
+      if (discardTileElement) {
+        discardTileElement.style.opacity = "0";
+      }
+
+      // Animate the swap using AnimationController
+      if (floatingBlankTile || floatingDiscardTile) {
+        await this.animationController.animateTileSwap(
+          floatingBlankTile,
+          floatingDiscardTile,
+          handContainer ? getElementCenterPosition(handContainer) : null,
+        );
+
+        // Clean up floating tiles
+        if (floatingBlankTile && floatingBlankTile.parentNode) {
+          floatingBlankTile.remove();
+        }
+        if (floatingDiscardTile && floatingDiscardTile.parentNode) {
+          floatingDiscardTile.remove();
+        }
+      }
+
+      // Force re-render of discard pile to show the blank tile that was added
+      // GameController has already updated the discards array
+      if (this.discardPile.discards && this.discardPile.discards.length > 0) {
+        const lastDiscardObj =
+          this.discardPile.discards[this.discardPile.discards.length - 1];
+        this.discardPile.rerender(lastDiscardObj);
+      }
+
+      // Apply blue glow to the retrieved tile in hand (after hand re-renders)
+      setTimeout(() => {
+        const updatedHandTiles =
+          handContainer?.querySelectorAll(".tile") || [];
+        for (const tile of updatedHandTiles) {
+          const tileIndex = parseInt(tile.dataset.tileIndex);
+          if (tileIndex === discardData.index) {
+            this.animationController.applyReceivedTileGlow(tile);
+            break;
+          }
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Error animating blank swap:", error);
+
+      // Fallback: just re-render without animation
+      if (this.discardPile.discards && this.discardPile.discards.length > 0) {
+        const lastDiscardObj =
+          this.discardPile.discards[this.discardPile.discards.length - 1];
+        this.discardPile.rerender(lastDiscardObj);
+      }
     }
 
     // Provide user feedback
     const playerName = this.getPlayerName(player);
-    const blankData = TileData.fromJSON(blankTile);
-    const discardData = TileData.fromJSON(retrievedTile);
-
     this.updateStatus(
       `${playerName} exchanged ${blankData.getText()} for ${discardData.getText()}`,
     );
-
-    // TODO: Add animation - blank tile flying to discard pile, discard tile flying to hand
-    // Animation could be triggered here using AnimationController
   }
 
   /**

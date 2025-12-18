@@ -1984,7 +1984,7 @@ getSelectionManager() {
 | **Charleston Animation** | CharlestonAnimationSequencer | CharlestonAnimationSequencer | ✅ Yes | Extracted to sequencer      |
 | **Dealing Animation**    | DealingAnimationSequencer    | DealingAnimationSequencer    | ✅ Yes | Extracted to sequencer      |
 | **Discard Animation**    | DiscardAnimationSequencer    | DiscardAnimationSequencer    | ✅ Yes | Extracted to sequencer      |
-| **Blank Tile Swap**      | ✓ Animated                   | ✗ Missing (TODO)             | ❌ No  | Mobile needs implementation |
+| **Blank Tile Swap**      | ✓ Animated                   | ✓ Animated                   | ✅ Yes | Completed Dec 18, 2025      |
 | **Event Cleanup**        | ✓ destroy() method           | ✓ destroy() method           | ✅ Yes | Completed in Section 5.1    |
 | **Audio Manager**        | audioManager.js              | MobileAudioManager.js        | ✓ OK   | Both platforms supported    |
 | **Hints Panel**          | HintAnimationManager         | HintsPanel component         | ✓ OK   | Both have implementation    |
@@ -2021,17 +2021,26 @@ desktop/animations/
 - Better separation of concerns
 - Easier to maintain and extend animations
 
-#### Problem 2: Blank Tile Swap Animation Missing on Mobile
+#### Problem 2: Blank Tile Swap Animation Missing on Mobile — ✅ **RESOLVED**
 
-Mobile TODO comment (line 573, 1059):
+**Status:** ✅ **COMPLETED: December 18, 2025**
 
-```javascript
-// TODO: Add animation - blank tile flying to discard pile, discard tile flying to hand
-```
+**Changes Made:**
 
-Desktop has this animation working.
+- Added `animateTileSwap()` method to [mobile/animations/AnimationController.js](mobile/animations/AnimationController.js)
+  - Animates blank tile flying from hand to discard pile
+  - Simultaneously animates discard tile flying from pile to hand
+  - Uses existing CSS animation classes (tile-discarding, tile-claiming-move)
+  - Promise-based flow control for smooth synchronization
+- Updated [mobile/MobileRenderer.js](mobile/MobileRenderer.js) `onBlankExchanged()` method
+  - Creates floating tile clones for animation
+  - Finds tile elements by index in DOM
+  - Hides original tiles during animation
+  - Applies blue glow to retrieved tile after swap completes
+  - Graceful fallback if animation fails
+- Mobile now has feature parity with desktop for blank tile swaps
 
-**Consistency Issue:** Users on mobile see instant tile swap, users on desktop see animated swap.
+**Result:** Users on both platforms now see animated tile swaps with visual feedback.
 
 #### Problem 3: Memory Management Inconsistency
 
@@ -2209,10 +2218,10 @@ December 17, 2025**
    - **Effort:** 1 hour
    - **Impact:** Low - test hygiene
 
-5. **Implement Mobile Blank Swap Animation** (Section 6.1)
-   - Feature parity with desktop
-   - **Effort:** 2 hours
-   - **Impact:** Medium - consistent user experience
+5. ~~**Implement Mobile Blank Swap Animation** (Section 6.1)~~ ✅ **COMPLETED: December 18, 2025**
+   - Added `animateTileSwap()` method to AnimationController
+   - Updated `onBlankExchanged()` in MobileRenderer with animation flow
+   - Mobile now has feature parity with desktop for blank tile swaps
 
 ### 🟢 Low Priority (Nice to Have)
 

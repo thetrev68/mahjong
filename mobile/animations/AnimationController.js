@@ -355,6 +355,100 @@ export class AnimationController {
   }
 
   /**
+   * Animate a tile swap between hand and discard pile
+   * Used for blank tile exchanges where one tile flies to discard and another flies to hand
+   * @param {HTMLElement} handTile - The tile element leaving the hand (e.g., blank tile)
+   * @param {HTMLElement} discardTile - The tile element leaving the discard pile
+   * @param {Object} handTargetPos - {x, y} target position in hand for the discard tile
+   * @returns {Promise} Resolves when both animations complete
+   */
+  animateTileSwap(handTile, discardTile, handTargetPos = null) {
+    return new Promise((resolve) => {
+      if (!handTile && !discardTile) {
+        resolve();
+        return;
+      }
+
+      const promises = [];
+
+      // Animate hand tile to discard pile
+      if (handTile) {
+        this._resetElementAnimation(handTile, TILE_ANIMATION_CLASSES);
+        const handStartPos = getElementCenterPosition(handTile);
+
+        // Find discard pile center as target
+        const discardPileElement = document.getElementById("discard-pile");
+        const discardTargetPos = discardPileElement
+          ? getElementCenterPosition(discardPileElement)
+          : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+        const handMovement = calculateMovement(handStartPos, discardTargetPos);
+
+        const handCssVars = {
+          "--start-x": toPx(handStartPos.x),
+          "--start-y": toPx(handStartPos.y),
+          "--end-x": toPx(discardTargetPos.x),
+          "--end-y": toPx(discardTargetPos.y),
+          "--movement-dx": toPx(handMovement.dx),
+          "--movement-dy": toPx(handMovement.dy),
+          "--tile-discard-duration": `${this.duration}ms`,
+          "--tile-discard-easing": this.easing,
+        };
+
+        this._setCssVariables(handTile, handCssVars);
+        this._applyAnimationClass(handTile, "tile-discarding");
+
+        const handPromise = new Promise((res) => {
+          this._scheduleTimer(handTile, this.duration, () => {
+            handTile.classList.remove("tile-discarding");
+            this._clearCssVariables(handTile, Object.keys(handCssVars));
+            res();
+          });
+        });
+        promises.push(handPromise);
+      }
+
+      // Animate discard tile to hand
+      if (discardTile) {
+        this._resetElementAnimation(discardTile, TILE_ANIMATION_CLASSES);
+        const discardStartPos = getElementCenterPosition(discardTile);
+
+        // Use provided target or calculate from hand container
+        const handContainer = document.getElementById("hand-area");
+        const actualHandTargetPos = handTargetPos ||
+          (handContainer ? getElementCenterPosition(handContainer) : discardStartPos);
+
+        const discardMovement = calculateMovement(discardStartPos, actualHandTargetPos);
+
+        const discardCssVars = {
+          "--start-x": toPx(discardStartPos.x),
+          "--start-y": toPx(discardStartPos.y),
+          "--target-x": toPx(actualHandTargetPos.x),
+          "--target-y": toPx(actualHandTargetPos.y),
+          "--movement-dx": toPx(discardMovement.dx),
+          "--movement-dy": toPx(discardMovement.dy),
+          "--tile-claim-duration": `${this.duration}ms`,
+        };
+
+        this._setCssVariables(discardTile, discardCssVars);
+        this._applyAnimationClass(discardTile, "tile-claiming-move");
+
+        const discardPromise = new Promise((res) => {
+          this._scheduleTimer(discardTile, this.duration, () => {
+            discardTile.classList.remove("tile-claiming-move");
+            this._clearCssVariables(discardTile, Object.keys(discardCssVars));
+            res();
+          });
+        });
+        promises.push(discardPromise);
+      }
+
+      // Resolve when both animations complete
+      Promise.all(promises).then(() => resolve());
+    });
+  }
+
+  /**
    * Shake animation for invalid action
    * @param {HTMLElement} element - Element to shake
    * @returns {Promise} Resolves when animation completes
