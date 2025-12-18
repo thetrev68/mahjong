@@ -1794,7 +1794,7 @@ export class MobileRenderer extends BaseAdapter {
     }
   }
 
-  // TODO: Asset error handling scaffolding (not yet wired up)
+  // TODO #6: Asset error handling scaffolding (not yet wired up)
   // Future work: Add image onerror handlers to detect tile sprite loading failures
   // Future work: Implement text mode fallback in HandRenderer
   // Future work: Call handleAssetError from asset loading pipeline
@@ -1819,7 +1819,7 @@ export class MobileRenderer extends BaseAdapter {
   }
 
   enableTextModeFallback() {
-    // TODO: Implement text mode in HandRenderer
+    // TODO #6: Implement text mode in HandRenderer
     // This would require HandRenderer to support text-based tile rendering
     console.warn(
       "Text mode fallback requested but not fully implemented in HandRenderer yet",

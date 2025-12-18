@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-// TODO: Move these to unit tests or create dedicated test page
+// TODO #7: Move these to unit tests or create dedicated test page
 // These tests use page.setContent() with ES modules which causes timing issues in Playwright
 test.describe.skip("TouchHandler", () => {
   test.beforeEach(async ({ page }) => {

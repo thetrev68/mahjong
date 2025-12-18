@@ -1565,7 +1565,7 @@ export class GameController extends EventEmitter {
     }
 
     // For now, auto-select the first available exchange
-    // TODO: Future enhancement - let user choose among multiple exchanges
+    // TODO #1: Future enhancement - let user choose among multiple exchanges
     // Could use promptUI to present matchingExchanges array for selection
     const exchange = matchingExchanges[0];
     const requiredTile = exchange.requiredTiles[0];

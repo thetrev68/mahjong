@@ -16,7 +16,7 @@ import { Wall, Discards } from "./gameObjects.js";
  *   2. Discards (discard pile)
  *   3. Visual turn indicator boxes
  *
- * TODO Phase 6 Cleanup:
+ * TODO #3 Phase 6 Cleanup:
  * - Delete all methods that reference this.players
  * - Keep only: wall, discards, boxes, reset(), switchPlayer()
  * - Consider moving Wall/Discards to TileManager

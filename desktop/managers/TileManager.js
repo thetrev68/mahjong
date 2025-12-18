@@ -596,7 +596,7 @@ export class TileManager {
    */
   enableTileDragForPlayer(playerIndex) {
     this.dragEnabledPlayers.add(playerIndex);
-    // TODO: Set up drag event handlers for this player's tiles
+    // TODO #4: Set up drag event handlers for this player's tiles
   }
 
   /**
@@ -606,7 +606,7 @@ export class TileManager {
    */
   disableTileDragForPlayer(playerIndex) {
     this.dragEnabledPlayers.delete(playerIndex);
-    // TODO: Remove drag event handlers
+    // TODO #4: Remove drag event handlers
   }
 
   /**
