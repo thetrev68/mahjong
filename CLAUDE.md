@@ -76,7 +76,12 @@ c:\Repos\mahjong\
 │
 ├── desktop/                 # Phaser-specific implementation
 │   ├── adapters/
-│   │   └── PhaserAdapter.js # Event → Phaser translator
+│   │   └── PhaserAdapter.js # Event → Phaser translator (extends BaseAdapter)
+│   ├── animations/          # Animation sequencers (matches mobile architecture)
+│   │   ├── AnimationSequencer.js          # Base class for animation flow
+│   │   ├── DealingAnimationSequencer.js   # Dealing phase animations
+│   │   ├── CharlestonAnimationSequencer.js # Charleston pass animations
+│   │   └── DiscardAnimationSequencer.js   # Discard animations
 │   ├── managers/            # Specialized desktop managers
 │   │   ├── ButtonManager.js
 │   │   ├── DialogManager.js
@@ -94,7 +99,7 @@ c:\Repos\mahjong\
 │       └── GameScene.js     # Phaser scene initialization
 │
 ├── mobile/                  # Mobile-specific implementation
-│   ├── MobileRenderer.js    # Event → HTML/CSS translator
+│   ├── MobileRenderer.js    # Event → HTML/CSS translator (extends BaseAdapter)
 │   ├── components/          # HTML/CSS UI components
 │   │   ├── MobileTile.js
 │   │   ├── DiscardPile.js
@@ -106,10 +111,15 @@ c:\Repos\mahjong\
 │   ├── gestures/
 │   │   └── TouchHandler.js
 │   └── animations/
-│       └── AnimationController.js
+│       ├── AnimationController.js          # CSS animation utilities
+│       ├── AnimationSequencer.js           # Base sequencer class
+│       ├── DealingAnimationSequencer.js    # Dealing phase
+│       ├── CharlestonAnimationSequencer.js # Charleston passes
+│       └── DiscardAnimationSequencer.js    # Discard animations
 │
 ├── shared/                  # Cross-platform utilities
-│   └── SettingsManager.js   # localStorage persistence
+│   ├── SettingsManager.js   # localStorage persistence
+│   └── BaseAdapter.js       # Event subscription tracking base class
 │
 ├── index.html               # Desktop entry point
 ├── mobile/index.html        # Mobile entry point
@@ -209,6 +219,19 @@ Both platforms use:
 - [core/AIEngine.js](core/AIEngine.js) - AI decisions
 - [card/card.js](card/card.js) - Hand validation
 - [shared/SettingsManager.js](shared/SettingsManager.js) - Settings persistence
+- [shared/BaseAdapter.js](shared/BaseAdapter.js) - Event subscription tracking base class
+
+### Cross-Platform Utilities
+
+**Truly Shared:**
+
+- [shared/SettingsManager.js](shared/SettingsManager.js) - localStorage persistence
+- [shared/BaseAdapter.js](shared/BaseAdapter.js) - Event subscription tracking and cleanup
+
+**Platform-Specific (do not share):**
+
+- [mobile/utils/](mobile/utils/) - Mobile position calculations, tile sprites
+- [desktop/config/](desktop/config/) - Desktop layout constants (playerLayout.js)
 
 ## Key Components
 
@@ -291,17 +314,43 @@ Pattern validation and hand ranking engine:
 
 **Location**: [desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js)
 
-Translates GameController events into Phaser-specific rendering calls.
+Translates GameController events into Phaser-specific rendering calls. Extends [shared/BaseAdapter.js](shared/BaseAdapter.js) for automatic event cleanup.
 
-**Pattern**: Listens to events, delegates to managers:
+**Pattern**: Listens to events, delegates to managers and animation sequencers:
 
 ```javascript
-setupEventListeners() {
-  this.gameController.on("TILE_DRAWN", (data) => this.onTileDrawn(data));
-  this.gameController.on("HAND_UPDATED", (data) => this.onHandUpdated(data));
-  this.gameController.on("UI_PROMPT", (event) => this.handleUIPrompt(event));
-}
+registerEventHandlers({
+  TILE_DRAWN: (data) => this.onTileDrawn(data),
+  HAND_UPDATED: (data) => this.onHandUpdated(data),
+  TILES_DEALT: (data) => this.dealingSequencer.execute(data),
+  UI_PROMPT: (event) => this.handleUIPrompt(event)
+})
 ```
+
+### Desktop Animation Sequencers
+
+**Architecture**: Desktop now uses animation sequencers matching mobile architecture (completed December 2025).
+
+**Location**: [desktop/animations/](desktop/animations/)
+
+**Base Class**: [desktop/animations/AnimationSequencer.js](desktop/animations/AnimationSequencer.js)
+
+- Promise-based flow control
+- Phaser tween orchestration
+- Event coordination
+
+**Specialized Sequencers**:
+
+- [DealingAnimationSequencer.js](desktop/animations/DealingAnimationSequencer.js) - Dealing phase tile animations
+- [CharlestonAnimationSequencer.js](desktop/animations/CharlestonAnimationSequencer.js) - Charleston pass/receive with fade effects
+- [DiscardAnimationSequencer.js](desktop/animations/DiscardAnimationSequencer.js) - Discard pile animations
+
+**Benefits**:
+
+- Consistent architecture with mobile
+- Better separation of concerns (adapter delegates to sequencers)
+- Improved testability
+- Easier to extend with new animations
 
 ### Desktop Managers
 
@@ -363,17 +412,39 @@ setupEventListeners() {
 
 **Location**: [mobile/MobileRenderer.js](mobile/MobileRenderer.js)
 
-Parallel to PhaserAdapter - translates GameController events into HTML/CSS updates.
+Parallel to PhaserAdapter - translates GameController events into HTML/CSS updates. Extends [shared/BaseAdapter.js](shared/BaseAdapter.js) for automatic event cleanup.
 
-**Pattern**: Listens to events, delegates to components:
+**Pattern**: Listens to events, delegates to components and animation sequencers:
 
 ```javascript
-setupEventListeners() {
-  this.gameController.on("TILE_DRAWN", (data) => this.onTileDrawn(data));
-  this.gameController.on("HAND_UPDATED", (data) => this.onHandUpdated(data));
-  this.gameController.on("UI_PROMPT", (event) => this.handleUIPrompt(event));
-}
+registerEventHandlers({
+  TILE_DRAWN: (data) => this.onTileDrawn(data),
+  HAND_UPDATED: (data) => this.onHandUpdated(data),
+  TILES_DEALT: (data) => this.dealingSequencer.execute(data),
+  UI_PROMPT: (event) => this.handleUIPrompt(event)
+})
 ```
+
+### Mobile Animation Sequencers
+
+**Location**: [mobile/animations/](mobile/animations/)
+
+**Base Class**: [mobile/animations/AnimationSequencer.js](mobile/animations/AnimationSequencer.js)
+
+- Promise-based flow control
+- CSS animation orchestration
+- Event coordination
+
+**Specialized Sequencers**:
+
+- [DealingAnimationSequencer.js](mobile/animations/DealingAnimationSequencer.js) - Dealing phase tile animations
+- [CharlestonAnimationSequencer.js](mobile/animations/CharlestonAnimationSequencer.js) - Charleston pass/receive animations
+- [DiscardAnimationSequencer.js](mobile/animations/DiscardAnimationSequencer.js) - Discard pile animations
+
+**Animation Controller**: [mobile/animations/AnimationController.js](mobile/animations/AnimationController.js)
+
+- Low-level CSS animation utilities
+- Used by sequencers for specific effects (slideIn, fadeOut, etc.)
 
 ### Mobile Components
 
@@ -571,6 +642,76 @@ Tiles have two representations:
 - New code should use [core/models/](core/models/) classes
 - Legacy objects maintained for backwards compatibility during transition
 
+## Legacy Files Being Phased Out
+
+These files are maintained for backward compatibility but should not be used for new code:
+
+- [desktop/gameObjects/gameObjects.js](desktop/gameObjects/gameObjects.js)
+- [desktop/gameObjects/gameObjects_table.js](desktop/gameObjects/gameObjects_table.js)
+- [desktop/gameObjects/gameObjects_hand.js](desktop/gameObjects/gameObjects_hand.js)
+- [desktop/gameObjects/gameObjects_player.js](desktop/gameObjects/gameObjects_player.js)
+
+**Migration Status:**
+
+- TileManager fully migrated to use TileData ✓
+- HandRenderer partially migrated to use HandData ✓
+- Remaining dependencies in legacy code paths
+
+**For New Code:**
+
+- Use [core/models/TileData.js](core/models/TileData.js) instead of Phaser Tile objects
+- Use [core/models/HandData.js](core/models/HandData.js) instead of gameObjects_hand
+- Use [core/models/PlayerData.js](core/models/PlayerData.js) instead of gameObjects_player
+
+## Memory Management
+
+**CRITICAL**: All adapters and managers must implement `destroy()` method for proper cleanup:
+
+### Requirements
+
+1. **Event Listener Cleanup** - Unsubscribe from all GameController events
+2. **DOM Event Cleanup** - Remove all DOM event listeners (clicks, touches, etc.)
+3. **Reference Cleanup** - Set all object references to null to break circular dependencies
+4. **Timer Cleanup** - Clear all setTimeout/setInterval/requestAnimationFrame calls
+
+### BaseAdapter Pattern
+
+Both [desktop/adapters/PhaserAdapter.js](desktop/adapters/PhaserAdapter.js) and [mobile/MobileRenderer.js](mobile/MobileRenderer.js) extend [shared/BaseAdapter.js](shared/BaseAdapter.js) which provides:
+
+- Automatic subscription tracking via `registerEventHandlers()`
+- Centralized cleanup via `destroy()` method
+- Prevents memory leaks on game restart
+
+### When destroy() is Called
+
+- Game restart
+- Scene shutdown (desktop)
+- Page navigation (mobile)
+- PWA page unload
+
+### Example Implementation
+
+```javascript
+// Extending BaseAdapter
+class PhaserAdapter extends BaseAdapter {
+  constructor(gameController, scene) {
+    super(gameController);
+    this.setupManagers();
+    this.registerEventHandlers({
+      TILE_DRAWN: (data) => this.onTileDrawn(data),
+      HAND_UPDATED: (data) => this.onHandUpdated(data)
+    });
+  }
+
+  destroy() {
+    super.destroy(); // Unsubscribes all events
+    this.buttonManager?.destroy();
+    this.selectionManager?.destroy();
+    // ... destroy all managers
+  }
+}
+```
+
 ### PWA Features (Mobile)
 
 - Install prompt after 3 games played ([mobile/components/InstallPrompt.js](mobile/components/InstallPrompt.js))
@@ -630,7 +771,10 @@ Run `npm run lint` before committing to catch issues.
 2. **No Redux** - Custom event-driven architecture via EventEmitter
 3. **Multi-platform** - Desktop (Phaser) and Mobile (HTML/CSS) share core logic
 4. **Event-driven** - Adapters listen to GameController events and update UI
-5. **Callback-based prompts** - UI prompts use callbacks, not promises
-6. **Legacy objects exist** - gameObjects_*.js files being phased out
-7. **State machine is strict** - All state transitions managed by GameController
-8. **AI is platform-agnostic** - AIEngine works on plain data models
+5. **BaseAdapter pattern** - Both platforms extend BaseAdapter for event cleanup
+6. **Animation sequencers** - Both platforms use sequencer architecture (consistent as of Dec 2025)
+7. **Memory management required** - All adapters/managers must implement destroy() method
+8. **Callback-based prompts** - UI prompts use callbacks, not promises
+9. **Legacy objects exist** - gameObjects_*.js files being phased out, use core/models/ instead
+10. **State machine is strict** - All state transitions managed by GameController
+11. **AI is platform-agnostic** - AIEngine works on plain data models

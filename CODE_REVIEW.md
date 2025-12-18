@@ -1071,139 +1071,41 @@ npm run jsdoc:check  # New script to verify coverage
 
 ### 3.2 CLAUDE.md Accuracy Issues
 
-**Severity:** 🟢 **LOW**
+**Severity:** 🟢 **LOW** → ✅ **RESOLVED**
 **Impact:** Developer confusion, outdated knowledge base
+
+**Status:** ✅ **COMPLETED: December 17, 2025** — Updated CLAUDE.md with all recommended changes
 
 #### Discrepancies Found
 
-##### Issue 1: Cross-Platform Utilities
+##### Issue 1: Cross-Platform Utilities — ✅ **RESOLVED**
 
-CLAUDE.md states (line 111-112):
+**Changes Made:**
 
-```markdown
-├── shared/ # Cross-platform utilities
-│ └── SettingsManager.js # localStorage persistence
-```
+- Updated directory structure to show both SettingsManager.js and BaseAdapter.js in shared/
+- Added new "Cross-Platform Utilities" section clarifying what's truly shared vs platform-specific
+- Documents that mobile/utils/ and desktop/config/ are intentionally platform-specific
+- Clear guidance for developers on what belongs where
 
-Reality:
+##### Issue 2: Animation Sequencers on Desktop — ✅ **RESOLVED**
 
-- Only SettingsManager.js in shared/
-- Mobile has `mobile/utils/positionUtils.js` (platform-specific)
-- Desktop has `desktop/config/playerLayout.js` (platform-specific)
-- No truly shared utilities besides SettingsManager
+**Changes Made:**
 
-**Recommendation:** Update CLAUDE.md or refactor utilities:
+- Added Desktop Animation Sequencers section documenting the new architecture
+- Listed all sequencer files: AnimationSequencer.js (base), DealingAnimationSequencer.js, CharlestonAnimationSequencer.js, DiscardAnimationSequencer.js
+- Documented completion date (December 2025)
+- Explained benefits: consistency, testability, separation of concerns
 
-```markdown
-### Option A (Update docs):
+##### Issue 3: File Organization Changed — ✅ **RESOLVED**
 
-shared/ contains only SettingsManager.js
-Mobile utilities in mobile/utils/ (position, tile display)
-Desktop utilities in desktop/config/ (layout)
+**Changes Made:**
 
-### Option B (Refactor - RECOMMENDED):
-
-Move cross-platform utilities to shared/:
-
-- shared/PositionUtils.js (can be used by both)
-- shared/AnimationConfig.js (animation constants)
-- shared/TileDisplayUtils.js (sprite positioning)
-```
-
-##### Issue 2: Animation Sequencers on Desktop
-
-CLAUDE.md (line 286) mentions:
-
-```javascript
-* TODO: Refactor to DealingAnimationSequencer class
-```
-
-Reality:
-
-- Mobile HAS `mobile/animations/DealingAnimationSequencer.js` ✓
-- Desktop DOESN'T have this (inline in adapter)
-- Creates inconsistency
-
-**Recommendation:** Either:
-
-- Implement desktop version (RECOMMENDED for consistency)
-- OR update CLAUDE.md to document inconsistency
-
-##### Issue 3: File Organization Changed
-
-CLAUDE.md (line 140) shows:
-
-```text
-├── gameObjects/             # Legacy Phaser objects (being phased out)
-│   └── gameObjects_table.js
-│   └── gameObjects_hand.js
-│   └── gameObjects_player.js
-```
-
-Reality: Files exist but gameObjects/ directory isn't clearly marked as legacy. No deprecation timeline.
-
-#### Recommendations
-
-1. **Create deprecation section in CLAUDE.md:**
-
-```markdown
-## Legacy Files Being Phased Out
-
-These files are maintained for backward compatibility but should not be used for new code:
-
-- gameObjects.js
-- gameObjects_table.js
-- gameObjects_hand.js
-- gameObjects_player.js
-
-**Deprecation Timeline:**
-
-- Phase 1 (Now): Use new data models (TileData, HandData, PlayerData)
-- Phase 2 (Jan 2026): Remove legacy objects, move to deprecated/ directory
-- Phase 3 (Feb 2026): Delete entirely
-
-**Migration Status:** [50% complete]
-
-- TileManager fully migrated ✓
-- HandRenderer partially migrated (waiting on desktop)
-```
-
-1. **Update to clarify shared utilities:**
-
-```markdown
-## Cross-Platform Utilities
-
-**Truly Shared:**
-
-- shared/SettingsManager.js
-
-**Platform-Specific (do not share):**
-
-- mobile/utils/ - Mobile position calculations
-- desktop/config/ - Desktop layout constants
-
-**Opportunities for sharing (future):**
-
-- Animation timing constants
-- Tile display utilities
-```
-
-1. **Document animation architecture mismatch:**
-
-```markdown
-## Animation Sequencers
-
-**Mobile** (well-structured):
-
-- CharlestonAnimationSequencer
-- DealingAnimationSequencer
-- DiscardAnimationSequencer
-
-**Desktop** (needs refactor):
-
-- Animation logic inline in PhaserAdapter
-- TODO: Extract to sequencer classes for consistency
-```
+- Added comprehensive "Legacy Files Being Phased Out" section
+- Lists all gameObjects_*.js files that should not be used for new code
+- Documents migration status (TileManager fully migrated, HandRenderer partially migrated)
+- Provides clear guidance: use core/models/ classes instead
+- Added Memory Management section with BaseAdapter pattern and destroy() requirements
+- Updated Critical Knowledge section to reflect new architecture (11 items now)
 
 ---
 
@@ -2287,10 +2189,13 @@ December 17, 2025**
 2. ~~**Extract Base Adapter Class** (Section 2.5)~~ ✅ **COMPLETED: December 17, 2025**
     - `shared/BaseAdapter.js` added and in use by desktop and mobile adapters.
 
-3. **Update CLAUDE.md** (Section 3.2)
-    - Accuracy and completeness
-    - **Effort:** 30 min
-    - **Impact:** Low - documentation
+3. ~~**Update CLAUDE.md** (Section 3.2)~~ ✅ **COMPLETED: December 17, 2025**
+    - Updated directory structure with animations/ and shared/BaseAdapter.js
+    - Added Desktop/Mobile Animation Sequencers sections
+    - Added Cross-Platform Utilities section
+    - Added Legacy Files Being Phased Out section
+    - Added Memory Management section
+    - Updated Critical Knowledge section (11 items)
 
 ---
 
