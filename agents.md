@@ -2,7 +2,7 @@
 
 ## 1. Modern Architecture Overview
 
-```
+```text
 core/GameController.js (platform-agnostic)
 ├── AIEngine (core/AIEngine.js)
 ├── Card Validator (core/card/)
@@ -10,10 +10,12 @@ core/GameController.js (platform-agnostic)
 └── EventEmitter (core/events/EventEmitter.js)
 
 Desktop Stack
-   GameController → PhaserAdapter → Managers (Tile/Selection/Dialog/Button/HandRenderer) → Phaser Scene
+   GameController → PhaserAdapter → Managers
+   (Tile/Selection/Dialog/Button/HandRenderer) → Phaser Scene
 
 Mobile Stack
-   GameController → MobileRenderer → Reactivity layer (OpponentBar, HandRenderer, DiscardPile, Touch gestures)
+   GameController → MobileRenderer → Reactivity layer
+   (OpponentBar, HandRenderer, DiscardPile, Touch gestures)
 ```
 
 - **Single Source of Truth:** `GameController` manages state, turn order, Charleston, courtesy, loop phases, and emits rich events. Both desktop (Phaser) and mobile (DOM/CSS) read the same state transitions.
@@ -182,9 +184,88 @@ Mobile Stack
 - **E2E Tests**: Create Playwright tests in `tests/e2e/` directories
 - **Manual Testing**: Use `window.gameController` for debugging in desktop mode
 
-## 9. File Structure Reference
+## 9. Memory Management & Critical Patterns
 
+### Memory Management Requirements
+
+**CRITICAL**: All adapters and managers must implement `destroy()` method for proper cleanup:
+
+1. **Event Listener Cleanup** - Unsubscribe from all GameController events
+2. **DOM Event Cleanup** - Remove all DOM event listeners (clicks, touches, etc.)
+3. **Reference Cleanup** - Set all object references to null to break circular dependencies
+4. **Timer Cleanup** - Clear all setTimeout/setInterval/requestAnimationFrame calls
+
+### BaseAdapter Pattern
+
+Both `PhaserAdapter` and `MobileRenderer` extend `shared/BaseAdapter.js` which provides:
+
+- Automatic subscription tracking via `registerEventHandlers()`
+- Centralized cleanup via `destroy()` method
+- Prevents memory leaks on game restart
+
+### When destroy() is Called
+
+- Game restart
+- Scene shutdown (desktop)
+- Page navigation (mobile)
+- PWA page unload
+
+### Example Implementation
+
+```javascript
+// Extending BaseAdapter
+class PhaserAdapter extends BaseAdapter {
+  constructor(gameController, scene) {
+    super(gameController);
+    this.setupManagers();
+    this.registerEventHandlers({
+      TILE_DRAWN: (data) => this.onTileDrawn(data),
+      HAND_UPDATED: (data) => this.onHandUpdated(data)
+    });
+  }
+
+  destroy() {
+    super.destroy(); // Unsubscribes all events
+    this.buttonManager?.destroy();
+    this.selectionManager?.destroy();
+    // ... destroy all managers
+  }
+}
 ```
+
+## 10. Legacy Files & Migration Status
+
+### Legacy Files Being Phased Out
+
+These files are maintained for backward compatibility but should not be used for new code:
+
+- `desktop/gameObjects/gameObjects.js`
+- `desktop/gameObjects/gameObjects_table.js`
+- `desktop/gameObjects/gameObjects_hand.js`
+- `desktop/gameObjects/gameObjects_player.js`
+
+### Migration Status
+
+- TileManager fully migrated to use TileData ✓
+- HandRenderer partially migrated to use HandData ✓
+- Remaining dependencies in legacy code paths
+
+### For New Code
+
+- Use `core/models/TileData.js` instead of Phaser Tile objects
+- Use `core/models/HandData.js` instead of gameObjects_hand
+- Use `core/models/PlayerData.js` instead of gameObjects_player
+
+## 11. PWA Features (Mobile)
+
+- Install prompt after 3 games played (`mobile/components/InstallPrompt.js`)
+- Offline capability via service worker
+- App manifest for iOS/Android home screen
+- Theme color and icons
+
+## 12. File Structure Reference
+
+```text
 core/
 ├── AIEngine.js              # Main AI logic
 ├── GameController.js        # Central game state management
@@ -209,8 +290,19 @@ desktop/
 mobile/
 ├── MobileRenderer.js        # Mobile platform renderer
 └── ...                      # Mobile-specific components
+
+shared/
+├── BaseAdapter.js           # Event subscription tracking base class
+└── SettingsManager.js       # Settings persistence
 ```
 
 ---
 
 **Key Takeaway:** After the refactors, AI agents live inside a platform-neutral controller that exposes deterministic events. Adapters render state, while AI logic stays shared across desktop and mobile, ensuring consistent strategy and easier future enhancements. This architecture provides clear separation of concerns and well-defined extension points for adding new features.
+
+**Critical Reminders:**
+
+- GameController is the single source of truth
+- All adapters/managers must implement destroy() for memory management
+- Use core/models/ instead of legacy gameObjects/
+- Both platforms now use unified Animation Sequencer architecture

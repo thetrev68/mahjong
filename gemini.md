@@ -1,79 +1,105 @@
-
 # Gemini Project Overview: American Mahjong Game
 
-This document provides a high-level overview of the American Mahjong game project to guide future development and analysis.
+This document provides a high-level overview and technical guide for the American Mahjong game project.
 
 ## 1. Project Goal
 
-The project is a web-based, 4-player American Mahjong game. It features a single human player competing against three AI-controlled opponents. The game is built using modern web technologies and aims to provide an authentic and engaging Mahjong experience.
+The project is a cross-platform, 4-player American Mahjong game. It features a single human player competing against three AI-controlled opponents. The game runs on Desktop (using Phaser 3) and Mobile (using a custom HTML/CSS renderer as a PWA).
 
 ## 2. Core Technologies
 
-* **JavaScript (ES6 Modules):** The entire codebase is written in modern JavaScript, utilizing ES6 modules for a clean, organized, and maintainable structure. All scripts are loaded with `type="module"`.
-* **Vite:** The project uses Vite for a fast development server and efficient build process.
-* **Phaser 3:** The game is built on the Phaser 3 game engine (`v3.90.0`), which handles rendering, game loop management, and user input. Phaser is installed locally as a dependency.
-* **HTML5 & CSS:** The user interface, including the game board, buttons, and informational displays, is structured with HTML5 and styled with CSS.
+* **JavaScript (ES6 Modules):** The entire codebase uses modern JavaScript with ES6 modules.
+* **Vite:** Used for the development server and build process.
+* **Desktop Renderer:** **Phaser 3** (`v3.90.0`) handles rendering and input for the desktop experience.
+* **Mobile Renderer:** **HTML5 & CSS Grid** (Custom DOM-based renderer) for the mobile PWA experience.
+* **Architecture:** Custom **Event-Driven Architecture** (Pub/Sub) with a strict separation between Core Logic and Platform Adapters.
 
-## 3. Project Structure
+## 3. Architecture Overview
 
-The project is organized into several key files and directories:
+### High-Level Structure
 
-* **`index.html`:** The main entry point for the application. It sets up the HTML structure, includes the Phaser library, and loads the main game scripts.
-* **`main.js`:** The primary script that initializes the Phaser game instance and the main `GameScene`.
-* **`GameScene.js`:** The core of the game, extending `Phaser.Scene`. It manages game objects, handles game logic, and processes user interactions.
-* **`gameLogic.js`:** Contains the central state machine and rules engine for the game, managing turns, game phases (like the Charleston), and win conditions.
-* **`gameAI.js`:** Implements the logic and strategy for the three AI opponents, including tile evaluation, hand analysis, and decision-making.
-* **`gameObjects/`:** A directory containing classes for various game elements, such as `Tile`, `Hand`, and `Table`.
-* **`card/`:** This directory contains the hand validation system. It is structured with subdirectories for different years (e.g., `2017`, `2025`), each containing the specific rules and hand patterns for that year's Mahjong card.
-* **`assets/`:** Contains all game assets, including images for the tiles (`tiles.png`, `tiles.json`) and audio files.
-* **`constants.js`:** A centralized file for defining game-wide constants, such as window dimensions and game parameters.
-* **`package.json`:** Defines project metadata, scripts, and dependencies. Key dependencies include Phaser for the game engine and Vite for the development server and build process.
-
-## 4. Key Features
-
-* **Single Player vs. AI:** The game is designed for a single human player against three AI opponents.
-* **Authentic Gameplay:** Implements official American Mahjong rules, including the Charleston, courtesy passes, and tile exposures.
-* **Multi-Year Card Support:** The game supports Mahjong cards from various years (2017-2020, and 2025), with a system in place to easily add more.
-* **Training Mode:** A special mode that allows players to practice with specific hands and scenarios.
-* **Interactive UI:** A user-friendly interface with features like drag-and-drop tile management and informational displays.
-
-## 5. Running the Project
-
-To run the game, you need to have Node.js and npm installed. The project uses Vite for a development server. See the README.md for detailed instructions.
-
-## 6. Development Guidelines
-
-* **Modularity:** Adhere to the existing ES6 module structure.
-* **Class-Based Architecture:** Follow the object-oriented design, creating classes for distinct game components.
-* **Separation of Concerns:** Keep game logic (`gameLogic.js`), AI (`gameAI.js`), and presentation (`GameScene.js`) separate.
-* **Use of Constants:** Use the `constants.js` file for any new game-wide constants.
-
-## 7. Debugging
-
-To control the verbosity of the console logs, you can use the `gdebug` flag in `utils.js`.
-
-* **`gdebug = 0`**: Disables debug messages.
-* **`gdebug = 1`**: Enables debug messages.
-
-The relevant code is in `c:\Repos\mahjong\utils.js`:
-
-```javascript
-export const gdebug = 0; // Set to 0 to disable debug messages
-
-// ...
-
-let debugPrint = function() {};
-
-// ...
-
-if (gdebug) {
-    debugPrint = function(str) {
-        console.log(str);
-    };
-    // ...
-}
-
-export { debugPrint, debugTrace };
+```
+┌─────────────────────────────────────────────────────────┐
+│                   PLATFORM LAYER                         │
+│  ┌─────────────────────┐    ┌─────────────────────┐    │
+│  │  Desktop (Phaser)   │    │  Mobile (HTML/CSS)  │    │
+│  │  - PhaserAdapter    │    │  - MobileRenderer   │    │
+│  │  - Managers         │    │  - Components       │    │
+│  │  - HandRenderer     │    │  - HandRenderer     │    │
+│  └──────────┬──────────┘    └──────────┬──────────┘    │
+└─────────────┼──────────────────────────┼───────────────┘
+              │                          │
+              └─────────┬────────────────┘
+                        │ EventEmitter (pub/sub)
+              ┌─────────▼───────────────────┐
+              │  CORE LAYER (Platform-agnostic)│
+              │  - GameController            │
+              │  - AIEngine                  │
+              │  - Card (Validator)          │
+              │  - Data Models               │
+              └──────────────────────────────┘
 ```
 
-You can also use your browser's developer tools to filter console messages.
+### Directory Structure
+
+* **`core/`**: Platform-agnostic logic.
+  * `GameController.js`: The central state machine and orchestrator.
+  * `AIEngine.js`: AI decision logic.
+  * `card/`: Hand validation and pattern matching.
+  * `models/`: Pure data models (`TileData`, `HandData`, `PlayerData`).
+  * `events/`: Event system (`EventEmitter`, `GameEvents`).
+* **`desktop/`**: Phaser-specific implementation.
+  * `adapters/PhaserAdapter.js`: Translates core events to Phaser actions.
+  * `animations/`: Animation Sequencers (Dealing, Charleston, Discard).
+  * `managers/`: specialized managers (Selection, Button, Dialog).
+  * `scenes/`: Phaser scenes.
+* **`mobile/`**: Mobile PWA implementation.
+  * `MobileRenderer.js`: Translates core events to DOM updates.
+  * `components/`: UI components (MobileTile, DiscardPile).
+  * `animations/`: CSS-based Animation Sequencers.
+* **`shared/`**: Cross-platform utilities.
+  * `BaseAdapter.js`: Base class for adapters (handles event cleanup).
+  * `SettingsManager.js`: `localStorage` persistence.
+
+## 4. Key Architectural Patterns
+
+1. **Adapter Pattern:** `GameController` knows nothing about the view. It emits events. `PhaserAdapter` and `MobileRenderer` listen to these events and update their respective UIs.
+2. **BaseAdapter & Memory Management:** Both adapters extend `shared/BaseAdapter.js`. This class tracks event subscriptions. **Crucially, all managers and adapters must implement a `destroy()` method** to clean up listeners and references, preventing memory leaks on game restart.
+3. **Animation Sequencers:** Both platforms use an "Animation Sequencer" pattern (e.g., `DealingAnimationSequencer`, `CharlestonAnimationSequencer`) to handle complex animation flows using Promises.
+4. **Legacy Object Phase-Out:** The project is moving away from `desktop/gameObjects/` (e.g., `gameObjects_hand.js`). New code should use `core/models/` (`HandData`, `TileData`).
+
+## 5. Development Guidelines
+
+* **State Management:** `GameController` is the **Single Source of Truth**. Do not create parallel state in the UI layer.
+* **Event Cleanup:** When creating a component that listens to events (DOM or GameController), ensure there is a `destroy()` or cleanup mechanism.
+* **Logging:** Use `gdebug` from `utils.js` to gate debug logs. Avoid leaving `console.log` in production code.
+
+    ```javascript
+    import { gdebug } from '../../utils.js';
+    if (gdebug) console.log("Debug info");
+    ```
+
+* **Constants:** Use `constants.js` for game-wide values (States, Tile IDs, Dimensions). Do not use "magic numbers".
+* **UI Prompts:** The game uses a callback-based prompt system.
+
+    ```javascript
+    // GameController emits UI_PROMPT
+    // Adapter handles it, gets user input, and calls the callback provided in the event.
+    ```
+
+* **Parity:** When implementing features, ensure they work on both Desktop and Mobile unless explicitly platform-specific.
+
+## 6. Running the Project
+
+* **Development:** `npm run dev` (Starts Vite server).
+* **Testing:** `npm test` (Runs Playwright tests).
+* **Linting:** `npm run lint`.
+
+## 7. Critical Knowledge for Gemini
+
+* **No Redux:** The state is managed entirely by `GameController`.
+* **Platform Specifics:**
+  * **Desktop:** Uses `phaser` (canvas/webgl).
+  * **Mobile:** Uses HTML DOM elements.
+* **Legacy Warning:** If you see files starting with `gameObjects_` in `desktop/`, be aware these are legacy. Prefer `core/models/` for logic.
+* **Mobile vs Desktop Animation:** Both now use a unified "Sequencer" architecture.
