@@ -1,6 +1,7 @@
 import { AnimationSequencer } from "./AnimationSequencer.js";
 import { TileData } from "../../core/models/TileData.js";
-import { PLAYER, PLAYER_LAYOUT } from "../../constants.js";
+import { PLAYER } from "../../constants.js";
+import { PLAYER_LAYOUT } from "../config/playerLayout.js";
 import { debugError } from "../../utils.js";
 
 /**
