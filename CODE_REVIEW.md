@@ -738,10 +738,24 @@ getTileAtHandPosition(...) {
 
 ### 2.4 Commented-Out Code
 
-**Severity:** 🟢 **LOW**
+**Severity:** 🟢 **LOW** → ✅ **RESOLVED**
 **Impact:** Code clutter, confusion about what code is active
 
-#### Examples
+**Status:** ✅ **COMPLETED: December 18, 2025**
+
+#### What Was Removed
+
+Removed commented-out code that added clutter and confusion:
+
+1. **GameScene.js:9** - Unused import `// import { debugPrint } from "../../utils.js";`
+2. **GameScene.js:645** - Commented audio call `// this.audioManager.playSFX("fireworks");`
+3. **settings.js:488** - Commented settings load `// const settings = SettingsManager.load();`
+4. **OpponentBar.js:64** - Commented variable `// const count = this.getTileCount(playerData);`
+5. **game-basic.spec.js:2** - Unused import `// import { STATE } from "../../../constants.js";`
+
+**Note:** Commented placeholder code in CharlestonAnimationSequencer (lines 328, 337, 347) was retained as it documents potential future functionality with clear intent comments.
+
+**Previous Examples (now cleaned):**
 
 **File: `mobile/main.js:45`**
 
@@ -755,21 +769,14 @@ getTileAtHandPosition(...) {
 // console.log("Tile.create() called for tile:", this.suit, this.number, "sprite:", this.sprite);
 ```
 
-#### Recommendations
+**Resolution:**
 
-1. **Delete all commented code (keep git history):**
+- ✅ Comprehensive search for commented-out code performed
+- ✅ Removed 5 instances of commented-out code
+- ✅ Console.log statements already cleaned in previous commit (e058eee)
+- ✅ Retained intentional placeholder comments with clear documentation purpose
 
-```bash
-# Search for commented code
-grep -r "^\s*//.*console\|^\s*//" src/
-```
-
-1. **If unsure about removing - commit before deletion:**
-
-```bash
-git commit -m "chore: Clean up commented debug code"
-git rm <file>
-```
+**Result:** Codebase is cleaner with no ambiguous commented-out code. Git history preserves all removed code if needed.
 
 ---
 

@@ -61,7 +61,6 @@ export class OpponentBar {
 
     // Update tile count - HIDDEN per UX improvements (will show exposures only)
     const countElement = this.element.querySelector(".tile-count");
-    // const count = this.getTileCount(playerData);
     countElement.textContent = ""; // Hide tile count - exposures are visible instead
 
     // Update exposures

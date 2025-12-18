@@ -6,7 +6,6 @@ import AudioManager from "../../audioManager.js";
 import { GameController } from "../../core/GameController.js";
 import { PhaserAdapter } from "../adapters/PhaserAdapter.js";
 import { HintAnimationManager } from "../managers/HintAnimationManager.js";
-// import { debugPrint } from "../../utils.js";
 import {
   WINDOW_WIDTH,
   WINDOW_HEIGHT,
@@ -641,9 +640,6 @@ class GameScene extends Phaser.Scene {
       const emittersList = [];
 
       try {
-        // Play firework sound effect (if available)
-        // this.audioManager.playSFX("fireworks");
-
         // Create multiple fireworks with individual emitters (Phaser 3.60+ API)
         for (let i = 0; i < numFireworks; i++) {
           // Random position on screen

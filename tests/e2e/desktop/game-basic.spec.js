@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-// import { STATE } from "../../../constants.js";
 
 /**
  * Wait until GameController is available on window.
