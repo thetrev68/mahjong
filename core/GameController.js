@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-/* global process */
 
 /**
  * GameController - Platform-agnostic game state machine
@@ -38,7 +37,7 @@ import {ExposureData} from "./models/HandData.js";
 import * as GameEvents from "./events/GameEvents.js";
 import {gTileGroups} from "./tileDefinitions.js";
 import {debugPrint, debugWarn, debugError} from "../utils.js";
-import {GameError, ValidationError, RenderingError, StateError} from "./errors/GameErrors.js";
+import {StateError} from "./errors/GameErrors.js";
 
 const CHARLESTON_DIRECTION_SEQUENCE = {
     1: ["right", "across", "left"],
