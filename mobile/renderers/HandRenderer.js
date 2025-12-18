@@ -1,6 +1,7 @@
 import { SUIT, WIND, DRAGON } from "../../constants.js";
 import { TileData } from "../../core/models/TileData.js";
 import { tileSprites } from "../utils/tileSprites.js";
+import { createTextModeTile } from "../utils/textModeRenderer.js";
 
 const SUIT_NAMES = {
   [SUIT.CRACK]: "CRACK",
@@ -43,6 +44,7 @@ export class HandRenderer {
     this.exposedSection = null;
     this.currentHandData = null;
     this.currentSortMode = null; // Track explicit sort mode ('suit', 'rank', or null for auto)
+    this.textMode = false; // Text mode enabled (fallback when sprites fail or user preference)
 
     // Dependencies injected via setSelectionManager() and setEventCoordinator()
     this.selectionManager = null;
@@ -65,6 +67,31 @@ export class HandRenderer {
    */
   setEventCoordinator(eventCoordinator) {
     this.eventCoordinator = eventCoordinator;
+  }
+
+  /**
+   * Enable text mode rendering (fallback when sprites fail)
+   * @param {boolean} enabled - Whether to enable text mode
+   */
+  setTextMode(enabled) {
+    if (this.textMode === enabled) {
+      return; // No change needed
+    }
+
+    this.textMode = enabled;
+
+    // Re-render current hand if we have one
+    if (this.currentHandData) {
+      this.render(this.currentHandData);
+    }
+  }
+
+  /**
+   * Check if text mode is enabled
+   * @returns {boolean}
+   */
+  isTextMode() {
+    return this.textMode;
   }
 
   /**
@@ -219,26 +246,33 @@ export class HandRenderer {
       }
 
       exposure.tiles.forEach((tile) => {
-        // Use tileSprites for exposed tiles too
-        const exposedTile = document.createElement("div");
-        exposedTile.className = "tile tile--small";
-        exposedTile.setAttribute("role", "img");
+        let exposedTile;
 
-        if (tile) {
-          const pos = tileSprites.getSpritePosition(tile);
-          // Use CSS class for image, only set position
-          exposedTile.style.backgroundPosition = `${pos.xPct}% ${pos.yPct}%`;
+        if (this.textMode) {
+          // Use text mode for exposed tiles
+          exposedTile = createTextModeTile(tile, "small");
+        } else {
+          // Use tileSprites for exposed tiles too
+          exposedTile = document.createElement("div");
+          exposedTile.className = "tile tile--small";
+          exposedTile.setAttribute("role", "img");
+
+          if (tile) {
+            const pos = tileSprites.getSpritePosition(tile);
+            // Use CSS class for image, only set position
+            exposedTile.style.backgroundPosition = `${pos.xPct}% ${pos.yPct}%`;
+          }
+
+          exposedTile.dataset.suit = this.getSuitName(tile?.suit);
+          exposedTile.dataset.number = this.getDataNumber(tile);
+
+          const textLabel = this.formatTileText(tile);
+          if (textLabel) {
+            exposedTile.setAttribute("aria-label", textLabel);
+          }
         }
 
-        exposedTile.dataset.suit = this.getSuitName(tile?.suit);
-        exposedTile.dataset.number = this.getDataNumber(tile);
-
-        const textLabel = this.formatTileText(tile);
-        if (textLabel) {
-          exposedTile.setAttribute("aria-label", textLabel);
-        }
-
-        // No text content; accessibility handled via aria-label above
+        // No text content needed in sprite mode; accessibility handled via aria-label above
         exposureSet.appendChild(exposedTile);
       });
 
@@ -283,27 +317,46 @@ export class HandRenderer {
   }
 
   createTileButton(tileData, index) {
-    const tileButton = document.createElement("button");
-    tileButton.type = "button";
-    // Use .tile class for sprite styling
-    tileButton.className = "tile tile--default";
+    let tileButton;
 
-    // Apply sprite background position
-    if (tileData) {
-      const pos = tileSprites.getSpritePosition(tileData);
-      tileButton.style.backgroundPosition = `${pos.xPct}% ${pos.yPct}%`;
+    // Use text mode if enabled
+    if (this.textMode) {
+      tileButton = createTextModeTile(tileData, "default");
+      // Convert div to button for interactivity
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = tileButton.className;
+      button.dataset.suit = tileButton.dataset.suit;
+      button.dataset.number = tileButton.dataset.number;
+      button.dataset.index = String(index);
+      button.textContent = tileButton.textContent;
+      button.setAttribute("role", tileButton.getAttribute("role"));
+      button.setAttribute("aria-label", tileButton.getAttribute("aria-label"));
+      tileButton = button;
+    } else {
+      // Use sprite mode
+      tileButton = document.createElement("button");
+      tileButton.type = "button";
+      // Use .tile class for sprite styling
+      tileButton.className = "tile tile--default";
+
+      // Apply sprite background position
+      if (tileData) {
+        const pos = tileSprites.getSpritePosition(tileData);
+        tileButton.style.backgroundPosition = `${pos.xPct}% ${pos.yPct}%`;
+      }
+
+      tileButton.dataset.suit = this.getSuitName(tileData?.suit);
+      tileButton.dataset.number = this.getDataNumber(tileData);
+      tileButton.dataset.index = String(index);
+
+      const textLabel = this.formatTileText(tileData);
+      if (textLabel) {
+        tileButton.setAttribute("aria-label", textLabel);
+      }
     }
 
-    tileButton.dataset.suit = this.getSuitName(tileData?.suit);
-    tileButton.dataset.number = this.getDataNumber(tileData);
-    tileButton.dataset.index = String(index);
-
-    const textLabel = this.formatTileText(tileData);
-    if (textLabel) {
-      tileButton.setAttribute("aria-label", textLabel);
-    }
-
-    // No text content; accessibility handled via aria-label above
+    // Common properties for both modes
     tileButton.disabled = !this.interactive;
 
     const clickHandler = (event) => {

@@ -127,55 +127,54 @@ The TileManager had placeholder methods for enabling/disabling tile drag, but th
 
 ---
 
-## Issue #6: [ENHANCEMENT] Implement asset error handling for mobile
+## Issue #6: ✅ [ENHANCEMENT] Implement asset error handling for mobile
 
 **Labels**: `enhancement`, `low-priority`, `mobile`, `accessibility`
 
-**File**: [mobile/MobileRenderer.js:1797-1822](mobile/MobileRenderer.js#L1797-L1822)
+**Status**: ✅ **COMPLETED - December 18, 2025**
+
+**File**: [mobile/MobileRenderer.js:1833-1857](mobile/MobileRenderer.js#L1833-L1857)
 
 **Description**:
 
-Scaffolding exists for asset error handling and text mode fallback, but it's not wired up to the asset loading pipeline.
+Implemented asset error handling and text mode fallback for mobile platform. When tiles.png fails to load, the game automatically switches to text-based rendering using colorized tile characters.
 
-**Current State**:
+**Resolution**:
 
-```javascript
-// TODO: Asset error handling scaffolding (not yet wired up)
-// Future work: Add image onerror handlers to detect tile sprite loading failures
-// Future work: Implement text mode fallback in HandRenderer
-// Future work: Call handleAssetError from asset loading pipeline
-```
+1. **Error Detection System**:
+   - ✅ Created [assetErrorDetector.js](mobile/utils/assetErrorDetector.js) utility
+   - ✅ Detects tiles.png loading failures using Image() API
+   - ✅ Automatically triggers text mode fallback on error
+   - ✅ Wired up in MobileRenderer constructor
 
-**Implementation Tasks**:
+2. **Text Mode Rendering**:
+   - ✅ Created [textModeRenderer.js](mobile/utils/textModeRenderer.js) utility
+   - ✅ Uses same colorized tile-char format as pattern visualizer
+   - ✅ Displays numbered tiles (1-9), Dragons (D), Winds (N/E/S/W), Jokers (J), Flowers (F)
+   - ✅ Color-coded: Red (Crack), Green (Bam), Blue (Dot), Black (Winds/Flowers), Gray (Jokers)
+   - ✅ Extended HandRenderer with `setTextMode()` method
+   - ✅ Added CSS styling in [tiles.css](mobile/styles/tiles.css#L207-L277)
 
-1. **Wire Up Error Detection**:
-   - [ ] Add `onerror` handlers to tile sprite images
-   - [ ] Detect when tiles.png fails to load
-   - [ ] Call `handleAssetError()` from loading pipeline
+3. **Settings Integration**:
+   - ✅ Added "Text Mode" toggle in settings sheet (Display section)
+   - ✅ Allows users to enable text mode manually for accessibility
+   - ✅ Settings persist via SettingsManager
+   - ✅ MobileRenderer listens for textMode setting changes
 
-2. **Implement Text Mode Fallback**:
-   - [ ] Extend HandRenderer to support text-based rendering
-   - [ ] Display tile text (e.g., "B3", "W", "GD") instead of sprites
-   - [ ] Ensure text mode is accessible and readable
-   - [ ] Add CSS styling for text mode tiles
+4. **Accessibility Features**:
+   - ✅ All text mode tiles have aria-label attributes
+   - ✅ Screen reader compatible (e.g., "3 Bam", "North Wind", "Red Dragon")
+   - ✅ Maintains full tile interactivity (selection, animations, glow effects)
+   - ✅ Works for hand tiles, exposed tiles, and discard pile
 
-3. **Test Error Scenarios**:
-   - [ ] Simulate missing tiles.png
-   - [ ] Verify text mode activates automatically
-   - [ ] Ensure game is playable in text mode
-   - [ ] Test screen reader compatibility
+**Testing**:
 
-**Acceptance Criteria**:
+- ✅ Text mode automatically activates if tiles.png fails to load
+- ✅ Manual toggle available in settings for user preference
+- ✅ Game remains fully playable in text mode
+- ✅ All tile types render correctly with appropriate colors
 
-- [ ] Asset loading failures are detected automatically
-- [ ] User sees error notification when assets fail
-- [ ] Text mode fallback activates on asset failure
-- [ ] Game remains playable in text mode
-- [ ] Screen readers can read tile values
-
-**Accessibility Impact**: High - enables gameplay even when graphics fail to load
-
-**Effort Estimate**: 3-4 hours
+**Result**: Mobile platform now has robust asset error handling with seamless text mode fallback, improving both reliability and accessibility.
 
 ---
 
@@ -226,20 +225,20 @@ Touch handler tests are currently in E2E suite but should be unit tests or have 
 
 ## Summary
 
-**Total Issues**: 7 (3 remaining + 4 completed)
+**Total Issues**: 7 (2 remaining + 5 completed)
 
 **By Priority**:
 
-- 🔴 High: 0 issues (all completed: #2, #3)
-- 🟡 Medium: 2 issues (#1 Joker choice, #6 Asset handling)
+- 🔴 High: 0 issues (all completed: #2, #3, #5)
+- 🟡 Medium: 1 issue (#1 Joker choice)
 - 🟢 Low: 1 issue (#7 Test migration)
-- ✅ Completed: 4 issues (#2 PhaserTileSprites rename, #3 TableManager cleanup, #4 Drag handlers removed, #5 Mobile animation)
+- ✅ Completed: 5 issues (#2 PhaserTileSprites rename, #3 TableManager cleanup, #4 Drag handlers removed, #5 Mobile animation, #6 Asset handling)
 
 **By Type**:
 
-- Enhancement/Feature: 2 (#1, #6)
+- Enhancement/Feature: 1 (#1)
 - Testing: 1 (#7)
-- ✅ Completed: 4 issues (#2 Refactor, #3 Refactor, #4 Refactor, #5 Feature)
+- ✅ Completed: 5 issues (#2 Refactor, #3 Refactor, #4 Refactor, #5 Feature, #6 Enhancement)
 
 **Quick Wins** (1-2 hours):
 
@@ -248,7 +247,6 @@ Touch handler tests are currently in E2E suite but should be unit tests or have 
 **Medium Effort** (2-4 hours):
 
 - #1 - Joker exchange UI
-- #6 - Asset error handling
 
 ---
 

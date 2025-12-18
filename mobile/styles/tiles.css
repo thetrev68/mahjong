@@ -185,7 +185,7 @@ button.tile {
     position: absolute;
 }
 
-/* Tile character styling (text fallback) */
+/* Tile character styling (text fallback for pattern visualizer) */
 .tile-char {
     min-width: 16px;
     height: 20px;
@@ -203,3 +203,75 @@ button.tile {
 .component-spacer {
     width: 8px;
 }
+
+/* Text Mode Tiles - Full-size tile fallback when sprites fail to load */
+.tile--text-mode {
+    /* Override background image - use solid color instead */
+    background-image: none !important;
+    background-color: var(--tile-bg-color, #fff);
+
+    /* Center the text character */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Text styling */
+    font-size: 24px;
+    font-weight: bold;
+    font-family: var(--font-stack);
+
+    /* Keep existing tile dimensions and styling */
+    /* .tile--default, .tile--small, .tile--discard sizes still apply */
+}
+
+/* Text mode size adjustments */
+.tile--text-mode.tile--default {
+    font-size: 24px;
+}
+
+.tile--text-mode.tile--small {
+    font-size: 18px;
+}
+
+.tile--text-mode.tile--discard {
+    font-size: 12px;
+}
+
+/* Button styling for text mode tiles */
+button.tile--text-mode {
+    cursor: pointer;
+}
+
+/* Preserve interaction states in text mode */
+.tile--text-mode:active {
+    transform: translateY(-12px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.tile--text-mode.selected {
+    transform: translateY(-25px);
+    /* Border color will be overridden by color classes (border-red-700, etc.) */
+    /* But keep the blue glow as visual feedback */
+    box-shadow: 0 10px 18px rgba(43, 140, 255, 0.35);
+    z-index: 2;
+}
+
+.tile--text-mode:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* Ensure color classes work properly in text mode */
+.tile--text-mode.bg-red-600 { background-color: #dc2626 !important; }
+.tile--text-mode.bg-green-600 { background-color: #16a34a !important; }
+.tile--text-mode.bg-blue-600 { background-color: #2563eb !important; }
+.tile--text-mode.bg-black { background-color: #000000 !important; }
+.tile--text-mode.bg-gray-600 { background-color: #4b5563 !important; }
+
+.tile--text-mode.text-white { color: #ffffff !important; }
+
+.tile--text-mode.border-red-700 { border-color: #b91c1c !important; }
+.tile--text-mode.border-green-700 { border-color: #15803d !important; }
+.tile--text-mode.border-blue-700 { border-color: #1d4ed8 !important; }
+.tile--text-mode.border-gray-800 { border-color: #1f2937 !important; }
+.tile--text-mode.border-gray-700 { border-color: #374151 !important; }

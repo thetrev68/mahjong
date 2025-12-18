@@ -12,6 +12,7 @@ import { HomePageTiles } from "./components/HomePageTiles.js";
 import { DiscardSelectionModal } from "./components/DiscardSelectionModal.js";
 import { GameEndModal } from "./components/GameEndModal.js";
 import MobileAudioManager from "./MobileAudioManager.js";
+import { assetErrorDetector } from "./utils/assetErrorDetector.js";
 import { PLAYER, STATE, SUIT } from "../constants.js";
 import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
@@ -236,9 +237,33 @@ export class MobileRenderer extends BaseAdapter {
       if (settings.sfxVolume !== undefined) {
         this.audioManager.setSFXVolume(settings.sfxVolume / 100);
       }
+      if (settings.textMode !== undefined) {
+        this.handRenderer.setTextMode(settings.textMode);
+      }
     };
     window.addEventListener("settingsChanged", onSettingsChanged);
     this.settingsChangedListener = onSettingsChanged;
+
+    // Initialize asset error detection
+    this.initializeAssetErrorDetection();
+  }
+
+  /**
+   * Initialize asset error detection for tiles.png
+   * Automatically enables text mode fallback if sprites fail to load
+   */
+  async initializeAssetErrorDetection() {
+    // Register error callback
+    assetErrorDetector.onAssetError((assetType, assetPath) => {
+      console.error(`Asset loading failed: ${assetType} at ${assetPath}`);
+      this.handleAssetError(assetType, assetPath);
+    });
+
+    // Test if tiles.png loads successfully
+    const loaded = await assetErrorDetector.testTilesAsset();
+    if (!loaded) {
+      console.warn("Tiles sprite sheet failed to load - text mode activated");
+    }
   }
 
   createOpponentBars(containers) {
@@ -1805,35 +1830,29 @@ export class MobileRenderer extends BaseAdapter {
     }
   }
 
-  // TODO #6: Asset error handling scaffolding (not yet wired up)
-  // Future work: Add image onerror handlers to detect tile sprite loading failures
-  // Future work: Implement text mode fallback in HandRenderer
-  // Future work: Call handleAssetError from asset loading pipeline
+  /**
+   * Handle asset loading errors
+   * Called when critical assets like tiles.png fail to load
+   * @param {string} assetType - Type of asset that failed (e.g., "tiles.png")
+   * @param {string} assetPath - Path to the failed asset
+   */
   handleAssetError(assetType, assetPath) {
     console.error(`Failed to load ${assetType}: ${assetPath}`);
 
-    // Provide fallback UI
+    // Automatically enable text mode fallback for tile sprite failures
     if (assetType === "tiles.png") {
-      this.showAssetError("Tile graphics failed to load. Using text mode.");
       this.enableTextModeFallback();
     }
   }
 
-  showAssetError(message) {
-    // Show non-intrusive error notification
-    const errorEl = document.createElement("div");
-    errorEl.className = "error-banner";
-    errorEl.textContent = message;
-    document.body.appendChild(errorEl);
-
-    setTimeout(() => errorEl.remove(), 5000);
-  }
-
+  /**
+   * Enable text mode fallback when sprite assets fail to load
+   * Seamlessly switches to text-based tile rendering
+   */
   enableTextModeFallback() {
-    // TODO #6: Implement text mode in HandRenderer
-    // This would require HandRenderer to support text-based tile rendering
-    console.warn(
-      "Text mode fallback requested but not fully implemented in HandRenderer yet",
-    );
+    if (this.handRenderer) {
+      this.handRenderer.setTextMode(true);
+      console.log("Text mode activated - tiles will display as colored text");
+    }
   }
 }

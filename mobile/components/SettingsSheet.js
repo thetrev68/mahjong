@@ -77,6 +77,19 @@ class SettingsSheet {
                     </div>
                 </section>
 
+                <!-- Display Settings Section -->
+                <section class="settings-section">
+                    <h3 class="settings-section__title">Display</h3>
+
+                    <div class="settings-item settings-item--toggle">
+                        <label for="mobile-text-mode">
+                            Text Mode
+                            <span class="settings-hint">Display tiles as colorized text instead of sprites (accessibility)</span>
+                        </label>
+                        <input type="checkbox" id="mobile-text-mode" class="settings-checkbox">
+                    </div>
+                </section>
+
                 <!-- Audio Settings Section -->
                 <section class="settings-section">
                     <h3 class="settings-section__title">Audio</h3>
@@ -182,6 +195,10 @@ class SettingsSheet {
     document.getElementById("mobile-sfx-value").textContent =
       settings.sfxVolume;
     document.getElementById("mobile-sfx-mute").checked = settings.sfxMuted;
+
+    // Display settings
+    document.getElementById("mobile-text-mode").checked =
+      settings.textMode || false;
 
     // Training mode
     document.getElementById("mobile-training-mode").checked =
@@ -290,6 +307,9 @@ class SettingsSheet {
       sfxMuted:
         document.getElementById("mobile-sfx-mute")?.checked ??
         SettingsManager.getDefault("sfxMuted"),
+
+      textMode:
+        document.getElementById("mobile-text-mode")?.checked ?? false,
 
       trainingMode:
         document.getElementById("mobile-training-mode")?.checked ??
