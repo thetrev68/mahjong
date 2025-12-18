@@ -1,44 +1,40 @@
 import { printMessage } from "../../utils.js";
-import {
-  // PLAYER, PLAYER_OPTION, SUIT,
-  getTotalTileCount,
-} from "../../constants.js";
-import { Wall, Discards } from "./PhaserTileSprites.js";
+import { getTotalTileCount } from "../../constants.js";
+import { Wall, Discards } from "../gameObjects/PhaserTileSprites.js";
 
 /**
- * Table - Legacy class from Phase 5
+ * TableManager - Manages wall, discards, and visual turn indicators
  *
  * CURRENT ARCHITECTURE (Phase 6):
  * - GameController manages all game state (players, hands, turn flow)
  * - HandRenderer handles all visual rendering
- * - This Table class now ONLY manages:
+ * - This TableManager now ONLY manages:
  *   1. Wall (tile pool)
  *   2. Discards (discard pile)
  *   3. Visual turn indicator boxes
  *
- * TODO #3 Phase 6 Cleanup:
- * - Delete all methods that reference this.players
- * - Keep only: wall, discards, boxes, reset(), switchPlayer()
- * - Consider moving Wall/Discards to TileManager
+ * RESPONSIBILITIES:
+ * - wall: Wall instance managing the tile pool
+ * - discards: Discards instance managing the discard pile
+ * - boxes: Array of 4 Phaser graphics objects (turn indicators)
+ * - reset(): Returns all discarded tiles back to wall
+ * - switchPlayer(): Updates visual turn indicator
+ *
+ * FUTURE CONSIDERATION:
+ * - Moving Wall/Discards to TileManager could further consolidate tile management
  */
 
-// Phase 6: gPlayerInfo moved to desktop/config/playerLayout.js (PLAYER_LAYOUT)
-
-export class Table {
+export class TableManager {
   constructor(scene) {
     this.scene = scene;
-    this.gameLogic = null; // Will be set after construction
     this.wall = new Wall(scene);
     this.discards = new Discards();
 
+    // Visual turn indicator boxes (graphics objects)
     this.boxes = [];
     for (let i = 0; i < 4; i++) {
       this.boxes[i] = null;
     }
-
-    // Visual turn indicator boxes (graphics objects)
-    this.player02CourtesyVote = 0;
-    this.player13CourtesyVote = 0;
   }
 
   create(skipTileCreation = false) {
@@ -66,7 +62,7 @@ export class Table {
     const expectedTileCount = getTotalTileCount();
     if (this.wall.tileArray.length !== expectedTileCount) {
       printMessage(
-        "ERROR - table.reset() - total tile count is not " +
+        "ERROR - TableManager.reset() - total tile count is not " +
           expectedTileCount +
           ". Tile count = " +
           this.wall.tileArray.length +

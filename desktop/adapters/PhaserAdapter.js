@@ -23,6 +23,7 @@ import {
   debugError,
 } from "../../utils.js";
 import { PLAYER_LAYOUT } from "../config/playerLayout.js";
+import { TableManager } from "../managers/TableManager.js";
 import { TileManager } from "../managers/TileManager.js";
 import { ButtonManager } from "../managers/ButtonManager.js";
 import { DialogManager } from "../managers/DialogManager.js";
@@ -38,13 +39,7 @@ export class PhaserAdapter extends BaseAdapter {
   /**
    * @param {GameController} gameController - Core game controller
    * @param {GameScene} scene - Phaser scene
-   * @param {Table} table - Existing Phaser table object
-   * @param {GameLogic} gameLogic - Existing game logic (for data access only)
-   */
-  /**
-   * @param {GameController} gameController - Core game controller
-   * @param {GameScene} scene - Phaser scene
-   * @param {Table} table - Existing Phaser table object
+   * @param {TableManager} table - TableManager instance
    */
   constructor(gameController, scene, table) {
     // MUST call super() before accessing 'this'

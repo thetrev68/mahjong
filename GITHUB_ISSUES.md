@@ -35,52 +35,44 @@ This file was marked for removal with a misleading TODO comment. After analysis,
 
 ---
 
-## Issue #3: [REFACTOR] Clean up Table class (Phase 6 Cleanup)
+## Issue #3: ✅ [REFACTOR] Clean up Table class (Phase 6 Cleanup)
 
 **Labels**: `refactor`, `technical-debt`, `medium-priority`
 
-**File**: [desktop/gameObjects/gameObjects_table.js:19-22](desktop/gameObjects/gameObjects_table.js#L19-L22)
+**Status**: ✅ **COMPLETED - December 18, 2025**
+
+**File**: [desktop/managers/TableManager.js](desktop/managers/TableManager.js) (renamed and moved from desktop/gameObjects/gameObjects_table.js)
 
 **Description**:
 
-The Table class needs cleanup to remove player-related methods and focus only on wall, discards, and visual indicators.
+The Table class needed cleanup to remove player-related methods and focus only on wall, discards, and visual indicators.
 
-**TODO Comment**:
+**Resolution**:
 
-```javascript
-* TODO Phase 6 Cleanup:
-* - Delete all methods that reference this.players
-* - Keep only: wall, discards, boxes, reset(), switchPlayer()
-* - Consider moving Wall/Discards to TileManager
-```
+1. **Cleanup Completed**:
+   - ✅ Removed unused `gameLogic` property
+   - ✅ Removed unused `player02CourtesyVote` and `player13CourtesyVote` properties
+   - ✅ Confirmed no methods reference `this.players` (class was already clean)
+   - ✅ Only essential properties remain: `scene`, `wall`, `discards`, `boxes`
+   - ✅ Only essential methods remain: `create()`, `reset()`, `switchPlayer()`
 
-**Tasks**:
+2. **Renamed and Moved**:
+   - ✅ Renamed class from `Table` to `TableManager` for consistency with other managers
+   - ✅ Moved from `desktop/gameObjects/gameObjects_table.js` to `desktop/managers/TableManager.js`
+   - ✅ Updated all imports in [GameScene.js](desktop/scenes/GameScene.js) and [PhaserAdapter.js](desktop/adapters/PhaserAdapter.js)
+   - ✅ Deleted old file
 
-1. **Remove Player References**:
-   - [ ] Audit all methods that reference `this.players`
-   - [ ] Delete or refactor player-dependent methods
-   - [ ] Move player logic to appropriate managers
+3. **Documentation Updated**:
+   - ✅ Updated class documentation to reflect current responsibilities
+   - ✅ Added FUTURE CONSIDERATION note about potentially moving Wall/Discards to TileManager
+   - ✅ Updated error message in `reset()` method to reference TableManager
 
-2. **Streamline Table Responsibilities**:
-   - [ ] Keep: wall management
-   - [ ] Keep: discard pile management
-   - [ ] Keep: visual turn indicator boxes
-   - [ ] Keep: reset() and switchPlayer() methods
-   - [ ] Remove everything else
+**Testing**:
 
-3. **Consider Further Refactoring**:
-   - [ ] Evaluate if Wall should move to TileManager
-   - [ ] Evaluate if Discards should move to TileManager
-   - [ ] Document final Table class responsibilities
+- ✅ All 45 desktop and core tests pass
+- ✅ No new failures introduced
 
-**Acceptance Criteria**:
-
-- [ ] No methods reference `this.players`
-- [ ] Only wall, discards, boxes, reset(), switchPlayer() remain
-- [ ] Desktop gameplay still works correctly
-- [ ] All tests pass
-
-**Effort Estimate**: 3-4 hours
+**Result**: TableManager now has a clean, focused API matching the manager pattern used throughout the desktop platform.
 
 ---
 
@@ -257,21 +249,20 @@ Touch handler tests are currently in E2E suite but should be unit tests or have 
 
 ## Summary
 
-**Total Issues**: 7 (6 remaining + 1 completed)
+**Total Issues**: 7 (5 remaining + 2 completed)
 
 **By Priority**:
 
-- 🔴 High: 1 issue (#2 - Remove gameObjects.js)
-- 🟡 Medium: 3 issues (#1 Joker choice, #3 Table cleanup, #6 Asset handling)
+- 🔴 High: 0 issues (both completed: #2, #3)
+- 🟡 Medium: 2 issues (#1 Joker choice, #6 Asset handling)
 - 🟢 Low: 2 issues (#4 Drag handlers, #7 Test migration)
-- ✅ Completed: 1 issue (#5 Mobile animation)
+- ✅ Completed: 3 issues (#2 PhaserTileSprites rename, #3 TableManager cleanup, #5 Mobile animation)
 
 **By Type**:
 
-- Enhancement/Feature: 3 (#1, #4, #6)
-- Refactor/Technical Debt: 2 (#2, #3)
+- Enhancement/Feature: 2 (#1, #6) + 1 low priority (#4)
 - Testing: 1 (#7)
-- Completed: 1 (#5)
+- ✅ Completed: 3 issues (#2 Refactor, #3 Refactor, #5 Feature)
 
 **Quick Wins** (1-2 hours):
 
@@ -281,12 +272,7 @@ Touch handler tests are currently in E2E suite but should be unit tests or have 
 **Medium Effort** (2-4 hours):
 
 - #1 - Joker exchange UI
-- #3 - Table class cleanup
 - #6 - Asset error handling
-
-**Larger Effort** (4+ hours):
-
-- #2 - Remove legacy gameObjects.js (requires careful migration)
 
 ---
 

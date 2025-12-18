@@ -1,6 +1,6 @@
 // GameScene.js
 import * as Phaser from "phaser";
-import { Table } from "../gameObjects/gameObjects_table.js";
+import { TableManager } from "../managers/TableManager.js";
 import { HomePageTileManager } from "../managers/HomePageTileManager.js";
 import AudioManager from "../../audioManager.js";
 import { GameController } from "../../core/GameController.js";
@@ -66,7 +66,7 @@ class GameScene extends Phaser.Scene {
     this.audioManager = new AudioManager(this, window.settingsManager || {});
 
     // Create game objects
-    this.gTable = new Table(this);
+    this.gTable = new TableManager(this);
 
     // Determine card year
     let year = 2025; // Default year
