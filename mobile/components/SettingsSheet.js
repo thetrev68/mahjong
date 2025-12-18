@@ -338,7 +338,7 @@ class SettingsSheet {
     }
 
     // Clear existing options except the first one
-    handSelect.innerHTML = '<option value="">Select a hand...</option>';
+    handSelect.innerHTML = "<option value=\"\">Select a hand...</option>";
 
     // Add hand options from card
     for (const group of card.validHandGroups) {

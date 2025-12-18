@@ -170,7 +170,7 @@ class InstallPrompt {
                     <h3 class="install-banner__title">Install Mahjong</h3>
                     <p class="install-banner__message">${
                       isIOS
-                        ? 'Tap <strong style="font-size: 20px;">⎙</strong> then "Add to Home Screen"'
+                        ? "Tap <strong style=\"font-size: 20px;\">⎙</strong> then \"Add to Home Screen\""
                         : "Add to home screen for quick access"
                     }</p>
                 </div>
