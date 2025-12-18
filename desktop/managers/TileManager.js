@@ -57,12 +57,6 @@ export class TileManager {
      * @type {Function|null}
      */
     this.onTileDeselected = null;
-
-    /**
-     * Track which players have drag enabled
-     * @type {Set<number>}
-     */
-    this.dragEnabledPlayers = new Set();
   }
 
   /**
@@ -589,27 +583,6 @@ export class TileManager {
   }
 
   /**
-   * Enable drag for a player's hand
-   * Allows reordering tiles by dragging
-   *
-   * @param {number} playerIndex - Player to enable drag for
-   */
-  enableTileDragForPlayer(playerIndex) {
-    this.dragEnabledPlayers.add(playerIndex);
-    // TODO #4: Set up drag event handlers for this player's tiles
-  }
-
-  /**
-   * Disable drag for a player's hand
-   *
-   * @param {number} playerIndex - Player to disable drag for
-   */
-  disableTileDragForPlayer(playerIndex) {
-    this.dragEnabledPlayers.delete(playerIndex);
-    // TODO #4: Remove drag event handlers
-  }
-
-  /**
    * Reorder tiles in a hand visually
    * Called when hand is sorted by suit/rank
    *
@@ -687,7 +660,6 @@ export class TileManager {
    * Used during animations or dialogs
    */
   disableAllInteraction() {
-    this.dragEnabledPlayers.clear();
     this.tileSprites.forEach((sprite) => {
       if (sprite.setInteractive) {
         sprite.disableInteractive();

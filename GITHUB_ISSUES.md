@@ -76,63 +76,40 @@ The Table class needed cleanup to remove player-related methods and focus only o
 
 ---
 
-## Issue #4: [FEATURE] Implement drag event handlers for TileManager
+## Issue #4: ✅ [REFACTOR] Remove unused drag event handlers from TileManager
 
-**Labels**: `enhancement`, `low-priority`, `desktop-only`
+**Labels**: `refactor`, `low-priority`, `desktop-only`
 
-**File**: [desktop/managers/TileManager.js:599, 609](desktop/managers/TileManager.js#L599)
+**Status**: ✅ **COMPLETED - December 18, 2025**
+
+**File**: [desktop/managers/TileManager.js](desktop/managers/TileManager.js)
 
 **Description**:
 
-The TileManager has placeholder methods for enabling/disabling tile drag, but the actual event handlers are not implemented.
+The TileManager had placeholder methods for enabling/disabling tile drag, but the actual event handlers were never implemented and the methods were never called anywhere in the codebase.
 
-**Current Code**:
+**Investigation Results**:
 
-```javascript
-enableTileDragForPlayer(playerIndex) {
-  this.dragEnabledPlayers.add(playerIndex);
-  // TODO: Set up drag event handlers for this player's tiles
-}
+- ✅ Verified methods were not called anywhere in the codebase
+- ✅ Confirmed SelectionManager already handles all tile interaction via click handlers
+- ✅ Determined these were legacy placeholders from old Phaser drag system
 
-disableTileDragForPlayer(playerIndex) {
-  this.dragEnabledPlayers.delete(playerIndex);
-  // TODO: Remove drag event handlers
-}
-```
+**Resolution**:
 
-**Context**:
+**Removed the following unused code:**
 
-- Drag functionality currently handled via SelectionManager
-- These methods may be legacy from old Phaser object drag system
-- Need to determine if this is still needed
+1. ✅ Removed `enableTileDragForPlayer()` method
+2. ✅ Removed `disableTileDragForPlayer()` method
+3. ✅ Removed `this.dragEnabledPlayers` property
+4. ✅ Removed associated TODO comments
 
-**Resolution Options**:
+**Testing**:
 
-**Option A: Implement Drag Handlers** (if needed)
+- ✅ All desktop tests pass (11/11)
+- ✅ No references remain in codebase
+- ✅ Desktop gameplay works correctly
 
-- Set up Phaser drag events for tile sprites
-- Track drag state per player
-- Clean up handlers on disable
-
-**Option B: Remove Methods** (if obsolete)
-
-- Verify SelectionManager handles all selection needs
-- Remove these placeholder methods
-- Update any callers
-
-**Investigation Needed**:
-
-- [ ] Check if these methods are called anywhere
-- [ ] Verify SelectionManager provides all needed functionality
-- [ ] Determine if Phaser object drag is desired feature
-
-**Acceptance Criteria**:
-
-- [ ] If implementing: Drag works for enabled players only
-- [ ] If removing: No references remain, functionality unchanged
-- [ ] Desktop gameplay works correctly
-
-**Effort Estimate**: 1-2 hours
+**Result**: Cleaned up unused legacy code. SelectionManager continues to handle all tile interaction needs via click-based selection.
 
 ---
 
@@ -249,24 +226,23 @@ Touch handler tests are currently in E2E suite but should be unit tests or have 
 
 ## Summary
 
-**Total Issues**: 7 (5 remaining + 2 completed)
+**Total Issues**: 7 (3 remaining + 4 completed)
 
 **By Priority**:
 
-- 🔴 High: 0 issues (both completed: #2, #3)
+- 🔴 High: 0 issues (all completed: #2, #3)
 - 🟡 Medium: 2 issues (#1 Joker choice, #6 Asset handling)
-- 🟢 Low: 2 issues (#4 Drag handlers, #7 Test migration)
-- ✅ Completed: 3 issues (#2 PhaserTileSprites rename, #3 TableManager cleanup, #5 Mobile animation)
+- 🟢 Low: 1 issue (#7 Test migration)
+- ✅ Completed: 4 issues (#2 PhaserTileSprites rename, #3 TableManager cleanup, #4 Drag handlers removed, #5 Mobile animation)
 
 **By Type**:
 
-- Enhancement/Feature: 2 (#1, #6) + 1 low priority (#4)
+- Enhancement/Feature: 2 (#1, #6)
 - Testing: 1 (#7)
-- ✅ Completed: 3 issues (#2 Refactor, #3 Refactor, #5 Feature)
+- ✅ Completed: 4 issues (#2 Refactor, #3 Refactor, #4 Refactor, #5 Feature)
 
 **Quick Wins** (1-2 hours):
 
-- #4 - Investigate drag handlers (likely can just remove)
 - #7 - Move touch tests to unit tests
 
 **Medium Effort** (2-4 hours):
