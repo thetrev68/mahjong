@@ -19,7 +19,7 @@ import {
   WINDOW_WIDTH,
   WINDOW_HEIGHT,
 } from "../../constants.js";
-import { Tile } from "../gameObjects/gameObjects.js";
+import { Tile } from "../gameObjects/PhaserTileSprites.js";
 
 export class TileManager {
   /**

@@ -6,98 +6,32 @@ Copy each issue below into GitHub's issue tracker with the specified labels.
 
 ---
 
-## Issue #1: [ENHANCEMENT] Allow user to choose joker exchange options
-
-**Labels**: `enhancement`, `medium-priority`, `gameplay`
-
-**File**: [core/GameController.js:1568](core/GameController.js#L1568)
-
-**Description**:
-
-Currently, when a player has multiple valid joker exchanges available, the system automatically selects the first one. This should be enhanced to let the user choose among all available exchange options.
-
-**Current Behavior**:
-
-```javascript
-// For now, auto-select the first available exchange
-// TODO: Future enhancement - let user choose among multiple exchanges
-// Could use promptUI to present matchingExchanges array for selection
-const exchange = matchingExchanges[0];
-```
-
-**Desired Behavior**:
-
-- When `matchingExchanges.length > 1`, show a UI prompt
-- Present all available exchange options to the user
-- Let user select which tile they want to exchange for the joker
-- Use existing `promptUI()` mechanism for consistency
-
-**Implementation Notes**:
-
-- Use `this.promptUI()` to present choices
-- Pass `matchingExchanges` array with formatted display text
-- Handle callback to get user selection
-
-**Acceptance Criteria**:
-
-- [ ] When multiple exchanges are available, user sees selection prompt
-- [ ] Prompt shows all valid exchange options clearly
-- [ ] User can select their preferred exchange
-- [ ] Single exchange still auto-selects (no prompt needed)
-- [ ] Works on both desktop and mobile platforms
-
-**Effort Estimate**: 2-3 hours
-
 ---
 
-## Issue #2: [REFACTOR] Remove legacy gameObjects.js file
+## Issue #2: ✅ [REFACTOR] Remove legacy gameObjects.js file
 
 **Labels**: `refactor`, `technical-debt`, `high-priority`
 
-**File**: [desktop/gameObjects/gameObjects.js:13](desktop/gameObjects/gameObjects.js#L13)
+**Status**: ✅ **COMPLETED - December 18, 2025**
+
+**File**: [desktop/gameObjects/PhaserTileSprites.js:1](desktop/gameObjects/PhaserTileSprites.js#L1) (renamed from gameObjects.js)
 
 **Description**:
 
-This legacy file is marked for removal but still exists in the codebase. We need a migration plan to remove it safely.
+This file was marked for removal with a misleading TODO comment. After analysis, determined these are legitimate Phaser sprite wrappers for desktop, not legacy code to remove.
 
-**Current State**:
+**Resolution**:
 
-```javascript
-//TODO: This file is to be phased out and removed.
-```
+1. **Analysis**: Determined that `Tile`, `Wall`, and `Discards` classes are legitimate Phaser-specific sprite wrappers for the desktop platform, NOT legacy code to be removed. These manage visual sprites and cannot be replaced with platform-agnostic `TileData` models.
 
-**Migration Tasks**:
+2. **Actions Taken**:
+   - ✅ Renamed `desktop/gameObjects/gameObjects.js` → `PhaserTileSprites.js` (clearer name)
+   - ✅ Updated imports in [TileManager.js](desktop/managers/TileManager.js), [HomePageTileManager.js](desktop/managers/HomePageTileManager.js), [gameObjects_table.js](desktop/gameObjects/gameObjects_table.js)
+   - ✅ Migrated `gTileGroups` usage to [core/tileDefinitions.js](core/tileDefinitions.js) in HomePageTileManager
+   - ✅ Updated card test files (2017-2020) to use `TileData` instead of Phaser `Tile`
+   - ✅ Replaced misleading TODO comment with clear documentation header explaining these are intentional desktop implementation classes
 
-1. **Audit Dependencies**:
-   - [ ] Search codebase for all imports from `gameObjects.js`
-   - [ ] Identify which components are still used
-   - [ ] Document migration path for each component
-
-2. **Create Migration Plan**:
-   - [ ] Map old components to new equivalents (core/models/)
-   - [ ] Identify any functionality that needs preservation
-   - [ ] Create deprecation timeline
-
-3. **Execute Migration**:
-   - [ ] Replace all usages with modern equivalents
-   - [ ] Update imports to use TileData, HandData, PlayerData
-   - [ ] Remove the file
-   - [ ] Update tests if needed
-
-**Related Files**:
-
-- `desktop/gameObjects/gameObjects_table.js` (also has TODO)
-- `desktop/gameObjects/gameObjects_hand.js`
-- `desktop/gameObjects/gameObjects_player.js`
-
-**Acceptance Criteria**:
-
-- [ ] No code imports from gameObjects.js
-- [ ] All functionality migrated to new models
-- [ ] File removed from codebase
-- [ ] Tests pass on desktop platform
-
-**Effort Estimate**: 4-6 hours
+3. **Result**: File renamed and clarified, all imports updated, no functionality broken. The classes remain as desktop Phaser sprite wrappers, which is their correct architectural role.
 
 ---
 

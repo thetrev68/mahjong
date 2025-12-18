@@ -1,5 +1,5 @@
 import { debugPrint } from "../../../utils.js";
-import { Tile } from "../../../desktop/gameObjects/gameObjects.js";
+import { TileData } from "../../models/TileData.js";
 import { CardHand as Hand } from "../CardHand.js";
 
 import { SUIT, DRAGON, WIND } from "../../../constants.js";
@@ -18,21 +18,21 @@ export class CardTest {
     {
       // 222 0000 111 7777 (2 suits)
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.CRACK, 2));
-      hand.insertHidden(new Tile(SUIT.CRACK, 2));
-      hand.insertHidden(new Tile(SUIT.CRACK, 2));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.BAM, 1));
-      hand.insertHidden(new Tile(SUIT.BAM, 1));
-      hand.insertHidden(new Tile(SUIT.BAM, 1));
-      hand.insertHidden(new Tile(SUIT.BAM, 7));
-      hand.insertHidden(new Tile(SUIT.BAM, 7));
-      hand.insertHidden(new Tile(SUIT.BAM, 7));
+      hand.insertHidden(new TileData(SUIT.CRACK, 2));
+      hand.insertHidden(new TileData(SUIT.CRACK, 2));
+      hand.insertHidden(new TileData(SUIT.CRACK, 2));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.BAM, 1));
+      hand.insertHidden(new TileData(SUIT.BAM, 1));
+      hand.insertHidden(new TileData(SUIT.BAM, 1));
+      hand.insertHidden(new TileData(SUIT.BAM, 7));
+      hand.insertHidden(new TileData(SUIT.BAM, 7));
+      hand.insertHidden(new TileData(SUIT.BAM, 7));
 
-      const singleTile = new Tile(SUIT.BAM, 7);
+      const singleTile = new TileData(SUIT.BAM, 7);
 
       debugPrint("222 0000 111 7777 (2 suits)\n");
 
@@ -43,21 +43,21 @@ export class CardTest {
     {
       // 222 0000 111 7777 (2 suits)
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.CRACK, 2));
-      hand.insertHidden(new Tile(SUIT.CRACK, 2));
-      hand.insertHidden(new Tile(SUIT.CRACK, 2));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.DOT, 1));
-      hand.insertHidden(new Tile(SUIT.DOT, 1));
-      hand.insertHidden(new Tile(SUIT.DOT, 1));
-      hand.insertHidden(new Tile(SUIT.DOT, 7));
-      hand.insertHidden(new Tile(SUIT.DOT, 7));
-      hand.insertHidden(new Tile(SUIT.DOT, 7));
+      hand.insertHidden(new TileData(SUIT.CRACK, 2));
+      hand.insertHidden(new TileData(SUIT.CRACK, 2));
+      hand.insertHidden(new TileData(SUIT.CRACK, 2));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DOT, 1));
+      hand.insertHidden(new TileData(SUIT.DOT, 1));
+      hand.insertHidden(new TileData(SUIT.DOT, 1));
+      hand.insertHidden(new TileData(SUIT.DOT, 7));
+      hand.insertHidden(new TileData(SUIT.DOT, 7));
+      hand.insertHidden(new TileData(SUIT.DOT, 7));
 
-      const singleTile = new Tile(SUIT.DOT, 7);
+      const singleTile = new TileData(SUIT.DOT, 7);
 
       debugPrint("222 0000 111 7777 (2 suits)\n");
 
@@ -68,21 +68,21 @@ export class CardTest {
     {
       // FF DDDD 2017 DDDD (2 or 3 suits)  2 suits
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.CRACK, 2));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.CRACK, 1));
-      hand.insertHidden(new Tile(SUIT.CRACK, 7));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.CRACK, 2));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.CRACK, 1));
+      hand.insertHidden(new TileData(SUIT.CRACK, 7));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.GREEN));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.GREEN));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.GREEN));
 
-      const singleTile = new Tile(SUIT.DRAGON, DRAGON.GREEN);
+      const singleTile = new TileData(SUIT.DRAGON, DRAGON.GREEN);
 
       debugPrint("FF DDDD 2017 DDDD (2 or 3 suits)  2 suits\n");
 
@@ -93,21 +93,21 @@ export class CardTest {
     {
       // FF DDDD 2017 DDDD (2 or 3 suits)  3 suits
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DOT, 2));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.DOT, 1));
-      hand.insertHidden(new Tile(SUIT.DOT, 7));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DOT, 2));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DOT, 1));
+      hand.insertHidden(new TileData(SUIT.DOT, 7));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.GREEN));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.GREEN));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.GREEN));
 
-      const singleTile = new Tile(SUIT.DRAGON, DRAGON.GREEN);
+      const singleTile = new TileData(SUIT.DRAGON, DRAGON.GREEN);
 
       debugPrint("FF DDDD 2017 DDDD (2 or 3 suits)  3 suits\n");
 
@@ -118,21 +118,21 @@ export class CardTest {
     {
       // FF DDDD 2017 DDDD (2 or 3 suits)  3 suits
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.JOKER, 0));
-      hand.insertHidden(new Tile(SUIT.DOT, 2));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.DOT, 1));
-      hand.insertHidden(new Tile(SUIT.DOT, 7));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
-      hand.insertHidden(new Tile(SUIT.JOKER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.JOKER, 0));
+      hand.insertHidden(new TileData(SUIT.DOT, 2));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DOT, 1));
+      hand.insertHidden(new TileData(SUIT.DOT, 7));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.GREEN));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.GREEN));
+      hand.insertHidden(new TileData(SUIT.JOKER, 0));
 
-      const singleTile = new Tile(SUIT.DRAGON, DRAGON.GREEN);
+      const singleTile = new TileData(SUIT.DRAGON, DRAGON.GREEN);
 
       debugPrint("FF DDDD 2017 DDDD (2 or 3 suits)  3 suits, using jokers\n");
 
@@ -143,21 +143,21 @@ export class CardTest {
     {
       // FFFF 2 44 666 8888 (1 suit)
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.DOT, 2));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 6));
-      hand.insertHidden(new Tile(SUIT.DOT, 6));
-      hand.insertHidden(new Tile(SUIT.DOT, 6));
-      hand.insertHidden(new Tile(SUIT.DOT, 8));
-      hand.insertHidden(new Tile(SUIT.DOT, 8));
-      hand.insertHidden(new Tile(SUIT.DOT, 8));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.DOT, 2));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 6));
+      hand.insertHidden(new TileData(SUIT.DOT, 6));
+      hand.insertHidden(new TileData(SUIT.DOT, 6));
+      hand.insertHidden(new TileData(SUIT.DOT, 8));
+      hand.insertHidden(new TileData(SUIT.DOT, 8));
+      hand.insertHidden(new TileData(SUIT.DOT, 8));
 
-      const singleTile = new Tile(SUIT.DOT, 8);
+      const singleTile = new TileData(SUIT.DOT, 8);
 
       debugPrint("FFFF 2 44 666 8888 (1 suit)\n");
 
@@ -168,21 +168,21 @@ export class CardTest {
     {
       // 22 44 666 8888 DDDD (3 suits)
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.DOT, 2));
-      hand.insertHidden(new Tile(SUIT.DOT, 2));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.BAM, 6));
-      hand.insertHidden(new Tile(SUIT.BAM, 6));
-      hand.insertHidden(new Tile(SUIT.BAM, 6));
-      hand.insertHidden(new Tile(SUIT.BAM, 8));
-      hand.insertHidden(new Tile(SUIT.BAM, 8));
-      hand.insertHidden(new Tile(SUIT.BAM, 8));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DOT, 2));
+      hand.insertHidden(new TileData(SUIT.DOT, 2));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.BAM, 6));
+      hand.insertHidden(new TileData(SUIT.BAM, 6));
+      hand.insertHidden(new TileData(SUIT.BAM, 6));
+      hand.insertHidden(new TileData(SUIT.BAM, 8));
+      hand.insertHidden(new TileData(SUIT.BAM, 8));
+      hand.insertHidden(new TileData(SUIT.BAM, 8));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
 
-      const singleTile = new Tile(SUIT.DRAGON, DRAGON.RED);
+      const singleTile = new TileData(SUIT.DRAGON, DRAGON.RED);
 
       debugPrint("22 44 666 8888 DDDD (3 suits)\n");
 
@@ -193,23 +193,23 @@ export class CardTest {
     {
       // FF 1111 DDDD 1111 (3 suits, like numbers)
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
 
-      hand.insertHidden(new Tile(SUIT.BAM, 4));
-      hand.insertHidden(new Tile(SUIT.BAM, 4));
-      hand.insertHidden(new Tile(SUIT.BAM, 4));
-      hand.insertHidden(new Tile(SUIT.BAM, 4));
+      hand.insertHidden(new TileData(SUIT.BAM, 4));
+      hand.insertHidden(new TileData(SUIT.BAM, 4));
+      hand.insertHidden(new TileData(SUIT.BAM, 4));
+      hand.insertHidden(new TileData(SUIT.BAM, 4));
 
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
 
-      const singleTile = new Tile(SUIT.DRAGON, DRAGON.RED);
+      const singleTile = new TileData(SUIT.DRAGON, DRAGON.RED);
 
       debugPrint("FF 1111 DDDD 1111 (3 suits, like numbers)\n");
 
@@ -220,24 +220,24 @@ export class CardTest {
     {
       // FFFF 4444 9999 13 (1 suit, lucky 13)
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
 
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
 
-      hand.insertHidden(new Tile(SUIT.DOT, 9));
-      hand.insertHidden(new Tile(SUIT.DOT, 9));
-      hand.insertHidden(new Tile(SUIT.DOT, 9));
-      hand.insertHidden(new Tile(SUIT.DOT, 9));
+      hand.insertHidden(new TileData(SUIT.DOT, 9));
+      hand.insertHidden(new TileData(SUIT.DOT, 9));
+      hand.insertHidden(new TileData(SUIT.DOT, 9));
+      hand.insertHidden(new TileData(SUIT.DOT, 9));
 
-      hand.insertHidden(new Tile(SUIT.DOT, 1));
+      hand.insertHidden(new TileData(SUIT.DOT, 1));
 
-      const singleTile = new Tile(SUIT.DOT, 3);
+      const singleTile = new TileData(SUIT.DOT, 3);
 
       debugPrint("FFFF 4444 9999 13 (1 suit, lucky 13)\n");
 
@@ -248,24 +248,24 @@ export class CardTest {
     {
       // FFFF 4444 9999 13 (3 suit, lucky 13)
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
 
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
 
-      hand.insertHidden(new Tile(SUIT.CRACK, 9));
-      hand.insertHidden(new Tile(SUIT.CRACK, 9));
-      hand.insertHidden(new Tile(SUIT.CRACK, 9));
-      hand.insertHidden(new Tile(SUIT.CRACK, 9));
+      hand.insertHidden(new TileData(SUIT.CRACK, 9));
+      hand.insertHidden(new TileData(SUIT.CRACK, 9));
+      hand.insertHidden(new TileData(SUIT.CRACK, 9));
+      hand.insertHidden(new TileData(SUIT.CRACK, 9));
 
-      hand.insertHidden(new Tile(SUIT.BAM, 1));
+      hand.insertHidden(new TileData(SUIT.BAM, 1));
 
-      const singleTile = new Tile(SUIT.BAM, 3);
+      const singleTile = new TileData(SUIT.BAM, 3);
 
       debugPrint("FFFF 4444 9999 13 (3 suit, lucky 13)\n");
 
@@ -276,21 +276,21 @@ export class CardTest {
     {
       // NNNNN DDDD 11111 (quints, any wind, any dragon, any number/suit)
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.BAM, 3));
-      hand.insertHidden(new Tile(SUIT.BAM, 3));
-      hand.insertHidden(new Tile(SUIT.BAM, 3));
-      hand.insertHidden(new Tile(SUIT.BAM, 3));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.BAM, 3));
+      hand.insertHidden(new TileData(SUIT.BAM, 3));
+      hand.insertHidden(new TileData(SUIT.BAM, 3));
+      hand.insertHidden(new TileData(SUIT.BAM, 3));
 
-      const singleTile = new Tile(SUIT.BAM, 3);
+      const singleTile = new TileData(SUIT.BAM, 3);
 
       debugPrint(
         "NNNNN DDDD 11111 (quints, any wind, any dragon, any number/suit)\n",
@@ -303,21 +303,21 @@ export class CardTest {
     {
       // NNNNN DDDD 11111 (quints, any wind, any dragon, any number/suit)
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.EAST));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.EAST));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.EAST));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.EAST));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.EAST));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.CRACK, 7));
-      hand.insertHidden(new Tile(SUIT.CRACK, 7));
-      hand.insertHidden(new Tile(SUIT.CRACK, 7));
-      hand.insertHidden(new Tile(SUIT.CRACK, 7));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.EAST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.EAST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.EAST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.EAST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.EAST));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.CRACK, 7));
+      hand.insertHidden(new TileData(SUIT.CRACK, 7));
+      hand.insertHidden(new TileData(SUIT.CRACK, 7));
+      hand.insertHidden(new TileData(SUIT.CRACK, 7));
 
-      const singleTile = new Tile(SUIT.CRACK, 7);
+      const singleTile = new TileData(SUIT.CRACK, 7);
 
       debugPrint(
         "NNNNN DDDD 11111 (quints, any wind, any dragon, any number/suit)\n",
@@ -330,24 +330,24 @@ export class CardTest {
     {
       // FF 11111 22 33333 (1 suit, 3 consecutive numbers)
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
 
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
 
-      hand.insertHidden(new Tile(SUIT.CRACK, 4));
-      hand.insertHidden(new Tile(SUIT.CRACK, 4));
+      hand.insertHidden(new TileData(SUIT.CRACK, 4));
+      hand.insertHidden(new TileData(SUIT.CRACK, 4));
 
-      hand.insertHidden(new Tile(SUIT.CRACK, 5));
-      hand.insertHidden(new Tile(SUIT.CRACK, 5));
-      hand.insertHidden(new Tile(SUIT.CRACK, 5));
-      hand.insertHidden(new Tile(SUIT.CRACK, 5));
+      hand.insertHidden(new TileData(SUIT.CRACK, 5));
+      hand.insertHidden(new TileData(SUIT.CRACK, 5));
+      hand.insertHidden(new TileData(SUIT.CRACK, 5));
+      hand.insertHidden(new TileData(SUIT.CRACK, 5));
 
-      const singleTile = new Tile(SUIT.CRACK, 5);
+      const singleTile = new TileData(SUIT.CRACK, 5);
 
       debugPrint("FF 11111 22 33333 (1 suit, 3 consecutive numbers)\n");
 
@@ -358,24 +358,24 @@ export class CardTest {
     {
       // FF 1111 2222 3333 (3 suit, 3 consecutive numbers)
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
 
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
 
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
 
-      hand.insertHidden(new Tile(SUIT.BAM, 5));
-      hand.insertHidden(new Tile(SUIT.BAM, 5));
-      hand.insertHidden(new Tile(SUIT.BAM, 5));
+      hand.insertHidden(new TileData(SUIT.BAM, 5));
+      hand.insertHidden(new TileData(SUIT.BAM, 5));
+      hand.insertHidden(new TileData(SUIT.BAM, 5));
 
-      const singleTile = new Tile(SUIT.BAM, 5);
+      const singleTile = new TileData(SUIT.BAM, 5);
 
       debugPrint("FF 1111 2222 3333 (3 suit, 3 consecutive numbers)\n");
 
@@ -387,23 +387,23 @@ export class CardTest {
       // 11 22 111 222 3333 (3 suit, 3 consecutive numbers)
       const hand = new Hand(false);
 
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 4));
-      hand.insertHidden(new Tile(SUIT.CRACK, 4));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 4));
+      hand.insertHidden(new TileData(SUIT.CRACK, 4));
 
-      hand.insertHidden(new Tile(SUIT.DOT, 3));
-      hand.insertHidden(new Tile(SUIT.DOT, 3));
-      hand.insertHidden(new Tile(SUIT.DOT, 3));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
-      hand.insertHidden(new Tile(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 3));
+      hand.insertHidden(new TileData(SUIT.DOT, 3));
+      hand.insertHidden(new TileData(SUIT.DOT, 3));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
+      hand.insertHidden(new TileData(SUIT.DOT, 4));
 
-      hand.insertHidden(new Tile(SUIT.BAM, 5));
-      hand.insertHidden(new Tile(SUIT.BAM, 5));
-      hand.insertHidden(new Tile(SUIT.BAM, 5));
+      hand.insertHidden(new TileData(SUIT.BAM, 5));
+      hand.insertHidden(new TileData(SUIT.BAM, 5));
+      hand.insertHidden(new TileData(SUIT.BAM, 5));
 
-      const singleTile = new Tile(SUIT.BAM, 5);
+      const singleTile = new TileData(SUIT.BAM, 5);
 
       debugPrint("11 22 111 222 3333 (3 suit, 3 consecutive numbers)\n");
 
@@ -415,23 +415,23 @@ export class CardTest {
       // 111 22 333 DDD DDD (3 consecutive numbers, 3 suits)
       const hand = new Hand(false);
 
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 4));
-      hand.insertHidden(new Tile(SUIT.CRACK, 4));
-      hand.insertHidden(new Tile(SUIT.CRACK, 5));
-      hand.insertHidden(new Tile(SUIT.CRACK, 5));
-      hand.insertHidden(new Tile(SUIT.CRACK, 5));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 4));
+      hand.insertHidden(new TileData(SUIT.CRACK, 4));
+      hand.insertHidden(new TileData(SUIT.CRACK, 5));
+      hand.insertHidden(new TileData(SUIT.CRACK, 5));
+      hand.insertHidden(new TileData(SUIT.CRACK, 5));
 
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.GREEN));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.GREEN));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.GREEN));
 
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
 
-      const singleTile = new Tile(SUIT.DRAGON, DRAGON.WHITE);
+      const singleTile = new TileData(SUIT.DRAGON, DRAGON.WHITE);
 
       debugPrint("111 22 333 DDD DDD (3 consecutive numbers, 3 suits)\n");
 
@@ -443,23 +443,23 @@ export class CardTest {
       // NNNN EEEE WWWW SS
       const hand = new Hand(false);
 
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
 
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.WEST));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.WEST));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.WEST));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.WEST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.WEST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.WEST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.WEST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.WEST));
 
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.EAST));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.EAST));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.EAST));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.EAST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.EAST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.EAST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.EAST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.EAST));
 
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
-      const singleTile = new Tile(SUIT.WIND, WIND.SOUTH);
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.SOUTH));
+      const singleTile = new TileData(SUIT.WIND, WIND.SOUTH);
 
       debugPrint("NNNN EEEE WWWW SS\n");
 
@@ -471,22 +471,22 @@ export class CardTest {
       // NNNN DD DD DD SSSS (3 suits)
       const hand = new Hand(false);
 
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.SOUTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.SOUTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.SOUTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.SOUTH));
 
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.GREEN));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.GREEN));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
 
-      const singleTile = new Tile(SUIT.DRAGON, DRAGON.WHITE);
+      const singleTile = new TileData(SUIT.DRAGON, DRAGON.WHITE);
 
       debugPrint(" NNNN DD DD DD SSSS (3 suits)\n");
 
@@ -498,21 +498,21 @@ export class CardTest {
       // 11 NNN 11 SSS 1111 (3 suits, any like odds)
       const hand = new Hand(false);
 
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.SOUTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.SOUTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.SOUTH));
 
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.DOT, 3));
-      hand.insertHidden(new Tile(SUIT.DOT, 3));
-      hand.insertHidden(new Tile(SUIT.BAM, 3));
-      const singleTile = new Tile(SUIT.BAM, 3);
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.DOT, 3));
+      hand.insertHidden(new TileData(SUIT.DOT, 3));
+      hand.insertHidden(new TileData(SUIT.BAM, 3));
+      const singleTile = new TileData(SUIT.BAM, 3);
 
       debugPrint("11 NNN 11 SSS 1111 (3 suits, any like odds) \n");
 
@@ -524,21 +524,21 @@ export class CardTest {
       // NN EE WW SS 11 11 11 (3 suits, like numbers)
       const hand = new Hand(false);
 
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.WEST));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.WEST));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.EAST));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.EAST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.SOUTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.SOUTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.WEST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.WEST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.EAST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.EAST));
 
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.DOT, 3));
-      hand.insertHidden(new Tile(SUIT.DOT, 3));
-      hand.insertHidden(new Tile(SUIT.BAM, 3));
-      const singleTile = new Tile(SUIT.BAM, 3);
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.DOT, 3));
+      hand.insertHidden(new TileData(SUIT.DOT, 3));
+      hand.insertHidden(new TileData(SUIT.BAM, 3));
+      const singleTile = new TileData(SUIT.BAM, 3);
 
       debugPrint("NN EE WW SS 11 11 11 (3 suits, like numbers) \n");
 
@@ -550,20 +550,20 @@ export class CardTest {
       // 11 22 33 44 55 66 77 (any 7 consecutive numbers in 1 suit)
       const hand = new Hand(false);
 
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 4));
-      hand.insertHidden(new Tile(SUIT.CRACK, 4));
-      hand.insertHidden(new Tile(SUIT.CRACK, 5));
-      hand.insertHidden(new Tile(SUIT.CRACK, 5));
-      hand.insertHidden(new Tile(SUIT.CRACK, 6));
-      hand.insertHidden(new Tile(SUIT.CRACK, 6));
-      hand.insertHidden(new Tile(SUIT.CRACK, 7));
-      hand.insertHidden(new Tile(SUIT.CRACK, 7));
-      hand.insertHidden(new Tile(SUIT.CRACK, 8));
-      hand.insertHidden(new Tile(SUIT.CRACK, 8));
-      hand.insertHidden(new Tile(SUIT.CRACK, 9));
-      const singleTile = new Tile(SUIT.CRACK, 9);
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 4));
+      hand.insertHidden(new TileData(SUIT.CRACK, 4));
+      hand.insertHidden(new TileData(SUIT.CRACK, 5));
+      hand.insertHidden(new TileData(SUIT.CRACK, 5));
+      hand.insertHidden(new TileData(SUIT.CRACK, 6));
+      hand.insertHidden(new TileData(SUIT.CRACK, 6));
+      hand.insertHidden(new TileData(SUIT.CRACK, 7));
+      hand.insertHidden(new TileData(SUIT.CRACK, 7));
+      hand.insertHidden(new TileData(SUIT.CRACK, 8));
+      hand.insertHidden(new TileData(SUIT.CRACK, 8));
+      hand.insertHidden(new TileData(SUIT.CRACK, 9));
+      const singleTile = new TileData(SUIT.CRACK, 9);
 
       debugPrint(
         "11 22 33 44 55 66 77 (any 7 consecutive numbers in 1 suit) \n",
@@ -577,21 +577,21 @@ export class CardTest {
       // 11 33 55 77 99 11 11 (3 suits, like odd pairs in opposite 2 suits)
       const hand = new Hand(false);
 
-      hand.insertHidden(new Tile(SUIT.CRACK, 1));
-      hand.insertHidden(new Tile(SUIT.CRACK, 1));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 3));
-      hand.insertHidden(new Tile(SUIT.CRACK, 5));
-      hand.insertHidden(new Tile(SUIT.CRACK, 5));
-      hand.insertHidden(new Tile(SUIT.CRACK, 7));
-      hand.insertHidden(new Tile(SUIT.CRACK, 7));
-      hand.insertHidden(new Tile(SUIT.CRACK, 9));
-      hand.insertHidden(new Tile(SUIT.CRACK, 9));
+      hand.insertHidden(new TileData(SUIT.CRACK, 1));
+      hand.insertHidden(new TileData(SUIT.CRACK, 1));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 3));
+      hand.insertHidden(new TileData(SUIT.CRACK, 5));
+      hand.insertHidden(new TileData(SUIT.CRACK, 5));
+      hand.insertHidden(new TileData(SUIT.CRACK, 7));
+      hand.insertHidden(new TileData(SUIT.CRACK, 7));
+      hand.insertHidden(new TileData(SUIT.CRACK, 9));
+      hand.insertHidden(new TileData(SUIT.CRACK, 9));
 
-      hand.insertHidden(new Tile(SUIT.DOT, 3));
-      hand.insertHidden(new Tile(SUIT.DOT, 3));
-      hand.insertHidden(new Tile(SUIT.BAM, 3));
-      const singleTile = new Tile(SUIT.BAM, 3);
+      hand.insertHidden(new TileData(SUIT.DOT, 3));
+      hand.insertHidden(new TileData(SUIT.DOT, 3));
+      hand.insertHidden(new TileData(SUIT.BAM, 3));
+      const singleTile = new TileData(SUIT.BAM, 3);
 
       debugPrint(
         "11 33 55 77 99 11 11 (3 suits, like odd pairs in opposite 2 suits)\n",
@@ -605,21 +605,21 @@ export class CardTest {
       // FF 2017 DD 2017 DD  (bams and craks only)
       const hand = new Hand(false);
 
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.CRACK, 2));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.CRACK, 1));
-      hand.insertHidden(new Tile(SUIT.CRACK, 7));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.CRACK, 2));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.CRACK, 1));
+      hand.insertHidden(new TileData(SUIT.CRACK, 7));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.RED));
 
-      hand.insertHidden(new Tile(SUIT.BAM, 2));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.BAM, 1));
-      hand.insertHidden(new Tile(SUIT.BAM, 7));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.GREEN));
-      const singleTile = new Tile(SUIT.DRAGON, DRAGON.GREEN);
+      hand.insertHidden(new TileData(SUIT.BAM, 2));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.BAM, 1));
+      hand.insertHidden(new TileData(SUIT.BAM, 7));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.GREEN));
+      const singleTile = new TileData(SUIT.DRAGON, DRAGON.GREEN);
 
       debugPrint("FF 2017 DD 2017 DD (bams and craks only)\n");
 

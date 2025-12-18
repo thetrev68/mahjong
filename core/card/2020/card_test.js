@@ -1,5 +1,5 @@
 import { debugPrint } from "../../../utils.js";
-import { Tile } from "../../../desktop/gameObjects/gameObjects.js";
+import { TileData } from "../../models/TileData.js";
 import { CardHand as Hand } from "../CardHand.js";
 
 import { SUIT, DRAGON, WIND } from "../../../constants.js";
@@ -18,23 +18,23 @@ export class CardTest {
     {
       // FF 2020 2222 2222 (3 suits)
       const hand = new Hand(false);
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
 
-      hand.insertHidden(new Tile(SUIT.CRACK, 2));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.CRACK, 2));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.CRACK, 2));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.CRACK, 2));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
 
-      hand.insertHidden(new Tile(SUIT.DOT, 2));
-      hand.insertHidden(new Tile(SUIT.DOT, 2));
-      hand.insertHidden(new Tile(SUIT.DOT, 2));
-      hand.insertHidden(new Tile(SUIT.DOT, 2));
+      hand.insertHidden(new TileData(SUIT.DOT, 2));
+      hand.insertHidden(new TileData(SUIT.DOT, 2));
+      hand.insertHidden(new TileData(SUIT.DOT, 2));
+      hand.insertHidden(new TileData(SUIT.DOT, 2));
 
-      hand.insertHidden(new Tile(SUIT.BAM, 2));
-      hand.insertHidden(new Tile(SUIT.BAM, 2));
-      hand.insertHidden(new Tile(SUIT.BAM, 2));
-      hand.insertHidden(new Tile(SUIT.BAM, 2));
+      hand.insertHidden(new TileData(SUIT.BAM, 2));
+      hand.insertHidden(new TileData(SUIT.BAM, 2));
+      hand.insertHidden(new TileData(SUIT.BAM, 2));
+      hand.insertHidden(new TileData(SUIT.BAM, 2));
 
       debugPrint("FF 2020 2222 2222 (3 suits)\n");
 
@@ -46,23 +46,23 @@ export class CardTest {
       // FFFF 4444 6666 24 (3 suits)
       const hand = new Hand(false);
 
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
 
-      hand.insertHidden(new Tile(SUIT.CRACK, 4));
-      hand.insertHidden(new Tile(SUIT.CRACK, 4));
-      hand.insertHidden(new Tile(SUIT.CRACK, 4));
-      hand.insertHidden(new Tile(SUIT.CRACK, 4));
+      hand.insertHidden(new TileData(SUIT.CRACK, 4));
+      hand.insertHidden(new TileData(SUIT.CRACK, 4));
+      hand.insertHidden(new TileData(SUIT.CRACK, 4));
+      hand.insertHidden(new TileData(SUIT.CRACK, 4));
 
-      hand.insertHidden(new Tile(SUIT.DOT, 6));
-      hand.insertHidden(new Tile(SUIT.DOT, 6));
-      hand.insertHidden(new Tile(SUIT.DOT, 6));
-      hand.insertHidden(new Tile(SUIT.DOT, 6));
+      hand.insertHidden(new TileData(SUIT.DOT, 6));
+      hand.insertHidden(new TileData(SUIT.DOT, 6));
+      hand.insertHidden(new TileData(SUIT.DOT, 6));
+      hand.insertHidden(new TileData(SUIT.DOT, 6));
 
-      hand.insertHidden(new Tile(SUIT.BAM, 2));
-      hand.insertHidden(new Tile(SUIT.BAM, 4));
+      hand.insertHidden(new TileData(SUIT.BAM, 2));
+      hand.insertHidden(new TileData(SUIT.BAM, 4));
 
       debugPrint("FFFF 4444 6666 24 (3 suits)\n");
 
@@ -74,24 +74,24 @@ export class CardTest {
       // FF 2020 NEWS 2020 (any 2 suits, 2s match in each 2020, concealed)
       const hand = new Hand(false);
 
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
-      hand.insertHidden(new Tile(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
+      hand.insertHidden(new TileData(SUIT.FLOWER, 0));
 
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.NORTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.SOUTH));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.EAST));
-      hand.insertHidden(new Tile(SUIT.WIND, WIND.WEST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.NORTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.SOUTH));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.EAST));
+      hand.insertHidden(new TileData(SUIT.WIND, WIND.WEST));
 
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
-      hand.insertHidden(new Tile(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
+      hand.insertHidden(new TileData(SUIT.DRAGON, DRAGON.WHITE));
 
-      hand.insertHidden(new Tile(SUIT.CRACK, 2));
-      hand.insertHidden(new Tile(SUIT.CRACK, 2));
+      hand.insertHidden(new TileData(SUIT.CRACK, 2));
+      hand.insertHidden(new TileData(SUIT.CRACK, 2));
 
-      hand.insertHidden(new Tile(SUIT.DOT, 2));
-      hand.insertHidden(new Tile(SUIT.DOT, 2));
+      hand.insertHidden(new TileData(SUIT.DOT, 2));
+      hand.insertHidden(new TileData(SUIT.DOT, 2));
 
       debugPrint(
         "FF 2020 NEWS 2020 (any 2 suits, 2s match in each 2020, concealed)\n",

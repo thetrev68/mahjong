@@ -1,3 +1,18 @@
+/**
+ * PhaserTileSprites.js - Desktop Phaser sprite wrappers for mahjong tiles
+ *
+ * This file contains Phaser-specific visual components for the desktop platform:
+ * - Tile: Phaser sprite wrapper with animations, masking, and glow effects
+ * - Wall: Tile pool manager for the wall (152/160 tiles)
+ * - Discards: Discard pile manager with layout and selection
+ * - gTileGroups: Tile generation metadata (also exported from core/tileDefinitions.js)
+ *
+ * These classes are intentional desktop implementation details, not legacy code.
+ * They manage Phaser sprites and cannot be replaced with platform-agnostic TileData.
+ *
+ * For platform-agnostic tile data, see core/models/TileData.js
+ */
+
 import * as Phaser from "phaser";
 import {
   SUIT,
@@ -9,12 +24,6 @@ import {
   getTotalTileCount,
 } from "../../constants.js";
 import { debugPrint } from "../../utils.js";
-
-//TODO #2: This file is to be phased out and removed.
-
-// PRIVATE CONSTANTS
-
-// PRIVATE GLOBALS
 
 export const gTileGroups = [
   {

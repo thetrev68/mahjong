@@ -3,7 +3,7 @@ import {
   // PLAYER, PLAYER_OPTION, SUIT,
   getTotalTileCount,
 } from "../../constants.js";
-import { Wall, Discards } from "./gameObjects.js";
+import { Wall, Discards } from "./PhaserTileSprites.js";
 
 /**
  * Table - Legacy class from Phase 5

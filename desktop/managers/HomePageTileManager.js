@@ -1,5 +1,6 @@
 import * as Phaser from "phaser";
-import { Tile, gTileGroups } from "../gameObjects/gameObjects.js";
+import { Tile } from "../gameObjects/PhaserTileSprites.js";
+import { gTileGroups } from "../../core/tileDefinitions.js";
 import {
   SUIT,
   SPRITE_WIDTH,
