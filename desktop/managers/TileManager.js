@@ -12,7 +12,6 @@
 
 import {PLAYER, SUIT, SPRITE_WIDTH, SPRITE_SCALE, TILE_GAP, WINDOW_WIDTH, WINDOW_HEIGHT} from "../../constants.js";
 import {Tile} from "../gameObjects/gameObjects.js";
-import {animateTileSelect, animateTileDeselect} from "../animations/AnimationLibrary.js";
 
 export class TileManager {
     /**
@@ -460,14 +459,23 @@ export class TileManager {
 
         this.selectedTiles.add(index);
 
-        // Raise tile up
+        // Raise tile up with animation
         const currentY = sprite.y;
         const raisedY = currentY - 30;
 
-        return animateTileSelect(sprite, {y: raisedY}, 150, () => {
-            if (this.onTileSelected) {
-                this.onTileSelected(sprite, index);
-            }
+        return new Promise((resolve) => {
+            this.scene.tweens.add({
+                targets: sprite,
+                y: raisedY,
+                duration: 150,
+                ease: "Quad.easeOut",
+                onComplete: () => {
+                    if (this.onTileSelected) {
+                        this.onTileSelected(sprite, index);
+                    }
+                    resolve();
+                }
+            });
         });
     }
 
@@ -487,14 +495,23 @@ export class TileManager {
 
         this.selectedTiles.delete(index);
 
-        // Lower tile back down
+        // Lower tile back down with animation
         const raisedY = sprite.y;
         const normalY = raisedY + 30;
 
-        return animateTileDeselect(sprite, {y: normalY}, 150, () => {
-            if (this.onTileDeselected) {
-                this.onTileDeselected(sprite, index);
-            }
+        return new Promise((resolve) => {
+            this.scene.tweens.add({
+                targets: sprite,
+                y: normalY,
+                duration: 150,
+                ease: "Quad.easeOut",
+                onComplete: () => {
+                    if (this.onTileDeselected) {
+                        this.onTileDeselected(sprite, index);
+                    }
+                    resolve();
+                }
+            });
         });
     }
 
