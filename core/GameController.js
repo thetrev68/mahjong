@@ -476,111 +476,145 @@ export class GameController extends EventEmitter {
       if (typeof direction !== "number") {
         continue;
       }
-      this.setState(phase === 1 ? STATE.CHARLESTON1 : STATE.CHARLESTON2);
 
-      // Emit rich Charleston phase event
-      const phaseEvent = GameEvents.createCharlestonPhaseEvent(
-        phase,
-        i + 1,
-        directionName,
-      );
-      this.emit("CHARLESTON_PHASE", phaseEvent);
+      await this.executeSingleCharlestonPass(phase, i + 1, directionName, direction);
+    }
+  }
 
-      // Collect tiles from all players
-      const charlestonPassArray = [];
+  /**
+   * Execute a single Charleston pass in a given direction
+   * @param {number} phase - 1 or 2
+   * @param {number} passNumber - 1, 2, or 3
+   * @param {string} directionName - "right", "across", or "left"
+   * @param {number} direction - Player offset (1, 2, or 3)
+   */
+  async executeSingleCharlestonPass(phase, passNumber, directionName, direction) {
+    this.setState(phase === 1 ? STATE.CHARLESTON1 : STATE.CHARLESTON2);
 
-      for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
-        const player = this.players[playerIndex];
+    // Emit rich Charleston phase event
+    const phaseEvent = GameEvents.createCharlestonPhaseEvent(
+      phase,
+      passNumber,
+      directionName,
+    );
+    this.emit("CHARLESTON_PHASE", phaseEvent);
 
-        let tilesToPass;
-        if (player.isHuman) {
-          // Prompt human player
-          tilesToPass = await this.promptUI("CHARLESTON_PASS", {
-            direction: directionName,
-            requiredCount: 3,
-          });
-        } else {
-          // AI selects tiles
-          tilesToPass = await this.aiEngine.charlestonPass(player.hand);
-        }
+    // Collect tiles from all players
+    const charlestonPassArray = await this.collectCharlestonTiles(directionName, direction);
 
-        // Remove tiles from player's hand
-        tilesToPass.forEach((tile) => player.hand.removeTile(tile));
-        debugPrint(
-          `[GameController] Player ${playerIndex} removed ${tilesToPass.length} tiles, hand now has ${player.hand.tiles.length} tiles`,
-        );
+    // Exchange tiles between players based on direction
+    this.exchangeCharlestonTiles(charlestonPassArray, direction, directionName);
 
-        charlestonPassArray[playerIndex] = tilesToPass;
+    await this.sleep(500);
+  }
 
-        // Emit hand updated for sending player (tiles removed)
-        const senderHandEvent = GameEvents.createHandUpdatedEvent(
-          playerIndex,
-          this.players[playerIndex].hand.toJSON(),
-        );
-        this.emit("HAND_UPDATED", senderHandEvent);
+  /**
+   * Collect tiles from all players for Charleston pass
+   * @param {string} directionName - "right", "across", or "left"
+   * @param {number} direction - Player offset
+   * @returns {Promise<Array<TileData[]>>}
+   */
+  async collectCharlestonTiles(directionName, direction) {
+    const charlestonPassArray = [];
 
-        // Emit rich Charleston pass event
-        const toPlayer = (playerIndex + direction) % 4;
-        const passEvent = GameEvents.createCharlestonPassEvent(
-          playerIndex,
-          toPlayer,
-          directionName,
-          tilesToPass.map((t) => ({
-            suit: t.suit,
-            number: t.number,
-            index: t.index,
-          })),
-          {
-            type: "charleston-pass",
-            direction: directionName,
-            duration: 600,
-            easing: "ease-in-out",
-          },
-        );
-        this.emit("CHARLESTON_PASS", passEvent);
+    for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
+      const player = this.players[playerIndex];
+
+      let tilesToPass;
+      if (player.isHuman) {
+        // Prompt human player
+        tilesToPass = await this.promptUI("CHARLESTON_PASS", {
+          direction: directionName,
+          requiredCount: 3,
+        });
+      } else {
+        // AI selects tiles
+        tilesToPass = await this.aiEngine.charlestonPass(player.hand);
       }
 
-      // Exchange tiles between players based on direction
-      for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
-        const fromPlayer = playerIndex;
-        const toPlayer = (playerIndex + direction) % 4;
+      // Remove tiles from player's hand
+      tilesToPass.forEach((tile) => player.hand.removeTile(tile));
+      debugPrint(
+        `[GameController] Player ${playerIndex} removed ${tilesToPass.length} tiles, hand now has ${player.hand.tiles.length} tiles`,
+      );
 
-        // Add tiles to receiving player
-        charlestonPassArray[fromPlayer].forEach((tile) => {
-          this.players[toPlayer].hand.addTile(tile);
-        });
-        debugPrint(
-          `[GameController] Player ${toPlayer} received ${charlestonPassArray[fromPlayer].length} tiles, hand now has ${this.players[toPlayer].hand.tiles.length} tiles`,
-        );
+      charlestonPassArray[playerIndex] = tilesToPass;
 
-        // Emit tiles received event (for animation coordination)
-        const receivedTiles = charlestonPassArray[fromPlayer].map((t) => ({
+      // Emit hand updated for sending player (tiles removed)
+      const senderHandEvent = GameEvents.createHandUpdatedEvent(
+        playerIndex,
+        this.players[playerIndex].hand.toJSON(),
+      );
+      this.emit("HAND_UPDATED", senderHandEvent);
+
+      // Emit rich Charleston pass event
+      const toPlayer = (playerIndex + direction) % 4;
+      const passEvent = GameEvents.createCharlestonPassEvent(
+        playerIndex,
+        toPlayer,
+        directionName,
+        tilesToPass.map((t) => ({
           suit: t.suit,
           number: t.number,
           index: t.index,
-        }));
-        const tilesReceivedEvent = GameEvents.createTilesReceivedEvent(
-          toPlayer,
-          receivedTiles,
-          fromPlayer,
-          {
-            type: "charleston-receive",
-            direction: directionName,
-            duration: 600,
-            glow: { persist: true, color: 0x1e90ff },
-          },
-        );
-        this.emit("TILES_RECEIVED", tilesReceivedEvent);
+        })),
+        {
+          type: "charleston-pass",
+          direction: directionName,
+          duration: 600,
+          easing: "ease-in-out",
+        },
+      );
+      this.emit("CHARLESTON_PASS", passEvent);
+    }
 
-        // Emit hand updated for receiving player
-        const handEvent = GameEvents.createHandUpdatedEvent(
-          toPlayer,
-          this.players[toPlayer].hand.toJSON(),
-        );
-        this.emit("HAND_UPDATED", handEvent);
-      }
+    return charlestonPassArray;
+  }
 
-      await this.sleep(500);
+  /**
+   * Exchange Charleston tiles between players
+   * @param {Array<TileData[]>} charlestonPassArray - Tiles passed by each player
+   * @param {number} direction - Player offset
+   * @param {string} directionName - "right", "across", or "left"
+   */
+  exchangeCharlestonTiles(charlestonPassArray, direction, directionName) {
+    for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
+      const fromPlayer = playerIndex;
+      const toPlayer = (playerIndex + direction) % 4;
+
+      // Add tiles to receiving player
+      charlestonPassArray[fromPlayer].forEach((tile) => {
+        this.players[toPlayer].hand.addTile(tile);
+      });
+      debugPrint(
+        `[GameController] Player ${toPlayer} received ${charlestonPassArray[fromPlayer].length} tiles, hand now has ${this.players[toPlayer].hand.tiles.length} tiles`,
+      );
+
+      // Emit tiles received event (for animation coordination)
+      const receivedTiles = charlestonPassArray[fromPlayer].map((t) => ({
+        suit: t.suit,
+        number: t.number,
+        index: t.index,
+      }));
+      const tilesReceivedEvent = GameEvents.createTilesReceivedEvent(
+        toPlayer,
+        receivedTiles,
+        fromPlayer,
+        {
+          type: "charleston-receive",
+          direction: directionName,
+          duration: 600,
+          glow: { persist: true, color: 0x1e90ff },
+        },
+      );
+      this.emit("TILES_RECEIVED", tilesReceivedEvent);
+
+      // Emit hand updated for receiving player
+      const handEvent = GameEvents.createHandUpdatedEvent(
+        toPlayer,
+        this.players[toPlayer].hand.toJSON(),
+      );
+      this.emit("HAND_UPDATED", handEvent);
     }
   }
 
@@ -630,8 +664,25 @@ export class GameController extends EventEmitter {
   async courtesyPhase() {
     this.setState(STATE.COURTESY_QUERY);
 
-    // Each player votes on how many tiles to pass for courtesy (0-3)
+    // Collect votes from all players
+    const votes = await this.collectCourtesyVotes();
+
+    // Check if courtesy pass should occur (at least 2 players voted yes)
+    const yesVotes = votes.filter((v) => v.vote > 0).length;
+    if (yesVotes >= 2) {
+      await this.executeCourtesyPass(votes);
+    }
+
+    this.setState(STATE.COURTESY_COMPLETE);
+  }
+
+  /**
+   * Collect courtesy votes from all players
+   * @returns {Promise<Array<{player: number, vote: number}>>}
+   */
+  async collectCourtesyVotes() {
     const votes = [];
+
     for (const player of this.players) {
       let vote;
       if (player.isHuman) {
@@ -658,139 +709,179 @@ export class GameController extends EventEmitter {
       this.emit("COURTESY_VOTE", voteEvent);
     }
 
-    // If at least 2 players voted for more than 0 tiles, do courtesy pass
-    const yesVotes = votes.filter((v) => v.vote > 0).length;
-    if (yesVotes >= 2) {
-      this.setState(STATE.COURTESY);
+    return votes;
+  }
 
-      // Calculate agreed-upon courtesy pass counts for opposite players
-      const player02Vote = Math.min(votes[0].vote, votes[2].vote);
-      const player13Vote = Math.min(votes[1].vote, votes[3].vote);
+  /**
+   * Execute the courtesy pass based on collected votes
+   * @param {Array<{player: number, vote: number}>} votes
+   */
+  async executeCourtesyPass(votes) {
+    this.setState(STATE.COURTESY);
 
-      if (player02Vote > 0 || player13Vote > 0) {
-        // Build informative message showing individual votes
-        const voteMessages = [];
-        for (let i = 0; i < 4; i++) {
-          const playerName = this.players[i].name;
-          const vote = votes[i].vote;
-          voteMessages.push(`${playerName} voted ${vote}`);
-        }
+    // Calculate agreed-upon courtesy pass counts for opposite players
+    const player02Vote = Math.min(votes[0].vote, votes[2].vote);
+    const player13Vote = Math.min(votes[1].vote, votes[3].vote);
 
-        // Emit rich message event with detailed vote information
-        const msgEvent = GameEvents.createMessageEvent(
-          `Courtesy pass: ${voteMessages.join(", ")}. Passing ${player02Vote > 0 ? player02Vote + " tile(s) with opposite player" : "no tiles"}.`,
-          "info",
-        );
-        this.emit("MESSAGE", msgEvent);
-
-        // Collect tiles from each player
-        const tilesToPass = [];
-
-        // Sequential processing required - human player needs to select tiles via UI
-        for (let i = 0; i < 4; i++) {
-          const player = this.players[i];
-          const passingCount = i === 0 || i === 2 ? player02Vote : player13Vote;
-
-          if (passingCount === 0) {
-            tilesToPass[i] = [];
-            continue;
-          }
-
-          let selectedTiles;
-          if (player.isHuman) {
-            // Get opposite player's info for better messaging
-            const oppositePlayer = this.players[(i + 2) % 4];
-            const oppositeVote = votes[(i + 2) % 4].vote;
-            const yourVote = votes[i].vote;
-
-            // Prompt human to select exact number of tiles (minimum of both votes)
-            selectedTiles = await this.promptUI("SELECT_TILES", {
-              question: `${oppositePlayer.name} voted ${oppositeVote}, you voted ${yourVote}. Select exactly ${passingCount} tile(s) to pass.`,
-              minTiles: passingCount,
-              maxTiles: passingCount,
-            });
-          } else {
-            // AI selects tiles using courtesyPass method
-            selectedTiles = await this.aiEngine.courtesyPass(
-              player.hand,
-              passingCount,
-            );
-          }
-
-          tilesToPass[i] = selectedTiles;
-
-          // Remove tiles from player's hand
-          selectedTiles.forEach((tile) => player.hand.removeTile(tile));
-
-          // Emit rich courtesy pass event
-          const oppositePlayer = (i + 2) % 4;
-          const passEvent = GameEvents.createCourtesyPassEvent(
-            i,
-            oppositePlayer,
-            selectedTiles.map((t) => ({
-              suit: t.suit,
-              number: t.number,
-              index: t.index,
-            })),
-            { duration: 500 },
-          );
-          this.emit("COURTESY_PASS", passEvent);
-        }
-
-        // Exchange tiles with opposite players (0↔2, 1↔3)
-        for (let i = 0; i < 4; i++) {
-          const oppositePlayer = (i + 2) % 4;
-          const receivedTiles = tilesToPass[oppositePlayer];
-
-          receivedTiles.forEach((tile) => this.players[i].hand.addTile(tile));
-
-          if (receivedTiles.length > 0) {
-            // Emit rich tiles received event
-            const receivedEvent = GameEvents.createTilesReceivedEvent(
-              i,
-              receivedTiles.map((t) => ({
-                suit: t.suit,
-                number: t.number,
-                index: t.index,
-              })),
-              oppositePlayer,
-              { duration: 500 },
-            );
-            this.emit("TILES_RECEIVED", receivedEvent);
-          }
-        }
-
-        // Sort all hands
-        this.players.forEach((player) => player.hand.sortBySuit());
-
-        // Emit hand updates for all players
-        this.players.forEach((player, i) => {
-          const handEvent = GameEvents.createHandUpdatedEvent(
-            i,
-            player.hand.toJSON(),
-          );
-          this.emit("HAND_UPDATED", handEvent);
-        });
-
-        // Emit completion message
-        const completeMsg = GameEvents.createMessageEvent(
-          "Courtesy pass complete.",
-          "info",
-        );
-        this.emit("MESSAGE", completeMsg);
-      } else {
-        // Emit skip message
-        const skipMsg = GameEvents.createMessageEvent(
-          "Courtesy pass skipped (opposite players must both agree).",
-          "info",
-        );
-        this.emit("MESSAGE", skipMsg);
-      }
-
-      await this.sleep(1000);
+    if (player02Vote === 0 && player13Vote === 0) {
+      // No tiles to pass - emit skip message
+      const skipMsg = GameEvents.createMessageEvent(
+        "Courtesy pass skipped (opposite players must both agree).",
+        "info",
+      );
+      this.emit("MESSAGE", skipMsg);
+      return;
     }
 
-    this.setState(STATE.COURTESY_COMPLETE);
+    // Emit vote result message
+    this.emitCourtesyVoteMessage(votes, player02Vote);
+
+    // Collect tiles from all players
+    const tilesToPass = await this.collectCourtesyTiles(votes, player02Vote, player13Vote);
+
+    // Exchange tiles between opposite players
+    this.exchangeCourtesyTiles(tilesToPass);
+
+    // Update all hands and emit events
+    this.finalizeCourtesyPass();
+
+    await this.sleep(1000);
+  }
+
+  /**
+   * Emit a message showing courtesy vote results
+   * @param {Array<{player: number, vote: number}>} votes
+   * @param {number} player02Vote
+   */
+  emitCourtesyVoteMessage(votes, player02Vote) {
+    const voteMessages = [];
+    for (let i = 0; i < 4; i++) {
+      const playerName = this.players[i].name;
+      const vote = votes[i].vote;
+      voteMessages.push(`${playerName} voted ${vote}`);
+    }
+
+    const msgEvent = GameEvents.createMessageEvent(
+      `Courtesy pass: ${voteMessages.join(", ")}. Passing ${player02Vote > 0 ? player02Vote + " tile(s) with opposite player" : "no tiles"}.`,
+      "info",
+    );
+    this.emit("MESSAGE", msgEvent);
+  }
+
+  /**
+   * Collect tiles from each player for courtesy pass
+   * @param {Array<{player: number, vote: number}>} votes
+   * @param {number} player02Vote
+   * @param {number} player13Vote
+   * @returns {Promise<Array<TileData[]>>}
+   */
+  async collectCourtesyTiles(votes, player02Vote, player13Vote) {
+    const tilesToPass = [];
+
+    // Sequential processing required - human player needs to select tiles via UI
+    for (let i = 0; i < 4; i++) {
+      const player = this.players[i];
+      const passingCount = i === 0 || i === 2 ? player02Vote : player13Vote;
+
+      if (passingCount === 0) {
+        tilesToPass[i] = [];
+        continue;
+      }
+
+      let selectedTiles;
+      if (player.isHuman) {
+        // Get opposite player's info for better messaging
+        const oppositePlayer = this.players[(i + 2) % 4];
+        const oppositeVote = votes[(i + 2) % 4].vote;
+        const yourVote = votes[i].vote;
+
+        // Prompt human to select exact number of tiles (minimum of both votes)
+        selectedTiles = await this.promptUI("SELECT_TILES", {
+          question: `${oppositePlayer.name} voted ${oppositeVote}, you voted ${yourVote}. Select exactly ${passingCount} tile(s) to pass.`,
+          minTiles: passingCount,
+          maxTiles: passingCount,
+        });
+      } else {
+        // AI selects tiles using courtesyPass method
+        selectedTiles = await this.aiEngine.courtesyPass(
+          player.hand,
+          passingCount,
+        );
+      }
+
+      tilesToPass[i] = selectedTiles;
+
+      // Remove tiles from player's hand
+      selectedTiles.forEach((tile) => player.hand.removeTile(tile));
+
+      // Emit rich courtesy pass event
+      const oppositePlayer = (i + 2) % 4;
+      const passEvent = GameEvents.createCourtesyPassEvent(
+        i,
+        oppositePlayer,
+        selectedTiles.map((t) => ({
+          suit: t.suit,
+          number: t.number,
+          index: t.index,
+        })),
+        { duration: 500 },
+      );
+      this.emit("COURTESY_PASS", passEvent);
+    }
+
+    return tilesToPass;
+  }
+
+  /**
+   * Exchange tiles with opposite players (0↔2, 1↔3)
+   * @param {Array<TileData[]>} tilesToPass
+   */
+  exchangeCourtesyTiles(tilesToPass) {
+    for (let i = 0; i < 4; i++) {
+      const oppositePlayer = (i + 2) % 4;
+      const receivedTiles = tilesToPass[oppositePlayer];
+
+      receivedTiles.forEach((tile) => this.players[i].hand.addTile(tile));
+
+      if (receivedTiles.length > 0) {
+        // Emit rich tiles received event
+        const receivedEvent = GameEvents.createTilesReceivedEvent(
+          i,
+          receivedTiles.map((t) => ({
+            suit: t.suit,
+            number: t.number,
+            index: t.index,
+          })),
+          oppositePlayer,
+          { duration: 500 },
+        );
+        this.emit("TILES_RECEIVED", receivedEvent);
+      }
+    }
+  }
+
+  /**
+   * Sort hands and emit final updates after courtesy pass
+   */
+  finalizeCourtesyPass() {
+    // Sort all hands
+    this.players.forEach((player) => player.hand.sortBySuit());
+
+    // Emit hand updates for all players
+    this.players.forEach((player, i) => {
+      const handEvent = GameEvents.createHandUpdatedEvent(
+        i,
+        player.hand.toJSON(),
+      );
+      this.emit("HAND_UPDATED", handEvent);
+    });
+
+    // Emit completion message
+    const completeMsg = GameEvents.createMessageEvent(
+      "Courtesy pass complete.",
+      "info",
+    );
+    this.emit("MESSAGE", completeMsg);
   }
 
   /**
@@ -1055,49 +1146,16 @@ export class GameController extends EventEmitter {
       return { claimed: false };
     }
 
-    // Query each other player
+    // Query each other player in turn order
     for (let i = 1; i <= 3; i++) {
       const playerIndex = (this.currentPlayer + i) % 4;
       const player = this.players[playerIndex];
 
-      let claimDecision;
-      if (player.isHuman) {
-        const canExpose = this.canPlayerFormExposure(player, lastDiscard);
-        const canMahjong = this.canPlayerMahjongWithTile(player, lastDiscard);
-        if (!canExpose && !canMahjong) {
-          continue;
-        }
-        // Prompt human
-        claimDecision = await this.promptUI("CLAIM_DISCARD", {
-          tile: lastDiscard.toJSON(),
-          options: ["Mahjong", "Pung", "Kong", "Pass"],
-        });
-      } else {
-        // AI decides
-        const aiDecision = await this.aiEngine.claimDiscard(
-          lastDiscard,
-          playerIndex,
-          player.hand,
-        );
-
-        // Convert PLAYER_OPTION enum to string for consistency
-        if (aiDecision.playerOption === PLAYER_OPTION.MAHJONG) {
-          claimDecision = "Mahjong";
-        } else if (aiDecision.playerOption === PLAYER_OPTION.EXPOSE_TILES) {
-          // Determine exposure type based on number of tiles
-          const tileCount = aiDecision.tileArray.length;
-          if (tileCount === 3) {
-            claimDecision = "Pung";
-          } else if (tileCount === 4) {
-            claimDecision = "Kong";
-          } else if (tileCount === 5) {
-            claimDecision = "Quint";
-          }
-        } else {
-          // PLAYER_OPTION.DISCARD_TILE or unknown
-          claimDecision = "Pass";
-        }
-      }
+      const claimDecision = await this.getPlayerClaimDecision(
+        player,
+        playerIndex,
+        lastDiscard,
+      );
 
       if (claimDecision !== "Pass") {
         // Player claimed the tile
@@ -1110,6 +1168,85 @@ export class GameController extends EventEmitter {
     }
 
     return { claimed: false };
+  }
+
+  /**
+   * Get claim decision from a single player (human or AI)
+   * @param {PlayerData} player
+   * @param {number} playerIndex
+   * @param {TileData} lastDiscard
+   * @returns {Promise<string>} - "Mahjong", "Pung", "Kong", "Quint", or "Pass"
+   */
+  async getPlayerClaimDecision(player, playerIndex, lastDiscard) {
+    if (player.isHuman) {
+      return this.getHumanClaimDecision(player, lastDiscard);
+    } else {
+      return this.getAIClaimDecision(player, playerIndex, lastDiscard);
+    }
+  }
+
+  /**
+   * Get claim decision from human player
+   * @param {PlayerData} player
+   * @param {TileData} lastDiscard
+   * @returns {Promise<string>}
+   */
+  async getHumanClaimDecision(player, lastDiscard) {
+    const canExpose = this.canPlayerFormExposure(player, lastDiscard);
+    const canMahjong = this.canPlayerMahjongWithTile(player, lastDiscard);
+
+    if (!canExpose && !canMahjong) {
+      return "Pass";
+    }
+
+    // Prompt human
+    return this.promptUI("CLAIM_DISCARD", {
+      tile: lastDiscard.toJSON(),
+      options: ["Mahjong", "Pung", "Kong", "Pass"],
+    });
+  }
+
+  /**
+   * Get claim decision from AI player
+   * @param {PlayerData} player
+   * @param {number} playerIndex
+   * @param {TileData} lastDiscard
+   * @returns {Promise<string>}
+   */
+  async getAIClaimDecision(player, playerIndex, lastDiscard) {
+    // AI decides
+    const aiDecision = await this.aiEngine.claimDiscard(
+      lastDiscard,
+      playerIndex,
+      player.hand,
+    );
+
+    return this.convertAIDecisionToClaimType(aiDecision);
+  }
+
+  /**
+   * Convert AI decision enum to claim type string
+   * @param {Object} aiDecision - {playerOption: PLAYER_OPTION, tileArray: TileData[]}
+   * @returns {string} - "Mahjong", "Pung", "Kong", "Quint", or "Pass"
+   */
+  convertAIDecisionToClaimType(aiDecision) {
+    // Convert PLAYER_OPTION enum to string for consistency
+    if (aiDecision.playerOption === PLAYER_OPTION.MAHJONG) {
+      return "Mahjong";
+    } else if (aiDecision.playerOption === PLAYER_OPTION.EXPOSE_TILES) {
+      // Determine exposure type based on number of tiles
+      const tileCount = aiDecision.tileArray.length;
+      if (tileCount === 3) {
+        return "Pung";
+      } else if (tileCount === 4) {
+        return "Kong";
+      } else if (tileCount === 5) {
+        return "Quint";
+      }
+    }
+
+    // PLAYER_OPTION.DISCARD_TILE or unknown
+    return "Pass";
   }
 
   /**
@@ -1199,57 +1336,85 @@ export class GameController extends EventEmitter {
 
     const claimingPlayer = this.players[claimingPlayerIndex];
 
+    // Handle Mahjong claims separately (win condition)
     if (claimType === "Mahjong") {
-      // Player claims mahjong - validate before accepting
-      // Add claimed tile to hand temporarily for validation
-      claimingPlayer.hand.addTile(tile);
-
-      // Include both hidden and exposed tiles for validation
-      const tiles = claimingPlayer.hand.getAllTilesIncludingExposures
-        ? claimingPlayer.hand.getAllTilesIncludingExposures()
-        : claimingPlayer.hand.tiles;
-      const allHidden = claimingPlayer.hand.exposures.length === 0;
-
-      try {
-        const result = this.cardValidator.validateHand(tiles, allHidden);
-        if (result && result.valid) {
-          // Valid mahjong - player won!
-          this.gameResult.mahjong = true;
-          this.gameResult.winner = claimingPlayerIndex;
-          this.endGame("mahjong");
-          return;
-        } else {
-          // Invalid mahjong claim - remove tile and continue play
-          claimingPlayer.hand.removeTile(tile);
-          this.discards.push(tile); // Return tile to discard pile
-          debugWarn(
-            `Player ${claimingPlayerIndex} made invalid Mahjong claim - continuing play`,
-          );
-          this.emit(
-            "MESSAGE",
-            GameEvents.createMessageEvent(
-              "Invalid Mahjong claim - hand does not match any winning pattern",
-              "error",
-            ),
-          );
-          return; // Don't expose tiles, just continue
-        }
-      } catch (error) {
-        // Validation crashed - reject claim
-        claimingPlayer.hand.removeTile(tile);
-        this.discards.push(tile);
-        debugError("CRITICAL: CardValidator crashed during Mahjong claim", error);
-        this.emit(
-          "MESSAGE",
-          GameEvents.createMessageEvent(
-            "Invalid Mahjong claim - validation error",
-            "error",
-          ),
-        );
-        return;
-      }
+      this.handleMahjongClaim(claimingPlayerIndex, claimingPlayer, tile);
+      return;
     }
 
+    // Handle exposure claims (Pung, Kong, Quint)
+    this.handleExposureClaim(claimingPlayerIndex, claimingPlayer, tile, claimType);
+  }
+
+  /**
+   * Validate and handle a Mahjong claim
+   * @param {number} claimingPlayerIndex
+   * @param {PlayerData} claimingPlayer
+   * @param {TileData} tile
+   */
+  handleMahjongClaim(claimingPlayerIndex, claimingPlayer, tile) {
+    // Add claimed tile to hand temporarily for validation
+    claimingPlayer.hand.addTile(tile);
+
+    // Include both hidden and exposed tiles for validation
+    const tiles = claimingPlayer.hand.getAllTilesIncludingExposures
+      ? claimingPlayer.hand.getAllTilesIncludingExposures()
+      : claimingPlayer.hand.tiles;
+    const allHidden = claimingPlayer.hand.exposures.length === 0;
+
+    try {
+      const result = this.cardValidator.validateHand(tiles, allHidden);
+      if (result && result.valid) {
+        // Valid mahjong - player won!
+        this.gameResult.mahjong = true;
+        this.gameResult.winner = claimingPlayerIndex;
+        this.endGame("mahjong");
+        return;
+      } else {
+        // Invalid mahjong claim
+        this.rejectMahjongClaim(claimingPlayerIndex, claimingPlayer, tile);
+      }
+    } catch (error) {
+      // Validation crashed - reject claim
+      debugError("CRITICAL: CardValidator crashed during Mahjong claim", error);
+      this.rejectMahjongClaim(claimingPlayerIndex, claimingPlayer, tile, true);
+    }
+  }
+
+  /**
+   * Reject an invalid Mahjong claim and return tile to discard pile
+   * @param {number} claimingPlayerIndex
+   * @param {PlayerData} claimingPlayer
+   * @param {TileData} tile
+   * @param {boolean} validationError
+   */
+  rejectMahjongClaim(claimingPlayerIndex, claimingPlayer, tile, validationError = false) {
+    // Remove tile and return to discard pile
+    claimingPlayer.hand.removeTile(tile);
+    this.discards.push(tile);
+
+    debugWarn(
+      `Player ${claimingPlayerIndex} made invalid Mahjong claim - continuing play`,
+    );
+
+    const errorMessage = validationError
+      ? "Invalid Mahjong claim - validation error"
+      : "Invalid Mahjong claim - hand does not match any winning pattern";
+
+    this.emit(
+      "MESSAGE",
+      GameEvents.createMessageEvent(errorMessage, "error"),
+    );
+  }
+
+  /**
+   * Handle an exposure claim (Pung, Kong, Quint)
+   * @param {number} claimingPlayerIndex
+   * @param {PlayerData} claimingPlayer
+   * @param {TileData} tile
+   * @param {string} claimType
+   */
+  handleExposureClaim(claimingPlayerIndex, claimingPlayer, tile, claimType) {
     // Add tile to claiming player's hand
     claimingPlayer.hand.addTile(tile);
 
