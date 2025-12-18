@@ -1199,11 +1199,54 @@ export class GameController extends EventEmitter {
     const claimingPlayer = this.players[claimingPlayerIndex];
 
     if (claimType === "Mahjong") {
-      // Player won with this tile
-      this.gameResult.mahjong = true;
-      this.gameResult.winner = claimingPlayerIndex;
-      this.endGame("mahjong");
-      return;
+      // Player claims mahjong - validate before accepting
+      // Add claimed tile to hand temporarily for validation
+      claimingPlayer.hand.addTile(tile);
+
+      // Include both hidden and exposed tiles for validation
+      const tiles = claimingPlayer.hand.getAllTilesIncludingExposures
+        ? claimingPlayer.hand.getAllTilesIncludingExposures()
+        : claimingPlayer.hand.tiles;
+      const allHidden = claimingPlayer.hand.exposures.length === 0;
+
+      try {
+        const result = this.cardValidator.validateHand(tiles, allHidden);
+        if (result && result.valid) {
+          // Valid mahjong - player won!
+          this.gameResult.mahjong = true;
+          this.gameResult.winner = claimingPlayerIndex;
+          this.endGame("mahjong");
+          return;
+        } else {
+          // Invalid mahjong claim - remove tile and continue play
+          claimingPlayer.hand.removeTile(tile);
+          this.discards.push(tile); // Return tile to discard pile
+          debugWarn(
+            `Player ${claimingPlayerIndex} made invalid Mahjong claim - continuing play`,
+          );
+          this.emit(
+            "MESSAGE",
+            GameEvents.createMessageEvent(
+              "Invalid Mahjong claim - hand does not match any winning pattern",
+              "error",
+            ),
+          );
+          return; // Don't expose tiles, just continue
+        }
+      } catch (error) {
+        // Validation crashed - reject claim
+        claimingPlayer.hand.removeTile(tile);
+        this.discards.push(tile);
+        debugError("CRITICAL: CardValidator crashed during Mahjong claim", error);
+        this.emit(
+          "MESSAGE",
+          GameEvents.createMessageEvent(
+            "Invalid Mahjong claim - validation error",
+            "error",
+          ),
+        );
+        return;
+      }
     }
 
     // Add tile to claiming player's hand
