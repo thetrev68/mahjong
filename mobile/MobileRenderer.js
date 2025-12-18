@@ -519,11 +519,11 @@ export class MobileRenderer extends BaseAdapter {
 
   /**
    * Handle joker swap button click
-   * Calls GameController's onExchangeJoker method which auto-selects first available exchange
+   * Calls GameController's onExchangeJoker method which lets user choose among multiple exchanges
    */
-  handleJokerSwap() {
+  async handleJokerSwap() {
     try {
-      const success = this.gameController.onExchangeJoker();
+      const success = await this.gameController.onExchangeJoker();
 
       if (!success) {
         // Error messages already emitted by GameController via MESSAGE event
@@ -1450,6 +1450,17 @@ export class MobileRenderer extends BaseAdapter {
                 value: option,
               }),
             ),
+            onSelect: (choice) => data.callback(choice),
+          });
+          break;
+        case "JOKER_EXCHANGE_CHOICE":
+          this.showChoicePrompt({
+            title: data.options?.question ?? "Choose joker to exchange",
+            hint: "Select which tile to trade for a joker",
+            options: (data.options?.options || []).map((option) => ({
+              label: option.label,
+              value: option.value,
+            })),
             onSelect: (choice) => data.callback(choice),
           });
           break;

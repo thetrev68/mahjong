@@ -345,9 +345,9 @@ export class ButtonManager {
       }
     });
 
-    this.buttonCallbacks.set("button2", () => {
+    this.buttonCallbacks.set("button2", async () => {
       if (this.gameController.onExchangeJoker) {
-        this.gameController.onExchangeJoker();
+        await this.gameController.onExchangeJoker();
       }
     });
 

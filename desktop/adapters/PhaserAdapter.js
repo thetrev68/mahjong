@@ -777,6 +777,10 @@ export class PhaserAdapter extends BaseAdapter {
         this.handleSelectTilesPrompt(options, callback);
         break;
 
+      case "JOKER_EXCHANGE_CHOICE":
+        this.handleJokerExchangeChoicePrompt(options, callback);
+        break;
+
       default:
         console.warn(`Unknown prompt type: ${promptType}`);
         if (callback) callback(null);
@@ -1062,6 +1066,40 @@ export class PhaserAdapter extends BaseAdapter {
       .catch(() => {
         callback?.([]);
       });
+  }
+
+  /**
+   * Handle joker exchange choice prompt - Pattern C (Dialog-Based)
+   *
+   * Prompts the human player to choose which joker to exchange when multiple options are available.
+   * Uses DialogManager for modal overlay with multiple exchange options.
+   *
+   * @param {Object} options - Prompt options
+   * @param {string} options.question - Question text to display
+   * @param {Array} options.options - Array of {label, value} exchange options
+   * @param {Function} callback - GameController callback with selected exchange object
+   *
+   * @architecture Pattern C (Dialog-Based Prompt)
+   * Flow:
+   * 1. DialogManager creates modal overlay with buttons for each exchange option
+   * 2. User clicks button → DialogManager resolves callback with exchange object
+   * 3. DialogManager removes overlay and re-enables game input
+   *
+   * @see desktop/ADAPTER_PATTERNS.md for pattern documentation
+   */
+  handleJokerExchangeChoicePrompt(options, callback) {
+    const { question, options: exchangeOptions } = options;
+
+    // Convert exchange options to dialog button format
+    const buttons = exchangeOptions.map((opt) => ({
+      label: opt.label,
+      value: opt.value,
+    }));
+
+    // Use DialogManager to show the choice
+    this.dialogManager.showModalDialog(question, buttons, (result) => {
+      if (callback) callback(result);
+    });
   }
 
   /**

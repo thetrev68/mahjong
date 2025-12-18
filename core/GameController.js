@@ -36,6 +36,7 @@ import {
   PLAYER_OPTION,
   SUIT,
   WIND,
+  DRAGON,
   ANIMATION_TIMINGS,
 } from "../constants.js";
 import { PlayerData } from "./models/PlayerData.js";
@@ -1486,9 +1487,9 @@ export class GameController extends EventEmitter {
   /**
    * Handle joker exchange - human player exchanges a tile for an exposed joker
    * Called when human clicks "Exchange Joker" button
-   * @returns {boolean} - True if exchange occurred
+   * @returns {Promise<boolean>} - True if exchange occurred
    */
-  onExchangeJoker() {
+  async onExchangeJoker() {
     const humanPlayer = this.players[PLAYER.BOTTOM];
 
     // Safety guards
@@ -1564,10 +1565,29 @@ export class GameController extends EventEmitter {
       return false;
     }
 
-    // For now, auto-select the first available exchange
-    // TODO #1: Future enhancement - let user choose among multiple exchanges
-    // Could use promptUI to present matchingExchanges array for selection
-    const exchange = matchingExchanges[0];
+    // If multiple exchanges available, let user choose
+    let exchange;
+    if (matchingExchanges.length > 1) {
+      // Build options for user selection
+      const options = matchingExchanges.map((ex) => {
+        const tile = ex.requiredTiles[0];
+        const player = this.players[ex.playerIndex];
+        const tileStr = this.formatTileForDisplay(tile);
+        return {
+          label: `Trade your ${tileStr} for Joker from ${player.name}`,
+          value: ex,
+        };
+      });
+
+      exchange = await this.promptUI("JOKER_EXCHANGE_CHOICE", {
+        question: "Multiple joker exchanges available. Choose one:",
+        options,
+      });
+    } else {
+      // Single exchange, auto-select
+      exchange = matchingExchanges[0];
+    }
+
     const requiredTile = exchange.requiredTiles[0];
 
     // Find the tile in human's hand
@@ -1624,6 +1644,57 @@ export class GameController extends EventEmitter {
     );
 
     return true;
+  }
+
+  /**
+   * Format a tile for user-friendly display
+   * @param {TileData} tile
+   * @returns {string} - Formatted tile string (e.g., "5C", "N", "R")
+   */
+  formatTileForDisplay(tile) {
+    if (!tile) {
+      return "";
+    }
+
+    const { suit, number } = tile;
+
+    if (suit === SUIT.CRACK) {
+      return `${number} Crack`;
+    }
+    if (suit === SUIT.BAM) {
+      return `${number} Bam`;
+    }
+    if (suit === SUIT.DOT) {
+      return `${number} Dot`;
+    }
+    if (suit === SUIT.WIND) {
+      const windNames = {
+        [WIND.NORTH]: "North Wind",
+        [WIND.SOUTH]: "South Wind",
+        [WIND.EAST]: "East Wind",
+        [WIND.WEST]: "West Wind",
+      };
+      return windNames[number] || "Wind";
+    }
+    if (suit === SUIT.DRAGON) {
+      const dragonNames = {
+        [DRAGON.RED]: "Red Dragon",
+        [DRAGON.GREEN]: "Green Dragon",
+        [DRAGON.WHITE]: "White Dragon",
+      };
+      return dragonNames[number] || "Dragon";
+    }
+    if (suit === SUIT.FLOWER) {
+      return `Flower ${typeof number === "number" ? number + 1 : 1}`;
+    }
+    if (suit === SUIT.JOKER) {
+      return "Joker";
+    }
+    if (suit === SUIT.BLANK) {
+      return "Blank";
+    }
+
+    return `${number ?? ""}`;
   }
 
   /**
