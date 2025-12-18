@@ -20,11 +20,20 @@ test.describe("Phase 0: Testing Framework Setup", () => {
     });
 
     test("GameController initializes without errors", async ({ page }) => {
-        // Collect console errors during initialization
-        const errors = await MobileTestHelpers.getConsoleErrors(page, async () => {
+        const consoleErrors = [];
+        page.on("console", msg => {
+            if (msg.type() === "error") {
+                consoleErrors.push(msg.text());
+            }
+        });
+
+        try {
             await MobileTestHelpers.gotoMobileApp(page);
             await MobileTestHelpers.waitForMobileReady(page);
-        });
+        } catch (error) {
+            console.log("Initialization failed. Captured Console Errors:", consoleErrors);
+            throw error;
+        }
 
         // Verify GameController is available
         const hasGameController = await page.evaluate(() => {
