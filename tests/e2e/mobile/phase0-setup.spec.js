@@ -91,16 +91,14 @@ test.describe("Phase 0: Testing Framework Setup", () => {
     expect(tilesImageLoaded).toBe(true);
 
     // Verify tiles.json is accessible
-    const tilesJsonLoaded = await page.evaluate(async (candidates) => {
-      for (const url of candidates) {
-        try {
-          const response = await fetch(url);
-          if (response.ok) return true;
-        } catch {
-          // try next
-        }
-      }
-      return false;
+    const tilesJsonLoaded = await page.evaluate((candidates) => {
+      return Promise.all(
+        candidates.map((url) =>
+          fetch(url)
+            .then((response) => response.ok)
+            .catch(() => false)
+        )
+      ).then((results) => results.some((ok) => ok));
     }, TILE_JSON_CANDIDATES);
 
     expect(tilesJsonLoaded).toBe(true);

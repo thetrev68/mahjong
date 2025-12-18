@@ -164,7 +164,7 @@ export class MobileRenderer extends BaseAdapter {
     // Unsubscribe all GameController handlers
     try {
       super.destroy();
-    } catch (_e) {
+    } catch {
       /* Suppress cleanup errors */
     }
 

@@ -23,7 +23,6 @@ import {
   debugError,
 } from "../../utils.js";
 import { PLAYER_LAYOUT } from "../config/playerLayout.js";
-import { TableManager } from "../managers/TableManager.js";
 import { TileManager } from "../managers/TileManager.js";
 import { ButtonManager } from "../managers/ButtonManager.js";
 import { DialogManager } from "../managers/DialogManager.js";
@@ -39,7 +38,7 @@ export class PhaserAdapter extends BaseAdapter {
   /**
    * @param {GameController} gameController - Core game controller
    * @param {GameScene} scene - Phaser scene
-   * @param {TableManager} table - TableManager instance
+   * @param {Object} table - Table game object instance
    */
   constructor(gameController, scene, table) {
     // MUST call super() before accessing 'this'
@@ -1122,38 +1121,38 @@ export class PhaserAdapter extends BaseAdapter {
     // Use BaseAdapter cleanup first
     try {
       super.destroy();
-    } catch (_e) {
+    } catch {
       /* ignore errors during cleanup */
     }
 
     // Disable selection and cancel any in-progress UI flows
     try {
       this.selectionManager?.disableTileSelection();
-    } catch (_e) {
+    } catch {
       /* ignore errors */
     }
     try {
       this.blankSwapManager?.handleDiscardPromptEnd();
-    } catch (_e) {
+    } catch {
       /* ignore errors */
     }
 
     // Close dialogs and destroy managers that have teardown methods
     try {
       this.dialogManager?.closeDialog();
-    } catch (_e) {
+    } catch {
       /* ignore errors */
     }
     try {
       if (typeof this.buttonManager?.destroy === "function")
         this.buttonManager.destroy();
-    } catch (_e) {
+    } catch {
       /* ignore errors */
     }
     try {
       if (typeof this.handRenderer?.destroy === "function")
         this.handRenderer.destroy();
-    } catch (_e) {
+    } catch {
       /* ignore errors */
     }
 

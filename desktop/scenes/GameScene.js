@@ -147,17 +147,17 @@ class GameScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       try {
         this.adapter?.destroy();
-      } catch (_e) {
+      } catch {
         /* Suppress cleanup errors */
       }
       try {
         this.hintAnimationManager?.destroy?.();
-      } catch (_e) {
+      } catch {
         /* Suppress cleanup errors */
       }
       try {
         this.homePageTileManager?.cleanup?.();
-      } catch (_e) {
+      } catch {
         /* Suppress cleanup errors */
       }
       // Null references to help GC

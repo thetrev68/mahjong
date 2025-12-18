@@ -123,7 +123,7 @@ test.describe("TouchHandler", () => {
     handler.destroy();
   });
 
-  test("should detect a double-tap gesture when enabled", async () => {
+  test("should detect a double-tap gesture when enabled", () => {
     const element = document.createElement("div");
     document.body.appendChild(element);
 
@@ -243,7 +243,6 @@ test.describe("TouchHandler", () => {
     const element = document.createElement("div");
     const handler = new TouchHandler(element);
 
-    const callback = test.info().project.use;
     const calls = [];
     const listener = (e) => calls.push(e);
 

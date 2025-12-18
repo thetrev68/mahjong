@@ -128,7 +128,7 @@ export class SelectionManager {
     // Ensure selection is disabled and handlers removed
     try {
       this.disableTileSelection();
-    } catch (_e) {
+    } catch {
       /* Intentionally suppress errors during cleanup */
     }
     // Clear any leftover state

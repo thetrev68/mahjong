@@ -525,7 +525,7 @@ export class ButtonManager {
       this._domListeners.forEach(({ element, handler }) => {
         try {
           element.removeEventListener("click", handler);
-        } catch (_e) {
+        } catch {
           // Suppress cleanup errors
         }
       });

@@ -5,7 +5,6 @@ import { MobileTestHelpers } from "../../utils/mobile-helpers.js";
 
 const HAND_TILE_SELECTOR = "#hand-container button";
 const BASE_PATH = process.env.PLAYWRIGHT_BASE_PATH || "/mahjong";
-const MOBILE_HOME = `${BASE_PATH}/mobile/?playwright=true`;
 const MOBILE_SKIP_CHARLESTON = `${BASE_PATH}/mobile/?skipCharleston=true&playwright=true`;
 
 test.describe("Mobile Interface", () => {

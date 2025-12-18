@@ -32,7 +32,7 @@ export class BaseAdapter {
       this.subscriptions.forEach((unsub) => {
         try {
           if (typeof unsub === "function") unsub();
-        } catch (_e) {
+        } catch {
           /* Suppress unsubscribe errors */
         }
       });

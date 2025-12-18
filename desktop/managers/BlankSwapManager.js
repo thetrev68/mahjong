@@ -206,7 +206,7 @@ export class BlankSwapManager {
   destroy() {
     try {
       this.cancelSwapFlow(false);
-    } catch (_e) {
+    } catch {
       /* Intentionally suppress errors during cleanup */
     }
     this.discardPile = null;

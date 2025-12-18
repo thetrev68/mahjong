@@ -26,7 +26,7 @@ export class AssetErrorDetector {
    * @param {string} tilesPath - Path to tiles.png (default: /mahjong/assets/tiles.png)
    * @returns {Promise<boolean>} - Resolves to true if loaded, false if error
    */
-  async testTilesAsset(tilesPath = '/mahjong/assets/tiles.png') {
+  testTilesAsset(tilesPath = "/mahjong/assets/tiles.png") {
     return new Promise((resolve) => {
       // If we already detected an error, return false immediately
       if (this.hasDetectedError) {
@@ -57,9 +57,9 @@ export class AssetErrorDetector {
         // Notify all registered callbacks
         this.errorCallbacks.forEach(callback => {
           try {
-            callback('tiles.png', tilesPath);
+            callback("tiles.png", tilesPath);
           } catch (err) {
-            console.error('Error in asset error callback:', err);
+            console.error("Error in asset error callback:", err);
           }
         });
 
@@ -88,7 +88,7 @@ export class AssetErrorDetector {
     this.errorCallbacks = [];
     this.hasDetectedError = false;
     if (this.testImage) {
-      this.testImage.src = '';
+      this.testImage.src = "";
       this.testImage = null;
     }
   }
