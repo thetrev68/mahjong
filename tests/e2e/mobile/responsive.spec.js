@@ -1,6 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { MobileTestHelpers } from "../../utils/mobile-helpers.js";
 
+const BASE_PATH = process.env.PLAYWRIGHT_BASE_PATH || "/mahjong";
+const MOBILE_HOME = `${BASE_PATH}/mobile/?playwright=true`;
+
 test.describe("Phase 5: Responsive Design & Component Polish", () => {
   const viewports = [
     { width: 375, height: 667, name: "iPhone SE" },
@@ -16,7 +19,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
         width: viewport.width,
         height: viewport.height,
       });
-      await page.goto("/mobile/?playwright=true");
+      await page.goto(MOBILE_HOME);
       await MobileTestHelpers.waitForMobileReady(page);
 
       // Start game to populate UI
@@ -59,7 +62,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
         width: viewport.width,
         height: viewport.height,
       });
-      await page.goto("/mobile/?playwright=true");
+      await page.goto(MOBILE_HOME);
       await MobileTestHelpers.waitForMobileReady(page);
 
       await page.click("#new-game-btn");
@@ -95,7 +98,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
   test("opponent bar highlights current turn with golden glow", async ({
     page,
   }) => {
-    await page.goto("/mobile/?playwright=true");
+    await page.goto(MOBILE_HOME);
     await MobileTestHelpers.waitForMobileReady(page);
 
     await page.click("#new-game-btn");
@@ -124,7 +127,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
   });
 
   test("latest discard has pulse animation", async ({ page }) => {
-    await page.goto("/mobile/?playwright=true");
+    await page.goto(MOBILE_HOME);
     await MobileTestHelpers.waitForMobileReady(page);
 
     await page.click("#new-game-btn");
@@ -146,7 +149,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
   });
 
   test("exposed tiles display correctly as sprites", async ({ page }) => {
-    await page.goto("/mobile/?playwright=true");
+    await page.goto(MOBILE_HOME);
     await MobileTestHelpers.waitForMobileReady(page);
 
     await page.click("#new-game-btn");
@@ -171,7 +174,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
   });
 
   test("hand grid wraps properly with 14 tiles", async ({ page }) => {
-    await page.goto("/mobile/?playwright=true");
+    await page.goto(MOBILE_HOME);
     await MobileTestHelpers.waitForMobileReady(page);
 
     await page.click("#new-game-btn");
@@ -196,7 +199,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
   });
 
   test("tiles have visual feedback when selected", async ({ page }) => {
-    await page.goto("/mobile/?playwright=true");
+    await page.goto(MOBILE_HOME);
     await MobileTestHelpers.waitForMobileReady(page);
 
     await page.click("#new-game-btn");
@@ -231,7 +234,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
     /* eslint-disable no-await-in-loop */
     for (const breakpoint of breakpoints) {
       await page.setViewportSize({ width: breakpoint.width, height: 844 });
-      await page.goto("/mobile/?playwright=true");
+      await page.goto(MOBILE_HOME);
       await MobileTestHelpers.waitForMobileReady(page);
 
       await page.click("#new-game-btn");
@@ -264,7 +267,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
     /* eslint-disable no-await-in-loop */
     for (const viewport of viewports) {
       await page.setViewportSize(viewport);
-      await page.goto("/mobile/?playwright=true");
+      await page.goto(MOBILE_HOME);
       await MobileTestHelpers.waitForMobileReady(page);
 
       await page.click("#new-game-btn");

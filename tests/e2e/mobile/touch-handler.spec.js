@@ -1,10 +1,13 @@
 import { test, expect } from "@playwright/test";
 
+const BASE_PATH = process.env.PLAYWRIGHT_BASE_PATH || "/mahjong";
+const DESKTOP_HOME = `${BASE_PATH}/`;
+
 // TODO #7: Move these to unit tests or create dedicated test page
 // These tests use page.setContent() with ES modules which causes timing issues in Playwright
 test.describe.skip("TouchHandler", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await page.goto(DESKTOP_HOME);
     await page.setContent(`
       <div id="test-area" style="width: 200px; height: 200px; background: lightblue;"></div>
       <script type="module">

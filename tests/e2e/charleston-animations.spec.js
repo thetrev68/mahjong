@@ -1,6 +1,9 @@
 /* global getComputedStyle */
 import { test, expect } from "@playwright/test";
 
+const BASE_PATH = process.env.PLAYWRIGHT_BASE_PATH || "/mahjong";
+const MOBILE_HOME = `${BASE_PATH}/mobile/?playwright=true`;
+
 /**
  * Integration tests for Charleston animation sequence
  * Tests all three Charleston directions: right, across, left
@@ -9,7 +12,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Charleston Animations", () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to mobile version
-    await page.goto("/mobile/?playwright=true");
+    await page.goto(MOBILE_HOME);
     await page.waitForLoadState("networkidle");
 
     // Wait for game to be ready
@@ -330,7 +333,7 @@ test.describe("Charleston Animations", () => {
       });
     });
 
-    await page.goto("/mobile/?playwright=true");
+    await page.goto(MOBILE_HOME);
     await page.waitForLoadState("networkidle");
 
     // Start game

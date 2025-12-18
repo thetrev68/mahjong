@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 
+const BASE_PATH = process.env.PLAYWRIGHT_BASE_PATH || "/mahjong";
+const DESKTOP_HOME = `${BASE_PATH}/`;
+
 /**
  * Wait until GameController is available on window.
  */
@@ -38,7 +41,7 @@ async function resetTestSubscriptions(page) {
 
 test.describe("Game Initialization", () => {
   test("should load the game page successfully", async ({ page }) => {
-    await page.goto("/");
+    await page.goto(DESKTOP_HOME);
 
     // Wait for game to initialize
     await page.waitForSelector("#controldiv", { state: "visible" });
@@ -51,7 +54,7 @@ test.describe("Game Initialization", () => {
   });
 
   test("should show game controls", async ({ page }) => {
-    await page.goto("/");
+    await page.goto(DESKTOP_HOME);
 
     // Wait for game to initialize
     await page.waitForSelector("#controldiv", { state: "visible" });
@@ -66,7 +69,7 @@ test.describe("Game Start", () => {
   test("should start a new game when Start Game is clicked", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto(DESKTOP_HOME);
 
     // Wait for game to initialize
     await page.waitForSelector("#controldiv", { state: "visible" });
@@ -113,7 +116,7 @@ test.describe("Game Start", () => {
 
 test.describe("Settings Panel", () => {
   test("should open and close settings overlay", async ({ page }) => {
-    await page.goto("/");
+    await page.goto(DESKTOP_HOME);
 
     // Wait for game to initialize
     await page.waitForSelector("#controldiv", { state: "visible" });
@@ -128,7 +131,7 @@ test.describe("Settings Panel", () => {
   });
 
   test("should toggle training mode", async ({ page }) => {
-    await page.goto("/");
+    await page.goto(DESKTOP_HOME);
 
     // Wait for game to initialize
     await page.waitForSelector("#controldiv", { state: "visible" });
@@ -150,14 +153,14 @@ test.describe("Settings Panel", () => {
 
 test.describe("UI Elements", () => {
   test("should display game log area", async ({ page }) => {
-    await page.goto("/");
+    await page.goto(DESKTOP_HOME);
 
     // Check that game log is visible
     await expect(page.locator("#messages")).toBeVisible();
   });
 
   test("should display hint section", async ({ page }) => {
-    await page.goto("/");
+    await page.goto(DESKTOP_HOME);
 
     // Check that hint toggle button is visible
     await expect(page.locator("#hint-toggle")).toBeVisible();
@@ -173,7 +176,7 @@ test.describe("Game Logic", () => {
       }
     });
 
-    await page.goto("/");
+    await page.goto(DESKTOP_HOME);
     await page.click("#start");
     await page.waitForTimeout(5000); // Let game run
 
@@ -181,7 +184,7 @@ test.describe("Game Logic", () => {
   });
 
   test("GameController emits events", async ({ page }) => {
-    await page.goto("/");
+    await page.goto(DESKTOP_HOME);
 
     // Wait for GameController to be initialized
     await waitForGameController(page);
@@ -228,7 +231,7 @@ test.describe("Game Logic", () => {
 
   test("game progresses through states", async ({ page }) => {
     test.setTimeout(60000);
-    await page.goto("/");
+    await page.goto(DESKTOP_HOME);
 
     // Wait for GameController to be initialized
     await waitForGameController(page);

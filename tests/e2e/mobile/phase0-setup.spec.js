@@ -8,6 +8,13 @@
 import { test, expect } from "@playwright/test";
 import { MobileTestHelpers } from "../../utils/mobile-helpers.js";
 
+const BASE_PATH = process.env.PLAYWRIGHT_BASE_PATH || "/mahjong";
+const ASSET_CANDIDATES = [`${BASE_PATH}/assets/tiles.png`, "/assets/tiles.png"];
+const TILE_JSON_CANDIDATES = [
+  `${BASE_PATH}/assets/tiles.json`,
+  "/assets/tiles.json",
+];
+
 test.describe("Phase 0: Testing Framework Setup", () => {
   test("mobile site loads with correct viewport", async ({ page }) => {
     await MobileTestHelpers.gotoMobileApp(page);
@@ -61,26 +68,40 @@ test.describe("Phase 0: Testing Framework Setup", () => {
     await page.waitForLoadState("networkidle");
 
     // Verify tiles.png is accessible
-    const tilesImageLoaded = await page.evaluate(() => {
+    const tilesImageLoaded = await page.evaluate((candidates) => {
       return new Promise((resolve) => {
         const img = new Image();
-        img.onload = () => resolve(true);
-        img.onerror = () => resolve(false);
-        img.src = "/mahjong/assets/tiles.png";
+        let index = 0;
+        const tryNext = () => {
+          if (index >= candidates.length) {
+            resolve(false);
+            return;
+          }
+          img.onload = () => resolve(true);
+          img.onerror = () => {
+            index += 1;
+            tryNext();
+          };
+          img.src = candidates[index];
+        };
+        tryNext();
       });
-    });
+    }, ASSET_CANDIDATES);
 
     expect(tilesImageLoaded).toBe(true);
 
     // Verify tiles.json is accessible
-    const tilesJsonLoaded = await page.evaluate(async () => {
-      try {
-        const response = await fetch("/mahjong/assets/tiles.json");
-        return response.ok;
-      } catch {
-        return false;
+    const tilesJsonLoaded = await page.evaluate(async (candidates) => {
+      for (const url of candidates) {
+        try {
+          const response = await fetch(url);
+          if (response.ok) return true;
+        } catch {
+          // try next
+        }
       }
-    });
+      return false;
+    }, TILE_JSON_CANDIDATES);
 
     expect(tilesJsonLoaded).toBe(true);
   });

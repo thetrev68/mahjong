@@ -3,8 +3,14 @@
  * Utility functions for testing the mobile implementation
  */
 
+const BASE_PATH = process.env.PLAYWRIGHT_BASE_PATH || "/mahjong";
 const MOBILE_APP_PATH =
-  process.env.PLAYWRIGHT_MOBILE_PATH || "/mobile/?playwright=true";
+  process.env.PLAYWRIGHT_MOBILE_PATH || `${BASE_PATH}/mobile/?playwright=true`;
+
+function getAssetCandidates(filename) {
+  const normalized = filename.startsWith("/") ? filename.slice(1) : filename;
+  return [`${BASE_PATH}/${normalized}`, `/${normalized}`];
+}
 
 export class MobileTestHelpers {
   /**
@@ -36,15 +42,27 @@ export class MobileTestHelpers {
    * @param {import('@playwright/test').Page} page - Playwright page object
    */
   static async waitForSpriteLoad(page) {
+    const candidates = getAssetCandidates("assets/tiles.png");
     await page.waitForFunction(
-      () => {
-        return new Promise((resolve) => {
+      (paths) =>
+        new Promise((resolve) => {
           const img = new Image();
-          img.onload = () => resolve(true);
-          img.onerror = () => resolve(false);
-          img.src = "/mahjong/assets/tiles.png";
-        });
-      },
+          let index = 0;
+          const tryNext = () => {
+            if (index >= paths.length) {
+              resolve(false);
+              return;
+            }
+            img.onload = () => resolve(true);
+            img.onerror = () => {
+              index += 1;
+              tryNext();
+            };
+            img.src = paths[index];
+          };
+          tryNext();
+        }),
+      candidates,
       { timeout: 10000 },
     );
   }

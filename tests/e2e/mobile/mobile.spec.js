@@ -4,6 +4,9 @@ import { test, expect } from "@playwright/test";
 import { MobileTestHelpers } from "../../utils/mobile-helpers.js";
 
 const HAND_TILE_SELECTOR = "#hand-container button";
+const BASE_PATH = process.env.PLAYWRIGHT_BASE_PATH || "/mahjong";
+const MOBILE_HOME = `${BASE_PATH}/mobile/?playwright=true`;
+const MOBILE_SKIP_CHARLESTON = `${BASE_PATH}/mobile/?skipCharleston=true&playwright=true`;
 
 test.describe("Mobile Interface", () => {
   test.describe("Test 1: Mobile Page Load", () => {
@@ -66,7 +69,7 @@ test.describe("Mobile Interface", () => {
       await MobileTestHelpers.waitForMobileReady(page);
 
       // Start game with Charleston skipped for simpler testing
-      await page.goto("/mobile/?skipCharleston=true&playwright=true");
+      await page.goto(MOBILE_SKIP_CHARLESTON);
       await MobileTestHelpers.waitForMobileReady(page);
       await page.click("#new-game-btn");
 
@@ -269,9 +272,10 @@ test.describe("Mobile Interface", () => {
       await MobileTestHelpers.waitForMobileReady(page);
 
       const result = await page.evaluate(async () => {
-        const module =
-          await import("/mobile/animations/AnimationController.js");
-        const controller = new module.AnimationController({ duration: 50 });
+        const controller = window.mobileRenderer?.animationController;
+        if (!controller) {
+          return { classApplied: false, classStillPresent: false };
+        }
         const tile = document.createElement("div");
         tile.className = "mobile-tile";
         document.body.appendChild(tile);

@@ -1,6 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { MobileTestHelpers } from "../../utils/mobile-helpers.js";
 
+const BASE_PATH = process.env.PLAYWRIGHT_BASE_PATH || "/mahjong";
+const MOBILE_SKIP_CHARLESTON = `${BASE_PATH}/mobile/?skipCharleston=true&playwright=true`;
+
 // Only run these tests on mobile viewport with touch support
 test.use({
   viewport: { width: 390, height: 844 },
@@ -11,7 +14,7 @@ test.use({
 
 test.describe("Core Interactions", () => {
   test("DRAW button appears during player turn", async ({ page }) => {
-    await page.goto("/mobile?skipCharleston=true&playwright=true");
+    await page.goto(MOBILE_SKIP_CHARLESTON);
     await MobileTestHelpers.waitForMobileReady(page);
 
     // Start game and wait for player's turn
@@ -34,7 +37,7 @@ test.describe("Core Interactions", () => {
   });
 
   test("tile tap selects for discard", async ({ page }) => {
-    await page.goto("/mobile?skipCharleston=true&playwright=true");
+    await page.goto(MOBILE_SKIP_CHARLESTON);
     await MobileTestHelpers.waitForMobileReady(page);
 
     await page.click("#new-game-btn");
@@ -59,7 +62,7 @@ test.describe("Core Interactions", () => {
   });
 
   test("SORT button rearranges hand", async ({ page }) => {
-    await page.goto("/mobile?skipCharleston=true&playwright=true");
+    await page.goto(MOBILE_SKIP_CHARLESTON);
     await MobileTestHelpers.waitForMobileReady(page);
 
     await page.click("#new-game-btn");
@@ -107,7 +110,7 @@ test.describe("Core Interactions", () => {
     // Simulate failed asset loading by blocking the tiles.png request
     await page.route("**/assets/tiles.png", (route) => route.abort());
 
-    await page.goto("/mobile?skipCharleston=true&playwright=true");
+    await page.goto(MOBILE_SKIP_CHARLESTON);
     await MobileTestHelpers.waitForMobileReady(page);
 
     // Start a game
