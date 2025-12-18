@@ -9,7 +9,10 @@
 
 ## Executive Summary
 
-This is a well-architected multi-platform American Mahjong game with strong event-driven design and proper platform separation. The codebase demonstrates excellent high-level architectural decisions (adapter pattern, event emitter, platform-agnostic core). However, it requires attention in several areas:
+This is a well-architected multi-platform American Mahjong game with strong event-driven design
+and proper platform separation. The codebase demonstrates excellent high-level architectural
+decisions (adapter pattern, event emitter, platform-agnostic core). However, it requires attention
+in several areas:
 
 **Key Issues:**
 
@@ -35,9 +38,11 @@ This is a well-architected multi-platform American Mahjong game with strong even
 ### 1.1 Console Logging - Production Code Pollution
 
 **Severity:** ⚠️ **HIGH**
+
 **Impact:** Performance overhead, cluttered browser console, harder to debug real issues
 
-**Problem Summary:** 200+ console.log/warn/error statements throughout production code, many are debug statements that should be removed.
+**Problem Summary:** 200+ console.log/warn/error statements throughout production code, many are
+debug statements that should be removed.
 
 #### Specific Locations
 
@@ -141,9 +146,11 @@ export const debugWarn = (message, data = null) => {
 ### 1.2 Error Handling - Inconsistent Patterns
 
 **Severity:** 🔴 **MEDIUM-HIGH**
+
 **Impact:** Silent failures, unpredictable game state, harder debugging
 
-**Problem:** Error handling is inconsistent across codebase - some errors logged and ignored, others thrown, others silently fallback.
+**Problem:** Error handling is inconsistent across codebase - some errors logged and ignored,
+others thrown, others silently fallback.
 
 #### Specific Issues
 
@@ -204,7 +211,9 @@ try {
 - Game stuck in waiting state
 - **Problem:** User can't proceed
 
-**Status:** ✅ **COMPLETED: December 17, 2025** — Implemented `GameErrors` classes, updated `GameController`, `PhaserAdapter`, and `MobileRenderer` to use standardized error handling and safe fallbacks.
+**Status:** ✅ **COMPLETED: December 17, 2025** — Implemented `GameErrors` classes, updated
+`GameController`, `PhaserAdapter`, and `MobileRenderer` to use standardized error handling and
+safe fallbacks.
 
 #### Recommendations
 
@@ -616,7 +625,7 @@ test("dealTiles distributes exactly 108 tiles to 4 players", () => {
 
 1. **Create GitHub issues for each TODO:**
 
-   ```
+   ```text
    Title: [ENHANCEMENT] Allow user to choose joker exchange options
    Label: future-enhancement, medium-priority
 
@@ -637,7 +646,7 @@ test("dealTiles distributes exactly 108 tiles to 4 players", () => {
 
 3. **Create removal plan for deprecated files:**
 
-   ```
+   ```text
    src/deprecated/ (temporary)
    └── gameObjects.js
    └── gameObjects_table.js
@@ -1058,7 +1067,7 @@ npm run jsdoc:check  # New script to verify coverage
 
 #### Discrepancies Found
 
-**Issue 1: Cross-Platform Utilities**
+##### Issue 1: Cross-Platform Utilities
 
 CLAUDE.md states (line 111-112):
 
@@ -1092,7 +1101,7 @@ Move cross-platform utilities to shared/:
 - shared/TileDisplayUtils.js (sprite positioning)
 ```
 
-**Issue 2: Animation Sequencers on Desktop**
+##### Issue 2: Animation Sequencers on Desktop
 
 CLAUDE.md (line 286) mentions:
 
@@ -1111,11 +1120,11 @@ Reality:
 - Implement desktop version (RECOMMENDED for consistency)
 - OR update CLAUDE.md to document inconsistency
 
-**Issue 3: File Organization Changed**
+##### Issue 3: File Organization Changed
 
 CLAUDE.md (line 140) shows:
 
-```
+```text
 ├── gameObjects/             # Legacy Phaser objects (being phased out)
 │   └── gameObjects_table.js
 │   └── gameObjects_hand.js
@@ -1211,7 +1220,7 @@ Issues:
 
 1. **Rename or move file:**
 
-```
+```text
 Option A: Rename to desktopSettings.js
 Option B: Move to desktop/managers/DesktopSettingsManager.js
 ```
@@ -1582,7 +1591,7 @@ export function calculateDistance(from, to) { ... }
 
 1. **Consolidate tile display utils:**
 
-```
+```text
 Option A: Keep tileDisplayUtils.js at root, remove duplication
 Option B: Move to shared/TileDisplayUtils.js, import from both platforms
 ```
@@ -1971,7 +1980,7 @@ this.selectionManager = selectionManager;
 
 #### Scenario
 
-```
+```text
 PhaserAdapter
   ├── ButtonManager
   │   └── selectionManager (reference back)
@@ -2067,7 +2076,7 @@ desktop/animations/
 - Better separation of concerns
 - Easier to maintain and extend animations
 
-**Problem 2: Blank Tile Swap Animation Missing on Mobile**
+#### Problem 2: Blank Tile Swap Animation Missing on Mobile
 
 Mobile TODO comment (line 573, 1059):
 
@@ -2079,7 +2088,7 @@ Desktop has this animation working.
 
 **Consistency Issue:** Users on mobile see instant tile swap, users on desktop see animated swap.
 
-**Problem 3: Memory Management Inconsistency**
+#### Problem 3: Memory Management Inconsistency
 
 Desktop: No destroy() method (memory leak risk)
 Mobile: Has proper destroy() method
@@ -2173,13 +2182,18 @@ npm update phaser
 - **To enable debug mode:** Set `gdebug = 1` in `utils.js`
 - **Impact:** Production console now clean, performance improved
 
-**Event Listener Cleanup & Adapter Teardown (Sections 5.1 & 4.1)** - ✅ **COMPLETED: December 17, 2025**
+**Event Listener Cleanup & Adapter Teardown (Sections 5.1 & 4.1)** - ✅ **COMPLETED:
+December 17, 2025**
 
 - Added `shared/BaseAdapter.js` to centralize event subscription tracking.
-- Refactored `desktop/adapters/PhaserAdapter.js` and `mobile/MobileRenderer.js` to extend `BaseAdapter` and use `registerEventHandlers`.
-- Implemented `destroy()` on `PhaserAdapter` and managers: `ButtonManager`, `SelectionManager`, `BlankSwapManager`, and wired `GameScene` to call `adapter.destroy()` on shutdown.
-- Added unit tests (`tests/unit/*`) and `vitest.config.js`; updated `package.json` scripts; `npm run test:unit` passes for the new specs.
-- **Verification:** Unit tests green and manual restart smoke test confirms no duplicate listener behavior after restart.
+- Refactored `desktop/adapters/PhaserAdapter.js` and `mobile/MobileRenderer.js` to extend
+  `BaseAdapter` and use `registerEventHandlers`.
+- Implemented `destroy()` on `PhaserAdapter` and managers: `ButtonManager`, `SelectionManager`,
+  `BlankSwapManager`, and wired `GameScene` to call `adapter.destroy()` on shutdown.
+- Added unit tests (`tests/unit/*`) and `vitest.config.js`; updated `package.json` scripts;
+  `npm run test:unit` passes for the new specs.
+- **Verification:** Unit tests green and manual restart smoke test confirms no duplicate listener
+  behavior after restart.
 
 ---
 
@@ -2355,13 +2369,19 @@ npm update phaser
 
 ## OVERALL ASSESSMENT
 
-**Grade: B- (Good architecture, needs cleanup)**
+### Grade: B- (Good architecture, needs cleanup)
 
-**Positive:** The codebase demonstrates strong architectural vision with event-driven patterns and clean platform separation. The core game logic is well-organized, and the mobile implementation shows best practices.
+**Positive:** The codebase demonstrates strong architectural vision with event-driven patterns and
+clean platform separation. The core game logic is well-organized, and the mobile implementation
+shows best practices.
 
-**Needs Improvement:** Desktop adapter needs modernization to match mobile standards. Production code has accumulated debug statements. Memory management patterns are inconsistent. Function complexity in core game logic should be reduced.
+**Needs Improvement:** Desktop adapter needs modernization to match mobile standards. Production
+code has accumulated debug statements. Memory management patterns are inconsistent. Function
+complexity in core game logic should be reduced.
 
-**Verdict:** This is a well-architected project that needs quality improvements, not structural changes. Most recommendations are incremental cleanups that will improve maintainability and performance without major refactoring.
+**Verdict:** This is a well-architected project that needs quality improvements, not structural
+changes. Most recommendations are incremental cleanups that will improve maintainability and
+performance without major refactoring.
 
 ---
 
