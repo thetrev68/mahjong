@@ -1,0 +1,18 @@
+{
+  // Configuration for markdownlint-cli2
+  "config": {
+    // Reference existing .markdownlintrc rules
+    "extends": ".markdownlintrc"
+  },
+  // Glob patterns to lint
+  "globs": [
+    "**/*.md"
+  ],
+  // Ignore patterns
+  "ignores": [
+    "node_modules/**",
+    "dist/**",
+    "playwright-report/**",
+    ".archive/**"
+  ]
+}

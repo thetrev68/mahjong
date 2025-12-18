@@ -19,7 +19,7 @@
 Created **[GITHUB_ISSUES.md](GITHUB_ISSUES.md)** with 7 detailed issues ready to copy into GitHub:
 
 | Issue | Type | Priority | Effort | File |
-|-------|------|----------|--------|------|
+| ----- | ---- | -------- | ------ | ---- |
 | #1 | Enhancement | Medium | 2-3h | GameController.js:1568 |
 | #2 | Refactor | **HIGH** | 4-6h | gameObjects.js:13 |
 | #3 | Refactor | Medium | 3-4h | gameObjects_table.js:19 |

@@ -151,16 +151,16 @@ Create a clean MVP/MVC separation where:
 
 ### Can Do After Core Works
 
-5. Complete animation library
-6. Charleston/Courtesy UI
-7. Exposure animations
-8. Remove GameLogic dependencies
+1. Complete animation library
+2. Charleston/Courtesy UI
+3. Exposure animations
+4. Remove GameLogic dependencies
 
 ### Nice to Have
 
-9. Mobile renderer proof of concept
-10. Performance optimizations
-11. Better event typing/structure
+1. Mobile renderer proof of concept
+2. Performance optimizations
+3. Better event typing/structure
 
 ## Key Design Decisions
 

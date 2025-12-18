@@ -5,12 +5,14 @@ This file documents the MCP (Model Context Protocol) servers configured for this
 ## Active MCP Servers
 
 ### Context7
+
 - **Purpose**: Fetches up-to-date documentation for any library/framework
 - **Status**: ✓ Connected
 - **Configuration**: `npx -y @upstash/context7-mcp@latest`
 - **API Key**: `ctx7sk-79544ae2-a1b7-4fbe-8b26-97152183eeea`
 
 **How to use with Claude Code:**
+
 ```bash
 # Already installed! Just ask Claude to:
 # - "Get the latest React documentation"
@@ -19,25 +21,30 @@ This file documents the MCP (Model Context Protocol) servers configured for this
 ```
 
 **Available tools:**
+
 - `mcp__context7__resolve-library-id` - Find library by name
 - `mcp__context7__get-library-docs` - Get documentation for a library
 
 **Verify it's working:**
+
 ```bash
 claude mcp list
 ```
 
 ### Serena
+
 - **Purpose**: Semantic code navigation and editing for this codebase
 - **Status**: ✓ Connected
 - **Configuration**: `uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant --project C:/Repos/mahjong`
 
 ### Playwright
+
 - **Purpose**: Automated end-to-end testing of the game
 - **Status**: ✓ Connected
 - **Configuration**: `npx @executeautomation/playwright-mcp-server`
 
 **How to use with Claude Code:**
+
 ```bash
 # Run tests
 npm test                 # Run all tests headless
@@ -54,6 +61,7 @@ npm run test:report      # View test report
 **Test files location:** `tests/` directory
 
 **Available tools:**
+
 - Browser automation for testing game interactions
 - Screenshot and video capture on failures
 - Multi-browser testing (Chrome, Firefox, Safari)

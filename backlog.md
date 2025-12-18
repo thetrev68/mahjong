@@ -9,7 +9,7 @@ This document provides a high-level analysis of potential new features for the A
 
 ---
 
-### 4. Name Players
+## 4. Name Players
 
 - **Description:** Allow users to name players instead of using the default "Player 0, 1, 2, 3."
   Part 2: Randomly assign names to bot players (AI Bob, AI Charlie, AI Dave, and so on).

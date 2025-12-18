@@ -260,7 +260,7 @@ Main settings management class.
 
 ## Data Flow
 
-### Opening Settings:
+### Opening Settings
 
 1. User clicks "Settings" button (#settings)
 2. SettingsManager.showSettings() triggered
@@ -268,13 +268,13 @@ Main settings management class.
 4. Back button focused
 5. Current settings displayed from localStorage
 
-### Closing Settings:
+### Closing Settings
 
 - Back button → hideSettings() → display "none", focus settings button
 - Escape key → hideSettings()
 - Click outside overlay → hideSettings()
 
-### Saving Settings:
+### Saving Settings
 
 1. User changes form input
 2. Change event listener triggers
@@ -283,7 +283,7 @@ Main settings management class.
 5. For training/year: Settings applied on next game start
 6. For blank tiles: getTotalTileCount() returns updated value
 
-### Loading Settings:
+### Loading Settings
 
 1. DOMContentLoaded event
 2. SettingsManager initialized
