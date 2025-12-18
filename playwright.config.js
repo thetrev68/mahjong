@@ -7,8 +7,8 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests",
 
-  // Match only E2E tests (unit tests run separately)
-  testMatch: "**/e2e/**/*.spec.js",
+  // Match both E2E and unit tests
+  testMatch: ["**/e2e/**/*.spec.js", "**/unit/**/*.test.js"],
 
   // Run tests in files in parallel
   fullyParallel: true,
@@ -39,6 +39,13 @@ export default defineConfig({
 
   // Configure projects for major browsers and mobile
   projects: [
+    {
+      name: "unit",
+      testMatch: "**/unit/**/*.test.js",
+      use: {
+        // Unit tests don't need browser context
+      },
+    },
     {
       name: "desktop",
       testMatch: [

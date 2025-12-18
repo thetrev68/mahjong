@@ -21,7 +21,8 @@
       "Bash(node -c:*)",
       "Bash(npm run test:headed:*)",
       "Bash(ls:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npm run test:unit:*)"
     ],
     "deny": [],
     "ask": []
