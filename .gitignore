@@ -90,6 +90,9 @@ mobile/screencaps(Temp)/
 # CodeQL artifacts (ignore any downloaded CLI in repo)
 /tools/codeql/
 codeql-db
+results.sarif
+codeql-report.html
+parse-sarif.cjs
 
 # Workspace settings (don't commit machine-specific settings)
 .vscode/settings.json

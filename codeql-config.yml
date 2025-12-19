@@ -1,0 +1,15 @@
+# CodeQL Configuration File
+# This tells CodeQL which paths to exclude from analysis
+
+name: "CodeQL Config for Mahjong"
+
+# Paths to exclude from all queries
+paths-ignore:
+  - dist/              # Build output
+  - node_modules/      # Dependencies
+  - test-results/      # Playwright test results
+  - playwright-report/ # Test reports
+  - coverage/          # Code coverage
+  - .serena/           # AI assistant cache
+  - .claude/           # AI assistant cache
+  - .kilocode/         # AI assistant cache
