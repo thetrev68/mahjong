@@ -1194,7 +1194,7 @@ export class GameController extends EventEmitter {
    * @param {TileData} lastDiscard
    * @returns {Promise<string>} - "Mahjong", "Pung", "Kong", "Quint", or "Pass"
    */
-  async getPlayerClaimDecision(player, playerIndex, lastDiscard) {
+  getPlayerClaimDecision(player, playerIndex, lastDiscard) {
     if (player.isHuman) {
       return this.getHumanClaimDecision(player, lastDiscard);
     } else {
@@ -1208,12 +1208,12 @@ export class GameController extends EventEmitter {
    * @param {TileData} lastDiscard
    * @returns {Promise<string>}
    */
-  async getHumanClaimDecision(player, lastDiscard) {
+  getHumanClaimDecision(player, lastDiscard) {
     const canExpose = this.canPlayerFormExposure(player, lastDiscard);
     const canMahjong = this.canPlayerMahjongWithTile(player, lastDiscard);
 
     if (!canExpose && !canMahjong) {
-      return "Pass";
+      return Promise.resolve("Pass");
     }
 
     // Prompt human

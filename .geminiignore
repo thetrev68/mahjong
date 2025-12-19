@@ -1,2 +1,20 @@
-# Ignore node_modules for performance
+# Dependencies
 node_modules/
+.git/
+
+# Build outputs
+dist/
+build/
+out/
+
+# Large Data & Reports
+codeql-db/
+results.sarif
+playwright-report/
+test-results/
+coverage/
+*.log
+
+# Large Metadata
+package-lock.json
+yarn.lock

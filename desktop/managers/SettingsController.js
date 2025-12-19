@@ -1,7 +1,5 @@
 import { debugPrint } from "../../utils.js";
 import SettingsManager from "../../shared/SettingsManager.js";
-import { SettingsUI } from "./SettingsUI.js";
-import { AudioControlsManager } from "../../shared/AudioControlsManager.js";
 
 /**
  * SettingsController - Orchestrates Desktop Settings
