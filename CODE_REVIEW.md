@@ -435,7 +435,7 @@ export const PLAYER_POSITIONS = {
 **Severity:** 🟡 **MEDIUM** → ✅ **RESOLVED**
 **Impact:** Hard to test, hard to understand, high bug risk, violates Single Responsibility Principle
 
-**Status:** ✅ **COMPLETED: December 2025** — GameController refactored from 1,995 lines to 530 lines (73% reduction)
+**Status:** ✅ **COMPLETED: December 19, 2025** — Core GameController methods were extracted into specialized managers, and subsequently, large methods within those managers were refactored into smaller, single-responsibility functions. See [BREAK_UP_FUNCTIONS_ANALYSIS.md](BREAK_UP_FUNCTIONS_ANALYSIS.md) for the detailed completion report.
 
 **Problem:** Core game logic was concentrated in oversized methods.
 
@@ -451,43 +451,15 @@ export const PLAYER_POSITIONS = {
 | `mainGameLoop()`      | 200   | Main play loop            | Draw, discard, claim logic mixed             |
 | `queryClaimDiscard()` | 120   | Discard claim logic       | Pung/Kong/Quint/Mahjong all in one           |
 
-**Example - `dealTiles()` at lines 195-345:**
+**Refactoring Achievement:**
 
-```javascript
-async dealTiles() {
-    // Step 1: Initial dealing sequence (30 lines)
-    const dealSequence = [];
-    // Complex rotation logic...
-
-    // Step 2: Update player hands (20 lines)
-    dealSequence.forEach((step) => {
-        // Complex hand updates...
-    });
-
-    // Step 3: Emit events (50 lines)
-    this.emit("TILES_DEALT", {...});
-
-    // Step 4: Wall tile updates (30 lines)
-    this.updateWallAfterDealing();
-
-    // Step 5: Wait for animation (10 lines)
-    await this.sleep(500);
-
-    // Step 6: UI updates (10 lines)
-    // ...
-}
-```
-
-**File: `desktop/adapters/PhaserAdapter.js:onTilesDealt()` - 200+ lines**
-
-```javascript
-onTilesDealt(data) {
-    // 50 lines: Setup animation
-    // 80 lines: Tile creation and positioning
-    // 70 lines: Animation sequence
-    // No extraction of sub-tasks
-}
-```
+1.  **Extraction:** Logic moved to `DealingManager`, `CharlestonManager`, `CourtesyManager`, `GameLoopManager`, and `JokerExchangeManager`.
+2.  **Decomposition:** Large methods within managers were further broken down:
+    - `GameLoopManager.chooseDiscard` (86 lines) → Split into 4 methods.
+    - `GameLoopManager.exchangeBlankWithDiscard` (70 lines) → Split into 4 methods.
+    - `GameLoopManager.exposeTiles` (58 lines) → Split into 5 methods.
+    - `CourtesyManager.collectCourtesyTiles` (56 lines) → Split into 4 methods.
+    - `JokerExchangeManager.performExchange` (58 lines) → Split into 2 methods.
 
 #### Recommendations
 

@@ -281,7 +281,7 @@ export class HintAnimationManager {
     const year = this.gameController?.settings?.year || this.card?.year || "";
 
     let html = "<h3>Top Possible Hands:</h3>";
-    html += "<div class=\"hint-item\">";
+    html += '<div class="hint-item">';
 
     for (let i = 0; i < Math.min(3, rankCardHands.length); i++) {
       const rankHand = rankCardHands[i];
@@ -306,7 +306,7 @@ export class HintAnimationManager {
       // Check if hand is concealed
       const concealed = rankHand.hand?.concealed === true;
       const badge = concealed
-        ? "<span class=\"concealed-badge\" title=\"Concealed\">C</span>"
+        ? '<span class="concealed-badge" title="Concealed">C</span>'
         : "";
 
       // Build header parts: year, group, hand description

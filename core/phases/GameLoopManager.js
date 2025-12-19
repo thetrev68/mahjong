@@ -735,7 +735,11 @@ export class GameLoopManager {
     );
 
     const player = this.gameController.players[0]; // PLAYER.BOTTOM
-    const tileToTake = this.performBlankExchange(player, blankTile, discardIndex);
+    const tileToTake = this.performBlankExchange(
+      player,
+      blankTile,
+      discardIndex,
+    );
 
     this.emitBlankExchangeEvents(player, blankTile, tileToTake);
 
