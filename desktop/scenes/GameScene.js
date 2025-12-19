@@ -65,6 +65,13 @@ class GameScene extends Phaser.Scene {
     // Create audio manager
     this.audioManager = new AudioManager(this, window.settingsManager || {});
 
+    // Notify settings system that audio manager is ready
+    window.dispatchEvent(
+      new window.CustomEvent("gameSceneReady", {
+        detail: { audioManager: this.audioManager },
+      }),
+    );
+
     // Create game objects
     this.gTable = new TableManager(this);
 
