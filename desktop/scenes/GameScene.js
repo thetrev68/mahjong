@@ -63,7 +63,7 @@ class GameScene extends Phaser.Scene {
     this.scale.on("resize", this.resize, this);
 
     // Create audio manager
-    this.audioManager = new AudioManager(this, window.settingsManager || {});
+    this.audioManager = new AudioManager(this);
 
     // Notify settings system that audio manager is ready
     window.dispatchEvent(

@@ -4,35 +4,22 @@
 import SettingsManager from "./shared/SettingsManager.js";
 
 export default class AudioManager {
-  constructor(scene, settingsManager) {
+  constructor(scene) {
     this.scene = scene;
-    this.settingsManager = settingsManager;
 
     // Audio instances
     this.bgm = null;
     this.currentBGMKey = null;
 
-    // Load settings from localStorage via settingsManager
+    // Load settings from localStorage via SettingsManager static methods
     // SettingsManager stores volume as 0-100 percentage, convert to 0-1 scale for Phaser
-    const bgmVolumePercent = this.settingsManager.getSetting(
-      "bgmVolume",
-      SettingsManager.getDefault("bgmVolume"),
-    );
-    const sfxVolumePercent = this.settingsManager.getSetting(
-      "sfxVolume",
-      SettingsManager.getDefault("sfxVolume"),
-    );
+    const bgmVolumePercent = SettingsManager.get("bgmVolume");
+    const sfxVolumePercent = SettingsManager.get("sfxVolume");
 
     this.bgmVolume = bgmVolumePercent / 100;
-    this.bgmMuted = this.settingsManager.getSetting(
-      "bgmMuted",
-      SettingsManager.getDefault("bgmMuted"),
-    );
+    this.bgmMuted = SettingsManager.get("bgmMuted");
     this.sfxVolume = sfxVolumePercent / 100;
-    this.sfxMuted = this.settingsManager.getSetting(
-      "sfxMuted",
-      SettingsManager.getDefault("sfxMuted"),
-    );
+    this.sfxMuted = SettingsManager.get("sfxMuted");
   }
 
   // Background Music Methods
