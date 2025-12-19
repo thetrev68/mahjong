@@ -1,0 +1,12 @@
+# CodeQL extraction ignores - prevent generated bundles from being analyzed
+
+# Exclude build artifacts
+
+dist/
+dist/**
+dist/assets/
+
+# (Optional) exclude other generated outputs
+
+node_modules/
+codeql-db/

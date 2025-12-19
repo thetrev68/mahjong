@@ -6,6 +6,8 @@ name: "CodeQL Config for Mahjong"
 # Paths to exclude from all queries
 paths-ignore:
   - dist/ # Build output
+  - dist/** # exclude build files
+  - dist/assets/** # exclude bundled assets
   - node_modules/ # Dependencies
   - test-results/ # Playwright test results
   - playwright-report/ # Test reports

@@ -49,8 +49,20 @@ Your setup is **already 90% complete**! Here's what's left:
    ```
 
    **Using the config file** (excludes dist/, node_modules/, etc.):
-   The `codeql-config.yml` file automatically excludes build folders and dependencies from analysis.
-   The database creation already respects .gitignore, but the config provides explicit exclusions.
+   The `codeql-config.yml` file automatically excludes build folders and dependencies from analysis. For extra safety, add a `.codeqlignore` file to the repository root with the following contents to prevent generated bundles from being included in future databases:
+
+   ```
+   dist/
+   dist/**
+   dist/assets/
+   ```
+
+   After adding `.codeqlignore` remove any existing analysis database and re-create it so the database extraction excludes `dist/`:
+
+   ```bash
+   rm -rf codeql-db
+   C:\Tools\codeql\codeql.exe database create codeql-db --language=javascript --source-root=.
+   ```
 
    This runs all the standard JavaScript security queries and saves results to `results.sarif`.
 
