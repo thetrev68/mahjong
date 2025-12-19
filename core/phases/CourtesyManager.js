@@ -159,7 +159,6 @@ export class CourtesyManager {
 
     // Sequential processing required - human player needs to select tiles via UI
     for (let i = 0; i < 4; i++) {
-      const player = this.gameController.players[i];
       const passingCount = i === 0 || i === 2 ? player02Vote : player13Vote;
 
       if (passingCount === 0) {
@@ -167,48 +166,97 @@ export class CourtesyManager {
         continue;
       }
 
-      let selectedTiles;
-      if (player.isHuman) {
-        // Get opposite player's info for better messaging
-        const oppositePlayer = this.gameController.players[(i + 2) % 4];
-        const oppositeVote = votes[(i + 2) % 4].vote;
-        const yourVote = votes[i].vote;
-
-        // Prompt human to select exact number of tiles (minimum of both votes)
-        selectedTiles = await this.gameController.promptUI("SELECT_TILES", {
-          question: `${oppositePlayer.name} voted ${oppositeVote}, you voted ${yourVote}. Select exactly ${passingCount} tile(s) to pass.`,
-          minTiles: passingCount,
-          maxTiles: passingCount,
-        });
-      } else {
-        // AI selects tiles using courtesyPass method
-        selectedTiles = await this.gameController.aiEngine.courtesyPass(
-          player.hand,
-          passingCount,
-        );
-      }
-
-      tilesToPass[i] = selectedTiles;
-
-      // Remove tiles from player's hand
-      selectedTiles.forEach((tile) => player.hand.removeTile(tile));
-
-      // Emit rich courtesy pass event
-      const oppositePlayer = (i + 2) % 4;
-      const passEvent = GameEvents.createCourtesyPassEvent(
+      tilesToPass[i] = await this.selectAndPrepareCourtesyTiles(
         i,
-        oppositePlayer,
-        selectedTiles.map((t) => ({
-          suit: t.suit,
-          number: t.number,
-          index: t.index,
-        })),
-        { duration: 500 },
+        passingCount,
+        votes,
       );
-      this.gameController.emit("COURTESY_PASS", passEvent);
     }
 
     return tilesToPass;
+  }
+
+  /**
+   * Orchestrate selection, removal and emission for a single player's courtesy tiles
+   * @param {number} playerIndex
+   * @param {number} count
+   * @param {Array<{player: number, vote: number}>} votes
+   * @returns {Promise<TileData[]>}
+   */
+  async selectAndPrepareCourtesyTiles(playerIndex, count, votes) {
+    const selectedTiles = await this.selectPlayerCourtesyTiles(
+      playerIndex,
+      count,
+      votes,
+    );
+
+    this.removeCourtesyTilesFromHand(playerIndex, selectedTiles);
+    this.emitCourtesyPassEvent(playerIndex, selectedTiles);
+
+    return selectedTiles;
+  }
+
+  /**
+   * Handle human/AI branching for tile selection
+   * @param {number} playerIndex
+   * @param {number} count
+   * @param {Array<{player: number, vote: number}>} votes
+   * @returns {Promise<TileData[]>}
+   */
+  async selectPlayerCourtesyTiles(playerIndex, count, votes) {
+    const player = this.gameController.players[playerIndex];
+
+    if (player.isHuman) {
+      // Get opposite player's info for better messaging
+      const oppositePlayer = this.gameController.players[(playerIndex + 2) % 4];
+      const oppositeVote = votes[(playerIndex + 2) % 4].vote;
+      const yourVote = votes[playerIndex].vote;
+
+      // Prompt human to select exact number of tiles (minimum of both votes)
+      const selectedTiles = await this.gameController.promptUI("SELECT_TILES", {
+        question: `${oppositePlayer.name} voted ${oppositeVote}, you voted ${yourVote}. Select exactly ${count} tile(s) to pass.`,
+        minTiles: count,
+        maxTiles: count,
+      });
+      return selectedTiles;
+    } else {
+      // AI selects tiles using courtesyPass method
+      const selectedTiles = await this.gameController.aiEngine.courtesyPass(
+        player.hand,
+        count,
+      );
+      return selectedTiles;
+    }
+  }
+
+  /**
+   * Remove selected tiles from player's hand
+   * @param {number} playerIndex
+   * @param {TileData[]} tiles
+   */
+  removeCourtesyTilesFromHand(playerIndex, tiles) {
+    const player = this.gameController.players[playerIndex];
+    tiles.forEach((tile) => player.hand.removeTile(tile));
+  }
+
+  /**
+   * Emit event for courtesy pass
+   * @param {number} playerIndex
+   * @param {TileData[]} selectedTiles
+   */
+  emitCourtesyPassEvent(playerIndex, selectedTiles) {
+    const oppositePlayer = (playerIndex + 2) % 4;
+    const passEvent = GameEvents.createCourtesyPassEvent(
+      playerIndex,
+      oppositePlayer,
+      selectedTiles.map((t) => ({
+        suit: t.suit,
+        number: t.number,
+        index: t.index,
+      })),
+      { duration: 500 },
+    );
+    this.gameController.emit("COURTESY_PASS", passEvent);
   }
 
   /**
