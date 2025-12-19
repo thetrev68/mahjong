@@ -406,7 +406,7 @@ export class GameController extends EventEmitter {
    * Delegates to JokerExchangeManager
    * @returns {Promise<boolean>} - True if exchange occurred
    */
-  async onExchangeJoker() {
+  onExchangeJoker() {
     return this.jokerExchangeManager.execute();
   }
 

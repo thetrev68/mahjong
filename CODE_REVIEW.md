@@ -1471,109 +1471,30 @@ onHandUpdated(data) {
 
 ### 4.3 Shared Utilities - Severely Underutilized
 
-**Severity:** 🟡 **MEDIUM**
+**Severity:** 🟡 **MEDIUM** → ✅ **RESOLVED**
 **Impact:** Code duplication, inconsistent utilities, hard to maintain
 
-**Current State:**
+**Status:** ✅ **COMPLETED: December 19, 2025** — Centralized all shared enums, animation timings, and utility functions into the `shared/` directory. Removed the root-level `constants.js` and `tileDisplayUtils.js`.
 
-- `shared/` has only SettingsManager.js
-- Mobile has `mobile/utils/` with platform-specific helpers
-- Desktop has `desktop/config/` with platform-specific layout
-- Core has utilities scattered in main files
+**Changes Made:**
 
-#### Opportunities
+1.  **Created [shared/GameConstants.js](shared/GameConstants.js)**: Unified source for `STATE`, `SUIT`, `PLAYER`, `WIND`, `DRAGON`, etc.
+2.  **Created [shared/AnimationConfig.js](shared/AnimationConfig.js)**: Unified animation timing configuration used by both Phaser and CSS animations.
+3.  **Created [shared/GameUtils.js](shared/GameUtils.js)**: Shared logic like `getTotalTileCount`.
+4.  **Created [desktop/config/UIConstants.js](desktop/config/UIConstants.js)**: Isolated desktop-specific dimensions and coordinates.
+5.  **Moved [shared/GameDisplayUtils.js](shared/GameDisplayUtils.js)**: Moved from root to `shared/` for better organization.
+6.  **Full Migration**: Updated imports in 90+ files across Core, Desktop, Mobile, and Test layers.
 
-1. **Animation Timing Constants** - Currently scattered:
+#### Opportunities (Previously Identified)
 
-```javascript
-// core/GameController.js:878
-await this.sleep(300);  // Charleston
-await this.sleep(500);  // Courtesy
-await this.sleep(1000); // End
-
-// desktop/adapters/PhaserAdapter.js:320
-duration: 300,  // Dealing animation
-duration: 200,  // Tile draw
-
-// mobile/animations/AnimationController.js:100
-DURATION: 400,  // Discard animation
-DELAY: 100,     // Tile draw
-```
-
-1. **Tile Display Utilities** - Duplicated:
-
-```javascript
-// Root level: tileDisplayUtils.js (17 KB)
-// Mobile: mobile/utils/tileSprites.js
-// Both have similar tile positioning logic
-```
-
-1. **Position Utilities:**
-
-```javascript
-// mobile/utils/positionUtils.js
-export function getElementCenterPosition(element) { ... }
-
-// Could be useful for desktop too
-```
+1. **Animation Timing Constants** - Now Centralized in `shared/AnimationConfig.js`.
+2. **Tile Display Utilities** - Now in `shared/GameDisplayUtils.js`.
+3. **Position Utilities** - Remained platform-specific due to DOM vs Phaser coordinate differences.
 
 #### Recommendations
 
-1. **Create shared animation configuration:**
-
-```javascript
-// shared/AnimationConfig.js
-export const ANIMATION_TIMINGS = {
-  TILE_DRAW: 100,
-  TILE_FLY: 300,
-  CHARLESTON_PASS: 400,
-  COURTESY_REVEAL: 300,
-  EXPOSURE_ANIMATE: 250,
-  GAME_END: 500,
-};
-
-export const ANIMATION_SEQUENCES = {
-  DEALING: {
-    tileDrawDelay: ANIMATION_TIMINGS.TILE_DRAW,
-    sequenceDelay: ANIMATION_TIMINGS.TILE_FLY,
-    completeDelay: 500,
-  },
-  CHARLESTON: {
-    passAnimation: ANIMATION_TIMINGS.CHARLESTON_PASS,
-    receiveAnimation: ANIMATION_TIMINGS.CHARLESTON_PASS,
-    phaseTransition: 500,
-  },
-};
-```
-
-1. **Use in GameController:**
-
-```javascript
-// core/GameController.js
-import { ANIMATION_TIMINGS } from "shared/AnimationConfig.js";
-
-async charlestonPhase1() {
-    // ...
-    await this.sleep(ANIMATION_TIMINGS.CHARLESTON_PASS);
-}
-```
-
-1. **Create shared position utilities:**
-
-```javascript
-// shared/PositionUtils.js
-export function calculateCenterPosition(element) { ... }
-export function calculateDistance(from, to) { ... }
-
-// Use in mobile and desktop
-```
-
-1. **Consolidate tile display utils:**
-
-```text
-Option A: Keep tileDisplayUtils.js at root, remove duplication
-Option B: Move to shared/TileDisplayUtils.js, import from both platforms
-```
+1. **Use shared/AnimationConfig.js**: (DONE)
+2. **Consolidate tile display utils**: (DONE)
 
 ---
 

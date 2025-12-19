@@ -1,6 +1,6 @@
 /**
  * UIConstants - Desktop-specific UI configuration
- * 
+ *
  * Contains dimensions, scaling factors, and positioning constants used by Phaser.
  */
 

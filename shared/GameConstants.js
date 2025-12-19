@@ -1,6 +1,6 @@
 /**
  * GameConstants - Shared enums and constants for game logic
- * 
+ *
  * Contains platform-agnostic constants used by Core, Desktop, and Mobile layers.
  */
 

@@ -22,7 +22,7 @@ class MockGameController {
     this.events = [];
 
     this.aiEngine = {
-      courtesyPass: async (hand, count) => {
+      courtesyPass: (hand, count) => {
         return hand.tiles.slice(0, count);
       },
     };
@@ -38,7 +38,7 @@ class MockGameController {
     this.events.push({ event, data });
   }
 
-  async promptUI(type, options) {
+  promptUI(_type, _options) {
     return this.mockPromptResult;
   }
 }

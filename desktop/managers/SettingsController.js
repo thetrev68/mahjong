@@ -330,4 +330,4 @@ export class SettingsController {
   }
 }
 
-export default SettingsController;
+

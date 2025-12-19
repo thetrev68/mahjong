@@ -1,4 +1,10 @@
-import { STATE, PLAYER, SUIT, WIND, DRAGON } from "../../shared/GameConstants.js";
+import {
+  STATE,
+  PLAYER,
+  SUIT,
+  WIND,
+  DRAGON,
+} from "../../shared/GameConstants.js";
 import * as GameEvents from "../events/GameEvents.js";
 
 /**

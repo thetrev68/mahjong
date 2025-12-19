@@ -31,7 +31,7 @@ test.describe("JokerExchangeManager", () => {
     jokerExchangeManager = new JokerExchangeManager(gameController);
   });
 
-  test("performExchange - Successfully exchanges tile for joker", async () => {
+  test("performExchange - Successfully exchanges tile for joker", () => {
     const humanPlayer = gameController.players[0];
     const botPlayer = gameController.players[1];
 
@@ -74,7 +74,7 @@ test.describe("JokerExchangeManager", () => {
     ).toHaveLength(2);
   });
 
-  test("performExchange - Returns false if tile not in hand", async () => {
+  test("performExchange - Returns false if tile not in hand", () => {
     const humanPlayer = gameController.players[0];
     const exchange = {
       requiredTiles: [new TileData(SUIT.DOT, 1, 5)],

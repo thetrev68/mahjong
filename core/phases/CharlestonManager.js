@@ -150,7 +150,7 @@ export class CharlestonManager {
    * @returns {Promise<Array<TileData>>}
    * @private
    */
-  async selectTilesToPass(player, playerIndex, directionName) {
+  selectTilesToPass(player, playerIndex, directionName) {
     if (player.isHuman) {
       return this.gameController.promptUI("CHARLESTON_PASS", {
         direction: directionName,
@@ -307,7 +307,7 @@ export class CharlestonManager {
    * @returns {Promise<string>} "Yes" or "No"
    * @private
    */
-  async getHumanVote() {
+  getHumanVote() {
     return this.gameController.promptUI("CHARLESTON_CONTINUE", {
       question: "Continue Charleston to phase 2?",
       options: ["Yes", "No"],

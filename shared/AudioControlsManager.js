@@ -143,4 +143,4 @@ export class AudioControlsManager {
   }
 }
 
-export default AudioControlsManager;
+

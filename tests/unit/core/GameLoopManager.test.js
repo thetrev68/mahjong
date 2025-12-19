@@ -1,9 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { GameLoopManager } from "../../../core/phases/GameLoopManager.js";
 import { PlayerData } from "../../../core/models/PlayerData.js";
-import { HandData } from "../../../core/models/HandData.js";
 import { TileData } from "../../../core/models/TileData.js";
-import { SUIT, PLAYER, STATE } from "../../../shared/GameConstants.js";
+import { SUIT, PLAYER } from "../../../shared/GameConstants.js";
 
 // Mock GameController
 class MockGameController {
@@ -22,7 +21,7 @@ class MockGameController {
     this.events = [];
 
     this.aiEngine = {
-      chooseDiscard: async () => null, // Default mock
+      chooseDiscard: () => null, // Default mock
     };
 
     this.settings = {
@@ -40,11 +39,11 @@ class MockGameController {
     this.events.push({ event, data });
   }
 
-  async promptUI(type, options) {
+  promptUI(_type, _options) {
     return this.mockPromptResult;
   }
 
-  async sleep(ms) {
+  async sleep(_ms) {
     // No-op
   }
 }
@@ -52,19 +51,14 @@ class MockGameController {
 test.describe("GameLoopManager", () => {
   let gameController;
   let gameLoopManager;
-  let tile1, tile2;
 
   test.beforeEach(() => {
     gameController = new MockGameController();
     gameLoopManager = new GameLoopManager(gameController);
-
-    // Setup tiles
-    tile1 = new TileData(SUIT.BAMBOO, 1, 0);
-    tile2 = new TileData(SUIT.DOT, 5, 1);
   });
 
   // Tests for exposeTiles
-  test("exposeTiles - Creates a Pung (2 matching tiles + claimed)", async () => {
+  test("exposeTiles - Creates a Pung (2 matching tiles + claimed)", () => {
     const player = gameController.players[0];
     const claimedTile = new TileData(SUIT.BAMBOO, 1, 100);
 
@@ -108,7 +102,7 @@ test.describe("GameLoopManager", () => {
     expect(exposedEvent.data.tiles.length).toBe(3);
   });
 
-  test("exposeTiles - Uses Jokers if matching tiles insufficient", async () => {
+  test("exposeTiles - Uses Jokers if matching tiles insufficient", () => {
     const player = gameController.players[0];
     const claimedTile = new TileData(SUIT.BAMBOO, 1, 100);
 
@@ -132,7 +126,7 @@ test.describe("GameLoopManager", () => {
     expect(player.hand.tiles.length).toBe(0);
   });
 
-  test("exposeTiles - Does nothing if not enough tiles", async () => {
+  test("exposeTiles - Does nothing if not enough tiles", () => {
     const player = gameController.players[0];
     const claimedTile = new TileData(SUIT.BAMBOO, 1, 100);
 
