@@ -649,6 +649,25 @@ export class GameLoopManager {
    * @returns {boolean} True if exchange succeeded
    */
   exchangeBlankWithDiscard(blankTileInput, discardTileInput) {
+    this.validateBlankExchange();
+
+    const { blankTile, discardIndex } = this.resolveBlankExchangeTiles(
+      blankTileInput,
+      discardTileInput,
+    );
+
+    const player = this.gameController.players[0]; // PLAYER.BOTTOM
+    const tileToTake = this.performBlankExchange(player, blankTile, discardIndex);
+
+    this.emitBlankExchangeEvents(player, blankTile, tileToTake);
+
+    return true;
+  }
+
+  /**
+   * Validate that blank exchange is allowed in current state
+   */
+  validateBlankExchange() {
     if (!this.gameController.settings.useBlankTiles) {
       throw new Error("Blank exchange is disabled (house rule off)");
     }
@@ -660,17 +679,20 @@ export class GameLoopManager {
     if (!player || !player.isHuman) {
       throw new Error("Blank exchange only available to human player");
     }
+  }
 
+  /**
+   * Normalize and validate the tiles involved in the exchange
+   * @param {TileData|Object} blankTileInput
+   * @param {TileData|Object} discardTileInput
+   * @returns {{blankTile: TileData, discardIndex: number}}
+   */
+  resolveBlankExchangeTiles(blankTileInput, discardTileInput) {
     const blankTile = normalizeTileData(blankTileInput);
     const targetDiscardTile = normalizeTileData(discardTileInput);
 
     if (!blankTile.isBlank()) {
       throw new Error("Selected tile is not a blank");
-    }
-
-    const removed = player.hand.removeTile(blankTile);
-    if (!removed) {
-      throw new Error("Blank tile not found in hand");
     }
 
     const discardIndex = this.gameController.discards.findIndex((tile) =>
@@ -685,6 +707,22 @@ export class GameLoopManager {
       throw new Error("Cannot exchange blank for a joker");
     }
 
+    return { blankTile, discardIndex };
+  }
+
+  /**
+   * Execute the exchange: swap tiles between hand and discard pile
+   * @param {PlayerData} player
+   * @param {TileData} blankTile
+   * @param {number} discardIndex
+   * @returns {TileData} The tile taken from discards
+   */
+  performBlankExchange(player, blankTile, discardIndex) {
+    const removed = player.hand.removeTile(blankTile);
+    if (!removed) {
+      throw new Error("Blank tile not found in hand");
+    }
+
     // Remove selected tile from discard pile and push blank to the top
     const [tileToTake] = this.gameController.discards.splice(discardIndex, 1);
     this.gameController.discards.push(blankTile);
@@ -693,6 +731,16 @@ export class GameLoopManager {
     player.hand.addTile(tileToTake);
     player.hand.sortBySuit();
 
+    return tileToTake;
+  }
+
+  /**
+   * Emit events related to blank exchange
+   * @param {PlayerData} player
+   * @param {TileData} blankTile
+   * @param {TileData} tileToTake
+   */
+  emitBlankExchangeEvents(player, blankTile, tileToTake) {
     // Emit blank exchange event for renderers
     const exchangeEvent = GameEvents.createBlankExchangeEvent(
       0, // PLAYER.BOTTOM
@@ -715,8 +763,6 @@ export class GameLoopManager {
       "info",
     );
     this.gameController.emit("MESSAGE", messageEvent);
-
-    return true;
   }
 
   /**
