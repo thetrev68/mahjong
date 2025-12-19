@@ -86,3 +86,9 @@ web_modules/
 .serena/cache/
 jules-scratch/
 mobile/screencaps(Temp)/
+
+# CodeQL artifacts (ignore any downloaded CLI in repo)
+/tools/codeql/
+
+# Workspace settings (don't commit machine-specific settings)
+.vscode/settings.json
