@@ -83,17 +83,6 @@ export class GameLoopManager {
   }
 
   /**
-   * Remove top tile from wall
-   * @returns {TileData}
-   */
-  drawTileFromWall() {
-    if (this.gameController.wallTiles.length === 0) {
-      throw new StateError("Attempted to draw from an empty wall");
-    }
-    return this.gameController.wallTiles.pop();
-  }
-
-  /**
    * Determine whether current player should draw from wall
    * @returns {boolean}
    */
@@ -119,7 +108,7 @@ export class GameLoopManager {
     const player =
       this.gameController.players[this.gameController.currentPlayer];
 
-    const tileDataObject = this.drawTileFromWall();
+    const tileDataObject = this.gameController.drawTileFromWall();
     player.hand.addTile(tileDataObject);
     player.hand.sortBySuit();
 
