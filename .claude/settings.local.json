@@ -25,7 +25,8 @@
       "Bash(npm run test:unit:*)",
       "Bash($env:PATH -split ';')",
       "Bash(Select-String -Pattern 'codeql' -CaseSensitive:$false)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(powershell -Command \"\\(Get-Content ''c:\\\\Repos\\\\mahjong\\\\core\\\\GameController.js'' | Measure-Object -Line\\).Lines\")"
     ],
     "deny": [],
     "ask": []
