@@ -186,8 +186,21 @@ export class JokerExchangeManager {
       return false;
     }
 
-    // Perform the exchange
     const humanTile = humanPlayer.hand.tiles[tileIndex];
+
+    this.executeExchange(humanPlayer, humanTile, exchange);
+    this.emitExchangeEvents(humanPlayer, humanTile, exchange);
+
+    return true;
+  }
+
+  /**
+   * Execute the physical exchange of tiles
+   * @param {PlayerData} humanPlayer
+   * @param {TileData} humanTile
+   * @param {Object} exchange
+   */
+  executeExchange(humanPlayer, humanTile, exchange) {
     const jokerTile = exchange.jokerTile;
 
     // Remove tile from human's hand, add joker (use HandData API)
@@ -199,6 +212,17 @@ export class JokerExchangeManager {
     ownerPlayer.hand.exposures[exchange.exposureIndex].tiles[
       exchange.tileIndex
     ] = humanTile;
+  }
+
+  /**
+   * Emit events related to joker exchange
+   * @param {PlayerData} humanPlayer
+   * @param {TileData} humanTile
+   * @param {Object} exchange
+   */
+  emitExchangeEvents(humanPlayer, humanTile, exchange) {
+    const jokerTile = exchange.jokerTile;
+    const ownerPlayer = this.gameController.players[exchange.playerIndex];
 
     // Emit joker swapped event (for backward compatibility with PhaserAdapter)
     this.gameController.emit("JOKER_SWAPPED", {
@@ -229,8 +253,6 @@ export class JokerExchangeManager {
         "info",
       ),
     );
-
-    return true;
   }
 
   /**
