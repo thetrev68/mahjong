@@ -2,7 +2,7 @@
 import { STATE, PLAYER_OPTION, ANIMATION_TIMINGS } from "../../constants.js";
 import { debugWarn, debugError, normalizeTileData } from "../../utils.js";
 import * as GameEvents from "../events/GameEvents.js";
-import { StateError } from "../errors.js";
+import { StateError } from "../errors/GameErrors.js";
 import TileData from "../models/TileData.js";
 
 /**
