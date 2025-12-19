@@ -206,7 +206,7 @@ export class DealingManager {
     ) {
       return trainingTiles[trainingTileIndex];
     }
-    return this.gameController.drawTileFromWall();
+    return this.gameController.gameLoopManager.drawTileFromWall();
   }
 
   /**

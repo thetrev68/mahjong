@@ -322,18 +322,6 @@ export class GameController extends EventEmitter {
   }
 
   /**
-   * Remove top tile from wall
-   * Used by DealingManager and GameLoopManager
-   * @returns {TileData}
-   */
-  drawTileFromWall() {
-    if (this.wallTiles.length === 0) {
-      throw new StateError("Attempted to draw from an empty wall");
-    }
-    return this.wallTiles.pop();
-  }
-
-  /**
    * Exchange a blank tile from the human player's hand with a tile in the discard pile
    * Delegates to GameLoopManager
    * @param {TileData|Object} blankTileInput
