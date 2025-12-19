@@ -62,7 +62,8 @@ class TreeScanner:
             ".archive", ".kilocode", "node_modules", ".git", ".ruff_cache", "docs", ".github", "public", "__pycache__",
             ".vscode", ".idea", ".vite", "dist", "build", "legacy", "logs", ".pytest_cache", ".serena", "venv",
             ".geminiignore", ".gitignore", "agents.md", "backlog.md", "claude.md", "eslint.config.js", "gemini.md", "knip.json", 
-            "package-lock.json", "package.json", "tree.txt", "tree_scanner.py", "vite.config.js", "test-results", "playwright-report"
+            "package-lock.json", "package.json", "tree.txt", "tree_scanner.py", "vite.config.js", "test-results", "playwright-report",
+            "codeql-db", "jules-scratch"
         }
         
         self.count_lines_for = count_lines_for or {
@@ -266,7 +267,8 @@ def main():
         ".kilocode", ".archive", "coverage", "node_modules", ".git", ".ruff_cache", "docs", ".github", "public", "__pycache__",
             ".claude", ".vscode", ".vite", ".idea", "dist", "build", "legacy", "logs", ".serena", ".pytest_cache", "venv", "jules-scratch",
             ".geminiignore", ".gitignore", "agents.md", "backlog.md", "claude.md", "eslint.config.js", "gemini.md", "knip.json", 
-            "package-lock.json", "package.json", "tree.txt", "tree_scanner.py", "vite.config.js", "test-results", "playwright-report"
+            "package-lock.json", "package.json", "tree.txt", "tree_scanner.py", "vite.config.js", "test-results", "playwright-report",
+            "codeql-db"
     }
     custom_excludes = set(args.exclude) if args.exclude else set()
     all_excludes = default_excludes | custom_excludes

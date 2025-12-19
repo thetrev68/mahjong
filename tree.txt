@@ -75,8 +75,14 @@ mahjong/
 │   │   ├── HandData.js (282 lines)
 │   │   ├── PlayerData.js (87 lines)
 │   │   └── TileData.js (156 lines)
+│   ├── phases/
+│   │   ├── CharlestonManager.js (321 lines)
+│   │   ├── CourtesyManager.js (232 lines)
+│   │   ├── DealingManager.js (234 lines)
+│   │   ├── GameLoopManager.js (643 lines)
+│   │   └── JokerExchangeManager.js (269 lines)
 │   ├── AIEngine.js (637 lines)
-│   ├── GameController.js (1724 lines)
+│   ├── GameController.js (457 lines)
 │   └── tileDefinitions.js (64 lines)
 ├── desktop/
 │   ├── adapters/
@@ -92,25 +98,26 @@ mahjong/
 │   ├── gameObjects/
 │   │   └── PhaserTileSprites.js (646 lines)
 │   ├── managers/
+│   │   ├── AudioManager.js (96 lines)
 │   │   ├── BlankSwapManager.js (193 lines)
 │   │   ├── ButtonManager.js (498 lines)
 │   │   ├── DialogManager.js (431 lines)
 │   │   ├── HintAnimationManager.js (287 lines)
 │   │   ├── HomePageTileManager.js (273 lines)
 │   │   ├── SelectionManager.js (762 lines)
-│   │   ├── SettingsController.js (303 lines)
+│   │   ├── SettingsController.js (297 lines)
 │   │   ├── SettingsUI.js (197 lines)
 │   │   ├── TableManager.js (71 lines)
 │   │   └── TileManager.js (606 lines)
 │   ├── renderers/
 │   │   └── HandRenderer.js (494 lines)
 │   ├── scenes/
-│   │   └── GameScene.js (679 lines)
+│   │   └── GameScene.js (680 lines)
 │   ├── ADAPTER_PATTERNS.md
 │   └── FUTURE_REFACTORS.md
 ├── mobile/
 │   ├── animations/
-│   │   ├── AnimationController.js (594 lines)
+│   │   ├── AnimationController.js (600 lines)
 │   │   ├── AnimationSequencer.js (146 lines)
 │   │   ├── CharlestonAnimationSequencer.js (304 lines)
 │   │   ├── DealingAnimationSequencer.js (213 lines)
@@ -127,7 +134,7 @@ mahjong/
 │   │   ├── MobileTile.js (159 lines)
 │   │   ├── OpponentBar.js (215 lines)
 │   │   ├── PlayerRack.js (79 lines)
-│   │   ├── SettingsSheet.js (351 lines)
+│   │   ├── SettingsSheet.js (350 lines)
 │   │   └── WallCounter.js (94 lines)
 │   ├── gestures/
 │   │   └── TouchHandler.js (304 lines)
@@ -151,28 +158,28 @@ mahjong/
 │   │   ├── Screenshot 2025-11-24 202904.png
 │   │   └── Spacing.png
 │   ├── styles/
-│   │   ├── animations.css (421 lines)
-│   │   ├── base.css (72 lines)
-│   │   ├── DiscardSelectionModal.css (157 lines)
-│   │   ├── GameEndModal.css (126 lines)
-│   │   ├── HandRenderer.css (107 lines)
-│   │   ├── MobileGame.css (382 lines)
+│   │   ├── animations.css (447 lines)
+│   │   ├── base.css (73 lines)
+│   │   ├── DiscardSelectionModal.css (161 lines)
+│   │   ├── GameEndModal.css (128 lines)
+│   │   ├── HandRenderer.css (109 lines)
+│   │   ├── MobileGame.css (402 lines)
 │   │   ├── OpponentBar.css (129 lines)
 │   │   ├── SettingsSheet.css (244 lines)
-│   │   └── tiles.css (244 lines)
+│   │   └── tiles.css (298 lines)
 │   ├── utils/
 │   │   ├── assetErrorDetector.js (85 lines)
 │   │   ├── positionUtils.js (19 lines)
 │   │   ├── textModeRenderer.js (158 lines)
 │   │   └── tileSprites.js (118 lines)
-│   ├── animation-test.html (145 lines)
-│   ├── index.html (79 lines)
+│   ├── animation-test.html (157 lines)
+│   ├── index.html (111 lines)
 │   ├── main.js (344 lines)
 │   ├── MobileAudioManager.js (188 lines)
-│   ├── MobileRenderer.js (1648 lines)
-│   ├── mockup.css (468 lines)
-│   ├── mockup.html (152 lines)
-│   └── styles.css (63 lines)
+│   ├── MobileRenderer.js (1647 lines)
+│   ├── mockup.css (503 lines)
+│   ├── mockup.html (158 lines)
+│   └── styles.css (127 lines)
 ├── pwa/
 │   ├── assets/
 │   │   ├── audio/
@@ -231,22 +238,32 @@ mahjong/
 │   │       └── baseAdapter.test.js (25 lines)
 │   └── utils/
 │       └── mobile-helpers.js (231 lines)
+├── .codeqlignore
 ├── .markdownlint-cli2.jsonc
+├── .markdownlintignore
 ├── .markdownlintrc
-├── audioManager.js (108 lines)
+├── .prettierignore
+├── BREAK_UP_FUNCTIONS_ANALYSIS.md
 ├── CLAUDE.md
 ├── CODE_REVIEW.md
+├── codeql-analyze.log
+├── codeql-config.yml
+├── codeql-create.log
+├── codeql-report.html (169 lines)
+├── CODEQL_QUICKSTART.md
+├── CODEQL_SETUP.md
 ├── constants.js (155 lines)
 ├── Description_Animation_Draw_Tile.md
 ├── Description_Animation_Joker_Swap.md
 ├── favicon.ico
 ├── favicon.svg
-├── index.html (182 lines)
+├── index.html (297 lines)
 ├── main.js (116 lines)
 ├── playwright.config.js (66 lines)
 ├── README.md
+├── results.sarif
 ├── settings.js (80 lines)
-├── styles.css (898 lines)
+├── styles.css (1004 lines)
 ├── test_coordinator.mjs
 ├── tileDisplayUtils.js (466 lines)
 ├── TODO.md
@@ -255,11 +272,11 @@ mahjong/
 ==================================================
 DIRECTORY TREE STATISTICS
 ==================================================
-Total directories: 44
-Total files: 208
-Files with line counts: 159
-Total lines of code: 42,698
+Total directories: 45
+Total files: 224
+Files with line counts: 165
+Total lines of code: 43,765
 
 Configuration:
-  Excluded directories: .archive, .claude, .geminiignore, .git, .github, .gitignore, .idea, .kilocode, .pytest_cache, .ruff_cache, .serena, .vite, .vscode, __pycache__, agents.md, backlog.md, build, claude.md, coverage, dist, docs, eslint.config.js, gemini.md, jules-scratch, knip.json, legacy, logs, node_modules, package-lock.json, package.json, playwright-report, public, test-results, tree.txt, tree_scanner.py, venv, vite.config.js
+  Excluded directories: .archive, .claude, .geminiignore, .git, .github, .gitignore, .idea, .kilocode, .pytest_cache, .ruff_cache, .serena, .vite, .vscode, __pycache__, agents.md, backlog.md, build, claude.md, codeql-db, coverage, dist, docs, eslint.config.js, gemini.md, jules-scratch, knip.json, legacy, logs, node_modules, package-lock.json, package.json, playwright-report, public, test-results, tree.txt, tree_scanner.py, venv, vite.config.js
   Line counting for: .c, .cpp, .css, .dart, .h, .html, .java, .js, .ts, .tsx

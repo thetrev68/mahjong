@@ -246,9 +246,7 @@ export class CourtesyManager {
    */
   finalizeCourtesyPass() {
     // Sort all hands
-    this.gameController.players.forEach((player) =>
-      player.hand.sortBySuit(),
-    );
+    this.gameController.players.forEach((player) => player.hand.sortBySuit());
 
     // Emit hand updates for all players
     this.gameController.players.forEach((player, i) => {

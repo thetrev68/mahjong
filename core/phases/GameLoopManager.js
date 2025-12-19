@@ -381,11 +381,7 @@ export class GameLoopManager {
    * @returns {boolean}
    */
   canPlayerMahjongWithTile(player, tile) {
-    if (
-      !this.gameController.cardValidator ||
-      !player ||
-      !player.hand
-    ) {
+    if (!this.gameController.cardValidator || !player || !player.hand) {
       return false;
     }
     const tempHand = player.hand.clone();

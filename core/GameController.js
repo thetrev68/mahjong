@@ -28,12 +28,7 @@
  */
 
 import { EventEmitter } from "./events/EventEmitter.js";
-import {
-  STATE,
-  PLAYER,
-  SUIT,
-  WIND,
-} from "../constants.js";
+import { STATE, PLAYER, SUIT, WIND } from "../constants.js";
 import { PlayerData } from "./models/PlayerData.js";
 import { TileData } from "./models/TileData.js";
 import * as GameEvents from "./events/GameEvents.js";

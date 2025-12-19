@@ -718,13 +718,10 @@ class GameScene extends Phaser.Scene {
     // Update settings with current values from SettingsManager (static methods)
     this.gameController.settings = {
       ...this.gameController.settings,
-      skipCharleston:
-        SettingsManager.get("skipCharleston") ?? false,
-      trainingMode:
-        SettingsManager.get("trainingMode") ?? false,
+      skipCharleston: SettingsManager.get("skipCharleston") ?? false,
+      trainingMode: SettingsManager.get("trainingMode") ?? false,
       trainingHand: SettingsManager.get("trainingHand") ?? "",
-      trainingTileCount:
-        SettingsManager.get("trainingTileCount") ?? 13,
+      trainingTileCount: SettingsManager.get("trainingTileCount") ?? 13,
     };
   }
 
