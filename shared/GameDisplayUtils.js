@@ -1,6 +1,6 @@
 // tileDisplayUtils.js - Utilities for displaying colorized mahjong patterns with tile matching
 
-import { SUIT, VNUMBER, DRAGON, WIND } from "./shared/GameConstants.js";
+import { SUIT, VNUMBER, DRAGON, WIND } from "./GameConstants.js";
 
 // Color mapping based on provided specs
 const SUIT_COLORS = {
