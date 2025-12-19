@@ -1,9 +1,10 @@
 /* eslint-disable no-await-in-loop */
 import { STATE, PLAYER_OPTION, ANIMATION_TIMINGS } from "../../constants.js";
-import { debugWarn, debugError, normalizeTileData } from "../../utils.js";
+import { debugWarn, debugError } from "../../utils.js";
 import * as GameEvents from "../events/GameEvents.js";
 import { StateError } from "../errors/GameErrors.js";
 import { TileData } from "../models/TileData.js";
+import { normalizeTileData } from "../GameController.js";
 
 /**
  * GameLoopManager - Handles main game loop logic

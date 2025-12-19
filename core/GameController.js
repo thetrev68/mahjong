@@ -463,7 +463,7 @@ export class GameController extends EventEmitter {
  * @param {number} fallbackIndex
  * @returns {TileData}
  */
-function normalizeTileData(tile, fallbackIndex = -1) {
+export function normalizeTileData(tile, fallbackIndex = -1) {
   if (tile instanceof TileData) {
     return tile.clone();
   }
