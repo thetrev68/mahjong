@@ -14,15 +14,15 @@
  */
 
 import * as Phaser from "phaser";
+import { SUIT } from "../../shared/GameConstants.js";
 import {
-  SUIT,
   SPRITE_HEIGHT,
   SPRITE_WIDTH,
   TILE_GAP,
   WINDOW_WIDTH,
   WINDOW_HEIGHT,
-  getTotalTileCount,
-} from "../../constants.js";
+} from "../config/UIConstants.js";
+import { getTotalTileCount } from "../../shared/GameUtils.js";
 import { debugPrint } from "../../utils.js";
 
 export const gTileGroups = [

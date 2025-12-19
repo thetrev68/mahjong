@@ -1,4 +1,4 @@
-import { SUIT, WIND, DRAGON, VNUMBER } from "../../../constants.js";
+import { SUIT, WIND, DRAGON, VNUMBER } from "../../../shared/GameConstants.js";
 
 // Rules for describing hands
 //  - Components must be in the exact order shown on the NMJL card

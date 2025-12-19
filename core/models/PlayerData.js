@@ -4,7 +4,7 @@
  */
 
 import { HandData } from "./HandData.js";
-import { PLAYER } from "../../constants.js";
+import { PLAYER } from "../../shared/GameConstants.js";
 
 export class PlayerData {
   /**

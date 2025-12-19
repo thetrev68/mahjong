@@ -1,4 +1,5 @@
-import { SUIT, UI_POSITIONS } from "../../constants.js";
+import { SUIT } from "../../shared/GameConstants.js";
+import { UI_POSITIONS } from "../config/UIConstants.js";
 
 /**
  * SelectionManager - Manages tile selection state and visual feedback

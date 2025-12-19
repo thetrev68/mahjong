@@ -1,4 +1,4 @@
-import { PLAYER } from "../../constants.js";
+import { PLAYER } from "../../shared/GameConstants.js";
 import { debugPrint, debugWarn } from "../../utils.js";
 import * as GameEvents from "../events/GameEvents.js";
 

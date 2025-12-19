@@ -1,12 +1,12 @@
+import { PLAYER } from "../../shared/GameConstants.js";
 import {
-  PLAYER,
   SPRITE_WIDTH,
   SPRITE_HEIGHT,
   SPRITE_SCALE,
   TILE_GAP,
   WINDOW_WIDTH,
   WINDOW_HEIGHT,
-} from "../../constants.js";
+} from "../config/UIConstants.js";
 import { debugPrint } from "../../utils.js";
 import { PLAYER_LAYOUT } from "../config/playerLayout.js";
 

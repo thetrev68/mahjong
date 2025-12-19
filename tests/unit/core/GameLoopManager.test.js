@@ -3,7 +3,7 @@ import { GameLoopManager } from "../../../core/phases/GameLoopManager.js";
 import { PlayerData } from "../../../core/models/PlayerData.js";
 import { HandData } from "../../../core/models/HandData.js";
 import { TileData } from "../../../core/models/TileData.js";
-import { SUIT, PLAYER, STATE } from "../../../constants.js";
+import { SUIT, PLAYER, STATE } from "../../../shared/GameConstants.js";
 
 // Mock GameController
 class MockGameController {

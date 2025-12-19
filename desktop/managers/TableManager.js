@@ -1,5 +1,5 @@
 import { printMessage } from "../../utils.js";
-import { getTotalTileCount } from "../../constants.js";
+import { getTotalTileCount } from "../../shared/GameUtils.js";
 import { Wall, Discards } from "../gameObjects/PhaserTileSprites.js";
 
 /**

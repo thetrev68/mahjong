@@ -1,4 +1,4 @@
-import { PLAYER, SUIT } from "../../constants.js";
+import { PLAYER, SUIT } from "../../shared/GameConstants.js";
 import { TileData } from "../../core/models/TileData.js";
 import { printInfo, printMessage } from "../../utils.js";
 

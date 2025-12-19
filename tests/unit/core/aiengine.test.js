@@ -9,7 +9,7 @@ import { AIEngine } from "../../../core/AIEngine.js";
 import { TileData } from "../../../core/models/TileData.js";
 import { HandData } from "../../../core/models/HandData.js";
 import { Card } from "../../../core/card/card.js";
-import { SUIT, PLAYER_OPTION } from "../../../constants.js";
+import { SUIT, PLAYER_OPTION } from "../../../shared/GameConstants.js";
 
 // Set up jsdom environment for DOM globals (needed by Card class)
 const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {

@@ -1,5 +1,5 @@
 import { MobileTile } from "./MobileTile.js";
-import { WIND, PLAYER } from "../../constants.js";
+import { WIND, PLAYER } from "../../shared/GameConstants.js";
 
 /**
  * OpponentBar - Displays opponent info compactly

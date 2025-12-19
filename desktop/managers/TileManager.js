@@ -10,15 +10,14 @@
  * - Support hand reordering and interactions
  */
 
+import { PLAYER, SUIT } from "../../shared/GameConstants.js";
 import {
-  PLAYER,
-  SUIT,
   SPRITE_WIDTH,
   SPRITE_SCALE,
   TILE_GAP,
   WINDOW_WIDTH,
   WINDOW_HEIGHT,
-} from "../../constants.js";
+} from "../config/UIConstants.js";
 import { Tile } from "../gameObjects/PhaserTileSprites.js";
 
 export class TileManager {

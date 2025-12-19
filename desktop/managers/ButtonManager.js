@@ -8,7 +8,7 @@
  * - Wire button clicks to GameController callbacks
  */
 
-import { STATE } from "../../constants.js";
+import { STATE } from "../../shared/GameConstants.js";
 
 export class ButtonManager {
   /**

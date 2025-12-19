@@ -15,7 +15,9 @@
  */
 
 import { TileData } from "../../core/models/TileData.js";
-import { PLAYER, getTotalTileCount } from "../../constants.js";
+import { PLAYER } from "../../shared/GameConstants.js";
+import { getTotalTileCount } from "../../shared/GameUtils.js";
+import { ANIMATION_TIMINGS } from "../../shared/AnimationConfig.js";
 import {
   printMessage,
   printInfo,
@@ -364,7 +366,7 @@ export class PhaserAdapter extends BaseAdapter {
       targetPos.x,
       targetPos.y,
       PLAYER_LAYOUT[playerIndex].angle,
-      200,
+      ANIMATION_TIMINGS.DRAW_ANIMATION,
     );
     if (tween && this.scene.audioManager) {
       tween.once("complete", () => {
@@ -376,7 +378,7 @@ export class PhaserAdapter extends BaseAdapter {
     this.scene.tweens.add({
       targets: phaserTile.sprite,
       alpha: 1,
-      duration: 200,
+      duration: ANIMATION_TIMINGS.DRAW_ANIMATION,
     });
     phaserTile.isNewlyInserted = false;
 

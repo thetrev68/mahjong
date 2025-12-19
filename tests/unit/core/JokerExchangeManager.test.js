@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { JokerExchangeManager } from "../../../core/phases/JokerExchangeManager.js";
 import { PlayerData } from "../../../core/models/PlayerData.js";
 import { TileData } from "../../../core/models/TileData.js";
-import { SUIT, PLAYER } from "../../../constants.js";
+import { SUIT, PLAYER } from "../../../shared/GameConstants.js";
 
 // Mock GameController
 class MockGameController {

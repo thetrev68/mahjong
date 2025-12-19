@@ -5,7 +5,7 @@
  * Uses the same colorized tile-char format as the pattern visualizer in hints panel.
  */
 
-import { SUIT, WIND, DRAGON } from "../../constants.js";
+import { SUIT, WIND, DRAGON } from "../../shared/GameConstants.js";
 
 // Color mapping matching tileDisplayUtils.js
 const SUIT_COLORS = {

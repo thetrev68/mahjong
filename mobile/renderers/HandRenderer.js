@@ -1,4 +1,4 @@
-import { SUIT, WIND, DRAGON } from "../../constants.js";
+import { SUIT, WIND, DRAGON } from "../../shared/GameConstants.js";
 import { TileData } from "../../core/models/TileData.js";
 import { tileSprites } from "../utils/tileSprites.js";
 import { createTextModeTile } from "../utils/textModeRenderer.js";

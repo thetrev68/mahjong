@@ -19,7 +19,7 @@
  */
 
 import * as GameEvents from "../events/GameEvents.js";
-import { STATE } from "../../constants.js";
+import { STATE } from "../../shared/GameConstants.js";
 
 export class CourtesyManager {
   /**

@@ -1,6 +1,6 @@
 import * as Phaser from "phaser";
 import GameScene from "./desktop/scenes/GameScene.js";
-import { WINDOW_WIDTH, WINDOW_HEIGHT } from "./constants.js";
+import { WINDOW_WIDTH, WINDOW_HEIGHT } from "./desktop/config/UIConstants.js";
 
 // Use Canvas rendering for Playwright tests to avoid GPU stall warnings
 // WebGL can cause "GPU stall due to ReadPixels" when Playwright takes screenshots

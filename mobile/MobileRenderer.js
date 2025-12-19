@@ -13,7 +13,7 @@ import { DiscardSelectionModal } from "./components/DiscardSelectionModal.js";
 import { GameEndModal } from "./components/GameEndModal.js";
 import MobileAudioManager from "./MobileAudioManager.js";
 import { assetErrorDetector } from "./utils/assetErrorDetector.js";
-import { PLAYER, STATE, SUIT } from "../constants.js";
+import { PLAYER, STATE, SUIT } from "../shared/GameConstants.js";
 import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
 import { getElementCenterPosition } from "./utils/positionUtils.js";

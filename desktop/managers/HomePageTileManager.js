@@ -1,13 +1,13 @@
 import * as Phaser from "phaser";
 import { Tile } from "../gameObjects/PhaserTileSprites.js";
 import { gTileGroups } from "../../core/tileDefinitions.js";
+import { SUIT } from "../../shared/GameConstants.js";
 import {
-  SUIT,
   SPRITE_WIDTH,
   SPRITE_HEIGHT,
   WINDOW_WIDTH,
   WINDOW_HEIGHT,
-} from "../../constants.js";
+} from "../config/UIConstants.js";
 import { debugPrint } from "../../utils.js";
 
 export class HomePageTileManager {

@@ -3,7 +3,7 @@
  * NO Phaser dependencies - this is pure game state
  */
 
-import { SUIT } from "../../constants.js";
+import { SUIT } from "../../shared/GameConstants.js";
 import { gTileGroups } from "../tileDefinitions.js";
 
 export class TileData {

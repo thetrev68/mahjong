@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { JSDOM } from "jsdom";
-import { SUIT } from "../../../constants.js";
+import { SUIT } from "../../../shared/GameConstants.js";
 import { MobileTile } from "../../../mobile/components/MobileTile.js";
 
 // Set up jsdom environment for DOM globals

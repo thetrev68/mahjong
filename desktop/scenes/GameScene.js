@@ -6,11 +6,8 @@ import AudioManager from "../managers/AudioManager.js";
 import { GameController } from "../../core/GameController.js";
 import { PhaserAdapter } from "../adapters/PhaserAdapter.js";
 import { HintAnimationManager } from "../managers/HintAnimationManager.js";
-import {
-  WINDOW_WIDTH,
-  WINDOW_HEIGHT,
-  getTotalTileCount,
-} from "../../constants.js";
+import { WINDOW_WIDTH, WINDOW_HEIGHT } from "../config/UIConstants.js";
+import { getTotalTileCount } from "../../shared/GameUtils.js";
 import { AIEngine } from "../../core/AIEngine.js";
 import { Card } from "../../core/card/card.js";
 import SettingsManager from "../../shared/SettingsManager.js";

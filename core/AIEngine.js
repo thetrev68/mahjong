@@ -5,7 +5,7 @@
  */
 
 import { debugPrint } from "../utils.js";
-import { PLAYER_OPTION, SUIT, VNUMBER } from "../constants.js";
+import { PLAYER_OPTION, SUIT, VNUMBER } from "../shared/GameConstants.js";
 import { TileData } from "./models/TileData.js";
 
 // PRIVATE CONSTANTS

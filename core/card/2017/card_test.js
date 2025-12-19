@@ -2,7 +2,7 @@ import { debugPrint } from "../../../utils.js";
 import { TileData } from "../../models/TileData.js";
 import { CardHand as Hand } from "../CardHand.js";
 
-import { SUIT, DRAGON, WIND } from "../../../constants.js";
+import { SUIT, DRAGON, WIND } from "../../../shared/GameConstants.js";
 
 // PRIVATE GLOBALS
 

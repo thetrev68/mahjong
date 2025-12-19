@@ -5,7 +5,7 @@
  * Panel can be toggled open/closed via the HINTS button.
  */
 import { HandData } from "../../core/models/HandData.js";
-import { renderPatternVariation } from "../../tileDisplayUtils.js";
+import { renderPatternVariation } from "../../shared/GameDisplayUtils.js";
 
 export class HintsPanel {
   /**
@@ -142,7 +142,7 @@ export class HintsPanel {
 
     // Create 3 skeleton pattern blocks with empty content
     // This reserves the vertical space so hand doesn't jump
-    let html = '<div class="hint-item">';
+    let html = "<div class=\"hint-item\">";
     for (let i = 0; i < 3; i++) {
       html += `
                 <div class="hint-pattern hint-pattern-skeleton">
@@ -208,7 +208,7 @@ export class HintsPanel {
       const hiddenTiles = handData.tiles;
 
       // Render pattern visualizations with compact summaries
-      let html = '<div class="hint-item">';
+      let html = "<div class=\"hint-item\">";
       top3Patterns.forEach((rankHand, index) => {
         // Pattern #1 (index 0) is never dimmed
         // Patterns beyond consideredPatternCount are dimmed
@@ -229,7 +229,7 @@ export class HintsPanel {
           rankHand.card?.year || this.gameController.settings?.year || "";
         const concealed = rankHand.hand?.concealed === true;
         const badge = concealed
-          ? '<span class="concealed-badge" title="Concealed">C</span>'
+          ? "<span class=\"concealed-badge\" title=\"Concealed\">C</span>"
           : "";
         const headerParts = [year, groupDesc, handDesc].filter(Boolean);
 

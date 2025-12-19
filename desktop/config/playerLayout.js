@@ -3,13 +3,13 @@
  * Defines positioning and display properties for all 4 player positions
  */
 
+import { PLAYER } from "../../shared/GameConstants.js";
 import {
-  PLAYER,
   WINDOW_WIDTH,
   WINDOW_HEIGHT,
   SPRITE_HEIGHT,
   SPRITE_SCALE,
-} from "../../constants.js";
+} from "./UIConstants.js";
 
 /**
  * Player layout information for each position

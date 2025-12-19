@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
-import { STATE, PLAYER_OPTION, ANIMATION_TIMINGS } from "../../constants.js";
+import { STATE, PLAYER_OPTION } from "../../shared/GameConstants.js";
+import { ANIMATION_TIMINGS } from "../../shared/AnimationConfig.js";
 import { debugWarn, debugError } from "../../utils.js";
 import * as GameEvents from "../events/GameEvents.js";
 import { StateError } from "../errors/GameErrors.js";

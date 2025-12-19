@@ -4,7 +4,7 @@
  * Extracted from gameObjects.js for use by core models
  */
 
-import { SUIT } from "../constants.js";
+import { SUIT } from "../shared/GameConstants.js";
 
 export const gTileGroups = [
   {

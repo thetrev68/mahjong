@@ -1,6 +1,6 @@
 // tileDisplayUtils.js - Utilities for displaying colorized mahjong patterns with tile matching
 
-import { SUIT, VNUMBER, DRAGON, WIND } from "./constants.js";
+import { SUIT, VNUMBER, DRAGON, WIND } from "./shared/GameConstants.js";
 
 // Color mapping based on provided specs
 const SUIT_COLORS = {
@@ -494,10 +494,10 @@ export function renderPatternVariation(
     }
   });
 
-  let html = '<div class="pattern-row">';
+  let html = "<div class=\"pattern-row\">";
   finalDisplay.forEach((item) => {
     if (item.isSpacer) {
-      html += '<span class="component-spacer"></span>';
+      html += "<span class=\"component-spacer\"></span>";
     } else {
       html += `<span class="${getTileCharClasses(item)}">${item.char}</span>`;
     }
