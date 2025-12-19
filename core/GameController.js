@@ -44,39 +44,10 @@ import { TileData } from "./models/TileData.js";
 import { ExposureData } from "./models/HandData.js";
 import * as GameEvents from "./events/GameEvents.js";
 import { gTileGroups } from "./tileDefinitions.js";
-import { debugPrint, debugWarn, debugError } from "../utils.js";
+import { debugWarn, debugError } from "../utils.js";
 import { StateError } from "./errors/GameErrors.js";
-
-const CHARLESTON_DIRECTION_SEQUENCE = {
-  1: ["right", "across", "left"],
-  2: ["left", "across", "right"],
-};
-
-const CHARLESTON_DIRECTION_OFFSETS = {
-  right: PLAYER.RIGHT,
-  across: PLAYER.TOP,
-  left: PLAYER.LEFT,
-};
-
-const DEAL_SEQUENCE = [
-  [PLAYER.BOTTOM, 4],
-  [PLAYER.RIGHT, 4],
-  [PLAYER.TOP, 4],
-  [PLAYER.LEFT, 4],
-  [PLAYER.BOTTOM, 4],
-  [PLAYER.RIGHT, 4],
-  [PLAYER.TOP, 4],
-  [PLAYER.LEFT, 4],
-  [PLAYER.BOTTOM, 4],
-  [PLAYER.RIGHT, 4],
-  [PLAYER.TOP, 4],
-  [PLAYER.LEFT, 4],
-  [PLAYER.BOTTOM, 1],
-  [PLAYER.RIGHT, 1],
-  [PLAYER.TOP, 1],
-  [PLAYER.LEFT, 1],
-  [PLAYER.BOTTOM, 1],
-];
+import { DealingManager } from "./phases/DealingManager.js";
+import { CharlestonManager } from "./phases/CharlestonManager.js";
 
 export class GameController extends EventEmitter {
   constructor() {
@@ -134,6 +105,12 @@ export class GameController extends EventEmitter {
 
     /** @type {Function|null} Optional wall generator (returns tile data array) */
     this.wallGenerator = null;
+
+    /** @type {DealingManager} Manages tile dealing logic */
+    this.dealingManager = new DealingManager(this);
+
+    /** @type {CharlestonManager} Manages Charleston tile passing phase */
+    this.charlestonManager = new CharlestonManager(this);
   }
 
   /**
@@ -281,153 +258,12 @@ export class GameController extends EventEmitter {
    *
    * Note: Actual dealing is handled entirely by PhaserAdapter to access Phaser timing
    */
-  dealTiles() {
+  async dealTiles() {
     this.setState(STATE.DEAL);
 
-    const dealSequence = this.buildInitialDealSequence();
-
-    // Emit event to trigger adapters to animate dealing using provided sequence
-    const dealtEvent = GameEvents.createTilesDealtEvent(dealSequence);
-    this.emit("TILES_DEALT", dealtEvent);
-
-    // DO NOT emit HAND_UPDATED here - it would show all tiles instantly
-    // Wait for dealing animation to complete, then emit HAND_UPDATED
-    // PhaserAdapter will emit DEALING_COMPLETE when animation finishes
-
-    // Wait for dealing to complete with fallback for headless/mobile environments
-    return new Promise((resolve) => {
-      let timeoutId = null;
-      let resolved = false;
-
-      // Shared completion logic - emits HAND_UPDATED and resolves promise
-      const completeDealing = () => {
-        if (resolved) return; // Prevent double execution
-        resolved = true;
-
-        if (timeoutId !== null) {
-          clearTimeout(timeoutId);
-        }
-
-        // Emit HAND_UPDATED after dealing animation completes (or timeout)
-        this.players.forEach((player, index) => {
-          const handEvent = GameEvents.createHandUpdatedEvent(
-            index,
-            player.hand.toJSON(),
-          );
-          this.emit("HAND_UPDATED", handEvent);
-        });
-        resolve();
-      };
-
-      // Listen for DEALING_COMPLETE from PhaserAdapter
-      this.once("DEALING_COMPLETE", completeDealing);
-
-      // Fallback timeout for mobile/headless (no animation adapter present)
-      // If DEALING_COMPLETE doesn't arrive within 30 seconds, proceed anyway
-      // Desktop dealing animation takes 6-12 seconds depending on tile count
-      timeoutId = setTimeout(() => {
-        this.off("DEALING_COMPLETE", completeDealing); // Remove event listener
-        completeDealing();
-      }, 30000);
-    });
-  }
-
-  /**
-   * Build the initial dealing sequence and mutate player hands accordingly
-   * In training mode, player 0 gets a generated hand instead of random tiles
-   * @returns {Array<{player:number, tiles:Object[]}>}
-   */
-  buildInitialDealSequence() {
-    const sequence = [];
-    let trainingTiles = null;
-    let trainingTileIndex = 0;
-
-    // Training mode: Pre-generate tiles for player 0
-    if (this.settings.trainingMode && this.settings.trainingHand) {
-      // Generate training hand using card validator
-      const generatedHand = this.cardValidator.generateHand(
-        this.settings.trainingHand,
-        this.settings.trainingTileCount,
-      );
-
-      const templateTiles = generatedHand.getTileArray();
-
-      // Find matching tiles from the wall for each generated tile
-      // This ensures proper indices for rendering
-      trainingTiles = [];
-      for (const template of templateTiles) {
-        // Find a matching tile in the wall
-        const wallIndex = this.wallTiles.findIndex(
-          (wallTile) =>
-            wallTile.suit === template.suit &&
-            wallTile.number === template.number,
-        );
-
-        if (wallIndex !== -1) {
-          // Remove from wall and use it
-          const matchedTile = this.wallTiles.splice(wallIndex, 1)[0];
-          trainingTiles.push(matchedTile);
-        } else {
-          // Fallback: use the template (shouldn't happen with a valid wall)
-          debugWarn(
-            `Could not find matching tile for ${template.suit}-${template.number}`,
-          );
-          trainingTiles.push(template);
-        }
-      }
-
-      if (this.debug) {
-        debugPrint("Training Mode Settings:", {
-          trainingMode: this.settings.trainingMode,
-          trainingHand: this.settings.trainingHand,
-          trainingTileCount: this.settings.trainingTileCount,
-        });
-        debugPrint(
-          "Generated hand tiles:",
-          trainingTiles.map((t) => `${t.suit}-${t.number} (index: ${t.index})`),
-        );
-      }
-
-      this.emit("MESSAGE", {
-        text: `Training Mode: Dealing ${this.settings.trainingTileCount} tiles for "${this.settings.trainingHand}"`,
-        type: "info",
-      });
-    }
-
-    // Use standard dealing sequence for animation
-    for (const [playerIndex, tileCount] of DEAL_SEQUENCE) {
-      const tilesForPlayer = [];
-      const player = this.players[playerIndex];
-
-      for (let i = 0; i < tileCount; i++) {
-        let tileData;
-
-        // Player 0 in training mode: use pre-generated tiles
-        if (
-          playerIndex === PLAYER.BOTTOM &&
-          trainingTiles &&
-          trainingTileIndex < trainingTiles.length
-        ) {
-          tileData = trainingTiles[trainingTileIndex++];
-        } else {
-          // Normal: draw from wall
-          tileData = this.drawTileFromWall();
-        }
-
-        player.hand.addTile(tileData);
-        tilesForPlayer.push(tileData.toJSON());
-      }
-
-      // Keep human hand sorted for readability
-      player.hand.sortBySuit();
-
-      sequence.push({
-        player: playerIndex,
-        tiles: tilesForPlayer,
-      });
-    }
-
-    return sequence;
+    const dealSequence = this.dealingManager.buildInitialDealSequence();
+    this.dealingManager.emitDealingStartEvent(dealSequence);
+    await this.dealingManager.waitForDealingComplete();
   }
 
   /**
@@ -443,16 +279,17 @@ export class GameController extends EventEmitter {
 
     // Charleston Phase 1 (required)
     this.charlestonState.phase = 1;
-    await this.executeCharlestonPasses(1);
+    await this.charlestonManager.executeCharlestonPasses(1);
 
     // Query whether to continue to phase 2
     this.setState(STATE.CHARLESTON_QUERY);
-    const continueToPhase2 = await this.queryCharlestonContinue();
+    const continueToPhase2 =
+      await this.charlestonManager.queryCharlestonContinue();
 
     if (continueToPhase2) {
       // Charleston Phase 2 (optional)
       this.charlestonState.phase = 2;
-      await this.executeCharlestonPasses(2);
+      await this.charlestonManager.executeCharlestonPasses(2);
     }
 
     // Courtesy pass query
@@ -460,215 +297,6 @@ export class GameController extends EventEmitter {
 
     // Move to game loop
     await this.gameLoop();
-  }
-
-  /**
-   * Execute Charleston passes (3 passes per phase)
-   * @param {number} phase - 1 or 2
-   */
-  async executeCharlestonPasses(phase) {
-    const directionSequence =
-      CHARLESTON_DIRECTION_SEQUENCE[phase] || CHARLESTON_DIRECTION_SEQUENCE[1];
-
-    for (let i = 0; i < directionSequence.length; i++) {
-      const directionName = directionSequence[i];
-      const direction = CHARLESTON_DIRECTION_OFFSETS[directionName];
-      if (typeof direction !== "number") {
-        continue;
-      }
-
-      await this.executeSingleCharlestonPass(
-        phase,
-        i + 1,
-        directionName,
-        direction,
-      );
-    }
-  }
-
-  /**
-   * Execute a single Charleston pass in a given direction
-   * @param {number} phase - 1 or 2
-   * @param {number} passNumber - 1, 2, or 3
-   * @param {string} directionName - "right", "across", or "left"
-   * @param {number} direction - Player offset (1, 2, or 3)
-   */
-  async executeSingleCharlestonPass(
-    phase,
-    passNumber,
-    directionName,
-    direction,
-  ) {
-    this.setState(phase === 1 ? STATE.CHARLESTON1 : STATE.CHARLESTON2);
-
-    // Emit rich Charleston phase event
-    const phaseEvent = GameEvents.createCharlestonPhaseEvent(
-      phase,
-      passNumber,
-      directionName,
-    );
-    this.emit("CHARLESTON_PHASE", phaseEvent);
-
-    // Collect tiles from all players
-    const charlestonPassArray = await this.collectCharlestonTiles(
-      directionName,
-      direction,
-    );
-
-    // Exchange tiles between players based on direction
-    this.exchangeCharlestonTiles(charlestonPassArray, direction, directionName);
-
-    await this.sleep(500);
-  }
-
-  /**
-   * Collect tiles from all players for Charleston pass
-   * @param {string} directionName - "right", "across", or "left"
-   * @param {number} direction - Player offset
-   * @returns {Promise<Array<TileData[]>>}
-   */
-  async collectCharlestonTiles(directionName, direction) {
-    const charlestonPassArray = [];
-
-    for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
-      const player = this.players[playerIndex];
-
-      let tilesToPass;
-      if (player.isHuman) {
-        // Prompt human player
-        tilesToPass = await this.promptUI("CHARLESTON_PASS", {
-          direction: directionName,
-          requiredCount: 3,
-        });
-      } else {
-        // AI selects tiles
-        tilesToPass = await this.aiEngine.charlestonPass(player.hand);
-      }
-
-      // Remove tiles from player's hand
-      tilesToPass.forEach((tile) => player.hand.removeTile(tile));
-      debugPrint(
-        `[GameController] Player ${playerIndex} removed ${tilesToPass.length} tiles, hand now has ${player.hand.tiles.length} tiles`,
-      );
-
-      charlestonPassArray[playerIndex] = tilesToPass;
-
-      // Emit hand updated for sending player (tiles removed)
-      const senderHandEvent = GameEvents.createHandUpdatedEvent(
-        playerIndex,
-        this.players[playerIndex].hand.toJSON(),
-      );
-      this.emit("HAND_UPDATED", senderHandEvent);
-
-      // Emit rich Charleston pass event
-      const toPlayer = (playerIndex + direction) % 4;
-      const passEvent = GameEvents.createCharlestonPassEvent(
-        playerIndex,
-        toPlayer,
-        directionName,
-        tilesToPass.map((t) => ({
-          suit: t.suit,
-          number: t.number,
-          index: t.index,
-        })),
-        {
-          type: "charleston-pass",
-          direction: directionName,
-          duration: 600,
-          easing: "ease-in-out",
-        },
-      );
-      this.emit("CHARLESTON_PASS", passEvent);
-    }
-
-    return charlestonPassArray;
-  }
-
-  /**
-   * Exchange Charleston tiles between players
-   * @param {Array<TileData[]>} charlestonPassArray - Tiles passed by each player
-   * @param {number} direction - Player offset
-   * @param {string} directionName - "right", "across", or "left"
-   */
-  exchangeCharlestonTiles(charlestonPassArray, direction, directionName) {
-    for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
-      const fromPlayer = playerIndex;
-      const toPlayer = (playerIndex + direction) % 4;
-
-      // Add tiles to receiving player
-      charlestonPassArray[fromPlayer].forEach((tile) => {
-        this.players[toPlayer].hand.addTile(tile);
-      });
-      debugPrint(
-        `[GameController] Player ${toPlayer} received ${charlestonPassArray[fromPlayer].length} tiles, hand now has ${this.players[toPlayer].hand.tiles.length} tiles`,
-      );
-
-      // Emit tiles received event (for animation coordination)
-      const receivedTiles = charlestonPassArray[fromPlayer].map((t) => ({
-        suit: t.suit,
-        number: t.number,
-        index: t.index,
-      }));
-      const tilesReceivedEvent = GameEvents.createTilesReceivedEvent(
-        toPlayer,
-        receivedTiles,
-        fromPlayer,
-        {
-          type: "charleston-receive",
-          direction: directionName,
-          duration: 600,
-          glow: { persist: true, color: 0x1e90ff },
-        },
-      );
-      this.emit("TILES_RECEIVED", tilesReceivedEvent);
-
-      // Emit hand updated for receiving player
-      const handEvent = GameEvents.createHandUpdatedEvent(
-        toPlayer,
-        this.players[toPlayer].hand.toJSON(),
-      );
-      this.emit("HAND_UPDATED", handEvent);
-    }
-  }
-
-  /**
-   * Query players whether to continue Charleston to phase 2
-   * @returns {Promise<boolean>}
-   */
-  async queryCharlestonContinue() {
-    // Human player votes
-    const humanVote = await this.promptUI("CHARLESTON_CONTINUE", {
-      question: "Continue Charleston to phase 2?",
-      options: ["Yes", "No"],
-    });
-
-    // AI players vote
-    const aiVotes = this.players
-      .filter((p) => !p.isHuman)
-      .map((p) => this.aiEngine.charlestonContinueVote(p.hand));
-
-    const allVotes = [humanVote === "Yes", ...aiVotes];
-    const yesVotes = allVotes.filter((v) => v).length;
-    const noVotes = allVotes.filter((v) => !v).length;
-
-    // TEMPORARY: Force continuation for testing Charleston Phase 2 glow bug
-    const continueToPhase2 = true; // Must be unanimous (normally: yesVotes === 4)
-
-    if (continueToPhase2) {
-      const msgEvent = GameEvents.createMessageEvent(
-        "All players voted YES - continuing to Charleston phase 2",
-        "info",
-      );
-      this.emit("MESSAGE", msgEvent);
-    } else {
-      const msgEvent = GameEvents.createMessageEvent(
-        `Vote: ${yesVotes} Yes, ${noVotes} No - skipping Charleston phase 2`,
-        "info",
-      );
-      this.emit("MESSAGE", msgEvent);
-    }
-
-    return continueToPhase2;
   }
 
   /**
