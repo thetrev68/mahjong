@@ -1262,8 +1262,7 @@ export class MobileRenderer extends BaseAdapter {
 
       // Apply blue glow to the retrieved tile in hand (after hand re-renders)
       setTimeout(() => {
-        const updatedHandTiles =
-          handContainer?.querySelectorAll(".tile") || [];
+        const updatedHandTiles = handContainer?.querySelectorAll(".tile") || [];
         for (const tile of updatedHandTiles) {
           const tileIndex = parseInt(tile.dataset.tileIndex);
           if (tileIndex === discardData.index) {

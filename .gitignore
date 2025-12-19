@@ -89,6 +89,7 @@ mobile/screencaps(Temp)/
 
 # CodeQL artifacts (ignore any downloaded CLI in repo)
 /tools/codeql/
+codeql-db
 
 # Workspace settings (don't commit machine-specific settings)
 .vscode/settings.json

@@ -14,12 +14,7 @@
     "**/*.css",
     "**/*.md"
   ],
-  "ignore": [
-    "dist/**",
-    "node_modules/**",
-    "**/*.py",
-    "pwa/service-worker.js"
-  ],
-    
+  "ignore": ["dist/**", "node_modules/**", "**/*.py", "pwa/service-worker.js"],
+
   "tags": ["knip-ignore"]
 }

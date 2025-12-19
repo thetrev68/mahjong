@@ -477,7 +477,12 @@ export class GameController extends EventEmitter {
         continue;
       }
 
-      await this.executeSingleCharlestonPass(phase, i + 1, directionName, direction);
+      await this.executeSingleCharlestonPass(
+        phase,
+        i + 1,
+        directionName,
+        direction,
+      );
     }
   }
 
@@ -488,7 +493,12 @@ export class GameController extends EventEmitter {
    * @param {string} directionName - "right", "across", or "left"
    * @param {number} direction - Player offset (1, 2, or 3)
    */
-  async executeSingleCharlestonPass(phase, passNumber, directionName, direction) {
+  async executeSingleCharlestonPass(
+    phase,
+    passNumber,
+    directionName,
+    direction,
+  ) {
     this.setState(phase === 1 ? STATE.CHARLESTON1 : STATE.CHARLESTON2);
 
     // Emit rich Charleston phase event
@@ -500,7 +510,10 @@ export class GameController extends EventEmitter {
     this.emit("CHARLESTON_PHASE", phaseEvent);
 
     // Collect tiles from all players
-    const charlestonPassArray = await this.collectCharlestonTiles(directionName, direction);
+    const charlestonPassArray = await this.collectCharlestonTiles(
+      directionName,
+      direction,
+    );
 
     // Exchange tiles between players based on direction
     this.exchangeCharlestonTiles(charlestonPassArray, direction, directionName);
@@ -737,7 +750,11 @@ export class GameController extends EventEmitter {
     this.emitCourtesyVoteMessage(votes, player02Vote);
 
     // Collect tiles from all players
-    const tilesToPass = await this.collectCourtesyTiles(votes, player02Vote, player13Vote);
+    const tilesToPass = await this.collectCourtesyTiles(
+      votes,
+      player02Vote,
+      player13Vote,
+    );
 
     // Exchange tiles between opposite players
     this.exchangeCourtesyTiles(tilesToPass);
@@ -1343,7 +1360,12 @@ export class GameController extends EventEmitter {
     }
 
     // Handle exposure claims (Pung, Kong, Quint)
-    this.handleExposureClaim(claimingPlayerIndex, claimingPlayer, tile, claimType);
+    this.handleExposureClaim(
+      claimingPlayerIndex,
+      claimingPlayer,
+      tile,
+      claimType,
+    );
   }
 
   /**
@@ -1388,7 +1410,12 @@ export class GameController extends EventEmitter {
    * @param {TileData} tile
    * @param {boolean} validationError
    */
-  rejectMahjongClaim(claimingPlayerIndex, claimingPlayer, tile, validationError = false) {
+  rejectMahjongClaim(
+    claimingPlayerIndex,
+    claimingPlayer,
+    tile,
+    validationError = false,
+  ) {
     // Remove tile and return to discard pile
     claimingPlayer.hand.removeTile(tile);
     this.discards.push(tile);
@@ -1401,10 +1428,7 @@ export class GameController extends EventEmitter {
       ? "Invalid Mahjong claim - validation error"
       : "Invalid Mahjong claim - hand does not match any winning pattern";
 
-    this.emit(
-      "MESSAGE",
-      GameEvents.createMessageEvent(errorMessage, "error"),
-    );
+    this.emit("MESSAGE", GameEvents.createMessageEvent(errorMessage, "error"));
   }
 
   /**

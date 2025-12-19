@@ -1,199 +1,313 @@
 <!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="American Mahjong game">
-    <meta name="keywords" content="Mahjong, free, game, javascript">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="American Mahjong game" />
+    <meta name="keywords" content="Mahjong, free, game, javascript" />
     <title>American Mahjong</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=4">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=4" />
+    <link rel="stylesheet" href="styles.css" />
 
     <!-- PWA Manifest (only for production) -->
     <script>
-        // Only load manifest in production (not localhost)
-        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-            const link = document.createElement('link');
-            link.rel = 'manifest';
-            link.href = '/mahjong/manifest.json';
-            document.head.appendChild(link);
-        }
+      // Only load manifest in production (not localhost)
+      if (
+        window.location.hostname !== "localhost" &&
+        window.location.hostname !== "127.0.0.1"
+      ) {
+        const link = document.createElement("link");
+        link.rel = "manifest";
+        link.href = "/mahjong/manifest.json";
+        document.head.appendChild(link);
+      }
     </script>
 
     <!-- iOS-specific meta tags -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Mahjong">
-    <link rel="apple-touch-icon" href="/mahjong/icons/icon-180.png">
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Mahjong" />
+    <link rel="apple-touch-icon" href="/mahjong/icons/icon-180.png" />
 
     <!-- Theme color for browsers -->
-    <meta name="theme-color" content="#0c6d3a">
+    <meta name="theme-color" content="#0c6d3a" />
 
     <script>
-        // Redirect to mobile version if screen width is appropriate
-        if (window.innerWidth <= 768) {
-            window.location.href = '/mahjong/mobile/index.html';
-        }
+      // Redirect to mobile version if screen width is appropriate
+      if (window.innerWidth <= 768) {
+        window.location.href = "/mahjong/mobile/index.html";
+      }
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <div id="parentdiv">
-        <div id="gamediv"></div>
+      <div id="gamediv"></div>
 
-        <div id="uicenterdiv" class="command-bar--hidden" role="region" aria-label="Action commands" aria-describedby="commandBarHint">
-            <p class="sr-only" id="commandBarHint">To reposition the action bar, drag or touch and move it within the play area.</p>
-            <label class="sr-only" for="info">Action status</label>
-            <textarea id="info" readonly aria-live="polite" rows="2"></textarea>
-            <div id="buttondiv">
-                <button id="button1" class="button">button1</button>
-                <button id="button2" class="button">button2</button>
-                <button id="button3" class="button">button3</button>
-                <button id="button4" class="button">button4</button>
-            </div>
+      <div
+        id="uicenterdiv"
+        class="command-bar--hidden"
+        role="region"
+        aria-label="Action commands"
+        aria-describedby="commandBarHint"
+      >
+        <p class="sr-only" id="commandBarHint">
+          To reposition the action bar, drag or touch and move it within the
+          play area.
+        </p>
+        <label class="sr-only" for="info">Action status</label>
+        <textarea id="info" readonly aria-live="polite" rows="2"></textarea>
+        <div id="buttondiv">
+          <button id="button1" class="button">button1</button>
+          <button id="button2" class="button">button2</button>
+          <button id="button3" class="button">button3</button>
+          <button id="button4" class="button">button4</button>
         </div>
+      </div>
 
-        <aside id="uidiv">
-            <section id="messagesdiv" class="sidebar__section sidebar__section--log">
-                <label class="sidebar__heading" for="messages">Game Log</label>
-                <textarea id="messages" class="sidebar__textarea message-log__textarea" readonly aria-live="polite" role="log" aria-label="Game log output"></textarea>
-            </section>
+      <aside id="uidiv">
+        <section
+          id="messagesdiv"
+          class="sidebar__section sidebar__section--log"
+        >
+          <label class="sidebar__heading" for="messages">Game Log</label>
+          <textarea
+            id="messages"
+            class="sidebar__textarea message-log__textarea"
+            readonly
+            aria-live="polite"
+            role="log"
+            aria-label="Game log output"
+          ></textarea>
+        </section>
 
-            <section id="hintdiv" class="sidebar__section sidebar__section--hint">
-                <button id="hint-toggle" class="sidebar__heading" aria-expanded="true" aria-controls="hint-content">Hint</button>
-                <div id="hint-content" class="sidebar__textarea" role="region"></div>
-            </section>
+        <section id="hintdiv" class="sidebar__section sidebar__section--hint">
+          <button
+            id="hint-toggle"
+            class="sidebar__heading"
+            aria-expanded="true"
+            aria-controls="hint-content"
+          >
+            Hint
+          </button>
+          <div id="hint-content" class="sidebar__textarea" role="region"></div>
+        </section>
 
-            <div id="controldiv">
-                <button id="start" class="button">Start Game</button>
-                <button id="settings" class="button">Settings</button>
-                <button id="sort1" class="button">Sort by suit</button>
-                <button id="sort2" class="button">Sort by rank</button>
+        <div id="controldiv">
+          <button id="start" class="button">Start Game</button>
+          <button id="settings" class="button">Settings</button>
+          <button id="sort1" class="button">Sort by suit</button>
+          <button id="sort2" class="button">Sort by rank</button>
+        </div>
+      </aside>
+
+      <!-- Settings Overlay -->
+      <div id="settings-overlay" class="settings-overlay" style="display: none">
+        <div class="settings-container">
+          <header class="settings-header">
+            <div class="settings-header-actions">
+              <button
+                id="settings-save"
+                class="settings-button settings-button--primary"
+              >
+                Save
+              </button>
+              <button
+                id="settings-cancel"
+                class="settings-button settings-button--secondary"
+              >
+                Cancel
+              </button>
             </div>
-        </aside>
+            <h1 class="settings-title">Settings</h1>
+          </header>
 
-        <!-- Settings Overlay -->
-        <div id="settings-overlay" class="settings-overlay" style="display: none;">
-            <div class="settings-container">
-                <header class="settings-header">
-                    <div class="settings-header-actions">
-                        <button id="settings-save" class="settings-button settings-button--primary">Save</button>
-                        <button id="settings-cancel" class="settings-button settings-button--secondary">Cancel</button>
+          <main class="settings-content">
+            <section class="settings-section">
+              <h2 class="settings-section-title">Game Settings</h2>
+              <div class="house-rules-container">
+                <div class="house-rules-item">
+                  <input id="skipCharlestonCheckbox" type="checkbox" />
+                  <label for="skipCharlestonCheckbox" class="house-rules-label"
+                    >Skip Charleston Phase</label
+                  >
+                </div>
+                <p class="settings-description">
+                  When enabled, the Charleston tile-passing phase will be
+                  skipped and the game will start directly with the main play
+                  phase.
+                </p>
+              </div>
+            </section>
+
+            <section class="settings-section">
+              <h2 class="settings-section-title">Training Mode</h2>
+              <form id="trainform1" class="training-form">
+                <fieldset id="trainfieldset1">
+                  <div class="training-form__toggle">
+                    <input id="trainCheckbox" type="checkbox" />
+                    <label for="trainCheckbox">Enable Training Mode</label>
+                  </div>
+                </fieldset>
+              </form>
+              <form id="trainform2" class="training-form">
+                <fieldset id="trainfieldset2">
+                  <div class="training-form__grid">
+                    <div class="training-form__item training-form__item--full">
+                      <label class="training-form__label" for="handSelect"
+                        >Select a Starting Hand</label
+                      >
+                      <select
+                        id="handSelect"
+                        class="training-form__select"
+                      ></select>
                     </div>
-                    <h1 class="settings-title">Settings</h1>
-                </header>
+                    <div class="training-form__item">
+                      <label class="training-form__label" for="numTileSelect"
+                        >Number of Tiles</label
+                      >
+                      <select
+                        id="numTileSelect"
+                        class="training-form__select training-form__select--compact"
+                      ></select>
+                    </div>
+                  </div>
+                </fieldset>
+              </form>
+            </section>
 
-                <main class="settings-content">
-                    <section class="settings-section">
-                        <h2 class="settings-section-title">Game Settings</h2>
-                        <div class="house-rules-container">
-                            <div class="house-rules-item">
-                                <input id="skipCharlestonCheckbox" type="checkbox">
-                                <label for="skipCharlestonCheckbox" class="house-rules-label">Skip Charleston Phase</label>
-                            </div>
-                            <p class="settings-description">When enabled, the Charleston tile-passing phase will be skipped and the game will start directly with the main play phase.</p>
-                        </div>
-                    </section>
+            <section class="settings-section">
+              <h2 class="settings-section-title">AI Difficulty</h2>
+              <div class="setting-item">
+                <label for="difficultySelect" class="setting-label"
+                  >Opponent Skill Level</label
+                >
+                <select id="difficultySelect" class="setting-select">
+                  <option value="easy">Easy - Beginner Friendly</option>
+                  <option value="medium" selected>
+                    Medium - Balanced Challenge
+                  </option>
+                  <option value="hard">Hard - Expert Opponent</option>
+                </select>
+              </div>
+            </section>
 
-                    <section class="settings-section">
-                        <h2 class="settings-section-title">Training Mode</h2>
-                        <form id="trainform1" class="training-form">
-                            <fieldset id="trainfieldset1">
-                                <div class="training-form__toggle">
-                                    <input id="trainCheckbox" type="checkbox">
-                                    <label for="trainCheckbox">Enable Training Mode</label>
-                                </div>
-                            </fieldset>
-                        </form>
-                        <form id="trainform2" class="training-form">
-                            <fieldset id="trainfieldset2">
-                                <div class="training-form__grid">
-                                    <div class="training-form__item training-form__item--full">
-                                        <label class="training-form__label" for="handSelect">Select a Starting Hand</label>
-                                        <select id="handSelect" class="training-form__select"></select>
-                                    </div>
-                                    <div class="training-form__item">
-                                        <label class="training-form__label" for="numTileSelect">Number of Tiles</label>
-                                        <select id="numTileSelect" class="training-form__select training-form__select--compact"></select>
-                                    </div>
-                                </div>
-                            </fieldset>
-                        </form>
-                    </section>
+            <section class="settings-section">
+              <h2 class="settings-section-title">Year Selection</h2>
+              <p class="settings-description">
+                Select which year's card patterns to use. Changes take effect
+                when starting a new game.
+              </p>
+              <div class="year-select-container">
+                <label for="yearSelect" class="year-select-label"
+                  >Card Year</label
+                >
+                <select id="yearSelect" class="year-select">
+                  <option value="2017">2017</option>
+                  <option value="2018">2018</option>
+                  <option value="2019">2019</option>
+                  <option value="2020">2020</option>
+                  <option value="2025" selected>2025</option>
+                </select>
+              </div>
+            </section>
 
-                    <section class="settings-section">
-                        <h2 class="settings-section-title">AI Difficulty</h2>
-                        <div class="setting-item">
-                            <label for="difficultySelect" class="setting-label">Opponent Skill Level</label>
-                            <select id="difficultySelect" class="setting-select">
-                                <option value="easy">Easy - Beginner Friendly</option>
-                                <option value="medium" selected>Medium - Balanced Challenge</option>
-                                <option value="hard">Hard - Expert Opponent</option>
-                            </select>
-                        </div>
-                    </section>
+            <section class="settings-section">
+              <h2 class="settings-section-title">Audio Controls</h2>
+              <div class="audio-controls">
+                <div class="audio-controls__group">
+                  <h3 class="audio-controls__subtitle">Background Music</h3>
+                  <div class="audio-controls__item">
+                    <label for="bgmVolume" class="audio-controls__label"
+                      >Volume</label
+                    >
+                    <input
+                      type="range"
+                      id="bgmVolume"
+                      class="audio-controls__slider"
+                      min="0"
+                      max="100"
+                      value="70"
+                    />
+                    <span id="bgmVolumeValue" class="audio-controls__value"
+                      >70%</span
+                    >
+                  </div>
+                  <div
+                    class="audio-controls__item audio-controls__item--checkbox"
+                  >
+                    <input
+                      type="checkbox"
+                      id="bgmMute"
+                      class="audio-controls__checkbox"
+                    />
+                    <label for="bgmMute" class="audio-controls__checkbox-label"
+                      >Mute Background Music</label
+                    >
+                  </div>
+                </div>
+                <div class="audio-controls__group">
+                  <h3 class="audio-controls__subtitle">Sound Effects</h3>
+                  <div class="audio-controls__item">
+                    <label for="sfxVolume" class="audio-controls__label"
+                      >Volume</label
+                    >
+                    <input
+                      type="range"
+                      id="sfxVolume"
+                      class="audio-controls__slider"
+                      min="0"
+                      max="100"
+                      value="80"
+                    />
+                    <span id="sfxVolumeValue" class="audio-controls__value"
+                      >80%</span
+                    >
+                  </div>
+                  <div
+                    class="audio-controls__item audio-controls__item--checkbox"
+                  >
+                    <input
+                      type="checkbox"
+                      id="sfxMute"
+                      class="audio-controls__checkbox"
+                    />
+                    <label for="sfxMute" class="audio-controls__checkbox-label"
+                      >Mute Sound Effects</label
+                    >
+                  </div>
+                </div>
+              </div>
+            </section>
 
-                    <section class="settings-section">
-                        <h2 class="settings-section-title">Year Selection</h2>
-                        <p class="settings-description">Select which year's card patterns to use. Changes take effect when starting a new game.</p>
-                        <div class="year-select-container">
-                            <label for="yearSelect" class="year-select-label">Card Year</label>
-                            <select id="yearSelect" class="year-select">
-                                <option value="2017">2017</option>
-                                <option value="2018">2018</option>
-                                <option value="2019">2019</option>
-                                <option value="2020">2020</option>
-                                <option value="2025" selected>2025</option>
-                            </select>
-                        </div>
-                    </section>
-
-                    <section class="settings-section">
-                        <h2 class="settings-section-title">Audio Controls</h2>
-                        <div class="audio-controls">
-                            <div class="audio-controls__group">
-                                <h3 class="audio-controls__subtitle">Background Music</h3>
-                                <div class="audio-controls__item">
-                                    <label for="bgmVolume" class="audio-controls__label">Volume</label>
-                                    <input type="range" id="bgmVolume" class="audio-controls__slider" min="0" max="100" value="70">
-                                    <span id="bgmVolumeValue" class="audio-controls__value">70%</span>
-                                </div>
-                                <div class="audio-controls__item audio-controls__item--checkbox">
-                                    <input type="checkbox" id="bgmMute" class="audio-controls__checkbox">
-                                    <label for="bgmMute" class="audio-controls__checkbox-label">Mute Background Music</label>
-                                </div>
-                            </div>
-                            <div class="audio-controls__group">
-                                <h3 class="audio-controls__subtitle">Sound Effects</h3>
-                                <div class="audio-controls__item">
-                                    <label for="sfxVolume" class="audio-controls__label">Volume</label>
-                                    <input type="range" id="sfxVolume" class="audio-controls__slider" min="0" max="100" value="80">
-                                    <span id="sfxVolumeValue" class="audio-controls__value">80%</span>
-                                </div>
-                                <div class="audio-controls__item audio-controls__item--checkbox">
-                                    <input type="checkbox" id="sfxMute" class="audio-controls__checkbox">
-                                    <label for="sfxMute" class="audio-controls__checkbox-label">Mute Sound Effects</label>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="settings-section">
-                        <h2 class="settings-section-title">House Rules</h2>
-                        <div class="house-rules-container">
-                            <div class="house-rules-item">
-                                <input type="checkbox" id="useBlankTiles" class="house-rules-checkbox">
-                                <label for="useBlankTiles" class="house-rules-label">Use Blank Tiles (8 blanks added to wall)</label>
-                            </div>
-                            <p class="settings-description">When enabled, 8 blank tiles are added to the wall. Players may swap blanks for any non-joker tile from the discard pile at any time.</p>
-                        </div>
-                    </section>
-                </main>
-            </div>
+            <section class="settings-section">
+              <h2 class="settings-section-title">House Rules</h2>
+              <div class="house-rules-container">
+                <div class="house-rules-item">
+                  <input
+                    type="checkbox"
+                    id="useBlankTiles"
+                    class="house-rules-checkbox"
+                  />
+                  <label for="useBlankTiles" class="house-rules-label"
+                    >Use Blank Tiles (8 blanks added to wall)</label
+                  >
+                </div>
+                <p class="settings-description">
+                  When enabled, 8 blank tiles are added to the wall. Players may
+                  swap blanks for any non-joker tile from the discard pile at
+                  any time.
+                </p>
+              </div>
+            </section>
+          </main>
         </div>
+      </div>
     </div>
 
     <script src="settings.js" type="module"></script>
     <script src="main.js" type="module"></script>
-
-</body>
+  </body>
 </html>

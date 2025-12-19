@@ -11,60 +11,124 @@
 
 /* CSS Custom Properties / Variables */
 :root {
-    --color-table-base: #0c6d3a;
-    --color-table-dark: #044328;
-    --color-table-highlight: #178c4e;
-    --gradient-table: radial-gradient(circle at 35% 18%, var(--color-table-highlight) 0%, var(--color-table-base) 45%, var(--color-table-dark) 98%), radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.15) 0%, transparent 60%), radial-gradient(circle at 20% 60%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.08) 0%, transparent 45%);
-    --font-stack: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-    --font-mono: "Consolas", "SFMono-Regular", "Menlo", monospace;
+  --color-table-base: #0c6d3a;
+  --color-table-dark: #044328;
+  --color-table-highlight: #178c4e;
+  --gradient-table:
+    radial-gradient(
+      circle at 35% 18%,
+      var(--color-table-highlight) 0%,
+      var(--color-table-base) 45%,
+      var(--color-table-dark) 98%
+    ),
+    radial-gradient(
+      circle at 70% 80%,
+      rgba(255, 255, 255, 0.15) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 20% 60%,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 85% 30%,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 45%
+    );
+  --font-stack: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Consolas", "SFMono-Regular", "Menlo", monospace;
 }
 
 /* Global utility classes */
 .concealed-badge {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background: #ccc;
-    border-radius: 50%;
-    text-align: center;
-    line-height: 20px;
-    font-weight: bold;
-    color: #044328;
-    margin-right: 6px;
-    margin-left: auto;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: #ccc;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 20px;
+  font-weight: bold;
+  color: #044328;
+  margin-right: 6px;
+  margin-left: auto;
 }
 
 .pattern-row {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 1px;
-    margin-bottom: 4px;
-    overflow-x: auto;
-    padding: 2px 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1px;
+  margin-bottom: 4px;
+  overflow-x: auto;
+  padding: 2px 0;
 }
 
 /* Tailwind-style color utilities for pattern visualization */
-.bg-red-600 { background-color: #dc2626; }
-.bg-green-600 { background-color: #16a34a; }
-.bg-blue-600 { background-color: #2563eb; }
-.bg-black { background-color: #000000; }
-.bg-gray-600 { background-color: #4b5563; }
+.bg-red-600 {
+  background-color: #dc2626;
+}
+.bg-green-600 {
+  background-color: #16a34a;
+}
+.bg-blue-600 {
+  background-color: #2563eb;
+}
+.bg-black {
+  background-color: #000000;
+}
+.bg-gray-600 {
+  background-color: #4b5563;
+}
 
-.text-red-600 { color: #dc2626; }
-.text-green-600 { color: #16a34a; }
-.text-blue-600 { color: #2563eb; }
-.text-black { color: #000000; }
-.text-gray-600 { color: #4b5563; }
-.text-white { color: #ffffff; }
+.text-red-600 {
+  color: #dc2626;
+}
+.text-green-600 {
+  color: #16a34a;
+}
+.text-blue-600 {
+  color: #2563eb;
+}
+.text-black {
+  color: #000000;
+}
+.text-gray-600 {
+  color: #4b5563;
+}
+.text-white {
+  color: #ffffff;
+}
 
-.border-red-700 { border-color: #b91c1c; }
-.border-green-700 { border-color: #15803d; }
-.border-blue-700 { border-color: #1d4ed8; }
-.border-black { border-color: #000000; }
-.border-gray-700 { border-color: #374151; }
-.border-red-200 { border-color: #fecaca; }
-.border-green-200 { border-color: #bbf7d0; }
-.border-blue-200 { border-color: #bfdbfe; }
-.border-gray-200 { border-color: #e5e7eb; }
+.border-red-700 {
+  border-color: #b91c1c;
+}
+.border-green-700 {
+  border-color: #15803d;
+}
+.border-blue-700 {
+  border-color: #1d4ed8;
+}
+.border-black {
+  border-color: #000000;
+}
+.border-gray-700 {
+  border-color: #374151;
+}
+.border-red-200 {
+  border-color: #fecaca;
+}
+.border-green-200 {
+  border-color: #bbf7d0;
+}
+.border-blue-200 {
+  border-color: #bfdbfe;
+}
+.border-gray-200 {
+  border-color: #e5e7eb;
+}
 
-.bg-white { background-color: #ffffff !important; opacity: 1; }
+.bg-white {
+  background-color: #ffffff !important;
+  opacity: 1;
+}

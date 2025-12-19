@@ -1,180 +1,184 @@
 /* Discard Selection Modal - For blank tile swap feature */
 
 .discard-selection-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 9999;
-    display: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .discard-selection-modal--visible {
-    display: block;
-    opacity: 1;
+  display: block;
+  opacity: 1;
 }
 
 /* Backdrop */
 .discard-selection-modal__backdrop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
 }
 
 /* Content Container - Bottom sheet style like settings */
 .discard-selection-modal__content {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-height: 85vh;
-    background: linear-gradient(to bottom, #044328, #0c6d3a);
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-    transform: translateY(100%);
-    transition: transform 0.3s ease-out;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    z-index: 1;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 85vh;
+  background: linear-gradient(to bottom, #044328, #0c6d3a);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1;
 }
 
 .discard-selection-modal--visible .discard-selection-modal__content {
-    transform: translateY(0);
+  transform: translateY(0);
 }
 
 /* Header Section */
 .discard-selection-modal__header {
-    padding: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    flex-shrink: 0;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 /* Title */
 .discard-selection-modal__title {
-    margin: 0 0 8px 0;
-    font-size: 22px;
-    font-weight: 600;
-    color: #f5fbf7;
-    text-align: center;
-    font-family: var(--font-stack);
+  margin: 0 0 8px 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #f5fbf7;
+  text-align: center;
+  font-family: var(--font-stack);
 }
 
 /* Hint Text */
 .discard-selection-modal__hint {
-    margin: 0;
-    font-size: 14px;
-    color: rgba(245, 251, 247, 0.7);
-    text-align: center;
-    font-family: var(--font-stack);
+  margin: 0;
+  font-size: 14px;
+  color: rgba(245, 251, 247, 0.7);
+  text-align: center;
+  font-family: var(--font-stack);
 }
 
 /* Tile Grid Container */
 .discard-selection-modal__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 52px);
-    gap: 8px;
-    padding: 20px;
-    padding-bottom: 80px; /* Extra padding for bottom menu */
-    overflow-y: auto;
-    flex: 1;
-    justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 52px);
+  gap: 8px;
+  padding: 20px;
+  padding-bottom: 80px; /* Extra padding for bottom menu */
+  overflow-y: auto;
+  flex: 1;
+  justify-content: center;
 }
 
 /* Individual Tile Button - invisible wrapper */
 .discard-selection-modal__tile {
-    background: transparent;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    width: 52px;
-    height: 69px;
-    position: relative;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 52px;
+  height: 69px;
+  position: relative;
 }
 
 /* Hover effect - glow around tile */
 .discard-selection-modal__tile:hover .tile {
-    border-color: #2563eb;
-    box-shadow: 0 0 12px rgba(37, 99, 235, 0.8), 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-color: #2563eb;
+  box-shadow:
+    0 0 12px rgba(37, 99, 235, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Active/tap effect */
 .discard-selection-modal__tile:active .tile {
-    transform: scale(0.95);
-    box-shadow: 0 0 16px rgba(37, 99, 235, 1), 0 2px 4px rgba(0, 0, 0, 0.15);
+  transform: scale(0.95);
+  box-shadow:
+    0 0 16px rgba(37, 99, 235, 1),
+    0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 /* Tile inherits standard tile styling from tiles.css */
 .discard-selection-modal__tile .tile {
-    pointer-events: none;
-    /* Tile gets standard styling: border-radius, border, shadow, etc. */
+  pointer-events: none;
+  /* Tile gets standard styling: border-radius, border, shadow, etc. */
 }
 
 /* Footer with Cancel Button */
 .discard-selection-modal__footer {
-    padding: 16px 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    flex-shrink: 0;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .discard-selection-modal__cancel {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    padding: 14px 24px;
-    color: #f5fbf7;
-    font-size: 16px;
-    font-weight: 600;
-    font-family: var(--font-stack);
-    cursor: pointer;
-    transition: all 0.2s ease;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 14px 24px;
+  color: #f5fbf7;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--font-stack);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .discard-selection-modal__cancel:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .discard-selection-modal__cancel:active {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(0.98);
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(0.98);
 }
 
 /* Responsive adjustments */
 @media (max-width: 400px) {
-    .discard-selection-modal__header {
-        padding: 16px;
-    }
+  .discard-selection-modal__header {
+    padding: 16px;
+  }
 
-    .discard-selection-modal__grid {
-        grid-template-columns: repeat(auto-fill, 40px);
-        gap: 6px;
-        padding: 16px;
-        padding-bottom: 80px;
-    }
+  .discard-selection-modal__grid {
+    grid-template-columns: repeat(auto-fill, 40px);
+    gap: 6px;
+    padding: 16px;
+    padding-bottom: 80px;
+  }
 
-    .discard-selection-modal__tile {
-        width: 40px;
-        height: 54px;
-    }
+  .discard-selection-modal__tile {
+    width: 40px;
+    height: 54px;
+  }
 
-    .discard-selection-modal__title {
-        font-size: 20px;
-    }
+  .discard-selection-modal__title {
+    font-size: 20px;
+  }
 
-    .discard-selection-modal__hint {
-        font-size: 13px;
-    }
+  .discard-selection-modal__hint {
+    font-size: 13px;
+  }
 
-    .discard-selection-modal__footer {
-        padding: 12px 16px;
-    }
+  .discard-selection-modal__footer {
+    padding: 12px 16px;
+  }
 }

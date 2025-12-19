@@ -1,96 +1,124 @@
 <!doctype html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="American Mahjong game - Mobile">
-    <meta name="keywords" content="Mahjong, free, game, javascript, mobile">
+    <meta name="description" content="American Mahjong game - Mobile" />
+    <meta name="keywords" content="Mahjong, free, game, javascript, mobile" />
     <title>American Mahjong - Mobile</title>
 
     <!-- PWA Manifest (only for production) -->
     <script>
-        // Only load manifest in production (not localhost)
-        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-            const link = document.createElement('link');
-            link.rel = 'manifest';
-            link.href = '/mahjong/manifest.json';
-            document.head.appendChild(link);
-        }
+      // Only load manifest in production (not localhost)
+      if (
+        window.location.hostname !== "localhost" &&
+        window.location.hostname !== "127.0.0.1"
+      ) {
+        const link = document.createElement("link");
+        link.rel = "manifest";
+        link.href = "/mahjong/manifest.json";
+        document.head.appendChild(link);
+      }
     </script>
 
     <!-- iOS-specific meta tags -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Mahjong">
-    <link rel="apple-touch-icon" href="/mahjong/icons/icon-180.png">
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Mahjong" />
+    <link rel="apple-touch-icon" href="/mahjong/icons/icon-180.png" />
 
     <!-- Theme color for browsers -->
-    <meta name="theme-color" content="#0c6d3a">
+    <meta name="theme-color" content="#0c6d3a" />
 
     <!-- Viewport for mobile -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
 
     <!-- Mobile styles -->
-    <link rel="stylesheet" href="styles.css?v=3">
-</head>
+    <link rel="stylesheet" href="styles.css?v=3" />
+  </head>
 
-<body>
+  <body>
     <div id="mobile-app">
-        <!-- Status Bar -->
-        <div id="game-status" class="game-status">Initializing...</div>
+      <!-- Status Bar -->
+      <div id="game-status" class="game-status">Initializing...</div>
 
-        <!-- Wall Counter (absolute positioned, top-right) -->
-        <div id="wall-counter" class="wall-counter">
-            <span class="wall-label">Wall</span>
-            <span class="wall-tiles">--</span>
+      <!-- Wall Counter (absolute positioned, top-right) -->
+      <div id="wall-counter" class="wall-counter">
+        <span class="wall-label">Wall</span>
+        <span class="wall-tiles">--</span>
+      </div>
+
+      <!-- Top: Opponent information bars -->
+      <div id="opponents-container" class="opponents-container">
+        <div id="opponent-top"></div>
+        <div id="opponent-left"></div>
+        <div id="opponent-right"></div>
+      </div>
+
+      <!-- Center: Discard pile -->
+      <div id="game-center" class="game-center">
+        <div
+          id="home-page-tiles"
+          class="home-page-tiles-container"
+          style="display: none"
+        >
+          <!-- Populated by HomePageTiles component -->
         </div>
+        <div id="discard-container" class="discard-container"></div>
+      </div>
 
-
-
-        <!-- Top: Opponent information bars -->
-        <div id="opponents-container" class="opponents-container">
-            <div id="opponent-top"></div>
-            <div id="opponent-left"></div>
-            <div id="opponent-right"></div>
+      <!-- Player hand -->
+      <div id="hand-area" class="hand-area">
+        <div
+          id="player-rack-container"
+          class="player-rack-container hide-on-home"
+        >
+          <div id="hand-container" class="hand-container"></div>
         </div>
+      </div>
 
-        <!-- Center: Discard pile -->
-        <div id="game-center" class="game-center">
-            <div id="home-page-tiles" class="home-page-tiles-container" style="display: none;">
-                <!-- Populated by HomePageTiles component -->
-            </div>
-            <div id="discard-container" class="discard-container"></div>
+      <!-- Hints Panel (above bottom menu) -->
+      <div id="hints-panel" class="hints-panel hide-on-home">
+        <button id="hints-toggle" class="hints-toggle">HINTS</button>
+        <div id="hints-content" class="hints-content" style="display: none">
+          <!-- Populated by HintsPanel component -->
         </div>
+      </div>
 
-        <!-- Player hand -->
-        <div id="hand-area" class="hand-area">
-            <div id="player-rack-container" class="player-rack-container hide-on-home">
-                <div id="hand-container" class="hand-container"></div>
-            </div>
-        </div>
-
-        <!-- Hints Panel (above bottom menu) -->
-        <div id="hints-panel" class="hints-panel hide-on-home">
-            <button id="hints-toggle" class="hints-toggle">HINTS</button>
-            <div id="hints-content" class="hints-content" style="display: none;">
-                <!-- Populated by HintsPanel component -->
-            </div>
-        </div>
-
-        <!-- Bottom action menu -->
-        <div class="bottom-menu">
-            <button id="swap-blank-btn" class="menu-btn" style="display: none;">SWAP</button>
-            <button id="exchange-joker-btn" class="menu-btn" style="display: none;">JOKER</button>
-            <button id="mahjong-btn" class="menu-btn menu-btn--mahjong" style="display: none;">MAHJONG!</button>
-            <button id="draw-btn" class="menu-btn menu-btn--primary" style="display: none;">DRAW</button>
-            <button id="sort-btn" class="menu-btn">SORT</button>
-            <button id="new-game-btn" class="menu-btn">Start</button>
-            <button id="mobile-settings-btn" class="menu-btn">⚙️</button>
-        </div>
+      <!-- Bottom action menu -->
+      <div class="bottom-menu">
+        <button id="swap-blank-btn" class="menu-btn" style="display: none">
+          SWAP
+        </button>
+        <button id="exchange-joker-btn" class="menu-btn" style="display: none">
+          JOKER
+        </button>
+        <button
+          id="mahjong-btn"
+          class="menu-btn menu-btn--mahjong"
+          style="display: none"
+        >
+          MAHJONG!
+        </button>
+        <button
+          id="draw-btn"
+          class="menu-btn menu-btn--primary"
+          style="display: none"
+        >
+          DRAW
+        </button>
+        <button id="sort-btn" class="menu-btn">SORT</button>
+        <button id="new-game-btn" class="menu-btn">Start</button>
+        <button id="mobile-settings-btn" class="menu-btn">⚙️</button>
+      </div>
     </div>
 
     <!-- Mobile scripts -->
     <script src="main.js" type="module"></script>
-</body>
-
+  </body>
 </html>

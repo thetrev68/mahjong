@@ -182,7 +182,7 @@ test.describe("Phase 5: Responsive Design & Component Polish", () => {
     await page.waitForTimeout(2000);
 
     // Check hand container grid
-      const handGrid = page.locator("#hand-container");
+    const handGrid = page.locator("#hand-container");
     const gridProps = await handGrid.evaluate((el) => {
       const style = window.getComputedStyle(el);
       return {

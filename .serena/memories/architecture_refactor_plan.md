@@ -56,20 +56,20 @@ Create a clean MVP/MVC separation where:
 - Should emit HAND_UPDATED events whenever hands change
 - Should track exposures, selections, etc.
 
-1.2 Create comprehensive event system
+  1.2 Create comprehensive event system
 
 - For EVERY state change → emit STATE_CHANGED
 - For EVERY UI interaction needed → emit UI_PROMPT
 - For EVERY animation → emit corresponding event with timing info
 - Example: TILE_DISCARDED should include {player, tile, sourcePosition, targetPosition, animation: "slide-to-center", duration: 500}
 
-1.3 Make GameController deal with Phaser Tiles directly
+  1.3 Make GameController deal with Phaser Tiles directly
 
 - Accept sharedTable in init()
 - Use actual Phaser Tile objects from wall
 - When dealing, GameController just pops tiles and assigns them, PhaserAdapter handles animation
 
-1.4 Implement all game flows in GameController
+  1.4 Implement all game flows in GameController
 
 - Charleston phase logic
 - Courtesy pass logic
@@ -90,20 +90,20 @@ Create a clean MVP/MVC separation where:
 - CHARLESTON_PHASE: show Charleston UI
 - etc.
 
-2.2 Create hand/tile UI management
+  2.2 Create hand/tile UI management
 
 - Tile selection (raise to position 575)
 - Tile drag-drop reordering
 - Hand display updates
 - Sort button functionality
 
-2.3 Create prompt/dialog management
+  2.3 Create prompt/dialog management
 
 - Handle UI_PROMPT events
 - Show/hide buttons, input fields
 - Convert user interactions to GameController callback responses
 
-2.4 Create complete animation library
+  2.4 Create complete animation library
 
 - Deal sequence (staggered tiles from wall)
 - Tile draw (wall → hand)
@@ -123,13 +123,13 @@ Create a clean MVP/MVC separation where:
 - Some utility methods
 - UI management logic
 
-3.2 Move/refactor into appropriate places
+  3.2 Move/refactor into appropriate places
 
 - Hints → Keep in PhaserAdapter or new HintManager
 - Utilities → Utility functions
 - UI state → PhaserAdapter
 
-3.3 Delete gameLogic.js and related files
+  3.3 Delete gameLogic.js and related files
 
 ### Phase 4: Create Mobile Renderer
 

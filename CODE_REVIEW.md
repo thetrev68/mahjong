@@ -2039,17 +2039,17 @@ getSelectionManager() {
 **Severity:** 🟡 **MEDIUM** → ✅ **RESOLVED**
 **Impact:** Desktop and mobile now have consistent animation architecture
 
-| Feature                  | Desktop                      | Mobile                       | Parity | Status                      |
-| ------------------------ | ---------------------------- | ---------------------------- | ------ | --------------------------- |
-| **Charleston Animation** | CharlestonAnimationSequencer | CharlestonAnimationSequencer | ✅ Yes | Extracted to sequencer      |
-| **Dealing Animation**    | DealingAnimationSequencer    | DealingAnimationSequencer    | ✅ Yes | Extracted to sequencer      |
-| **Discard Animation**    | DiscardAnimationSequencer    | DiscardAnimationSequencer    | ✅ Yes | Extracted to sequencer      |
-| **Blank Tile Swap**      | ✓ Animated                   | ✓ Animated                   | ✅ Yes | Completed Dec 18, 2025      |
-| **Event Cleanup**        | ✓ destroy() method           | ✓ destroy() method           | ✅ Yes | Completed in Section 5.1    |
-| **Audio Manager**        | audioManager.js              | MobileAudioManager.js        | ✓ OK   | Both platforms supported    |
-| **Hints Panel**          | HintAnimationManager         | HintsPanel component         | ✓ OK   | Both have implementation    |
-| **Settings UI**          | DesktopSettingsManager       | SettingsSheet component      | ✓ OK   | Both supported              |
-| **Touch Support**        | ✗ Mouse only                 | ✓ Full touch gestures        | ✓ OK   | Appropriate for platforms   |
+| Feature                  | Desktop                      | Mobile                       | Parity | Status                    |
+| ------------------------ | ---------------------------- | ---------------------------- | ------ | ------------------------- |
+| **Charleston Animation** | CharlestonAnimationSequencer | CharlestonAnimationSequencer | ✅ Yes | Extracted to sequencer    |
+| **Dealing Animation**    | DealingAnimationSequencer    | DealingAnimationSequencer    | ✅ Yes | Extracted to sequencer    |
+| **Discard Animation**    | DiscardAnimationSequencer    | DiscardAnimationSequencer    | ✅ Yes | Extracted to sequencer    |
+| **Blank Tile Swap**      | ✓ Animated                   | ✓ Animated                   | ✅ Yes | Completed Dec 18, 2025    |
+| **Event Cleanup**        | ✓ destroy() method           | ✓ destroy() method           | ✅ Yes | Completed in Section 5.1  |
+| **Audio Manager**        | audioManager.js              | MobileAudioManager.js        | ✓ OK   | Both platforms supported  |
+| **Hints Panel**          | HintAnimationManager         | HintsPanel component         | ✓ OK   | Both have implementation  |
+| **Settings UI**          | DesktopSettingsManager       | SettingsSheet component      | ✓ OK   | Both supported            |
+| **Touch Support**        | ✗ Mouse only                 | ✓ Full touch gestures        | ✓ OK   | Appropriate for platforms |
 
 #### Implementation Summary
 

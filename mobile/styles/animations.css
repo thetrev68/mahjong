@@ -1,87 +1,93 @@
 /* ===== Tile Draw Animation (Movement-Based) ===== */
 @keyframes tile-draw {
-    0% {
-        transform: translate3d(var(--start-x, 0px), var(--start-y, 0px), 0) scale(0.3);
-        opacity: 0;
-        filter: blur(2px);
-    }
+  0% {
+    transform: translate3d(var(--start-x, 0px), var(--start-y, 0px), 0)
+      scale(0.3);
+    opacity: 0;
+    filter: blur(2px);
+  }
 
-    60% {
-        transform: translate3d(
-            calc(var(--start-x, 0px) + var(--movement-dx, 0px) * 0.7),
-            calc(var(--start-y, 0px) + var(--movement-dy, 0px) * 0.7),
-            0
-        ) scale(1.1);
-        opacity: 0.8;
-        filter: blur(0px);
-    }
+  60% {
+    transform: translate3d(
+        calc(var(--start-x, 0px) + var(--movement-dx, 0px) * 0.7),
+        calc(var(--start-y, 0px) + var(--movement-dy, 0px) * 0.7),
+        0
+      )
+      scale(1.1);
+    opacity: 0.8;
+    filter: blur(0px);
+  }
 
-    100% {
-        transform: translate3d(var(--end-x, 0px), var(--end-y, 0px), 0) scale(1);
-        opacity: 1;
-        filter: blur(0px);
-    }
+  100% {
+    transform: translate3d(var(--end-x, 0px), var(--end-y, 0px), 0) scale(1);
+    opacity: 1;
+    filter: blur(0px);
+  }
 }
 
 .tile-drawing {
-    animation: tile-draw var(--tile-draw-duration, 300ms) var(--tile-draw-easing, ease-out) forwards;
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
+  animation: tile-draw var(--tile-draw-duration, 300ms)
+    var(--tile-draw-easing, ease-out) forwards;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
 }
 
 /* ===== Enhanced Discard Animations (DiscardAnimationSequencer) ===== */
 
 /* Preparation lift */
 .tile-discarding-prep {
-    animation: tile-discard-prep 100ms ease-out forwards;
+  animation: tile-discard-prep 100ms ease-out forwards;
 }
 
 @keyframes tile-discard-prep {
-    from {
-        transform: translateY(0);
-    }
-    to {
-        transform: translateY(-8px);
-    }
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-8px);
+  }
 }
 
 /* Arc throw animation with rotation */
 .tile-discard-throw {
-    animation: tile-discard-throw var(--duration, 300ms) var(--easing, ease-out) forwards;
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
+  animation: tile-discard-throw var(--duration, 300ms) var(--easing, ease-out)
+    forwards;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
 }
 
 @keyframes tile-discard-throw {
-    0% {
-        transform: translate(0, 0) rotate(0deg);
-        opacity: 1;
-    }
-    50% {
-        transform: translate(var(--mid-x), var(--mid-y)) rotate(calc(var(--rotation, 360deg) * 0.5));
-        opacity: 1;
-    }
-    100% {
-        transform: translate(var(--delta-x), var(--delta-y)) rotate(var(--rotation, 360deg));
-        opacity: 0.9;
-    }
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(var(--mid-x), var(--mid-y))
+      rotate(calc(var(--rotation, 360deg) * 0.5));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--delta-x), var(--delta-y))
+      rotate(var(--rotation, 360deg));
+    opacity: 0.9;
+  }
 }
 
 /* Settle bounce in discard pile */
 .tile-settle-bounce {
-    animation: tile-settle 200ms cubic-bezier(0.5, 1.5, 0.5, 1);
+  animation: tile-settle 200ms cubic-bezier(0.5, 1.5, 0.5, 1);
 }
 
 @keyframes tile-settle {
-    0% {
-        transform: scale(1.1) translateY(-5px);
-    }
-    50% {
-        transform: scale(0.95) translateY(2px);
-    }
-    100% {
-        transform: scale(1) translateY(0);
-    }
+  0% {
+    transform: scale(1.1) translateY(-5px);
+  }
+  50% {
+    transform: scale(0.95) translateY(2px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* Note: Blue glow animation for Charleston/Courtesy received tiles
@@ -90,175 +96,188 @@
 
 /* ===== Tile Claim Animations (Performant) ===== */
 @keyframes claim-pulse-scale {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); } /* Keeps the original scaling effect */
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  } /* Keeps the original scaling effect */
 }
 
 @keyframes claim-pulse-glow {
-    0%, 100% { opacity: 0; }
-    50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .tile-claiming-pulse {
-    position: relative; /* Required for pseudo-element */
-    animation: claim-pulse-scale 500ms ease-in-out;
+  position: relative; /* Required for pseudo-element */
+  animation: claim-pulse-scale 500ms ease-in-out;
 }
 
 .tile-claiming-pulse::after {
-    content: '';
-    position: absolute;
-    top: -5px;
-    left: -5px;
-    right: -5px;
-    bottom: -5px;
-    border-radius: inherit; /* Match tile's border-radius */
-    box-shadow: 0 0 20px rgba(255, 215, 0, 1), 0 0 8px rgba(255, 255, 255, 0.5); /* A richer glow */
-    opacity: 0; /* Animation controls visibility */
-    animation: claim-pulse-glow 500ms ease-in-out;
-    z-index: -1; /* Behind the tile */
-    will-change: opacity;
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: inherit; /* Match tile's border-radius */
+  box-shadow:
+    0 0 20px rgba(255, 215, 0, 1),
+    0 0 8px rgba(255, 255, 255, 0.5); /* A richer glow */
+  opacity: 0; /* Animation controls visibility */
+  animation: claim-pulse-glow 500ms ease-in-out;
+  z-index: -1; /* Behind the tile */
+  will-change: opacity;
 }
 
 @keyframes claim-move {
-    0% {
-        transform: translate3d(var(--start-x, 0px), var(--start-y, 0px), 0) scale(1);
-        opacity: 1;
-        filter: brightness(1);
-    }
+  0% {
+    transform: translate3d(var(--start-x, 0px), var(--start-y, 0px), 0) scale(1);
+    opacity: 1;
+    filter: brightness(1);
+  }
 
-    50% {
-        transform: translate3d(
-            calc(var(--start-x, 0px) + var(--movement-dx, 0px) * 0.5),
-            calc(var(--start-y, 0px) + var(--movement-dy, 0px) * 0.5),
-            0
-        ) scale(1.1);
-        opacity: 0.8;
-        filter: brightness(1.2);
-    }
+  50% {
+    transform: translate3d(
+        calc(var(--start-x, 0px) + var(--movement-dx, 0px) * 0.5),
+        calc(var(--start-y, 0px) + var(--movement-dy, 0px) * 0.5),
+        0
+      )
+      scale(1.1);
+    opacity: 0.8;
+    filter: brightness(1.2);
+  }
 
-    100% {
-        transform: translate3d(var(--target-x, 0px), var(--target-y, 0px), 0) scale(0.9);
-        opacity: 0.6;
-        filter: brightness(0.9);
-    }
+  100% {
+    transform: translate3d(var(--target-x, 0px), var(--target-y, 0px), 0)
+      scale(0.9);
+    opacity: 0.6;
+    filter: brightness(0.9);
+  }
 }
 
 .tile-claiming-move {
-    animation: claim-move var(--tile-claim-duration, 300ms) ease-out forwards;
+  animation: claim-move var(--tile-claim-duration, 300ms) ease-out forwards;
 }
 
 /* ===== Turn Indicator Animations ===== */
 @keyframes turn-start {
-    0% {
-        border-left-width: 0;
-        box-shadow: none;
-    }
+  0% {
+    border-left-width: 0;
+    box-shadow: none;
+  }
 
-    50% {
-        border-left-width: 8px;
-        box-shadow: 0 0 24px rgba(255, 215, 0, 1);
-    }
+  50% {
+    border-left-width: 8px;
+    box-shadow: 0 0 24px rgba(255, 215, 0, 1);
+  }
 
-    100% {
-        border-left-width: 4px;
-        box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
-    }
+  100% {
+    border-left-width: 4px;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+  }
 }
 
 .turn-starting {
-    animation: turn-start 600ms ease-out forwards;
+  animation: turn-start 600ms ease-out forwards;
 }
 
 @keyframes turn-end {
-    0% {
-        border-left-width: 4px;
-        box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
-    }
+  0% {
+    border-left-width: 4px;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+  }
 
-    100% {
-        border-left-width: 0;
-        box-shadow: none;
-    }
+  100% {
+    border-left-width: 0;
+    box-shadow: none;
+  }
 }
 
 .turn-ending {
-    animation: turn-end 300ms ease-in forwards;
+  animation: turn-end 300ms ease-in forwards;
 }
 
 /* ===== Hand Sort Animation ===== */
 @keyframes hand-sort {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
 
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .hand-sorting .mobile-tile {
-    animation: hand-sort 400ms ease-in-out;
+  animation: hand-sort 400ms ease-in-out;
 }
 
 /* ===== Exposure Animation ===== */
 @keyframes tile-expose {
-    0% {
-        transform: translate3d(0, 0, 0) rotate(0deg);
-        opacity: 1;
-    }
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 1;
+  }
 
-    50% {
-        transform: translate3d(0, -40px, 0) rotate(5deg);
-        opacity: 0.8;
-    }
+  50% {
+    transform: translate3d(0, -40px, 0) rotate(5deg);
+    opacity: 0.8;
+  }
 
-    100% {
-        transform: translate3d(var(--target-x, 0px), var(--target-y, 0px), 0) rotate(0deg);
-        opacity: 1;
-    }
+  100% {
+    transform: translate3d(var(--target-x, 0px), var(--target-y, 0px), 0)
+      rotate(0deg);
+    opacity: 1;
+  }
 }
 
 .tile-exposing {
-    animation: tile-expose 300ms ease-out forwards;
+  animation: tile-expose 300ms ease-out forwards;
 }
 
 /* ===== Invalid Action Animation ===== */
 @keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
 
-    0%,
-    100% {
-        transform: translateX(0);
-    }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
 
-    10%,
-    30%,
-    50%,
-    70%,
-    90% {
-        transform: translateX(-5px);
-    }
-
-    20%,
-    40%,
-    60%,
-    80% {
-        transform: translateX(5px);
-    }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
 }
 
 .invalid-action {
-    animation: shake 500ms ease-in-out;
-    border-color: #f44336 !important;
+  animation: shake 500ms ease-in-out;
+  border-color: #f44336 !important;
 }
 
 /* ===== Custom Easing Functions ===== */
 :root {
-    --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    --ease-gentle: cubic-bezier(0.4, 0.0, 0.2, 1);
-    --ease-snappy: cubic-bezier(0.4, 0.0, 1, 1);
+  --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-gentle: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-snappy: cubic-bezier(0.4, 0, 1, 1);
 }
 
 /* ===== Performance Optimization ===== */
@@ -271,223 +290,227 @@
 .tile-exposing,
 .tile-charleston-leaving,
 .tile-charleston-arriving {
-    will-change: transform, opacity, filter;
-    transform: translateZ(0);
-    contain: layout style paint;
+  will-change: transform, opacity, filter;
+  transform: translateZ(0);
+  contain: layout style paint;
 }
 
 .turn-starting,
 .turn-ending {
-    will-change: border-left-width, box-shadow;
-    contain: layout style paint;
+  will-change: border-left-width, box-shadow;
+  contain: layout style paint;
 }
 
 @media (prefers-reduced-motion: reduce) {
-
-    .tile-drawing,
-    .tile-claiming-pulse,
-    .tile-claiming-move,
-    .tile-exposing,
-    .tile-charleston-leaving,
-    .tile-charleston-arriving,
-    .turn-starting,
-    .turn-ending,
-    .hand-sorting .mobile-tile,
-    .invalid-action {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
+  .tile-drawing,
+  .tile-claiming-pulse,
+  .tile-claiming-move,
+  .tile-exposing,
+  .tile-charleston-leaving,
+  .tile-charleston-arriving,
+  .turn-starting,
+  .turn-ending,
+  .hand-sorting .mobile-tile,
+  .invalid-action {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Respect user's reduced-motion preference */
 @media (prefers-reduced-motion: reduce) {
-    /* Instant state changes with minimal visual feedback */
-    .tile-discarding-prep {
-        animation: none;
-        transform: translateY(-2px); /* Minimal lift */
-    }
+  /* Instant state changes with minimal visual feedback */
+  .tile-discarding-prep {
+    animation: none;
+    transform: translateY(-2px); /* Minimal lift */
+  }
 
-    .tile-discard-throw {
-        animation: none;
-        opacity: 0.9; /* Instant fade to final state */
-    }
+  .tile-discard-throw {
+    animation: none;
+    opacity: 0.9; /* Instant fade to final state */
+  }
 
-    .tile-settle-bounce {
-        animation: none;
-        transform: none; /* No bounce, instant settle */
-    }
-    
-    /* Subtle color transition alternative for reduced motion users */
-    .tile-discard-throw {
-        transition: background-color 150ms ease-out;
-        background-color: var(--tile-discard-highlight, #e3f2fd);
-    }
+  .tile-settle-bounce {
+    animation: none;
+    transform: none; /* No bounce, instant settle */
+  }
+
+  /* Subtle color transition alternative for reduced motion users */
+  .tile-discard-throw {
+    transition: background-color 150ms ease-out;
+    background-color: var(--tile-discard-highlight, #e3f2fd);
+  }
 }
 
 /* ===== Charleston Pass/Receive Animations ===== */
 
 /* Pass Out Animation - Tiles leaving hand */
 @keyframes charleston-pass-out {
-    0% {
-        transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
-        opacity: 1;
-    }
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
 
-    30% {
-        transform: translate3d(
-            calc(var(--exit-x, 0px) * 0.3),
-            calc(var(--exit-y, 0px) * 0.3),
-            0
-        ) rotate(5deg) scale(1.05);
-        opacity: 0.9;
-    }
+  30% {
+    transform: translate3d(
+        calc(var(--exit-x, 0px) * 0.3),
+        calc(var(--exit-y, 0px) * 0.3),
+        0
+      )
+      rotate(5deg) scale(1.05);
+    opacity: 0.9;
+  }
 
-    100% {
-        transform: translate3d(var(--exit-x, 0px), var(--exit-y, 0px), 0)
-                   rotate(15deg) scale(0.5);
-        opacity: 0;
-    }
+  100% {
+    transform: translate3d(var(--exit-x, 0px), var(--exit-y, 0px), 0)
+      rotate(15deg) scale(0.5);
+    opacity: 0;
+  }
 }
 
 .tile-charleston-leaving {
-    animation: charleston-pass-out 600ms ease-in-out forwards;
-    will-change: transform, opacity;
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
+  animation: charleston-pass-out 600ms ease-in-out forwards;
+  will-change: transform, opacity;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
 }
 
 /* Receive Animation - Tiles arriving in hand */
 @keyframes charleston-receive {
-    0% {
-        transform: translate3d(var(--entry-x, 0px), var(--entry-y, 0px), 0)
-                   rotate(-15deg) scale(0.5);
-        opacity: 0;
-    }
+  0% {
+    transform: translate3d(var(--entry-x, 0px), var(--entry-y, 0px), 0)
+      rotate(-15deg) scale(0.5);
+    opacity: 0;
+  }
 
-    70% {
-        transform: translate3d(
-            calc(var(--entry-x, 0px) * 0.3),
-            calc(var(--entry-y, 0px) * 0.3),
-            0
-        ) rotate(-5deg) scale(1.05);
-        opacity: 0.8;
-    }
+  70% {
+    transform: translate3d(
+        calc(var(--entry-x, 0px) * 0.3),
+        calc(var(--entry-y, 0px) * 0.3),
+        0
+      )
+      rotate(-5deg) scale(1.05);
+    opacity: 0.8;
+  }
 
-    100% {
-        transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
-        opacity: 1;
-    }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
 }
 
 .tile-charleston-arriving {
-    animation: charleston-receive 600ms ease-out forwards;
-    will-change: transform, opacity;
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
+  animation: charleston-receive 600ms ease-out forwards;
+  will-change: transform, opacity;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
 }
 
 /* ===== Home Page Tiles Animation ===== */
 .home-page-tiles-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 10;
-    pointer-events: none;
-    overflow: hidden; /* Clip tiles at screen edges - funnel effect */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  pointer-events: none;
+  overflow: hidden; /* Clip tiles at screen edges - funnel effect */
 }
 
 .home-page-tile {
-    position: absolute;
-    will-change: transform;
-    transform: translateZ(0);
-    /* Force GPU acceleration */
-    /* Transition is set dynamically in JavaScript for precise control */
+  position: absolute;
+  will-change: transform;
+  transform: translateZ(0);
+  /* Force GPU acceleration */
+  /* Transition is set dynamically in JavaScript for precise control */
 }
 
 /* ===== Tile Deal Animation (for initial dealing sequence) ===== */
 @keyframes tile-deal {
-    0% {
-        transform: translate3d(var(--start-x, 0px), var(--start-y, 0px), 0) scale(0.5);
-        opacity: 0;
-    }
+  0% {
+    transform: translate3d(var(--start-x, 0px), var(--start-y, 0px), 0)
+      scale(0.5);
+    opacity: 0;
+  }
 
-    70% {
-        transform: translate3d(
-            calc(var(--start-x, 0px) + var(--movement-dx, 0px) * 0.8),
-            calc(var(--start-y, 0px) + var(--movement-dy, 0px) * 0.8),
-            0
-        ) scale(1.05);
-        opacity: 0.9;
-    }
+  70% {
+    transform: translate3d(
+        calc(var(--start-x, 0px) + var(--movement-dx, 0px) * 0.8),
+        calc(var(--start-y, 0px) + var(--movement-dy, 0px) * 0.8),
+        0
+      )
+      scale(1.05);
+    opacity: 0.9;
+  }
 
-    100% {
-        transform: translate3d(var(--end-x, 0px), var(--end-y, 0px), 0) scale(1);
-        opacity: 1;
-    }
+  100% {
+    transform: translate3d(var(--end-x, 0px), var(--end-y, 0px), 0) scale(1);
+    opacity: 1;
+  }
 }
 
 .tile-dealing {
-    animation: tile-deal var(--tile-deal-duration, 400ms) var(--tile-deal-easing, ease-out) forwards;
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
+  animation: tile-deal var(--tile-deal-duration, 400ms)
+    var(--tile-deal-easing, ease-out) forwards;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
 }
 
 /* ===== Opponent Tiles Fade Out (after dealing round completes) ===== */
 @keyframes tile-fade-out {
-    0% {
-        opacity: 1;
-        transform: scale(1);
-    }
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
 
-    100% {
-        opacity: 0;
-        transform: scale(0.8);
-    }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
 }
 
 .tile-fading-out {
-    animation: tile-fade-out 300ms ease-in forwards;
+  animation: tile-fade-out 300ms ease-in forwards;
 }
 
 /* ===== Initial Deal Tile Reveal Animation ===== */
 
 /* Face-down tile state (show back of tile) */
 .tile--face-down {
-    background-image: url('../../pwa/assets/back.png') !important;
-    background-size: cover !important;
-    background-position: center !important;
+  background-image: url("../../pwa/assets/back.png") !important;
+  background-size: cover !important;
+  background-position: center !important;
 }
 
 /* Reveal animation (flip from back to face) */
 .tile--revealing {
-    animation: tile-reveal 500ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  animation: tile-reveal 500ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes tile-reveal {
-    0% {
-        transform: scale(0.95) rotateY(0deg);
-    }
-    50% {
-        transform: scale(1.05) rotateY(90deg);
-    }
-    100% {
-        transform: scale(1) rotateY(0deg);
-    }
+  0% {
+    transform: scale(0.95) rotateY(0deg);
+  }
+  50% {
+    transform: scale(1.05) rotateY(90deg);
+  }
+  100% {
+    transform: scale(1) rotateY(0deg);
+  }
 }
 
 /* Add tile-revealing to performance optimization list */
 .tile--revealing {
-    will-change: transform, opacity, filter;
-    transform: translateZ(0);
-    contain: layout style paint;
+  will-change: transform, opacity, filter;
+  transform: translateZ(0);
+  contain: layout style paint;
 }
 
 /* Reduced motion support for dealing animation */
 @media (prefers-reduced-motion: reduce) {
-    .tile--revealing {
-        animation-duration: 50ms !important;
-    }
+  .tile--revealing {
+    animation-duration: 50ms !important;
+  }
 }

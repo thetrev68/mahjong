@@ -308,8 +308,7 @@ class SettingsSheet {
         document.getElementById("mobile-sfx-mute")?.checked ??
         SettingsManager.getDefault("sfxMuted"),
 
-      textMode:
-        document.getElementById("mobile-text-mode")?.checked ?? false,
+      textMode: document.getElementById("mobile-text-mode")?.checked ?? false,
 
       trainingMode:
         document.getElementById("mobile-training-mode")?.checked ??
@@ -358,7 +357,7 @@ class SettingsSheet {
     }
 
     // Clear existing options except the first one
-    handSelect.innerHTML = "<option value=\"\">Select a hand...</option>";
+    handSelect.innerHTML = '<option value="">Select a hand...</option>';
 
     // Add hand options from card
     for (const group of card.validHandGroups) {

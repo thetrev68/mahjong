@@ -55,7 +55,7 @@ export class AssetErrorDetector {
         this.testImage = null;
 
         // Notify all registered callbacks
-        this.errorCallbacks.forEach(callback => {
+        this.errorCallbacks.forEach((callback) => {
           try {
             callback("tiles.png", tilesPath);
           } catch (err) {

@@ -96,8 +96,8 @@ test.describe("Phase 0: Testing Framework Setup", () => {
         candidates.map((url) =>
           fetch(url)
             .then((response) => response.ok)
-            .catch(() => false)
-        )
+            .catch(() => false),
+        ),
       ).then((results) => results.some((ok) => ok));
     }, TILE_JSON_CANDIDATES);
 

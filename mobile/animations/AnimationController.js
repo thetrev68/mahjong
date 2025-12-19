@@ -415,10 +415,16 @@ export class AnimationController {
 
         // Use provided target or calculate from hand container
         const handContainer = document.getElementById("hand-area");
-        const actualHandTargetPos = handTargetPos ||
-          (handContainer ? getElementCenterPosition(handContainer) : discardStartPos);
+        const actualHandTargetPos =
+          handTargetPos ||
+          (handContainer
+            ? getElementCenterPosition(handContainer)
+            : discardStartPos);
 
-        const discardMovement = calculateMovement(discardStartPos, actualHandTargetPos);
+        const discardMovement = calculateMovement(
+          discardStartPos,
+          actualHandTargetPos,
+        );
 
         const discardCssVars = {
           "--start-x": toPx(discardStartPos.x),
