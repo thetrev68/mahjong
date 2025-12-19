@@ -5,11 +5,11 @@ name: "CodeQL Config for Mahjong"
 
 # Paths to exclude from all queries
 paths-ignore:
-  - dist/              # Build output
-  - node_modules/      # Dependencies
-  - test-results/      # Playwright test results
+  - dist/ # Build output
+  - node_modules/ # Dependencies
+  - test-results/ # Playwright test results
   - playwright-report/ # Test reports
-  - coverage/          # Code coverage
-  - .serena/           # AI assistant cache
-  - .claude/           # AI assistant cache
-  - .kilocode/         # AI assistant cache
+  - coverage/ # Code coverage
+  - .serena/ # AI assistant cache
+  - .claude/ # AI assistant cache
+  - .kilocode/ # AI assistant cache

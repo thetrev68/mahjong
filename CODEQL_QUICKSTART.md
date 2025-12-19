@@ -5,6 +5,7 @@
 Your setup is **already 90% complete**! Here's what's left:
 
 ### ✅ Already Done
+
 - CodeQL CLI installed at `C:\Tools\codeql` (global, not in repo)
 - `.gitignore` configured to exclude CodeQL artifacts
 - Local VSCode settings created (`.vscode/settings.json`)
@@ -61,7 +62,6 @@ Your setup is **already 90% complete**! Here's what's left:
 3. **View Results**:
 
    After running queries, you can view results in several ways:
-
    - **HTML Report**: Open `codeql-report.html` in your browser (auto-generated)
    - **Command Line**: Run `node parse-sarif.cjs` for a text summary
    - **SARIF Viewer Extension**: Install "SARIF Viewer" extension to view `results.sarif` in VSCode
@@ -78,6 +78,7 @@ For each repo you want to analyze:
    - Add to `.gitignore`: `codeql-db` and `.vscode/settings.json`
 
 2. Create database in that repo:
+
    ```bash
    cd /path/to/other/repo
    C:\Tools\codeql\codeql.exe database create codeql-db --language=javascript
@@ -86,6 +87,7 @@ For each repo you want to analyze:
 ## What Won't Upload to GitHub
 
 These are all in `.gitignore`:
+
 - `codeql-db/` - Your analysis database (large, local-only)
 - `/tools/codeql/` - Any downloaded CLI (you have global install)
 - `.vscode/settings.json` - Your machine-specific paths
@@ -142,8 +144,8 @@ These are all in `.gitignore`:
 ## Getting Help
 
 - Full setup details: See [CODEQL_SETUP.md](CODEQL_SETUP.md)
-- Official docs: https://docs.github.com/en/code-security/codeql-for-vs-code
-- Extension page: https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-codeql
+- Official docs: <https://docs.github.com/en/code-security/codeql-for-vs-code>
+- Extension page: <https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-codeql>
 
 ## Common Commands
 
@@ -171,6 +173,7 @@ If you want to type just `codeql` instead of the full path:
 4. Restart terminals
 
 Then you can use:
+
 ```bash
 codeql version
 codeql database create codeql-db --language=javascript

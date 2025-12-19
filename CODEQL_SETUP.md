@@ -12,12 +12,15 @@
 ## What's Configured
 
 ### Global Installation
+
 - **Location**: `C:\Tools\codeql\`
 - **Executable**: `C:\Tools\codeql\codeql.exe`
 - **Languages Available**: JavaScript, TypeScript, Python, Java, C++, C#, Go, Ruby, Rust, Swift, and more
 
 ### Repository Configuration
+
 Your `.gitignore` already excludes:
+
 - `/tools/codeql/` - Any locally downloaded CLI
 - `codeql-db` - Local database files
 - `.vscode/settings.json` - Machine-specific settings (won't be committed)
@@ -29,6 +32,7 @@ Your `.gitignore` already excludes:
 You need to tell the VSCode extension to use your global CodeQL installation instead of downloading its own copy.
 
 **Option A: Via VSCode UI** (Recommended)
+
 1. Open VSCode
 2. Go to Extensions (Ctrl+Shift+X)
 3. Find "CodeQL" extension and click the gear icon
@@ -37,8 +41,10 @@ You need to tell the VSCode extension to use your global CodeQL installation ins
 6. Set `CodeQL › Cli: Executable Path` to: `C:\Tools\codeql\codeql.exe`
 
 **Option B: Via Settings JSON**
+
 1. Create `.vscode/settings.json` in this repo (already in `.gitignore`)
 2. Add this content (or use the file created below):
+
 ```json
 {
   "codeQL.cli.executablePath": "C:\\Tools\\codeql\\codeql.exe"
@@ -55,6 +61,7 @@ This allows you to run `codeql` commands from any terminal:
 4. Restart terminals/VSCode to pick up the change
 
 **Verify it worked:**
+
 ```bash
 codeql version
 ```
@@ -64,6 +71,7 @@ codeql version
 Once the extension is configured, you can create a database to analyze your code:
 
 **Option A: Via VSCode Extension**
+
 1. Open Command Palette (Ctrl+Shift+P)
 2. Type "CodeQL: Create Database"
 3. Select your workspace folder
@@ -71,6 +79,7 @@ Once the extension is configured, you can create a database to analyze your code
 5. Wait for database creation to complete
 
 **Option B: Via Command Line** (if CodeQL is in PATH)
+
 ```bash
 codeql database create codeql-db --language=javascript
 ```
@@ -80,11 +89,13 @@ codeql database create codeql-db --language=javascript
 ### 4. Where to Store Databases
 
 **Recommended approach:**
+
 - Store databases locally in each repository as `codeql-db/` (already ignored)
 - This keeps databases isolated per project
 - Databases can be large (80+ MB), so keeping them local is fine
 
 **Alternative approach:**
+
 - Create a global databases folder like `C:\CodeQL\Databases\`
 - Store databases as `C:\CodeQL\Databases\mahjong\`
 - Configure extension setting `CodeQL › Cli: Database Path` to point there
@@ -96,6 +107,7 @@ For your use case (analyzing multiple repos), I recommend the **local approach**
 To use CodeQL in your other local repositories:
 
 1. **Copy `.gitignore` entries** to each repo:
+
    ```gitignore
    # CodeQL artifacts
    codeql-db
@@ -103,6 +115,7 @@ To use CodeQL in your other local repositories:
    ```
 
 2. **Create `.vscode/settings.json`** in each repo:
+
    ```json
    {
      "codeQL.cli.executablePath": "C:\\Tools\\codeql\\codeql.exe"
@@ -120,22 +133,26 @@ Once you have a database:
 3. Or explore the CodeQL extension's query packs in the sidebar
 
 ### Useful Query Packs
+
 - `codeql/javascript-queries` - Standard JavaScript/TypeScript security queries
 - `codeql/javascript-all` - All available JavaScript queries
 
 ## Troubleshooting
 
 ### Extension Not Finding CLI
+
 - Check the CodeQL output panel in VSCode (View → Output → CodeQL)
 - Verify the executable path is correct
 - Try absolute path with escaped backslashes: `C:\\Tools\\codeql\\codeql.exe`
 
 ### Database Creation Fails
+
 - Ensure your project has a valid package.json (already exists ✓)
 - Check that Node.js dependencies are installed: `npm install`
 - Look at CodeQL logs for specific errors
 
 ### Database Too Large
+
 - CodeQL databases can be 50-100MB or larger
 - They include extracted code representations for analysis
 - This is normal and expected
