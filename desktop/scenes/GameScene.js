@@ -718,12 +718,12 @@ class GameScene extends Phaser.Scene {
     this.gameController.settings = {
       ...this.gameController.settings,
       skipCharleston:
-        window.settingsManager.getSetting("skipCharleston", false) || false,
+        window.settingsManager.get("skipCharleston") ?? false,
       trainingMode:
-        window.settingsManager.getSetting("trainingMode", false) || false,
-      trainingHand: window.settingsManager.getSetting("trainingHand", "") || "",
+        window.settingsManager.get("trainingMode") ?? false,
+      trainingHand: window.settingsManager.get("trainingHand") ?? "",
       trainingTileCount:
-        window.settingsManager.getSetting("trainingTileCount", 13) || 13,
+        window.settingsManager.get("trainingTileCount") ?? 13,
     };
   }
 
