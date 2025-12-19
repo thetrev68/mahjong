@@ -154,33 +154,62 @@ export class GameLoopManager {
     const player =
       this.gameController.players[this.gameController.currentPlayer];
 
-    let tileToDiscard;
+    let tileToDiscard = await this.getPlayerDiscardTile(player);
+    tileToDiscard = this.validateAndRecoverDiscard(tileToDiscard, player);
+
+    await this.performDiscard(player, tileToDiscard);
+  }
+
+  /**
+   * Get the discard tile selection from player (human or AI)
+   * @param {PlayerData} player
+   * @returns {Promise<TileData>}
+   */
+  async getPlayerDiscardTile(player) {
     if (player.isHuman) {
       // Prompt human player to select tile
-      tileToDiscard = await this.gameController.promptUI("CHOOSE_DISCARD", {
+      const result = await this.gameController.promptUI("CHOOSE_DISCARD", {
         hand: player.hand.toJSON(),
       });
+      return result;
     } else {
       // AI chooses discard
-      tileToDiscard = await this.gameController.aiEngine.chooseDiscard(
+      const result = await this.gameController.aiEngine.chooseDiscard(
         player.hand,
       );
+      return result;
     }
+  }
 
+  /**
+   * Validate the discard selection and perform recovery if needed
+   * @param {TileData} tileToDiscard
+   * @param {PlayerData} player
+   * @returns {TileData}
+   */
+  validateAndRecoverDiscard(tileToDiscard, player) {
     if (!tileToDiscard) {
       // Attempt recovery by picking first available tile
       if (player.hand.tiles.length > 0) {
         debugWarn(
           `chooseDiscard: No tile returned for player ${this.gameController.currentPlayer}, falling back to first tile.`,
         );
-        tileToDiscard = player.hand.tiles[0];
+        return player.hand.tiles[0];
       } else {
         throw new StateError(
           `chooseDiscard: Player ${this.gameController.currentPlayer} hand is empty, cannot discard.`,
         );
       }
     }
+    return tileToDiscard;
+  }
 
+  /**
+   * Execute the discard action: remove from hand, add to pile, emit events
+   * @param {PlayerData} player
+   * @param {TileData} tileToDiscard
+   */
+  async performDiscard(player, tileToDiscard) {
     // Capture tile index before removing from hand (needed for animation)
     const tileIndex = player.hand.tiles.findIndex((t) =>
       t.isSameTile(tileToDiscard),
@@ -197,6 +226,18 @@ export class GameLoopManager {
     // Add to discard pile
     this.gameController.discards.push(tileToDiscard);
 
+    this.emitDiscardEvents(player, tileToDiscard, tileIndex);
+
+    await this.gameController.sleep(ANIMATION_TIMINGS.DISCARD_COMPLETE_DELAY);
+  }
+
+  /**
+   * Emit discard related events
+   * @param {PlayerData} player
+   * @param {TileData} tileToDiscard
+   * @param {number} tileIndex
+   */
+  emitDiscardEvents(player, tileToDiscard, tileIndex) {
     // Emit rich tile discarded event with animation
     // Pass complete TileData including index
     const tileData = {
@@ -231,8 +272,6 @@ export class GameLoopManager {
       player.hand.toJSON(),
     );
     this.gameController.emit("HAND_UPDATED", handEvent);
-
-    await this.gameController.sleep(ANIMATION_TIMINGS.DISCARD_COMPLETE_DELAY);
   }
 
   /**
