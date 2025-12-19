@@ -1,6 +1,6 @@
 import { PLAYER } from "../../constants.js";
 import { debugPrint, debugWarn } from "../../utils.js";
-import { GameEvents } from "../events/GameEvents.js";
+import * as GameEvents from "../events/GameEvents.js";
 
 /**
  * Dealing sequence: 4-4-4-4, 4-4-4-4, 4-4-4-4, 1-1-1-1, then 1 extra for dealer
