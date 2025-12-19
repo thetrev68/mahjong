@@ -2,7 +2,7 @@
 import * as Phaser from "phaser";
 import { TableManager } from "../managers/TableManager.js";
 import { HomePageTileManager } from "../managers/HomePageTileManager.js";
-import AudioManager from "../../audioManager.js";
+import AudioManager from "../managers/AudioManager.js";
 import { GameController } from "../../core/GameController.js";
 import { PhaserAdapter } from "../adapters/PhaserAdapter.js";
 import { HintAnimationManager } from "../managers/HintAnimationManager.js";

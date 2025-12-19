@@ -1,7 +1,8 @@
-// audioManager.js - Audio management for American Mahjong
+// AudioManager.js - Audio management for American Mahjong (Desktop/Phaser)
 // Handles background music and sound effects with separate volume controls
+// Platform-specific implementation using Phaser's sound API
 
-import SettingsManager from "./shared/SettingsManager.js";
+import SettingsManager from "../../shared/SettingsManager.js";
 
 export default class AudioManager {
   constructor(scene) {
