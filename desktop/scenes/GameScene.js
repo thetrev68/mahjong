@@ -13,6 +13,7 @@ import {
 } from "../../constants.js";
 import { AIEngine } from "../../core/AIEngine.js";
 import { Card } from "../../core/card/card.js";
+import SettingsManager from "../../shared/SettingsManager.js";
 
 class GameScene extends Phaser.Scene {
   constructor() {
@@ -710,20 +711,20 @@ class GameScene extends Phaser.Scene {
    * Called before starting each new game to pick up setting changes
    */
   updateGameControllerSettings() {
-    if (!this.gameController || !window.settingsManager) {
+    if (!this.gameController) {
       return;
     }
 
-    // Update settings with current values from SettingsManager
+    // Update settings with current values from SettingsManager (static methods)
     this.gameController.settings = {
       ...this.gameController.settings,
       skipCharleston:
-        window.settingsManager.get("skipCharleston") ?? false,
+        SettingsManager.get("skipCharleston") ?? false,
       trainingMode:
-        window.settingsManager.get("trainingMode") ?? false,
-      trainingHand: window.settingsManager.get("trainingHand") ?? "",
+        SettingsManager.get("trainingMode") ?? false,
+      trainingHand: SettingsManager.get("trainingHand") ?? "",
       trainingTileCount:
-        window.settingsManager.get("trainingTileCount") ?? 13,
+        SettingsManager.get("trainingTileCount") ?? 13,
     };
   }
 
