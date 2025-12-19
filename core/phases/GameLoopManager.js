@@ -585,26 +585,84 @@ export class GameLoopManager {
    */
   exposeTiles(playerIndex, exposureType, claimedTile) {
     const player = this.gameController.players[playerIndex];
-
-    // Find matching tiles and jokers in hand (excluding the claimed tile itself)
-    const matchingTiles = player.hand.tiles.filter(
-      (t) => t.equals(claimedTile) && !t.isSameTile(claimedTile),
+    const tilesToExpose = this.buildExposureTiles(
+      player,
+      exposureType,
+      claimedTile,
     );
-    const jokerTiles = player.hand.tiles.filter((t) => t.isJoker());
+
+    if (tilesToExpose.length === 0) {
+      return;
+    }
+
+    this.commitExposure(player, tilesToExpose, exposureType);
+    this.emitExposureEvents(playerIndex, tilesToExpose, exposureType);
+  }
+
+  /**
+   * Build the array of tiles to be exposed (matches + jokers + claimed)
+   * @param {PlayerData} player
+   * @param {string} exposureType
+   * @param {TileData} claimedTile
+   * @returns {TileData[]}
+   */
+  buildExposureTiles(player, exposureType, claimedTile) {
+    const { matchingTiles, jokerTiles } = this.findTilesForExposure(
+      player,
+      claimedTile,
+    );
 
     const requiredCount =
       exposureType === "Pung" ? 2 : exposureType === "Kong" ? 3 : 4;
+
     const totalAvailable = matchingTiles.length + jokerTiles.length;
 
     if (totalAvailable < requiredCount) {
       console.warn("Exposure attempted without enough tiles", {
-        playerIndex,
+        playerIndex: this.gameController.players.indexOf(player),
         exposureType,
         claimedTile,
       });
-      return;
+      return [];
     }
 
+    return this.constructExposureArray(
+      matchingTiles,
+      jokerTiles,
+      requiredCount,
+      claimedTile,
+    );
+  }
+
+  /**
+   * Find matching tiles and jokers in player's hand
+   * @param {PlayerData} player
+   * @param {TileData} claimedTile
+   * @returns {{matchingTiles: TileData[], jokerTiles: TileData[]}}
+   */
+  findTilesForExposure(player, claimedTile) {
+    return {
+      matchingTiles: player.hand.tiles.filter(
+        (t) => t.equals(claimedTile) && !t.isSameTile(claimedTile),
+      ),
+      jokerTiles: player.hand.tiles.filter((t) => t.isJoker()),
+    };
+  }
+
+  /**
+   * Construct the final array of tiles for the exposure
+   * @param {TileData[]} matchingTiles
+   * @param {TileData[]} jokerTiles
+   * @param {number} requiredCount
+   * @param {TileData} claimedTile
+   * @returns {TileData[]}
+   */
+  constructExposureArray(
+    matchingTiles,
+    jokerTiles,
+    requiredCount,
+    claimedTile,
+  ) {
     // Take matching tiles first
     const tilesToExpose = matchingTiles.slice(0, requiredCount);
 
@@ -615,16 +673,36 @@ export class GameLoopManager {
       tilesToExpose.push(...jokersToUse);
     }
 
+    // Include claimed tile in exposure
+    tilesToExpose.push(claimedTile);
+
+    return tilesToExpose;
+  }
+
+  /**
+   * Remove tiles from hand and add to exposures
+   * @param {PlayerData} player
+   * @param {TileData[]} tilesToExpose
+   * @param {string} exposureType
+   */
+  commitExposure(player, tilesToExpose, exposureType) {
     // Remove from hand
     tilesToExpose.forEach((tile) => {
       player.hand.removeTile(tile);
     });
 
-    // Include claimed tile in exposure
-    tilesToExpose.push(claimedTile);
-
     // Add to exposures
     player.hand.addExposure(tilesToExpose, exposureType);
+  }
+
+  /**
+   * Emit events for exposure
+   * @param {number} playerIndex
+   * @param {TileData[]} tilesToExpose
+   * @param {string} exposureType
+   */
+  emitExposureEvents(playerIndex, tilesToExpose, exposureType) {
+    const player = this.gameController.players[playerIndex];
 
     // Emit event
     const exposedEvent = GameEvents.createTilesExposedEvent(
