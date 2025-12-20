@@ -8,7 +8,7 @@
  * - No longer depends on gameLogic stub
  */
 
-import { debugPrint, printHint } from "../../utils.js";
+import { debugPrint, printHint } from "../../shared/DebugUtils.js";
 import { PLAYER, SUIT, VNUMBER } from "../../shared/GameConstants.js";
 import { TileData } from "../../core/models/TileData.js";
 import { renderPatternVariation } from "../../shared/GameDisplayUtils.js";

@@ -1,4 +1,4 @@
-import { debugPrint } from "../../../utils.js";
+import { debugPrint } from "../../../shared/DebugUtils.js";
 import { TileData } from "../../models/TileData.js";
 import { CardHand as Hand } from "../CardHand.js";
 

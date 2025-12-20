@@ -7,7 +7,7 @@ import {
   WINDOW_WIDTH,
   WINDOW_HEIGHT,
 } from "../config/UIConstants.js";
-import { debugPrint } from "../../utils.js";
+import { debugPrint } from "../../shared/DebugUtils.js";
 import { PLAYER_LAYOUT } from "../config/playerLayout.js";
 
 /**

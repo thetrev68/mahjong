@@ -23,7 +23,7 @@ import {
   printInfo,
   debugPrint,
   debugError,
-} from "../../utils.js";
+} from "../../shared/DebugUtils.js";
 import { PLAYER_LAYOUT } from "../config/playerLayout.js";
 import { TileManager } from "../managers/TileManager.js";
 import { ButtonManager } from "../managers/ButtonManager.js";

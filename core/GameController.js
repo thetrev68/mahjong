@@ -33,7 +33,7 @@ import { PlayerData } from "./models/PlayerData.js";
 import { TileData } from "./models/TileData.js";
 import * as GameEvents from "./events/GameEvents.js";
 import { gTileGroups } from "./tileDefinitions.js";
-import { debugWarn } from "../utils.js";
+import { debugWarn } from "../shared/DebugUtils.js";
 import { StateError } from "./errors/GameErrors.js";
 import { DealingManager } from "./phases/DealingManager.js";
 import { CharlestonManager } from "./phases/CharlestonManager.js";

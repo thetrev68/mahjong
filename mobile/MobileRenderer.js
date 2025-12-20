@@ -17,7 +17,7 @@ import { PLAYER, STATE, SUIT } from "../shared/GameConstants.js";
 import { TileData } from "../core/models/TileData.js";
 import { HandData } from "../core/models/HandData.js";
 import { getElementCenterPosition } from "./utils/positionUtils.js";
-import { debugPrint } from "../utils.js";
+import { debugPrint } from "../shared/DebugUtils.js";
 import { BaseAdapter } from "../shared/BaseAdapter.js";
 
 const HUMAN_PLAYER = PLAYER.BOTTOM ?? 0;

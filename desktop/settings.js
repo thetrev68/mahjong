@@ -1,8 +1,8 @@
-import { debugPrint } from "./utils.js";
-import SettingsManager from "./shared/SettingsManager.js";
-import { SettingsUI } from "./desktop/managers/SettingsUI.js";
-import { AudioControlsManager } from "./shared/AudioControlsManager.js";
-import { SettingsController } from "./desktop/managers/SettingsController.js";
+import { debugPrint } from "../shared/DebugUtils.js";
+import SettingsManager from "../shared/SettingsManager.js";
+import { SettingsUI } from "./managers/SettingsUI.js";
+import { AudioControlsManager } from "../shared/AudioControlsManager.js";
+import { SettingsController } from "./managers/SettingsController.js";
 
 /**
  * Desktop Settings Entry Point

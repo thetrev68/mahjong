@@ -1,5 +1,5 @@
 import { PLAYER } from "../../shared/GameConstants.js";
-import { debugPrint, debugWarn } from "../../utils.js";
+import { debugPrint, debugWarn } from "../../shared/DebugUtils.js";
 import * as GameEvents from "../events/GameEvents.js";
 
 /**

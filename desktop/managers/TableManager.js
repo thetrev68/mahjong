@@ -1,4 +1,4 @@
-import { printMessage } from "../../utils.js";
+import { printMessage } from "../../shared/DebugUtils.js";
 import { getTotalTileCount } from "../../shared/GameUtils.js";
 import { Wall, Discards } from "../gameObjects/PhaserTileSprites.js";
 

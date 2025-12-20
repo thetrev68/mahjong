@@ -2,7 +2,7 @@ import { AnimationSequencer } from "./AnimationSequencer.js";
 import { TileData } from "../../core/models/TileData.js";
 import { PLAYER } from "../../shared/GameConstants.js";
 import { PLAYER_LAYOUT } from "../config/playerLayout.js";
-import { debugError } from "../../utils.js";
+import { debugError } from "../../shared/DebugUtils.js";
 
 /**
  * DealingAnimationSequencer

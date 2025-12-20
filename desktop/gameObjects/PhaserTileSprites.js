@@ -23,7 +23,7 @@ import {
   WINDOW_HEIGHT,
 } from "../config/UIConstants.js";
 import { getTotalTileCount } from "../../shared/GameUtils.js";
-import { debugPrint } from "../../utils.js";
+import { debugPrint } from "../../shared/DebugUtils.js";
 
 export const gTileGroups = [
   {

@@ -1,4 +1,4 @@
-import { debugPrint } from "../utils.js";
+import { debugPrint } from "./DebugUtils.js";
 import SettingsManager from "./SettingsManager.js";
 
 /**

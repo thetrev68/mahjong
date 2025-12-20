@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 
 import { STATE } from "../../shared/GameConstants.js";
-import { debugPrint } from "../../utils.js";
+import { debugPrint } from "../../shared/DebugUtils.js";
 import * as GameEvents from "../events/GameEvents.js";
 
 /**

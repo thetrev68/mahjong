@@ -10,7 +10,7 @@
  * Subclasses (e.g., CharlestonAnimationSequencer) extend this to implement
  * specific animation flows while leveraging common functionality.
  */
-import { debugPrint } from "../../utils.js";
+import { debugPrint } from "../../shared/DebugUtils.js";
 
 export class AnimationSequencer {
   /**

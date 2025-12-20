@@ -1,6 +1,6 @@
 import { PLAYER, SUIT } from "../../shared/GameConstants.js";
 import { TileData } from "../../core/models/TileData.js";
-import { printInfo, printMessage } from "../../utils.js";
+import { printInfo, printMessage } from "../../shared/DebugUtils.js";
 
 /**
  * BlankSwapManager - Handles blank tile exchange interactions on desktop.

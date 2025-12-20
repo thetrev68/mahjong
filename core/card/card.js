@@ -1,4 +1,4 @@
-import { debugPrint, debugTrace, gdebug } from "../../utils.js";
+import { debugPrint, debugTrace, gdebug } from "../../shared/DebugUtils.js";
 import { TileData } from "../models/TileData.js";
 import { CardHand } from "./CardHand.js";
 import { SUIT, VNUMBER } from "../../shared/GameConstants.js";

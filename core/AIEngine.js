@@ -4,7 +4,7 @@
  * Refactored from gameAI.js to enable cross-platform use (desktop + mobile)
  */
 
-import { debugPrint } from "../utils.js";
+import { debugPrint } from "../shared/DebugUtils.js";
 import { PLAYER_OPTION, SUIT, VNUMBER } from "../shared/GameConstants.js";
 import { TileData } from "./models/TileData.js";
 

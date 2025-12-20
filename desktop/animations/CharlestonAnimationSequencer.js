@@ -1,7 +1,7 @@
 import { AnimationSequencer } from "./AnimationSequencer.js";
 import { TileData } from "../../core/models/TileData.js";
 import { PLAYER } from "../../shared/GameConstants.js";
-import { debugPrint } from "../../utils.js";
+import { debugPrint } from "../../shared/DebugUtils.js";
 
 /**
  * CharlestonAnimationSequencer - Orchestrates Charleston tile pass/receive animations

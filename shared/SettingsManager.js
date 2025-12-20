@@ -5,7 +5,7 @@
  * Platform-agnostic (works on desktop and mobile).
  */
 
-import { debugPrint } from "../utils.js";
+import { debugPrint } from "./DebugUtils.js";
 
 const DEFAULTS = {
   // Game settings
