@@ -1,4 +1,4 @@
-import("./mobile/renderers/HandEventCoordinator.js")
+import("../../mobile/renderers/HandEventCoordinator.js")
   .then((module) => {
     const { HandEventCoordinator } = module;
 
