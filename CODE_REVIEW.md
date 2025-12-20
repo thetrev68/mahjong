@@ -453,13 +453,13 @@ export const PLAYER_POSITIONS = {
 
 **Refactoring Achievement:**
 
-1.  **Extraction:** Logic moved to `DealingManager`, `CharlestonManager`, `CourtesyManager`, `GameLoopManager`, and `JokerExchangeManager`.
-2.  **Decomposition:** Large methods within managers were further broken down:
-    - `GameLoopManager.chooseDiscard` (86 lines) → Split into 4 methods.
-    - `GameLoopManager.exchangeBlankWithDiscard` (70 lines) → Split into 4 methods.
-    - `GameLoopManager.exposeTiles` (58 lines) → Split into 5 methods.
-    - `CourtesyManager.collectCourtesyTiles` (56 lines) → Split into 4 methods.
-    - `JokerExchangeManager.performExchange` (58 lines) → Split into 2 methods.
+1. **Extraction:** Logic moved to `DealingManager`, `CharlestonManager`, `CourtesyManager`, `GameLoopManager`, and `JokerExchangeManager`.
+2. **Decomposition:** Large methods within managers were further broken down:
+   - `GameLoopManager.chooseDiscard` (86 lines) → Split into 4 methods.
+   - `GameLoopManager.exchangeBlankWithDiscard` (70 lines) → Split into 4 methods.
+   - `GameLoopManager.exposeTiles` (58 lines) → Split into 5 methods.
+   - `CourtesyManager.collectCourtesyTiles` (56 lines) → Split into 4 methods.
+   - `JokerExchangeManager.performExchange` (58 lines) → Split into 2 methods.
 
 #### Recommendations
 
@@ -1478,12 +1478,12 @@ onHandUpdated(data) {
 
 **Changes Made:**
 
-1.  **Created [shared/GameConstants.js](shared/GameConstants.js)**: Unified source for `STATE`, `SUIT`, `PLAYER`, `WIND`, `DRAGON`, etc.
-2.  **Created [shared/AnimationConfig.js](shared/AnimationConfig.js)**: Unified animation timing configuration used by both Phaser and CSS animations.
-3.  **Created [shared/GameUtils.js](shared/GameUtils.js)**: Shared logic like `getTotalTileCount`.
-4.  **Created [desktop/config/UIConstants.js](desktop/config/UIConstants.js)**: Isolated desktop-specific dimensions and coordinates.
-5.  **Moved [shared/GameDisplayUtils.js](shared/GameDisplayUtils.js)**: Moved from root to `shared/` for better organization.
-6.  **Full Migration**: Updated imports in 90+ files across Core, Desktop, Mobile, and Test layers.
+1. **Created [shared/GameConstants.js](shared/GameConstants.js)**: Unified source for `STATE`, `SUIT`, `PLAYER`, `WIND`, `DRAGON`, etc.
+2. **Created [shared/AnimationConfig.js](shared/AnimationConfig.js)**: Unified animation timing configuration used by both Phaser and CSS animations.
+3. **Created [shared/GameUtils.js](shared/GameUtils.js)**: Shared logic like `getTotalTileCount`.
+4. **Created [desktop/config/UIConstants.js](desktop/config/UIConstants.js)**: Isolated desktop-specific dimensions and coordinates.
+5. **Moved [shared/GameDisplayUtils.js](shared/GameDisplayUtils.js)**: Moved from root to `shared/` for better organization.
+6. **Full Migration**: Updated imports in 90+ files across Core, Desktop, Mobile, and Test layers.
 
 #### Opportunities (Previously Identified)
 

@@ -97,10 +97,10 @@ _No changes needed. All methods under 50 lines._
 
 **Refactoring Actions Taken:**
 
-1.  **GameLoopManager.chooseDiscard()** -> Split into 4 focused methods.
-2.  **GameLoopManager.exchangeBlankWithDiscard()** -> Split into 4 focused methods.
-3.  **GameLoopManager.exposeTiles()** -> Split into 5 focused methods.
-4.  **CourtesyManager.collectCourtesyTiles()** -> Split into 4 focused methods.
-5.  **JokerExchangeManager.performExchange()** -> Split into 2 focused methods.
+1. **GameLoopManager.chooseDiscard()** -> Split into 4 focused methods.
+2. **GameLoopManager.exchangeBlankWithDiscard()** -> Split into 4 focused methods.
+3. **GameLoopManager.exposeTiles()** -> Split into 5 focused methods.
+4. **CourtesyManager.collectCourtesyTiles()** -> Split into 4 focused methods.
+5. **JokerExchangeManager.performExchange()** -> Split into 2 focused methods.
 
 The codebase is now significantly more modular, readable, and testable. The "Break Up Long Functions" initiative is considered complete.
