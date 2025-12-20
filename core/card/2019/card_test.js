@@ -17,7 +17,7 @@ export class CardTest {
   test() {
     {
       // FF 2019 1111 1111 (3 suits, kongs 2)
-      const hand = new Hand(false);
+      const hand = new Hand();
       hand.insertHidden(new TileData(SUIT.FLOWER, 0));
       hand.insertHidden(new TileData(SUIT.FLOWER, 0));
 
@@ -44,7 +44,7 @@ export class CardTest {
 
     {
       // 22 000 NEWS 111 88 (1 suit, concealed)
-      const hand = new Hand(false);
+      const hand = new Hand();
 
       hand.insertHidden(new TileData(SUIT.CRACK, 2));
       hand.insertHidden(new TileData(SUIT.CRACK, 2));
@@ -73,7 +73,7 @@ export class CardTest {
 
     {
       // FFFF NNNN DD SSSS (red dragon only)
-      const hand = new Hand(false);
+      const hand = new Hand();
 
       hand.insertHidden(new TileData(SUIT.FLOWER, 0));
       hand.insertHidden(new TileData(SUIT.FLOWER, 0));
@@ -101,7 +101,7 @@ export class CardTest {
 
     {
       // FF 22 44 66 88 22 22 (3 suits, any like even pairs, concealed)
-      const hand = new Hand(false);
+      const hand = new Hand();
 
       hand.insertHidden(new TileData(SUIT.FLOWER, 0));
       hand.insertHidden(new TileData(SUIT.FLOWER, 0));

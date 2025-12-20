@@ -614,7 +614,7 @@ export class AIEngine {
     // Scale threshold based on hand rank
     // If rank is very high (bad hand): increase threshold (more likely to vote YES)
     // If rank is very low (good hand): decrease threshold (more likely to vote NO)
-    let adjustedThreshold = baseThreshold;
+    let adjustedThreshold;
 
     // Thresholds for voting: adjust based on how close we are to winning
     const thresholds = this.config.courtesyThresholds;

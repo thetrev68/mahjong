@@ -41,26 +41,6 @@ export class Card {
     const { validHandGroups } = await import(`./${year}/card${year}.js`);
     this.validHandGroups = validHandGroups;
 
-    // Debug only
-    // eslint-disable-next-line no-constant-condition
-    if (false) {
-      // eslint-disable-next-line no-undef
-      const cardTest = new CardTest(this);
-      cardTest.test();
-    }
-
-    // Debug only
-    // eslint-disable-next-line no-constant-condition
-    if (false) {
-      for (const group of this.validHandGroups) {
-        for (const validHand of group.hands) {
-          const hand = this.generateHand(validHand.description);
-          if (!this.validateHand14(hand)) {
-            debugPrint("ERROR - generateHand produced invalid hand\n");
-          }
-        }
-      }
-    }
   }
 
   /**

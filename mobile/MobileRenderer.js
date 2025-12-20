@@ -755,11 +755,9 @@ export class MobileRenderer extends BaseAdapter {
     }
 
     // Show modal dialog
-    if (title) {
-      new GameEndModal(title, message, () => {
-        // Modal closed - cleanup
-      });
-    }
+    new GameEndModal(title, message, () => {
+      // Modal closed - cleanup
+    });
 
     this.hidePrompt();
     this.resetHandSelection();
@@ -1031,7 +1029,6 @@ export class MobileRenderer extends BaseAdapter {
           "MobileRenderer: No discard element found for claim animation",
         );
         this.discardPile.removeLatestDiscard();
-        removedDiscard = true;
         return;
       }
 
@@ -1042,7 +1039,6 @@ export class MobileRenderer extends BaseAdapter {
       floatingTile = await this._createFloatingTile(data.tile, startPos);
       if (!floatingTile) {
         this.discardPile.removeLatestDiscard();
-        removedDiscard = true;
         return;
       }
 

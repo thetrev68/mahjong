@@ -91,8 +91,6 @@
         console.log("Testing: Animate Discard");
         resetTileState();
         // Animate from middle to top right
-        const startRect = tile.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
         const startPos = { x: 0, y: 0 };
         const targetPos = {
           x: container.offsetWidth / 2 - tile.offsetWidth / 2 - 20,

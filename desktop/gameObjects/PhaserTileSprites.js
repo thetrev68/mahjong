@@ -314,12 +314,6 @@ export class Tile {
     // UPDATE GLOW VISIBILITY
     this.updateGlowPosition();
 
-    // Debug - all tiles face up
-    // eslint-disable-next-line no-constant-condition
-    if (false) {
-      this.sprite.visible = visible;
-      this.spriteBack.visible = false;
-    }
   }
 
   getText() {

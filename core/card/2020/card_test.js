@@ -17,7 +17,7 @@ export class CardTest {
   test() {
     {
       // FF 2020 2222 2222 (3 suits)
-      const hand = new Hand(false);
+      const hand = new Hand();
       hand.insertHidden(new TileData(SUIT.FLOWER, 0));
       hand.insertHidden(new TileData(SUIT.FLOWER, 0));
 
@@ -44,7 +44,7 @@ export class CardTest {
 
     {
       // FFFF 4444 6666 24 (3 suits)
-      const hand = new Hand(false);
+      const hand = new Hand();
 
       hand.insertHidden(new TileData(SUIT.FLOWER, 0));
       hand.insertHidden(new TileData(SUIT.FLOWER, 0));
@@ -72,7 +72,7 @@ export class CardTest {
 
     {
       // FF 2020 NEWS 2020 (any 2 suits, 2s match in each 2020, concealed)
-      const hand = new Hand(false);
+      const hand = new Hand();
 
       hand.insertHidden(new TileData(SUIT.FLOWER, 0));
       hand.insertHidden(new TileData(SUIT.FLOWER, 0));

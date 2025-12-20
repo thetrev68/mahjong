@@ -6,7 +6,7 @@ param(
     [string]$OutputDir = "codeql-results",
     [string]$Format = "sarif-latest",
     [switch]$QuickScan,
-    [switch]$OpenResults =
+    [switch]$OpenResults
 )
 
 Write-Host "🔍 CodeQL Analysis for Mahjong Project" -ForegroundColor Cyan
