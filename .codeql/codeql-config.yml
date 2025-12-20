@@ -1,0 +1,20 @@
+# CodeQL Configuration
+name: "Mahjong CodeQL Config"
+
+paths-ignore:
+  - dist
+  - build
+  - node_modules
+  - playwright-report
+  - test-results
+  - coverage
+  - .archive
+  - "**/*.min.js"
+  - "**/*.bundle.js"
+
+paths:
+  - core
+  - desktop
+  - mobile
+  - shared
+  - tests

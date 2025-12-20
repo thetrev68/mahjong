@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "CodeQL: Refresh Database",
+      "type": "shell",
+      "command": "codeql",
+      "args": [
+        "database",
+        "create",
+        "codeql-db",
+        "--language=javascript",
+        "--source-root=.",
+        "--overwrite"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    }
+  ]
+}

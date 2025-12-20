@@ -1,12 +1,21 @@
-# CodeQL extraction ignores - prevent generated bundles from being analyzed
+# CodeQL ignore file - exclude these paths from analysis
+# Syntax: One glob pattern per line
 
-# Exclude build artifacts
-
+# Build artifacts
 dist/
-dist/**
-dist/assets/
+build/
 
-# (Optional) exclude other generated outputs
+# Test reports
+playwright-report/
+test-results/
+coverage/
 
+# Dependencies
 node_modules/
-codeql-db/
+
+# Archive/legacy code
+.archive/
+
+# Generated files
+*.min.js
+*.bundle.js

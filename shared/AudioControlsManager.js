@@ -142,5 +142,3 @@ export class AudioControlsManager {
     };
   }
 }
-
-

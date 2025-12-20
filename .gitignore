@@ -89,8 +89,10 @@ mobile/screencaps(Temp)/
 
 # CodeQL artifacts (ignore any downloaded CLI in repo)
 /tools/codeql/
-codeql-db
-results.sarif
+codeql-db/
+codeql-results/
+results*.sarif
+results*.csv
 codeql-report.html
 parse-sarif.cjs
 

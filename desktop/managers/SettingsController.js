@@ -329,5 +329,3 @@ export class SettingsController {
     return this.settingsManager.load();
   }
 }
-
-

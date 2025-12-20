@@ -56,12 +56,24 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
     const { player: playerIndex, tile: tileJSON } = data;
     const tileData = TileData.fromJSON(tileJSON);
 
-    await this.executeSequence([
-      () => this.prepareDiscard(playerIndex, tileData),
-      () => this.animateTileToDiscard(playerIndex, tileData),
-      () => this.applyDiscardGlow(tileData),
-      () => this.finalizeDiscard(),
-    ]);
+    if (this.isAnimating) {
+      // If another discard animation is running, render immediately so claim prompts have a visible discard.
+      this.applyFallbackDiscard(playerIndex, tileData);
+      return;
+    }
+
+    try {
+      await this.executeSequence([
+        () => this.prepareDiscard(playerIndex, tileData),
+        () => this.animateTileToDiscard(playerIndex, tileData),
+        () => this.applyDiscardGlow(tileData),
+        () => this.finalizeDiscard(),
+      ]);
+    } catch (error) {
+      // Fall back to an immediate discard update so the pile stays in sync
+      console.error("Discard animation failed, applying fallback:", error);
+      this.applyFallbackDiscard(playerIndex, tileData);
+    }
   }
 
   /**
@@ -168,6 +180,42 @@ export class DiscardAnimationSequencer extends AnimationSequencer {
    */
   clearLastDiscardReference() {
     this.lastDiscardGlowTile = null;
+  }
+
+  /**
+   * Fallback path when the animated sequence fails.
+   * Inserts the tile directly into the discard pile so gameplay stays consistent.
+   * @param {number} playerIndex
+   * @param {TileData} tileData
+   */
+  applyFallbackDiscard(playerIndex, tileData) {
+    const phaserTile = this.tileManager?.getOrCreateTile(tileData);
+    if (!phaserTile || !this.tileManager?.discards) {
+      return;
+    }
+
+    if (
+      this.lastDiscardGlowTile &&
+      typeof this.lastDiscardGlowTile.removeGlowEffect === "function"
+    ) {
+      this.lastDiscardGlowTile.removeGlowEffect();
+      this.lastDiscardGlowTile = null;
+    }
+
+    // Clear any human draw glow to avoid stale highlights
+    if (playerIndex === PLAYER.BOTTOM && this.clearHumanDrawGlow) {
+      this.clearHumanDrawGlow(phaserTile);
+    }
+
+    this.tileManager.discards.insertDiscard(phaserTile);
+    this.tileManager.discards.layoutTiles();
+    phaserTile.showTile(true, true);
+
+    this.applyDiscardGlow(tileData);
+
+    if (this.blankSwapManager?.handleDiscardPileChanged) {
+      this.blankSwapManager.handleDiscardPileChanged();
+    }
   }
 
   /**

@@ -5,6 +5,7 @@ import { debugWarn, debugError } from "../../utils.js";
 import * as GameEvents from "../events/GameEvents.js";
 import { StateError } from "../errors/GameErrors.js";
 import { TileData } from "../models/TileData.js";
+import { ExposureData } from "../models/HandData.js";
 import { normalizeTileData } from "../GameController.js";
 
 /**
@@ -143,7 +144,7 @@ export class GameLoopManager {
     );
     this.gameController.emit("HAND_UPDATED", handEvent);
 
-    await this.gameController.sleep(ANIMATION_TIMINGS.TILE_DRAWN_DELAY);
+    await this.gameController.sleep(ANIMATION_TIMINGS.LEGACY.TILE_DRAWN_DELAY);
   }
 
   /**
@@ -229,7 +230,9 @@ export class GameLoopManager {
 
     this.emitDiscardEvents(player, tileToDiscard, tileIndex);
 
-    await this.gameController.sleep(ANIMATION_TIMINGS.DISCARD_COMPLETE_DELAY);
+    await this.gameController.sleep(
+      ANIMATION_TIMINGS.LEGACY.DISCARD_COMPLETE_DELAY,
+    );
   }
 
   /**
@@ -251,8 +254,8 @@ export class GameLoopManager {
       type: "discard-arc",
       duration:
         this.gameController.currentPlayer === 0
-          ? ANIMATION_TIMINGS.DISCARD_ANIMATION_HUMAN
-          : ANIMATION_TIMINGS.DISCARD_ANIMATION_AI,
+          ? ANIMATION_TIMINGS.GAMEPLAY.DISCARD_HUMAN
+          : ANIMATION_TIMINGS.GAMEPLAY.DISCARD_AI,
       easing: "ease-out",
       rotation: this.gameController.currentPlayer === 0 ? 360 : 180,
     };
@@ -693,7 +696,11 @@ export class GameLoopManager {
     });
 
     // Add to exposures
-    player.hand.addExposure(tilesToExpose, exposureType);
+    const exposure = new ExposureData({
+      type: exposureType ? exposureType.toUpperCase() : "UNKNOWN",
+      tiles: tilesToExpose,
+    });
+    player.hand.addExposure(exposure);
   }
 
   /**
@@ -708,8 +715,8 @@ export class GameLoopManager {
     // Emit event
     const exposedEvent = GameEvents.createTilesExposedEvent(
       playerIndex,
-      tilesToExpose.map((t) => t.toJSON()),
       exposureType,
+      tilesToExpose.map((t) => t.toJSON()),
     );
     this.gameController.emit("TILES_EXPOSED", exposedEvent);
 

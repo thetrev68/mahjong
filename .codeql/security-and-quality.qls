@@ -1,0 +1,5 @@
+# Security and Quality Query Suite
+- description: Run security and quality checks
+- queries: c:/Tools/codeql-packs/codeql/javascript-queries/2.2.3
+- apply: codeql-suites/javascript-security-and-quality.qls
+  from: codeql/javascript-queries
